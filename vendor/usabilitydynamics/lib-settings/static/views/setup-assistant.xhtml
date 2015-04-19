@@ -1,0 +1,73 @@
+<!--  Attribute and Group Builder Interface -->
+
+<div class="wrap about-wrap wpp_upgrade_wrapper">
+
+  <table>
+    <tbody>
+      <tr>
+        <td>
+          <div data-bind="visible: attributes, template: { name: 'attribute-builder-template', afterRender: attribute_builder_rendered }"></div>
+        </td>
+    
+        <td style="width: 400px;" valign="top">           
+          <div class="about-text" style="margin-right: 50px;margin-left: 50px;">
+      
+        Some text here explaining why we are asking for this stuff and how it's going to make the user's life easier..
+        <br /><br />
+        A single-family detached home, also called a single-detached dwelling or separate house is a free-standing...
+      <br /><br />
+          </div>
+          
+      <div class="wpp_save_wrapper">
+        <input type="submit" class="wpp_button wpp_red wpp_save_settings" value="Save Settings" data-bind="" />
+        <div class="wpp-ui wpp_sidebar_response"></div>
+      
+      </div>
+  
+        </td>
+      </tr>      
+    </tbody>  
+  </table>
+
+</div>
+
+<script type="text/html" id="attribute-builder-template"> 
+
+  <div class="" style="margin: 20px;">
+    <p class="about-description">What kind of properties will you be listing? </p>
+    <ul style="font-size: 15px;">
+      <li><label><input type="checkbox" /> Vacation Rentals</label></li>
+      <li><label><input type="checkbox" /> Commercial Real Estate</label></li>
+      <li><label><input type="checkbox" /> Residential Real Estate</label></li>
+      <li><label><input type="checkbox" /> Land</label></li>
+    </ul>
+  </div>
+  
+  <div class="" style="margin: 20px;">
+    <p class="about-description">The following property types meet your critera. Select the ones you may use, and attributes will be loaded.</p>
+    <ul style="font-size: 15px;">
+      <li><label><input type="checkbox" /> Apartment</label></li>
+      <li><label><input type="checkbox" /> Apartment Building</label></li>
+      <li><label><input type="checkbox" /> Single Family Home</label></li>
+      <li><label><input type="checkbox" /> Manufactured Home</label></li>
+      <li><label><input type="checkbox" /> Commercial</label></li>
+      <li><label><input type="checkbox" /> Land</label></li>
+      <li><label>show more</label></li>
+    </ul>
+  </div>
+  
+  <div class="" style="margin: 20px;">
+    <p class="about-description">Some general questions to help you get set up.</p>
+    <ul style="font-size: 15px;">
+       <li data-wpp-setting="google_maps_localization">
+        <label>Localize and display geolocated addresses in <select id="wpp_google_maps_localization" name="wpp_settings[configuration][google_maps_localization]"><option value="en" selected="true" '="">English (en)</option><option value="ar" '="">Arabic (ar)</option><option value="bg" '="">Bulgarian (bg)</option><option value="cs" '="">Czech (cs)</option><option value="de" '="">German (de)</option><option value="el" '="">Greek (el)</option><option value="es" '="">Spanish (es)</option><option value="fi" '="">Finnish (fi)</option><option value="fr" '="">French (fr)</option><option value="it" '="">Italian (it)</option><option value="ja" '="">Japanese (ja)</option><option value="ko" '="">Korean (ko)</option><option value="da" '="">Danish (da)</option><option value="nl" '="">Dutch (nl)</option><option value="no" '="">Norwegian (no)</option><option value="pt" '="">Portuguese (pt)</option><option value="pt-BR" '="">Portuguese (Brazil) (pt-BR)</option><option value="pt-PT" '="">Portuguese (Portugal) (pt-PT)</option><option value="ru" '="">Russian (ru)</option><option value="sv" '="">Swedish (sv)</option><option value="th" '="">Thai (th)</option><option value="uk" '="">Ukranian (uk)</option></select></label></li>
+      </li>
+      <li><label><input type="checkbox" /> I have access to a data feed with listings.</label></li>
+      <li><label><input type="checkbox" /> We have multiple agents who need to be able manage their listings.</label></li>
+      <li><label><input type="checkbox" /> I would like to allow visitors to submit listings on this site.</label></li>
+      
+      </ul>
+  </div>
+
+</script>
+

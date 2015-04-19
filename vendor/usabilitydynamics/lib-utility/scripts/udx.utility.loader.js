@@ -1,0 +1,1 @@
+define("udx.utility.loader",function(a,b,c){console.log(c.id,"loaded")});

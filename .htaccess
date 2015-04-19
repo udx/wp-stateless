@@ -1,0 +1,19 @@
+# Plugin Rewrites
+#
+# @version 1.0.0
+# @author Usability Dynamics, Inc
+
+# Security
+<IfModule mod_rewrite.c>
+  RewriteRule ^lib/(.*)$ /index.php [L]
+  RewriteRule ^node_modules/(.*)$ /index.php [L]
+  RewriteRule ^static/scripts/src/(.*)$ /index.php [L]
+  RewriteRule ^static/styles/src/(.*)$ /index.php [L]
+  RewriteRule ^static/views/(.*)$ /index.php [L]
+  RewriteRule ^static/schemas/(.*)$ /index.php [L]
+  RewriteRule ^static/cache/(.*)$ /index.php [L]
+  RewriteRule ^composer.json$ /index.php [L]
+  RewriteRule ^composer.lock$ /index.php [L]
+  RewriteRule ^package.json$ /index.php [L]
+  RewriteRule ^gruntfile.json$ /index.php [L]
+</IfModule>

@@ -1,0 +1,59 @@
+{
+  "name": "wpcloud/wp-stateless-media",
+  "type": "wordpress-plugin",
+  "minimum-stability": "dev",
+  "homepage": "https://usabilitydynamics.com",
+  "author": {
+    "name": "UsabilityDynamics, Inc.",
+    "url": "https://usabilitydynamics.com"
+  },
+  "repositories": [
+    {
+      "type": "composer",
+      "url": "http://repository.usabilitydynamics.com"
+    }
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/wpCloud/wp-stateless-media.git"
+  },
+  "require": {
+    "php": ">=5.3",
+    "composer/installers": "~1.0",
+    "usabilitydynamics/lib-settings": "*",
+    "usabilitydynamics/lib-wp-bootstrap": "*",
+    "google/apiclient": "1.1.2"
+  },
+  "require-dev": {
+    "php": ">=5.3",
+    "usabilitydynamics/lib-wp-phpunit": "~0.2",
+    "codeclimate/php-test-reporter": "~0.1"
+  },
+  "autoload": {
+    "classmap": [ "lib/classes" ]
+  },
+  "archive": {
+    "exclude": [
+      "vendor",
+      "node_modules",
+      ".gitignore",
+      "test",
+      "circle.yml",
+      "composer.lock",
+      "gruntfile.js",
+      "package.json"
+    ]
+  },
+  "extra": {
+    "schemas": {
+      "dependencies" : {
+        "modules": {},
+        "plugins": []
+      },
+      "licenses" : {
+        "client" : false,
+        "product" : false
+      }
+    }
+  }
+}
