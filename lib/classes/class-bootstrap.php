@@ -170,8 +170,8 @@ namespace wpCloud\StatelessMedia {
        * @todo: it should not be loaded everywhere. peshkov@UD
        */
       public function admin_enqueue_scripts() {
-        wp_enqueue_style( 'wp-stateless-media', $this->path( 'static/styles/wp-stateless-media.css', 'url'  ), array(), self::$version );
-        wp_enqueue_script( 'wp-stateless-media', $this->path( 'static/scripts/wp-stateless-media.js', 'url'  ), array( 'jquery-ui-core' ), self::$version, true );
+        wp_enqueue_style( 'wp-stateless', $this->path( 'static/styles/wp-stateless.css', 'url'  ), array(), self::$version );
+        wp_enqueue_script( 'wp-stateless', $this->path( 'static/scripts/wp-stateless.js', 'url'  ), array( 'jquery-ui-core' ), self::$version, true );
       }
 
       /**
@@ -187,7 +187,7 @@ namespace wpCloud\StatelessMedia {
 
         $sm_cloud = get_post_meta( $attachment->ID, 'sm_cloud', true );
         if( is_array( $sm_cloud ) && !empty( $sm_cloud[ 'name' ] ) ) {
-          $attr[ 'class' ] = $attr[ 'class' ] . ' wp-stateless-media-item';
+          $attr[ 'class' ] = $attr[ 'class' ] . ' wp-stateless-item';
           $attr[ 'data-image-size' ] = is_array( $size ) ? implode( 'x', $size ) : $size;
           $attr[ 'data-stateless-media-bucket' ] = isset( $sm_cloud[ 'bucket' ] ) ? $sm_cloud[ 'bucket' ] : false;
           $attr[ 'data-stateless-media-name' ] = $sm_cloud[ 'name' ];

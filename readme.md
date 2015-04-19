@@ -3,15 +3,15 @@
 wpCloud Stateless Media for GCE
 
 ***
-[![Issues - Bug](https://badge.waffle.io/wpCloud/wp-stateless-media.png?label=bug&title=Bugs)](http://waffle.io/wpCloud/wp-stateless-media)
-[![Issues - Backlog](https://badge.waffle.io/wpCloud/wp-stateless-media.png?label=backlog&title=Backlog)](http://waffle.io/wpCloud/wp-stateless-media/)
-[![Issues - Active](https://badge.waffle.io/wpCloud/wp-stateless-media.png?label=in progress&title=Active)](http://waffle.io/wpCloud/wp-stateless-media/)
+[![Issues - Bug](https://badge.waffle.io/wpCloud/wp-stateless.png?label=bug&title=Bugs)](http://waffle.io/wpCloud/wp-stateless)
+[![Issues - Backlog](https://badge.waffle.io/wpCloud/wp-stateless.png?label=backlog&title=Backlog)](http://waffle.io/wpCloud/wp-stateless/)
+[![Issues - Active](https://badge.waffle.io/wpCloud/wp-stateless.png?label=in progress&title=Active)](http://waffle.io/wpCloud/wp-stateless/)
 ***
-[![Dependency Status](https://gemnasium.com/wpCloud/wp-stateless-media.svg)](https://gemnasium.com/wpCloud/wp-stateless-media)
-[![Scrutinizer Quality](http://img.shields.io/scrutinizer/g/wpCloud/wp-stateless-media.svg)](https://scrutinizer-ci.com/g/wpCloud/wp-stateless-media)
-[![Scrutinizer Coverage](http://img.shields.io/scrutinizer/coverage/g/wpCloud/wp-stateless-media.svg)](https://scrutinizer-ci.com/g/wpCloud/wp-stateless-media)
-[![Packagist Vesion](http://img.shields.io/packagist/v/wpCloud/wp-stateless-media.svg)](https://packagist.org/packages/wpCloud/wp-stateless-media)
-[![CircleCI](https://circleci.com/gh/wpCloud/wp-stateless-media.png)](https://circleci.com/gh/wpCloud/wp-stateless-media)
+[![Dependency Status](https://gemnasium.com/wpCloud/wp-stateless.svg)](https://gemnasium.com/wpCloud/wp-stateless)
+[![Scrutinizer Quality](http://img.shields.io/scrutinizer/g/wpCloud/wp-stateless.svg)](https://scrutinizer-ci.com/g/wpCloud/wp-stateless)
+[![Scrutinizer Coverage](http://img.shields.io/scrutinizer/coverage/g/wpCloud/wp-stateless.svg)](https://scrutinizer-ci.com/g/wpCloud/wp-stateless)
+[![Packagist Vesion](http://img.shields.io/packagist/v/wpCloud/wp-stateless.svg)](https://packagist.org/packages/wpCloud/wp-stateless)
+[![CircleCI](https://circleci.com/gh/wpCloud/wp-stateless.png)](https://circleci.com/gh/wpCloud/wp-stateless)
 ***
 
 

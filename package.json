@@ -1,5 +1,5 @@
 {
-  "name": "wp-stateless-media",
+  "name": "wp-stateless",
   "title": "Stateless Media",
   "description": "wpCloud Stateless Media for GCE",
   "version": "1.5.0",
@@ -10,7 +10,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/wpCloud/wp-stateless-media"
+    "url": "https://github.com/wpCloud/wp-stateless"
   },
   "engines": {
     "node": ">= 0.10.0"

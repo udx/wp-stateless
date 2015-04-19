@@ -1,4 +1,5 @@
 #### 1.5.0
+* Migration into wp-stateless from wp-stateless-media.
 * Version bump to resolve bucket permissions issues.
  
 #### 1.3.2

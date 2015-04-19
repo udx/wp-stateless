@@ -1,13 +1,13 @@
 <?php
 /**
- * Plugin Name: Stateless Media v1.5
+ * Plugin Name: WP-Stateless: Media v1.5
  * Plugin URI: https://usabilitydynamics.com
  * Description: wpCloud Stateless Media for GCE
  * Author: Usability Dynamics, Inc.
  * Version: 1.5.0
  * Text Domain: stateless-media
  * Author URI: http://usabilitydynamics.com
- * GitHub Plugin URI: wpCloud/wp-stateless-media
+ * GitHub Plugin URI: wpCloud/wp-stateless
  * GitHub Plugin Branch: v1.5
  *
  * Copyright 2012 - 2015 Usability Dynamics, Inc.  ( email : info@usabilitydynamics.com )
@@ -21,6 +21,9 @@ if( !function_exists( 'ud_get_stateless_media' ) ) {
    *
    * @author Usability Dynamics, Inc.
    * @since 0.2.0
+   * @param bool $key
+   * @param null $default
+   * @return
    */
   function ud_get_stateless_media( $key = false, $default = null ) {
     $instance = \wpCloud\StatelessMedia\Bootstrap::get_instance();
