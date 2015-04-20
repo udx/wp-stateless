@@ -54,6 +54,9 @@ namespace wpCloud\StatelessMedia {
           include_once($this->path('lib/cli/class-sm-cli-command.php', 'dir'));
         }
 
+
+        // add_action( 'network_admin_plugin_action_links', array( $this, 'plugin_action_links' ), 10, 2 );
+
         $this->is_network_detected();
 
         /**
@@ -126,6 +129,27 @@ namespace wpCloud\StatelessMedia {
           }
 
         }
+
+      }
+
+      public function plugin_action_links( $links, $file ) {
+
+        if ($file == plugin_basename( dirname( __DIR__ ) . '/wp-stateless-media.php' ) ) {
+          $settings_link = '<a href="'. '' .'">'.__( 'Settings' , 'ssd').'</a>';
+          array_unshift( $links, $settings_link );
+        }
+
+        if ($file == plugin_basename( dirname( __DIR__ ) . '/wp-stateless.php' ) ) {
+          $settings_link = '<a href="'. '' .'">'.__( 'Settings' , 'ssd').'</a>';
+          array_unshift( $links, $settings_link );
+        }
+
+        return $links;
+      }
+
+      public function plugin_row() {
+
+        echo '</tr><tr class="plugin-update-tr"><td colspan="3" class="plugin-update"><div class="update-message">' . $new_version . __( sprintf( '%sRegister%s your copy of Gravity Forms to receive access to automatic upgrades and support. Need a license key? %sPurchase one now%s.', '<a href="' . admin_url() . 'admin.php?page=gf_settings">', '</a>', '<a href="http://www.gravityforms.com">', '</a>' ), 'gravityforms' ) . '</div></td>';
 
       }
 

@@ -1,0 +1,30 @@
+/**
+ *
+ *
+ */
+
+td.image-icon img.wp-stateless-media-item {
+}
+
+
+.submitbox span.sm-view-link {
+  float: right;
+}
+
+.wp-stateless-credentials-options label {
+  width: 10em;
+  display: inline-block;
+}
+
+.wp-stateless-media-options input.sm_service_account_name {
+  width: 40em;
+}
+
+.wp-stateless-media-options input.sm_key_file_path {
+  width: 40em;
+}
+
+.sm-mode small.description {
+  display: inline-block;
+  margin-left: 10px;
+}
