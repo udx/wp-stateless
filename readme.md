@@ -15,7 +15,8 @@ wpCloud Stateless Media for GCE
 
 
 ### Usage
-```
+```php
+define( 'WP_STATELESS_MEDIA_BUCKET', 'media.application-domain.com' );
 define( 'WP_STATELESS_MEDIA_MODE', 'cdn' );
 define( 'WP_STATELESS_MEDIA_KEY_FILE_PATH', '/var/www/wp-content/keys/application-name-service-id.p12' );
 define( 'WP_STATELESS_MEDIA_SERVICE_ACCOUNT', '12345689-hash@developer.gserviceaccount.com' );
