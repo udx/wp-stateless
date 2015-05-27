@@ -1,5 +1,5 @@
 {
-  "name": "wpcloud/wp-stateless-media",
+  "name": "wpcloud/wp-stateless",
   "type": "wordpress-plugin",
   "minimum-stability": "dev",
   "homepage": "https://usabilitydynamics.com",
