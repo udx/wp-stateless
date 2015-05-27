@@ -11,8 +11,15 @@ wpCloud Stateless Media for GCE
 [![Scrutinizer Quality](http://img.shields.io/scrutinizer/g/wpCloud/wp-stateless.svg)](https://scrutinizer-ci.com/g/wpCloud/wp-stateless)
 [![Scrutinizer Coverage](http://img.shields.io/scrutinizer/coverage/g/wpCloud/wp-stateless.svg)](https://scrutinizer-ci.com/g/wpCloud/wp-stateless)
 [![Packagist Vesion](http://img.shields.io/packagist/v/wpCloud/wp-stateless.svg)](https://packagist.org/packages/wpCloud/wp-stateless)
-[![CircleCI](https://circleci.com/gh/wpCloud/wp-stateless.png)](https://circleci.com/gh/wpCloud/wp-stateless)
 ***
+
+
+### Usage
+```
+define( 'WP_STATELESS_MEDIA_MODE', 'cdn' );
+define( 'WP_STATELESS_MEDIA_KEY_FILE_PATH', '/var/www/wp-content/keys/application-name-service-id.p12' );
+define( 'WP_STATELESS_MEDIA_SERVICE_ACCOUNT', '12345689-hash@developer.gserviceaccount.com' );
+```
 
 
 ### Available Constants
