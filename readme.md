@@ -35,6 +35,13 @@ define( 'WP_STATELESS_MEDIA_SERVICE_ACCOUNT', '12345689-hash@developer.gservicea
 }
 ```
 
+Set options:
+```sh
+wp option update sm_mode cdn
+wp option update sm_service_account_name blah@google.com
+wp option update sm_key_file_path /var/www/wp-content/keys/some-key.p12
+wp option update sm_bucket media.site.com
+```
 
 ### Available Constants
 Setting a setting via constants will prevent ability to make changes in control panel.
