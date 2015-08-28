@@ -37,6 +37,16 @@ namespace UsabilityDynamics\WP {
        * @type array
        */
       private $messages = array();
+
+      /**
+       * Warnings
+       *
+       * @used admin_notices
+       * @public
+       * @property $messages
+       * @type array
+       */
+      private $warnings = array();
       
       /**
        * Action Links in Footer
@@ -47,6 +57,13 @@ namespace UsabilityDynamics\WP {
        * @type array
        */
       private $action_links = array();
+
+      /**
+       * Dismiss action link is available or not.
+       *
+       * @var bool
+       */
+      private $dismiss = true;
       
       /**
        *
@@ -60,6 +77,8 @@ namespace UsabilityDynamics\WP {
       /**
        * Add new message for admin notices
        *
+       * @param string $message
+       * @param string $type Values: 'error', 'message', 'warning'
        * @author peshkov@UD
        */
       public function add( $message, $type = 'error' ) {
@@ -70,11 +89,14 @@ namespace UsabilityDynamics\WP {
           case 'message':
             $this->messages[] = $message;
             break;
+          case 'warning':
+            $this->warnings[] = $message;
+            break;
         }
       }
       
       /**
-       * Add footer link to specific ( errors|notices ) block
+       * Add footer link to specific ( errors|messages|wanrnings ) block
        *
        * @author peshkov@UD
        */
@@ -85,6 +107,9 @@ namespace UsabilityDynamics\WP {
             break;
           case 'message':
             $this->action_links[ 'messages' ][] = $link;
+            break;
+          case 'message':
+            $this->action_links[ 'warnings' ][] = $link;
             break;
         }
       }
@@ -134,9 +159,10 @@ namespace UsabilityDynamics\WP {
         
         $errors = apply_filters( 'ud:errors:admin_notices', $this->errors, $this->args );
         $messages = apply_filters( 'ud:messages:admin_notices', $this->messages, $this->args );
+        $warnings = apply_filters( 'ud:warnings:admin_notices', $this->warnings, $this->args );
         
-        if( !empty( $errors ) || !empty( $messages ) ) {
-          echo "<style>.ud-admin-notice a { text-decoration: underline !important; }</style>";
+        if( !empty( $errors ) || !empty( $messages ) || !empty( $warnings ) ) {
+          echo "<style>.ud-admin-notice a { text-decoration: underline !important; } .ud-admin-notice { display: block !important; } .ud-admin-notice.update-nag { border-color: #ffba00 !important; }</style>";
         }
         
         //** Errors Block */
@@ -147,6 +173,16 @@ namespace UsabilityDynamics\WP {
             $message .= '<p>' . implode( ' | ', $this->action_links[ 'errors' ] ) . '</p>';
           }
           echo '<div class="ud-admin-notice error fade" style="padding:11px;">' . $message . '</div>';
+        }
+
+        //** Warnings Block */
+        if( !empty( $warnings ) && is_array( $warnings ) ) {
+          $message = '<ul style="list-style:disc inside;"><li>' . implode( '</li><li>', $warnings ) . '</li></ul>';
+          $message = sprintf( __( '<p><b>%s</b> has the following warnings:</p> %s', $this->domain ), $this->name, $message );
+          if( !empty( $this->action_links[ 'errors' ] ) && is_array( $this->action_links[ 'errors' ] ) ) {
+            $message .= '<p>' . implode( ' | ', $this->action_links[ 'errors' ] ) . '</p>';
+          }
+          echo '<div class="ud-admin-notice updated update-nag fade" style="padding:11px;">' . $message . '</div>';
         }
         
         //** Determine if message has been dismissed ( for week! ) */
@@ -160,7 +196,9 @@ namespace UsabilityDynamics\WP {
             } else {
               $message = sprintf( __( '<p><b>%s</b> is active, but has the following notices:</p> %s', $this->domain ), $this->name, $message );
             }
-            $this->action_links[ 'messages' ][] = '<a class="dismiss-notice" href="' . add_query_arg( 'udan-dismiss-' . sanitize_key( $this->name ), 'true' ) . '" target="_parent">' . __( 'Dismiss this notice', $this->domain ) . '</a>';
+            if( $this->dismiss ) {
+              $this->action_links[ 'messages' ][] = '<a class="dismiss-notice" href="' . add_query_arg( 'udan-dismiss-' . sanitize_key( $this->name ), 'true' ) . '" target="_parent">' . __( 'Dismiss this notice', $this->domain ) . '</a>';
+            }
             $message .= '<p>' . implode( ' | ', $this->action_links[ 'messages' ] ) . '</p>';
             echo '<div class="ud-admin-notice updated fade" style="padding:11px;">' . $message . '</div>';
           }

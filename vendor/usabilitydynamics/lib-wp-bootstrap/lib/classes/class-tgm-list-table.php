@@ -122,7 +122,7 @@ namespace UsabilityDynamics\WP {
                     $table_data[$i]['plugin'] = '<strong><a href="' . esc_url( $external_url ) . '" title="' . $plugin['name'] . '" target="_blank">' . $plugin['name'] . '</a></strong>';
                 }
                 elseif ( ! $source || preg_match( '|^http://wordpress.org/extend/plugins/|', $source ) ) {
-                    $url = add_query_arg(
+                    $url = esc_url( add_query_arg(
                         array(
                             'tab'       => 'plugin-information',
                             'plugin'    => $this->_get_plugin_data_from_name( $plugin['name'] ),
@@ -130,8 +130,8 @@ namespace UsabilityDynamics\WP {
                             'width'     => '640',
                             'height'    => '500',
                         ),
-                        network_admin_url( 'plugin-install.php' )
-                    );
+                        admin_url( 'plugin-install.php' )
+                    ) );
 
                     $table_data[$i]['plugin'] = '<strong><a href="' . esc_url( $url ) . '" class="thickbox" title="' . $plugin['name'] . '">' . $plugin['name'] . '</a></strong>';
                 }
@@ -283,7 +283,7 @@ namespace UsabilityDynamics\WP {
                   'install' => sprintf(
                     '<a href="%1$s" title="' . __( 'Install', 'tgmpa' ) . ' %2$s">' . __( 'Install', 'tgmpa' ) . '</a>',
                     wp_nonce_url(
-                      add_query_arg(
+                      esc_url( add_query_arg(
                         array(
                           'page'          => TGM_Plugin_Activation::$instance->menu,
                           'plugin'        => $item['slug'],
@@ -291,8 +291,8 @@ namespace UsabilityDynamics\WP {
                           'plugin_source' => $item['url'],
                           'tgmpa-install' => 'install-plugin',
                         ),
-                        network_admin_url( 'themes.php' )
-                      ),
+                        admin_url( 'themes.php' )
+                      ) ),
                       'tgmpa-install'
                     ),
                     $item['sanitized_plugin']
@@ -305,7 +305,7 @@ namespace UsabilityDynamics\WP {
                 $actions = array(
                     'activate' => sprintf(
                         '<a href="%1$s" title="' . __( 'Activate', 'tgmpa' ) . ' %2$s">' . __( 'Activate', 'tgmpa' ) . '</a>',
-                        add_query_arg(
+                        esc_url( add_query_arg(
                             array(
                                 'page'                 => TGM_Plugin_Activation::$instance->menu,
                                 'plugin'               => $item['slug'],
@@ -314,8 +314,8 @@ namespace UsabilityDynamics\WP {
                                 'tgmpa-activate'       => 'activate-plugin',
                                 'tgmpa-activate-nonce' => wp_create_nonce( 'tgmpa-activate' ),
                             ),
-                            network_admin_url( 'themes.php' )
-                        ),
+                            admin_url( 'themes.php' )
+                        ) ),
                         $item['sanitized_plugin']
                     ),
                 );
@@ -361,7 +361,7 @@ namespace UsabilityDynamics\WP {
          */
         public function no_items() {
 
-            printf( __( 'No plugins to install or activate. <a href="%1$s" title="Return to the Dashboard">Return to the Dashboard</a>', 'tgmpa' ), network_admin_url() );
+            printf( __( 'No plugins to install or activate. <a href="%1$s" title="Return to the Dashboard">Return to the Dashboard</a>', 'tgmpa' ), admin_url() );
             echo '<style type="text/css">#adminmenu .wp-submenu li.current { display: none !important; }</style>';
 
         }
@@ -523,7 +523,7 @@ namespace UsabilityDynamics\WP {
 
                 // Pass all necessary information via URL if WP_Filesystem is needed.
                 $url = wp_nonce_url(
-                    add_query_arg(
+                    esc_url( add_query_arg(
                         array(
                             'page'          => TGM_Plugin_Activation::$instance->menu,
                             'tgmpa-action'  => 'install-selected',
@@ -531,8 +531,8 @@ namespace UsabilityDynamics\WP {
                             'plugin_paths'  => urlencode( implode( ',', $plugin_paths ) ),
                             'plugin_names'  => urlencode( implode( ',', $plugin_names ) ),
                         ),
-                        network_admin_url( 'themes.php' )
-                    ),
+                        admin_url( 'themes.php' )
+                    ) ),
                     'bulk-plugins'
                 );
                 $method = ''; // Leave blank so WP_Filesystem can populate it as necessary.
@@ -574,7 +574,7 @@ namespace UsabilityDynamics\WP {
                 }
 
                 // Finally, all the data is prepared to be sent to the installer.
-                $url   = add_query_arg( array( 'page' => TGM_Plugin_Activation::$instance->menu ), network_admin_url( 'themes.php' ) );
+                $url   = esc_url( add_query_arg( array( 'page' => TGM_Plugin_Activation::$instance->menu ), admin_url( 'themes.php' ) ) );
                 $nonce = 'bulk-plugins';
                 $names = $plugin_names;
                 

@@ -78,6 +78,8 @@ namespace UsabilityDynamics\WP {
         $this->composer_dependencies();
         //** Determine if plugin/theme requires or recommends another plugin(s) */
         $this->plugins_dependencies();
+        // Maybe run install or upgrade processes.
+        $this->maybe_run_upgrade_process();
         //** Set install/upgrade pages if needed */
         $this->define_splash_pages();
         //** Maybe need to show UD splash page. Used static functions intentionaly. */
@@ -189,7 +191,209 @@ namespace UsabilityDynamics\WP {
       public function get_localization() {
         return array();
       }
-      
+
+      /**
+       * Determine if product is just installed or upgraded
+       * and run install/upgrade processes
+       *
+       * @author peshkov@UD
+       */
+      protected function maybe_run_upgrade_process() {
+        //** Determine what to show depending on version installed */
+        $version = get_option($this->slug . '-current-version', 0);
+        $this->old_version = $version;
+        //** Just installed */
+        if (!$version) {
+          add_action( 'plugins_loaded', array( $this, 'run_install_process' ), 0 );
+        }
+        //** Upgraded */
+        elseif (version_compare($version, $this->args['version']) == -1) {
+          add_action( 'plugins_loaded', array( $this, 'run_upgrade_process' ), 0 );
+        }
+        update_option( $this->slug . '-current-version', $this->args['version'] );
+      }
+
+      /**
+       * Run Install Process.
+       *
+       * Re-define the function in child.
+       */
+      public function run_install_process() {}
+
+      /**
+       * Run Upgrade Process.
+       *
+       * Re-define the function in child.
+       */
+      public function run_upgrade_process() {}
+
+      /**
+       * Define splash pages for plugins if needed
+       * And Renders Admin Notice about installed product
+       *
+       * @return boolean
+       * @author korotkov@UD
+       * @author peshkov@UD
+       */
+      public function define_splash_pages() {
+        //** If not defined in schemas or not determined - skip */
+        if ( !$splashes = $this->get_schema( 'extra.splashes' ) ) {
+          return false;
+        }
+
+        foreach( (array)$splashes as $splash => $shortpath ) {
+          $path = $this->type == 'theme' ? get_template_directory() . '/' . ltrim( $shortpath, '/\\' ) : $this->path( $shortpath, 'dir' );
+          if( !file_exists( $path ) ) {
+            unset( $splashes[ $splash ] );
+          }
+        }
+
+        //** If no splash templates files or missed 'install' splash - skip */
+        if( empty( $splashes ) || !isset( $splashes[ 'install' ] ) ) {
+          return false;
+        }
+
+        $page = false;
+
+        //** Determine what to show depending on version installed */
+        $version = get_option( $this->slug . '-splash-version', 0 );
+
+        //** Just installed */
+        if( !$version ) {
+          $page = 'install';
+        }
+        //** Upgraded */
+        elseif ( version_compare( $version,  $this->args['version'] ) == -1 ) {
+          if( isset( $splashes[ 'upgrade' ] ) ) {
+            $page = 'upgrade';
+          } else {
+            $page = 'install';
+          }
+        }
+        //** In other case do not do this */
+        else {
+
+          /**
+           * Maybe Render Install Notice
+           * about current instance
+           */
+
+          $option = sanitize_key( 'dismiss_' . $this->slug . '_' . str_replace( '.', '_', $this->args['version'] ) . '_notice' );
+
+          if(
+            isset( $_REQUEST[ 'page' ] ) &&
+            $_REQUEST[ 'page' ] == Dashboard::get_instance()->page_slug &&
+            isset( $_REQUEST[ 'slug' ] ) &&
+            $_REQUEST[ 'slug' ] == $this->slug
+          ) {
+
+            /** Dismiss Admin Notice */
+            if( isset( $_REQUEST[ 'dismiss' ] ) ) {
+
+              update_option( $option, array(
+                'slug' => $this->slug,
+                'type' => $this->type,
+                'version' => $this->args['version']
+              ) );
+
+              if( !function_exists( 'wp_redirect' ) ) {
+                require_once( ABSPATH . 'wp-includes/pluggable.php' );
+              }
+
+              if( !empty( $_SERVER[ 'HTTP_REFERER' ] ) ) {
+                wp_redirect( $_SERVER[ 'HTTP_REFERER' ] );
+              } else {
+                wp_redirect( admin_url( 'plugins.php' ) );
+              }
+              exit;
+
+            }
+
+            /** Add information about product to Dashboard page */
+            else {
+
+              if( isset( $splashes[ 'upgrade' ] ) ) {
+                $page = 'upgrade';
+              } else {
+                $page = 'install';
+              }
+
+            }
+
+          }
+
+          if( !get_option( $option ) ) {
+            add_action( 'admin_notices',  array( $this, 'render_upgrade_notice' ), 1 );
+          }
+
+          if( empty( $page ) ) {
+            return false;
+          }
+
+        }
+
+        $content = $this->root_path . ltrim( $splashes[$page], '/\\' );
+
+        //** Abort if no files exist */
+        if ( !file_exists( $content ) ) {
+          return false;
+        }
+
+        //** Push data to temp transient */
+        $_current_pages_to_show = get_transient( Dashboard::get_instance()->transient_key );
+
+        //** If empty - create */
+        if ( !$_current_pages_to_show ) {
+          set_transient( Dashboard::get_instance()->transient_key, array(
+            $this->slug => array(
+              'name' => $this->name,
+              'content' => $content,
+              'version' => $this->args['version']
+            )
+          ), 30 );
+        }
+        //** If not empty - update */
+        else {
+          $_current_pages_to_show[$this->slug] = array(
+            'name' => $this->name,
+            'content' => $content,
+            'version' => $this->args['version']
+          );
+          set_transient( Dashboard::get_instance()->transient_key, $_current_pages_to_show, 30 );
+        }
+
+        set_transient( Dashboard::get_instance()->need_splash_key, Dashboard::get_instance()->transient_key, 30 );
+
+      }
+
+      /**
+       * Renders Upgrade Notice.
+       *
+       */
+      public function render_upgrade_notice() {
+
+        if( $this->type == 'theme' ) {
+          $icon = file_exists( get_template_directory() . '/static/images/icon.png' ) ? get_template_directory_uri() . '/static/images/icon.png' : false;
+        } else {
+          $icon = file_exists( $this->path( 'static/images/icon.png', 'dir' ) ) ? $this->path( 'static/images/icon.png', 'url' ) : false;
+        }
+
+        ob_start();
+        $vars = apply_filters( 'ud::bootstrap::upgrade_notice::vars', array(
+          'content' => false,
+          'icon' => $icon,
+          'name' => $this->name,
+          'type' => $this->type,
+          'dashboard_link' => admin_url( 'index.php?page='. Dashboard::get_instance()->page_slug . '&slug=' . $this->slug ),
+          'dismiss_link' => admin_url( 'index.php?page='. Dashboard::get_instance()->page_slug . '&slug=' . $this->slug . '&dismiss=1' ),
+          'home_link' => !empty( $this->schema[ 'homepage' ] ) ? $this->schema[ 'homepage' ] : false,
+        ) );
+        extract( $vars );
+        require( dirname( dirname( __DIR__ ) ) . '/static/views/install_notice.php' );
+        $content = ob_get_clean();
+        echo apply_filters( 'ud::bootstrap::upgrade_notice::template', $content, $this->slug, $vars );
+      }
+
       /**
        * Check plugins requirements
        *
@@ -221,69 +425,7 @@ namespace UsabilityDynamics\WP {
           }
         }
       }
-      
-      /**
-       * Define splash pages for plugins if needed.
-       * @return boolean
-       * @author korotkov@ud
-       */
-      public function define_splash_pages() {
-        //** If not defined in schemas or not determined - skip */
-        if ( !$splashes = $this->get_schema( 'extra.splashes' ) ) {
-          return false;
-        }
-        
-        $page = false;
-        //** Determine what to show depending on version installed */
-        $version = get_option( $this->slug . '-splash-version', 0 );
-        
-        //** Just installed */
-        if ( !$version ) {
-          $page = 'install';
-        } 
-        //** Upgraded */
-        elseif ( version_compare( $version,  $this->args['version'] ) == -1 ) {
-          $page = 'upgrade';
-        } 
-        //** In other case do not do this */
-        else {
-          return false;
-        }
-        
-        $content = $this->root_path . ltrim( $splashes[$page], '/\\' );
-        
-        //** Abort if no files exist */
-        if ( !file_exists( $content ) ) {
-          return false;
-        }
-          
-        //** Push data to temp transient */
-        $_current_pages_to_show = get_transient( Dashboard::get_instance()->transient_key );
-        
-        //** If empty - create */
-        if ( !$_current_pages_to_show ) {
-          set_transient( Dashboard::get_instance()->transient_key, array(
-            $this->slug => array(
-              'name' => $this->name,
-              'content' => $content,
-              'version' => $this->args['version']
-            )
-          ), 30 );
-        } 
-        //** If not empty - update */
-        else {
-          $_current_pages_to_show[$this->slug] = array(
-            'name' => $this->name,
-            'content' => $content,
-            'version' => $this->args['version']
-          );
-          set_transient( Dashboard::get_instance()->transient_key, $_current_pages_to_show, 30 ); 
-        }
-        
-        set_transient( Dashboard::get_instance()->need_splash_key, Dashboard::get_instance()->transient_key, 30 );
 
-      }
-      
       /**
        * Maybe determines if Composer autoloader is included and modules classes are up to date
        *
@@ -314,6 +456,17 @@ namespace UsabilityDynamics\WP {
        * @author peshkov@UD
        */
       private function plugins_dependencies() {
+        /** 
+         * Dependencies must be checked before plugins_loaded hook to prevent issues!
+         * 
+         * The current condition fixes incorrect behaviour on custom 'Install Plugins' page
+         * after activation plugin which has own dependencies.
+         * 
+         * The condition belongs to WordPress 4.3 and higher.
+         */
+        if( did_action( 'plugins_loaded' ) ) {
+          return;
+        }
         $plugins = $this->get_schema( 'extra.schemas.dependencies.plugins' );
         if( !empty( $plugins ) && is_array( $plugins ) ) {
           $tgma = TGM_Plugin_Activation::get_instance();
@@ -348,13 +501,14 @@ namespace UsabilityDynamics\WP {
           return false;
         }
         $args = $this->args;
-        $args = array_merge( $args, $schema, array(
+        $args = array_merge( $args, array(
           'type' => $this->type,
           'name' => $this->name,
           'slug' => $this->slug,
+          'referrer_slug' => $this->slug,
           'domain' => $this->domain,
           'errors_callback' => array( $this->errors, 'add' ),
-        ) );
+        ), $schema );
         if( empty( $args[ 'screen' ] ) ) {
           $this->errors->add( __( 'Licenses client can not be activated due to invalid \'licenses\' schema.', $this->domain ) );
         }

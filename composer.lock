@@ -1,10 +1,10 @@
 {
     "_readme": [
         "This file locks the dependencies of your project to a known state",
-        "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "23f319bf9043ecf80217d166d8b61018",
+    "hash": "c6c489e7a8b7a6538f2e494171baf130",
     "packages": [
         {
             "name": "composer/installers",
@@ -12,12 +12,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/composer/installers.git",
-                "reference": "d64e23fce42a4063d63262b19b8e7c0f3b5e4c45"
+                "reference": "e420b539e8d7b38b7c6f3f99dccc0386bd3dfe41"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/composer/installers/zipball/d64e23fce42a4063d63262b19b8e7c0f3b5e4c45",
-                "reference": "d64e23fce42a4063d63262b19b8e7c0f3b5e4c45",
+                "url": "https://api.github.com/repos/composer/installers/zipball/e420b539e8d7b38b7c6f3f99dccc0386bd3dfe41",
+                "reference": "e420b539e8d7b38b7c6f3f99dccc0386bd3dfe41",
                 "shasum": ""
             },
             "replace": {
@@ -99,7 +99,7 @@
                 "zend",
                 "zikula"
             ],
-            "time": "2015-02-18 17:17:01"
+            "time": "2015-06-13 15:30:38"
         },
         {
             "name": "google/apiclient",
@@ -145,15 +145,15 @@
         },
         {
             "name": "usabilitydynamics/lib-settings",
-            "version": "master",
+            "version": "0.2.3",
             "source": {
                 "type": "git",
-                "url": "git@github.com:usabilitydynamics/lib-settings",
-                "reference": "master"
+                "url": "git@github.com:UsabilityDynamics/lib-settings",
+                "reference": "0.2.3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://github.com/usabilitydynamics/lib-settings/archive/master.zip",
+                "url": "https://github.com/UsabilityDynamics/lib-settings/archive/0.2.3.zip",
                 "reference": null,
                 "shasum": null
             },
@@ -175,7 +175,8 @@
                     "files": [
                         "static/schemas/settings.json"
                     ]
-                }
+                },
+                "installer-name": "lib-settings"
             },
             "autoload": {
                 "classmap": [
@@ -215,12 +216,12 @@
             "version": "0.3.6",
             "source": {
                 "type": "git",
-                "url": "git@github.com:usabilitydynamics/lib-utility",
+                "url": "git@github.com:UsabilityDynamics/lib-utility",
                 "reference": "0.3.6"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://github.com/usabilitydynamics/lib-utility/archive/0.3.6.zip",
+                "url": "https://github.com/UsabilityDynamics/lib-utility/archive/0.3.6.zip",
                 "reference": null,
                 "shasum": null
             },
@@ -273,15 +274,15 @@
         },
         {
             "name": "usabilitydynamics/lib-wp-bootstrap",
-            "version": "master",
+            "version": "1.1.5",
             "source": {
                 "type": "git",
-                "url": "git@github.com:usabilitydynamics/lib-wp-bootstrap",
-                "reference": "master"
+                "url": "git@github.com:UsabilityDynamics/lib-wp-bootstrap",
+                "reference": "1.1.5"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://github.com/usabilitydynamics/lib-wp-bootstrap/archive/master.zip",
+                "url": "https://github.com/UsabilityDynamics/lib-wp-bootstrap/archive/1.1.5.zip",
                 "reference": null,
                 "shasum": null
             },
@@ -290,6 +291,9 @@
                 "usabilitydynamics/lib-utility": "~0.3"
             },
             "type": "library",
+            "extra": {
+                "installer-name": "lib-wp-bootstrap"
+            },
             "autoload": {
                 "classmap": [
                     "lib/classes"
@@ -299,7 +303,7 @@
                 "MIT"
             ],
             "description": "Wordpress bootstrap library created by UsabilityDynamics",
-            "homepage": "https://github.com/usabilitydynamics/lib-wp-bootstrap",
+            "homepage": "https://github.com/UsabilityDynamics/lib-wp-bootstrap",
             "keywords": [
                 "wordpress"
             ]
@@ -310,6 +314,7 @@
     "minimum-stability": "dev",
     "stability-flags": [],
     "prefer-stable": false,
+    "prefer-lowest": false,
     "platform": {
         "php": ">=5.3"
     },

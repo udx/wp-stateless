@@ -501,7 +501,7 @@ namespace UsabilityDynamics\WP {
               $complete = array();
               foreach ( TGM_Plugin_Activation::$instance->plugins as $plugin ) {
                   if ( ! is_plugin_active( $plugin['file_path'] ) ) {
-                      echo '<p><a href="' . add_query_arg( 'page', TGM_Plugin_Activation::$instance->menu, network_admin_url( 'themes.php' ) ) . '" title="' . esc_attr( TGM_Plugin_Activation::$instance->strings['return'] ) . '" target="_parent">' . TGM_Plugin_Activation::$instance->strings['return'] . '</a></p>';
+                      echo '<p><a href="' . esc_url( add_query_arg( 'page', TGM_Plugin_Activation::$instance->menu, network_admin_url( 'themes.php' ) ) ) . '" title="' . esc_attr( TGM_Plugin_Activation::$instance->strings['return'] ) . '" target="_parent">' . TGM_Plugin_Activation::$instance->strings['return'] . '</a></p>';
                       $complete[] = $plugin;
                       break;
                   }

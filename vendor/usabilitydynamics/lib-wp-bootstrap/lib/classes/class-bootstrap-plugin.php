@@ -92,7 +92,7 @@ namespace UsabilityDynamics\WP {
        * @author peshkov@UD
        */
       public function load_textdomain() {
-        load_plugin_textdomain( $this->domain, false, $this->root_path . 'static/languages/' );
+        load_plugin_textdomain( $this->domain, false, dirname( plugin_basename( $this->boot_file ) ) . '/static/languages/' );
       }
       
       /**
@@ -128,6 +128,8 @@ namespace UsabilityDynamics\WP {
               'name' => 'Plugin Name',
               'version' => 'Version',
               'domain' => 'Text Domain',
+              'uservoice_url' => 'UserVoice',
+              'support_url' => 'Support',
             ), 'plugin' );
             $args = array_merge( (array)$pd, (array)$args, array(
               'root_path' => dirname( $dbt[0]['file'] ),
@@ -137,16 +139,34 @@ namespace UsabilityDynamics\WP {
             ) );
             $class::$instance = new $class( $args );
             //** Register activation hook */
-            register_activation_hook( $dbt[0]['file'], array( $class::$instance, 'activate' ) );
+            register_activation_hook( $dbt[0]['file'], array( $class::$instance, '_activate' ) );
             //** Register activation hook */
-            register_deactivation_hook( $dbt[0]['file'], array( $class::$instance, 'deactivate' ) );
+            register_deactivation_hook( $dbt[0]['file'], array( $class::$instance, '_deactivate' ) );
           } else {
             $class::$instance = new $class( $args );
           }
         }
         return $class::$instance;
       }
-      
+
+      /**
+       * Plugin Activation
+       * Internal method. Use activate() instead
+       */
+      public function _activate() {
+        delete_option( sanitize_key( 'dismiss_' . $this->slug . '_' . str_replace( '.', '_', $this->args['version'] ) . '_notice' ) );
+        $this->activate();
+      }
+
+      /**
+       * Plugin Deactivation
+       * Internal method. Use deactivate() instead
+       */
+      public function _deactivate() {
+        delete_option( sanitize_key( 'dismiss_' . $this->slug . '_' . str_replace( '.', '_', $this->args['version'] ) . '_notice' ) );
+        $this->deactivate();
+      }
+
       /**
        * Plugin Activation
        * Redeclare the method in child class!

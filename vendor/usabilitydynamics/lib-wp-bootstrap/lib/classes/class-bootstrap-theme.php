@@ -56,19 +56,37 @@ namespace UsabilityDynamics\WP {
         $this->define_license_manager();
         //** Maybe define license client */
         $this->define_license_client();
-        //** Be sure we do not have errors. Do not initialize theme if we have anyone. */
+        add_action( 'after_setup_theme', array( $this, 'pre_init' ), 100 );
+        $this->boot();
+      }
+      
+      /**
+	     * Determine if we have errors before plugin initialization!
+	     *
+       * @since 1.0.6
+	     */
+      public function pre_init() {
+        //** Be sure we do not have errors. Do not initialize plugin if we have them. */
         if( $this->has_errors() ) {
           if( !is_admin() ) {
-            //** Show message about error on fornt end only if user administrator! */
+            //** Show message about error on front end only if user administrator! */
             if( current_user_can( 'manage_options' ) ) {
               _e( "Theme is activated with errors. Please, follow instructions on admin panel to solve the issue!", $this->domain );
             }
             die();
           }
         } else {
-          $this->init();
+          $this->init();  
         }
       }
+      
+      /**
+       * Called in the end of constructor.
+       * Redeclare the method in child class!
+       *
+       * @author peshkov@UD
+       */
+      public function boot() {}
       
       /**
        * Load Text Domain
@@ -76,7 +94,7 @@ namespace UsabilityDynamics\WP {
        * @author peshkov@UD
        */
       public function load_textdomain() {
-        load_theme_textdomain( $this->domain, $this->root_path . 'static/languages/' );
+        load_theme_textdomain( $this->domain, get_template_directory() . '/static/languages/' );
       }
       
       /**
@@ -97,8 +115,23 @@ namespace UsabilityDynamics\WP {
           exit( "Property \$instance must be <b>static</b> for {$class}" );
         }
         if( null === $class::$instance ) {
+
+          //** Get custom ( undefined ) Headers from style.css */
+          global $wp_theme_directories;
+          $stylesheet = get_stylesheet();
+          $theme_root = get_raw_theme_root($stylesheet);
+          if (false === $theme_root) {
+            $theme_root = WP_CONTENT_DIR . '/themes';
+          } elseif (!in_array($theme_root, (array)$wp_theme_directories)) {
+            $theme_root = WP_CONTENT_DIR . $theme_root;
+          }
+          $data = get_file_data( $theme_root . '/' . get_stylesheet() . '/style.css', array(
+            'uservoice_url' => 'UserVoice',
+            'support_url' => 'Support',
+          ) );
+
           $t = wp_get_theme();
-          $args = array_merge( (array)$args, array(
+          $args = array_merge( (array)$args, $data, array(
             'name' => $t->get( 'Name' ),
             'version' => $t->get( 'Version' ),
             'template' => $t->get( 'Template' ),
