@@ -96,6 +96,7 @@ namespace wpCloud\StatelessMedia {
             if( $this->get( 'sm.mode' ) === 'cdn' ) {
               add_filter( 'wp_get_attachment_image_attributes', array( $this, 'wp_get_attachment_image_attributes' ), 20, 3 );
               add_filter( 'wp_get_attachment_url', array( $this, 'wp_get_attachment_url' ), 20, 2 );
+              add_filter( 'attachment_url_to_postid', array( $this, 'attachment_url_to_postid' ), 20, 2 );
             }
 
             // add_filter( 'upload_dir', array( $this, 'upload_dir' ), 20, 2 );
@@ -489,6 +490,25 @@ namespace wpCloud\StatelessMedia {
           return $sm_cloud[ 'fileLink' ];
         }
         return $url;
+      }
+
+      /**
+       * Filter for attachment_url_to_postid()
+       * 
+       * @param int|false $post_id originally found post ID (or false if not found)
+       * @param string $url the URL to find the post ID for
+       * @return int|false found post ID from cloud storage URL
+       */
+      public function attachment_url_to_postid( $post_id, $url ) {
+        global $wpdb;
+
+        if ( ! $post_id ) {
+          $query = "SELECT post_id FROM $wpdb->postmeta WHERE meta_key = 'sm_cloud' AND meta_value LIKE '%s'";
+
+          $post_id = $wpdb->get_var( $wpdb->prepare( $query, '%' . $url . '%' ) );
+        }
+
+        return $post_id;
       }
 
       /**
