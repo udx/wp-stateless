@@ -124,6 +124,11 @@ namespace wpCloud\StatelessMedia {
             add_filter( 'wp_generate_attachment_metadata', array( $this, 'add_media' ), 100, 2 );
 
             /**
+             * Handle any other on fly generated media
+             */
+            add_filter( 'image_make_intermediate_size', array( $this, 'handle_on_fly' ) );
+
+            /**
              * On physical file deletion we remove any from GS
              */
             add_filter( 'delete_attachment', array( $this, 'remove_media' ) );
@@ -133,6 +138,28 @@ namespace wpCloud\StatelessMedia {
 
       }
 
+      /**
+       * @param $file
+       * @return mixed
+       */
+      public function handle_on_fly( $file ) {
+
+        $client = ud_get_stateless_media()->get_client();
+        $upload_dir = wp_upload_dir();
+
+        $client->add_media( $_mediaOptions = array_filter( array(
+            'name' => str_replace( trailingslashit( $upload_dir[ 'basedir' ] ), '', $file ),
+            'absolutePath' => wp_normalize_path( $file )
+        ) ));
+
+        return $file;
+      }
+
+      /**
+       * @param $links
+       * @param $file
+       * @return mixed
+       */
       public function plugin_action_links( $links, $file ) {
 
         if ($file == plugin_basename( dirname( __DIR__ ) . '/wp-stateless-media.php' ) ) {
