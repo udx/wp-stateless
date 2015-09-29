@@ -514,7 +514,7 @@ namespace wpCloud\StatelessMedia {
       public function wp_get_attachment_url( $url = '', $post_id = '' ) {
         $sm_cloud = get_post_meta( $post_id, 'sm_cloud', 1 );
         if( is_array( $sm_cloud ) && !empty( $sm_cloud[ 'fileLink' ] ) ) {
-          return $sm_cloud[ 'fileLink' ];
+          return strpos( $sm_cloud[ 'fileLink' ], 'https://' ) === false ? ( 'https:' . $sm_cloud[ 'fileLink' ] ) : $sm_cloud[ 'fileLink' ];
         }
         return $url;
       }
