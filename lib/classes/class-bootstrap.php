@@ -97,6 +97,10 @@ namespace wpCloud\StatelessMedia {
               add_filter( 'wp_get_attachment_image_attributes', array( $this, 'wp_get_attachment_image_attributes' ), 20, 3 );
               add_filter( 'wp_get_attachment_url', array( $this, 'wp_get_attachment_url' ), 20, 2 );
               add_filter( 'attachment_url_to_postid', array( $this, 'attachment_url_to_postid' ), 20, 2 );
+
+              if ( $this->get( 'sm.body_rewrite' ) == 'true' ) {
+                add_filter( 'the_content', array( $this, 'the_content_filter' ) );
+              }
             }
 
             // add_filter( 'upload_dir', array( $this, 'upload_dir' ), 20, 2 );
@@ -136,6 +140,22 @@ namespace wpCloud\StatelessMedia {
 
         }
 
+      }
+
+      /**
+       * @param $content
+       * @return mixed
+       */
+      public function the_content_filter( $content ) {
+
+        if ( $upload_data = wp_upload_dir() ) {
+
+          if ( !empty( $upload_data['baseurl'] ) && !empty( $content ) ) {
+            $content = preg_replace( '/(href|src)=(\'|")('.str_replace('/', '\/', $upload_data['baseurl']).')(.+?)(\.jpg|\.png|\.gif|\.jpeg)(\'|")/i', '$1=$2https://storage.googleapis.com/'.$this->get( 'sm.bucket' ).'$4$5$6', $content);
+          }
+        }
+
+        return $content;
       }
 
       /**
