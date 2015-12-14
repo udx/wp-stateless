@@ -87,7 +87,8 @@ namespace wpCloud\StatelessMedia {
 
           add_action( 'admin_enqueue_scripts', array( $this, 'admin_enqueue_scripts' ) );
 
-          // add_filter( 'views_upload', array( $this, 'views_upload' ), 30 );
+          /** Temporary fix to WP 4.4 srcset feature **/
+          add_filter( 'max_srcset_image_width', create_function( '', 'return 1;' ) );
 
           /**
            * Carry on only if we do not have errors.
