@@ -152,7 +152,9 @@ namespace wpCloud\StatelessMedia {
         if ( $upload_data = wp_upload_dir() ) {
 
           if ( !empty( $upload_data['baseurl'] ) && !empty( $content ) ) {
-            $content = preg_replace( '/(href|src)=(\'|")('.str_replace('/', '\/', $upload_data['baseurl']).')(.+?)(\.jpg|\.png|\.gif|\.jpeg)(\'|")/i', '$1=$2https://storage.googleapis.com/'.$this->get( 'sm.bucket' ).'$4$5$6', $content);
+            $baseurl = preg_replace('/https?:\/\//','',$upload_data['baseurl']);
+            $content = preg_replace( '/(href|src)=(\'|")(https?:\/\/'.str_replace('/', '\/', $baseurl).')(.+?)(\.jpg|\.png|\.gif|\.jpeg)(\'|")/i',
+                '$1=$2https://storage.googleapis.com/'.$this->get( 'sm.bucket' ).'$4$5$6', $content);
           }
         }
 
