@@ -4,6 +4,7 @@ static/cache
 static/codex
 npm-debug.log
 wp-test-config.php
+/test
 
 .git
 .svn
