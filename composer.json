@@ -19,6 +19,7 @@
   },
   "require": {
     "php": ">=5.3",
+    "composer/installers": "~1.0",
     "usabilitydynamics/lib-settings": "0.2.3",
     "usabilitydynamics/lib-wp-bootstrap": "1.1.9",
     "google/apiclient": "1.1.2"
