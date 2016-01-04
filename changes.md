@@ -1,3 +1,6 @@
+#### 1.7.0
+* Fixed conflict with SSL forcing plugin.
+
 #### 1.6.0
 * Plugin Updates ability added.
 * WordPress 4.4 compatibility fixed.
