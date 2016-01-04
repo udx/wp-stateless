@@ -1,3 +1,8 @@
+#### 1.6.0
+* Plugin Updates ability added.
+* WordPress 4.4 compatibility fixed.
+* Post content filter fixed.
+
 #### 1.5.0
 * Migration into wp-stateless from wp-stateless-media.
 * Version bump to resolve bucket permissions issues.
