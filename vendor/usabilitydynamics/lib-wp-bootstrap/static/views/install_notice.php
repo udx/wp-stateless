@@ -80,6 +80,7 @@
     do_action( 'ud::bootstrap::upgrade_notice::additional_info', $this, $vars );
     ?>
     <div class="ud-install-notice-dismiss">
+      <?php printf( __( '<a href="%s" class="">Dismiss this notice</a>' ), $dismiss_link ); ?>
       <?php if( !empty( $home_link ) ) : ?>
         | <?php printf( __( '<a href="%s" target="_blank" class="">%s\'s Home page</a>' ), $home_link, ucfirst( $type ) ); ?>
       <?php endif; ?>
@@ -89,7 +90,6 @@
       <?php if( !empty( $this->uservoice_url ) ) : ?>
         | <a href="<?php echo $this->uservoice_url ?>" target="_blank" ><?php _e( 'Post your idea' ) ?></a>
       <?php endif; ?>
-      | <?php printf( __( '<a href="%s" class="">Dismiss this notice</a>' ), $dismiss_link ); ?>
     </div>
   </div>
   <div class="ud-install-notice-clear"></div>

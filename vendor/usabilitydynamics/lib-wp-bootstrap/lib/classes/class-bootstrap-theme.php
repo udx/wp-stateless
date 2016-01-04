@@ -130,7 +130,7 @@ namespace UsabilityDynamics\WP {
             'support_url' => 'Support',
           ) );
 
-          $t = wp_get_theme( get_template() );
+          $t = wp_get_theme();
           $args = array_merge( (array)$args, $data, array(
             'name' => $t->get( 'Name' ),
             'version' => $t->get( 'Version' ),
