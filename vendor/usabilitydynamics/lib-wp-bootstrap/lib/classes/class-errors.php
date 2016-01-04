@@ -132,7 +132,7 @@ namespace UsabilityDynamics\WP {
        */
       public function dismiss() {
         if ( isset( $_GET[ 'udan-dismiss-' . sanitize_key( $this->name ) ] ) ) {
-          update_user_meta( get_current_user_id(), ( 'dismissed_notice_' . sanitize_key( $this->name ) ), time() );
+          update_option( ( 'dismissed_notice_' . sanitize_key( $this->name ) ), time() );
         }
       }
       
@@ -143,11 +143,20 @@ namespace UsabilityDynamics\WP {
        */
       public function admin_notices() {
         global $wp_version;
+
+        //** Don't show the message if the user has no enough permissions. */
+        if ( ! function_exists( 'wp_get_current_user' ) ) {
+          require_once( ABSPATH . 'wp-includes/pluggable.php' );
+        }
         
-        //** Don't show the message if the user isn't an administrator. */
-        if ( ! current_user_can( 'manage_options' ) ) { 
+        if(
+          empty( $this->args['type'] ) ||
+          ( $this->args['type'] == 'plugin' && !current_user_can( 'activate_plugins' ) ) ||
+          ( $this->args['type'] == 'theme' && !current_user_can( 'switch_themes' ) )
+        ) {
           return;
         }
+
         //** Don't show the message if on a multisite and the user isn't a super user. */
         if ( is_multisite() && ! is_super_admin() ) {
           return;
@@ -185,9 +194,9 @@ namespace UsabilityDynamics\WP {
           echo '<div class="ud-admin-notice updated update-nag fade" style="padding:11px;">' . $message . '</div>';
         }
         
-        //** Determine if message has been dismissed ( for week! ) */
-        $dismiss_timer = get_user_meta( get_current_user_id(), ( 'dismissed_notice_' . sanitize_key( $this->name ) ), true );
-        if ( !$dismiss_timer || ( time() - (int)$dismiss_timer ) >= 604800 ) {
+        //** Determine if message has been dismissed */
+        $dismissed = get_option( ( 'dismissed_notice_' . sanitize_key( $this->name ) ) );
+        if ( empty( $dismissed ) ) {
           //** Notices Block */
           if( !empty( $messages ) && is_array( $messages ) ) {
             $message = '<ul style="list-style:disc inside;"><li>' . implode( '</li><li>', $messages ) . '</li></ul>';

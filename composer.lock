@@ -4,8 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "e68305a37c781d7822e8ddedc7069d67",
-    "content-hash": "ac6066ca1293c52cb78c23ef2be242bc",
+    "hash": "fdb5ee5afb3129b576b6903ef18e2096",
+    "content-hash": "66de494935d4f618c13f6c371ea20661",
     "packages": [
         {
             "name": "google/apiclient",
@@ -180,15 +180,15 @@
         },
         {
             "name": "usabilitydynamics/lib-wp-bootstrap",
-            "version": "1.1.5",
+            "version": "1.1.9",
             "source": {
                 "type": "git",
                 "url": "git@github.com:UsabilityDynamics/lib-wp-bootstrap",
-                "reference": "1.1.5"
+                "reference": "1.1.9"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://github.com/UsabilityDynamics/lib-wp-bootstrap/archive/1.1.5.zip",
+                "url": "https://github.com/UsabilityDynamics/lib-wp-bootstrap/archive/1.1.9.zip",
                 "reference": null,
                 "shasum": null
             },

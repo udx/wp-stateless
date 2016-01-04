@@ -18,7 +18,7 @@ namespace UsabilityDynamics\WP {
      */
     class Bootstrap_Plugin extends Bootstrap {
     
-      public static $version = '1.0.3';
+      public static $version = '1.0.4';
       
       public $type = 'plugin';
       
@@ -35,7 +35,7 @@ namespace UsabilityDynamics\WP {
         //** Load text domain */
         add_action( 'plugins_loaded', array( $this, 'load_textdomain' ), 1 );
         //** May be initialize Licenses Manager. */
-        add_action( 'plugins_loaded', array( $this, 'define_license_manager' ), 10 );
+        add_action( 'plugins_loaded', array( $this, 'define_license_manager' ), 1 );
         //** Initialize plugin here. All plugin actions must be added on this step */
         add_action( 'plugins_loaded', array( $this, 'pre_init' ), 100 );
         //** TGM Plugin activation. */
@@ -96,15 +96,6 @@ namespace UsabilityDynamics\WP {
       }
       
       /**
-       * Go through additional conditions on 'plugins_loaded' action before we start plugin initialization
-       *
-       * @author peshkov@UD
-       */
-      public function plugins_loaded() {
-        $this->define_license_manager();
-      }
-      
-      /**
        * Determine if instance already exists and Return Instance
        *
        * Attention: The method MUST be called from plugin core file at first to set correct path to plugin!
@@ -154,7 +145,10 @@ namespace UsabilityDynamics\WP {
        * Internal method. Use activate() instead
        */
       public function _activate() {
+        /* Delete 'Install/Upgrade' notice 'dismissed' information */
         delete_option( sanitize_key( 'dismiss_' . $this->slug . '_' . str_replace( '.', '_', $this->args['version'] ) . '_notice' ) );
+        /* Delete 'Bootstrap' notice 'dismissed' information */
+        delete_option( 'dismissed_notice_' . sanitize_key( $this->name ) );
         $this->activate();
       }
 
@@ -163,7 +157,10 @@ namespace UsabilityDynamics\WP {
        * Internal method. Use deactivate() instead
        */
       public function _deactivate() {
+        /* Delete 'Install/Upgrade' notice 'dismissed' information */
         delete_option( sanitize_key( 'dismiss_' . $this->slug . '_' . str_replace( '.', '_', $this->args['version'] ) . '_notice' ) );
+        /* Delete 'Bootstrap' notice 'dismissed' information */
+        delete_option( 'dismissed_notice_' . sanitize_key( $this->name ) );
         $this->deactivate();
       }
 

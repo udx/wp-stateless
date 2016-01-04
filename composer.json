@@ -20,7 +20,7 @@
   "require": {
     "php": ">=5.3",
     "usabilitydynamics/lib-settings": "0.2.3",
-    "usabilitydynamics/lib-wp-bootstrap": "1.1.5",
+    "usabilitydynamics/lib-wp-bootstrap": "1.1.9",
     "google/apiclient": "1.1.2"
   },
   "require-dev": {
