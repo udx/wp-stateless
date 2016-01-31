@@ -34,6 +34,8 @@ namespace wpCloud\StatelessMedia {
               'bucket_url_path' => get_option( 'sm_bucket_url_path' ),
               'body_rewrite' => get_option( 'sm_body_rewrite' ),
               'post_content_rewrite' => get_option( 'sm_post_content_rewrite' ),
+              'key_type' => get_option( 'sm_key_type', 'file' ),
+              'key_json' => get_option( 'sm_key_json' ),
               'key_file_path' => get_option( 'sm_key_file_path' ),
               'bucket' => get_option( 'sm_bucket' )
             )
@@ -258,8 +260,16 @@ namespace wpCloud\StatelessMedia {
         } else {
 
           $inputs[] = '<p><label for="sm_service_account_name">'.__( 'Email Address', ud_get_stateless_media()->domain ).'</label><input autocomplete="off" id="sm_service_account_name" class="regular-text sm_service_account_name" size="80" type="text" name="sm[service_account_name]" value="'. esc_attr( $this->get( 'sm.service_account_name' ) ) .'" /></p>';
-          $inputs[] = '<p><label for="sm_key_file_path">'.__( 'Key File path', ud_get_stateless_media()->domain ).'</label><input id="sm_key_file_path" class="regular-text sm_key_file_path" type="text" name="sm[key_file_path]" value="'. esc_attr( $this->get( 'sm.key_file_path' ) ) .'" /></p>';
-
+          $inputs[] = '<div class="key_type"><label>Key</label><div>';
+            $inputs[] = '<div class="_key_type _sm_key_json">';
+              $inputs[] = '<input class="radio" type="radio" name="sm[key_type]" value="json" ' . checked( 'json', $this->get( 'sm.key_type', 'file' ), false) . '/>';
+              $inputs[] = '<label class="label" for="sm_key_json">'.__( 'Key in json format', ud_get_stateless_media()->domain ).'</label><textarea id="sm_key_json" class="field regular-textarea sm_key_json" type="text" name="sm[key_json]" >'. esc_attr( $this->get( 'sm.key_json' ) ) .'</textarea>';
+            $inputs[] = '</div>';
+            $inputs[] = '<div class="_key_type _sm_key_file_path">';
+              $inputs[] = '<input class="radio" type="radio" name="sm[key_type]" value="file" ' . checked( 'file', $this->get( 'sm.key_type', 'file' ), false) . '/>';
+              $inputs[] = '<label class="label" for="sm_key_file_path">'.__( 'Key File path', ud_get_stateless_media()->domain ).'</label><input id="sm_key_file_path" class="field regular-text sm_key_file_path" type="text" name="sm[key_file_path]" value="'. esc_attr( $this->get( 'sm.key_file_path' ) ) .'" />';
+            $inputs[] = '</div>';
+          $inputs[] = '</div></div>';
         }
 
         $inputs[] = '</section>';

@@ -28,3 +28,27 @@ td.image-icon img.wp-stateless-media-item {
   display: inline-block;
   margin-left: 10px;
 }
+
+.key_type{
+	margin-top: 4px;
+	margin-bottom: 0;
+}
+.key_type>label{
+	vertical-align: top;
+}
+.key_type>div{
+	display: inline-block;
+	width:auto;
+	padding-top: 3px;
+}
+.key_type ._sm_key_file_path{
+	margin-top: 7px;
+}
+.key_type .sm_key_json, .key_type .sm_key_file_path{
+	display: block;
+	width: 40em;
+	max-width: 100%;
+}
+.key_type .sm_key_json{
+	height:200px;
+}

@@ -94,7 +94,6 @@ namespace wpCloud\StatelessMedia {
 
         /* We check the file in get_instance() !  */
         $key = file_get_contents( $this->key_file_path );
-
         $cred = new Google_Auth_AssertionCredentials( $this->service_account_name, array( 'https://www.googleapis.com/auth/devstorage.full_control' ), $key );
 
         $this->client->setAssertionCredentials( $cred );
@@ -219,7 +218,6 @@ namespace wpCloud\StatelessMedia {
        * @return \wpCloud\StatelessMedia\GS_Client
        */
       public static function get_instance( $args ) {
-
         if( null === self::$instance ) {
 
           try {
@@ -231,8 +229,11 @@ namespace wpCloud\StatelessMedia {
               throw new Exception( __( '<b>Bucket</b> parameter must be provided.' ) );
             }
 
-            if( empty( $args[ 'key_file_path' ] ) || !file_exists( $args[ 'key_file_path' ] ) ) {
-              throw new Exception( __( '<b>Key File Path</b> parameter is not provided or <b>p12</b> file does not exist.' ) );
+            if( get_option( 'sm_key_type', 'file' ) == 'file' && ( empty( $args[ 'key_file_path' ] ) || !file_exists( $args[ 'key_file_path' ] ) )) {
+              throw new Exception( __( '<b>XKey File Path</b> parameter is not provided or <b>p12</b> file does not exist.' ) );
+            }
+            elseif( empty( $args[ 'key_json' ] ) || !$json = json_decode( $args[ 'key_json' ]) || !property_exists($json, 'private_key') ){ //type = json 
+              throw new Exception( __( '<b>json Key not working</b> or <b>p12</b> file does not exist.' ) );
             }
 
             self::$instance = new self( $args );
