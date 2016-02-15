@@ -72,6 +72,8 @@ namespace wpCloud\StatelessMedia {
          */
         $this->settings = new Settings();
 
+        add_action( 'admin_enqueue_scripts', array( $this, 'admin_enqueue_scripts' ) );
+
         /* Initialize plugin only if Mode is not 'disabled'. */
         if( $this->get( 'sm.mode' ) !== 'disabled' ) {
 
@@ -84,8 +86,6 @@ namespace wpCloud\StatelessMedia {
           if ( is_wp_error( $is_connected ) ) {
             $this->errors->add( $is_connected->get_error_message() );
           }
-
-          add_action( 'admin_enqueue_scripts', array( $this, 'admin_enqueue_scripts' ) );
 
           /** Temporary fix to WP 4.4 srcset feature **/
           add_filter( 'max_srcset_image_width', create_function( '', 'return 1;' ) );
@@ -429,43 +429,15 @@ namespace wpCloud\StatelessMedia {
 
         if( null === $this->client ) {
 
-          /* Maybe fix the path to p12 file. */
-          $key_file_path = $this->get( 'sm.key_file_path' );
-
-          if( !empty( $key_file_path ) ) {
-            $upload_dir = wp_upload_dir();
-            /* Check if file exists */
-            switch( true ) {
-              /* Determine if default path is correct */
-              case (file_exists($key_file_path)):
-                /* Path is correct. Do nothing */
-                break;
-              /* Look using WP root. */
-              case (file_exists( ABSPATH . $key_file_path ) ):
-                $key_file_path = ABSPATH . $key_file_path;
-                break;
-              /* Look in wp-content dir */
-              case (file_exists( WP_CONTENT_DIR . $key_file_path ) ):
-                $key_file_path = WP_CONTENT_DIR . $key_file_path;
-                break;
-              /* Look in uploads dir */
-              case (file_exists( wp_normalize_path( $upload_dir[ 'basedir' ] ) . '/' . $key_file_path ) ):
-                $key_file_path = wp_normalize_path( $upload_dir[ 'basedir' ] ) . '/' . $key_file_path;
-                break;
-              /* Look using Plugin root */
-              case (file_exists($this->path( $key_file_path, 'dir') ) ):
-                $key_file_path = $this->path( $key_file_path, 'dir' );
-                break;
-
-            }
+          $key_json = get_site_option( 'sm_key_json' );
+          if ( empty($key_json) ) {
+            $key_json = $this->get( 'sm.key_json' );
           }
 
           /* Try to initialize GS Client */
           $this->client = GS_Client::get_instance( array(
-            'service_account_name' => $this->get( 'sm.service_account_name' ),
             'bucket' => $this->get( 'sm.bucket' ),
-            'key_file_path' => $key_file_path,
-            'key_json' => $this->get( 'sm.key_json' )
+            'key_json' => $key_json
           ) );
         }
 

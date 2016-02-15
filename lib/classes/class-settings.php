@@ -67,9 +67,9 @@ namespace wpCloud\StatelessMedia {
        * @author peshkov@UD
        */
       public function save_network_settings() {
-        $settings  = array_map( 'sanitize_text_field', $_POST['sm'] );
+        $settings  = $_POST['sm'];
         foreach ( $settings as $name => $value ) {
-          update_site_option( 'sm_'. $name, $value );
+          update_site_option( 'sm_'. $name, stripslashes($value) );
         }
       }
 
@@ -80,28 +80,14 @@ namespace wpCloud\StatelessMedia {
        * @author peshkov@UD
        */
       public function register_network_settings() {
-        $san_readonly = defined( 'WP_STATELESS_MEDIA_SERVICE_ACCOUNT' ) ? 'readonly="readonly"' : '';
-        $kfp_readonly = defined( 'WP_STATELESS_MEDIA_KEY_FILE_PATH' ) ? 'readonly="readonly"' : '';
         ?>
         <h3><?php _e( 'Stateless Media Settings', ud_get_stateless_media()->domain ); ?></h3>
         <p><?php $this->section_callback(); ?></p>
-        <table id="menu" class="form-table">
-          <tr valign="top">
-            <th scope="row"><?php _e( 'Email Address', ud_get_stateless_media()->domain ); ?></th>
-            <td>
-              <input <?php echo $san_readonly; ?> id="sm_service_account_name" class="regular-text" size="80" type="text" name="sm[service_account_name]" value="<?php echo esc_attr( $this->get( 'sm.service_account_name' ) ); ?>" />
-            </td>
-          </tr>
-          <tr valign="top">
-            <th scope="row"><?php _e( 'Key File path', ud_get_stateless_media()->domain ); ?></th>
-            <td>
-              <input <?php echo $kfp_readonly; ?> id="sm_key_file_path" class="regular-text" type="text" name="sm[key_file_path]" value="<?php echo esc_attr( $this->get( 'sm.key_file_path' ) ); ?>" />
-              <?php if( $kfp_readonly ) { ?>
-                <p class="description"><?php _e( 'The key file path can not be changed because it is set via <code>WP_STATELESS_MEDIA_KEY_FILE_PATH</code> constant.'); ?></p>
-              <?php } ?>
-            </td>
-          </tr>
-        </table>
+        <div class="key_type"><label><b><?php _e('Service Account JSON', ud_get_stateless_media()->domain) ?></b></label>
+          <div class="_key_type _sm_key_json">
+            <textarea id="sm_key_json" class="field regular-textarea sm_key_json" type="text" name="sm[key_json]"><?php echo get_site_option( 'sm_key_json' ); ?></textarea>
+          </div>
+        </div>
       <?php
       }
 
@@ -203,28 +189,16 @@ namespace wpCloud\StatelessMedia {
 
           if( is_super_admin() ) {
 
-            $san_readonly = get_site_option( 'sm_service_account_name' ) || defined( 'WP_STATELESS_MEDIA_SERVICE_ACCOUNT' ) ? 'readonly="readonly"' : '';
-            $kfp_readonly = get_site_option( 'sm_key_file_path' ) || defined( 'WP_STATELESS_MEDIA_KEY_FILE_PATH' ) ? 'readonly="readonly"' : '';
+            $kjsn_readonly = get_site_option( 'sm_key_json' ) || defined( 'WP_STATELESS_MEDIA_KEY_FILE_PATH' ) ? 'readonly="readonly"' : '';
 
-            $inputs[] = '<p class="wp-stateless-media-for-superadmin"><label for="sm_service_account_name">'.__( 'Email Address', ud_get_stateless_media()->domain ).'</label><input ' . $san_readonly . ' id="sm_service_account_name" size="80" class="regular-text sm_service_account_name" type="text" name="sm[service_account_name]" value="'. esc_attr( $this->get( 'sm.service_account_name' ) ) .'" /></p>';
+            $inputs[] = '<div class="key_type"><label>'.__('Service Account JSON', ud_get_stateless_media()->domain).'</label>';
+            $inputs[] = '<div class="_key_type _sm_key_json">';
+            $inputs[] = '<textarea '.$kjsn_readonly.' id="sm_key_json" class="field regular-textarea sm_key_json" type="text" name="sm[key_json]" >'. esc_attr( $this->get( 'sm.key_json' ) ) .'</textarea>';
+            $inputs[] = '</div>';
+            $inputs[] = '</div>';
 
-            if( $san_readonly ) {
-              if( defined( 'WP_STATELESS_MEDIA_SERVICE_ACCOUNT' ) ) {
-                $inputs[ ] = '<p class="description">' . __( 'The account name can not be changed because it is set via <code>WP_STATELESS_MEDIA_SERVICE_ACCOUNT</code> constant.' ) . '</p>';
-              } else {
-                $inputs[ ] = '<p class="description">' . sprintf( __( 'The account name can not be changed because it is set via <a href="%s">Network Settings.</a>' ), network_admin_url( 'settings.php' ) ) . '</p>';
-              }
-
-            }
-
-            $inputs[] = '<p class="wp-stateless-media-for-superadmin"><label for="sm_key_file_path">'.__( 'Key File path', ud_get_stateless_media()->domain ).'</label><input ' . $kfp_readonly . ' id="sm_key_file_path" class="regular-text sm_key_file_path" type="text" name="sm[key_file_path]" value="'. esc_attr( $this->get( 'sm.key_file_path' ) ) .'" /></p>';
-
-            if( $kfp_readonly ) {
-              if( defined( 'WP_STATELESS_MEDIA_KEY_FILE_PATH' ) ) {
-                $inputs[ ] = '<p class="description">' . __( 'The key file path can not be changed because it is set via <code>WP_STATELESS_MEDIA_KEY_FILE_PATH</code> constant.' ) . '</p>';
-              } else {
-                $inputs[ ] = '<p class="description">' . sprintf( __( 'The key file path can not be changed because it is set via <a href="%s">Network Settings.</a>' ), network_admin_url( 'settings.php' ) ) . '</p>';
-              }
+            if( $kjsn_readonly ) {
+              $inputs[ ] = '<p class="description">' . sprintf( __( 'The account name can not be changed because it is set via <a href="%s">Network Settings.</a>' ), network_admin_url( 'settings.php' ) ) . '</p>';
             }
 
           }

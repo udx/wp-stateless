@@ -69,8 +69,6 @@ namespace wpCloud\StatelessMedia {
        */
       protected function __construct( $args ) {
         global $current_blog;
-        $this->service_account_name = $args[ 'service_account_name' ];
-        $this->key_file_path = $args[ 'key_file_path' ];
         $this->bucket = $args[ 'bucket' ];
         $this->key_json = json_decode($args['key_json'], 1);
 
