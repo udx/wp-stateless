@@ -72,9 +72,12 @@ namespace wpCloud\StatelessMedia {
         $this->service_account_name = $args[ 'service_account_name' ];
         $this->key_file_path = $args[ 'key_file_path' ];
         $this->bucket = $args[ 'bucket' ];
+        $this->key_json = json_decode($args['key_json'], 1);
 
         /* Initialize our client */
         $this->client = new Google_Client();
+
+        $this->client->setAuthConfig($this->key_json);
 
         if( isset( $current_blog ) && isset( $current_blog->domain ) ) {
           $this->client->setApplicationName( $current_blog->domain );
@@ -82,26 +85,7 @@ namespace wpCloud\StatelessMedia {
           $this->client->setApplicationName( urlencode( str_replace( array( 'http://', 'https://' ), '', get_bloginfo( 'url' ) ) ) );
         }
 
-        /**
-         * If we have an access token, we can carry on.
-         * Otherwise, we'll get one with the help of an
-         * assertion credential. We also supply
-         * the service account
-         */
-        if ( get_transient( 'wp-stateless-media:service_token' ) ) {
-          $this->client->setAccessToken( get_transient( 'wp-stateless-media:service_token' ) );
-        }
-
-        /* We check the file in get_instance() !  */
-        $key = file_get_contents( $this->key_file_path );
-        $cred = new Google_Auth_AssertionCredentials( $this->service_account_name, array( 'https://www.googleapis.com/auth/devstorage.full_control' ), $key );
-
-        $this->client->setAssertionCredentials( $cred );
-
-        if( $this->client->getAuth()->isAccessTokenExpired() ) {
-          $this->client->getAuth()->refreshTokenWithAssertion( $cred );
-          set_transient( 'wp-stateless-media:service_token', $this->client->getAccessToken(), 86400 );
-        }
+        $this->client->setScopes(['https://www.googleapis.com/auth/devstorage.full_control']);
 
         /* Now, Initialize our Google Storage Service */
         $this->service = new Google_Service_Storage( $this->client );
@@ -221,19 +205,13 @@ namespace wpCloud\StatelessMedia {
         if( null === self::$instance ) {
 
           try {
-            if( empty( $args[ 'service_account_name' ] ) ) {
-              throw new Exception( __( '<b>Email Address</b> parameter must be provided.' ) );
-            }
 
             if( empty( $args[ 'bucket' ] ) ) {
               throw new Exception( __( '<b>Bucket</b> parameter must be provided.' ) );
             }
 
-            if( get_option( 'sm_key_type', 'file' ) == 'file' && ( empty( $args[ 'key_file_path' ] ) || !file_exists( $args[ 'key_file_path' ] ) )) {
-              throw new Exception( __( '<b>XKey File Path</b> parameter is not provided or <b>p12</b> file does not exist.' ) );
-            }
-            elseif( empty( $args[ 'key_json' ] ) || !$json = json_decode( $args[ 'key_json' ]) || !property_exists($json, 'private_key') ){ //type = json 
-              throw new Exception( __( '<b>json Key not working</b> or <b>p12</b> file does not exist.' ) );
+            if( empty( $args[ 'key_json' ] ) || !$json = json_decode( $args[ 'key_json' ]) || !property_exists($json, 'private_key') ){
+              throw new Exception( __( '<b>Service Account JSON</b> is invalid.' ) );
             }
 
             self::$instance = new self( $args );

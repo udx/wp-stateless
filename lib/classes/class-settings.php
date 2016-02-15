@@ -30,35 +30,12 @@ namespace wpCloud\StatelessMedia {
           'data'        => array(
             'sm' => array(
               'mode' => get_option( 'sm_mode', 'disabled' ),
-              'service_account_name' => get_option( 'sm_service_account_name' ),
-              'bucket_url_path' => get_option( 'sm_bucket_url_path' ),
               'body_rewrite' => get_option( 'sm_body_rewrite' ),
-              'post_content_rewrite' => get_option( 'sm_post_content_rewrite' ),
-              'key_type' => get_option( 'sm_key_type', 'file' ),
               'key_json' => get_option( 'sm_key_json' ),
-              'key_file_path' => get_option( 'sm_key_file_path' ),
               'bucket' => get_option( 'sm_bucket' )
             )
           )
         ));
-
-        /**
-         * Check for defined constants
-         * and Network settings and overwrite current ones if needed.
-         */
-        if( defined( 'WP_STATELESS_MEDIA_SERVICE_ACCOUNT' ) ) {
-          $this->set( 'sm.service_account_name', WP_STATELESS_MEDIA_SERVICE_ACCOUNT );
-        }
-        elseif ( is_multisite() && $service_account_name = get_site_option( 'sm_service_account_name' ) ) {
-          $this->set( 'sm.service_account_name', $service_account_name );
-        }
-
-        if( defined( 'WP_STATELESS_MEDIA_KEY_FILE_PATH' ) ) {
-          $this->set( 'sm.key_file_path', WP_STATELESS_MEDIA_KEY_FILE_PATH );
-        }
-        elseif ( is_multisite() && $key_file_path = get_site_option( 'sm_key_file_path' ) ) {
-          $this->set( 'sm.key_file_path', $key_file_path );
-        }
 
         /* Use constant value for mode, if set. */
         if( defined( 'WP_STATELESS_MEDIA_MODE' ) ) {
@@ -191,12 +168,8 @@ namespace wpCloud\StatelessMedia {
         $inputs = array();
 
         $inputs[] = '<input type="hidden" name="sm[body_rewrite]" value="false" />';
-        $inputs[] = '<input type="hidden" name="sm[post_content_rewrite]" value="false" />';
-        $inputs[] = '<input type="hidden" name="sm[bucket_url_path]" value="false" />';
 
-        // $inputs[] = '<label for="sm_post_content_rewrite"><input id="sm_post_content_rewrite" type="checkbox" name="sm[post_content_rewrite]" value="true" '. checked( 'true', $this->get( 'sm.post_content_rewrite' ), false ) .'/>'.__( 'Post Content URL Rewrite', ud_get_stateless_media()->domain ).'</label>';
         $inputs[] = '<label for="sm_body_rewrite"><input id="sm_body_rewrite" type="checkbox" name="sm[body_rewrite]" value="true" '. checked( 'true', $this->get( 'sm.body_rewrite' ), false ) .'/>'.__( 'Body content media URL rewrite.', ud_get_stateless_media()->domain ).'</label>';
-        // $inputs[] = '<label for="sm_bucket_url_path"><input id="sm_bucket_url_path" type="checkbox" name="sm[bucket_url_path]" value="true" '. checked( 'true', $this->get( 'sm.bucket_url_path' ), false ) .' />'.__( 'Bucket CNAME Path', ud_get_stateless_media()->domain ).'</label>';
 
         echo '<section class="wp-stateless-media-options wp-stateless-media-advanced-options"><p>' . implode( "</p>\n<p>", (array) apply_filters( 'sm::settings::advanced', $inputs ) ) . '</p></section>';
 
@@ -221,10 +194,9 @@ namespace wpCloud\StatelessMedia {
         $inputs = array( '<section class="wp-stateless-media-options wp-stateless-credentials-options">' );
 
         if( !defined( 'WP_STATELESS_MEDIA_BUCKET' ) ) {
-          $inputs[ ] = '<p><label for="sm_bucket">'.__( 'Bucket', ud_get_stateless_media()->domain ).'</label><input id="sm_bucket" class="regular-text" type="text" name="sm[bucket]" value="'. esc_attr( $this->get( 'sm.bucket' ) ) .'" /></p>';
+          $inputs[ ] = '<p><label for="sm_bucket">'.__( 'Bucket', ud_get_stateless_media()->domain ).'</label><div><input id="sm_bucket" class="regular-text" type="text" name="sm[bucket]" value="'. esc_attr( $this->get( 'sm.bucket' ) ) .'" /></div></p>';
         } else {
-          $inputs[ ] = '<p><label for="sm_bucket">'.__( 'Bucket', ud_get_stateless_media()->domain ).'</label><input id="sm_bucket" class="regular-text" readonly="readonly" type="text" name="sm[bucket]" value="'. esc_attr( $this->get( 'sm.bucket' ) ) .'" /></p>';
-          // $inputs[ ] = '<p class="description">' . __( 'The Bucket can not be changed because it is set via <code>WP_STATELESS_MEDIA_BUCKET</code> constant.' ) . '</p>';
+          $inputs[ ] = '<p><label for="sm_bucket">'.__( 'Bucket', ud_get_stateless_media()->domain ).'</label><div><input id="sm_bucket" class="regular-text" readonly="readonly" type="text" name="sm[bucket]" value="'. esc_attr( $this->get( 'sm.bucket' ) ) .'" /></div></p>';
         }
 
         if( ud_get_stateless_media()->is_network_detected() ) {
@@ -259,17 +231,11 @@ namespace wpCloud\StatelessMedia {
 
         } else {
 
-          $inputs[] = '<p><label for="sm_service_account_name">'.__( 'Email Address', ud_get_stateless_media()->domain ).'</label><input autocomplete="off" id="sm_service_account_name" class="regular-text sm_service_account_name" size="80" type="text" name="sm[service_account_name]" value="'. esc_attr( $this->get( 'sm.service_account_name' ) ) .'" /></p>';
-          $inputs[] = '<div class="key_type"><label>Key</label><div>';
+          $inputs[] = '<div class="key_type"><label>'.__('Service Account JSON', ud_get_stateless_media()->domain).'</label>';
             $inputs[] = '<div class="_key_type _sm_key_json">';
-              $inputs[] = '<input class="radio" type="radio" name="sm[key_type]" value="json" ' . checked( 'json', $this->get( 'sm.key_type', 'file' ), false) . '/>';
-              $inputs[] = '<label class="label" for="sm_key_json">'.__( 'Key in json format', ud_get_stateless_media()->domain ).'</label><textarea id="sm_key_json" class="field regular-textarea sm_key_json" type="text" name="sm[key_json]" >'. esc_attr( $this->get( 'sm.key_json' ) ) .'</textarea>';
+              $inputs[] = '<textarea id="sm_key_json" class="field regular-textarea sm_key_json" type="text" name="sm[key_json]" >'. esc_attr( $this->get( 'sm.key_json' ) ) .'</textarea>';
             $inputs[] = '</div>';
-            $inputs[] = '<div class="_key_type _sm_key_file_path">';
-              $inputs[] = '<input class="radio" type="radio" name="sm[key_type]" value="file" ' . checked( 'file', $this->get( 'sm.key_type', 'file' ), false) . '/>';
-              $inputs[] = '<label class="label" for="sm_key_file_path">'.__( 'Key File path', ud_get_stateless_media()->domain ).'</label><input id="sm_key_file_path" class="field regular-text sm_key_file_path" type="text" name="sm[key_file_path]" value="'. esc_attr( $this->get( 'sm.key_file_path' ) ) .'" />';
-            $inputs[] = '</div>';
-          $inputs[] = '</div></div>';
+          $inputs[] = '</div>';
         }
 
         $inputs[] = '</section>';

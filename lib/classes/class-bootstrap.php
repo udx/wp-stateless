@@ -465,6 +465,7 @@ namespace wpCloud\StatelessMedia {
             'service_account_name' => $this->get( 'sm.service_account_name' ),
             'bucket' => $this->get( 'sm.bucket' ),
             'key_file_path' => $key_file_path,
+            'key_json' => $this->get( 'sm.key_json' )
           ) );
         }
 
@@ -479,9 +480,9 @@ namespace wpCloud\StatelessMedia {
        */
       public function is_connected_to_gs() {
 
-        $trnst = get_transient( 'sm::is_connected_to_gs' );
+        //$trnst = get_transient( 'sm::is_connected_to_gs' );
 
-        if ( false === $trnst || !isset( $trnst[ 'hash' ] ) || $trnst[ 'hash' ] != md5( serialize( $this->get( 'sm' ) ) ) ) {
+        if ( empty($trnst) || false === $trnst || !isset( $trnst[ 'hash' ] ) || $trnst[ 'hash' ] != md5( serialize( $this->get( 'sm' ) ) ) ) {
           $trnst = array(
             'success' => 'true',
             'error' => '',

@@ -90,7 +90,6 @@ namespace wpCloud\StatelessMedia {
        * @return bool|string
        */
       public static function add_media( $metadata, $attachment_id ) {
-        global $current_blog;
 
         /* Get metadata in case if method is called directly. */
         if( current_filter() !== 'wp_generate_attachment_metadata' ) {
@@ -115,12 +114,8 @@ namespace wpCloud\StatelessMedia {
             "width" => isset( $metadata[ 'width' ] ) ? $metadata[ 'width' ] : null,
             "height" => isset( $metadata[ 'height' ] )  ? $metadata[ 'height' ] : null,
             'object-id' => $attachment_id,
-            'source-id' => md5( $current_blog->domain ),
-            'file-hash' => md5( $metadata[ 'file' ] ),
-            // 'image-size' => 'default',
-            // 'attachment_id' => $attachment_id,
-            // 'blog_id' => get_current_blog_id(),
-            // 'site_url' => get_site_url(),
+            'source-id' => md5( $attachment_id.ud_get_stateless_media()->get( 'sm.bucket' ) ),
+            'file-hash' => md5( $metadata[ 'file' ] )
           );
 
           /* Add default image */

@@ -15,7 +15,8 @@
  * limitations under the License.
  */
 
-require_once realpath(dirname(__FILE__) . '/../../../autoload.php');
+use Google\Auth\CacheInterface;
+use Psr\Log\LoggerInterface;
 
 /**
  * A persistent storage class based on the memcache, which is not
@@ -27,7 +28,7 @@ require_once realpath(dirname(__FILE__) . '/../../../autoload.php');
  *
  * @author Chris Chabot <chabotc@google.com>
  */
-class Google_Cache_Memcache extends Google_Cache_Abstract
+class Google_Cache_Memcache implements CacheInterface
 {
   private $connection = false;
   private $mc = false;
@@ -35,35 +36,23 @@ class Google_Cache_Memcache extends Google_Cache_Abstract
   private $port;
 
   /**
-   * @var Google_Client the current client
+   * @var use Psr\Log\LoggerInterface logger
    */
-  private $client;
+  private $logger;
 
-  public function __construct(Google_Client $client)
+  public function __construct($host = null, $port = null, LoggerInterface $logger = null)
   {
+    $this->logger = $logger;
+
     if (!function_exists('memcache_connect') && !class_exists("Memcached")) {
       $error = "Memcache functions not available";
 
-      $client->getLogger()->error($error);
+      $this->log('error', $error);
       throw new Google_Cache_Exception($error);
     }
 
-    $this->client = $client;
-
-    if ($client->isAppEngine()) {
-      // No credentials needed for GAE.
-      $this->mc = new Memcached();
-      $this->connection = true;
-    } else {
-      $this->host = $client->getClassConfig($this, 'host');
-      $this->port = $client->getClassConfig($this, 'port');
-      if (empty($this->host) || (empty($this->port) && (string) $this->port != "0")) {
-        $error = "You need to supply a valid memcache host and port";
-
-        $client->getLogger()->error($error);
-        throw new Google_Cache_Exception($error);
-      }
-    }
+    $this->host = $host;
+    $this->port = $port;
   }
 
   /**
@@ -79,14 +68,16 @@ class Google_Cache_Memcache extends Google_Cache_Abstract
       $ret = memcache_get($this->connection, $key);
     }
     if ($ret === false) {
-      $this->client->getLogger()->debug(
+      $this->log(
+          'debug',
           'Memcache cache miss',
           array('key' => $key)
       );
       return false;
     }
     if (is_numeric($expiration) && (time() - $ret['time'] > $expiration)) {
-      $this->client->getLogger()->debug(
+      $this->log(
+          'debug',
           'Memcache cache miss (expired)',
           array('key' => $key, 'var' => $ret)
       );
@@ -94,7 +85,8 @@ class Google_Cache_Memcache extends Google_Cache_Abstract
       return false;
     }
 
-    $this->client->getLogger()->debug(
+    $this->log(
+        'debug',
         'Memcache cache hit',
         array('key' => $key, 'var' => $ret)
     );
@@ -121,7 +113,8 @@ class Google_Cache_Memcache extends Google_Cache_Abstract
       $rc = memcache_set($this->connection, $key, $data, false);
     }
     if ($rc == false) {
-      $this->client->getLogger()->error(
+      $this->log(
+          'error',
           'Memcache cache set failed',
           array('key' => $key, 'var' => $data)
       );
@@ -129,7 +122,8 @@ class Google_Cache_Memcache extends Google_Cache_Abstract
       throw new Google_Cache_Exception("Couldn't store data in cache");
     }
 
-    $this->client->getLogger()->debug(
+    $this->log(
+        'debug',
         'Memcache cache set',
         array('key' => $key, 'var' => $data)
     );
@@ -148,7 +142,8 @@ class Google_Cache_Memcache extends Google_Cache_Abstract
       memcache_delete($this->connection, $key, 0);
     }
 
-    $this->client->getLogger()->debug(
+    $this->log(
+        'debug',
         'Memcache cache delete',
         array('key' => $key)
     );
@@ -175,8 +170,15 @@ class Google_Cache_Memcache extends Google_Cache_Abstract
     if (! $this->connection) {
       $error = "Couldn't connect to memcache server";
 
-      $this->client->getLogger()->error($error);
+      $this->log('error', $error);
       throw new Google_Cache_Exception($error);
+    }
+  }
+
+  private function log($level, $message, $context = array())
+  {
+    if ($this->logger) {
+      $this->logger->log($level, $message, $context);
     }
   }
 }
