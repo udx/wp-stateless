@@ -3570,7 +3570,6 @@ return array(
     'UsabilityDynamics\\WP\\TGM_Bulk_Installer' => $vendorDir . '/usabilitydynamics/lib-wp-bootstrap/lib/classes/class-tgm-bulk-installer.php',
     'UsabilityDynamics\\WP\\TGM_Bulk_Installer_Skin' => $vendorDir . '/usabilitydynamics/lib-wp-bootstrap/lib/classes/class-tgm-bulk-installer.php',
     'UsabilityDynamics\\WP\\TGM_Plugin_Activation' => $vendorDir . '/usabilitydynamics/lib-wp-bootstrap/lib/classes/class-tgm-plugin-activation.php',
-    'WPUpdatesPluginUpdater_1413' => $baseDir . '/lib/classes/class-plugin-updater.php',
     'wpCloud\\StatelessMedia\\Bootstrap' => $baseDir . '/lib/classes/class-bootstrap.php',
     'wpCloud\\StatelessMedia\\GS_Client' => $baseDir . '/lib/classes/class-gs-client.php',
     'wpCloud\\StatelessMedia\\Settings' => $baseDir . '/lib/classes/class-settings.php',

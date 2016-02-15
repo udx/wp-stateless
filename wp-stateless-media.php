@@ -95,5 +95,3 @@ if( ud_check_stateless_media() ) {
   //** Initialize. */
   ud_get_stateless_media();
 }
-
-new WPUpdatesPluginUpdater_1413( 'http://wp-updates.com/api/2/plugin', plugin_basename(__FILE__));
