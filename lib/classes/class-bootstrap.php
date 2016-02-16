@@ -42,6 +42,8 @@ namespace wpCloud\StatelessMedia {
        */
       public function init() {
 
+        new Ajax();
+
         /**
          * Maybe Upgrade current Version
          */

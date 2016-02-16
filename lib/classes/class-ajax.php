@@ -33,12 +33,6 @@ namespace wpCloud\StatelessMedia {
        */
       public function __construct(){
 
-        /**
-         * Maybe extend the list by external modules.
-         */
-        $this->actions = apply_filters( 'wpp::walkscore::ajax_actions', $this->actions );
-        $this->nopriv_actions = apply_filters( 'wpp::walkscore::ajax_nopriv_actions', $this->nopriv_actions );
-
         foreach( $this->actions as $action ) {
           add_action( 'wp_ajax_' . $action, array( $this, 'request' ) );
         }
@@ -92,7 +86,7 @@ namespace wpCloud\StatelessMedia {
       /**
        *
        */
-      public function stateless_process_image() {
+      public function action_stateless_process_image() {
         @error_reporting( 0 ); // Don't break the JSON result
 
         $id = (int) $_REQUEST['id'];
