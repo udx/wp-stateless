@@ -156,7 +156,7 @@ namespace wpCloud\StatelessMedia {
       }
 
       /**
-       * get or save media file 
+       * get or save media file
        * @param $path
        * @param bool $save
        * @param bool $path
