@@ -84,10 +84,10 @@ namespace wpCloud\StatelessMedia {
       }
 
       /**
-       *
+       * Regenerate image sizes.
        */
       public function action_stateless_process_image() {
-        @error_reporting( 0 ); // Don't break the JSON result
+        @error_reporting( 0 );
 
         $id = (int) $_REQUEST['id'];
         $image = get_post( $id );
@@ -100,8 +100,15 @@ namespace wpCloud\StatelessMedia {
 
         $fullsizepath = get_attached_file( $image->ID );
 
+        // If no file found
         if ( false === $fullsizepath || ! file_exists( $fullsizepath ) ) {
-          // File not found
+          $upload_dir = wp_upload_dir();
+
+          // Try get it and save
+          $result_code = ud_get_stateless_media()->get_client()->get_media( str_replace( trailingslashit( $upload_dir[ 'basedir' ] ), '', $fullsizepath ), true, $fullsizepath );
+
+          if ( $result_code !== 200 )
+            throw new \Exception( __( 'File not found', ud_get_stateless_media()->domain ) );
         }
 
         @set_time_limit( 900 );
@@ -111,7 +118,7 @@ namespace wpCloud\StatelessMedia {
         if ( is_wp_error( $metadata ) )
           throw new \Exception( $metadata->get_error_message() );
         if ( empty( $metadata ) )
-          throw new \Exception( __( 'Unknown failure reason.', 'regenerate-thumbnails' ) );
+          throw new \Exception( __( 'Unknown failure reason.', ud_get_stateless_media()->domain ) );
 
         // If this fails, then it just means that nothing was changed (old value == new value)
         wp_update_attachment_metadata( $image->ID, $metadata );

@@ -12,6 +12,8 @@
   wp_enqueue_style( 'jquery-ui-regenthumbs', ud_get_stateless_media()->path( 'static/scripts/jquery-ui/redmond/jquery-ui-1.7.2.custom.css', 'url' ), array(), '1.7.2' );
 ?>
 
+<div id="message" class="updated fade" style="display:none"></div>
+
 <div class="wrap">
 
   <h2><?php _e('Stateless Images Synchronisation', ud_get_stateless_media()->domain); ?></h2>
@@ -23,6 +25,10 @@
   <div id="regenthumbs-bar" style="position:relative;height:25px;">
     <div id="regenthumbs-bar-percent" style="position:absolute;left:50%;top:50%;width:300px;margin-left:-150px;height:25px;margin-top:-9px;font-weight:bold;text-align:center;"></div>
   </div>
+
+  <ol id="regenthumbs-debuglist">
+    <li style="display:none"></li>
+  </ol>
 
   <?php
 
@@ -75,13 +81,13 @@
         if ( success ) {
           rt_successes = rt_successes + 1;
           $("#regenthumbs-debug-successcount").html(rt_successes);
-          $("#regenthumbs-debuglist").append("<li>" + response.success + "</li>");
+          $("#regenthumbs-debuglist").append("<li>" + response.data + "</li>");
         }
         else {
           rt_errors = rt_errors + 1;
           rt_failedlist = rt_failedlist + ',' + id;
           $("#regenthumbs-debug-failurecount").html(rt_errors);
-          $("#regenthumbs-debuglist").append("<li>" + response.error + "</li>");
+          $("#regenthumbs-debuglist").append("<li>" + response.data + "</li>");
         }
       }
 
@@ -115,12 +121,7 @@
               response.error = "<?php printf( esc_js( __( 'The resize request was abnormally terminated (ID %s). This is likely due to the image exceeding available memory or some other type of fatal error.', 'regenerate-thumbnails' ) ), '" + id + "' ); ?>";
             }
 
-            if ( response.success ) {
-              RegenThumbsUpdateStatus( id, true, response );
-            }
-            else {
-              RegenThumbsUpdateStatus( id, false, response );
-            }
+            RegenThumbsUpdateStatus( id, response.success, response );
 
             if ( rt_images.length && rt_continue ) {
               RegenThumbs( rt_images.shift() );

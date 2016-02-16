@@ -154,6 +154,38 @@ namespace wpCloud\StatelessMedia {
         }
         return get_object_vars( $media );
       }
+
+      /**
+       * get or save media file 
+       * @param $path
+       * @param bool $save
+       * @param bool $path
+       * @return \Google_Service_Storage_StorageObject
+       */
+      public function get_media( $path, $save = false, $save_path = false ) {
+        try {
+          $media = $this->service->objects->get($this->bucket, $path);
+        } catch ( \Exception $e ) {
+          return false;
+        }
+
+        if ( empty( $media->id ) ) return false;
+
+        if ( $save && $save_path ) {
+          return $this->client->getHttpClient()->request('GET', $media->getMediaLink(), ['sink' => $save_path] )->getStatusCode();
+        }
+
+        return $media;
+      }
+
+      /**
+       * Check if media exists
+       * @param $path
+       * @return bool
+       */
+      public function media_exists( $path ) {
+        return !empty( $this->service->objects->get( $this->bucket, $path )->id ) ? true : false;
+      }
       
       /**
        * Fired for every file remove action
