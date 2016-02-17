@@ -441,12 +441,12 @@
         "source": {
             "type": "git",
             "url": "https://github.com/guzzle/guzzle.git",
-            "reference": "8c033e192fdcddb3067ca77e0b6829e910ecdd7d"
+            "reference": "8ff79efe3370d6e995d9151ee783685b8771da0d"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/guzzle/guzzle/zipball/8c033e192fdcddb3067ca77e0b6829e910ecdd7d",
-            "reference": "8c033e192fdcddb3067ca77e0b6829e910ecdd7d",
+            "url": "https://api.github.com/repos/guzzle/guzzle/zipball/8ff79efe3370d6e995d9151ee783685b8771da0d",
+            "reference": "8ff79efe3370d6e995d9151ee783685b8771da0d",
             "shasum": ""
         },
         "require": {
@@ -459,7 +459,7 @@
             "phpunit/phpunit": "~4.0",
             "psr/log": "~1.0"
         },
-        "time": "2016-01-31 00:19:49",
+        "time": "2016-02-16 16:48:23",
         "type": "library",
         "extra": {
             "branch-alias": {
@@ -599,12 +599,12 @@
         "source": {
             "type": "git",
             "url": "https://github.com/phpseclib/phpseclib.git",
-            "reference": "88a04862aeeedcd8dd593cea7e284e882f358092"
+            "reference": "fc4599985ab7617b6565b0de53cf93299192e941"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/phpseclib/phpseclib/zipball/88a04862aeeedcd8dd593cea7e284e882f358092",
-            "reference": "88a04862aeeedcd8dd593cea7e284e882f358092",
+            "url": "https://api.github.com/repos/phpseclib/phpseclib/zipball/fc4599985ab7617b6565b0de53cf93299192e941",
+            "reference": "fc4599985ab7617b6565b0de53cf93299192e941",
             "shasum": ""
         },
         "require": {
@@ -622,7 +622,7 @@
             "ext-mcrypt": "Install the Mcrypt extension in order to speed up a few other cryptographic operations.",
             "ext-openssl": "Install the OpenSSL extension in order to speed up a wide variety of cryptographic operations."
         },
-        "time": "2016-01-27 11:13:47",
+        "time": "2016-02-16 15:29:25",
         "type": "library",
         "installation-source": "source",
         "autoload": {

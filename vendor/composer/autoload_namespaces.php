@@ -7,4 +7,5 @@ $baseDir = dirname($vendorDir);
 
 return array(
     'Google_' => array($vendorDir . '/google/apiclient/src'),
+    'Composer\\Installers\\' => array($vendorDir . '/composer/installers/src'),
 );
