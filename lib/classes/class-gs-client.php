@@ -184,7 +184,14 @@ namespace wpCloud\StatelessMedia {
        * @return bool
        */
       public function media_exists( $path ) {
-        return !empty( $this->service->objects->get( $this->bucket, $path )->id ) ? true : false;
+        try {
+          $media = $this->service->objects->get($this->bucket, $path);
+        } catch ( \Exception $e ) {
+          return false;
+        }
+
+        if ( empty( $media->id ) ) return false;
+        return true;
       }
       
       /**

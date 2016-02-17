@@ -30,24 +30,48 @@ td.image-icon img.wp-stateless-media-item {
 }
 
 .key_type{
-	margin-top: 4px;
-	margin-bottom: 0;
+    margin-top: 4px;
+    margin-bottom: 0;
 }
 .key_type>label{
-	vertical-align: top;
+    vertical-align: top;
 }
 .key_type>div{
-	width:auto;
-	padding-top: 3px;
+    width:auto;
+    padding-top: 3px;
 }
 .key_type ._sm_key_file_path{
-	margin-top: 7px;
+    margin-top: 7px;
 }
 .key_type .sm_key_json, .key_type .sm_key_file_path{
-	display: block;
-	width: 40em;
-	max-width: 100%;
+    display: block;
+    width: 40em;
+    max-width: 100%;
 }
 .key_type .sm_key_json{
-	height:200px;
+    height:200px;
+}
+
+#go .option {
+  margin-bottom: 5px;
+}
+
+#go .status {
+  color: grey;
+  font-family: monospace;
+  margin-bottom: 10px;
+  margin-top: 10px;
+}
+
+#go .buttons {
+	margin-top: 10px;
+}
+
+#go ol {
+	margin: 0 0 0 25px;
+	font-family: monospace;
+}
+
+#go #regenthumbs-bar {
+	margin-bottom: 10px;
 }

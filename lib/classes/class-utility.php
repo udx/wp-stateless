@@ -101,7 +101,7 @@ namespace wpCloud\StatelessMedia {
         if( !is_wp_error( $client ) ) {
 
           // Make non-images uploadable.             // e.g. 2015/02/asdf.jpg
-          if( !$metadata && $attachment_id ) {
+          if( empty($metadata['file']) && $attachment_id ) {
             $upload_dir = wp_upload_dir();
             $metadata = array( "file" => str_replace( trailingslashit( $upload_dir[ 'basedir' ] ), '', get_attached_file( $attachment_id ) ) );
           }

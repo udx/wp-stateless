@@ -24,21 +24,22 @@
   <noscript><p><em><?php _e( 'You must enable Javascript in order to proceed!', ud_get_stateless_media()->domain ); ?></em></p></noscript>
 
   <form id="go" ng-submit="processStart($event)">
-    <div>
+
+    <div class="option">
       <label>
         <input type="radio" name="action" value="regenerate_images" checked="checked" />
         <?php _e( 'Regenerate all stateless images and synchronize Google Storage with local server', ud_get_stateless_media()->domain ); ?>
       </label>
     </div>
 
-    <div>
+    <div class="option">
       <label>
         <input type="radio" name="action" value="sync_non_images" />
         <?php _e( 'Synchronize non-images files between Google Storage and local server', ud_get_stateless_media()->domain ); ?>
       </label>
     </div>
 
-    <div class="status" ng-show="status">{{status}}</div>
+    <div class="status" ng-show="status"><?php _e( 'Status:', ud_get_stateless_media()->domain ); ?> {{status}}</div>
 
     <div ng-show="isRunning" id="regenthumbs-bar" style="position:relative;height:25px;">
       <div id="regenthumbs-bar-percent" style="position:absolute;left:50%;top:50%;width:300px;margin-left:-150px;height:25px;margin-top:-9px;font-weight:bold;text-align:center;"></div>
@@ -48,7 +49,7 @@
       <li ng-repeat="l in log">{{l.message}}</li>
     </ol>
 
-    <div>
+    <div class="buttons">
       <button ng-disabled="isRunning || isLoading" type="submit" class="button-primary"><?php _e( 'Go! (may take a while)' ); ?></button>
       <div ng-disabled="!isRunning" ng-click="processStop($event)" class="button-secondary"><?php _e( 'Stop' ); ?></div>
       <div ng-disabled="!log.length" ng-click="log=[]" class="button-secondary"><?php _e( 'Clear Log' ); ?></div>

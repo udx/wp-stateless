@@ -17,7 +17,9 @@ namespace wpCloud\StatelessMedia {
        */
       var $actions = array(
         'stateless_process_image',
-        'get_images_media_ids'
+        'get_images_media_ids',
+        'get_other_media_ids',
+        'stateless_process_file'
       );
 
       /**
@@ -128,6 +130,55 @@ namespace wpCloud\StatelessMedia {
       }
 
       /**
+       * @return string
+       * @throws \Exception
+       */
+      public function action_stateless_process_file() {
+        @error_reporting( 0 );
+
+        $id = (int) $_REQUEST['id'];
+        $file = get_post( $id );
+
+        if ( ! $file || 'attachment' != $file->post_type )
+          throw new \Exception( sprintf( __( 'Attachment not found: %s is an invalid file ID.', ud_get_stateless_media()->domain ), esc_html( $id ) ) );
+
+        if ( ! current_user_can( 'manage_options' ) )
+          throw new \Exception( __( "You are not allowed to do this.", ud_get_stateless_media()->domain ) );
+
+        $fullsizepath = get_attached_file( $file->ID );
+
+        if ( false === $fullsizepath || ! file_exists( $fullsizepath ) ) {
+          $upload_dir = wp_upload_dir();
+
+          // Try get it and save
+          $result_code = ud_get_stateless_media()->get_client()->get_media( str_replace( trailingslashit( $upload_dir[ 'basedir' ] ), '', $fullsizepath ), true, $fullsizepath );
+
+          if ( $result_code !== 200 )
+            throw new \Exception( sprintf( __( 'File not found (%s)', ud_get_stateless_media()->domain ), $file->guid ) );
+        } else {
+          $upload_dir = wp_upload_dir();
+
+          if ( !ud_get_stateless_media()->get_client()->media_exists( str_replace( trailingslashit( $upload_dir[ 'basedir' ] ), '', $fullsizepath ) ) ) {
+
+            @set_time_limit( 900 );
+
+            $metadata = wp_generate_attachment_metadata( $file->ID, $fullsizepath );
+
+            if ( is_wp_error( $metadata ) )
+              throw new \Exception( $metadata->get_error_message() );
+            if ( empty( $metadata ) )
+              throw new \Exception( __( 'Unknown failure reason.', ud_get_stateless_media()->domain ) );
+
+            wp_update_attachment_metadata( $file->ID, $metadata );
+
+          }
+
+        }
+
+        return sprintf( __( '%1$s (ID %2$s) was successfully synchronised in %3$s seconds.', ud_get_stateless_media()->domain ), esc_html( get_the_title( $file->ID ) ), $file->ID, timer_stop() );
+      }
+
+      /**
        * Returns IDs of images media objects
        */
       public function action_get_images_media_ids() {
@@ -140,6 +191,23 @@ namespace wpCloud\StatelessMedia {
         $ids = array();
         foreach ( $images as $image )
           $ids[] = (int)$image->ID;
+
+        return $ids;
+      }
+
+      /**
+       * Returns IDs of images media objects
+       */
+      public function action_get_other_media_ids() {
+        global $wpdb;
+
+        if ( ! $files = $wpdb->get_results( "SELECT ID FROM $wpdb->posts WHERE post_type = 'attachment' AND post_mime_type NOT LIKE 'image/%' ORDER BY ID DESC" ) ) {
+          throw new \Exception( __('No files found.', ud_get_stateless_media()->domain) );
+        }
+
+        $ids = array();
+        foreach ( $files as $file )
+          $ids[] = (int)$file->ID;
 
         return $ids;
       }

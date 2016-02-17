@@ -133,6 +133,65 @@ var wpStatelessApp = angular.module('wpStatelessApp', [])
   };
 
   /**
+   * Load non-images media files
+   * @param callback
+   */
+  $scope.getOtherMedia = function( callback ) {
+
+    $scope.continue = true;
+    $scope.isLoading = true;
+    $scope.status = 'Loading non-image Media Objects...';
+
+    $http({
+      method: 'GET',
+      url: ajaxurl,
+      params: { action: 'get_other_media_ids' }
+    }).then(function(response){
+      var data = response.data || {};
+
+      if ( data.success ) {
+        if ( typeof callback === 'function' ) {
+          if ( typeof data.data !== 'undefined' ) {
+            $scope.objectIDs = data.data;
+            callback();
+          } else {
+            $scope.status = 'Error appeared';
+            $scope.error = "IDs are malformed";
+          }
+        }
+      } else {
+        $scope.status = 'Error appeared';
+        $scope.error = data.data || "Request failed";
+      }
+
+      $scope.isLoading = false;
+
+    }, function(response) {
+      $scope.error = response.data || "Request failed";
+      $scope.status = 'Error appeared';
+      $scope.isLoading = false;
+    });
+
+  };
+
+  /**
+   * Run sync for files
+   */
+  $scope.syncFiles = function() {
+    $scope.isRunning = true;
+    $scope.status = 'Processing files...';
+    $scope.objectsTotal = $scope.objectIDs.length;
+    $scope.objectsCounter = 0;
+
+    jQuery("#regenthumbs-bar").progressbar("value", 0);
+    jQuery("#regenthumbs-bar-percent").html( "0%" );
+
+    if ( $scope.objectIDs.length ) {
+      $scope.syncSingleFile( $scope.objectIDs.shift() );
+    }
+  }
+
+  /**
    * Run images regeneration
    * @param ids
    */
@@ -180,6 +239,40 @@ var wpStatelessApp = angular.module('wpStatelessApp', [])
         $scope.status = 'Error appeared';
         $scope.isRunning = false;
       }
+    );
+
+  }
+
+  /**
+   * Process single file
+   * @param id
+   */
+  $scope.syncSingleFile = function( id ) {
+
+    $http({
+      method: 'GET',
+      url: ajaxurl,
+      params: { action: "stateless_process_file", id: id }
+    }).then(
+        function(response) {
+          var data = response.data || {};
+          $scope.log.push({message:data.data});
+
+          jQuery("#regenthumbs-bar").progressbar( "value", ( ++$scope.objectsCounter / $scope.objectsTotal ) * 100 );
+          jQuery("#regenthumbs-bar-percent").html( Math.round( ( $scope.objectsCounter / $scope.objectsTotal ) * 1000 ) / 10 + "%" );
+
+          if ( $scope.objectIDs.length && $scope.continue ) {
+            $scope.syncSingleFile( $scope.objectIDs.shift() );
+          } else {
+            $scope.status = 'Finished';
+            $scope.isRunning = false;
+          }
+        },
+        function(response) {
+          $scope.error = response.data || "Request failed";
+          $scope.status = 'Error appeared';
+          $scope.isRunning = false;
+        }
     );
 
   }
