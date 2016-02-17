@@ -10,12 +10,17 @@ namespace wpCloud\StatelessMedia {
 
     final class Settings extends \UsabilityDynamics\Settings {
 
+      /**
+       * @var false|null|string
+       */
       private $regenerate_ui = null;
 
       /**
        * Overriden construct
        */
       public function __construct() {
+
+        add_action('admin_menu', array( $this, 'admin_menu' ));
 
         /* Add 'Settings' link for SM plugin on plugins page. */
         $_basename = plugin_basename( ud_get_stateless_media()->boot_file );
@@ -25,8 +30,6 @@ namespace wpCloud\StatelessMedia {
           array_unshift($links, $settings_link);
           return $links;
         });
-
-        $this->regenerate_ui = add_management_page( __( 'Stateless Images Synchronisation', ud_get_stateless_media()->domain ), __( 'Stateless Sync', ud_get_stateless_media()->domain ), 'manage_options', 'stateless-regenerate', array($this, 'regenerate_interface') );
 
         parent::__construct( array(
           'store'       => 'options',
@@ -62,6 +65,13 @@ namespace wpCloud\StatelessMedia {
 
         /** Register options */
         add_action( 'admin_init', array( $this, 'register_settings' ) );
+      }
+
+      /**
+       *
+       */
+      public function admin_menu() {
+        $this->regenerate_ui = add_management_page( __( 'Stateless Images Synchronisation', ud_get_stateless_media()->domain ), __( 'Stateless Sync', ud_get_stateless_media()->domain ), 'manage_options', 'stateless-regenerate', array($this, 'regenerate_interface') );
       }
 
       /**

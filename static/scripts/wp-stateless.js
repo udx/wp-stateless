@@ -62,6 +62,8 @@ var wpStatelessApp = angular.module('wpStatelessApp', [])
    */
   $scope.processStart = function(e) {
 
+    $scope.error = false;
+
     var data = jQuery(e.currentTarget).serializeArray().reduce(function(obj, item) {
       obj[item.name] = item.value;
       return obj;

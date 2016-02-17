@@ -52,6 +52,10 @@ td.image-icon img.wp-stateless-media-item {
     height:200px;
 }
 
+#go {
+    margin-top: 25px;
+}
+
 #go .option {
   margin-bottom: 5px;
 }
