@@ -17,7 +17,7 @@
 
 <div id="message" class="error fade" ng-show="error"><p>{{error}}</p></div>
 
-<div class="wrap" ng-app="wpStatelessApp" ng-controller="wpStatelessTools">
+<div class="wrap" ng-app="wpStatelessApp" ng-controller="wpStatelessTools" ng-init="init()">
 
   <h2><?php _e('Stateless Images Synchronisation', ud_get_stateless_media()->domain); ?></h2>
 
