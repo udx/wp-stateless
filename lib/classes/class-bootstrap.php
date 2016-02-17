@@ -248,7 +248,6 @@ namespace wpCloud\StatelessMedia {
        */
       public function admin_enqueue_scripts() {
         wp_enqueue_style( 'wp-stateless', $this->path( 'static/styles/wp-stateless.css', 'url'  ), array(), self::$version );
-        wp_enqueue_script( 'wp-stateless', $this->path( 'static/scripts/wp-stateless.js', 'url'  ), array( 'jquery-ui-core' ), self::$version, true );
       }
 
       /**

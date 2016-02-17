@@ -3,9 +3,185 @@
  *
  */
 
+// Application
+var wpStatelessApp = angular.module('wpStatelessApp', [])
+
+// Controller
+.controller('wpStatelessTools', ['$scope', '$http', function ($scope, $http) {
+
+  /**
+   * Counters
+   * @type {number}
+   */
+  $scope.objectsCounter = 0;
+  $scope.objectsTotal   = 0;
+
+  /**
+   * Error storage
+   * @type {boolean}
+   */
+  $scope.error = false;
+
+  /**
+   * Flags
+   * @type {boolean}
+   */
+  $scope.isRunning = false;
+  $scope.isLoading = false;
+  $scope.continue  = true;
+
+  /**
+   * IDs storage
+   * @type {Array}
+   */
+  $scope.objectIDs = [];
+
+  /**
+   * Log
+   * @type {Array}
+   */
+  $scope.log = [];
+
+  /**
+   *
+   * @type {boolean}
+   */
+  $scope.status = false;
+
+  /**
+   * Form submit handler
+   * @param e
+   * @returns {boolean}
+   */
+  $scope.processStart = function(e) {
+
+    // Get form data
+    var data = jQuery(e.currentTarget).serializeArray().reduce(function(obj, item) {
+      obj[item.name] = item.value;
+      return obj;
+    }, {});
+
+    if ( data.action ) {
+      switch( data.action ) {
+        case 'regenerate_images':
+          $scope.getImagesMedia( $scope.regenerateImages );
+          break;
+        case 'sync_non_images':
+
+          break;
+        default: break;
+      }
+    }
+
+    return false;
+  };
+
+  /**
+   *
+   */
+  $scope.processStop = function() {
+    $scope.status = 'Stopping...';
+    $scope.continue = false;
+  };
+
+  /**
+   *
+   * @param callback
+   */
+  $scope.getImagesMedia = function( callback ) {
+
+    $scope.continue = true;
+    $scope.isLoading = true;
+    $scope.status = 'Loading Images Media Objects...';
+
+    $http({
+      method: 'GET',
+      url: ajaxurl,
+      params: { action: 'get_images_media_ids' }
+    }).then(function(response){
+      var data = response.data || {};
+
+      if ( data.success ) {
+        if ( typeof callback === 'function' ) {
+          if ( typeof data.data !== 'undefined' ) {
+            $scope.objectIDs = data.data;
+            callback();
+          } else {
+            $scope.status = 'Error appeared';
+            $scope.error = "IDs are malformed";
+          }
+        }
+      } else {
+        $scope.status = 'Error appeared';
+        $scope.error = data.data || "Request failed";
+      }
+
+      $scope.isLoading = false;
+
+    }, function(response) {
+      $scope.error = response.data || "Request failed";
+      $scope.status = 'Error appeared';
+      $scope.isLoading = false;
+    });
+
+  };
+
+  /**
+   *
+   * @param ids
+   */
+  $scope.regenerateImages = function() {
+    $scope.isRunning = true;
+    $scope.status = 'Processing images...';
+    $scope.objectsTotal = $scope.objectIDs.length;
+
+    jQuery("#regenthumbs-bar").progressbar();
+    jQuery("#regenthumbs-bar-percent").html( "0%" );
+
+    if ( $scope.objectIDs.length ) {
+      $scope.regenerateSingle( $scope.objectIDs.shift() );
+    }
+  };
+
+  /**
+   * Process Single Image
+   * @param id
+   */
+  $scope.regenerateSingle = function( id ) {
+
+    $http({
+      method: 'GET',
+      url: ajaxurl,
+      params: { action: "stateless_process_image", id: id }
+    }).then(
+      function(response) {
+        var data = response.data || {};
+        $scope.log.push({message:data.data});
+
+        jQuery("#regenthumbs-bar").progressbar( "value", ( ++$scope.objectsCounter / $scope.objectsTotal ) * 100 );
+        jQuery("#regenthumbs-bar-percent").html( Math.round( ( $scope.objectsCounter / $scope.objectsTotal ) * 1000 ) / 10 + "%" );
+
+        if ( $scope.objectIDs.length && $scope.continue ) {
+          $scope.regenerateSingle( $scope.objectIDs.shift() );
+        } else {
+          $scope.status = 'Finished';
+          $scope.isRunning = false;
+        }
+      },
+      function(response) {
+        $scope.error = response.data || "Request failed";
+        $scope.status = 'Error appeared';
+        $scope.isRunning = false;
+      }
+    );
+
+  }
+
+}]);
+
 jQuery(document).ready(function($) {
 	var i;
-	var rt_total = rt_images.length;
+	var rt_total = 0
 	var rt_count = 1;
 	var rt_percent = 0;
 	var rt_successes = 0;

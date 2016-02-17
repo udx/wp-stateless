@@ -9,59 +9,51 @@
   else
     wp_enqueue_script( 'jquery-ui-progressbar', ud_get_stateless_media()->path( 'static/scripts/jquery-ui/jquery.ui.progressbar.min.1.7.2.js', 'url' ), array( 'jquery-ui-core' ), '1.7.2' );
 
+  wp_enqueue_script( 'wp-stateless-angular', 'https://ajax.googleapis.com/ajax/libs/angularjs/1.5.0/angular.min.js', array(), '1.5.0', true );
+  wp_enqueue_script( 'wp-stateless', ud_get_stateless_media()->path( 'static/scripts/wp-stateless.js', 'url'  ), array( 'jquery-ui-core' ), ud_get_stateless_media()->version, true );
+
   wp_enqueue_style( 'jquery-ui-regenthumbs', ud_get_stateless_media()->path( 'static/scripts/jquery-ui/redmond/jquery-ui-1.7.2.custom.css', 'url' ), array(), '1.7.2' );
 ?>
 
-<div id="message" class="updated fade" style="display:none"></div>
+<div id="message" class="error fade" ng-show="error"><p>{{error}}</p></div>
 
-<div class="wrap">
+<div class="wrap" ng-app="wpStatelessApp" ng-controller="wpStatelessTools">
 
   <h2><?php _e('Stateless Images Synchronisation', ud_get_stateless_media()->domain); ?></h2>
 
   <noscript><p><em><?php _e( 'You must enable Javascript in order to proceed!', ud_get_stateless_media()->domain ); ?></em></p></noscript>
 
-  <p><?php _e( 'Regenerate local and remote thumbnails and synchronize local and remote storage.', ud_get_stateless_media()->domain ); ?></p>
+  <form id="go" ng-submit="processStart($event)">
+    <div>
+      <label>
+        <input type="radio" name="action" value="regenerate_images" checked="checked" />
+        <?php _e( 'Regenerate all stateless images and synchronize Google Storage with local server', ud_get_stateless_media()->domain ); ?>
+      </label>
+    </div>
 
-  <div id="regenthumbs-bar" style="position:relative;height:25px;">
-    <div id="regenthumbs-bar-percent" style="position:absolute;left:50%;top:50%;width:300px;margin-left:-150px;height:25px;margin-top:-9px;font-weight:bold;text-align:center;"></div>
-  </div>
+    <div>
+      <label>
+        <input type="radio" name="action" value="sync_non_images" />
+        <?php _e( 'Synchronize non-images files between Google Storage and local server', ud_get_stateless_media()->domain ); ?>
+      </label>
+    </div>
 
-  <ol id="regenthumbs-debuglist">
-    <li style="display:none"></li>
-  </ol>
+    <div class="status" ng-show="status">{{status}}</div>
 
-  <div>
-    <label>
-      <input type="radio" name="action" value="regenerate_images" checked="checked" />
-      <?php _e( 'Regenerate all stateless images and synchronize Google Storage with local server', ud_get_stateless_media()->domain ); ?>
-    </label>
-  </div>
+    <div ng-show="isRunning" id="regenthumbs-bar" style="position:relative;height:25px;">
+      <div id="regenthumbs-bar-percent" style="position:absolute;left:50%;top:50%;width:300px;margin-left:-150px;height:25px;margin-top:-9px;font-weight:bold;text-align:center;"></div>
+    </div>
 
-  <div>
-    <label>
-      <input type="radio" name="action" value="sync_non_images" />
-      <?php _e( 'Synchronize non-images files between Google Storage and local server', ud_get_stateless_media()->domain ); ?>
-    </label>
-  </div>
+    <ol ng-show="log.length" id="regenthumbs-debuglist">
+      <li ng-repeat="l in log">{{l.message}}</li>
+    </ol>
 
-  <div>
-    <button class="button-primary" id="go"><?php _e( 'Go! (may take a while)' ); ?></button>
-  </div>
+    <div>
+      <button ng-disabled="isRunning || isLoading" type="submit" class="button-primary"><?php _e( 'Go! (may take a while)' ); ?></button>
+      <div ng-disabled="!isRunning" ng-click="processStop($event)" class="button-secondary"><?php _e( 'Stop' ); ?></div>
+      <div ng-disabled="!log.length" ng-click="log=[]" class="button-secondary"><?php _e( 'Clear Log' ); ?></div>
+    </div>
 
-  <?php
+  </form>
 
-  if ( ! $images = $wpdb->get_results( "SELECT ID FROM $wpdb->posts WHERE post_type = 'attachment' AND post_mime_type LIKE 'image/%' ORDER BY ID DESC" ) ) {
-    echo '	<p>' . sprintf( __( "Unable to find any images. Are you sure <a href='%s'>some exist</a>?", ud_get_stateless_media()->domain ), admin_url( 'upload.php?post_mime_type=image' ) ) . "</p></div>";
-  }
-
-  $ids = array();
-  foreach ( $images as $image )
-    $ids[] = $image->ID;
-  $ids = implode( ',', $ids );
-
-  ?>
-
-  <script type="text/javascript">
-    var rt_images = [<?php echo $ids; ?>];
-  </script>
 </div>

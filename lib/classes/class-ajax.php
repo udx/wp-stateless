@@ -16,7 +16,8 @@ namespace wpCloud\StatelessMedia {
        * @var array
        */
       var $actions = array(
-        'stateless_process_image'
+        'stateless_process_image',
+        'get_images_media_ids'
       );
 
       /**
@@ -108,7 +109,7 @@ namespace wpCloud\StatelessMedia {
           $result_code = ud_get_stateless_media()->get_client()->get_media( str_replace( trailingslashit( $upload_dir[ 'basedir' ] ), '', $fullsizepath ), true, $fullsizepath );
 
           if ( $result_code !== 200 )
-            throw new \Exception( __( 'File not found', ud_get_stateless_media()->domain ) );
+            throw new \Exception( sprintf( __( 'File not found (%s)', ud_get_stateless_media()->domain ), $image->guid ) );
         }
 
         @set_time_limit( 900 );
@@ -123,7 +124,24 @@ namespace wpCloud\StatelessMedia {
         // If this fails, then it just means that nothing was changed (old value == new value)
         wp_update_attachment_metadata( $image->ID, $metadata );
 
-        return sprintf( __( '&quot;%1$s&quot; (ID %2$s) was successfully resized in %3$s seconds.', ud_get_stateless_media()->domain ), esc_html( get_the_title( $image->ID ) ), $image->ID, timer_stop() );
+        return sprintf( __( '%1$s (ID %2$s) was successfully resized in %3$s seconds.', ud_get_stateless_media()->domain ), esc_html( get_the_title( $image->ID ) ), $image->ID, timer_stop() );
+      }
+
+      /**
+       * Returns IDs of images media objects
+       */
+      public function action_get_images_media_ids() {
+        global $wpdb;
+
+        if ( ! $images = $wpdb->get_results( "SELECT ID FROM $wpdb->posts WHERE post_type = 'attachment' AND post_mime_type LIKE 'image/%' ORDER BY ID DESC" ) ) {
+          throw new \Exception( __('No images media objects found.', ud_get_stateless_media()->domain) );
+        }
+
+        $ids = array();
+        foreach ( $images as $image )
+          $ids[] = (int)$image->ID;
+
+        return $ids;
       }
 
     }
