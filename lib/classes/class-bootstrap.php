@@ -200,12 +200,6 @@ namespace wpCloud\StatelessMedia {
         return $links;
       }
 
-      public function plugin_row() {
-
-        echo '</tr><tr class="plugin-update-tr"><td colspan="3" class="plugin-update"><div class="update-message">' . $new_version . __( sprintf( '%sRegister%s your copy of Gravity Forms to receive access to automatic upgrades and support. Need a license key? %sPurchase one now%s.', '<a href="' . admin_url() . 'admin.php?page=gf_settings">', '</a>', '<a href="http://www.gravityforms.com">', '</a>' ), 'gravityforms' ) . '</div></td>';
-
-      }
-
       /**
        * Parse Post content for inline image URLs.
        *

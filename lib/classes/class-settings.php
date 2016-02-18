@@ -37,9 +37,9 @@ namespace wpCloud\StatelessMedia {
           'data'        => array(
             'sm' => array(
               'mode' => get_option( 'sm_mode', 'disabled' ),
-              'body_rewrite' => get_option( 'sm_body_rewrite' ),
+              'bucket' => get_option( 'sm_bucket' ),
               'key_json' => get_option( 'sm_key_json' ),
-              'bucket' => get_option( 'sm_bucket' )
+              'body_rewrite' => get_option( 'sm_body_rewrite' )
             )
           )
         ));

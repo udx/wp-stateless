@@ -4,8 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "8d87c98997e33e4fe80ad9ebd54b50e3",
-    "content-hash": "03b8815b4dd7b8dfcaa94600b6f8ad37",
+    "hash": "5867696673123c2e47f684e37c6cd2ed",
+    "content-hash": "8755f3224b2ff99cb48649567cf669d2",
     "packages": [
         {
             "name": "composer/installers",
@@ -150,16 +150,16 @@
         },
         {
             "name": "google/apiclient",
-            "version": "dev-master",
+            "version": "v2.0.0-RC5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/google/google-api-php-client.git",
-                "reference": "91afc209835afb0e3795d98c82a9701b6fc3abea"
+                "reference": "fb16405770d7a4e3c4c3af6ece8a2aebc549eafe"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/google/google-api-php-client/zipball/91afc209835afb0e3795d98c82a9701b6fc3abea",
-                "reference": "91afc209835afb0e3795d98c82a9701b6fc3abea",
+                "url": "https://api.github.com/repos/google/google-api-php-client/zipball/fb16405770d7a4e3c4c3af6ece8a2aebc549eafe",
+                "reference": "fb16405770d7a4e3c4c3af6ece8a2aebc549eafe",
                 "shasum": ""
             },
             "require": {
@@ -201,7 +201,7 @@
             "keywords": [
                 "google"
             ],
-            "time": "2016-02-12 22:19:58"
+            "time": "2016-02-10 23:39:47"
         },
         {
             "name": "google/auth",
@@ -256,12 +256,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/guzzle/guzzle.git",
-                "reference": "8ff79efe3370d6e995d9151ee783685b8771da0d"
+                "reference": "739b9c8378c462943c42fee5353453ab4164ed8e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/guzzle/guzzle/zipball/8ff79efe3370d6e995d9151ee783685b8771da0d",
-                "reference": "8ff79efe3370d6e995d9151ee783685b8771da0d",
+                "url": "https://api.github.com/repos/guzzle/guzzle/zipball/739b9c8378c462943c42fee5353453ab4164ed8e",
+                "reference": "739b9c8378c462943c42fee5353453ab4164ed8e",
                 "shasum": ""
             },
             "require": {
@@ -310,7 +310,7 @@
                 "rest",
                 "web service"
             ],
-            "time": "2016-02-16 16:48:23"
+            "time": "2016-02-17 21:09:10"
         },
         {
             "name": "guzzlehttp/promises",
@@ -853,7 +853,9 @@
     "packages-dev": null,
     "aliases": [],
     "minimum-stability": "dev",
-    "stability-flags": [],
+    "stability-flags": {
+        "google/apiclient": 5
+    },
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
