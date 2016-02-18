@@ -104,6 +104,7 @@ namespace wpCloud\StatelessMedia {
 
           $name = apply_filters( 'wp_stateless_file_name', $name );
 
+          // If media exists we just return it
           if ( $media = $this->media_exists( $name ) ) {
             return get_object_vars( $media );
           }

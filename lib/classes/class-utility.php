@@ -100,8 +100,8 @@ namespace wpCloud\StatelessMedia {
 
         if( !is_wp_error( $client ) ) {
 
-          // Make non-images uploadable.             // e.g. 2015/02/asdf.jpg
-          if( empty($metadata['file']) && $attachment_id ) {
+          // Make non-images uploadable.
+          if( empty( $metadata['file'] ) && $attachment_id ) {
             $upload_dir = wp_upload_dir();
             $metadata = array( "file" => str_replace( trailingslashit( $upload_dir[ 'basedir' ] ), '', get_attached_file( $attachment_id ) ) );
           }
@@ -139,7 +139,7 @@ namespace wpCloud\StatelessMedia {
 
           $cloud_meta = array(
             'id' => $media[ 'id' ],
-            'name' => $file,
+            'name' => !empty($media['name']) ? $media['name'] : $file,
             'fileLink' => $fileLink,
             'storageClass' => $media[ 'storageClass' ],
             'mediaLink' => $media[ 'mediaLink' ],
@@ -194,7 +194,7 @@ namespace wpCloud\StatelessMedia {
                 // @note We don't add storageClass because it's same as parent...
                 $cloud_meta[ 'sizes' ][ $image_size ] = array(
                   'id' => $mediaPath . '/' . $media[ 'id' ],
-                  'name' => $mediaPath . '/' . $data[ 'file' ],
+                  'name' => !empty($media['name']) ? $media['name'] : $file_path,
                   'fileLink' => $fileLink,
                   'mediaLink' => $media[ 'mediaLink' ],
                   'selfLink' => $media[ 'selfLink' ]
