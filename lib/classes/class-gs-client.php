@@ -40,20 +40,6 @@ namespace wpCloud\StatelessMedia {
       public $service;
 
       /**
-       * Email Address
-       *
-       * @var string
-       */
-      private $service_account_name;
-
-      /**
-       * Absolute path to p12 file
-       *
-       * @var
-       */
-      private $key_file_path;
-
-      /**
        * Google Storage Bucket
        *
        * @var
@@ -116,37 +102,43 @@ namespace wpCloud\StatelessMedia {
             $name = basename( $args['name'] );
           }
 
+          $name = apply_filters( 'wp_stateless_file_name', $name );
+
+          if ( $this->media_exists( $name ) ) {
+            return true;
+          }
+
           $media = new \Google_Service_Storage_StorageObject();
-          $media->setName( $name );
-          $media->setMetadata( $args['metadata'] );
+          $media->setName($name);
+          $media->setMetadata($args['metadata']);
 
-          if( isset( $args['cacheControl'] ) ) {
-            $media->setCacheControl( $args['cacheControl'] );
+          if (isset($args['cacheControl'])) {
+            $media->setCacheControl($args['cacheControl']);
           }
 
-          if( isset( $args['contentEncoding'] ) ) {
-            $media->setContentEncoding( $args['contentEncoding'] );
+          if (isset($args['contentEncoding'])) {
+            $media->setContentEncoding($args['contentEncoding']);
           }
 
-          if( isset( $args['contentDisposition'] ) ) {
-            $media->getContentDisposition( $args['contentDisposition'] );
+          if (isset($args['contentDisposition'])) {
+            $media->getContentDisposition($args['contentDisposition']);
           }
 
           /* Upload Media file to Google storage */
-          $media = $this->service->objects->insert( $this->bucket, $media, array_filter( array(
-            'data' => file_get_contents( $args['absolutePath'] ),
-            'uploadType' => 'media',
-            'mimeType' => $args['mimeType'],
-            'predefinedAcl' => 'bucketOwnerFullControl',
-          ) ));
+          $media = $this->service->objects->insert($this->bucket, $media, array_filter(array(
+              'data' => file_get_contents($args['absolutePath']),
+              'uploadType' => 'media',
+              'mimeType' => $args['mimeType'],
+              'predefinedAcl' => 'bucketOwnerFullControl',
+          )));
 
           /* Make Media Public READ for all on success */
-          if( is_object( $media ) ) {
+          if (is_object($media)) {
             $acl = new Google_Service_Storage_ObjectAccessControl();
-            $acl->setEntity( 'allUsers' );
-            $acl->setRole( 'READER' );
+            $acl->setEntity('allUsers');
+            $acl->setRole('READER');
 
-            $this->service->objectAccessControls->insert( $this->bucket, $name, $acl );
+            $this->service->objectAccessControls->insert($this->bucket, $name, $acl);
           }
 
         } catch( Exception $e ) {

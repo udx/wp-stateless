@@ -149,15 +149,6 @@ namespace wpCloud\StatelessMedia {
             'sizes' => array(),
           );
 
-          //update_post_meta( $attachment_id, 'sm_cloud:name', $file );
-          //update_post_meta( $attachment_id, 'sm_cloud:fileLink', $fileLink );
-          //update_post_meta( $attachment_id, 'sm_cloud:id', $media[ 'id' ] );
-          //update_post_meta( $attachment_id, 'sm_cloud:storageClass', $media[ 'storageClass' ] );
-          //update_post_meta( $attachment_id, 'sm_cloud:mediaLink', $media[ 'mediaLink' ] );
-          //update_post_meta( $attachment_id, 'sm_cloud:selfLink', $media[ 'selfLink' ] );
-          //update_post_meta( $attachment_id, 'sm_cloud:bucket', ud_get_stateless_media()->get( 'sm.bucket' ) );
-          //update_post_meta( $attachment_id, 'sm_cloud:object', $media );
-
           if( isset( $_cacheControl ) && $_cacheControl ) {
             //update_post_meta( $attachment_id, 'sm_cloud:cacheControl', $_cacheControl );
             $cloud_meta[ 'cacheControl' ] = $_cacheControl;
@@ -208,12 +199,6 @@ namespace wpCloud\StatelessMedia {
                   'mediaLink' => $media[ 'mediaLink' ],
                   'selfLink' => $media[ 'selfLink' ]
                 );
-
-                //update_post_meta( $attachment_id, 'sm_cloud:' . $image_size . ':id', $mediaPath . '/' . $media[ 'id' ] );
-                //update_post_meta( $attachment_id, 'sm_cloud:' . $image_size . ':name', $mediaPath . '/' . $data[ 'file' ] );
-                //update_post_meta( $attachment_id, 'sm_cloud:' . $image_size . ':fileLink', $fileLink );
-                //update_post_meta( $attachment_id, 'sm_cloud:' . $image_size . ':mediaLink', $media[ 'mediaLink' ] );
-                //update_post_meta( $attachment_id, 'sm_cloud:' . $image_size . ':selfLink', $media[ 'selfLink' ] );
 
               }
 
