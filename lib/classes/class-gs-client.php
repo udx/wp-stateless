@@ -104,8 +104,8 @@ namespace wpCloud\StatelessMedia {
 
           $name = apply_filters( 'wp_stateless_file_name', $name );
 
-          if ( $this->media_exists( $name ) ) {
-            return true;
+          if ( $media = $this->media_exists( $name ) ) {
+            return get_object_vars( $media );
           }
 
           $media = new \Google_Service_Storage_StorageObject();
@@ -183,7 +183,7 @@ namespace wpCloud\StatelessMedia {
         }
 
         if ( empty( $media->id ) ) return false;
-        return true;
+        return $media;
       }
       
       /**

@@ -11,11 +11,6 @@ td.image-icon img.wp-stateless-media-item {
   float: right;
 }
 
-.wp-stateless-credentials-options label {
-  width: 10em;
-  display: inline-block;
-}
-
 .wp-stateless-media-options input.sm_service_account_name {
   width: 40em;
 }

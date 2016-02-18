@@ -96,6 +96,7 @@ namespace wpCloud\StatelessMedia {
            * Carry on only if we do not have errors.
            */
           if( !$this->has_errors() ) {
+
             if( $this->get( 'sm.mode' ) === 'cdn' ) {
               add_filter( 'wp_get_attachment_image_attributes', array( $this, 'wp_get_attachment_image_attributes' ), 20, 3 );
               add_filter( 'wp_get_attachment_url', array( $this, 'wp_get_attachment_url' ), 20, 2 );
@@ -103,6 +104,12 @@ namespace wpCloud\StatelessMedia {
 
               if ( $this->get( 'sm.body_rewrite' ) == 'true' ) {
                 add_filter( 'the_content', array( $this, 'the_content_filter' ) );
+              }
+            }
+
+            if ( $root_dir = $this->get( 'sm.root_dir' ) ) {
+              if ( trim( $root_dir ) !== '' ) {
+                add_filter( 'wp_stateless_file_name', array( $this, 'handle_root_dir' ) );
               }
             }
 
@@ -133,7 +140,7 @@ namespace wpCloud\StatelessMedia {
             /**
              * Handle any other on fly generated media
              */
-            add_filter( 'image_make_intermediate_size', array( $this, 'handle_on_fly' ) );
+            //add_filter( 'image_make_intermediate_size', array( $this, 'handle_on_fly' ) );
 
             /**
              * On physical file deletion we remove any from GS
@@ -143,6 +150,21 @@ namespace wpCloud\StatelessMedia {
 
         }
 
+      }
+
+      /**
+       * @param $current_path
+       * @return string
+       */
+      public function handle_root_dir( $current_path ) {
+        $root_dir = $this->get( 'sm.root_dir' );
+        $root_dir = trim( $root_dir );
+
+        if ( !empty( $root_dir ) ) {
+          return $root_dir . $current_path;
+        }
+
+        return $current_path;
       }
 
       /**
@@ -198,18 +220,6 @@ namespace wpCloud\StatelessMedia {
         }
 
         return $links;
-      }
-
-      /**
-       * Parse Post content for inline image URLs.
-       *
-       * @author potanin@UD
-       * @todo Use get_content_images/get_post_gallery_images to extract available images in a post_content body.
-       * @param null $content
-       * @return null
-       */
-      public function post_content( $content = null ) {
-        return $content;
       }
 
       /**

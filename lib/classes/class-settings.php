@@ -38,6 +38,7 @@ namespace wpCloud\StatelessMedia {
             'sm' => array(
               'mode' => get_option( 'sm_mode', 'disabled' ),
               'bucket' => get_option( 'sm_bucket' ),
+              'root_dir' => get_option( 'sm_root_dir' ),
               'key_json' => get_option( 'sm_key_json' ),
               'body_rewrite' => get_option( 'sm_body_rewrite' )
             )
@@ -54,6 +55,11 @@ namespace wpCloud\StatelessMedia {
           $this->set( 'sm.bucket', WP_STATELESS_MEDIA_BUCKET );
         }
 
+        /* Use constant value for Root Dir, if set. */
+        if( defined( 'WP_STATELESS_MEDIA_ROOT_DIR' ) ) {
+          $this->set( 'sm.root_dir', WP_STATELESS_MEDIA_ROOT_DIR );
+        }
+
         /**
          * Manage specific Network Settings
          */
@@ -68,14 +74,14 @@ namespace wpCloud\StatelessMedia {
       }
 
       /**
-       *
+       * Add menu options
        */
       public function admin_menu() {
         $this->regenerate_ui = add_management_page( __( 'Stateless Images Synchronisation', ud_get_stateless_media()->domain ), __( 'Stateless Sync', ud_get_stateless_media()->domain ), 'manage_options', 'stateless-regenerate', array($this, 'regenerate_interface') );
       }
 
       /**
-       *
+       * Draw interface
        */
       public function regenerate_interface() {
         include ud_get_stateless_media()->path( '/static/views/regenerate_interface.php', 'dir' );
@@ -183,12 +189,12 @@ namespace wpCloud\StatelessMedia {
       }
 
       /**
-       *
+       * Debug output
        * @author potanin@UD
        */
       public function sm_fields_debug_callback() {
 
-        echo( '<pre>' . print_r( json_decode($this->get()), true ) . '</pre>' );
+        echo( '<pre style="width:600px;overflow:scroll;">' . print_r( json_decode($this->get()), true ) . '</pre>' );
 
       }
 
@@ -204,6 +210,12 @@ namespace wpCloud\StatelessMedia {
           $inputs[ ] = '<p><label for="sm_bucket">'.__( 'Bucket', ud_get_stateless_media()->domain ).'</label><div><input id="sm_bucket" class="regular-text" type="text" name="sm[bucket]" value="'. esc_attr( $this->get( 'sm.bucket' ) ) .'" /></div></p>';
         } else {
           $inputs[ ] = '<p><label for="sm_bucket">'.__( 'Bucket', ud_get_stateless_media()->domain ).'</label><div><input id="sm_bucket" class="regular-text" readonly="readonly" type="text" name="sm[bucket]" value="'. esc_attr( $this->get( 'sm.bucket' ) ) .'" /></div></p>';
+        }
+
+        if( !defined( 'WP_STATELESS_MEDIA_ROOT_DIR' ) ) {
+          $inputs[ ] = '<p><label for="sm_bucket">'.__( 'Root Directory', ud_get_stateless_media()->domain ).'<small> '.__('(With trailing slash!)', ud_get_stateless_media()->domain).'</small></label><div><input id="sm_bucket" class="regular-text" type="text" name="sm[root_dir]" value="'. esc_attr( $this->get( 'sm.root_dir' ) ) .'" /></div></p>';
+        } else {
+          $inputs[ ] = '<p><label for="sm_bucket">'.__( 'Root Directory', ud_get_stateless_media()->domain ).'<small> '.__('(With trailing slash!)', ud_get_stateless_media()->domain).'</small></label><div><input id="sm_bucket" class="regular-text" readonly="readonly" type="text" name="sm[root_dir]" value="'. esc_attr( $this->get( 'sm.root_dir' ) ) .'" /></div></p>';
         }
 
         if( ud_get_stateless_media()->is_network_detected() ) {
@@ -236,7 +248,6 @@ namespace wpCloud\StatelessMedia {
         $inputs[] = '</section>';
 
         echo implode( "\n", (array) apply_filters( 'sm::settings::credentials', $inputs ) );
-
 
       }
 
