@@ -1,0 +1,17 @@
+{
+  "name": "usabilitydynamics/lib-wp-bootstrap",
+  "description": "Wordpress bootstrap library created by UsabilityDynamics",
+  "homepage": "https://github.com/UsabilityDynamics/lib-wp-bootstrap",
+  "keywords": [
+    "wordpress"
+  ],
+  "minimum-stability": "dev",
+  "license": "MIT",
+  "require": {
+    "php": ">=5.3",
+    "usabilitydynamics/lib-utility": "~0.3"
+  },
+  "autoload": {
+    "classmap": [ "lib/classes" ]
+  }
+}

@@ -1,0 +1,36 @@
+language: php
+
+sudo: false
+
+php:
+  - 5.4
+  - 5.5
+  - 5.6
+  - 7.0
+  - hhvm
+
+env:
+  global:
+    - FIREBASE_JWT_VERSION=3.0.0
+  matrix:
+    - GUZZLE_VERSION=5.3
+    - GUZZLE_VERSION=~6.0
+
+matrix:
+  exclude:
+    - php: 5.4
+      env: GUZZLE_VERSION=~6.0
+  # run one test with minimum firebase version
+  include:
+    - php: 5.5
+      env: FIREBASE_JWT_VERSION=2.0.0 GUZZLE_VERSION=~5.3
+
+before_script:
+  - composer install
+  - composer require firebase/php-jwt:$FIREBASE_JWT_VERSION
+  - composer require guzzlehttp/guzzle:$GUZZLE_VERSION
+
+script:
+  - vendor/bin/phpunit
+  - vendor/bin/phplint src/
+  - vendor/bin/phplint tests/
