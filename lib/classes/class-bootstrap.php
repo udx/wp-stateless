@@ -25,7 +25,7 @@ namespace wpCloud\StatelessMedia {
        * @property $version
        * @type {Object}
        */
-      public static $version = '1.1.0';
+      public static $version = '1.7.0';
 
       /**
        * Singleton Instance Reference.
@@ -55,9 +55,6 @@ namespace wpCloud\StatelessMedia {
         if( defined( 'WP_CLI' ) && WP_CLI ) {
           include_once($this->path('lib/cli/class-sm-cli-command.php', 'dir'));
         }
-
-
-        // add_action( 'network_admin_plugin_action_links', array( $this, 'plugin_action_links' ), 10, 2 );
 
         $this->is_network_detected();
 
@@ -112,8 +109,6 @@ namespace wpCloud\StatelessMedia {
                 add_filter( 'wp_stateless_file_name', array( $this, 'handle_root_dir' ) );
               }
             }
-
-            // add_filter( 'upload_dir', array( $this, 'upload_dir' ), 20, 2 );
 
             /**
              * Rewrite Image URLS
@@ -177,8 +172,10 @@ namespace wpCloud\StatelessMedia {
 
           if ( !empty( $upload_data['baseurl'] ) && !empty( $content ) ) {
             $baseurl = preg_replace('/https?:\/\//','',$upload_data['baseurl']);
-            $content = preg_replace( '/(href|src)=(\'|")(https?:\/\/'.str_replace('/', '\/', $baseurl).')(.+?)(\.jpg|\.png|\.gif|\.jpeg)(\'|")/i',
-                '$1=$2https://storage.googleapis.com/'.$this->get( 'sm.bucket' ).'$4$5$6', $content);
+            $root_dir = trim( $this->get( 'sm.root_dir' ) );
+            $root_dir = !empty( $root_dir ) ? $root_dir : false;
+            $content = preg_replace( '/(href|src)=(\'|")(https?:\/\/'.str_replace('/', '\/', $baseurl).')\/(.+?)(\.jpg|\.png|\.gif|\.jpeg)(\'|")/i',
+                '$1=$2https://storage.googleapis.com/'.$this->get( 'sm.bucket' ).'/'.($root_dir?$root_dir:'').'$4$5$6', $content);
           }
         }
 
