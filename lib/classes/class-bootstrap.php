@@ -132,15 +132,19 @@ namespace wpCloud\StatelessMedia {
              */
             add_filter( 'wp_generate_attachment_metadata', array( $this, 'add_media' ), 100, 2 );
 
-            /**
-             * Handle any other on fly generated media
-             */
-            //add_filter( 'image_make_intermediate_size', array( $this, 'handle_on_fly' ) );
+            if ( $this->get( 'sm.on_fly' ) == 'true' ) {
+              /**
+               * Handle any other on fly generated media
+               */
+              add_filter('image_make_intermediate_size', array($this, 'handle_on_fly'));
+            }
 
-            /**
-             * On physical file deletion we remove any from GS
-             */
-            add_filter( 'delete_attachment', array( $this, 'remove_media' ) );
+            if ( $this->get( 'sm.delete_remote' ) == 'true' ) {
+              /**
+               * On physical file deletion we remove any from GS
+               */
+              add_filter('delete_attachment', array($this, 'remove_media'));
+            }
           }
 
         }
