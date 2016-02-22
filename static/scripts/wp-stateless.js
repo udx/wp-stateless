@@ -9,6 +9,10 @@ var wpStatelessApp = angular.module('wpStatelessApp', [])
 // Controller
 .controller('wpStatelessTools', ['$scope', '$http', function ($scope, $http) {
 
+  $scope.action = 'regenerate_images';
+  $scope.method = 'start';
+  $scope.bulk_size = 1;
+
   /**
    * Counters
    * @type {number}
@@ -30,42 +34,18 @@ var wpStatelessApp = angular.module('wpStatelessApp', [])
   $scope.isLoading = false;
   $scope.continue  = true;
 
-  $scope.action = 'regenerate_images';
-
   $scope.progresses = {
     images: false,
     other: false
   };
-  $http({
-    method: 'GET',
-    url: ajaxurl,
-    params: {
-      action: 'stateless_get_current_progresses'
-    }
-  }).then(function(response){
-    var data = response.data || {};
-
-    if ( data.success ) {
-      if ( typeof callback === 'function' ) {
-        if ( typeof data.data !== 'undefined' ) {
-          $scope.progresses = data.data;
-        } else {
-          console.error( 'Could not retrieve progress' );
-        }
-      }
-    } else {
-      console.error( 'Could not retrieve progress' );
-    }
-
-  }, function(response) {
-    console.error( 'Could not retrieve progress' );
-  });
 
   /**
    * IDs storage
    * @type {Array}
    */
   $scope.objectIDs = [];
+
+  $scope.chunkIDs = [];
 
   /**
    * Log
@@ -85,6 +65,42 @@ var wpStatelessApp = angular.module('wpStatelessApp', [])
   $scope.init = function() {
     jQuery("#regenthumbs-bar").progressbar();
   }
+  
+  $scope.getCurrentProgresses = function( callback ) {
+    $scope.isLoading = true;
+
+    $http({
+      method: 'GET',
+      url: ajaxurl,
+      params: {
+        action: 'stateless_get_current_progresses'
+      }
+    }).then(function(response){
+      var data = response.data || {};
+
+      if ( data.success ) {
+        if ( typeof data.data !== 'undefined' ) {
+          $scope.progresses.images = data.data.images;
+          $scope.progresses.other = data.data.other;
+          if ( 'function' === typeof callback ) {
+            callback();
+          }
+        } else {
+          console.error( 'Could not retrieve progress' );
+        }
+      } else {
+        console.error( 'Could not retrieve progress' );
+      }
+
+      $scope.isLoading = false;
+    }, function(response) {
+      console.error( 'Could not retrieve progress' );
+
+      $scope.isLoading = false;
+    });
+  };
+
+  $scope.getCurrentProgresses();
 
   /**
    * Form submit handler
@@ -94,19 +110,18 @@ var wpStatelessApp = angular.module('wpStatelessApp', [])
   $scope.processStart = function(e) {
 
     $scope.error = false;
-
-    var data = jQuery(e.currentTarget).serializeArray().reduce(function(obj, item) {
-      obj[item.name] = item.value;
-      return obj;
-    }, {});
+    $scope.objectsCounter = 0;
+    $scope.objectsTotal = 0;
+    $scope.objectIDs = [];
+    $scope.chunkIDs = [];
 
     var cont = 0;
-    if ( 'continue' === data.method ) {
+    if ( 'continue' === $scope.method ) {
       cont = 1;
     }
 
-    if ( data.action ) {
-      switch( data.action ) {
+    if ( $scope.action ) {
+      switch( $scope.action ) {
         case 'regenerate_images':
           $scope.getImagesMedia( $scope.regenerateImages, cont );
           break;
@@ -126,11 +141,71 @@ var wpStatelessApp = angular.module('wpStatelessApp', [])
   $scope.processStop = function() {
     $scope.status = 'Stopping...';
     $scope.continue = false;
-    
-    // this is kind of bad, but will do for now
-    if ( $scope.objectsCounter < $scope.objectsTotal - 1 ) {
-      $scope.progresses.images = true;
-      $scope.progresses.other = true;
+  };
+
+  function array_bulk( arr, bulk_size ) {
+    var groups = [];
+    var i;
+
+    for ( i = 0; i < bulk_size; i++ ) {
+      groups[ i ] = [];
+    }
+
+    for ( i = 0; i < arr.length; i ++ ) {
+      groups[ i % bulk_size ].push( arr[ i ] );
+    }
+
+    return groups;
+  }
+
+  $scope.finishProcess = function( chunk_id ) {
+    var mode = 'images';
+    if ( 'sync_non_images' === $scope.action ) {
+      mode = 'other';
+    }
+
+    if ( $scope.objectsCounter >= $scope.objectsTotal ) {
+      // process finished
+
+      $http({
+        method: 'GET',
+        url: ajaxurl,
+        params: {
+          action: 'stateless_reset_progress',
+          mode: mode
+        }
+      }).then(function(response){
+        $scope.progresses[ mode ] = false;
+
+        $scope.status = 'Finished';
+        $scope.isRunning = false;
+      }, function(response) {
+        console.error( 'Could not reset progress' );
+      });
+    } else if ( 'undefined' !== typeof chunk_id ) {
+      // process cancelled, but this is only a chunk finishing request
+      
+      $scope.chunkIDs[ chunk_id ] = false;
+      var all_done = true;
+      for ( var i in $scope.chunkIDs ) {
+        if ( false !== $scope.chunkIDs[ i ] ) {
+          all_done = false;
+          break;
+        }
+      }
+      if ( all_done ) {
+        $scope.getCurrentProgresses( function() {
+          $scope.status = 'Cancelled';
+          $scope.isRunning = false;
+        });
+      }
+    } else {
+      // process cancelled
+
+      $scope.getCurrentProgresses( function() {
+        $scope.status = 'Cancelled';
+        $scope.isRunning = false;
+      });
     }
   };
 
@@ -237,7 +312,11 @@ var wpStatelessApp = angular.module('wpStatelessApp', [])
     jQuery("#regenthumbs-bar-percent").html( "0%" );
 
     if ( $scope.objectIDs.length ) {
-      $scope.syncSingleFile( $scope.objectIDs.shift() );
+      //$scope.syncSingleFile( $scope.objectIDs.shift() );
+      $scope.chunkIDs = array_bulk( $scope.objectIDs, $scope.bulk_size );
+      for ( var i in $scope.chunkIDs ) {
+        $scope.syncSingleFile( $scope.chunkIDs[ i ].shift(), i );
+      }
     }
   }
 
@@ -255,7 +334,11 @@ var wpStatelessApp = angular.module('wpStatelessApp', [])
     jQuery("#regenthumbs-bar-percent").html( "0%" );
 
     if ( $scope.objectIDs.length ) {
-      $scope.regenerateSingle( $scope.objectIDs.shift() );
+      //$scope.regenerateSingle( $scope.objectIDs.shift() );
+      $scope.chunkIDs = array_bulk( $scope.objectIDs, $scope.bulk_size );
+      for ( var i in $scope.chunkIDs ) {
+        $scope.regenerateSingle( $scope.chunkIDs[ i ].shift(), i );
+      }
     }
   };
 
@@ -263,20 +346,14 @@ var wpStatelessApp = angular.module('wpStatelessApp', [])
    * Process Single Image
    * @param id
    */
-  $scope.regenerateSingle = function( id ) {
-
-    var is_last = 0;
-    if ( $scope.objectsCounter === $scope.objectsTotal - 1 ) {
-      is_last = 1;
-    }
+  $scope.regenerateSingle = function( id, chunk_id ) {
 
     $http({
       method: 'GET',
       url: ajaxurl,
       params: {
         action: "stateless_process_image",
-        id: id,
-        is_last: is_last
+        id: id
       }
     }).then(
       function(response) {
@@ -286,11 +363,18 @@ var wpStatelessApp = angular.module('wpStatelessApp', [])
         jQuery("#regenthumbs-bar").progressbar( "value", ( ++$scope.objectsCounter / $scope.objectsTotal ) * 100 );
         jQuery("#regenthumbs-bar-percent").html( Math.round( ( $scope.objectsCounter / $scope.objectsTotal ) * 1000 ) / 10 + "%" );
 
-        if ( $scope.objectIDs.length && $scope.continue ) {
-          $scope.regenerateSingle( $scope.objectIDs.shift() );
+        if ( 'undefined' !== typeof chunk_id ) {
+          if ( $scope.chunkIDs[ chunk_id ].length && $scope.continue ) {
+            $scope.regenerateSingle( $scope.chunkIDs[ chunk_id ].shift(), chunk_id );
+          } else {
+            $scope.finishProcess( chunk_id );
+          }
         } else {
-          $scope.status = 'Finished';
-          $scope.isRunning = false;
+          if ( $scope.objectIDs.length && $scope.continue ) {
+            $scope.regenerateSingle( $scope.objectIDs.shift() );
+          } else {
+            $scope.finishProcess();
+          }
         }
       },
       function(response) {
@@ -306,41 +390,42 @@ var wpStatelessApp = angular.module('wpStatelessApp', [])
    * Process single file
    * @param id
    */
-  $scope.syncSingleFile = function( id ) {
-
-    var is_last = 0;
-    if ( $scope.objectsCounter === $scope.objectsTotal - 1 ) {
-      is_last = 1;
-    }
+  $scope.syncSingleFile = function( id, chunk_id ) {
 
     $http({
       method: 'GET',
       url: ajaxurl,
       params: {
         action: "stateless_process_file",
-        id: id,
-        is_last: is_last
+        id: id
       }
     }).then(
-        function(response) {
-          var data = response.data || {};
-          $scope.log.push({message:data.data});
+      function(response) {
+        var data = response.data || {};
+        $scope.log.push({message:data.data});
 
-          jQuery("#regenthumbs-bar").progressbar( "value", ( ++$scope.objectsCounter / $scope.objectsTotal ) * 100 );
-          jQuery("#regenthumbs-bar-percent").html( Math.round( ( $scope.objectsCounter / $scope.objectsTotal ) * 1000 ) / 10 + "%" );
+        jQuery("#regenthumbs-bar").progressbar( "value", ( ++$scope.objectsCounter / $scope.objectsTotal ) * 100 );
+        jQuery("#regenthumbs-bar-percent").html( Math.round( ( $scope.objectsCounter / $scope.objectsTotal ) * 1000 ) / 10 + "%" );
 
+        if ( 'undefined' !== typeof chunk_id ) {
+          if ( $scope.chunkIDs[ chunk_id ].length && $scope.continue ) {
+            $scope.syncSingleFile( $scope.chunkIDs[ chunk_id ].shift(), chunk_id );
+          } else {
+            $scope.finishProcess( chunk_id );
+          }
+        } else {
           if ( $scope.objectIDs.length && $scope.continue ) {
             $scope.syncSingleFile( $scope.objectIDs.shift() );
           } else {
-            $scope.status = 'Finished';
-            $scope.isRunning = false;
+            $scope.finishProcess();
           }
-        },
-        function(response) {
-          $scope.error = response.data || "Request failed";
-          $scope.status = 'Error appeared';
-          $scope.isRunning = false;
         }
+      },
+      function(response) {
+        $scope.error = response.data || "Request failed";
+        $scope.status = 'Error appeared';
+        $scope.isRunning = false;
+      }
     );
 
   }
