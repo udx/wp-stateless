@@ -19,7 +19,8 @@ namespace wpCloud\StatelessMedia {
         'stateless_process_image',
         'get_images_media_ids',
         'get_other_media_ids',
-        'stateless_process_file'
+        'stateless_process_file',
+        'stateless_get_current_progresses',
       );
 
       /**
@@ -95,6 +96,11 @@ namespace wpCloud\StatelessMedia {
         $id = (int) $_REQUEST['id'];
         $image = get_post( $id );
 
+        $is_last = false;
+        if ( isset( $_REQUEST['is_last'] ) ) {
+          $is_last = (bool) $_REQUEST['is_last'];
+        }
+
         if ( ! $image || 'attachment' != $image->post_type || 'image/' != substr( $image->post_mime_type, 0, 6 ) )
           throw new \Exception( sprintf( __( 'Failed resize: %s is an invalid image ID.', ud_get_stateless_media()->domain ), esc_html( $_REQUEST['id'] ) ) );
 
@@ -126,6 +132,8 @@ namespace wpCloud\StatelessMedia {
         // If this fails, then it just means that nothing was changed (old value == new value)
         wp_update_attachment_metadata( $image->ID, $metadata );
 
+        $this->store_current_progress( 'images', $id, $is_last );
+
         return sprintf( __( '%1$s (ID %2$s) was successfully resized in %3$s seconds.', ud_get_stateless_media()->domain ), esc_html( get_the_title( $image->ID ) ), $image->ID, timer_stop() );
       }
 
@@ -138,6 +146,11 @@ namespace wpCloud\StatelessMedia {
 
         $id = (int) $_REQUEST['id'];
         $file = get_post( $id );
+
+        $is_last = false;
+        if ( isset( $_REQUEST['is_last'] ) ) {
+          $is_last = (bool) $_REQUEST['is_last'];
+        }
 
         if ( ! $file || 'attachment' != $file->post_type )
           throw new \Exception( sprintf( __( 'Attachment not found: %s is an invalid file ID.', ud_get_stateless_media()->domain ), esc_html( $id ) ) );
@@ -175,6 +188,8 @@ namespace wpCloud\StatelessMedia {
 
         }
 
+        $this->store_current_progress( 'other', $id, $is_last );
+
         return sprintf( __( '%1$s (ID %2$s) was successfully synchronised in %3$s seconds.', ud_get_stateless_media()->domain ), esc_html( get_the_title( $file->ID ) ), $file->ID, timer_stop() );
       }
 
@@ -188,11 +203,12 @@ namespace wpCloud\StatelessMedia {
           throw new \Exception( __('No images media objects found.', ud_get_stateless_media()->domain) );
         }
 
-        $ids = array();
-        foreach ( $images as $image )
-          $ids[] = (int)$image->ID;
+        $continue = false;
+        if ( isset( $_REQUEST['continue'] ) ) {
+          $continue = (bool) $_REQUEST['continue'];
+        }
 
-        return $ids;
+        return $this->get_non_processed_media_ids( 'images', $images, $continue );
       }
 
       /**
@@ -205,11 +221,87 @@ namespace wpCloud\StatelessMedia {
           throw new \Exception( __('No files found.', ud_get_stateless_media()->domain) );
         }
 
+        $continue = false;
+        if ( isset( $_REQUEST['continue'] ) ) {
+          $continue = (bool) $_REQUEST['continue'];
+        }
+
+        return $this->get_non_processed_media_ids( 'other', $files, $continue );
+      }
+
+      /**
+       * Returns current progress storage for all modes (to check whether there is something to continue in JS)
+       */
+      public function action_stateless_get_current_progresses() {
+        return array(
+          'images'  => $this->retrieve_current_progress( 'images' ),
+          'other'   => $this->retrieve_current_progress( 'other' ),
+        );
+      }
+
+      private function get_non_processed_media_ids( $mode, $files, $continue = false ) {
+        if ( $continue ) {
+          $progress = $this->retrieve_current_progress( $mode );
+          if ( false !== $progress ) {
+            $ids = array();
+            foreach ( $files as $file ) {
+              $id = (int) $file->ID;
+              // only include IDs that have not been processed yet
+              if ( $id > $progress[0] || $id < $progress[1] ) {
+                $ids[] = $id;
+              }
+            }
+            return $ids;
+          }
+        }
+
+        $this->reset_current_progress( $mode );
+
         $ids = array();
         foreach ( $files as $file )
           $ids[] = (int)$file->ID;
 
         return $ids;
+      }
+
+      private function store_current_progress( $mode, $id, $is_last = false ) {
+        if ( $mode !== 'other' ) {
+          $mode = 'images';
+        }
+
+        if ( ! $is_last ) {
+          $first_processed = get_option( 'wp_stateless_' . $mode . '_first_processed' );
+          if ( ! $first_processed ) {
+            update_option( 'wp_stateless_' . $mode . '_first_processed', $id );
+          }
+          update_option( 'wp_stateless_' . $mode . '_last_processed', $id );
+        } else {
+          $this->reset_current_progress( $mode );
+        }
+      }
+
+      private function retrieve_current_progress( $mode ) {
+        if ( $mode !== 'other' ) {
+          $mode = 'images';
+        }
+
+        $first_processed = get_option( 'wp_stateless_' . $mode . '_first_processed' );
+        $last_processed = get_option( 'wp_stateless_' . $mode . '_last_processed' );
+
+        if ( ! $first_processed || ! $last_processed ) {
+          return false;
+        }
+
+        return array( (int) $first_processed, (int) $last_processed );
+      }
+
+      private function reset_current_progress( $mode ) {
+        if ( $mode !== 'other' ) {
+          $mode = 'images';
+        }
+
+        delete_option( 'wp_stateless_' . $mode . '_first_processed' );
+        delete_option( 'wp_stateless_' . $mode . '_last_processed' );
       }
 
     }

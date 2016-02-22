@@ -30,6 +30,37 @@ var wpStatelessApp = angular.module('wpStatelessApp', [])
   $scope.isLoading = false;
   $scope.continue  = true;
 
+  $scope.action = 'regenerate_images';
+
+  $scope.progresses = {
+    images: false,
+    other: false
+  };
+  $http({
+    method: 'GET',
+    url: ajaxurl,
+    params: {
+      action: 'stateless_get_current_progresses'
+    }
+  }).then(function(response){
+    var data = response.data || {};
+
+    if ( data.success ) {
+      if ( typeof callback === 'function' ) {
+        if ( typeof data.data !== 'undefined' ) {
+          $scope.progresses = data.data;
+        } else {
+          console.error( 'Could not retrieve progress' );
+        }
+      }
+    } else {
+      console.error( 'Could not retrieve progress' );
+    }
+
+  }, function(response) {
+    console.error( 'Could not retrieve progress' );
+  });
+
   /**
    * IDs storage
    * @type {Array}
@@ -69,13 +100,18 @@ var wpStatelessApp = angular.module('wpStatelessApp', [])
       return obj;
     }, {});
 
+    var cont = 0;
+    if ( 'continue' === data.method ) {
+      cont = 1;
+    }
+
     if ( data.action ) {
       switch( data.action ) {
         case 'regenerate_images':
-          $scope.getImagesMedia( $scope.regenerateImages );
+          $scope.getImagesMedia( $scope.regenerateImages, cont );
           break;
         case 'sync_non_images':
-          $scope.getOtherMedia( $scope.syncFiles );
+          $scope.getOtherMedia( $scope.syncFiles, cont );
           break;
         default: break;
       }
@@ -90,13 +126,19 @@ var wpStatelessApp = angular.module('wpStatelessApp', [])
   $scope.processStop = function() {
     $scope.status = 'Stopping...';
     $scope.continue = false;
+    
+    // this is kind of bad, but will do for now
+    if ( $scope.objectsCounter < $scope.objectsTotal - 1 ) {
+      $scope.progresses.images = true;
+      $scope.progresses.other = true;
+    }
   };
 
   /**
    * Load images IDs
    * @param callback
    */
-  $scope.getImagesMedia = function( callback ) {
+  $scope.getImagesMedia = function( callback, cont ) {
 
     $scope.continue = true;
     $scope.isLoading = true;
@@ -105,7 +147,10 @@ var wpStatelessApp = angular.module('wpStatelessApp', [])
     $http({
       method: 'GET',
       url: ajaxurl,
-      params: { action: 'get_images_media_ids' }
+      params: {
+        action: 'get_images_media_ids',
+        continue: cont
+      }
     }).then(function(response){
       var data = response.data || {};
 
@@ -138,7 +183,7 @@ var wpStatelessApp = angular.module('wpStatelessApp', [])
    * Load non-images media files
    * @param callback
    */
-  $scope.getOtherMedia = function( callback ) {
+  $scope.getOtherMedia = function( callback, cont ) {
 
     $scope.continue = true;
     $scope.isLoading = true;
@@ -147,7 +192,10 @@ var wpStatelessApp = angular.module('wpStatelessApp', [])
     $http({
       method: 'GET',
       url: ajaxurl,
-      params: { action: 'get_other_media_ids' }
+      params: {
+        action: 'get_other_media_ids',
+        continue: cont
+      }
     }).then(function(response){
       var data = response.data || {};
 
@@ -181,9 +229,9 @@ var wpStatelessApp = angular.module('wpStatelessApp', [])
    */
   $scope.syncFiles = function() {
     $scope.isRunning = true;
-    $scope.status = 'Processing files...';
     $scope.objectsTotal = $scope.objectIDs.length;
     $scope.objectsCounter = 0;
+    $scope.status = 'Processing files (' + $scope.objectsTotal + ' total)...';
 
     jQuery("#regenthumbs-bar").progressbar("value", 0);
     jQuery("#regenthumbs-bar-percent").html( "0%" );
@@ -199,9 +247,9 @@ var wpStatelessApp = angular.module('wpStatelessApp', [])
    */
   $scope.regenerateImages = function() {
     $scope.isRunning = true;
-    $scope.status = 'Processing images...';
     $scope.objectsTotal = $scope.objectIDs.length;
     $scope.objectsCounter = 0;
+    $scope.status = 'Processing images (' + $scope.objectsTotal + ' total)...';
 
     jQuery("#regenthumbs-bar").progressbar("value", 0);
     jQuery("#regenthumbs-bar-percent").html( "0%" );
@@ -217,10 +265,19 @@ var wpStatelessApp = angular.module('wpStatelessApp', [])
    */
   $scope.regenerateSingle = function( id ) {
 
+    var is_last = 0;
+    if ( $scope.objectsCounter === $scope.objectsTotal - 1 ) {
+      is_last = 1;
+    }
+
     $http({
       method: 'GET',
       url: ajaxurl,
-      params: { action: "stateless_process_image", id: id }
+      params: {
+        action: "stateless_process_image",
+        id: id,
+        is_last: is_last
+      }
     }).then(
       function(response) {
         var data = response.data || {};
@@ -251,10 +308,19 @@ var wpStatelessApp = angular.module('wpStatelessApp', [])
    */
   $scope.syncSingleFile = function( id ) {
 
+    var is_last = 0;
+    if ( $scope.objectsCounter === $scope.objectsTotal - 1 ) {
+      is_last = 1;
+    }
+
     $http({
       method: 'GET',
       url: ajaxurl,
-      params: { action: "stateless_process_file", id: id }
+      params: {
+        action: "stateless_process_file",
+        id: id,
+        is_last: is_last
+      }
     }).then(
         function(response) {
           var data = response.data || {};
