@@ -152,8 +152,8 @@ namespace wpCloud\StatelessMedia {
        * get or save media file
        * @param $path
        * @param bool $save
-       * @param bool $path
-       * @return \Google_Service_Storage_StorageObject
+       * @param bool $save_path
+       * @return bool|\Google_Service_Storage_StorageObject|int
        */
       public function get_media( $path, $save = false, $save_path = false ) {
         try {
@@ -165,6 +165,9 @@ namespace wpCloud\StatelessMedia {
         if ( empty( $media->id ) ) return false;
 
         if ( $save && $save_path ) {
+          if ( !file_exists( $_dir = dirname( $save_path ) ) ) {
+            wp_mkdir_p( $_dir );
+          }
           return $this->client->getHttpClient()->request('GET', $media->getMediaLink(), ['sink' => $save_path] )->getStatusCode();
         }
 
