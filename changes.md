@@ -1,3 +1,10 @@
+#### 1.7.1
+* Migrated from p12 to JSON.
+* New feature of media sync.
+* New option Root Directory.
+* Optimized uploading process.
+* Other options.
+
 #### 1.7.0
 * Fixed conflict with SSL forcing plugin.
 
