@@ -22,6 +22,7 @@ namespace wpCloud\StatelessMedia {
         'stateless_process_file',
         'stateless_get_current_progresses',
         'stateless_reset_progress',
+        'stateless_get_all_fails'
       );
 
       /**
@@ -112,23 +113,30 @@ namespace wpCloud\StatelessMedia {
           // Try get it and save
           $result_code = ud_get_stateless_media()->get_client()->get_media( apply_filters( 'wp_stateless_file_name', str_replace( trailingslashit( $upload_dir[ 'basedir' ] ), '', $fullsizepath )), true, $fullsizepath );
 
-          if ( $result_code !== 200 )
-            throw new \Exception( sprintf( __( 'File not found (%s)', ud_get_stateless_media()->domain ), $image->guid ) );
+          if ( $result_code !== 200 ) {
+            $this->store_failed_attachment( $image->ID, 'images' );
+            throw new \Exception(sprintf(__('File not found (%s)', ud_get_stateless_media()->domain), $image->guid));
+          }
         }
 
         @set_time_limit( 900 );
 
         $metadata = wp_generate_attachment_metadata( $image->ID, $fullsizepath );
 
-        if ( is_wp_error( $metadata ) )
-          throw new \Exception( $metadata->get_error_message() );
-        if ( empty( $metadata ) )
-          throw new \Exception( __( 'Unknown failure reason.', ud_get_stateless_media()->domain ) );
+        if ( is_wp_error( $metadata ) ) {
+          $this->store_failed_attachment( $image->ID, 'images' );
+          throw new \Exception($metadata->get_error_message());
+        }
+        if ( empty( $metadata ) ) {
+          $this->store_failed_attachment( $image->ID, 'images' );
+          throw new \Exception(__('Unknown failure reason.', ud_get_stateless_media()->domain));
+        }
 
         // If this fails, then it just means that nothing was changed (old value == new value)
         wp_update_attachment_metadata( $image->ID, $metadata );
 
         $this->store_current_progress( 'images', $id );
+        $this->maybe_fix_failed_attachment( 'images', $image->ID );
 
         return sprintf( __( '%1$s (ID %2$s) was successfully resized in %3$s seconds.', ud_get_stateless_media()->domain ), esc_html( get_the_title( $image->ID ) ), $image->ID, timer_stop() );
       }
@@ -157,8 +165,10 @@ namespace wpCloud\StatelessMedia {
           // Try get it and save
           $result_code = ud_get_stateless_media()->get_client()->get_media( str_replace( trailingslashit( $upload_dir[ 'basedir' ] ), '', $fullsizepath ), true, $fullsizepath );
 
-          if ( $result_code !== 200 )
-            throw new \Exception( sprintf( __( 'File not found (%s)', ud_get_stateless_media()->domain ), $file->guid ) );
+          if ( $result_code !== 200 ) {
+            $this->store_failed_attachment( $file->ID, 'other' );
+            throw new \Exception(sprintf(__('File not found (%s)', ud_get_stateless_media()->domain), $file->guid));
+          }
         } else {
           $upload_dir = wp_upload_dir();
 
@@ -168,10 +178,14 @@ namespace wpCloud\StatelessMedia {
 
             $metadata = wp_generate_attachment_metadata( $file->ID, $fullsizepath );
 
-            if ( is_wp_error( $metadata ) )
-              throw new \Exception( $metadata->get_error_message() );
-            if ( empty( $metadata ) )
-              throw new \Exception( __( 'Unknown failure reason.', ud_get_stateless_media()->domain ) );
+            if ( is_wp_error( $metadata ) ) {
+              $this->store_failed_attachment( $file->ID, 'other' );
+              throw new \Exception($metadata->get_error_message());
+            }
+            if ( empty( $metadata ) ) {
+              $this->store_failed_attachment( $file->ID, 'other' );
+              throw new \Exception(__('Unknown failure reason.', ud_get_stateless_media()->domain));
+            }
 
             wp_update_attachment_metadata( $file->ID, $metadata );
 
@@ -180,6 +194,7 @@ namespace wpCloud\StatelessMedia {
         }
 
         $this->store_current_progress( 'other', $id );
+        $this->maybe_fix_failed_attachment( 'other', $file->ID );
 
         return sprintf( __( '%1$s (ID %2$s) was successfully synchronised in %3$s seconds.', ud_get_stateless_media()->domain ), esc_html( get_the_title( $file->ID ) ), $file->ID, timer_stop() );
       }
@@ -231,6 +246,27 @@ namespace wpCloud\StatelessMedia {
       }
 
       /**
+       * @return array
+       */
+      public function action_stateless_get_all_fails() {
+        return array(
+          'images' => $this->get_fails( 'images' ),
+          'other'  => $this->get_fails( 'other' )
+        );
+      }
+
+      /**
+       * @param $mode
+       */
+      private function get_fails( $mode ) {
+        if ( $mode !== 'other' ) {
+          $mode = 'images';
+        }
+
+        return get_option( 'wp_stateless_failed_' . $mode );
+      }
+
+      /**
        * Resets the current progress for a specific mode.
        */
       public function action_stateless_reset_progress() {
@@ -244,6 +280,12 @@ namespace wpCloud\StatelessMedia {
         return true;
       }
 
+      /**
+       * @param $mode
+       * @param $files
+       * @param bool $continue
+       * @return array
+       */
       private function get_non_processed_media_ids( $mode, $files, $continue = false ) {
         if ( $continue ) {
           $progress = $this->retrieve_current_progress( $mode );
@@ -269,6 +311,10 @@ namespace wpCloud\StatelessMedia {
         return $ids;
       }
 
+      /**
+       * @param $mode
+       * @param $id
+       */
       private function store_current_progress( $mode, $id ) {
         if ( $mode !== 'other' ) {
           $mode = 'images';
@@ -284,6 +330,49 @@ namespace wpCloud\StatelessMedia {
         }
       }
 
+      /**
+       * @param $attachment_id
+       * @param $mode
+       */
+      private function store_failed_attachment( $attachment_id, $mode ) {
+        if ( $mode !== 'other' ) {
+          $mode = 'images';
+        }
+
+        $fails = get_option( 'wp_stateless_failed_' . $mode );
+        if ( !empty( $fails ) && is_array( $fails ) ) {
+          if ( !in_array( $attachment_id, $fails ) ) {
+            $fails[] = $attachment_id;
+          }
+        } else {
+          $fails = array( $attachment_id );
+        }
+
+        update_option( 'wp_stateless_failed_' . $mode, $fails );
+      }
+
+      /**
+       * @param $mode
+       * @param $attachment_id
+       */
+      private function maybe_fix_failed_attachment( $mode, $attachment_id ) {
+        $fails = get_option( 'wp_stateless_failed_' . $mode );
+
+        if ( !empty( $fails ) && is_array( $fails ) ) {
+          if ( in_array( $attachment_id, $fails ) ) {
+            foreach (array_keys($fails, $attachment_id) as $key) {
+              unset($fails[$key]);
+            }
+          }
+        }
+
+        update_option( 'wp_stateless_failed_' . $mode, $fails );
+      }
+
+      /**
+       * @param $mode
+       * @return array|bool
+       */
       private function retrieve_current_progress( $mode ) {
         if ( $mode !== 'other' ) {
           $mode = 'images';
@@ -299,6 +388,9 @@ namespace wpCloud\StatelessMedia {
         return array( (int) $first_processed, (int) $last_processed );
       }
 
+      /**
+       * @param $mode
+       */
       private function reset_current_progress( $mode ) {
         if ( $mode !== 'other' ) {
           $mode = 'images';

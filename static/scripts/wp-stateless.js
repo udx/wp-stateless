@@ -34,10 +34,23 @@ var wpStatelessApp = angular.module('wpStatelessApp', [])
   $scope.isLoading = false;
   $scope.continue  = true;
 
+  /**
+   *
+   * @type {{images: boolean, other: boolean}}
+   */
   $scope.progresses = {
     images: false,
     other: false
   };
+
+  /**
+   *
+   * @type {{images: boolean, other: boolean}}
+   */
+  $scope.fails = {
+    images: false,
+    other: false
+  }
 
   /**
    * IDs storage
@@ -45,6 +58,10 @@ var wpStatelessApp = angular.module('wpStatelessApp', [])
    */
   $scope.objectIDs = [];
 
+  /**
+   *
+   * @type {Array}
+   */
   $scope.chunkIDs = [];
 
   /**
@@ -65,7 +82,11 @@ var wpStatelessApp = angular.module('wpStatelessApp', [])
   $scope.init = function() {
     jQuery("#regenthumbs-bar").progressbar();
   }
-  
+
+  /**
+   *
+   * @param callback
+   */
   $scope.getCurrentProgresses = function( callback ) {
     $scope.isLoading = true;
 
@@ -100,7 +121,52 @@ var wpStatelessApp = angular.module('wpStatelessApp', [])
     });
   };
 
+  /**
+   *
+   */
   $scope.getCurrentProgresses();
+
+  /**
+   *
+   * @param callback
+   */
+  function getAllFails( callback ) {
+    $scope.isLoading = true;
+
+    $http({
+      method: 'GET',
+      url: ajaxurl,
+      params: {
+        action: 'stateless_get_all_fails'
+      }
+    }).then(function(response){
+      var data = response.data || {};
+
+      if ( data.success ) {
+        if ( typeof data.data !== 'undefined' ) {
+
+          $scope.fails.images = data.data.images;
+          $scope.fails.other = data.data.other;
+
+          if ( 'function' === typeof callback ) {
+            callback();
+          }
+        } else {
+          console.error( 'Could not get fails' );
+        }
+      } else {
+        console.error( 'Could not get fails' );
+      }
+
+      $scope.isLoading = false;
+    }, function(response) {
+      console.error( 'Could not get fails' );
+
+      $scope.isLoading = false;
+    });
+  };
+
+  getAllFails();
 
   /**
    * Form submit handler
