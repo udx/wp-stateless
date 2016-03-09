@@ -52,7 +52,7 @@
       <div class="option">
         <label>
           <input ng-disabled="isRunning || isLoading" type="radio" name="method" value="start" ng-model="$parent.method" />
-          <?php _e( 'Start a new process', ud_get_stateless_media()->domain ); ?><br>
+          <?php _e( 'Start a new process', ud_get_stateless_media()->domain ); ?>
           <span class="notice notice-warning" style="margin-left:20px;">
             <?php _e( '<strong>Warning:</strong> This will make it impossible to continue the last process.', ud_get_stateless_media()->domain ); ?>
           </span>
@@ -63,6 +63,22 @@
         <label>
           <input ng-disabled="isRunning || isLoading" type="radio" name="method" value="continue" ng-model="$parent.method" />
           <?php _e( 'Continue the last process', ud_get_stateless_media()->domain ); ?>
+        </label>
+      </div>
+
+    </div>
+
+    <div ng-if="(action == 'regenerate_images' && fails.images) || (action == 'sync_non_images' && fails.other)">
+
+      <h2><?php _e( 'Fix errors', ud_get_stateless_media()->domain ); ?></h2>
+
+      <div class="option">
+        <label>
+          <input ng-disabled="isRunning || isLoading" type="checkbox" name="method" ng-true-value="'fix'" ng-model="$parent.method" />
+          <?php _e( 'Try to fix previously failed items', ud_get_stateless_media()->domain ); ?>
+          <span class="notice notice-warning" style="margin-left:20px;">
+            <?php _e( '<strong>Warning:</strong> This will make it impossible to continue the last process.', ud_get_stateless_media()->domain ); ?>
+          </span>
         </label>
       </div>
 

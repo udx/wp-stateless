@@ -181,6 +181,25 @@ var wpStatelessApp = angular.module('wpStatelessApp', [])
     $scope.objectIDs = [];
     $scope.chunkIDs = [];
 
+    if ( $scope.method === 'fix' ) {
+
+      if ( $scope.action ) {
+        switch( $scope.action ) {
+          case 'regenerate_images':
+            $scope.objectIDs = $scope.fails.images;
+            $scope.regenerateImages();
+            break;
+          case 'sync_non_images':
+            $scope.objectIDs = $scope.fails.other;
+            $scope.syncFiles();
+            break;
+          default: break;
+        }
+      }
+
+      return false;
+    }
+
     var cont = 0;
     if ( 'continue' === $scope.method ) {
       cont = 1;
