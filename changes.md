@@ -1,3 +1,6 @@
+#### 1.7.2
+* Added ability to fix previously failed items.
+
 #### 1.7.1
 * Migrated from p12 to JSON.
 * New feature of media sync.
