@@ -18,14 +18,14 @@
     "url": "https://github.com/wpCloud/wp-stateless.git"
   },
   "require": {
-    "php": ">=5.3",
+    "php": ">=5.5",
     "composer/installers": "~1.0",
     "usabilitydynamics/lib-settings": "0.2.3",
     "usabilitydynamics/lib-wp-bootstrap": "1.1.5",
     "google/apiclient": "^2.0.0"
   },
   "require-dev": {
-    "php": ">=5.3",
+    "php": ">=5.5",
     "codeclimate/php-test-reporter": "~0.1"
   },
   "autoload": {

@@ -1,12 +1,12 @@
 <?php
 /**
- * Plugin Name: WP-Stateless Media
- * Plugin URI: https://usabilitydynamics.com
+ * Plugin Name: WP-Stateless
+ * Plugin URI: https://www.usabilitydynamics.com
  * Description: wpCloud Stateless Media for GCE
  * Author: Usability Dynamics, Inc.
  * Version: 1.7.2
  * Text Domain: stateless-media
- * Author URI: http://usabilitydynamics.com
+ * Author URI: https://www.usabilitydynamics.com
  *
  * Copyright 2012 - 2016 Usability Dynamics, Inc.  ( email : info@usabilitydynamics.com )
  *
