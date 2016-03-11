@@ -1,4 +1,5 @@
 <?php
+
 namespace GuzzleHttp\Tests\CookieJar;
 
 use GuzzleHttp\Cookie\SessionCookieJar;
@@ -36,12 +37,9 @@ class SessionCookieJarTest extends \PHPUnit_Framework_TestCase
         unset($_SESSION[$this->sessionVar]);
     }
 
-    /**
-     * @dataProvider testPersistsToSessionParameters
-     */
-    public function testPersistsToSession($testSaveSessionCookie = false)
+    public function testPersistsToSession()
     {
-        $jar = new SessionCookieJar($this->sessionVar, $testSaveSessionCookie);
+        $jar = new SessionCookieJar($this->sessionVar);
         $jar->setCookie(new SetCookie([
             'Name'    => 'foo',
             'Value'   => 'bar',
@@ -70,22 +68,9 @@ class SessionCookieJarTest extends \PHPUnit_Framework_TestCase
         // Load the cookieJar from the file
         $jar = new SessionCookieJar($this->sessionVar);
 
-        if ($testSaveSessionCookie) {
-            $this->assertEquals(3, count($jar));
-        } else {
-            // Weeds out temporary and session cookies
-            $this->assertEquals(2, count($jar));
-        }
-
+        // Weeds out temporary and session cookies
+        $this->assertEquals(2, count($jar));
         unset($jar);
         unset($_SESSION[$this->sessionVar]);
-    }
-
-    public function testPersistsToSessionParameters()
-    {
-        return array(
-            array(false),
-            array(true)
-        );
     }
 }

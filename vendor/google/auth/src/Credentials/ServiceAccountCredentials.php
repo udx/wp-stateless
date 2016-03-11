@@ -19,7 +19,6 @@ namespace Google\Auth\Credentials;
 
 use Google\Auth\CredentialsLoader;
 use Google\Auth\OAuth2;
-use GuzzleHttp\Psr7;
 
 /**
  * ServiceAccountCredentials supports authorization using a Google service
@@ -37,12 +36,10 @@ use GuzzleHttp\Psr7;
  *   use Google\Auth\Middleware\AuthTokenMiddleware;
  *   use GuzzleHttp\Client;
  *   use GuzzleHttp\HandlerStack;
- *   use GuzzleHttp\Psr7;
  *
- *   $stream = Psr7\stream_for(file_get_contents(<my_key_file>));
  *   $sa = new ServiceAccountCredentials(
  *       'https://www.googleapis.com/auth/taskqueue',
- *       $stream
+ *       '/path/to/your/json/key_file.json'
  *   );
  *   $middleware = new AuthTokenMiddleware($sa);
  *   $stack = HandlerStack::create();
@@ -59,15 +56,18 @@ use GuzzleHttp\Psr7;
 class ServiceAccountCredentials extends CredentialsLoader
 {
   /**
+   * The OAuth2 instance used to conduct authorization.
+   */
+  protected $auth;
+
+  /**
    * Create a new ServiceAccountCredentials.
    *
    * @param string|array $scope the scope of the access request, expressed
    *   either as an Array or as a space-delimited String.
    *
-   * @param array $jsonKey JSON credentials.
-   *
-   * @param string $jsonKeyPath the path to a file containing JSON credentials.  If
-   *   jsonKeyStream is set, it is ignored.
+   * @param string|array $jsonKey JSON credential file path or JSON credentials
+   *   as an associative array
    *
    * @param string $sub an email address account to impersonate, in situations when
    *   the service account has been delegated domain wide access.
@@ -75,12 +75,16 @@ class ServiceAccountCredentials extends CredentialsLoader
   public function __construct(
     $scope,
     $jsonKey,
-    $jsonKeyPath = null,
     $sub = null
   ) {
-    if (is_null($jsonKey)) {
-      $jsonKeyStream = Psr7\stream_for(file_get_contents($jsonKeyPath));
-      $jsonKey = json_decode($jsonKeyStream->getContents(), true);
+    if (is_string($jsonKey)) {
+      if (!file_exists($jsonKey)) {
+        throw new \InvalidArgumentException('file does not exist');
+      }
+      $jsonKeyStream = file_get_contents($jsonKey);
+      if (!$jsonKey = json_decode($jsonKeyStream, true)) {
+        throw new \LogicException('invalid json for auth config');
+      }
     }
     if (!array_key_exists('client_email', $jsonKey)) {
       throw new \InvalidArgumentException(
@@ -119,6 +123,14 @@ class ServiceAccountCredentials extends CredentialsLoader
       $key .= ':' . $sub;
     }
     return $key;
+  }
+
+  /**
+   * Implements FetchAuthTokenInterface#getLastReceivedToken.
+   */
+  public function getLastReceivedToken()
+  {
+    return $this->auth->getLastReceivedToken();
   }
 
   /**

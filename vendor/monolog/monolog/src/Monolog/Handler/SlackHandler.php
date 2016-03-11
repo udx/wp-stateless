@@ -96,7 +96,8 @@ class SlackHandler extends SocketHandler
         $this->useAttachment = $useAttachment;
         $this->useShortAttachment = $useShortAttachment;
         $this->includeContextAndExtra = $includeContextAndExtra;
-        if ($this->includeContextAndExtra) {
+
+        if ($this->includeContextAndExtra && $this->useShortAttachment) {
             $this->lineFormatter = new LineFormatter;
         }
     }
@@ -240,6 +241,10 @@ class SlackHandler extends SocketHandler
     protected function write(array $record)
     {
         parent::write($record);
+        $res = $this->getResource();
+        if (is_resource($res)) {
+            @fread($res, 2048);
+        }
         $this->closeSocket();
     }
 

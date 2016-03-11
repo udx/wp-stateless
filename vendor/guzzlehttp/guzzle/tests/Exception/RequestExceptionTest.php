@@ -2,8 +2,9 @@
 namespace GuzzleHttp\Tests\Event;
 
 use GuzzleHttp\Exception\RequestException;
-use GuzzleHttp\Psr7\Request;
-use GuzzleHttp\Psr7\Response;
+use GuzzleHttp\Message\Request;
+use GuzzleHttp\Message\Response;
+use GuzzleHttp\Ring\Exception\ConnectException;
 
 /**
  * @covers GuzzleHttp\Exception\RequestException
@@ -31,12 +32,8 @@ class RequestExceptionTest extends \PHPUnit_Framework_TestCase
     public function testCreatesClientErrorResponseException()
     {
         $e = RequestException::create(new Request('GET', '/'), new Response(400));
-        $this->assertContains(
-            'GET /',
-            $e->getMessage()
-        );
-        $this->assertContains(
-            '400 Bad Request',
+        $this->assertEquals(
+            'Client error response [url] / [status code] 400 [reason phrase] Bad Request',
             $e->getMessage()
         );
         $this->assertInstanceOf('GuzzleHttp\Exception\ClientException', $e);
@@ -45,12 +42,8 @@ class RequestExceptionTest extends \PHPUnit_Framework_TestCase
     public function testCreatesServerErrorResponseException()
     {
         $e = RequestException::create(new Request('GET', '/'), new Response(500));
-        $this->assertContains(
-            'GET /',
-            $e->getMessage()
-        );
-        $this->assertContains(
-            '500 Internal Server Error',
+        $this->assertEquals(
+            'Server error response [url] / [status code] 500 [reason phrase] Internal Server Error',
             $e->getMessage()
         );
         $this->assertInstanceOf('GuzzleHttp\Exception\ServerException', $e);
@@ -59,66 +52,8 @@ class RequestExceptionTest extends \PHPUnit_Framework_TestCase
     public function testCreatesGenericErrorResponseException()
     {
         $e = RequestException::create(new Request('GET', '/'), new Response(600));
-        $this->assertContains(
-            'GET /',
-            $e->getMessage()
-        );
-        $this->assertContains(
-            '600 ',
-            $e->getMessage()
-        );
-        $this->assertInstanceOf('GuzzleHttp\Exception\RequestException', $e);
-    }
-
-    public function dataPrintableResponses()
-    {
-        return [
-            ['You broke the test!'],
-            ['<h1>zlomený zkouška</h1>'],
-            ['{"tester": "Philépe Gonzalez"}'],
-            ["<xml>\n\t<text>Your friendly test</text>\n</xml>"],
-            ['document.body.write("here comes a test");'],
-            ["body:before {\n\tcontent: 'test style';\n}"],
-        ];
-    }
-
-    /**
-     * @dataProvider dataPrintableResponses
-     */
-    public function testCreatesExceptionWithPrintableBodySummary($content)
-    {
-        $response = new Response(
-            500,
-            [],
-            $content
-        );
-        $e = RequestException::create(new Request('GET', '/'), $response);
-        $this->assertContains(
-            $content,
-            $e->getMessage()
-        );
-        $this->assertInstanceOf('GuzzleHttp\Exception\RequestException', $e);
-    }
-
-    public function testCreatesExceptionWithTruncatedSummary()
-    {
-        $content = str_repeat('+', 121);
-        $response = new Response(500, [], $content);
-        $e = RequestException::create(new Request('GET', '/'), $response);
-        $expected = str_repeat('+', 120) . ' (truncated...)';
-        $this->assertContains($expected, $e->getMessage());
-    }
-
-    public function testCreatesExceptionWithoutPrintableBody()
-    {
-        $response = new Response(
-            500,
-            ['Content-Type' => 'image/gif'],
-            $content = base64_decode('R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7') // 1x1 gif
-        );
-        $e = RequestException::create(new Request('GET', '/'), $response);
-        $this->assertNotContains(
-            $content,
+        $this->assertEquals(
+            'Unsuccessful response [url] / [status code] 600 [reason phrase] ',
             $e->getMessage()
         );
         $this->assertInstanceOf('GuzzleHttp\Exception\RequestException', $e);
@@ -138,18 +73,11 @@ class RequestExceptionTest extends \PHPUnit_Framework_TestCase
         $this->assertSame($e, $ex->getPrevious());
     }
 
-    public function testDoesNotWrapExistingRequestExceptions()
+    public function testWrapsConnectExceptions()
     {
+        $e = new ConnectException('foo');
         $r = new Request('GET', 'http://www.oo.com');
-        $e = new RequestException('foo', $r);
-        $e2 = RequestException::wrapException($r, $e);
-        $this->assertSame($e, $e2);
-    }
-
-    public function testCanProvideHandlerContext()
-    {
-        $r = new Request('GET', 'http://www.oo.com');
-        $e = new RequestException('foo', $r, null, null, ['bar' => 'baz']);
-        $this->assertEquals(['bar' => 'baz'], $e->getHandlerContext());
+        $ex = RequestException::wrapException($r, $e);
+        $this->assertInstanceOf('GuzzleHttp\Exception\ConnectException', $ex);
     }
 }

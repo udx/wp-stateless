@@ -1,4 +1,4 @@
-#### 1.7.2
+#### 1.7.3
 * Added ability to fix previously failed items.
 
 #### 1.7.1

@@ -1,38 +1,21 @@
-help:
-	@echo "Please use \`make <target>' where <target> is one of"
-	@echo "  start-server   to start the test server"
-	@echo "  stop-server    to stop the test server"
-	@echo "  test           to perform unit tests.  Provide TEST to perform a specific test."
-	@echo "  coverage       to perform unit tests with code coverage. Provide TEST to perform a specific test."
-	@echo "  coverage-show  to show the code coverage report"
-	@echo "  clean          to remove build artifacts"
-	@echo "  docs           to build the Sphinx docs"
-	@echo "  docs-show      to view the Sphinx docs"
-	@echo "  tag            to modify the version, update changelog, and chag tag"
-	@echo "  package        to build the phar and zip files"
+all: clean coverage docs
 
-start-server: stop-server
-	node tests/server.js &> /dev/null &
+start-server:
+	cd vendor/guzzlehttp/ringphp && make start-server
 
 stop-server:
-	@PID=$(shell ps axo pid,command \
-	  | grep 'tests/server.js' \
-	  | grep -v grep \
-	  | cut -f 1 -d " "\
-	) && [ -n "$$PID" ] && kill $$PID || true
+	cd vendor/guzzlehttp/ringphp && make stop-server
 
 test: start-server
 	vendor/bin/phpunit
 	$(MAKE) stop-server
 
 coverage: start-server
-	vendor/bin/phpunit --coverage-html=build/artifacts/coverage
+	vendor/bin/phpunit --coverage-html=artifacts/coverage
 	$(MAKE) stop-server
 
-coverage-show: view-coverage
-
 view-coverage:
-	open build/artifacts/coverage/index.html
+	open artifacts/coverage/index.html
 
 clean:
 	rm -rf artifacts/*
@@ -40,7 +23,7 @@ clean:
 docs:
 	cd docs && make html && cd ..
 
-docs-show:
+view-docs:
 	open docs/_build/html/index.html
 
 tag:
@@ -53,7 +36,15 @@ tag:
 	git commit -m '$(TAG) release'
 	chag tag
 
-package:
+perf: start-server
+	php tests/perf.php
+	$(MAKE) stop-server
+
+package: burgomaster
 	php build/packager.php
 
-.PHONY: docs burgomaster coverage-show view-coverage
+burgomaster:
+	mkdir -p build/artifacts
+	curl -s https://raw.githubusercontent.com/mtdowling/Burgomaster/0.0.2/src/Burgomaster.php > build/artifacts/Burgomaster.php
+
+.PHONY: docs burgomaster

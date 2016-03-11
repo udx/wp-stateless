@@ -4,7 +4,7 @@
  * Plugin URI: https://www.usabilitydynamics.com
  * Description: wpCloud Stateless Media for GCE
  * Author: Usability Dynamics, Inc.
- * Version: 1.7.2
+ * Version: 1.7.3
  * Text Domain: stateless-media
  * Author URI: https://www.usabilitydynamics.com
  *

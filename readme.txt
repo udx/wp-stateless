@@ -5,7 +5,7 @@ Tags: admin, google, bucket, CDN, google cloud storage, media, mirror, uploads, 
 License: GPLv2 or later
 Requires at least: 4.0
 Tested up to: 4.4.2
-Stable tag: 1.7.2
+Stable tag: 1.7.3
 
 == Description ==
 
@@ -15,7 +15,7 @@ The WP-Stateless plugin copies your media uploads to Google Cloud Storage in rea
 
 This plugin is useful for running multiple environments or instances of your WordPress site.
 
-Plugin requires PHP 5.5 or higher.
+Plugin requires PHP 5.4 or higher.
 
 > See the plugin on [GitHub](https://github.com/wpCloud/wp-stateless)
 
@@ -56,10 +56,10 @@ See Installation tab.
 
 == Upgrade Notice ==
 
-= 1.7.2 =
+= 1.7.3 =
 * Initial public release.
 
 == Changelog ==
 
-= 1.7.2 =
+= 1.7.3 =
 * Initial public release.
