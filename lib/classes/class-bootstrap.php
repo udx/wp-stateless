@@ -25,7 +25,7 @@ namespace wpCloud\StatelessMedia {
        * @property $version
        * @type {Object}
        */
-      public static $version = '1.7.2';
+      public static $version = '1.7.3';
 
       /**
        * Singleton Instance Reference.
