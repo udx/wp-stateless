@@ -1,5 +1,5 @@
 ﻿=== WP-Stateless - Google Cloud Media Storage ===
-Contributors: usability_dynamics, andypotanin, maxim.peshkov, Anton Korotkoff, ideric, MariaKravchenko, Felix Arntz
+Contributors: usability_dynamics, andypotanin, maxim.peshkov, Anton Korotkoff, ideric, MariaKravchenko, flixos90
 Donate link: https://www.usabilitydynamics.com
 Tags: admin, google, bucket, CDN, google cloud storage, media, mirror, uploads, stateless
 License: GPLv2 or later
