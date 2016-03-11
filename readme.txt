@@ -9,8 +9,6 @@ Stable tag: 1.7.3
 
 == Description ==
 
-Stores and serves WordPress media files directly from Google Cloud Storage.
-
 The WP-Stateless plugin copies your media uploads to Google Cloud Storage in real-time as you add items to your Media Library. The uploaded files are then served directly from the Google bucket, making your media files load quicker from the distributed Google servers. The plugin will handle all media uploads including image thumbnails, PDF documents, audio files, and more.
 
 This plugin is useful for running multiple environments or instances of your WordPress site.

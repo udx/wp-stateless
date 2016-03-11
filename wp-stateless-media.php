@@ -2,7 +2,7 @@
 /**
  * Plugin Name: WP-Stateless
  * Plugin URI: https://www.usabilitydynamics.com
- * Description: wpCloud Stateless Media for GCE
+ * Description: Stores and serves WordPress media files directly from Google Cloud Storage.
  * Author: Usability Dynamics, Inc.
  * Version: 1.7.3
  * Text Domain: stateless-media
