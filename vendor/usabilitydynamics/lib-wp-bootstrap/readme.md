@@ -3,7 +3,7 @@ lib-wp-bootstrap
 
 UD Bootstrap library for WP plugins.
 
-## License
+## License 
 
 (The MIT License)
 

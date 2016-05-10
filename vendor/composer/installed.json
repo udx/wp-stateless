@@ -6,12 +6,12 @@
         "source": {
             "type": "git",
             "url": "https://github.com/composer/installers.git",
-            "reference": "0d061bff8273df2f4a45287209acfb769a01a02d"
+            "reference": "21a8c06dd5fe0a22b776797cc552e51d17d7e7dd"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/composer/installers/zipball/0d061bff8273df2f4a45287209acfb769a01a02d",
-            "reference": "0d061bff8273df2f4a45287209acfb769a01a02d",
+            "url": "https://api.github.com/repos/composer/installers/zipball/21a8c06dd5fe0a22b776797cc552e51d17d7e7dd",
+            "reference": "21a8c06dd5fe0a22b776797cc552e51d17d7e7dd",
             "shasum": ""
         },
         "require": {
@@ -25,7 +25,7 @@
             "composer/composer": "1.0.*@dev",
             "phpunit/phpunit": "4.1.*"
         },
-        "time": "2016-03-11 13:58:36",
+        "time": "2016-04-24 13:17:36",
         "type": "composer-plugin",
         "extra": {
             "class": "Composer\\Installers\\Plugin",
@@ -35,8 +35,8 @@
         },
         "installation-source": "source",
         "autoload": {
-            "psr-0": {
-                "Composer\\Installers\\": "src/"
+            "psr-4": {
+                "Composer\\Installers\\": "src/Composer/Installers"
             }
         },
         "notification-url": "https://packagist.org/downloads/",
@@ -51,14 +51,16 @@
             }
         ],
         "description": "A multi-framework Composer library installer",
-        "homepage": "http://composer.github.com/installers/",
+        "homepage": "https://composer.github.io/installers/",
         "keywords": [
             "Craft",
             "Dolibarr",
             "Hurad",
+            "ImageCMS",
             "MODX Evo",
             "Mautic",
             "OXID",
+            "RadPHP",
             "SMF",
             "Thelia",
             "WolfCMS",
@@ -112,7 +114,7 @@
         "dist": {
             "type": "zip",
             "url": "https://github.com/UsabilityDynamics/lib-utility/archive/0.3.6.zip",
-            "reference": null,
+            "reference": "0.3.6",
             "shasum": null
         },
         "require-dev": {
@@ -175,7 +177,7 @@
         "dist": {
             "type": "zip",
             "url": "https://github.com/UsabilityDynamics/lib-settings/archive/0.2.3.zip",
-            "reference": null,
+            "reference": "0.2.3",
             "shasum": null
         },
         "require": {
@@ -235,17 +237,17 @@
     },
     {
         "name": "usabilitydynamics/lib-wp-bootstrap",
-        "version": "1.1.5",
-        "version_normalized": "1.1.5.0",
+        "version": "1.2.0",
+        "version_normalized": "1.2.0.0",
         "source": {
             "type": "git",
             "url": "git@github.com:UsabilityDynamics/lib-wp-bootstrap",
-            "reference": "1.1.5"
+            "reference": "1.2.0"
         },
         "dist": {
             "type": "zip",
-            "url": "https://github.com/UsabilityDynamics/lib-wp-bootstrap/archive/1.1.5.zip",
-            "reference": null,
+            "url": "https://github.com/UsabilityDynamics/lib-wp-bootstrap/archive/1.2.0.zip",
+            "reference": "1.2.0",
             "shasum": null
         },
         "require": {
@@ -384,23 +386,23 @@
     },
     {
         "name": "react/promise",
-        "version": "v2.2.2",
-        "version_normalized": "2.2.2.0",
+        "version": "v2.4.1",
+        "version_normalized": "2.4.1.0",
         "source": {
             "type": "git",
             "url": "https://github.com/reactphp/promise.git",
-            "reference": "3aacad8bf10c7d83e6fa2089d413529888c2bedf"
+            "reference": "8025426794f1944de806618671d4fa476dc7626f"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/reactphp/promise/zipball/3aacad8bf10c7d83e6fa2089d413529888c2bedf",
-            "reference": "3aacad8bf10c7d83e6fa2089d413529888c2bedf",
+            "url": "https://api.github.com/repos/reactphp/promise/zipball/8025426794f1944de806618671d4fa476dc7626f",
+            "reference": "8025426794f1944de806618671d4fa476dc7626f",
             "shasum": ""
         },
         "require": {
             "php": ">=5.4.0"
         },
-        "time": "2016-02-26 19:09:02",
+        "time": "2016-05-03 17:50:52",
         "type": "library",
         "extra": {
             "branch-alias": {
@@ -435,12 +437,12 @@
         "source": {
             "type": "git",
             "url": "https://github.com/guzzle/streams.git",
-            "reference": "d1f8a6c55f0f753cfd6f6755856473eb02cedb19"
+            "reference": "d99a261c616210618ab94fd319cb17eda458cc3e"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/guzzle/streams/zipball/d1f8a6c55f0f753cfd6f6755856473eb02cedb19",
-            "reference": "d1f8a6c55f0f753cfd6f6755856473eb02cedb19",
+            "url": "https://api.github.com/repos/guzzle/streams/zipball/d99a261c616210618ab94fd319cb17eda458cc3e",
+            "reference": "d99a261c616210618ab94fd319cb17eda458cc3e",
             "shasum": ""
         },
         "require": {
@@ -449,7 +451,7 @@
         "require-dev": {
             "phpunit/phpunit": "~4.0"
         },
-        "time": "2015-01-22 00:01:34",
+        "time": "2016-04-13 16:32:01",
         "type": "library",
         "extra": {
             "branch-alias": {
@@ -594,12 +596,12 @@
         "source": {
             "type": "git",
             "url": "https://github.com/phpseclib/phpseclib.git",
-            "reference": "9e586e79f1fadced93cea6b8dfa09c1bde7904c2"
+            "reference": "c784d9e1e5da5b48f4994580c7bedd1f370ed0ce"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/phpseclib/phpseclib/zipball/9e586e79f1fadced93cea6b8dfa09c1bde7904c2",
-            "reference": "9e586e79f1fadced93cea6b8dfa09c1bde7904c2",
+            "url": "https://api.github.com/repos/phpseclib/phpseclib/zipball/c784d9e1e5da5b48f4994580c7bedd1f370ed0ce",
+            "reference": "c784d9e1e5da5b48f4994580c7bedd1f370ed0ce",
             "shasum": ""
         },
         "require": {
@@ -617,10 +619,13 @@
             "ext-mcrypt": "Install the Mcrypt extension in order to speed up a few other cryptographic operations.",
             "ext-openssl": "Install the OpenSSL extension in order to speed up a wide variety of cryptographic operations."
         },
-        "time": "2016-03-08 22:57:16",
+        "time": "2016-05-08 06:34:37",
         "type": "library",
         "installation-source": "source",
         "autoload": {
+            "files": [
+                "phpseclib/bootstrap.php"
+            ],
             "psr-4": {
                 "phpseclib\\": "phpseclib/"
             }
@@ -734,12 +739,12 @@
         "source": {
             "type": "git",
             "url": "https://github.com/Seldaek/monolog.git",
-            "reference": "81045d59740a686121d85281e7de245d49b1236a"
+            "reference": "b23ddb363f28b41d790744197c4cf71e3fdccfe4"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/Seldaek/monolog/zipball/81045d59740a686121d85281e7de245d49b1236a",
-            "reference": "81045d59740a686121d85281e7de245d49b1236a",
+            "url": "https://api.github.com/repos/Seldaek/monolog/zipball/b23ddb363f28b41d790744197c4cf71e3fdccfe4",
+            "reference": "b23ddb363f28b41d790744197c4cf71e3fdccfe4",
             "shasum": ""
         },
         "require": {
@@ -754,13 +759,13 @@
             "doctrine/couchdb": "~1.0@dev",
             "graylog2/gelf-php": "~1.0",
             "jakub-onderka/php-parallel-lint": "0.9",
+            "php-amqplib/php-amqplib": "~2.4",
             "php-console/php-console": "^3.1.3",
             "phpunit/phpunit": "~4.5",
             "phpunit/phpunit-mock-objects": "2.3.0",
             "raven/raven": "^0.13",
             "ruflin/elastica": ">=0.90 <3.0",
-            "swiftmailer/swiftmailer": "~5.3",
-            "videlalvaro/php-amqplib": "~2.4"
+            "swiftmailer/swiftmailer": "~5.3"
         },
         "suggest": {
             "aws/aws-sdk-php": "Allow sending log messages to AWS services like DynamoDB",
@@ -769,13 +774,13 @@
             "ext-mongo": "Allow sending log messages to a MongoDB server",
             "graylog2/gelf-php": "Allow sending log messages to a GrayLog2 server",
             "mongodb/mongodb": "Allow sending log messages to a MongoDB server via PHP Driver",
+            "php-amqplib/php-amqplib": "Allow sending log messages to an AMQP server using php-amqplib",
             "php-console/php-console": "Allow sending log messages to Google Chrome",
             "raven/raven": "Allow sending log messages to a Sentry server",
             "rollbar/rollbar": "Allow sending log messages to Rollbar",
-            "ruflin/elastica": "Allow sending log messages to an Elastic Search server",
-            "videlalvaro/php-amqplib": "Allow sending log messages to an AMQP server using php-amqplib"
+            "ruflin/elastica": "Allow sending log messages to an Elastic Search server"
         },
-        "time": "2016-03-09 11:43:02",
+        "time": "2016-04-20 19:08:06",
         "type": "library",
         "extra": {
             "branch-alias": {
@@ -913,7 +918,7 @@
         "dist": {
             "type": "zip",
             "url": "https://github.com/UsabilityDynamics/google-api-php-client/archive/v2.0.0.zip",
-            "reference": null,
+            "reference": "v2.0.0",
             "shasum": null
         },
         "require": {

@@ -73,7 +73,9 @@ namespace UsabilityDynamics\WP {
       protected function __construct( $args ) {
         parent::__construct( $args );
         //** Define our Admin Notices handler object */
-        $this->errors = new Errors( $args );
+        $this->errors = new Errors( array_merge( $args, array(
+          'type' => $this->type
+        ) ) );
         //** Determine if Composer autoloader is included and modules classes are up to date */
         $this->composer_dependencies();
         //** Determine if plugin/theme requires or recommends another plugin(s) */
@@ -204,13 +206,39 @@ namespace UsabilityDynamics\WP {
         $this->old_version = $version;
         //** Just installed */
         if (!$version) {
-          add_action( 'plugins_loaded', array( $this, 'run_install_process' ), 0 );
+          /* Run Install handlers */
+          add_action( 'plugins_loaded', array( $this, '_run_install_process' ), 0 );
         }
         //** Upgraded */
         elseif (version_compare($version, $this->args['version']) == -1) {
-          add_action( 'plugins_loaded', array( $this, 'run_upgrade_process' ), 0 );
+          /* Run Upgrade handlers */
+          add_action( 'plugins_loaded', array( $this, '_run_upgrade_process' ), 0 );
         }
         update_option( $this->slug . '-current-version', $this->args['version'] );
+      }
+
+      /**
+       * Installation Handler
+       * Internal method. Use run_install_process() instead
+       */
+      public function _run_install_process() {
+        /* Delete 'Install/Upgrade' notice 'dismissed' information */
+        delete_option( sanitize_key( 'dismiss_' . $this->slug . '_' . str_replace( '.', '_', $this->args['version'] ) . '_notice' ) );
+        /* Delete 'Bootstrap' notice 'dismissed' information */
+        delete_option( 'dismissed_notice_' . sanitize_key( $this->name ) );
+        $this->run_install_process();
+      }
+
+      /**
+       * Upgrade Handler
+       * Internal method. Use run_upgrade_process() instead
+       */
+      public function _run_upgrade_process() {
+        /* Delete 'Install/Upgrade' notice 'dismissed' information */
+        delete_option( sanitize_key( 'dismiss_' . $this->slug . '_' . str_replace( '.', '_', $this->args['version'] ) . '_notice' ) );
+        /* Delete 'Bootstrap' notice 'dismissed' information */
+        delete_option( 'dismissed_notice_' . sanitize_key( $this->name ) );
+        $this->run_upgrade_process();
       }
 
       /**
@@ -371,10 +399,16 @@ namespace UsabilityDynamics\WP {
        *
        */
       public function render_upgrade_notice() {
-
+        
         if( $this->type == 'theme' ) {
+          if( !current_user_can( 'switch_themes' ) ) {
+            return;
+          }
           $icon = file_exists( get_template_directory() . '/static/images/icon.png' ) ? get_template_directory_uri() . '/static/images/icon.png' : false;
         } else {
+          if( !current_user_can( 'activate_plugins' ) ) {
+            return;
+          }
           $icon = file_exists( $this->path( 'static/images/icon.png', 'dir' ) ) ? $this->path( 'static/images/icon.png', 'url' ) : false;
         }
 
@@ -464,7 +498,7 @@ namespace UsabilityDynamics\WP {
          * 
          * The condition belongs to WordPress 4.3 and higher.
          */
-        if( did_action( 'plugins_loaded' ) ) {
+        if( did_action( 'plugins_loaded' ) && $this->type == 'plugin' ) {
           return;
         }
         $plugins = $this->get_schema( 'extra.schemas.dependencies.plugins' );
@@ -541,7 +575,7 @@ namespace UsabilityDynamics\WP {
         ) );
         //** Licenses Manager */
         if( !class_exists( '\UsabilityDynamics\UD_API\Manager' ) ) {
-          $this->errors->add( __( 'Class \UsabilityDynamics\UD_API\Manager does not exist. Be sure all required plugins installed and activated.', $this->domain ), 'message' );
+          //$this->errors->add( __( 'Class \UsabilityDynamics\UD_API\Manager does not exist. Be sure all required plugins installed and activated.', $this->domain ), 'message' );
           return false;
         }
         $this->license_manager = new \UsabilityDynamics\UD_API\Manager( $schema );

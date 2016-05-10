@@ -71,7 +71,7 @@ namespace UsabilityDynamics\WP {
       public function __construct( $args ) {
         parent::__construct( $args );
         add_action( 'admin_notices', array( $this, 'admin_notices' ) );
-        add_action( 'admin_head', array( $this, 'dismiss' ) );
+        add_action( 'wp_ajax_ud_dismiss', array( $this, 'dismiss_notices' ) );
       }
       
       /**
@@ -124,30 +124,26 @@ namespace UsabilityDynamics\WP {
       }
       
       /**
-       * Add dismissable admin notices.
-       *
-       * Appends a link to the admin nag messages. If clicked, the admin notice disappears and no longer is visible to users.
-       *
-       * @since 2.1.0
-       */
-      public function dismiss() {
-        if ( isset( $_GET[ 'udan-dismiss-' . sanitize_key( $this->name ) ] ) ) {
-          update_user_meta( get_current_user_id(), ( 'dismissed_notice_' . sanitize_key( $this->name ) ), time() );
-        }
-      }
-      
-      /**
        * Renders admin notes in case there are errors or notices on bootstrap init
        *
        * @author peshkov@UD
        */
       public function admin_notices() {
         global $wp_version;
+
+        //** Don't show the message if the user has no enough permissions. */
+        if ( ! function_exists( 'wp_get_current_user' ) ) {
+          require_once( ABSPATH . 'wp-includes/pluggable.php' );
+        }
         
-        //** Don't show the message if the user isn't an administrator. */
-        if ( ! current_user_can( 'manage_options' ) ) { 
+        if(
+          empty( $this->args['type'] ) ||
+          ( $this->args['type'] == 'plugin' && !current_user_can( 'activate_plugins' ) ) ||
+          ( $this->args['type'] == 'theme' && !current_user_can( 'switch_themes' ) )
+        ) {
           return;
         }
+
         //** Don't show the message if on a multisite and the user isn't a super user. */
         if ( is_multisite() && ! is_super_admin() ) {
           return;
@@ -164,7 +160,7 @@ namespace UsabilityDynamics\WP {
         if( !empty( $errors ) || !empty( $messages ) || !empty( $warnings ) ) {
           echo "<style>.ud-admin-notice a { text-decoration: underline !important; } .ud-admin-notice { display: block !important; } .ud-admin-notice.update-nag { border-color: #ffba00 !important; }</style>";
         }
-        
+
         //** Errors Block */
         if( !empty( $errors ) && is_array( $errors ) ) {
           $message = '<ul style="list-style:disc inside;"><li>' . implode( '</li><li>', $errors ) . '</li></ul>';
@@ -175,19 +171,25 @@ namespace UsabilityDynamics\WP {
           echo '<div class="ud-admin-notice error fade" style="padding:11px;">' . $message . '</div>';
         }
 
-        //** Warnings Block */
-        if( !empty( $warnings ) && is_array( $warnings ) ) {
+        //** Determine if warning has been dismissed */
+        $warning_dismissed = get_option( ( 'dismissed_warning_' . sanitize_key( $this->name ) ) );
+        $show_warnings = $this->check_dismiss_time( $warning_dismissed );
+        if ( $show_warnings && ! empty( $warnings ) && is_array( $warnings ) ) {
+          //** Warnings Block */
           $message = '<ul style="list-style:disc inside;"><li>' . implode( '</li><li>', $warnings ) . '</li></ul>';
           $message = sprintf( __( '<p><b>%s</b> has the following warnings:</p> %s', $this->domain ), $this->name, $message );
-          if( !empty( $this->action_links[ 'errors' ] ) && is_array( $this->action_links[ 'errors' ] ) ) {
-            $message .= '<p>' . implode( ' | ', $this->action_links[ 'errors' ] ) . '</p>';
+          if( $this->dismiss ) {
+            $this->action_links[ 'warnings' ][] = '<a class="dismiss-warning dismiss" data-key="dismissed_warning_' . sanitize_key( $this->name ).'" href="#">' . __( 'Dismiss this warning', $this->domain ) . '</a>';
+          }
+          if( !empty( $this->action_links[ 'warnings' ] ) && is_array( $this->action_links[ 'warnings' ] ) ) {
+            $message .= '<p>' . implode( ' | ', $this->action_links[ 'warnings' ] ) . '</p>';
           }
           echo '<div class="ud-admin-notice updated update-nag fade" style="padding:11px;">' . $message . '</div>';
         }
-        
-        //** Determine if message has been dismissed ( for week! ) */
-        $dismiss_timer = get_user_meta( get_current_user_id(), ( 'dismissed_notice_' . sanitize_key( $this->name ) ), true );
-        if ( !$dismiss_timer || ( time() - (int)$dismiss_timer ) >= 604800 ) {
+
+        //** Determine if message has been dismissed */
+        $message_dismissed = get_option( ( 'dismissed_notice_' . sanitize_key( $this->name ) ) );
+        if ( empty( $message_dismissed ) ) {
           //** Notices Block */
           if( !empty( $messages ) && is_array( $messages ) ) {
             $message = '<ul style="list-style:disc inside;"><li>' . implode( '</li><li>', $messages ) . '</li></ul>';
@@ -197,13 +199,64 @@ namespace UsabilityDynamics\WP {
               $message = sprintf( __( '<p><b>%s</b> is active, but has the following notices:</p> %s', $this->domain ), $this->name, $message );
             }
             if( $this->dismiss ) {
-              $this->action_links[ 'messages' ][] = '<a class="dismiss-notice" href="' . add_query_arg( 'udan-dismiss-' . sanitize_key( $this->name ), 'true' ) . '" target="_parent">' . __( 'Dismiss this notice', $this->domain ) . '</a>';
+              $this->action_links[ 'messages' ][] = '<a class="dismiss-notice dismiss" data-key="dismissed_notice_' . sanitize_key( $this->name ).'" href="#">' . __( 'Dismiss this notice', $this->domain ) . '</a>';
             }
             $message .= '<p>' . implode( ' | ', $this->action_links[ 'messages' ] ) . '</p>';
             echo '<div class="ud-admin-notice updated fade" style="padding:11px;">' . $message . '</div>';
           }
         }
+
+        if ( $show_warnings || empty( $message_dismissed ) ) {
+          //enqueue dismiss js for ajax requests
+          $script_path = Utility::path( 'static/scripts/ud-dismiss.js', 'url' );
+          wp_enqueue_script( "ud-dismiss", $script_path, array( 'jquery' ) );
+          wp_localize_script( "ud-dismiss", "_ud_vars", array(
+              "ajaxurl" => admin_url( 'admin-ajax.php' ),
+          ) );
+        }
         
+      }
+
+      /**
+       * dismiss the notice ajax callback
+       * @throws \Exception
+       */
+      public function dismiss_notices(){
+        $response = array(
+          'success' => '0',
+          'error' => __( 'There was an error in request.', $this->domain ),
+        );
+        $error = false;
+
+        if( empty($_POST['key']) ) {
+          $response['error'] = __( 'Invalid key', $this->domain );
+          $error = true;
+        }
+
+        if ( ! $error && update_option( ( $_POST['key'] ), time() ) ) {
+          $response['success'] = '1';
+        }
+
+        wp_send_json( $response );
+      }
+
+      /**
+       * Check dismiss notice timestamp if greater than 24 hrs
+       *
+       * @param string $time
+       *
+       * @return bool
+       */
+      public function check_dismiss_time( $time = '' ) {
+        if( empty( $time ) ) {
+          return true;
+        }
+        $current_time = time();
+        $diff = $current_time - 86400;
+        if ( $diff > (int)$time ) {
+          return true;
+        }
+        return false;
       }
       
     }

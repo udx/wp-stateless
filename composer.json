@@ -10,7 +10,7 @@
   "repositories": [
     {
       "type": "composer",
-      "url": "http://repository.usabilitydynamics.com"
+      "url": "https://repository.usabilitydynamics.com"
     }
   ],
   "repository": {
@@ -21,7 +21,7 @@
     "php": ">=5.4",
     "composer/installers": "~1.0",
     "usabilitydynamics/lib-settings": "0.2.3",
-    "usabilitydynamics/lib-wp-bootstrap": "1.1.5",
+    "usabilitydynamics/lib-wp-bootstrap": "1.2.0",
     "usabilitydynamics/google-api-php-client": "^2.0.0"
   },
   "require-dev": {
