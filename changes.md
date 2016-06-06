@@ -1,3 +1,6 @@
+#### 1.8.0
+* https://github.com/wpCloud/wp-stateless/issues/31
+
 #### 1.7.3
 * Added ability to fix previously failed items.
 
