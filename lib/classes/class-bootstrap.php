@@ -187,6 +187,8 @@ namespace wpCloud\StatelessMedia {
       }
 
       /**
+       * Handle images on fly
+       *
        * @param $file
        * @return mixed
        */
@@ -195,10 +197,26 @@ namespace wpCloud\StatelessMedia {
         $client = ud_get_stateless_media()->get_client();
         $upload_dir = wp_upload_dir();
 
-        $client->add_media( $_mediaOptions = array_filter( array(
-            'name' => str_replace( trailingslashit( $upload_dir[ 'basedir' ] ), '', $file ),
-            'absolutePath' => wp_normalize_path( $file )
-        ) ));
+        $file_path = str_replace( trailingslashit( $upload_dir[ 'basedir' ] ), '', $file );
+        $file_info = @getimagesize( $file );
+
+        if ( $file_info ) {
+          $_metadata = array(
+            'width'  => $file_info[0],
+            'height' => $file_info[1],
+            'object-id' => 'unknown', // we really don't know it
+            'source-id' => md5( $file.ud_get_stateless_media()->get( 'sm.bucket' ) ),
+            'file-hash' => md5( $file )
+          );
+        }
+
+        $client->add_media( apply_filters('sm:item:on_fly:before_add', array_filter( array(
+          'name' => $file_path,
+          'absolutePath' => wp_normalize_path( $file ),
+          'cacheControl' => 'public, max-age=36000, must-revalidate',
+          'contentDisposition' => null,
+          'metadata' => $_metadata
+        ) ) ) );
 
         return $file;
       }

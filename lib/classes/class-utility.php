@@ -181,6 +181,8 @@ namespace wpCloud\StatelessMedia {
                 'contentDisposition' => $_contentDisposition,
                 'mimeType' => $data[ 'mime-type' ],
                 'metadata' => array_merge( $_metadata, array(
+                  'width' => $data['width'],
+                  'height' => $data['height'],
                   'child-of' => $attachment_id,
                   'file-hash' => md5( $data[ 'file' ] )
                 ))
