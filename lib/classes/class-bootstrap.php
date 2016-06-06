@@ -42,6 +42,14 @@ namespace wpCloud\StatelessMedia {
        */
       public function init() {
 
+        /**
+         * Register SM metaboxes
+         */
+        add_action( 'admin_init', array( $this, 'register_metaboxes' ) );
+
+        /**
+         * Init AJAX jobs
+         */
         new Ajax();
 
         /**
@@ -116,11 +124,6 @@ namespace wpCloud\StatelessMedia {
             add_filter( 'image_downsize', array( $this, 'image_downsize' ), 99, 3 );
 
             /**
-             * Hook into attachment egit page UI
-             */
-            add_action( 'attachment_submitbox_misc_actions', array( $this, 'attachment_submitbox_misc_actions' ), 20, 2 );
-
-            /**
              * Extends metadata by adding GS information.
              */
             add_filter( 'wp_get_attachment_metadata', array( $this, 'wp_get_attachment_metadata' ), 10, 2 );
@@ -149,6 +152,60 @@ namespace wpCloud\StatelessMedia {
 
         }
 
+      }
+
+      /**
+       * Register metaboxes
+       */
+      public function register_metaboxes() {
+        add_meta_box(
+          'sm-attachment-metabox',
+          __( 'Google Cloud Storage', ud_get_stateless_media()->domain ),
+          array($this, 'attachment_meta_box_callback'),
+          'attachment',
+          'side',
+          'low'
+        );
+      }
+
+      /**
+       * @param $post
+       */
+      public function attachment_meta_box_callback( $post ) {
+        ob_start();
+
+        $sm_cloud = get_post_meta( $post->ID, 'sm_cloud', 1 );
+
+        if ( is_array( $sm_cloud ) && !empty( $sm_cloud[ 'fileLink' ] ) ) { ?>
+
+          <?php if( !empty( $sm_cloud[ 'cacheControl' ] ) ) { ?>
+            <div class="misc-pub-cache-control hidden">
+              <?php _e( 'Cache Control:', ud_get_stateless_media()->domain ); ?> <strong><span><?php echo $sm_cloud[ 'cacheControl' ]; ?></span> </strong>
+            </div>
+          <?php } ?>
+
+          <div class="misc-pub-gs-file-link" style="margin-bottom: 15px;">
+            <label>
+              <?php _e( 'Storage Bucket URL:', ud_get_stateless_media()->domain ); ?> <a href="<?php echo $sm_cloud[ 'fileLink' ]; ?>" target="_blank" class="sm-view-link"><?php _e( '[view]' ); ?></a>
+              <input type="text" class="widefat urlfield" readonly="readonly" value="<?php echo esc_attr($sm_cloud[ 'fileLink' ]); ?>" />
+            </label>
+          </div>
+
+          <?php
+
+          if ( !empty( $sm_cloud[ 'bucket' ] ) ) {
+            ?>
+            <div class="misc-pub-gs-bucket">
+              <label>
+                <?php _e( 'Storage Bucket:', ud_get_stateless_media()->domain ); ?>
+                <input type="text" class="widefat urlfield" readonly="readonly" value="gs://<?php echo esc_attr($sm_cloud[ 'bucket' ]); ?>" />
+              </label>
+            </div>
+            <?php
+          }
+        }
+
+        echo apply_filters( 'sm::attachment::meta', ob_get_clean(), $post->ID );
       }
 
       /**
@@ -293,53 +350,6 @@ namespace wpCloud\StatelessMedia {
         }
 
         return $attr;
-
-      }
-
-      /**
-       * Add some meta to attachment edit page
-       *
-       * @global type $post
-       */
-      public function attachment_submitbox_misc_actions() {
-        global $post;
-
-        ob_start();
-
-        $sm_cloud = get_post_meta( $post->ID, 'sm_cloud', 1 );
-
-        if ( is_array( $sm_cloud ) && !empty( $sm_cloud[ 'fileLink' ] ) ) { ?>
-
-          <?php if( !empty( $sm_cloud[ 'cacheControl' ] ) ) { ?>
-            <div class="misc-pub-section misc-pub-cache-control hidden">
-		        <?php _e( 'Cache Control:', ud_get_stateless_media()->domain ); ?> <strong><span><?php echo $sm_cloud[ 'cacheControl' ]; ?></span> </strong>
-          </div>
-          <?php } ?>
-
-          <div class="misc-pub-section misc-pub-gs-file-link">
-            <label>
-              <?php _e( 'Storage Bucket URL:', ud_get_stateless_media()->domain ); ?> <a href="<?php echo $sm_cloud[ 'fileLink' ]; ?>" target="_blank" class="sm-view-link"><?php _e( '[view]' ); ?></a>
-              <input type="text" class="widefat urlfield" readonly="readonly" value="<?php echo esc_attr($sm_cloud[ 'fileLink' ]); ?>" />
-            </label>
-          </div>
-
-          <?php
-
-          if ( !empty( $sm_cloud[ 'bucket' ] ) ) {
-            ?>
-            <div class="misc-pub-section misc-pub-gs-bucket">
-              <label>
-                <?php _e( 'Storage Bucket:', ud_get_stateless_media()->domain ); ?>
-                <input type="text" class="widefat urlfield" readonly="readonly" value="gs://<?php echo esc_attr($sm_cloud[ 'bucket' ]); ?>" />
-              </label>
-            </div>
-          <?php
-          }
-
-
-        }
-
-        echo apply_filters( 'sm::attachment::meta', ob_get_clean(), $post->ID );
 
       }
 
