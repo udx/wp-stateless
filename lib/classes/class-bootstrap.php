@@ -48,6 +48,11 @@ namespace wpCloud\StatelessMedia {
         add_action( 'admin_init', array( $this, 'register_metaboxes' ) );
 
         /**
+         * Add custom actions to media rows
+         */
+        add_filter( 'media_row_actions', array( $this, 'add_custom_row_actions' ), 10, 3 );
+
+        /**
          * Init AJAX jobs
          */
         new Ajax();
@@ -151,6 +156,22 @@ namespace wpCloud\StatelessMedia {
           }
 
         }
+
+      }
+
+      /**
+       * @param $actions
+       * @param $post
+       * @param $detached
+       * @return mixed
+       */
+      public function add_custom_row_actions( $actions, $post, $detached ) {
+
+        if ( current_user_can( 'upload_files' ) ) {
+          $actions['sm_sync'] = '<a href="javascript:;" data-id="'.$post->ID.'" class="sm_inline_sync">' . __('Regen. and Sync with GCS', ud_get_stateless_media()->domain) . '</a>';
+        }
+
+        return $actions;
 
       }
 
@@ -326,8 +347,21 @@ namespace wpCloud\StatelessMedia {
        *
        * @todo: it should not be loaded everywhere. peshkov@UD
        */
-      public function admin_enqueue_scripts() {
+      public function admin_enqueue_scripts( $hook ) {
+
         wp_enqueue_style( 'wp-stateless', $this->path( 'static/styles/wp-stateless.css', 'url'  ), array(), self::$version );
+
+        switch( $hook ) {
+
+          case 'upload.php':
+
+            wp_enqueue_script( 'wp-stateless-uploads-js', $this->path( 'static/scripts/wp-stateless-uploads.js', 'url'  ), array( 'jquery' ), self::$version );
+
+            break;
+
+          default: break;
+        }
+
       }
 
       /**
