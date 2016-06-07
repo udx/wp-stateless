@@ -216,12 +216,18 @@ namespace wpCloud\StatelessMedia {
 
           if ( !empty( $sm_cloud[ 'bucket' ] ) ) {
             ?>
-            <div class="misc-pub-gs-bucket">
+            <div class="misc-pub-gs-bucket" style="margin-bottom: 15px;">
               <label>
                 <?php _e( 'Storage Bucket:', ud_get_stateless_media()->domain ); ?>
                 <input type="text" class="widefat urlfield" readonly="readonly" value="gs://<?php echo esc_attr($sm_cloud[ 'bucket' ]); ?>" />
               </label>
             </div>
+            <?php
+          }
+
+          if ( current_user_can( 'upload_files' ) ) {
+            ?>
+              <a href="javascript:;" data-id="<?php echo $post->ID; ?>" class="button-secondary sm_inline_sync"><?php _e('Regenerate and Sync with GCS', ud_get_stateless_media()->domain); ?></a>
             <?php
           }
         }
@@ -356,6 +362,16 @@ namespace wpCloud\StatelessMedia {
           case 'upload.php':
 
             wp_enqueue_script( 'wp-stateless-uploads-js', $this->path( 'static/scripts/wp-stateless-uploads.js', 'url'  ), array( 'jquery' ), self::$version );
+
+            break;
+
+          case 'post.php':
+
+            global $post;
+
+            if ( $post->post_type == 'attachment' ) {
+              wp_enqueue_script( 'wp-stateless-uploads-js', $this->path( 'static/scripts/wp-stateless-uploads.js', 'url'  ), array( 'jquery' ), self::$version );
+            }
 
             break;
 
