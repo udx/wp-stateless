@@ -17,14 +17,19 @@ jQuery(document).ready(function(){
       method: 'POST',
       url: ajaxurl,
       data: {
-        action: "stateless_process_image",
-        id: jQuery( e.target).data('id')
+        action: that.data('type') == 'image' ? "stateless_process_image" : "stateless_process_file",
+        id: that.data('id')
       }
     })
-    .done(function( response, message, xhr ) {
+    .done(function( response ) {
       if ( response.success ) {
-        that.replaceWith( response.data );
+        that.replaceWith( '<span style="color:#00520a">'+response.data+'</span>' );
+      } else {
+        that.replaceWith( '<span style="color:#a00">'+response.data+'</span>' );
       }
+    })
+    .fail(function( jqXHR, textStatus ) {
+      that.replaceWith( '<span style="color:#a00">'+textStatus+'</span>' );
     });
   });
 

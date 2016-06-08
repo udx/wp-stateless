@@ -115,7 +115,7 @@ namespace wpCloud\StatelessMedia {
 
           if ( $result_code !== 200 ) {
             $this->store_failed_attachment( $image->ID, 'images' );
-            throw new \Exception(sprintf(__('File not found (%s)', ud_get_stateless_media()->domain), $image->guid));
+            throw new \Exception(sprintf(__('Both local and remote files are missing. Unable to resize. (%s)', ud_get_stateless_media()->domain), $image->guid));
           }
         }
 

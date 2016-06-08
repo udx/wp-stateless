@@ -167,8 +167,14 @@ namespace wpCloud\StatelessMedia {
        */
       public function add_custom_row_actions( $actions, $post, $detached ) {
 
-        if ( current_user_can( 'upload_files' ) ) {
-          $actions['sm_sync'] = '<a href="javascript:;" data-id="'.$post->ID.'" class="sm_inline_sync">' . __('Regen. and Sync with GCS', ud_get_stateless_media()->domain) . '</a>';
+        if ( !current_user_can( 'upload_files' ) ) return $actions;
+
+        if ( $post && 'attachment' == $post->post_type && 'image/' == substr( $post->post_mime_type, 0, 6 ) ) {
+          $actions['sm_sync'] = '<a href="javascript:;" data-id="'.$post->ID.'" data-type="image" class="sm_inline_sync">' . __('Regenerate and Sync with GCS', ud_get_stateless_media()->domain) . '</a>';
+        }
+
+        if ( $post && 'attachment' == $post->post_type && 'image/' != substr( $post->post_mime_type, 0, 6 ) ) {
+          $actions['sm_sync'] = '<a href="javascript:;" data-id="'.$post->ID.'" data-type="other" class="sm_inline_sync">' . __('Sync with GCS', ud_get_stateless_media()->domain) . '</a>';
         }
 
         return $actions;
@@ -226,9 +232,19 @@ namespace wpCloud\StatelessMedia {
           }
 
           if ( current_user_can( 'upload_files' ) ) {
-            ?>
-              <a href="javascript:;" data-id="<?php echo $post->ID; ?>" class="button-secondary sm_inline_sync"><?php _e('Regenerate and Sync with GCS', ud_get_stateless_media()->domain); ?></a>
-            <?php
+            if ( $post && 'attachment' == $post->post_type && 'image/' == substr( $post->post_mime_type, 0, 6 ) ) {
+              ?>
+              <a href="javascript:;" data-type="image" data-id="<?php echo $post->ID; ?>"
+                 class="button-secondary sm_inline_sync"><?php _e('Regenerate and Sync with GCS', ud_get_stateless_media()->domain); ?></a>
+              <?php
+            }
+
+            if ( $post && 'attachment' == $post->post_type && 'image/' != substr( $post->post_mime_type, 0, 6 ) ) {
+              ?>
+              <a href="javascript:;" data-type="other" data-id="<?php echo $post->ID; ?>"
+                 class="button-secondary sm_inline_sync"><?php _e('Sync with GCS', ud_get_stateless_media()->domain); ?></a>
+              <?php
+            }
           }
         }
 
