@@ -53,6 +53,11 @@ namespace wpCloud\StatelessMedia {
         add_filter( 'media_row_actions', array( $this, 'add_custom_row_actions' ), 10, 3 );
 
         /**
+         * Handle switch blog properly.
+         */
+        add_action( 'switch_blog', array( $this, 'on_switch_blog' ), 10, 2 );
+
+        /**
          * Init AJAX jobs
          */
         new Ajax();
@@ -157,6 +162,15 @@ namespace wpCloud\StatelessMedia {
 
         }
 
+      }
+
+      /**
+       * Get new blog settings once switched blog.
+       * @param $new_blog
+       * @param $prev_blog_id
+       */
+      public function on_switch_blog( $new_blog, $prev_blog_id ) {
+        $this->settings = new Settings();
       }
 
       /**
