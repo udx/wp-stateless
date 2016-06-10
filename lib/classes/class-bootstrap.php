@@ -170,7 +170,7 @@ namespace wpCloud\StatelessMedia {
        * @param $prev_blog_id
        */
       public function on_switch_blog( $new_blog, $prev_blog_id ) {
-        $this->settings = new Settings();
+        $this->settings->refresh();
       }
 
       /**

@@ -76,6 +76,21 @@ namespace wpCloud\StatelessMedia {
       }
 
       /**
+       * Refresh settings
+       */
+      public function refresh() {
+        $this->set('sm', array(
+          'mode' => get_option( 'sm_mode', 'disabled' ),
+          'bucket' => get_option( 'sm_bucket' ),
+          'root_dir' => get_option( 'sm_root_dir' ),
+          'key_json' => get_option( 'sm_key_json' ),
+          'body_rewrite' => get_option( 'sm_body_rewrite' ),
+          'on_fly' => get_option( 'sm_on_fly' ),
+          'delete_remote' => get_option( 'sm_delete_remote' )
+        ));
+      }
+
+      /**
        * Add menu options
        */
       public function admin_menu() {
