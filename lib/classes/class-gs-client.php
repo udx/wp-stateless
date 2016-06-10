@@ -85,6 +85,8 @@ namespace wpCloud\StatelessMedia {
       public function add_media( $args = array() ) {
         try {
 
+          @set_time_limit( -1 );
+
           extract( $args = wp_parse_args( $args, array(
             'name' => false,
             'absolutePath' => false,

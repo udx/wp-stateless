@@ -119,7 +119,7 @@ namespace wpCloud\StatelessMedia {
           }
         }
 
-        @set_time_limit( 900 );
+        @set_time_limit( -1 );
 
         $metadata = wp_generate_attachment_metadata( $image->ID, $fullsizepath );
 
@@ -174,7 +174,7 @@ namespace wpCloud\StatelessMedia {
 
           if ( !ud_get_stateless_media()->get_client()->media_exists( str_replace( trailingslashit( $upload_dir[ 'basedir' ] ), '', $fullsizepath ) ) ) {
 
-            @set_time_limit( 900 );
+            @set_time_limit( -1 );
 
             $metadata = wp_generate_attachment_metadata( $file->ID, $fullsizepath );
 
