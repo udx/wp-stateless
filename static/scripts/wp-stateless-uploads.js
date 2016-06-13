@@ -28,8 +28,8 @@ jQuery(document).ready(function(){
         that.replaceWith( '<span style="color:#a00">'+response.data+'</span>' );
       }
     })
-    .fail(function( jqXHR, textStatus ) {
-      that.replaceWith( '<span style="color:#a00">'+textStatus+'</span>' );
+    .fail(function( jqXHR, textStatus, message ) {
+      that.replaceWith( '<span style="color:#a00">'+message+'. Check your server configuration.</span>' );
     });
   });
 
