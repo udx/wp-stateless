@@ -1,5 +1,9 @@
 #### 1.8.0
-* https://github.com/wpCloud/wp-stateless/issues/31
+* Added the ability to regenerate and synchronize separate Media file from the list.
+* Added the ability to regenerate and synchronize Media file from edit screen.
+* Fixed the issue on multisite setup (switch_to_blog now works as expected).
+* Performance fixes.
+* UI cleanup.
 
 #### 1.7.3
 * Added ability to fix previously failed items.
