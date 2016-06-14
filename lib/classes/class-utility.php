@@ -36,6 +36,30 @@ namespace wpCloud\StatelessMedia {
       }
 
       /**
+       * Randomize file name
+       * @param $filename
+       * @return string
+       */
+      public static function randomize_filename( $filename ) {
+        $info = pathinfo($filename);
+        $ext = empty($info['extension']) ? '' : '' . $info['extension'];
+        $_parts = array();
+        if (strpos($info['filename'], '@')) {
+          $_cleanName = explode('@', $info['filename'])[0];
+          $_retna = explode('@', $info['filename'])[1];
+          $_parts[] = substr(md5(time()), 0, 8);
+          $_parts[] = '-';
+          $_parts[] = strtolower($_cleanName);
+          $_parts[] = '@' . strtolower($_retna);
+        } else {
+          $_parts[] = substr(md5(time()), 0, 8);
+          $_parts[] = '-';
+          $_parts[] = strtolower($info['filename']);
+        }
+        return join('', $_parts) . '.' . $ext;
+      }
+
+      /**
        * Get Media Item Content Disposition
        *
        * @param null $attachment_id

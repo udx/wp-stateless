@@ -91,8 +91,15 @@ namespace wpCloud\StatelessMedia {
 
         add_action( 'admin_enqueue_scripts', array( $this, 'admin_enqueue_scripts' ) );
 
+        /**
+         * Hashify file name if option is enabled
+         */
+        if ( $this->get( 'sm.hashify_file_name' ) == 'true' ) {
+          add_filter('sanitize_file_name', array( $this, 'randomize_filename' ), 10);
+        }
+
         /* Initialize plugin only if Mode is not 'disabled'. */
-        if( $this->get( 'sm.mode' ) !== 'disabled' ) {
+        if ( $this->get( 'sm.mode' ) !== 'disabled' ) {
 
           /**
            * Determine if we have issues with connection to Google Storage Bucket

@@ -42,7 +42,8 @@ namespace wpCloud\StatelessMedia {
               'key_json' => get_option( 'sm_key_json' ),
               'body_rewrite' => get_option( 'sm_body_rewrite' ),
               'on_fly' => get_option( 'sm_on_fly' ),
-              'delete_remote' => get_option( 'sm_delete_remote' )
+              'delete_remote' => get_option( 'sm_delete_remote' ),
+              'hashify_file_name' => get_option( 'sm_hashify_file_name' )
             )
           )
         ));
@@ -86,7 +87,8 @@ namespace wpCloud\StatelessMedia {
           'key_json' => get_option( 'sm_key_json' ),
           'body_rewrite' => get_option( 'sm_body_rewrite' ),
           'on_fly' => get_option( 'sm_on_fly' ),
-          'delete_remote' => get_option( 'sm_delete_remote' )
+          'delete_remote' => get_option( 'sm_delete_remote' ),
+          'hashify_file_name' => get_option( 'sm_hashify_file_name' )
         ));
       }
 
@@ -197,17 +199,26 @@ namespace wpCloud\StatelessMedia {
 
         $inputs = array();
 
+        // body content rewrite
         $inputs[] = '<input type="hidden" name="sm[body_rewrite]" value="false" />';
 
         $inputs[] = '<label for="sm_body_rewrite"><input id="sm_body_rewrite" type="checkbox" name="sm[body_rewrite]" value="true" '. checked( 'true', $this->get( 'sm.body_rewrite' ), false ) .'/>'.__( 'Body content media URL rewrite.', ud_get_stateless_media()->domain ).'</label>';
 
+        // on fly generate
         $inputs[] = '<input type="hidden" name="sm[on_fly]" value="false" />';
 
         $inputs[] = '<label for="sm_on_fly"><input id="sm_on_fly" type="checkbox" name="sm[on_fly]" value="true" '. checked( 'true', $this->get( 'sm.on_fly' ), false ) .'/>'.__( 'Upload on-fly generated (by third-party scripts) images to GCS.', ud_get_stateless_media()->domain ).'<small> '.__( '(This option may slow down file upload processes)', ud_get_stateless_media()->domain ).'</small></label>';
 
+        // delete remote
         $inputs[] = '<input type="hidden" name="sm[delete_remote]" value="false" />';
 
         $inputs[] = '<label for="sm_delete_remote"><input id="sm_delete_remote" type="checkbox" name="sm[delete_remote]" value="true" '. checked( 'true', $this->get( 'sm.delete_remote' ), false ) .'/>'.__( 'Delete media from GCS when media is deleted from the site.', ud_get_stateless_media()->domain ).'<small> '.__( '(This option may slow down media deletion process)', ud_get_stateless_media()->domain ).'</small></label>';
+
+        // hashify
+        $inputs[] = '<input type="hidden" name="sm[hashify_file_name]" value="false" />';
+
+        $inputs[] = '<label for="sm_hashify_file_name"><input id="sm_hashify_file_name" type="checkbox" name="sm[hashify_file_name]" value="true" '. checked( 'true', $this->get( 'sm.hashify_file_name' ), false ) .'/>'.__( 'Randomize the filename of newly uploaded media files.', ud_get_stateless_media()->domain ).'<small> '.__( '(May help to avoid unwanted GCS caching)', ud_get_stateless_media()->domain ).'</small></label>';
+
 
         echo '<section class="wp-stateless-media-options wp-stateless-media-advanced-options"><p>' . implode( "</p>\n<p>", (array) apply_filters( 'sm::settings::advanced', $inputs ) ) . '</p></section>';
 
