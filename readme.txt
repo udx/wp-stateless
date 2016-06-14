@@ -15,6 +15,12 @@ This plugin is useful for running multiple environments or instances of your Wor
 
 Plugin requires PHP 5.4 or higher.
 
+Overview
+https://www.youtube.com/watch?v=aGntFnKwkE0
+
+Setting Up
+https://www.youtube.com/watch?v=szf5hTns4Ak
+
 > See the plugin on [GitHub](https://github.com/wpCloud/wp-stateless)
 
 = Features =
