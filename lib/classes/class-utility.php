@@ -17,6 +17,15 @@ namespace wpCloud\StatelessMedia {
     class Utility {
 
       /**
+       * Override Cache Control
+       * @param $cacheControl
+       * @return mixed
+       */
+      public static function override_cache_control( $cacheControl ) {
+        return ud_get_stateless_media()->get( 'sm.cache_control' );
+      }
+
+      /**
        * wp_normalize_path was added in 3.9.0
        *
        * @param $path

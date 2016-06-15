@@ -89,6 +89,9 @@ namespace wpCloud\StatelessMedia {
          */
         $this->settings = new Settings();
 
+        /**
+         * Add scripts
+         */
         add_action( 'admin_enqueue_scripts', array( $this, 'admin_enqueue_scripts' ) );
 
         /**
@@ -100,6 +103,13 @@ namespace wpCloud\StatelessMedia {
 
         /* Initialize plugin only if Mode is not 'disabled'. */
         if ( $this->get( 'sm.mode' ) !== 'disabled' ) {
+
+          /**
+           * Override Cache Control is option is enabled
+           */
+          if ( $this->get( 'sm.override_cache_control' ) == 'true' ) {
+            add_filter( 'sm:item:cacheControl', array( $this, 'override_cache_control' ) );
+          }
 
           /**
            * Determine if we have issues with connection to Google Storage Bucket
@@ -334,7 +344,7 @@ namespace wpCloud\StatelessMedia {
         $client->add_media( apply_filters('sm:item:on_fly:before_add', array_filter( array(
           'name' => $file_path,
           'absolutePath' => wp_normalize_path( $file ),
-          'cacheControl' => 'public, max-age=36000, must-revalidate',
+          'cacheControl' => apply_filters( 'sm:item:cacheControl', 'public, max-age=36000, must-revalidate', $_metadata ),
           'contentDisposition' => null,
           'metadata' => $_metadata
         ) ) ) );
