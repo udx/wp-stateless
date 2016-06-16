@@ -47,6 +47,11 @@ namespace wpCloud\StatelessMedia {
       private $bucket;
 
       /**
+       * @var
+       */
+      private $temp_objects = array();
+
+      /**
        * Constructor.
        * Must not be called directly.
        *
@@ -73,6 +78,52 @@ namespace wpCloud\StatelessMedia {
 
         /* Now, Initialize our Google Storage Service */
         $this->service = new Google_Service_Storage( $this->client );
+      }
+
+      /**
+       * Wrapper for listObjects()
+       */
+      public function list_objects( $bucket, $options = array() ) {
+
+        $options = wp_parse_args( $options, array(
+            'delimiter'  => '',
+            'maxResults' => 1000,
+            'pageToken'  => '',
+            'prefix'     => '',
+            'projection' => 'noAcl',
+            'versions'   => false
+        ) );
+
+        return $this->service->objects->listObjects( $bucket, $options );
+      }
+
+      /**
+       * List all items page by page of maxResults
+       * @param $bucket
+       * @param array $options
+       * @return mixed
+       */
+      public function list_all_objects( $bucket, $options = array() ) {
+
+        $options = wp_parse_args( $options, array(
+          'delimiter'  => '',
+          'maxResults' => 1000,
+          'pageToken'  => '',
+          'prefix'     => '',
+          'projection' => 'noAcl',
+          'versions'   => false
+        ) );
+
+        $response = $this->service->objects->listObjects( $bucket, $options );
+
+        $this->temp_objects = array_merge( $this->temp_objects, $response->getItems() );
+
+        if ( !empty( $response->nextPageToken ) ) {
+          $options['pageToken'] = $response->nextPageToken;
+          return $this->list_all_objects( $bucket, $options );
+        } else {
+          return $this->temp_objects;
+        }
       }
       
       /**
