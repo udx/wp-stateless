@@ -1,3 +1,7 @@
+#### 1.9.0
+* Added new ability to define cacheControl for remote objects.
+* Added new option that adds random hashes to file names.
+
 #### 1.8.0
 * Added the ability to regenerate and synchronize separate Media file from the list.
 * Added the ability to regenerate and synchronize Media file from edit screen.

@@ -5,7 +5,7 @@ Tags: admin, google, bucket, CDN, google cloud storage, media, mirror, uploads, 
 License: GPLv2 or later
 Requires at least: 4.0
 Tested up to: 4.5.2
-Stable tag: 1.8.0
+Stable tag: 1.9.0
 
 == Description ==
 
@@ -64,6 +64,10 @@ See Installation tab.
 * Initial public release.
 
 == Changelog ==
+
+= 1.9.0 =
+* Added new ability to define cacheControl for remote objects.
+* Added new option that adds random hashes to file names.
 
 = 1.8.0 =
 * Added the ability to regenerate and synchronize separate Media file from the list.
