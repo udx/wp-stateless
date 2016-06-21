@@ -93,6 +93,7 @@ namespace wpCloud\StatelessMedia {
        * Regenerate image sizes.
        */
       public function action_stateless_process_image() {
+
         @error_reporting( 0 );
 
         $id = (int) $_REQUEST['id'];

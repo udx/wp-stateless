@@ -61,6 +61,34 @@
     padding: 0;
   }
 </style>
+<script>
+  jQuery( document ).ready( function () {
+
+    jQuery( '.ud-install-notice-dismiss' ).on( 'click', '.dismiss', function(e){
+      e.preventDefault();
+
+      var _this = jQuery( this );
+
+      var data = {
+        action: 'ud_bootstrap_dismiss_notice',
+      }
+
+      jQuery.each( _this.data(), function(k,v){
+        data[k] = v;
+      });
+
+      jQuery.post( ajaxurl, data, function ( result_data ) {
+        if( result_data.success == '1' ) {
+          _this.closest('.ud-install-notice').remove();
+        } else if ( result_data.success == '0' ) {
+          alert(result_data.error);
+        }
+      }, "json" );
+
+    });
+
+  } );
+</script>
 <div class="<?php echo $this->slug; ?> ud-install-notice updated fade">
   <?php if( !empty( $icon ) ) : ?>
     <div class="ud-install-notice-icon <?php echo $this->slug; ?>"></div>
@@ -89,7 +117,7 @@
       <?php if( !empty( $this->uservoice_url ) ) : ?>
         | <a href="<?php echo $this->uservoice_url ?>" target="_blank" ><?php _e( 'Post your idea' ) ?></a>
       <?php endif; ?>
-      | <?php printf( __( '<a href="%s" class="">Dismiss this notice</a>' ), $dismiss_link ); ?>
+      | <?php printf( __( '<a data-key="%s" data-slug="%s" data-type="%s" data-version="%s" href="#" class="dismiss-notice dismiss">Dismiss this notice</a>' ), sanitize_key( 'dismiss_' . $slug . '_' . str_replace( '.', '_', $version ) . '_notice' ), $slug, $type, $version ); ?>
     </div>
   </div>
   <div class="ud-install-notice-clear"></div>

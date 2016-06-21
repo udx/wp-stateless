@@ -91,6 +91,7 @@ namespace UsabilityDynamics\WP {
         if ( !has_action( 'admin_menu', array( Dashboard::get_instance(), 'add_ud_splash_page') ) ) {
           add_action( 'admin_menu', array( Dashboard::get_instance(), 'add_ud_splash_page') );
         }
+        add_action( 'wp_ajax_ud_bootstrap_dismiss_notice', array( $this, 'ud_bootstrap_dismiss_notice' ) );
       }
       
       /**
@@ -418,6 +419,8 @@ namespace UsabilityDynamics\WP {
           'icon' => $icon,
           'name' => $this->name,
           'type' => $this->type,
+          'slug' => $this->slug,
+          'version' => $this->args['version'],
           'dashboard_link' => admin_url( 'index.php?page='. Dashboard::get_instance()->page_slug . '&slug=' . $this->slug ),
           'dismiss_link' => admin_url( 'index.php?page='. Dashboard::get_instance()->page_slug . '&slug=' . $this->slug . '&dismiss=1' ),
           'home_link' => !empty( $this->schema[ 'homepage' ] ) ? $this->schema[ 'homepage' ] : false,
@@ -580,6 +583,29 @@ namespace UsabilityDynamics\WP {
         }
         $this->license_manager = new \UsabilityDynamics\UD_API\Manager( $schema );
         return true;
+      }
+
+      public function ud_bootstrap_dismiss_notice() {
+        $response = array(
+            'success' => '0',
+            'error' => __( 'There was an error in request.', $this->domain ),
+        );
+        $error = false;
+
+        if( empty($_POST['key']) || empty($_POST['slug'] || empty($_POST['type']) || empty($_POST['version']) )) {
+          $response['error'] = __( 'Invalid values', $this->domain );
+          $error = true;
+        }
+
+        if ( ! $error && update_option( ( $_POST['key'] ), array(
+                'slug' => $_POST['slug'],
+                'type' => $_POST['type'],
+                'version' => $_POST['version'],
+            ) ) ) {
+          $response['success'] = '1';
+        }
+
+        wp_send_json( $response );
       }
       
     }

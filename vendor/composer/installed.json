@@ -6,12 +6,12 @@
         "source": {
             "type": "git",
             "url": "https://github.com/composer/installers.git",
-            "reference": "21a8c06dd5fe0a22b776797cc552e51d17d7e7dd"
+            "reference": "2db1f3ce7bcf0d294811f5f0214e24d2878a57da"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/composer/installers/zipball/21a8c06dd5fe0a22b776797cc552e51d17d7e7dd",
-            "reference": "21a8c06dd5fe0a22b776797cc552e51d17d7e7dd",
+            "url": "https://api.github.com/repos/composer/installers/zipball/2db1f3ce7bcf0d294811f5f0214e24d2878a57da",
+            "reference": "2db1f3ce7bcf0d294811f5f0214e24d2878a57da",
             "shasum": ""
         },
         "require": {
@@ -25,7 +25,7 @@
             "composer/composer": "1.0.*@dev",
             "phpunit/phpunit": "4.1.*"
         },
-        "time": "2016-04-24 13:17:36",
+        "time": "2016-05-19 16:58:29",
         "type": "composer-plugin",
         "extra": {
             "class": "Composer\\Installers\\Plugin",
@@ -596,12 +596,12 @@
         "source": {
             "type": "git",
             "url": "https://github.com/phpseclib/phpseclib.git",
-            "reference": "c784d9e1e5da5b48f4994580c7bedd1f370ed0ce"
+            "reference": "eeb65b234159f90c40b6f5b587ee017a1138c865"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/phpseclib/phpseclib/zipball/c784d9e1e5da5b48f4994580c7bedd1f370ed0ce",
-            "reference": "c784d9e1e5da5b48f4994580c7bedd1f370ed0ce",
+            "url": "https://api.github.com/repos/phpseclib/phpseclib/zipball/eeb65b234159f90c40b6f5b587ee017a1138c865",
+            "reference": "eeb65b234159f90c40b6f5b587ee017a1138c865",
             "shasum": ""
         },
         "require": {
@@ -619,7 +619,7 @@
             "ext-mcrypt": "Install the Mcrypt extension in order to speed up a few other cryptographic operations.",
             "ext-openssl": "Install the OpenSSL extension in order to speed up a wide variety of cryptographic operations."
         },
-        "time": "2016-05-08 06:34:37",
+        "time": "2016-06-20 00:45:00",
         "type": "library",
         "installation-source": "source",
         "autoload": {
@@ -739,12 +739,12 @@
         "source": {
             "type": "git",
             "url": "https://github.com/Seldaek/monolog.git",
-            "reference": "b23ddb363f28b41d790744197c4cf71e3fdccfe4"
+            "reference": "33df7889304575a7912935ada1beab36fa85a5d9"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/Seldaek/monolog/zipball/b23ddb363f28b41d790744197c4cf71e3fdccfe4",
-            "reference": "b23ddb363f28b41d790744197c4cf71e3fdccfe4",
+            "url": "https://api.github.com/repos/Seldaek/monolog/zipball/33df7889304575a7912935ada1beab36fa85a5d9",
+            "reference": "33df7889304575a7912935ada1beab36fa85a5d9",
             "shasum": ""
         },
         "require": {
@@ -763,8 +763,8 @@
             "php-console/php-console": "^3.1.3",
             "phpunit/phpunit": "~4.5",
             "phpunit/phpunit-mock-objects": "2.3.0",
-            "raven/raven": "^0.13",
             "ruflin/elastica": ">=0.90 <3.0",
+            "sentry/sentry": "^0.13",
             "swiftmailer/swiftmailer": "~5.3"
         },
         "suggest": {
@@ -776,11 +776,11 @@
             "mongodb/mongodb": "Allow sending log messages to a MongoDB server via PHP Driver",
             "php-amqplib/php-amqplib": "Allow sending log messages to an AMQP server using php-amqplib",
             "php-console/php-console": "Allow sending log messages to Google Chrome",
-            "raven/raven": "Allow sending log messages to a Sentry server",
             "rollbar/rollbar": "Allow sending log messages to Rollbar",
-            "ruflin/elastica": "Allow sending log messages to an Elastic Search server"
+            "ruflin/elastica": "Allow sending log messages to an Elastic Search server",
+            "sentry/sentry": "Allow sending log messages to a Sentry server"
         },
-        "time": "2016-04-20 19:08:06",
+        "time": "2016-06-11 15:09:14",
         "type": "library",
         "extra": {
             "branch-alias": {
