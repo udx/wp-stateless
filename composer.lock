@@ -4,8 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "3f0631e7f682cc3cb1dfd1acb3bfbb9f",
-    "content-hash": "48510af47625e12c127892a372a68f1d",
+    "hash": "ac7ad1f36c225a85b9e9792b7eaeaff0",
+    "content-hash": "8fe465ae8e3e226570f2f9ddfe892e7b",
     "packages": [
         {
             "name": "composer/installers",
@@ -904,16 +904,16 @@
         },
         {
             "name": "usabilitydynamics/lib-wp-bootstrap",
-            "version": "1.2.0",
+            "version": "1.2.1",
             "source": {
                 "type": "git",
                 "url": "git@github.com:UsabilityDynamics/lib-wp-bootstrap",
-                "reference": "1.2.0"
+                "reference": "1.2.1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://github.com/UsabilityDynamics/lib-wp-bootstrap/archive/1.2.0.zip",
-                "reference": "1.2.0",
+                "url": "https://github.com/UsabilityDynamics/lib-wp-bootstrap/archive/1.2.1.zip",
+                "reference": "1.2.1",
                 "shasum": null
             },
             "require": {
@@ -1210,12 +1210,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/console.git",
-                "reference": "44adfeb22e5f9e12a6d6fbe69abdf6ef92bdb514"
+                "reference": "1ad22309e904a3b8b7e14703fcd54956b7927a24"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/console/zipball/44adfeb22e5f9e12a6d6fbe69abdf6ef92bdb514",
-                "reference": "44adfeb22e5f9e12a6d6fbe69abdf6ef92bdb514",
+                "url": "https://api.github.com/repos/symfony/console/zipball/1ad22309e904a3b8b7e14703fcd54956b7927a24",
+                "reference": "1ad22309e904a3b8b7e14703fcd54956b7927a24",
                 "shasum": ""
             },
             "require": {
@@ -1225,11 +1225,13 @@
             "require-dev": {
                 "psr/log": "~1.0",
                 "symfony/event-dispatcher": "~2.8|~3.0",
+                "symfony/filesystem": "~2.8|~3.0",
                 "symfony/process": "~2.8|~3.0"
             },
             "suggest": {
                 "psr/log": "For using the console logger",
                 "symfony/event-dispatcher": "",
+                "symfony/filesystem": "",
                 "symfony/process": ""
             },
             "type": "library",
@@ -1262,7 +1264,7 @@
             ],
             "description": "Symfony Console Component",
             "homepage": "https://symfony.com",
-            "time": "2016-06-22 19:54:18"
+            "time": "2016-06-23 11:42:36"
         },
         {
             "name": "symfony/event-dispatcher",
@@ -1487,16 +1489,22 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/yaml.git",
-                "reference": "5b6568306892731d18753610f6a207133d982a10"
+                "reference": "91fe65bcc407fbb0d8842ed691242db2672b0172"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/yaml/zipball/5b6568306892731d18753610f6a207133d982a10",
-                "reference": "5b6568306892731d18753610f6a207133d982a10",
+                "url": "https://api.github.com/repos/symfony/yaml/zipball/91fe65bcc407fbb0d8842ed691242db2672b0172",
+                "reference": "91fe65bcc407fbb0d8842ed691242db2672b0172",
                 "shasum": ""
             },
             "require": {
                 "php": ">=5.5.9"
+            },
+            "require-dev": {
+                "symfony/console": "~2.8|~3.0"
+            },
+            "suggest": {
+                "symfony/console": "For validating YAML files using the lint command"
             },
             "type": "library",
             "extra": {
@@ -1528,7 +1536,7 @@
             ],
             "description": "Symfony Yaml Component",
             "homepage": "https://symfony.com",
-            "time": "2016-06-21 06:41:01"
+            "time": "2016-06-23 11:12:38"
         }
     ],
     "aliases": [],

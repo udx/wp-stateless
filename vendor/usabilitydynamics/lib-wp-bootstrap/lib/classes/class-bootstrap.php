@@ -592,7 +592,11 @@ namespace UsabilityDynamics\WP {
         );
         $error = false;
 
-        if( empty($_POST['key']) || empty($_POST['slug'] || empty($_POST['type']) || empty($_POST['version']) )) {
+        if( empty( $_POST['key'] ) ||
+            empty( $_POST['slug'] ) ||
+            empty( $_POST['type'] ) ||
+            empty( $_POST['version'] )
+        ) {
           $response['error'] = __( 'Invalid values', $this->domain );
           $error = true;
         }
