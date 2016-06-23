@@ -13,12 +13,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/composer/installers.git",
-                "reference": "2db1f3ce7bcf0d294811f5f0214e24d2878a57da"
+                "reference": "5bf0335072c90b0387857bc64dc4c0b9503fa53a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/composer/installers/zipball/2db1f3ce7bcf0d294811f5f0214e24d2878a57da",
-                "reference": "2db1f3ce7bcf0d294811f5f0214e24d2878a57da",
+                "url": "https://api.github.com/repos/composer/installers/zipball/5bf0335072c90b0387857bc64dc4c0b9503fa53a",
+                "reference": "5bf0335072c90b0387857bc64dc4c0b9503fa53a",
                 "shasum": ""
             },
             "require": {
@@ -106,7 +106,7 @@
                 "zend",
                 "zikula"
             ],
-            "time": "2016-05-19 16:58:29"
+            "time": "2016-06-22 15:59:10"
         },
         {
             "name": "firebase/php-jwt",
@@ -493,12 +493,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpseclib/phpseclib.git",
-                "reference": "eeb65b234159f90c40b6f5b587ee017a1138c865"
+                "reference": "b4c750514894c994340a8aec2abda0b2dbc0d9cc"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpseclib/phpseclib/zipball/eeb65b234159f90c40b6f5b587ee017a1138c865",
-                "reference": "eeb65b234159f90c40b6f5b587ee017a1138c865",
+                "url": "https://api.github.com/repos/phpseclib/phpseclib/zipball/b4c750514894c994340a8aec2abda0b2dbc0d9cc",
+                "reference": "b4c750514894c994340a8aec2abda0b2dbc0d9cc",
                 "shasum": ""
             },
             "require": {
@@ -577,7 +577,7 @@
                 "x.509",
                 "x509"
             ],
-            "time": "2016-06-20 00:45:00"
+            "time": "2016-06-22 17:36:35"
         },
         {
             "name": "psr/http-message",
@@ -1210,12 +1210,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/console.git",
-                "reference": "5eb1fd1bdaf1bb13514dcdaeab019233c9a7bf00"
+                "reference": "44adfeb22e5f9e12a6d6fbe69abdf6ef92bdb514"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/console/zipball/5eb1fd1bdaf1bb13514dcdaeab019233c9a7bf00",
-                "reference": "5eb1fd1bdaf1bb13514dcdaeab019233c9a7bf00",
+                "url": "https://api.github.com/repos/symfony/console/zipball/44adfeb22e5f9e12a6d6fbe69abdf6ef92bdb514",
+                "reference": "44adfeb22e5f9e12a6d6fbe69abdf6ef92bdb514",
                 "shasum": ""
             },
             "require": {
@@ -1262,7 +1262,7 @@
             ],
             "description": "Symfony Console Component",
             "homepage": "https://symfony.com",
-            "time": "2016-06-21 06:41:01"
+            "time": "2016-06-22 19:54:18"
         },
         {
             "name": "symfony/event-dispatcher",

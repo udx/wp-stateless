@@ -169,11 +169,11 @@ module.exports = function build( grunt ) {
         command: function( env ) {
           if( typeof env !== 'undefined' && env == 'dev' ) {
             return [
-              "composer install"
+              "COMPOSER_CACHE_DIR=/dev/null composer install"
             ].join( ' && ' );
           } else {
             return [
-              "composer install --no-dev",
+              "COMPOSER_CACHE_DIR=/dev/null composer install --no-dev",
               "rm -rf ./vendor/composer/installers",
               "find ./vendor -name .git -exec rm -rf '{}' \\;",
               "find ./vendor -name .svn -exec rm -rf '{}' \\;",

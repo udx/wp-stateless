@@ -6,12 +6,12 @@
         "source": {
             "type": "git",
             "url": "https://github.com/composer/installers.git",
-            "reference": "2db1f3ce7bcf0d294811f5f0214e24d2878a57da"
+            "reference": "5bf0335072c90b0387857bc64dc4c0b9503fa53a"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/composer/installers/zipball/2db1f3ce7bcf0d294811f5f0214e24d2878a57da",
-            "reference": "2db1f3ce7bcf0d294811f5f0214e24d2878a57da",
+            "url": "https://api.github.com/repos/composer/installers/zipball/5bf0335072c90b0387857bc64dc4c0b9503fa53a",
+            "reference": "5bf0335072c90b0387857bc64dc4c0b9503fa53a",
             "shasum": ""
         },
         "require": {
@@ -25,7 +25,7 @@
             "composer/composer": "1.0.*@dev",
             "phpunit/phpunit": "4.1.*"
         },
-        "time": "2016-05-19 16:58:29",
+        "time": "2016-06-22 15:59:10",
         "type": "composer-plugin",
         "extra": {
             "class": "Composer\\Installers\\Plugin",
@@ -596,12 +596,12 @@
         "source": {
             "type": "git",
             "url": "https://github.com/phpseclib/phpseclib.git",
-            "reference": "eeb65b234159f90c40b6f5b587ee017a1138c865"
+            "reference": "b4c750514894c994340a8aec2abda0b2dbc0d9cc"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/phpseclib/phpseclib/zipball/eeb65b234159f90c40b6f5b587ee017a1138c865",
-            "reference": "eeb65b234159f90c40b6f5b587ee017a1138c865",
+            "url": "https://api.github.com/repos/phpseclib/phpseclib/zipball/b4c750514894c994340a8aec2abda0b2dbc0d9cc",
+            "reference": "b4c750514894c994340a8aec2abda0b2dbc0d9cc",
             "shasum": ""
         },
         "require": {
@@ -619,7 +619,7 @@
             "ext-mcrypt": "Install the Mcrypt extension in order to speed up a few other cryptographic operations.",
             "ext-openssl": "Install the OpenSSL extension in order to speed up a wide variety of cryptographic operations."
         },
-        "time": "2016-06-20 00:45:00",
+        "time": "2016-06-22 17:36:35",
         "type": "library",
         "installation-source": "source",
         "autoload": {
