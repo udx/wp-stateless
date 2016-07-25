@@ -298,7 +298,13 @@ namespace wpCloud\StatelessMedia {
               throw new Exception( __( '<b>Bucket</b> parameter must be provided.' ) );
             }
 
-            if( empty( $args[ 'key_json' ] ) || !$json = json_decode( $args[ 'key_json' ]) || !property_exists($json, 'private_key') ){
+            $json = "{}";
+
+            if ( !empty( $args[ 'key_json' ] ) ) {
+              $json = json_decode($args['key_json']);
+            }
+
+            if( !$json || !property_exists($json, 'private_key') ){
               throw new Exception( __( '<b>Service Account JSON</b> is invalid.' ) );
             }
 
