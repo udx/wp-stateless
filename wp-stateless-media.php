@@ -4,7 +4,7 @@
  * Plugin URI: https://www.usabilitydynamics.com
  * Description: Stores and serves WordPress media files directly from Google Cloud Storage.
  * Author: Usability Dynamics, Inc.
- * Version: 1.9.0
+ * Version: 1.9.1
  * Text Domain: stateless-media
  * Author URI: https://www.usabilitydynamics.com
  *

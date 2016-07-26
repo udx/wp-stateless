@@ -4,8 +4,8 @@ Donate link: https://www.usabilitydynamics.com
 Tags: admin, google, bucket, CDN, google cloud storage, media, mirror, uploads, stateless
 License: GPLv2 or later
 Requires at least: 4.0
-Tested up to: 4.5.2
-Stable tag: 1.9.0
+Tested up to: 4.5.3
+Stable tag: 1.9.1
 
 == Description ==
 
@@ -64,6 +64,9 @@ See Installation tab.
 * Initial public release.
 
 == Changelog ==
+
+= 1.9.1 =
+* Extended Network Settings.
 
 = 1.9.0 =
 * Added new ability to define cacheControl for remote objects.
