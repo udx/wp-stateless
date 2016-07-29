@@ -54,7 +54,7 @@ namespace wpCloud\StatelessMedia {
          * MODE
          */
         /* Use Network setting for mode if needed. */
-        $network_mode = get_site_option( 'sm_mode' );
+        $network_mode = get_site_option( 'sm_mode', 'false' );
         if( $network_mode && $network_mode != 'false' ) {
           $this->set( 'sm.mode', $network_mode );
         }
@@ -86,7 +86,7 @@ namespace wpCloud\StatelessMedia {
          * DELETE REMOTE
          */
 
-        $network_delete_remote = get_site_option( 'sm_delete_remote' );
+        $network_delete_remote = get_site_option( 'sm_delete_remote', '0' );
         if( $network_delete_remote && $network_delete_remote == '1' ) {
           $this->set( 'sm.delete_remote', 'true' );
         }
@@ -98,7 +98,7 @@ namespace wpCloud\StatelessMedia {
          * HASH FILENAME
          */
 
-        $network_hashify = get_site_option( 'sm_hashify_file_name' );
+        $network_hashify = get_site_option( 'sm_hashify_file_name', '0' );
         if( $network_hashify && $network_hashify == '1' ) {
           $this->set( 'sm.hashify_file_name', 'true' );
         }
@@ -305,12 +305,12 @@ namespace wpCloud\StatelessMedia {
         $inputs[] = '<label for="sm_on_fly"><input id="sm_on_fly" type="checkbox" name="sm[on_fly]" value="true" '. checked( 'true', $this->get( 'sm.on_fly' ), false ) .'/>'.__( 'Upload on-fly generated (by third-party scripts) images to GCS.', ud_get_stateless_media()->domain ).'<small> '.__( '(This option may slow down file upload processes)', ud_get_stateless_media()->domain ).'</small></label>';
 
         // delete remote
-        $network_delete_remote = get_site_option( 'sm_delete_remote' );
+        $network_delete_remote = get_site_option( 'sm_delete_remote', '0' );
         $inputs[] = '<input type="hidden" name="sm[delete_remote]" value="false" />';
         $inputs[] = '<label for="sm_delete_remote"><input '. disabled( true, $network_delete_remote == '1', false ) .' title="'.($network_delete_remote == '1'?__('This option cannot be changed because it is set in Network Settings', ud_get_stateless_media()->domain):'').'" id="sm_delete_remote" type="checkbox" name="sm[delete_remote]" value="true" '. checked( 'true', $this->get( 'sm.delete_remote' ), false ) .'/>'.__( 'Delete media from GCS when media is deleted from the site.', ud_get_stateless_media()->domain ).'<small> '.__( '(This option may slow down media deletion process)', ud_get_stateless_media()->domain ).'</small></label>';
 
         // hashify
-        $network_hashify = get_site_option( 'sm_hashify_file_name' );
+        $network_hashify = get_site_option( 'sm_hashify_file_name', '0' );
         $inputs[] = '<input type="hidden" name="sm[hashify_file_name]" value="false" />';
         $inputs[] = '<label for="sm_hashify_file_name"><input '. disabled( true, $network_hashify == '1', false ) .' title="'.($network_hashify == '1'?__('This option cannot be changed because it is set in Network Settings', ud_get_stateless_media()->domain):'').'" id="sm_hashify_file_name" type="checkbox" name="sm[hashify_file_name]" value="true" '. checked( 'true', $this->get( 'sm.hashify_file_name' ), false ) .'/>'.__( 'Randomize the filename of newly uploaded media files.', ud_get_stateless_media()->domain ).'<small> '.__( '(May help to avoid unwanted GCS caching)', ud_get_stateless_media()->domain ).'</small></label>';
 
@@ -389,7 +389,7 @@ namespace wpCloud\StatelessMedia {
        */
       public function sm_fields_mode_callback() {
 
-        $network_mode = get_site_option( 'sm_mode' );
+        $network_mode = get_site_option( 'sm_mode', 'false' );
         $_mode = $network_mode && $network_mode != 'false' ? $network_mode : $this->get( 'sm.mode' );
 
         $inputs = array(
