@@ -389,7 +389,12 @@ namespace wpCloud\StatelessMedia {
        */
       public function sm_fields_mode_callback() {
 
-        $network_mode = get_site_option( 'sm_mode', 'false' );
+        $network_mode = 'false';
+
+        if ( ud_get_stateless_media()->is_network_detected() ) {
+          $network_mode = get_site_option( 'sm_mode', 'false' );
+        }
+
         $_mode = $network_mode && $network_mode != 'false' ? $network_mode : $this->get( 'sm.mode' );
 
         $inputs = array(
