@@ -32,13 +32,12 @@ wp.stateless = {
     try {
       console.log( "wp.stateless.getAccessToken", 'checking URL' );
 
-      var _token = JSON.parse(decodeURIComponent( location.search.replace( '?access_token=', '' )  ));
+      var _token = decodeURIComponent( location.search.replace( '?access_token=', '' ) );
 
-      if( _token && 'object' === typeof _token.token ) {
+      if( _token && 'string' === typeof _token ) {
         console.log( "wp.stateless.getAccessToken", 'setting token from url to sessionStorage' );
-        sessionStorage.setItem( 'wp.stateless.token', JSON.stringify( _token.token ) );
-        return _token.token;
-
+        sessionStorage.setItem( 'wp.stateless.token', _token );
+        return _token;
       }
 
 
