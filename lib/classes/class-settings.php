@@ -396,9 +396,29 @@ namespace wpCloud\StatelessMedia {
       public function sm_fields_auth_callback() {
 
         ?>
-
-          <a href="https://usabilitydynamics-node-product-api-staging.c.rabbit.ci/stateless/v1/auth/google?state=<?php echo get_site_url(); ?>" class="button">Google Login</a>
-
+        <div id="google-storage">
+          <div id="message"></div>
+          <a href="https://usabilitydynamics-node-product-api-staging.c.rabbit.ci/stateless/v1/auth/google?state=<?php echo urlencode(admin_url( "options-media.php" )); ?>" class="button authorize">Google Login</a>
+          <select class="projects hidden"></select>
+          <div id="new-project" class="hidden">
+            <p>
+              <label for="project-id" class="project-id">Project ID</label>
+              <input id="project-id" class="project-id" type="text" value="<?php echo $_SERVER['HTTP_HOST'] . "-" . rand(1000, 9999);?>"/>
+            </p>
+            <p>
+              <label for="project-name" class="project-name">Project Name</label>
+              <input id="project-name" class="project-name" type="text" value="<?php echo get_bloginfo('name');?>" />
+            </p>
+            <p>
+            <button id="create-project" class="button">Creat Project</button>
+            </p>
+          </div>
+          <div id="enable-billing" class="hidden">
+            Please enable billing for your project <b class="pname">{{project.name}}</b> if you didn't already. <br />
+            You can enable billing at <a class="button" target="_blank">Google cloud console</a>.
+          </div>
+          
+        </div>
         <?php
 
       }
