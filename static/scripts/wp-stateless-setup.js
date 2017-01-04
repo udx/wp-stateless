@@ -10,7 +10,6 @@ wp.stateless = {
    * Returns Google API Auth token, either from sessionStorage or from URL, if on settings setup page.
    *
    * wp.stateless.getAccessToken()
-   * wp.stateless.getAccessToken().access_token
    *
    */
   getAccessToken: function getAccessToken() {
@@ -68,7 +67,7 @@ wp.stateless = {
       data: JSON.stringify( options ),
       headers: {
         "content-type": "application/json",
-        "Authorization": " Bearer " + wp.stateless.getAccessToken().access_token
+        "Authorization": " Bearer " + wp.stateless.getAccessToken()
       }
     }).done(function( responseData  ) {
 
@@ -84,9 +83,10 @@ wp.stateless = {
   /**
    * Get Projects
    *
-   * @param name
+   * wp.stateless.listProjects()
+   *
    */
-  listProjects: function listProjects( name ) {
+  listProjects: function listProjects() {
 
     jQuery.ajax({
       url: 'https://cloudresourcemanager.googleapis.com/v1/projects',
@@ -94,7 +94,7 @@ wp.stateless = {
       dataType: "json",
       headers: {
         "content-type": "application/json",
-        "Authorization": " Bearer " + wp.stateless.getAccessToken().access_token
+        "Authorization": " Bearer " + wp.stateless.getAccessToken()
       }
     }).done(function( responseData  ) {
 
