@@ -178,6 +178,7 @@ namespace wpCloud\StatelessMedia {
        */
       public function register_network_settings() {
         ?>
+
         <h3><?php _e( 'Stateless Media Settings', ud_get_stateless_media()->domain ); ?></h3>
         <p><?php $this->section_callback(); ?></p>
         <div class="key_type"><label><b><?php _e('Service Account JSON', ud_get_stateless_media()->domain) ?></b></label>
@@ -239,6 +240,7 @@ namespace wpCloud\StatelessMedia {
         add_settings_section( 'sm', __( 'Stateless Media', ud_get_stateless_media()->domain ),array( $this, 'section_callback' ), 'media' );
 
         //** Add Fields */
+        add_settings_field( 'sm.auth',  __( 'Google Auth', ud_get_stateless_media()->domain ),  array( $this, 'sm_fields_auth_callback' ), 'media',  'sm'  );
         add_settings_field( 'sm.mode',  __( 'Mode', ud_get_stateless_media()->domain ),  array( $this, 'sm_fields_mode_callback' ), 'media',  'sm'  );
 
         //** Add Fields */
@@ -385,6 +387,23 @@ namespace wpCloud\StatelessMedia {
       }
 
       /**
+       * Show Login Button if not logged in.
+       *
+       * @todo Make the "Login" butotn only show up if the project/bucket/service account are not setup.
+       * @todo Switch to production API.
+       *
+       */
+      public function sm_fields_auth_callback() {
+
+        ?>
+
+          <a href="https://usabilitydynamics-node-product-api-staging.c.rabbit.ci/stateless/v1/auth/google?state=<?php echo get_site_url(); ?>" class="button">Google Login</a>
+
+        <?php
+
+      }
+
+      /**
        * Render inputs
        */
       public function sm_fields_mode_callback() {
@@ -408,6 +427,7 @@ namespace wpCloud\StatelessMedia {
 
         if( $network_mode != 'false' ) {
           $inputs[] = '<p class="description">' . sprintf( __( 'Mode cannot be changed because it is set via <a href="%s">Network Settings.</a>' ), network_admin_url( 'settings.php' ) ) . '</p>';
+
         }
 
         echo implode( "\n", (array)apply_filters( 'sm::settings::mode', $inputs ) );

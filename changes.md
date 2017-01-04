@@ -1,3 +1,10 @@
+#### 1.9.2
+* Improvements to onboarding process. [wip]
+* Added Featre Flag support for globally enabling/disabling functionality.
+* Added ChromeLogger and a utility method for using it.
+* Added REST API scaffold for [wp-stateless/v1/status] and [wp-stateless/v1/jobs].
+* Added [wp-stateless-setup] JavaScript library for setup UX.
+
 #### 1.9.1
 * Extended Network Settings 
 

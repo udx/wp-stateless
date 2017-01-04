@@ -17,6 +17,27 @@ namespace wpCloud\StatelessMedia {
     class Utility {
 
       /**
+       * ChromeLogger
+       *
+       * @author potanin@UD
+       * @param $data
+       */
+      static public function log( $data ) {
+
+        if( !class_exists( 'wpCloud\StatelessMedia\Logger' )) {
+          include_once( __DIR__ . '/class-logger.php' );
+        }
+
+
+        if( !class_exists( 'wpCloud\StatelessMedia\Logger' )) {
+          return;
+        }
+
+        Logger::log( '[wp-stateless]', $data );
+
+      }
+
+      /**
        * Override Cache Control
        * @param $cacheControl
        * @return mixed
@@ -110,7 +131,6 @@ namespace wpCloud\StatelessMedia {
         return apply_filters( 'sm:item:cacheControl', 'public, max-age=30, no-store, must-revalidate', array( 'attachment_id' => $attachment_id, 'mime_type' => null, 'metadata' => $metadata, 'data' => $data ) );
 
       }
-
 
       /**
        * Add/Update Media to Bucket

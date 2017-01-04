@@ -25,7 +25,7 @@ namespace wpCloud\StatelessMedia {
        * @property $version
        * @type {Object}
        */
-      public static $version = '1.9.1';
+      public static $version = '1.9.2';
 
       /**
        * Singleton Instance Reference.
@@ -41,6 +41,12 @@ namespace wpCloud\StatelessMedia {
        * Instantaite class.
        */
       public function init() {
+
+        // Parse feature falgs, set constants.
+        $this->parse_feature_flags();
+
+        // Invoke REST API
+        add_action( 'rest_api_init', array( $this, 'api_init' ) );
 
         /**
          * Register SM metaboxes
@@ -227,6 +233,27 @@ namespace wpCloud\StatelessMedia {
       }
 
       /**
+       * Define REST API.
+       *
+       * // https://usabilitydynamics-sandbox-uds-io-stateless-testing.c.rabbit.ci/wp-json/wp-stateless/v1
+       *
+       * @author potanin@UD
+       */
+      public function api_init() {
+
+        register_rest_route( 'wp-stateless/v1', '/status', array(
+          'methods' => 'GET',
+          'callback' => array( 'wpCloud\StatelessMedia\API', 'status' ),
+        ) );
+
+        register_rest_route( 'wp-stateless/v1', '/jobs', array(
+          'methods' => 'GET',
+          'callback' => array( 'wpCloud\StatelessMedia\API', 'jobs' ),
+        ) );
+
+      }
+
+      /**
        * @param $post
        */
       public function attachment_meta_box_callback( $post ) {
@@ -399,12 +426,19 @@ namespace wpCloud\StatelessMedia {
       /**
        *
        * @todo: it should not be loaded everywhere. peshkov@UD
+       * @param $hook
        */
       public function admin_enqueue_scripts( $hook ) {
 
         wp_enqueue_style( 'wp-stateless', $this->path( 'static/styles/wp-stateless.css', 'url'  ), array(), self::$version );
 
         switch( $hook ) {
+
+          case 'options-media.php':
+            //wp_enqueue_script( 'wp-api' );
+
+            wp_enqueue_script( 'wp-stateless-setup', ud_get_stateless_media()->path( 'static/scripts/wp-stateless-setup.js', 'url'  ), array( 'jquery-ui-core', 'wp-api' ), ud_get_stateless_media()->version, true );
+          break;
 
           case 'upload.php':
 
@@ -677,6 +711,52 @@ namespace wpCloud\StatelessMedia {
         $data[ 'url' ] = $data[ 'baseurl' ] . $data[ 'subdir' ];
 
         return $data;
+
+      }
+
+      /**
+       * Set Feature Flag constants by parsing composer.json
+       *
+       * @todo Make sure settings from DB can override these.
+       *
+       * @author potanin@UD
+       * @return array|mixed|null|object
+       */
+      public function parse_feature_flags( ) {
+
+        try {
+
+          $_raw = file_get_contents( Utility::normalize_path( $this->root_path ) . 'composer.json' );
+
+          $_parsed = json_decode( $_raw  );
+
+          // @todo Catch poorly formatted JSON.
+          if( !is_object( $_parsed  ) ) {
+            // throw new Error( "unable to parse."  );
+          }
+
+          foreach( (array) $_parsed->extra->featureFlags as $_feature ) {
+
+            if( !defined( $_feature->constant  ) ) {
+              define( $_feature->constant, $_feature->enabled );
+
+              if( $_feature->enabled ) {
+                Utility::log( 'Feature flag ' . $_feature->name . ', [' . $_feature->constant . '] enabled.' );
+              } else {
+                Utility::log( 'Feature flag ' . $_feature->name . ', [' . $_feature->constant . '] disabled.' );
+              }
+            }
+
+          }
+
+        } catch ( Exception $e ) {
+          Utility::log( 'Unable to parse [composer.json] feature flags. Error: [' . $e->getMessage() . ']' );
+          // echo 'Caught exception: ', $e->getMessage(), "\n";
+        }
+
+
+        return isset( $_parsed ) ? $_parsed : null;
+
 
       }
 
