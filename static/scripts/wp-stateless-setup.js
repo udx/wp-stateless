@@ -151,6 +151,64 @@ wp.stateless = {
     return promis;
   },
 
+  /**
+   *
+   * wp.stateless.getServiceAccounts({project:'uds-io-154013'})
+   *
+   * @param options
+   * @returns {boolean}
+   */
+  getServiceAccounts: function getServiceAccounts(options) {
+    console.log( 'getServiceAccounts', options );
+
+    if(!wp.stateless.getAccessToken() || !options)
+      return false;
+
+    var _promis = jQuery.ajax({
+      url: 'https://iam.googleapis.com/v1/projects/' + options.project + '/serviceAccounts',
+      method: "GET",
+      dataType: "json",
+      //data: JSON.stringify({name: options.name}),
+      headers: {
+        "content-type": "application/json",
+        "Authorization": " Bearer " + wp.stateless.getAccessToken()
+      }
+    });
+
+    _promis.done(function(responseData){
+      console.log( 'getServiceAccounts:done', responseData );
+
+    });
+
+    return _promis;
+
+  },
+
+  /**
+   *
+   * wp.stateless.createServiceAccount()
+   *
+   * @param options
+   * @returns {boolean}
+   */
+  createServiceAccount: function createServiceAccount(options) {
+    console.log( 'createServiceAccount' );
+
+    if(!wp.stateless.getAccessToken() || !options)
+      return false;
+
+    var promis = jQuery.ajax({
+      url: 'https://www.googleapis.com/storage/v1/b/?project=' + options.project,
+      method: "POST",
+      dataType: "json",
+      data: JSON.stringify({name: options.name}),
+      headers: {
+        "content-type": "application/json",
+        "Authorization": " Bearer " + wp.stateless.getAccessToken()
+      }
+    });
+    return promis;
+  },
 
   $_GET: function (name, url) {
     if (!url) {
