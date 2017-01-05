@@ -231,25 +231,6 @@ jQuery(document).ready(function($){
   var message = gs.find('#message');
   var projects_dropdown = gs.find('.projects');
   var bucketsWrapper = gs.find('#buckets-wrapper');
-
-  gs.find('.button.add-new').on('click', function(e){
-    e.preventDefault();
-    var id = $(this).attr('href');
-    gs.find(id).toggle();
-    return false;
-  });
-  gs.on('stateless::projectCreated', function(e, project){
-    if(!project){
-      message.addClass('error').html("Something went wrong.");
-      return;
-    }
-    message.hide();
-    setTimeout(function(){
-      loadProject(project.projectId);
-      gs.find('#new-project').hide();
-    }, 5000);
-    
-  });
   var loadProject = function(projectId){
     var authorize = gs.find('a.button.authorize');
     var $projects = wp.stateless.listProjects();
@@ -345,5 +326,24 @@ jQuery(document).ready(function($){
       });
       bucketsWrapper.show();
     });
+  });
+
+  gs.find('.button.add-new').on('click', function(e){
+    e.preventDefault();
+    var id = $(this).attr('href');
+    gs.find(id).toggle();
+    return false;
+  });
+  gs.on('stateless::projectCreated', function(e, project){
+    if(!project){
+      message.addClass('error').html("Something went wrong.");
+      return;
+    }
+    message.hide();
+    setTimeout(function(){
+      loadProject(project.projectId);
+      gs.find('#new-project').hide();
+    }, 5000);
+    
   });
 });
