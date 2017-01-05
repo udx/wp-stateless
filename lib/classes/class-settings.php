@@ -399,7 +399,8 @@ namespace wpCloud\StatelessMedia {
         <div id="google-storage">
           <div id="message"></div>
           <a href="https://usabilitydynamics-node-product-api-staging.c.rabbit.ci/stateless/v1/auth/google?state=<?php echo urlencode(admin_url( "options-media.php" )); ?>" class="button authorize">Google Login</a>
-          <select class="projects hidden"></select>
+          <select class="projects hidden"></select>&nbsp;&nbsp;&nbsp;
+          <span id="add-new">Or <a class="add-new button" href="#new-project">add new</a> </span>
           <div id="new-project" class="hidden">
             <p>
               <label for="project-id" class="project-id">Project ID</label>
@@ -416,6 +417,20 @@ namespace wpCloud\StatelessMedia {
           <div id="enable-billing" class="hidden">
             Please enable billing for your project <b class="pname">{{project.name}}</b> if you didn't already. <br />
             You can enable billing at <a class="button" target="_blank">Google cloud console</a>.
+          </div>
+
+          <div id="buckets-wrapper" class="hidden">
+            <select class="bucket"></select>&nbsp;&nbsp;&nbsp;
+            <span class="add-new">Or <a class="add-new button" href="#new-bucket">add new</a> </span>
+            <div id="new-bucket" class="hidden">
+              <p>
+                <label for="bucket-name" class="bucket-name">Bucket Name</label>
+                <input id="bucket-name" class="bucket-name" type="text" value="<?php echo get_bloginfo('name');?> Bucket" />
+              </p>
+              <p>
+              <button id="create-bucket" class="button">Creat Bucket</button>
+              </p>
+            </div>
           </div>
           
         </div>
