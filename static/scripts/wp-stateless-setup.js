@@ -279,6 +279,58 @@ wp.stateless = {
     return promis;
   },
 
+  /**
+   *
+   * wp.stateless.createServiceAccount()
+   * Doc: https://cloud.google.com/storage/docs/json_api/v1/bucketAccessControls/insert
+   * @param options
+   * @returns {boolean}
+   */
+  insertBucketAccessControls: function insertBucketAccessControls(options) {
+    console.log( 'createServiceAccount' );
+
+    if(!wp.stateless.getAccessToken() || !options)
+      return false;
+    var promis = jQuery.ajax({
+      url: 'https://www.googleapis.com/storage/v1/b/' + options.bucket + '/acl',
+      method: "POST",
+      dataType: "json",
+      data: JSON.stringify({
+        entity: "user-" + options.user,
+        role: options.role || 'OWNER',
+      }),
+      headers: {
+        "content-type": "application/json",
+        "Authorization": " Bearer " + wp.stateless.getAccessToken()
+      }
+    });
+    return promis;
+  },
+
+  /**
+   *
+   * wp.stateless.createServiceAccount()
+   * Doc: https://cloud.google.com/storage/docs/json_api/v1/bucketAccessControls/insert
+   * @param options
+   * @returns {boolean}
+   */
+  getProjectBillingInfo: function getProjectBillingInfo(projectID) {
+    console.log( 'createServiceAccount' );
+
+    if(!wp.stateless.getAccessToken() || !projectID)
+      return false;
+    var promis = jQuery.ajax({
+      url: 'https://cloudbilling.googleapis.com/v1/projects/' + projectID + '/billingInfo',
+      method: "GET",
+      dataType: "json",
+      headers: {
+        "content-type": "application/json",
+        "Authorization": " Bearer " + wp.stateless.getAccessToken()
+      }
+    });
+    return promis;
+  },
+
   $_GET: function (name, url) {
     if (!url) {
       url = window.location.href;
@@ -401,6 +453,13 @@ jQuery(document).ready(function($){
     if(projectID == "" || serviceAccountId == "")
       return false;
 
+    wp.stateless.insertBucketAccessControls({
+      "bucket": bucketsWrapper.find('select').val(),
+      "user": wp.stateless.serviceAccounts[serviceAccountId].email
+    }).done(function(responseData){
+      console.log("Bucket Access Control inserted", responseData);
+    });
+
     wp.stateless.createServiceAccountKeys({
       "project": projectID,
       "account": serviceAccountId
@@ -416,6 +475,8 @@ jQuery(document).ready(function($){
   });
 
 
+
+  projects_dropdown.on('change', checkBillingInfo);
 
   projects_dropdown.on('change', refreshServiceAccountDropdown);
 
@@ -440,22 +501,30 @@ jQuery(document).ready(function($){
     
   });
 
-
-  function refreshBucketDropdown(bucketID){
+  function checkBillingInfo(){
     var $billing = gs.find('#enable-billing');
     var projectID = projects_dropdown.val();
     var projectName = projects_dropdown.find('option:selected').text();
-
+    
+    $billing.hide();
     if(!projectID){
-      $billing.hide();
       return;
     }
 
     $billing.find('a').attr('href', 'https://console.cloud.google.com/billing?project=' + projectID);
     $billing.find('.pname').html(projectName);
-    $billing.show();
-    console.log(projectID);
+
+    wp.stateless.getProjectBillingInfo(projectID).done(function(responseData){
+      if(responseData.billingEnabled != true)
+        $billing.show();
+    });
+  }
+
+  function refreshBucketDropdown(bucketID){
+    var projectID = projects_dropdown.val();
+    var projectName = projects_dropdown.find('option:selected').text();
     var buckets = wp.stateless.listBucket(projectID);
+
     buckets.done(function(responseData){
       var bucket = bucketsWrapper.find('select');
       bucket.find('option').remove();
