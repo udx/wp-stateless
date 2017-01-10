@@ -438,6 +438,20 @@ namespace wpCloud\StatelessMedia {
                   </p>
                 </div>
               </div>
+              <div id="service-account">
+                <select class="service-account"></select>&nbsp;&nbsp;&nbsp;
+                <span class="add-new">Or <a class="add-new button" href="#new-service-account">add new</a> </span>
+                <div id="new-service-account" class="hidden">
+                  <p>
+                    <label for="service-account-name" class="service-account-name">service-account Name</label>
+                    <input id="service-account-name" class="service-account-name" type="text" value="<?php echo get_bloginfo('name');?> service-account" />
+                  </p>
+                  <p>
+                  <button id="create-service-account" class="button">Creat Service Account</button>
+                  </p>
+                </div>
+                <a class="generate-key button">Generate Key</a>
+              </div>
             </div>
           </div>
           

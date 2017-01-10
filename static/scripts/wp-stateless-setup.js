@@ -4,6 +4,13 @@
  *
  */
 
+/**
+ * To do: Check regular expression before submit.
+ *
+ *
+ *
+ */
+
 wp.stateless = {
 
   /**
@@ -198,10 +205,68 @@ wp.stateless = {
       return false;
 
     var promis = jQuery.ajax({
-      url: 'https://www.googleapis.com/storage/v1/b/?project=' + options.project,
+      url: 'https://iam.googleapis.com/v1/projects/' + options.project + '/serviceAccounts',
       method: "POST",
       dataType: "json",
-      data: JSON.stringify({name: options.name}),
+      data: JSON.stringify({
+        accountId: options.accountId,
+        serviceAccount: {
+          displayName: options.name
+        }
+      }),
+      headers: {
+        "content-type": "application/json",
+        "Authorization": " Bearer " + wp.stateless.getAccessToken()
+      }
+    });
+    return promis;
+  },
+
+  /**
+   *
+   * wp.stateless.createServiceAccount()
+   *
+   * @param options
+   * @returns {boolean}
+   */
+  listServiceAccountKeys: function listServiceAccountKeys(options) {
+    console.log( 'createServiceAccount' );
+
+    if(!wp.stateless.getAccessToken() || !options)
+      return false;
+
+    var promis = jQuery.ajax({
+      url: 'https://iam.googleapis.com/v1/projects/' + options.project + '/serviceAccounts/' + options.account + "/keys",
+      method: "GET",
+      dataType: "json",
+      headers: {
+        "content-type": "application/json",
+        "Authorization": " Bearer " + wp.stateless.getAccessToken()
+      }
+    });
+    return promis;
+  },
+
+  /**
+   *
+   * wp.stateless.createServiceAccount()
+   *
+   * @param options
+   * @returns {boolean}
+   */
+  createServiceAccountKeys: function createServiceAccountKeys(options) {
+    console.log( 'createServiceAccount' );
+
+    if(!wp.stateless.getAccessToken() || !options)
+      return false;
+    var promis = jQuery.ajax({
+      url: 'https://iam.googleapis.com/v1/projects/' + options.project + '/serviceAccounts/' + options.account + "/keys",
+      method: "POST",
+      dataType: "json",
+      data: JSON.stringify({
+        privateKeyType: options.privateKeyType || 'GOOGLE_CREDENTIALS_FILE',
+        keyAlgorithm: options.keyAlgorithm || 'KEY_ALG_RSA_2048',
+      }),
       headers: {
         "content-type": "application/json",
         "Authorization": " Bearer " + wp.stateless.getAccessToken()
@@ -230,6 +295,7 @@ jQuery(document).ready(function($){
   var gs = $('#google-storage');
   var message = gs.find('#message');
   var projects_dropdown = gs.find('.projects');
+  var serviceAccountWrapper = gs.find('#service-account');
   var bucketsWrapper = gs.find('#buckets-wrapper');
   var loadProject = function(projectId){
     var authorize = gs.find('a.button.authorize');
@@ -300,6 +366,39 @@ jQuery(document).ready(function($){
     });
     console.log(createdProject);
     return false;
+  });
+
+  
+  serviceAccountWrapper.find('.generate-key').on('click', function(e){
+    e.preventDefault();
+    var projectID = projects_dropdown.val();
+    var serviceAccount = serviceAccountWrapper.find('select').val();
+    if(projectID == "" || serviceAccount == "")
+      return false;
+
+    var serviceAccountKeys = wp.stateless.createServiceAccountKeys({
+      "project": projectID,
+      "account": serviceAccount
+    });
+    return false;
+  });
+
+
+
+  projects_dropdown.on('change', function(){
+    var projectID = projects_dropdown.val();
+    var buckets = wp.stateless.getServiceAccounts({project: projectID});
+    buckets.done(function(responseData){
+      var serviceAccount = serviceAccountWrapper.find('select');
+      serviceAccount.find('option').remove();
+      serviceAccount.append("<option value=''>Service Account</option>");
+      $.each(responseData.accounts, function(index, item){
+        serviceAccount.append("<option value='" + item.uniqueId + "'>" + item.displayName + "</option>");
+      });
+      bucketsWrapper.show();
+
+    });
+
   });
 
   projects_dropdown.on('change', function(){
