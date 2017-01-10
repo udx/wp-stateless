@@ -443,8 +443,12 @@ namespace wpCloud\StatelessMedia {
                 <span class="add-new">Or <a class="add-new button" href="#new-service-account">add new</a> </span>
                 <div id="new-service-account" class="hidden">
                   <p>
-                    <label for="service-account-name" class="service-account-name">service-account Name</label>
+                    <label for="service-account-name" class="service-account-name">Service Account Name</label>
                     <input id="service-account-name" class="service-account-name" type="text" value="<?php echo get_bloginfo('name');?> service-account" />
+                  </p>
+                  <p>
+                    <label for="service-account-id" class="service-account-id">Service Account ID</label>
+                    <input id="service-account-id" class="service-account-id" type="text" value=""/>
                   </p>
                   <p>
                   <button id="create-service-account" class="button">Creat Service Account</button>

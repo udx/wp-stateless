@@ -13,6 +13,10 @@
 
 wp.stateless = {
 
+  projects: {},
+  serviceAccounts: {},
+  selectedSettings: {},
+
   /**
    * Returns Google API Auth token, either from sessionStorage or from URL, if on settings setup page.
    *
@@ -264,7 +268,7 @@ wp.stateless = {
       method: "POST",
       dataType: "json",
       data: JSON.stringify({
-        privateKeyType: options.privateKeyType || 'GOOGLE_CREDENTIALS_FILE',
+        privateKeyType: options.privateKeyType || 'TYPE_GOOGLE_CREDENTIALS_FILE',
         keyAlgorithm: options.keyAlgorithm || 'KEY_ALG_RSA_2048',
       }),
       headers: {
@@ -308,8 +312,7 @@ jQuery(document).ready(function($){
       return;
     }
 
-    $projects.done(function(responseData){
-      authorize.hide();
+    $projects.done(function(responseData){      authorize.hide();
       projects_dropdown.show();
       if(responseData.projects){
         responseData.projects = $.grep(responseData.projects, function(project){
@@ -324,6 +327,8 @@ jQuery(document).ready(function($){
       projects_dropdown.find('option').remove();
       projects_dropdown.append("<option value=''>Select Project</option>");
       $.each(responseData.projects, function(index, item){
+        wp.stateless.projects[item.projectId] = item;
+        wp.stateless.projects[item.projectId]['buckets'] = {};
         projects_dropdown.append("<option value='" + item.projectId + "'>" + item.name + "</option>");
       });
       if(projectId){
@@ -348,6 +353,8 @@ jQuery(document).ready(function($){
     var createdProject = wp.stateless.createBucket({
       "project": projectID,
       "name": bucketName
+    }).done(function(responseData){
+      refreshBucketDropdown(responseData.id);
     });
     console.log(createdProject);
     return false;
@@ -369,63 +376,50 @@ jQuery(document).ready(function($){
   });
 
   
+  gs.find('#create-service-account').on('click', function(e){
+    e.preventDefault();
+
+    var project = projects_dropdown.val();
+    var accountId = gs.find('#service-account-id').val();
+    var name = gs.find('#service-account-name').val();
+
+    wp.stateless.createServiceAccount({
+      'project': project,
+      'accountId': accountId,
+      'name': name,
+    }).done(function(responseData){
+      refreshServiceAccountDropdown(responseData.uniqueId);
+    });
+
+    return false;
+  });
+
   serviceAccountWrapper.find('.generate-key').on('click', function(e){
     e.preventDefault();
     var projectID = projects_dropdown.val();
-    var serviceAccount = serviceAccountWrapper.find('select').val();
-    if(projectID == "" || serviceAccount == "")
+    var serviceAccountId = serviceAccountWrapper.find('select').val();
+    if(projectID == "" || serviceAccountId == "")
       return false;
 
-    var serviceAccountKeys = wp.stateless.createServiceAccountKeys({
+    wp.stateless.createServiceAccountKeys({
       "project": projectID,
-      "account": serviceAccount
+      "account": serviceAccountId
+    }).done(function(responseData){
+      var json = atob(responseData.privateKeyData);
+
+      jQuery('#sm_mode_cdn').prop("checked", true);
+      jQuery('#sm_bucket').val(bucketsWrapper.find('select').val());
+      jQuery('#sm_key_json').val(json);
     });
+
     return false;
   });
 
 
 
-  projects_dropdown.on('change', function(){
-    var projectID = projects_dropdown.val();
-    var buckets = wp.stateless.getServiceAccounts({project: projectID});
-    buckets.done(function(responseData){
-      var serviceAccount = serviceAccountWrapper.find('select');
-      serviceAccount.find('option').remove();
-      serviceAccount.append("<option value=''>Service Account</option>");
-      $.each(responseData.accounts, function(index, item){
-        serviceAccount.append("<option value='" + item.uniqueId + "'>" + item.displayName + "</option>");
-      });
-      bucketsWrapper.show();
+  projects_dropdown.on('change', refreshServiceAccountDropdown);
 
-    });
-
-  });
-
-  projects_dropdown.on('change', function(){
-    var $billing = gs.find('#enable-billing');
-    var projectID = projects_dropdown.val();
-    var projectName = projects_dropdown.find('option:selected').text();
-
-    if(!projectID){
-      $billing.hide();
-      return;
-    }
-
-    $billing.find('a').attr('href', 'https://console.cloud.google.com/billing?project=' + projectID);
-    $billing.find('.pname').html(projectName);
-    $billing.show();
-    console.log(projectID);
-    var buckets = wp.stateless.listBucket(projectID);
-    buckets.done(function(responseData){
-      var bucket = bucketsWrapper.find('select');
-      bucket.find('option').remove();
-      bucket.append("<option value=''>Select Bucket</option>");
-      $.each(responseData.items, function(index, item){
-        bucket.append("<option value='" + item.id + "'>" + item.name + "</option>");
-      });
-      bucketsWrapper.show();
-    });
-  });
+  projects_dropdown.on('change', refreshBucketDropdown);
 
   gs.find('.button.add-new').on('click', function(e){
     e.preventDefault();
@@ -445,4 +439,56 @@ jQuery(document).ready(function($){
     }, 5000);
     
   });
+
+
+  function refreshBucketDropdown(bucketID){
+    var $billing = gs.find('#enable-billing');
+    var projectID = projects_dropdown.val();
+    var projectName = projects_dropdown.find('option:selected').text();
+
+    if(!projectID){
+      $billing.hide();
+      return;
+    }
+
+    $billing.find('a').attr('href', 'https://console.cloud.google.com/billing?project=' + projectID);
+    $billing.find('.pname').html(projectName);
+    $billing.show();
+    console.log(projectID);
+    var buckets = wp.stateless.listBucket(projectID);
+    buckets.done(function(responseData){
+      var bucket = bucketsWrapper.find('select');
+      bucket.find('option').remove();
+      bucket.append("<option value=''>Select Bucket</option>");
+      $.each(responseData.items, function(index, item){
+        wp.stateless.projects[projectID]['buckets'][item.id] = item;
+        bucket.append("<option value='" + item.id + "'>" + item.name + "</option>");
+      });
+      if(typeof bucketID == "string"){
+        bucket.val(bucketID);
+        bucket.trigger('change');
+      }
+      bucketsWrapper.show();
+    });
+  };
+
+  function refreshServiceAccountDropdown(uniqueId){
+    var projectID = projects_dropdown.val();
+    var buckets = wp.stateless.getServiceAccounts({project: projectID});
+    buckets.done(function(responseData){
+      var serviceAccount = serviceAccountWrapper.find('select');
+      serviceAccount.find('option').remove();
+      serviceAccount.append("<option value=''>Service Account</option>");
+      $.each(responseData.accounts, function(index, item){
+        wp.stateless.serviceAccounts[item.uniqueId] = item;
+        serviceAccount.append("<option value='" + item.uniqueId + "'>" + item.displayName + "</option>");
+      });
+      if(typeof uniqueId == "string"){
+        serviceAccount.val(uniqueId);
+        serviceAccount.trigger('change');
+      }
+      bucketsWrapper.show();
+
+    });
+  };
 });
