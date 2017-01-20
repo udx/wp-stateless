@@ -313,6 +313,26 @@ wp.stateless = {
    * Doc: https://cloud.google.com/storage/docs/json_api/v1/bucketAccessControls/insert
    * @param options
    * @returns {boolean}
+   * @errors 
+{
+  "error": {
+    "code": 403,
+    "message": "Project has not enabled the API. Please use Google Developers Console to activate the 'cloudbilling' API for your project.",
+    "status": "PERMISSION_DENIED",
+    "details": [
+      {
+        "@type": "type.googleapis.com/google.rpc.Help",
+        "links": [
+          {
+            "description": "Google developer console API activation",
+            "url": "https://console.developers.google.com/project/541786531381/apiui/api"
+          }
+        ]
+      }
+    ]
+  }
+}
+
    */
   getProjectBillingInfo: function getProjectBillingInfo(projectID) {
     console.log( 'createServiceAccount' );

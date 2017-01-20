@@ -16,6 +16,11 @@ namespace wpCloud\StatelessMedia {
       private $regenerate_ui = null;
 
       /**
+       * @var false|null|string
+       */
+      public $setup_wizerd_ui = null;
+
+      /**
        * Overriden construct
        */
       public function __construct() {
@@ -148,6 +153,8 @@ namespace wpCloud\StatelessMedia {
        */
       public function admin_menu() {
         $this->regenerate_ui = add_management_page( __( 'Stateless Images Synchronisation', ud_get_stateless_media()->domain ), __( 'Stateless Sync', ud_get_stateless_media()->domain ), 'manage_options', 'stateless-regenerate', array($this, 'regenerate_interface') );
+
+        $this->setup_wizerd_ui = add_media_page( __( 'Stateless Setup Wizard', ud_get_stateless_media()->domain ), __( 'Stateless Setup Wizard', ud_get_stateless_media()->domain ), 'manage_options', 'stateless-setup-wizerd', array($this, 'setup_wizerd_interface') );
       }
 
       /**
@@ -155,6 +162,13 @@ namespace wpCloud\StatelessMedia {
        */
       public function regenerate_interface() {
         include ud_get_stateless_media()->path( '/static/views/regenerate_interface.php', 'dir' );
+      }
+
+      /**
+       * Draw interface
+       */
+      public function setup_wizerd_interface() {
+        include ud_get_stateless_media()->path( '/static/views/setup_wizerd_interface.php', 'dir' );
       }
 
       /**

@@ -456,6 +456,13 @@ namespace wpCloud\StatelessMedia {
 
             break;
 
+          case $this->settings->setup_wizerd_ui:
+            wp_enqueue_style( 'wp-stateless-setup-wizard', $this->path( 'static/styles/wp-stateless-setup-wizard.css', 'url'  ), array(), self::$version );
+
+            wp_enqueue_script( 'wp-stateless-setup', ud_get_stateless_media()->path( 'static/scripts/wp-stateless-setup.js', 'url'  ), array( 'jquery-ui-core', 'wp-api' ), ud_get_stateless_media()->version, true );
+            wp_enqueue_script( 'wp-stateless-setup-wizard', ud_get_stateless_media()->path( 'static/scripts/wp-stateless-setup-wizard.js', 'url'  ), array( 'jquery-ui-core', 'wp-api' ), ud_get_stateless_media()->version, true );
+            break;
+
           default: break;
         }
 
