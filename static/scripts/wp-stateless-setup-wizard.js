@@ -1,4 +1,4 @@
 // alert('js loaded');
 jQuery(document).ready(function($){
-	$('#wp-stateless-wrapper').siblings().remove();
+	jQuery('#wp-stateless-wrapper').siblings().remove();
 });

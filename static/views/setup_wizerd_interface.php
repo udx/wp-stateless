@@ -1,1 +1,1 @@
-test
+<a href="<?php echo admin_url('upload.php?page=stateless-setup-wizerd&step=splash-screen');?>">Back to splash screen</a>
