@@ -457,6 +457,7 @@ namespace wpCloud\StatelessMedia {
             break;
 
           case $this->settings->setup_wizerd_ui:
+            wp_enqueue_style( 'wp-stateless-bootstrap', $this->path( 'static/styles/bootstrap.min.css', 'url'  ), array(), '3.3.7' );
             wp_enqueue_style( 'wp-stateless-setup-wizard', $this->path( 'static/styles/wp-stateless-setup-wizard.css', 'url'  ), array(), self::$version );
 
             wp_enqueue_script( 'wp-stateless-setup', ud_get_stateless_media()->path( 'static/scripts/wp-stateless-setup.js', 'url'  ), array( 'jquery-ui-core', 'wp-api' ), ud_get_stateless_media()->version, true );

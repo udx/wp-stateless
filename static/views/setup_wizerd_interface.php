@@ -1,2 +1,1 @@
-<?php
-echo "Start here@@";
+test

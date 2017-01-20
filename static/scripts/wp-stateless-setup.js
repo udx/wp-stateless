@@ -368,6 +368,7 @@ wp.stateless = {
 
 
 jQuery(document).ready(function($){
+  return;
   var gs = $('#google-storage');
   var message = gs.find('#message');
   var projects_dropdown = gs.find('.projects');

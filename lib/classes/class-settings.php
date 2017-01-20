@@ -168,7 +168,16 @@ namespace wpCloud\StatelessMedia {
        * Draw interface
        */
       public function setup_wizerd_interface() {
-        include ud_get_stateless_media()->path( '/static/views/setup_wizerd_interface.php', 'dir' );
+        $step = !empty($_GET['step'])?$_GET['step']:'';
+        switch ($step) {
+          case 'splash-screen':
+            include ud_get_stateless_media()->path( '/static/views/stateless_splash_screen.php', 'dir' );
+            break;
+          
+          default:
+            include ud_get_stateless_media()->path( '/static/views/setup_wizerd_interface.php', 'dir' );
+            break;
+        }
       }
 
       /**
