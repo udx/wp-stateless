@@ -421,7 +421,7 @@ namespace wpCloud\StatelessMedia {
         ?>
         <div id="google-storage">
           <div id="message"></div>
-          <a href="https://usabilitydynamics-node-product-api-staging.c.rabbit.ci/stateless/v1/auth/google?state=<?php echo urlencode(admin_url( "options-media.php" )); ?>" class="button authorize">Google Login</a>
+          <a href="https://api.usabilitydynamics.com/product/stateless/v1/auth/google?state=<?php echo urlencode(admin_url( "options-media.php" )); ?>" class="button authorize">Google Login</a>
           <div id="setup-wizard">
             <div id="project-wrapper">
               <select class="projects hidden"></select>&nbsp;&nbsp;&nbsp;

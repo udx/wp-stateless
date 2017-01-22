@@ -1,6 +1,6 @@
 <div id="wp-stateless-wrapper">
     <div id="wpStatelessInner">
-        <div class="wpStateLess-header">
+        <div class="wpStateLess-header wpStateLess-header-bg">
             <div class="container">
                 <div class="row">
                     <div class="col-xs-12 text-center">
@@ -47,7 +47,7 @@
                 </div>
                 <div class="row wpStateLess-valigncenter">
                     <div class="col-md-4">
-                        <div class="wpStateLess-s-plan">
+                        <div class="wpStateLess-s-plan wpStateLess-free-plan">
                             <div class="wpStateLess-plan-name">
                                 <p>Free</p>
                             </div>
@@ -58,7 +58,7 @@
                                 <li>SSL delivery of files</li>
                             </ul>
                             <div class="text-center">
-                                <a href="<?php echo admin_url('upload.php?page=stateless-setup-wizerd');?>" class="btn btn-green">Google Login</a>
+                                <a href="<?php echo admin_url('upload.php?page=stateless-setup-wizerd');?>" class="btn btn-green">Get Started Now</a>
                             </div>
                         </div>
                     </div>
@@ -98,5 +98,34 @@
             </div>
         </div>
 
+        <div id="wpStateLess-popup" class="active">
+            <div class="wpStateLess-pop-area">
+                <div class="wpStateLess-pops">
+                    <h3>Contact Us</h3>
+                    <p>Signin with your google account to setup the plguin</p>
+                    <form action="" method="POST">
+                        <div class="wpStateLess-contact-input">
+                            <label for="wpstateless-fullname">Full Name</label>
+                            <input id="wpstateless-fullname" type="text" placeholder="John Smith" />
+                        </div>
+                        <div class="wpStateLess-contact-input">
+                            <label for="wpstateless-phone">Phone</label>
+                            <input id="wpstateless-phone" type="text" placeholder="+1 (857) 748 8383" />
+                        </div>
+                        <div class="wpStateLess-contact-input">
+                            <label for="wpstateless-email">Email</label>
+                            <input id="wpstateless-email" type="email" placeholder="me@domain.com" />
+                        </div>
+                        <div class="wpStateLess-contact-input">
+                            <label for="wpstateless-url">Website</label>
+                            <input id="wpstateless-url" type="url" placeholder="http://www.domain.com" />
+                        </div>
+                        <div class="text-center">
+                            <input type="submit" class="btn btn-googly-red" value="Submit">
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
