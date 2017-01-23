@@ -458,13 +458,12 @@ namespace wpCloud\StatelessMedia {
 
           case $this->settings->setup_wizerd_ui:
             wp_enqueue_style( 'wp-stateless-bootstrap', $this->path( 'static/styles/bootstrap.min.css', 'url'  ), array(), '3.3.7' );
-            wp_enqueue_style( 'wp-stateless-selectize', $this->path( 'static/styles/selectize.css', 'url'  ), array(), '0.12.4' );
             wp_enqueue_style( 'wp-stateless-setup-wizard', $this->path( 'static/styles/wp-stateless-setup-wizard.css', 'url'  ), array(), self::$version );
 
             wp_enqueue_script( 'jquery.history', ud_get_stateless_media()->path( 'static/scripts/jquery.history.js', 'url'  ), array( 'jquery' ), ud_get_stateless_media()->version, true );
-            wp_enqueue_script( 'wp-stateless-selectize', ud_get_stateless_media()->path( 'static/scripts/selectize.min.js', 'url'  ), array( 'jquery-ui-core', 'wp-api', 'jquery' ), '0.12.4', true );
+            wp_enqueue_script( 'wpStatelessComboBox', ud_get_stateless_media()->path( 'static/scripts/wpStateLess-combo-box.js', 'url'  ), array( 'jquery' ), ud_get_stateless_media()->version, true );
             wp_enqueue_script( 'wp-stateless-setup', ud_get_stateless_media()->path( 'static/scripts/wp-stateless-setup.js', 'url'  ), array( 'jquery-ui-core', 'wp-api', 'jquery.history' ), ud_get_stateless_media()->version, true );
-            wp_enqueue_script( 'wp-stateless-setup-wizard-js', ud_get_stateless_media()->path( 'static/scripts/wp-stateless-setup-wizard.js', 'url'  ), array( 'jquery', 'wp-api' ), ud_get_stateless_media()->version, true );
+            wp_enqueue_script( 'wp-stateless-setup-wizard-js', ud_get_stateless_media()->path( 'static/scripts/wp-stateless-setup-wizard.js', 'url'  ), array( 'jquery', 'wp-api', 'wpStatelessComboBox' ), ud_get_stateless_media()->version, true );
             break;
 
           default: break;

@@ -6,6 +6,7 @@ jQuery(document).ready(function ($) {
 	var setupSteps = setupStepContainer.find('.wpStateLess-s-step');
 	var stepSetupProject = setupSteps.find('.step-setup-project');
 	var userInfo = setupSteps.find('.wpStateLess-userinfo');
+	var setupForm = setupSteps.find('.wpStateLess-step-setup-form');
 
 	var checkAuthentication = function checkAuthentication(options){
 		// Checking if we have access token is session.
@@ -33,6 +34,10 @@ jQuery(document).ready(function ($) {
 	// Remove any warning shown.
 	statelessWrapper.siblings().remove();
 
+	// Binding text input to create new in dropdown
+
+	setupForm.find('.wpStateLess-combo-box').wpStatelessComboBox();
+
 	// Check if authenticated with google then move to step 2.
 	if(checkAuthentication()){
 
@@ -46,15 +51,38 @@ jQuery(document).ready(function ($) {
 
 		wp.stateless.listProjects()
 		  .done(function(projects){
-			var list = stepSetupProject.find('.wpStateLess-combo-box.project ul');
-			list.children().remove();
+			setupForm.find('.wpStateLess-combo-box.project').wpStatelessComboBox({items:projects});
+		  });
 
-			list.append("<option value=''>Select Project</option>");
-			jQuery.each(projects, function(index, item){
-				list.append("<option value='" + item.projectId + "'>" + item.name + "</option>");
-			});
+		wp.stateless.listProjectBillingAccounts()
+		  .done(function(accounts){
+			setupForm.find('.wpStateLess-combo-box.billing-account').wpStatelessComboBox({items:accounts});
 		  });
 	}
+
+	setupForm.find('.wpStateLess-combo-box.project').on('change', function(event){
+		event.stopPropagation();
+		event.stopImmediatePropagation();
+		var _this = jQuery(this);
+		var projectId = _this.find('.id').val();
+
+		// Need to check if it's existing project.
+		wp.stateless.listBucket(projectId)
+		  .done(function(buckets){
+			setupForm.find('.wpStateLess-combo-box.bucket').wpStatelessComboBox({items:buckets});
+		  });
+		wp.stateless.getProjectBillingInfo(projectId)
+		  .done(function(billingInfo){
+		  	var billingAccount = setupForm.find('.wpStateLess-combo-box.billing-account');
+		  	var currentAccount = setupForm.find('.wpStateLess-current-account');
+		  	var enabled = billingInfo.billingEnabled? "Enabled": "Disable";
+		  	billingAccount.find('.id').val(billingInfo.name);
+		  	billingAccount.find('.name').val(billingInfo.billingAccountName);
+		  	currentAccount.find('h5 .project').html(wp.stateless.projects[projectId].name);
+		  	currentAccount.find('span').html(billingInfo.billingAccountName + " (" + enabled + ")")
+		  	currentAccount.show();
+		  });
+	})
 
 	jQuery(document).on('tokenExpired', function(){
 		checkAuthentication({triggerEvent: false});

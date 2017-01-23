@@ -56,8 +56,9 @@
                                                     <p>By default we create a new project for you, or if you prefer, select an existing project.</p>
                                                 </label>
                                                 <div class="wpStateLess-combo-box project">
-                                                    <input type="text" class="name" value="mywebsite-com">
+                                                    <div class="error" style="display: none;"></div>
                                                     <input type="hidden" class="id" value="mywebsite-com">
+                                                    <input type="text" class="name" value="mywebsite-com">
                                                     <div class="wpStateLess-input-dropdown">
                                                         <div class="wpStateLess-create-new">
                                                             <h5>Create New Project</h5>
@@ -65,11 +66,7 @@
                                                         </div>
                                                         <div class="wpStateLess-existing">
                                                             <h5>Existing Projects</h5>
-                                                            <ul>
-                                                                <li>Disco Donnie Presents (client-ddp)</li>
-                                                                <li>Red Door Company (client-rdc)</li>
-                                                                <li>HealthyUNow Foundation (client-hun)</li> 
-                                                            </ul>
+                                                            <ul></ul>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -80,7 +77,9 @@
                                                     <p>By default we create a new bucket for you, or if you prefer, select an existing bucket.</p>
                                                 </label>
                                                 <div class="wpStateLess-combo-box bucket">
-                                                    <input type="text" value="mywebsite-com">
+                                                    <div class="error" style="display: none;"></div>
+                                                    <input type="hidden" class="id" value="mywebsite-com">
+                                                    <input type="text" class="name" value="mywebsite-com">
                                                     <div class="wpStateLess-input-dropdown">
                                                         <div class="wpStateLess-create-new">
                                                             <h5>Create New Project</h5>
@@ -88,11 +87,7 @@
                                                         </div>
                                                         <div class="wpStateLess-existing">
                                                             <h5>Existing Projects</h5>
-                                                            <ul>
-                                                                <li>Disco Donnie Presents (client-ddp)</li>
-                                                                <li>Red Door Company (client-rdc)</li>
-                                                                <li>HealthyUNow Foundation (client-hun)</li> 
-                                                            </ul>
+                                                            <ul></ul>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -103,19 +98,16 @@
                                                     <p>You will need to set a billing account in order to activate your Google Cloud Storage.</p>
                                                 </label>
                                                 <div class="wpStateLess-combo-box billing-account">
-                                                    <input type="text" value="mywebsite-com">
+                                                    <input type="hidden" class="id" value="mywebsite-com">
+                                                    <input type="text" class="name" value="mywebsite-com">
                                                     <div class="wpStateLess-input-dropdown">
-                                                        <div class="wpStateLess-create-new">
-                                                            <h5>Create New Project</h5>
-                                                            <span>mywebsite-com</span>
+                                                        <div class="wpStateLess-current-account">
+                                                            <h5>Billing Account for Project <b class="project"></b></h5>
+                                                            <span></span>
                                                         </div>
                                                         <div class="wpStateLess-existing">
                                                             <h5>Existing Projects</h5>
-                                                            <ul>
-                                                                <li>Disco Donnie Presents (client-ddp)</li>
-                                                                <li>Red Door Company (client-rdc)</li>
-                                                                <li>HealthyUNow Foundation (client-hun)</li> 
-                                                            </ul>
+                                                            <ul></ul>
                                                             <a class="btn btn-green">Create New Billing Account</a>
                                                         </div>
                                                     </div>

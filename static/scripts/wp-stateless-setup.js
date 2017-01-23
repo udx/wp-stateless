@@ -176,19 +176,24 @@ wp.stateless = {
    *
    */
   listProjects: function listProjects() {
-    if(!wp.stateless.getAccessToken()) return;
     var defer = new jQuery.Deferred();
     
+    if(!wp.stateless.getAccessToken()){
+      defer.reject();
+      return defer.promise();
+    }
+
     jQuery.ajax({
       url: 'https://cloudresourcemanager.googleapis.com/v1/projects',
     }).done(function(responseData){
-      var projects = {};
+      var projects = [];
 
-      projects = jQuery.grep(responseData.projects, function(project){
+      responseData.projects = jQuery.grep(responseData.projects, function(project){
         return project.lifecycleState == "ACTIVE";
       });
 
-      jQuery.each(projects, function(index, item){
+      jQuery.each(responseData.projects, function(index, item){
+        projects.push({id: item.projectId, name: item.name});
         wp.stateless.projects[item.projectId] = item;
         wp.stateless.projects[item.projectId]['buckets'] = {};
       });
@@ -224,14 +229,29 @@ wp.stateless = {
    *
    */
   listBucket: function listBucket(projectId) {
-    if(!wp.stateless.getAccessToken() || !projectId)
-      return false;
+    var defer = new jQuery.Deferred();
 
-    var promis = jQuery.ajax({
+    if(!wp.stateless.getAccessToken() || !projectId){
+      defer.reject();
+      return defer.promise();
+    }
+
+    jQuery.ajax({
       url: 'https://www.googleapis.com/storage/v1/b/',
       data: {'project': projectId},
+    }).done(function(responseData){
+      var buckets = [];
+
+      jQuery.each(responseData.items, function(index, item){
+        buckets.push({id: item.id, name: item.name});
+        wp.stateless.projects[projectId]['buckets'] = {};
+      });
+
+      defer.resolve(buckets);
+    }).fail(function(){
+      defer.reject();
     });
-    return promis;
+    return defer.promise();
   },
 
   /**
@@ -388,6 +408,35 @@ wp.stateless = {
       url: 'https://cloudbilling.googleapis.com/v1/projects/' + projectID + '/billingInfo',
     });
     return promis;
+  },
+
+  listProjectBillingAccounts: function listProjectBillingAccounts() {
+    var defer = new jQuery.Deferred();
+
+    if(!wp.stateless.getAccessToken()){
+      defer.reject();
+      return defer.promise();
+    }
+
+    jQuery.ajax({
+      url: 'https://cloudbilling.googleapis.com/v1/billingAccounts',
+    }).done(function(responseData){
+      var billingAccounts = [];
+      if(responseData.billingAccounts){
+        responseData.billingAccounts = jQuery.grep(responseData.billingAccounts, function(accounts){
+          return accounts.open == true;
+        });
+
+        jQuery.each(responseData.billingAccounts, function(index, item){
+          billingAccounts.push({id: item.name, name: item.displayName});
+        });
+
+      }
+      defer.resolve(billingAccounts);
+    }).fail(function(){
+      defer.reject();
+    });
+    return defer.promise();
   },
 
 };

@@ -358,13 +358,13 @@
 .wpStateLess-combo-box {
 	position: relative;
 }
-.wpStateLess-combo-box > input {
+.wpStateLess-combo-box > input.name {
     border: 1px solid #d9d9d9;
     border-radius: 5px;
     padding: 10px;
     width: 100%;
 }
-.wpStateLess-combo-box > input:focus {
+.wpStateLess-combo-box > input.name:focus {
 	outline: none;
 	box-shadow: none;
 	border-color: #d9d9d9;
@@ -387,10 +387,9 @@
 	z-index: 3;
 	width: 100%;
 }
-.wpStateLess-combo-box > input:focus + .wpStateLess-input-dropdown {
+.wpStateLess-combo-box .wpStateLess-input-dropdown.active {
 	transform: scaleY(1);
 	opacity: 1;
-
 }
 .wpStateLess-combo-box h5 {
 	color: #a9a9a9 !important;
