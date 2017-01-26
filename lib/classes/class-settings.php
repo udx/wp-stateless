@@ -16,6 +16,11 @@ namespace wpCloud\StatelessMedia {
       private $regenerate_ui = null;
 
       /**
+       * @var false|null|string
+       */
+      public $setup_wizerd_ui = null;
+
+      /**
        * Overriden construct
        */
       public function __construct() {
@@ -148,6 +153,8 @@ namespace wpCloud\StatelessMedia {
        */
       public function admin_menu() {
         $this->regenerate_ui = add_management_page( __( 'Stateless Images Synchronisation', ud_get_stateless_media()->domain ), __( 'Stateless Sync', ud_get_stateless_media()->domain ), 'manage_options', 'stateless-regenerate', array($this, 'regenerate_interface') );
+
+        $this->setup_wizerd_ui = add_media_page( __( 'Stateless Setup Wizard', ud_get_stateless_media()->domain ), __( 'Stateless Setup Wizard', ud_get_stateless_media()->domain ), 'manage_options', 'stateless-setup-wizerd', array($this, 'setup_wizerd_interface') );
       }
 
       /**
@@ -155,6 +162,22 @@ namespace wpCloud\StatelessMedia {
        */
       public function regenerate_interface() {
         include ud_get_stateless_media()->path( '/static/views/regenerate_interface.php', 'dir' );
+      }
+
+      /**
+       * Draw interface
+       */
+      public function setup_wizerd_interface() {
+        $step = !empty($_GET['step'])?$_GET['step']:'';
+        switch ($step) {
+          case 'splash-screen':
+            include ud_get_stateless_media()->path( '/static/views/stateless_splash_screen.php', 'dir' );
+            break;
+          
+          default:
+            include ud_get_stateless_media()->path( '/static/views/setup_wizerd_interface.php', 'dir' );
+            break;
+        }
       }
 
       /**
@@ -398,7 +421,7 @@ namespace wpCloud\StatelessMedia {
         ?>
         <div id="google-storage">
           <div id="message"></div>
-          <a href="https://usabilitydynamics-node-product-api-staging.c.rabbit.ci/stateless/v1/auth/google?state=<?php echo urlencode(admin_url( "options-media.php" )); ?>" class="button authorize">Google Login</a>
+          <a href="https://api.usabilitydynamics.com/product/stateless/v1/auth/google?state=<?php echo urlencode(admin_url( "options-media.php" )); ?>" class="button authorize">Google Login</a>
           <div id="setup-wizard">
             <div id="project-wrapper">
               <select class="projects hidden"></select>&nbsp;&nbsp;&nbsp;
