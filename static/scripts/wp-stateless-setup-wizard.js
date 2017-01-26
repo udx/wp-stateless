@@ -34,6 +34,16 @@ jQuery(document).ready(function ($) {
 		}
 	};
 
+	var listBillingAccounts = function listBillingAccounts() {
+		return wp.stateless.listBillingAccounts()
+		  .done(function(accounts){
+		  	if(accounts && accounts.length)
+				billingDropdown.wpStatelessComboBox({items:accounts}).show();
+			else
+				billingDropdown.hide();
+		  });
+	}
+
 	// Remove any warning shown.
 	statelessWrapper.siblings().remove();
 
@@ -57,15 +67,19 @@ jQuery(document).ready(function ($) {
 			userInfo.find('.user-email').html(profile.email);
 		  });
 
-		wp.stateless.listProjects()
+		var projects = wp.stateless.listProjects()
 		  .done(function(projects){
 			projectDropdown.wpStatelessComboBox({items:projects});
 		  });
 
-		wp.stateless.listProjectBillingAccounts()
-		  .done(function(accounts){
-			billingDropdown.wpStatelessComboBox({items:accounts});
-		  });
+		var billingAccounts = listBillingAccounts();
+
+		jQuery.when(projects, billingAccounts).done(function function_name(projects, billingAccounts) {
+			if((!projects || !projects.length) && (!billingAccounts || !billingAccounts.length)){
+				setupForm.hide();
+				jQuery('.wpStateLess-user-has-no-project-billing', statelessWrapper).show();
+			}
+		})
 	}
 
 	projectDropdown.on('change', function(event){
@@ -79,6 +93,9 @@ jQuery(document).ready(function ($) {
 		  .done(function(buckets){
 			bucketDropdown.wpStatelessComboBox({items:buckets});
 		  });
+
+		wp.stateless.getServiceAccounts({projectId:projectId});
+
 		wp.stateless.getProjectBillingInfo(projectId)
 		  .done(function(billingInfo){
 		  	var currentAccount = setupForm.find('.wpStateLess-current-account');
@@ -101,15 +118,41 @@ jQuery(document).ready(function ($) {
 		checkAuthentication();
 	});
 
+	statelessWrapper.on('click', '.create-billing-account', function(event) {
+		event.preventDefault();
+		var _this = jQuery(this)
+		var href = _this.attr('href');
+		var new_window = window.open(href,'_newtab');
+
+		_this.find('.wpStateLess-loading').addClass('active');
+
+		var billingChecker = setInterval(function() {
+			if(new_window.closed == true){
+				listBillingAccounts().done(function(argument) {
+					console.log("billingAccounts loaded");
+					jQuery('.wpStateLess-user-has-no-project-billing', statelessWrapper).hide();
+					setupForm.show();
+				});
+				clearInterval(billingChecker);
+				console.log("window closed");
+			}
+		}, 100);
+
+		return false;
+	})
+
 	setupForm.find('.get-json-key').on('click', function(event){
 		event.preventDefault();
 		var projectId = projectDropdown.find('.id').val();
-		var projectName = projectDropdown.find('.name').val();
-		var bucket = bucketDropdown.find('.id').val();
+		var projectName = projectDropdown.find('.name').val().replace(/^\s+|\s+$/g,'');
+		var bucketId = bucketDropdown.find('.id').val();
+		var bucketName = bucketDropdown.find('.name').val().replace(/\(.*/, '').replace(/^\s+|\s+$/g,'');
+		var serviceAccountId = 'stateless-' + bucketId.replace('stateless-', '');
+		var serviceAccountName = 'Stateless ' + bucketName.replace('Stateless', '');
 		var billingAccount = billingDropdown.find('.id').val();
 		var isValid = true;
 
-		if(!projectId || !projectName || !bucket || !billingAccount){ // No valid project id
+		if(!projectId || !projectName || !bucketId || !billingAccount){ // No valid project id
 			isValid = false;
 			console.log("Form:: Input not valid.")
 			return;
@@ -119,39 +162,104 @@ jQuery(document).ready(function ($) {
 		// Checking if user want to create new project.
 		if(!wp.stateless.projects[projectId]){
 			wp.stateless.createProject({"projectId": projectId, "name": projectName}).done(function(argument) {
-				jQuery(document).trigger("wp::stateless::updateProjectBillingInfo");
+				_updateProjectBillingInfo();
+			}).fail(function(response) {
+				console.log(response);
+				if(response && typeof response.error != 'undefined' && typeof response.error.status != 'undefined' && response.error.status == 'ALREADY_EXISTS'){
+					_updateProjectBillingInfo();
+				}
 			});
 		}else{
-			jQuery(document).trigger("wp::stateless::updateProjectBillingInfo");
+			_updateProjectBillingInfo();
 		}
 
-		jQuery(document).on("wp::stateless::updateProjectBillingInfo", function(){
-			if(!wp.stateless.projects[projectId]['billingInfo']){
+		function _updateProjectBillingInfo(){
+			if( typeof wp.stateless.projects[projectId] == 'undefined' || typeof wp.stateless.projects[projectId]['billingInfo'] == 'undefined'){
 				wp.stateless.updateProjectBillingInfo({"projectID": projectId, "accountName": billingAccount}).done(function(argument) {
-					jQuery(document).trigger("wp::stateless::createBucket");
+					_createBucket();
 				});
 			}
 			else{
-				jQuery(document).trigger("wp::stateless::createBucket");
+				_createBucket();
 			}
-		});
+		}
 
-		jQuery(document).on("wp::stateless::createBucket", function(){
-			if(!wp.stateless.projects[projectId]['buckets'][bucket]){
-				wp.stateless.createBucket({"projectId": projectId, "name": bucket}).done(function(argument) {
-					// body...
+		function _createBucket(){
+			if( typeof wp.stateless.projects[projectId] == 'undefined' || typeof wp.stateless.projects[projectId]['buckets'][bucketId] == 'undefined'){
+				wp.stateless.createBucket({"projectId": projectId, "name": bucketId}).done(function(argument) {
+					_createServiceAccount();
+				}).fail(function(response) {
+					console.log(response);
+					if(response && typeof response.error != 'undefined' && typeof response.error.message != 'undefined' && response.error.message == 'You already own this bucket. Please select another name.'){
+						_createServiceAccount();
+					}
 				});
 			}
 			else{
-				
+				_createServiceAccount();
 			}
-		});
+		};
 
-		jQuery(document).on("wp::stateless::createServiceAccountKeys", function(){
-			wp.stateless.createServiceAccountKeys({"projectId": projectId, "accountId": bucket, "name": bucket}).done(function(argument) {
-				// body...
+		function _createServiceAccount(){
+			console.log("wp::stateless::bucketCreated");
+			if( typeof wp.stateless.projects[projectId] != 'undefined' || typeof wp.stateless.projects[projectId]['serviceAccounts'] != 'undefined'){
+				var serviceAccounts = wp.stateless.projects[projectId]['serviceAccounts'];
+				var accountFound = false;
+				jQuery.each(serviceAccounts, function(index, item) {
+					if(item.displayName == bucketName || item.email.replace(/@.*/, '') == serviceAccountId){
+						_insertBucketAccessControls(item.email);
+						_createServiceAccountKeys(item.email);
+						accountFound = true;
+						return false;
+					}
+				})
+			}
+
+			if(accountFound) return;
+
+
+			wp.stateless.createServiceAccount({
+				'projectId': projectId,
+				'accountId': serviceAccountId,
+				'name': serviceAccountName,
+			}).done(function(createdSerciceAccount){
+				_insertBucketAccessControls(createdSerciceAccount.email);
+				_createServiceAccountKeys(createdSerciceAccount.email);
+			}).fail(function(response) {
+				alert("Something wrong."); // Remove
 			});
-		});
+		};
+
+		function _insertBucketAccessControls(createdSerciceAccountEmail) {
+			wp.stateless.insertBucketAccessControls({
+				"bucket": bucketId,
+				"user": createdSerciceAccountEmail
+			}).done(function(responseData){
+				console.log("Bucket Access Control inserted", responseData);
+			});
+		}
+
+		function _createServiceAccountKeys(createdSerciceAccountEmail) {
+			wp.stateless.createServiceAccountKeys({
+				"project": projectId,
+				"account": createdSerciceAccountEmail
+			}).done(function(ServiceAccountKey){
+				var privateKeyData = atob(ServiceAccountKey.privateKeyData); // Base 64 to json
+				jQuery.ajax({
+					url: ajaxurl,
+					method: "POST",
+					data: {//JSON.stringify({
+						'action': 'stateless_wizard_update_settings',
+						'bucket': bucketId,
+						'privateKeyData': privateKeyData,
+					}//)
+				}).done(function(response) {
+					if(typeof response.success != undefined && response.success == true){
+						console.log("Option updated");
+					}
+				})
+			});
+		}
 		
 		return false;
 	});

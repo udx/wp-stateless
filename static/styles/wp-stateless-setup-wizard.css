@@ -113,6 +113,9 @@
 .btn-green {
 	background-color: #6fd359;
 }
+.btn-green:hover {
+	color: #ffffff;
+}
 .btn-googly-red {
 	background-color: #de4937;
 }
@@ -344,6 +347,9 @@
 	margin-top: 0px;
 }
 .wpStateLess-single-step-input {}
+.wpStateLess-single-step-input > label {
+	display: block;
+}
 .wpStateLess-single-step-input > label h4 {
 	font-family: Cabin;
 	font-size: 18px;
@@ -453,4 +459,53 @@ body.wpStateLess-pops-active {
 .wpStateLess-pops .wpStateLess-contact-input input:focus {
 	border-color: #d9d9d9;
 	box-shadow: none;
+}
+
+.wpStateLess-user-has-no-project-billing {
+ display: none;
+}
+.wpStateLess-user-has-no-project-billing.active {
+ display: block;
+}
+.wpStateLess-user-has-no-project-billing > .btn {
+ height: 40px;
+ line-height: 40px;
+ font-size: 18px;
+ margin-top: 15px !important;
+}
+
+
+
+@keyframes wpStateLessblink {
+    0% {
+      opacity: .2;
+    }
+    20% {
+      opacity: 1;
+    }
+    100% {
+      opacity: .2;
+    }
+}
+.wpStateLess-loading {
+ align-items: center;
+ font-size: 20px !important;
+ display: none;
+}
+.wpStateLess-loading.active {
+ display: inline;
+}
+.wpStateLess-loading span {
+    animation-name: wpStateLessblink;
+    animation-duration: 1.4s;
+    animation-iteration-count: infinite;
+    animation-fill-mode: both;
+}
+
+.wpStateLess-loading span:nth-child(2) {
+    animation-delay: .2s;
+}
+
+.wpStateLess-loading span:nth-child(3) {
+    animation-delay: .4s;
 }

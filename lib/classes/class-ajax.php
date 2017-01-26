@@ -21,6 +21,7 @@ namespace wpCloud\StatelessMedia {
         'get_other_media_ids',
         'stateless_process_file',
         'stateless_get_current_progresses',
+        'stateless_wizard_update_settings',
         'stateless_reset_progress',
         'stateless_get_all_fails'
       );
@@ -63,7 +64,7 @@ namespace wpCloud\StatelessMedia {
 
         try{
 
-          $action = $_REQUEST[ 'action' ];
+          echo $action = $_REQUEST[ 'action' ];
 
           /** Determine if the current class has the method to handle request */
           if( is_callable( array( $this, 'action_'. $action ) ) ) {
@@ -87,6 +88,18 @@ namespace wpCloud\StatelessMedia {
 
         wp_send_json_success( $response );
 
+      }
+
+
+      /**
+       * Update json key to database.
+       */
+      public function stateless_wizard_update_settings() {
+        $bucket = $_POST['bucket'];
+        $privateKeyData = $_POST['privateKeyData'];
+        update_option( 'sm_bucket', $bucket);
+        update_option( 'sm_key_json', $privateKeyData);
+        wp_send_json(array('success' => true, 'settings_url' => admin_url('options-media.php')));
       }
 
       /**

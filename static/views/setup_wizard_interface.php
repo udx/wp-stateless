@@ -8,7 +8,7 @@
                             <h1>Stateless Setup</h1>
                             <p>Save your media files at one place. Start your free trial now</p>
                             <a class="btn btn-green" href="<?php echo admin_url('upload.php?page=stateless-setup-wizard&step=splash-screen');?>">Back to splash screen</a>
-                            
+
                         </div>
                     </div>
                 </div>
@@ -58,12 +58,12 @@
                                                 </label>
                                                 <div class="wpStateLess-combo-box project">
                                                     <div class="error" style="display: none;"></div>
-                                                    <input type="hidden" class="id" value="mywebsite-com">
-                                                    <input type="text" class="name" value="mywebsite-com">
+                                                    <input type="hidden" class="id" value="<?php echo str_replace('.', '-', $_SERVER['SERVER_NAME']);?>">
+                                                    <input type="text" class="name" value="<?php echo ucwords(str_replace('.', ' ', $_SERVER['SERVER_NAME']));?>" placeholder="Select or Create New Project">
                                                     <div class="wpStateLess-input-dropdown">
                                                         <div class="wpStateLess-create-new">
                                                             <h5>Create New Project</h5>
-                                                            <span>mywebsite-com</span>
+                                                            <span><?php echo ucwords(str_replace('.', ' ', $_SERVER['SERVER_NAME']));?> (<?php echo str_replace('.', '-', $_SERVER['SERVER_NAME']);?>)</span>
                                                         </div>
                                                         <div class="wpStateLess-existing">
                                                             <h5>Existing Projects</h5>
@@ -79,12 +79,12 @@
                                                 </label>
                                                 <div class="wpStateLess-combo-box bucket">
                                                     <div class="error" style="display: none;"></div>
-                                                    <input type="hidden" class="id" value="mywebsite-com">
-                                                    <input type="text" class="name" value="mywebsite-com">
+                                                    <input type="hidden" class="id" value="stateless-<?php echo str_replace('.', '-', $_SERVER['SERVER_NAME']);?>">
+                                                    <input type="text" class="name" value="Stateless <?php echo str_replace('.', ' ', $_SERVER['SERVER_NAME']);?>" placeholder="Select or Create New Bucket">
                                                     <div class="wpStateLess-input-dropdown">
                                                         <div class="wpStateLess-create-new">
-                                                            <h5>Create New Project</h5>
-                                                            <span>mywebsite-com</span>
+                                                            <h5>Create New Bucket</h5>
+                                                            <span>stateless-<?php echo str_replace('.', '-', $_SERVER['SERVER_NAME']);?></span>
                                                         </div>
                                                         <div class="wpStateLess-existing">
                                                             <h5>Existing Projects</h5>
@@ -100,7 +100,7 @@
                                                 </label>
                                                 <div class="wpStateLess-combo-box billing-account">
                                                     <input type="hidden" class="id" value="">
-                                                    <input type="text" class="name" value="" readonly="readonly">
+                                                    <input type="text" class="name" value="" readonly="readonly" placeholder="Select Billing Account">
                                                     <div class="wpStateLess-input-dropdown">
                                                         <div class="wpStateLess-current-account">
                                                             <h5>Billing Account for Project <b class="project"></b></h5>
@@ -109,18 +109,23 @@
                                                         <div class="wpStateLess-existing">
                                                             <h5>Existing Projects</h5>
                                                             <ul></ul>
-                                                            <a class="btn btn-green">Create New Billing Account</a>
+                                                            <a class="btn btn-green create-billing-account">Create New Billing Account</a>
                                                         </div>
                                                     </div>
                                                 </div>
                                                 <a class="btn btn-green">Create New Billing Account</a>
                                             </div>
-                                            <div class="wpStateLess-single-step-input text-center input-submit">
+                                            <div href="https://console.cloud.google.com/billing" class="wpStateLess-single-step-input text-center input-submit">
                                                 <input class="btn btn-green get-json-key" type="submit" value="Continue">
                                             </div>
                                         </form>
                                     </div>
-                                    
+                                    <div class="wpStateLess-user-has-no-project-billing">
+                                        <h4>Set Google Cloud Billing Account</h4>
+                                        <p>Click the button below to setup a billing account with Google Cloud. Once configured, return here and click continue.</p>
+                                        <a href="https://console.cloud.google.com/billing" class="btn btn-green create-billing-account" target="_blank"><span class="">Set Google Billing</span> <p class="wpStateLess-loading">(Checking <span>.</span><span>.</span><span>.</span>)</p></a>
+                                        
+                                    </div>
                                 </div>
                                 <div class="wpStateLess-s-step step-final">
                                     <img src="<?php echo ud_get_stateless_media()->path( 'static/images/setup-complete.png'); ?>" alt="">

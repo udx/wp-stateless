@@ -51,8 +51,6 @@
 				var match = regex.exec(value);
 
 				jQuery('.wpStateLess-input-dropdown', _this).removeClass('active');
-					console.log(value);
-					console.log(match);
 				if(!match || !match.length){
 					_this.find('.error').show().html("Name can contain lowercase alphanumeric characters and hyphens. It must start with a letter. Trailing hyphens are prohibited.");
 					

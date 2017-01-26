@@ -14,7 +14,6 @@
 wp.stateless = {
   access_token: '',
   projects: {},
-  serviceAccounts: {},
   selectedSettings: {},
 
 
@@ -149,6 +148,12 @@ wp.stateless = {
    * @param options
    */
   createProject: function createProject( options ) {
+    var defer = new jQuery.Deferred();
+    
+    if(!wp.stateless.getAccessToken()){
+      defer.reject();
+      return defer.promise("In valid access token.");
+    }
 
     jQuery.ajax({
       url: 'https://cloudresourcemanager.googleapis.com/v1/projects',
@@ -158,15 +163,16 @@ wp.stateless = {
       jQuery.ajax({
         url: 'https://cloudresourcemanager.googleapis.com/v1/' + responseData.name,
       }).done(function(responseData){
-        jQuery('#google-storage').trigger('stateless::projectCreated', options);
+        defer.resolve(responseData);
+      }).fail(function(responseData) {
+        defer.reject(responseData);
       });
-
-    }).fail(function( data ) {
-      jQuery('#google-storage').trigger('stateless::projectCreated', false);
-      console.log( "error", "data.responseText", JSON.parse( data.responseText ) );
+    }).fail(function(responseData) {
+      defer.reject(responseData);
     });
 
 
+    return defer.promise();
   },
 
   /**
@@ -196,6 +202,7 @@ wp.stateless = {
         projects.push({id: item.projectId, name: item.name});
         wp.stateless.projects[item.projectId] = item;
         wp.stateless.projects[item.projectId]['buckets'] = {};
+        wp.stateless.projects[item.projectId]['serviceAccounts'] = {};
       });
 
       defer.resolve(projects);
@@ -243,10 +250,11 @@ wp.stateless = {
       var buckets = [];
 
       jQuery.each(responseData.items, function(index, item){
-        buckets.push({id: item.id, name: item.name});
+        var bucket = {id: item.id, name: item.name};
+        buckets.push(bucket);
+        wp.stateless.projects[projectId]['buckets'][item.id] = bucket;
       });
 
-      wp.stateless.projects[projectId]['buckets'] = buckets;
       defer.resolve(buckets);
     }).fail(function(){
       defer.reject();
@@ -268,12 +276,13 @@ wp.stateless = {
       return false;
 
     var _promis = jQuery.ajax({
-      url: 'https://iam.googleapis.com/v1/projects/' + options.project + '/serviceAccounts',
+      url: 'https://iam.googleapis.com/v1/projects/' + options.projectId + '/serviceAccounts',
       //data: JSON.stringify({name: options.name}),
     });
 
     _promis.done(function(responseData){
-      console.log( 'getServiceAccounts:done', responseData );
+      console.log( 'getServiceAccounts:done', responseData.accounts );
+      wp.stateless.projects[options.projectId]['serviceAccounts'] = responseData.accounts;
 
     });
 
@@ -407,7 +416,7 @@ wp.stateless = {
     return promis;
   },
 
-  listProjectBillingAccounts: function listProjectBillingAccounts() {
+  listBillingAccounts: function listBillingAccounts() {
     var defer = new jQuery.Deferred();
 
     if(!wp.stateless.getAccessToken()){
@@ -531,7 +540,7 @@ jQuery(document).ready(function($){
     var name = gs.find('#service-account-name').val();
 
     wp.stateless.createServiceAccount({
-      'project': project,
+      'projectId': project,
       'accountId': accountId,
       'name': name,
     }).done(function(responseData){
