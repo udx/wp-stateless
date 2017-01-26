@@ -64,7 +64,7 @@ namespace wpCloud\StatelessMedia {
 
         try{
 
-          echo $action = $_REQUEST[ 'action' ];
+          $action = $_REQUEST[ 'action' ];
 
           /** Determine if the current class has the method to handle request */
           if( is_callable( array( $this, 'action_'. $action ) ) ) {
