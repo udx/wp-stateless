@@ -23,7 +23,7 @@
 				list.children().remove();
 				jQuery('h5', existing).show();
 				jQuery.each(options.items, function(index, item){
-					list.append("<li data-id='" + item.id + "'>" + item.name + "</li>");
+					list.append("<li data-id='" + item.id + "'>" + item.name + " ("  + item.id + ")</li>");
 				});
 			}
 
@@ -42,17 +42,25 @@
 			_input.on( 'change keyup', function(event){
 				event.stopPropagation();
 				event.stopImmediatePropagation();
-				var value = jQuery(this).val().replace(' ', '-').replace(/^-+|-+$/,'');
+				var originalValue = jQuery(this).val()
+				var value = originalValue.toLowerCase()
+							.replace(/\s/g, '-') // replacing space with -
+							.replace(/\(.*/,'') // Removing everithing after (
+							.replace(/^-+|-+$/g,''); // Trim hyphens.
 				var regex = /(^[a-zA-Z][\w-]{3,28}[\w]$)/;
 				var match = regex.exec(value);
+
+				jQuery('.wpStateLess-input-dropdown', _this).removeClass('active');
+					console.log(value);
+					console.log(match);
 				if(!match || !match.length){
 					_this.find('.error').show().html("Name can contain lowercase alphanumeric characters and hyphens. It must start with a letter. Trailing hyphens are prohibited.");
+					
 				}else{
 					_new.parent().show();
 					_this.find('.error').hide();
-					_new.html( value.toLowerCase() );
-					_id.val(value.toLowerCase());
-					console.log(value.toLowerCase());
+					_new.html( originalValue + " (" + value + ")" );
+					_id.val(value);
 				}
 				
 			});

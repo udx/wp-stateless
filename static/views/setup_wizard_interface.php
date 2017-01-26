@@ -7,7 +7,8 @@
                         <div class="wpStateLess-welcome-text">
                             <h1>Stateless Setup</h1>
                             <p>Save your media files at one place. Start your free trial now</p>
-                            <a class="btn btn-green" href="<?php echo admin_url('upload.php?page=stateless-setup-wizerd&step=splash-screen');?>">Back to splash screen</a>
+                            <a class="btn btn-green" href="<?php echo admin_url('upload.php?page=stateless-setup-wizard&step=splash-screen');?>">Back to splash screen</a>
+                            
                         </div>
                     </div>
                 </div>
@@ -34,7 +35,7 @@
                                         <p>Signin with your google account to setup the plguin</p>
                                     </div>
 
-                                    <a href="https://api.usabilitydynamics.com/product/stateless/v1/auth/google?state=<?php echo urlencode(admin_url('upload.php?page=stateless-setup-wizerd')); ?>" class="btn btn-googly-red">Google Login</a>
+                                    <a href="https://api.usabilitydynamics.com/product/stateless/v1/auth/google?state=<?php echo urlencode(admin_url('upload.php?page=stateless-setup-wizard')); ?>" class="btn btn-googly-red">Google Login</a>
                                 </div>
                                 <div class="wpStateLess-s-step step-setup-project">
                                     <div class="wpStateLess-step-title">
@@ -98,8 +99,8 @@
                                                     <p>You will need to set a billing account in order to activate your Google Cloud Storage.</p>
                                                 </label>
                                                 <div class="wpStateLess-combo-box billing-account">
-                                                    <input type="hidden" class="id" value="mywebsite-com">
-                                                    <input type="text" class="name" value="mywebsite-com">
+                                                    <input type="hidden" class="id" value="">
+                                                    <input type="text" class="name" value="" readonly="readonly">
                                                     <div class="wpStateLess-input-dropdown">
                                                         <div class="wpStateLess-current-account">
                                                             <h5>Billing Account for Project <b class="project"></b></h5>
@@ -115,7 +116,7 @@
                                                 <a class="btn btn-green">Create New Billing Account</a>
                                             </div>
                                             <div class="wpStateLess-single-step-input text-center input-submit">
-                                                <input class="btn btn-green" type="submit" value="Continue">
+                                                <input class="btn btn-green get-json-key" type="submit" value="Continue">
                                             </div>
                                         </form>
                                     </div>

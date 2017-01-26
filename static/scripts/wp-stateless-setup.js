@@ -77,7 +77,7 @@ wp.stateless = {
           wp.stateless.access_token = _token;
           sessionStorage.setItem( 'wp.stateless.token', _token );
           sessionStorage.setItem( 'wp.stateless.expiry_date', expiry_date );
-          History.replaceState('', title, '?page=stateless-setup-wizerd');
+          History.replaceState('', title, '?page=stateless-setup-wizard');
         }
       }
 
@@ -216,7 +216,7 @@ wp.stateless = {
       return false;
 
     var promis = jQuery.ajax({
-      url: 'https://www.googleapis.com/storage/v1/b/?project=' + options.project,
+      url: 'https://www.googleapis.com/storage/v1/b/?project=' + options.projectId,
       method: "POST",
       data: JSON.stringify({name: options.name}),
     });
@@ -244,9 +244,9 @@ wp.stateless = {
 
       jQuery.each(responseData.items, function(index, item){
         buckets.push({id: item.id, name: item.name});
-        wp.stateless.projects[projectId]['buckets'] = {};
       });
 
+      wp.stateless.projects[projectId]['buckets'] = buckets;
       defer.resolve(buckets);
     }).fail(function(){
       defer.reject();
@@ -289,13 +289,12 @@ wp.stateless = {
    * @returns {boolean}
    */
   createServiceAccount: function createServiceAccount(options) {
-    console.log( 'createServiceAccount' );
 
     if(!wp.stateless.getAccessToken() || !options)
       return false;
 
     var promis = jQuery.ajax({
-      url: 'https://iam.googleapis.com/v1/projects/' + options.project + '/serviceAccounts',
+      url: 'https://iam.googleapis.com/v1/projects/' + options.projectId + '/serviceAccounts',
       method: "POST",
       data: JSON.stringify({
         accountId: options.accountId,
@@ -315,7 +314,6 @@ wp.stateless = {
    * @returns {boolean}
    */
   listServiceAccountKeys: function listServiceAccountKeys(options) {
-    console.log( 'createServiceAccount' );
 
     if(!wp.stateless.getAccessToken() || !options)
       return false;
@@ -334,7 +332,6 @@ wp.stateless = {
    * @returns {boolean}
    */
   createServiceAccountKeys: function createServiceAccountKeys(options) {
-    console.log( 'createServiceAccount' );
 
     if(!wp.stateless.getAccessToken() || !options)
       return false;
@@ -357,7 +354,6 @@ wp.stateless = {
    * @returns {boolean}
    */
   insertBucketAccessControls: function insertBucketAccessControls(options) {
-    console.log( 'createServiceAccount' );
 
     if(!wp.stateless.getAccessToken() || !options)
       return false;
@@ -378,34 +374,35 @@ wp.stateless = {
    * Doc: https://cloud.google.com/storage/docs/json_api/v1/bucketAccessControls/insert
    * @param options
    * @returns {boolean}
-   * @errors 
-{
-  "error": {
-    "code": 403,
-    "message": "Project has not enabled the API. Please use Google Developers Console to activate the 'cloudbilling' API for your project.",
-    "status": "PERMISSION_DENIED",
-    "details": [
-      {
-        "@type": "type.googleapis.com/google.rpc.Help",
-        "links": [
-          {
-            "description": "Google developer console API activation",
-            "url": "https://console.developers.google.com/project/541786531381/apiui/api"
-          }
-        ]
-      }
-    ]
-  }
-}
-
+   * 
    */
   getProjectBillingInfo: function getProjectBillingInfo(projectID) {
-    console.log( 'createServiceAccount' );
+    var defer = new jQuery.Deferred();
 
     if(!wp.stateless.getAccessToken() || !projectID)
       return false;
-    var promis = jQuery.ajax({
+
+    jQuery.ajax({
       url: 'https://cloudbilling.googleapis.com/v1/projects/' + projectID + '/billingInfo',
+    }).done(function(responseData){
+      wp.stateless.projects[projectID]['billingInfo'] = responseData;
+      defer.resolve(responseData);
+    }).fail(function() {
+      defer.reject();
+    });
+    return defer.promise();
+  },
+
+  updateProjectBillingInfo: function updateProjectBillingInfo(options) {
+
+    if(!wp.stateless.getAccessToken() || !options.projectID)
+      return false;
+    var promis = jQuery.ajax({
+      method: 'PUT',
+      url: 'https://cloudbilling.googleapis.com/v1/projects/' + options.projectID + '/billingInfo',
+      data: JSON.stringify({
+        'billingAccountName': options.accountName
+      })
     });
     return promis;
   },
@@ -478,6 +475,7 @@ jQuery(document).ready(function($){
       $.each(responseData.projects, function(index, item){
         wp.stateless.projects[item.projectId] = item;
         wp.stateless.projects[item.projectId]['buckets'] = {};
+        wp.stateless.projects[item.projectId]['billingInfo'] = {};
         projects_dropdown.append("<option value='" + item.projectId + "'>" + item.name + "</option>");
       });
       if(projectId){

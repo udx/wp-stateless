@@ -7,7 +7,7 @@
                         <div class="wpStateLess-welcome-text">
                             <h1>All Media Files in One Place</h1>
                             <p>Stores and serves WordPress media files directly from Google Cloud Storage.</p>
-                            <a class="btn btn-rounded btn-green" href="<?php echo admin_url('upload.php?page=stateless-setup-wizerd');?>">Get Started Now</a>
+                            <a class="btn btn-rounded btn-green" href="<?php echo admin_url('upload.php?page=stateless-setup-wizard');?>">Get Started Now</a>
                         </div>
                     </div>
                 </div>
@@ -58,7 +58,7 @@
                                 <li>SSL delivery of files</li>
                             </ul>
                             <div class="text-center">
-                                <a href="<?php echo admin_url('upload.php?page=stateless-setup-wizerd');?>" class="btn btn-green">Get Started Now</a>
+                                <a href="<?php echo admin_url('upload.php?page=stateless-setup-wizard');?>" class="btn btn-green">Get Started Now</a>
                             </div>
                         </div>
                     </div>
@@ -75,7 +75,7 @@
                                 <li>Consolidated billing.</li>
                             </ul>
                             <div class="text-center">
-                                <a href="" class="btn btn-green">Learn More</a>
+                                <a href="" class="btn learn-more btn-green">Learn More</a>
                             </div>
                         </div>
                     </div>
@@ -90,7 +90,7 @@
                                 <li>Branded domain.</li>
                             </ul>
                             <div class="text-center">
-                                <a href="" class="btn btn-green">Learn More</a>
+                                <a href="" class="btn learn-more btn-green">Learn More</a>
                             </div>
                         </div>
                     </div>
@@ -98,7 +98,7 @@
             </div>
         </div>
 
-        <div id="wpStateLess-popup" class="active">
+        <div id="wpStateLess-popup" class="">
             <div class="wpStateLess-pop-area">
                 <div class="wpStateLess-pops">
                     <h3>Contact Us</h3>
