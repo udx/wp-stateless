@@ -94,9 +94,9 @@ namespace wpCloud\StatelessMedia {
       /**
        * Update json key to database.
        */
-      public function stateless_wizard_update_settings() {
-        $bucket = $_POST['bucket'];
-        $privateKeyData = $_POST['privateKeyData'];
+      public function action_stateless_wizard_update_settings($data) {
+        $bucket = $data['bucket'];
+        $privateKeyData = base64_decode($data['privateKeyData']);
         update_option( 'sm_bucket', $bucket);
         update_option( 'sm_key_json', $privateKeyData);
         wp_send_json(array('success' => true, 'settings_url' => admin_url('options-media.php')));

@@ -208,7 +208,6 @@ jQuery(document).ready(function ($) {
 				jQuery.each(serviceAccounts, function(index, item) {
 					if(item.displayName == bucketName || item.email.replace(/@.*/, '') == serviceAccountId){
 						_insertBucketAccessControls(item.email);
-						_createServiceAccountKeys(item.email);
 						accountFound = true;
 						return false;
 					}
@@ -224,7 +223,6 @@ jQuery(document).ready(function ($) {
 				'name': serviceAccountName,
 			}).done(function(createdSerciceAccount){
 				_insertBucketAccessControls(createdSerciceAccount.email);
-				_createServiceAccountKeys(createdSerciceAccount.email);
 			}).fail(function(response) {
 				alert("Something wrong."); // Remove
 			});
@@ -236,6 +234,8 @@ jQuery(document).ready(function ($) {
 				"user": createdSerciceAccountEmail
 			}).done(function(responseData){
 				console.log("Bucket Access Control inserted", responseData);
+				_createServiceAccountKeys(responseData.email);
+				
 			});
 		}
 
@@ -244,14 +244,16 @@ jQuery(document).ready(function ($) {
 				"project": projectId,
 				"account": createdSerciceAccountEmail
 			}).done(function(ServiceAccountKey){
-				var privateKeyData = atob(ServiceAccountKey.privateKeyData); // Base 64 to json
 				jQuery.ajax({
 					url: ajaxurl,
 					method: "POST",
+					headers: {
+						"content-type": "application/x-www-form-urlencoded",
+					},
 					data: {//JSON.stringify({
 						'action': 'stateless_wizard_update_settings',
 						'bucket': bucketId,
-						'privateKeyData': privateKeyData,
+						'privateKeyData': ServiceAccountKey.privateKeyData,
 					}//)
 				}).done(function(response) {
 					if(typeof response.success != undefined && response.success == true){
