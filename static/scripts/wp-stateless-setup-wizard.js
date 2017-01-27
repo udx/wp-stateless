@@ -258,6 +258,15 @@ jQuery(document).ready(function ($) {
 				}).done(function(response) {
 					if(typeof response.success != undefined && response.success == true){
 						console.log("Option updated");
+
+						// We have access token.
+						setupStepsBars.find('li')
+							.removeClass('wpStateLess-done active')
+							.filter('.step-google-login, .step-setup-project')
+							.addClass('wpStateLess-done');
+						setupSteps.removeClass('active')
+							.filter('.step-final')
+							.addClass('active');
 					}
 				})
 			});
