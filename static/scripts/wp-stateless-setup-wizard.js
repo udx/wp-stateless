@@ -144,7 +144,7 @@ jQuery(document).ready(function ($) {
 	setupForm.find('.get-json-key').on('click', function(event){
 		event.preventDefault();
 		var projectId = projectDropdown.find('.id').val();
-		var projectName = projectDropdown.find('.name').val().replace(/^\s+|\s+$/g,'');
+		var projectName = projectDropdown.find('.name').val().replace(/\(.*/, '').replace(/^\s+|\s+$/g,'');
 		var bucketId = bucketDropdown.find('.id').val();
 		var bucketName = bucketDropdown.find('.name').val().replace(/\(.*/, '').replace(/^\s+|\s+$/g,'');
 		var serviceAccountId = 'stateless-' + bucketId.replace('stateless-', '');

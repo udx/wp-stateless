@@ -37,6 +37,7 @@ wp.stateless = {
    */
   clearAccessToken: function clearAccessToken() {
     try {
+        wp.stateless.access_token = null;
         sessionStorage.removeItem( 'wp.stateless.token' );
         sessionStorage.removeItem( 'wp.stateless.expiry_date' );
         return true;
@@ -160,18 +161,26 @@ wp.stateless = {
       method: "POST",
       data: JSON.stringify( options ),
     }).done(function( responseData  ) {
-      jQuery.ajax({
-        url: 'https://cloudresourcemanager.googleapis.com/v1/' + responseData.name,
-      }).done(function(responseData){
-        defer.resolve(responseData);
-      }).fail(function(responseData) {
-        defer.reject(responseData);
-      });
+      var progress = createProjectProgress(responseData.name);
     }).fail(function(responseData) {
       defer.reject(responseData);
     });
 
 
+    return defer.promise();
+  },
+
+
+  createProjectProgress: function createProjectProgress(name){
+    var defer = new jQuery.Deferred();
+
+    jQuery.ajax({
+      url: 'https://cloudresourcemanager.googleapis.com/v1/' + name,
+    }).done(function(responseData){
+      defer.resolve(responseData);
+    }).fail(function(responseData) {
+      defer.reject(responseData);
+    });
     return defer.promise();
   },
 

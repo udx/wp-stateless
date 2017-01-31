@@ -58,12 +58,12 @@
                                                 </label>
                                                 <div class="wpStateLess-combo-box project">
                                                     <div class="error" style="display: none;"></div>
-                                                    <input type="hidden" class="id" value="<?php echo str_replace('.', '-', $_SERVER['SERVER_NAME']);?>">
-                                                    <input type="text" class="name" value="<?php echo ucwords(str_replace('.', ' ', $_SERVER['SERVER_NAME']));?>" placeholder="Select or Create New Project">
+                                                    <input type="hidden" class="id" value="<?php echo str_replace('.', '-', $_SERVER['HTTP_HOST']);?>">
+                                                    <input type="text" class="name" value="<?php echo ucwords(str_replace('.', ' ', $_SERVER['HTTP_HOST']));?>" placeholder="Select or Create New Project">
                                                     <div class="wpStateLess-input-dropdown">
                                                         <div class="wpStateLess-create-new">
                                                             <h5>Create New Project</h5>
-                                                            <span><?php echo ucwords(str_replace('.', ' ', $_SERVER['SERVER_NAME']));?> (<?php echo str_replace('.', '-', $_SERVER['SERVER_NAME']);?>)</span>
+                                                            <span><?php echo ucwords(str_replace('.', ' ', $_SERVER['HTTP_HOST']));?> (<?php echo str_replace('.', '-', $_SERVER['HTTP_HOST']);?>)</span>
                                                         </div>
                                                         <div class="wpStateLess-existing">
                                                             <h5>Existing Projects</h5>
@@ -79,12 +79,12 @@
                                                 </label>
                                                 <div class="wpStateLess-combo-box bucket">
                                                     <div class="error" style="display: none;"></div>
-                                                    <input type="hidden" class="id" value="stateless-<?php echo str_replace('.', '-', $_SERVER['SERVER_NAME']);?>">
-                                                    <input type="text" class="name" value="Stateless <?php echo str_replace('.', ' ', $_SERVER['SERVER_NAME']);?>" placeholder="Select or Create New Bucket">
+                                                    <input type="hidden" class="id" value="stateless-<?php echo str_replace('.', '-', $_SERVER['HTTP_HOST']);?>">
+                                                    <input type="text" class="name" value="Stateless <?php echo str_replace('.', ' ', $_SERVER['HTTP_HOST']);?>" placeholder="Select or Create New Bucket">
                                                     <div class="wpStateLess-input-dropdown">
                                                         <div class="wpStateLess-create-new">
                                                             <h5>Create New Bucket</h5>
-                                                            <span>stateless-<?php echo str_replace('.', '-', $_SERVER['SERVER_NAME']);?></span>
+                                                            <span>stateless-<?php echo str_replace('.', '-', $_SERVER['HTTP_HOST']);?></span>
                                                         </div>
                                                         <div class="wpStateLess-existing">
                                                             <h5>Existing Projects</h5>
