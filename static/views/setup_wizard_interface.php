@@ -142,8 +142,8 @@ $bucket_name    = str_replace(array('.', '-'), ' ', $server_name);
                                         <h3>Congrats, Your Setup is Complete</h3>
                                         <p>Any media file you upload to WordPress will now be uploaded to Google and served to your users from Google servers! A background process is now running that will upload any existing media into Google Cloud Storage. </p>
                                     </div>
-                                    <p>To further customize your stateless media setup, visit the settings panel!</p>
-                                    <a href="" class="btn btn-green">Continue</a>
+                                    <p>To further customize your stateless media setup, visit the <a href="<?php echo admin_url('options-media.php#stateless-media');?>">settings panel!</a></p>
+                                    <a href="<?php echo admin_url('media-new.php');?>" class="btn btn-green">Upload Something!</a>
                                 </div>
                             </div>
                         </div>
