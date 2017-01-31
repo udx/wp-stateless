@@ -92,7 +92,7 @@ jQuery(document).ready(function ($) {
 		wp.stateless.listBucket(projectId)
 		  .done(function(buckets){
 		  	if(typeof wp.stateless.projects[projectId] != 'undefined'){
-				bucketDropdown.find('.wpStateLess-existing h5').html(wp.stateless.projects[projectId].name + " Buckets");
+				bucketDropdown.find('.wpStateLess-existing h5').html(wp.stateless.projects[projectId].name + " Buckets").show();
 		  	}
 			bucketDropdown.wpStatelessComboBox({items:buckets});
 		  });
@@ -173,6 +173,7 @@ jQuery(document).ready(function ($) {
 			wp.stateless.createProject({"projectId": projectId, "name": projectName}).done(function(argument) {
 				_updateProjectBillingInfo();
 			}).fail(function(response) {
+				response = response.responseJSON;
 				console.log(response);
 				if(response && typeof response.error != 'undefined' && typeof response.error.status != 'undefined' && response.error.status == 'ALREADY_EXISTS'){
 					_updateProjectBillingInfo();
@@ -198,8 +199,9 @@ jQuery(document).ready(function ($) {
 				wp.stateless.createBucket({"projectId": projectId, "name": bucketId}).done(function(argument) {
 					_createServiceAccount();
 				}).fail(function(response) {
+					response = response.responseJSON;
 					console.log(response);
-					if(response && typeof response.error != 'undefined' && typeof response.error.message != 'undefined' && response.error.message == 'You already own this bucket. Please select another name.'){
+					if(response && typeof response.error != 'undefined' && typeof response.error.code != 'undefined' && response.error.code == 409){
 						_createServiceAccount();
 					}
 				});
@@ -211,7 +213,7 @@ jQuery(document).ready(function ($) {
 
 		function _createServiceAccount(){
 			console.log("wp::stateless::bucketCreated");
-			if( typeof wp.stateless.projects[projectId] != 'undefined' || typeof wp.stateless.projects[projectId]['serviceAccounts'] != 'undefined'){
+			if( typeof wp.stateless.projects[projectId] != 'undefined' && typeof wp.stateless.projects[projectId]['serviceAccounts'] != 'undefined'){
 				var serviceAccounts = wp.stateless.projects[projectId]['serviceAccounts'];
 				var accountFound = false;
 				jQuery.each(serviceAccounts, function(index, item) {

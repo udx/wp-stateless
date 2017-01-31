@@ -71,7 +71,7 @@ $bucket_name    = str_replace(array('.', '-'), ' ', $server_name);
                                                     <input type="hidden" class="id" value="<?php echo $project_id;?>">
                                                     <input type="text" class="name" value="<?php echo $project_name;?>" placeholder="Select or Create New Project">
                                                     <div class="wpStateLess-input-dropdown">
-                                                        <div class="wpStateLess-create-new">
+                                                        <div class="wpStateLess-create-new active" data-id="<?php echo $project_id?>" data-name="<?php echo $project_name?>">
                                                             <h5>Create New Project</h5>
                                                             <span><?php echo "$project_name ($project_id)";?></span>
                                                         </div>
@@ -92,7 +92,7 @@ $bucket_name    = str_replace(array('.', '-'), ' ', $server_name);
                                                     <input type="hidden" class="id" value="stateless-<?php echo $bucket_id;?>">
                                                     <input type="text" class="name" value="Stateless <?php echo $bucket_name;?>" placeholder="Select or Create New Bucket">
                                                     <div class="wpStateLess-input-dropdown">
-                                                        <div class="wpStateLess-create-new">
+                                                        <div class="wpStateLess-create-new active" data-id="<?php echo $bucket_id?>" data-name="<?php echo $bucket_id?>">
                                                             <h5>Create New Bucket</h5>
                                                             <span>stateless-<?php echo $bucket_id;?></span>
                                                         </div>
@@ -123,7 +123,9 @@ $bucket_name    = str_replace(array('.', '-'), ' ', $server_name);
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <a class="btn btn-green">Create New Billing Account</a>
+                                            </div>
+                                            <div class="wpStateLess-single-step-input text-center input-submit">
+                                                <input class="btn btn-green get-json-key" type="submit" value="Continue">
                                             </div>
                                         </form>
                                     </div>

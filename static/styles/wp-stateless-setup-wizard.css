@@ -420,7 +420,7 @@
 .wpStateLess-create-new, .wpStateLess-current-account {
     padding: 20px;
 }
-.wpStateLess-create-new.active, .wpStateLess-current-account {
+.wpStateLess-create-new.active, .wpStateLess-create-new:hover, .wpStateLess-current-account {
     background: #fbfbfb none repeat scroll 0 0;
 }
 .wpStateLess-create-new, 
@@ -447,9 +447,10 @@
 	font-weight: 400 !important;
 }
 .wpStateLess-existing li {
-	padding: 0px 20px;
+	padding: 1.5px 20px;
+	margin: 0px;
 }
-.wpStateLess-existing li:hover, .wpStateLess-existing li.active {
+.wpStateLess-existing li:hover, .wpStateLess-existing li.active, .wpStateLess-create-new:hover {
 	cursor: pointer;
 	background: #fbfbfb;
 }

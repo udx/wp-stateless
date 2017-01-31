@@ -163,15 +163,18 @@ wp.stateless = {
       method: "POST",
       data: JSON.stringify( options ),
     }).done(function( responseData  ) {
-      var progress = createProjectProgress(responseData.name).done(function() {
-        setTimeout(function(argument) {
-          defer.resolve(responseData);
-        }, 5000);
+      wp.stateless.createProjectProgress(responseData.name);
+
+      jQuery(document).on('project-created-' + responseData.name, function(argument) {
+        defer.resolve(responseData);
       });
-      
+      jQuery(document).on('project-creation-faild-' + responseData.name, function(argument) {
+        defer.reject(responseData);
+      });
     }).fail(function(responseData) {
       defer.reject(responseData);
     });
+
 
 
     return defer.promise();
@@ -179,16 +182,17 @@ wp.stateless = {
 
 
   createProjectProgress: function createProjectProgress(name){
-    var defer = new jQuery.Deferred();
-
     jQuery.ajax({
       url: 'https://cloudresourcemanager.googleapis.com/v1/' + name,
     }).done(function(responseData){
-      defer.resolve(responseData);
+      if(typeof responseData.done != 'undefined' && responseData.done == true){
+        jQuery(document).trigger('project-created-' + name);
+      }else{
+        wp.stateless.createProjectProgress(name);
+      }
     }).fail(function(responseData) {
-      defer.reject(responseData);
+      jQuery(document).trigger('project-creation-faild-' + name);
     });
-    return defer.promise();
   },
 
   /**
