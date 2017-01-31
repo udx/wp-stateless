@@ -188,7 +188,9 @@ wp.stateless = {
       if(typeof responseData.done != 'undefined' && responseData.done == true){
         jQuery(document).trigger('project-created-' + name);
       }else{
-        wp.stateless.createProjectProgress(name);
+        setTimeout(function(argument) {
+          wp.stateless.createProjectProgress(name);
+        }, 800);
       }
     }).fail(function(responseData) {
       jQuery(document).trigger('project-creation-faild-' + name);
