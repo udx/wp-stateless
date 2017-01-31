@@ -1,5 +1,15 @@
+<?php
+$server_name    = $_SERVER['HTTP_HOST']?$_SERVER['HTTP_HOST']: $_SERVER["SERVER_NAME"];
+$project_id     = str_replace('.', '-', $server_name);
+$project_name   = ucwords(str_replace('.', ' ', $server_name));
+
+$bucket_id      = str_replace('.', '-', $server_name);
+$bucket_name    = str_replace(array('.', '-'), ' ', $server_name);
+
+?>
 <div id="wp-stateless-wrapper">
     <div id="wpStatelessInner">
+
         <div class="wpStateLess-header">
             <div class="container">
                 <div class="row">
@@ -7,7 +17,7 @@
                         <div class="wpStateLess-welcome-text">
                             <h1>Stateless Setup</h1>
                             <p>Save your media files at one place. Start your free trial now</p>
-                            <a class="btn btn-green" href="<?php echo admin_url('upload.php?page=stateless-setup-wizard&step=splash-screen');?>">Back to splash screen</a>
+                            <!-- <a class="btn btn-green" href="<?php //echo admin_url('upload.php?page=stateless-setup-wizard&step=splash-screen');?>">Back to splash screen</a> -->
 
                         </div>
                     </div>
@@ -35,7 +45,7 @@
                                         <p>Signin with your google account to setup the plguin</p>
                                     </div>
 
-                                    <a href="https://api.usabilitydynamics.com/product/stateless/v1/auth/google?state=<?php echo urlencode(admin_url('upload.php?page=stateless-setup-wizard')); ?>" class="btn btn-googly-red">Google Login</a>
+                                    <a href="https://api.usabilitydynamics.com/product/stateless/v1/auth/google?state=<?php echo urlencode(admin_url('upload.php?page=stateless-setup-wizard&step=setup-project')); ?>" class="btn btn-googly-red">Google Login</a>
                                 </div>
                                 <div class="wpStateLess-s-step step-setup-project">
                                     <div class="wpStateLess-step-title">
@@ -58,12 +68,12 @@
                                                 </label>
                                                 <div class="wpStateLess-combo-box project">
                                                     <div class="error" style="display: none;"></div>
-                                                    <input type="hidden" class="id" value="<?php echo str_replace('.', '-', $_SERVER['HTTP_HOST']);?>">
-                                                    <input type="text" class="name" value="<?php echo ucwords(str_replace('.', ' ', $_SERVER['HTTP_HOST']));?>" placeholder="Select or Create New Project">
+                                                    <input type="hidden" class="id" value="<?php echo $project_id;?>">
+                                                    <input type="text" class="name" value="<?php echo $project_name;?>" placeholder="Select or Create New Project">
                                                     <div class="wpStateLess-input-dropdown">
                                                         <div class="wpStateLess-create-new">
                                                             <h5>Create New Project</h5>
-                                                            <span><?php echo ucwords(str_replace('.', ' ', $_SERVER['HTTP_HOST']));?> (<?php echo str_replace('.', '-', $_SERVER['HTTP_HOST']);?>)</span>
+                                                            <span><?php echo "$project_name ($project_id)";?></span>
                                                         </div>
                                                         <div class="wpStateLess-existing">
                                                             <h5>Existing Projects</h5>
@@ -79,12 +89,12 @@
                                                 </label>
                                                 <div class="wpStateLess-combo-box bucket">
                                                     <div class="error" style="display: none;"></div>
-                                                    <input type="hidden" class="id" value="stateless-<?php echo str_replace('.', '-', $_SERVER['HTTP_HOST']);?>">
-                                                    <input type="text" class="name" value="Stateless <?php echo str_replace('.', ' ', $_SERVER['HTTP_HOST']);?>" placeholder="Select or Create New Bucket">
+                                                    <input type="hidden" class="id" value="stateless-<?php echo $bucket_id;?>">
+                                                    <input type="text" class="name" value="Stateless <?php echo $bucket_name;?>" placeholder="Select or Create New Bucket">
                                                     <div class="wpStateLess-input-dropdown">
                                                         <div class="wpStateLess-create-new">
                                                             <h5>Create New Bucket</h5>
-                                                            <span>stateless-<?php echo str_replace('.', '-', $_SERVER['HTTP_HOST']);?></span>
+                                                            <span>stateless-<?php echo $bucket_id;?></span>
                                                         </div>
                                                         <div class="wpStateLess-existing">
                                                             <h5>Existing Projects</h5>
@@ -114,9 +124,6 @@
                                                     </div>
                                                 </div>
                                                 <a class="btn btn-green">Create New Billing Account</a>
-                                            </div>
-                                            <div href="https://console.cloud.google.com/billing" class="wpStateLess-single-step-input text-center input-submit">
-                                                <input class="btn btn-green get-json-key" type="submit" value="Continue">
                                             </div>
                                         </form>
                                     </div>

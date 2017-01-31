@@ -7,7 +7,7 @@
                         <div class="wpStateLess-welcome-text">
                             <h1>All Media Files in One Place</h1>
                             <p>Stores and serves WordPress media files directly from Google Cloud Storage.</p>
-                            <a class="btn btn-rounded btn-green" href="<?php echo admin_url('upload.php?page=stateless-setup-wizard');?>">Get Started Now</a>
+                            <a class="btn btn-rounded btn-green" href="<?php echo admin_url('upload.php?page=stateless-setup-wizard&amp;step=google-login');?>">Get Started Now</a>
                         </div>
                     </div>
                 </div>
@@ -42,7 +42,7 @@
             <div class="container">
                 <div class="row">
                     <div class="col-xs-12">
-                        <h1 class="wpStateLess-section-title">Free & Paid Plans</h1>
+                        <h1 class="wpStateLess-section-title">Free &amp; Paid Plans</h1>
                     </div>
                 </div>
                 <div class="row wpStateLess-valigncenter">
@@ -58,7 +58,7 @@
                                 <li>SSL delivery of files</li>
                             </ul>
                             <div class="text-center">
-                                <a href="<?php echo admin_url('upload.php?page=stateless-setup-wizard');?>" class="btn btn-green">Get Started Now</a>
+                                <a href="<?php echo admin_url('upload.php?page=stateless-setup-wizard&amp;step=google-login');?>" class="btn btn-green">Get Started Now</a>
                             </div>
                         </div>
                     </div>

@@ -38,7 +38,7 @@ jQuery(document).ready(function ($) {
 		return wp.stateless.listBillingAccounts()
 		  .done(function(accounts){
 		  	if(accounts && accounts.length)
-				billingDropdown.wpStatelessComboBox({items:accounts}).show();
+				billingDropdown.wpStatelessComboBox({items:accounts, selected: 0}).show();
 			else
 				billingDropdown.hide();
 		  });
@@ -91,8 +91,13 @@ jQuery(document).ready(function ($) {
 		// Need to check if it's existing project.
 		wp.stateless.listBucket(projectId)
 		  .done(function(buckets){
+		  	if(typeof wp.stateless.projects[projectId] != 'undefined'){
+				bucketDropdown.find('.wpStateLess-existing h5').html(wp.stateless.projects[projectId].name + " Buckets");
+		  	}
 			bucketDropdown.wpStatelessComboBox({items:buckets});
 		  });
+
+		bucketDropdown.find('.name').val("stateless-" + projectId).trigger('change');
 
 		wp.stateless.getServiceAccounts({projectId:projectId});
 
@@ -100,11 +105,15 @@ jQuery(document).ready(function ($) {
 		  .done(function(billingInfo){
 		  	var currentAccount = setupForm.find('.wpStateLess-current-account');
 		  	var enabled = billingInfo.billingEnabled? "Enabled": "Disable";
-		  	billingDropdown.find('.id').val(billingInfo.name);
-		  	billingDropdown.find('.name').val(billingInfo.billingAccountName);
-		  	currentAccount.find('h5 .project').html(wp.stateless.projects[projectId].name);
-		  	currentAccount.find('span').html(billingInfo.billingAccountName + " (" + enabled + ")")
-		  	currentAccount.show();
+      		if(typeof billingInfo.billingAccountName != 'undefined'){
+			  	billingDropdown.find('.id').val(billingInfo.billingAccountName);
+			  	billingDropdown.find('.name').val(billingInfo.billingAccountName);
+			  	currentAccount.find('h5 .project').html(wp.stateless.projects[projectId].name);
+			  	currentAccount.find('span').html(billingInfo.billingAccountName + " (" + enabled + ")")
+			  	currentAccount.show();
+			}else{
+				currentAccount.hide();
+			}
 		  });
 	});
 

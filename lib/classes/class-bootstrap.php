@@ -668,7 +668,16 @@ namespace wpCloud\StatelessMedia {
        * Plugin Activation
        *
        */
-      public function activate() {}
+      public function activate() {
+        add_action( 'activated_plugin', array($this, 'redirect_to_splash') );
+        wp_redirect(admin_url('upload.php?page=stateless-setup-wizard&step=splash-screen'));
+      }
+
+      public function redirect_to_splash($plugin =''){
+        if( $plugin == plugin_basename( $this->boot_file ) ) {
+          exit( wp_redirect(admin_url('upload.php?page=stateless-setup-wizard&step=splash-screen')));
+        }
+      }
 
       /**
        * Plugin Deactivation

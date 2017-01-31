@@ -31,6 +31,7 @@
 #wpStatelessInner h6 {
 	color: #5a6c7a;
 	font-weight: 700;
+	margin-bottom: 0px;
 }
 #wpStatelessInner:before {
 	background: -moz-linear-gradient(top,  rgba(0,76,148,1) 0%, rgba(0,172,212,0.51) 40%, rgba(85,181,226,0) 95%, rgba(125,185,232,0) 100%); 
@@ -330,6 +331,13 @@
 .wpStateLess-userinfo .wpStateLess-user-detais {
 	padding-left: 20px;
 }
+.wpStateLess-user-detais p.user-email {
+	color: #a9a9a9;
+	font-family: "Helvetica Neue";
+	font-size: 14px;
+	font-weight: 400;
+}
+
 .wpStateLess-userinfo .wpStateLess-user-detais h4 a.logout {
 	display: inline-block;
 	margin-left: 10px;
@@ -346,9 +354,12 @@
 	margin-bottom: 0px;
 	margin-top: 0px;
 }
-.wpStateLess-single-step-input {}
+.wpStateLess-single-step-input {
+	margin-bottom: 40px;
+}
 .wpStateLess-single-step-input > label {
 	display: block;
+	font-weight: normal;
 }
 .wpStateLess-single-step-input > label h4 {
 	font-family: Cabin;
@@ -364,11 +375,15 @@
 .wpStateLess-combo-box {
 	position: relative;
 }
+.wpStateLess-combo-box .error{
+	margin-left: 0px;
+}
 .wpStateLess-combo-box > input.name {
     border: 1px solid #d9d9d9;
     border-radius: 5px;
-    padding: 10px;
+    padding: 9px 20px;
     width: 100%;
+    color: #5a6c7a;
 }
 .wpStateLess-combo-box > input.name:focus {
 	outline: none;
@@ -392,6 +407,8 @@
 	background-color: #fff;
 	z-index: 3;
 	width: 100%;
+	max-height: 450px;
+	overflow-y: scroll;
 }
 .wpStateLess-combo-box .wpStateLess-input-dropdown.active {
 	transform: scaleY(1);
@@ -401,19 +418,40 @@
 	color: #a9a9a9 !important;
 }
 .wpStateLess-create-new, .wpStateLess-current-account {
-    background: #fbfbfb none repeat scroll 0 0;
     padding: 20px;
+}
+.wpStateLess-create-new.active, .wpStateLess-current-account {
+    background: #fbfbfb none repeat scroll 0 0;
+}
+.wpStateLess-create-new, 
+.wpStateLess-existing {
+	color: #5a6c7a;
+	font-family: "Helvetica Neue";
+	font-size: 16px;
+	font-weight: 400;
 }
 .wpStateLess-create-new > h5 {
 	margin-top: 0px;
-    margin-bottom: 5px;
+    margin-bottom: 5px !important;
+	font-family: "Helvetica Neue";
+	font-weight: 400 !important;
 }
 .wpStateLess-existing {
-    padding: 10px 20px 20px;
+    padding: 10px 0px 20px;
 }
-.wpStateLess-existing li:hover {
+.wpStateLess-existing > h5 {
+	padding-left: 20px;
+	padding-right: 20px;
+	margin-bottom: 5px !important;
+	font-family: "Helvetica Neue";
+	font-weight: 400 !important;
+}
+.wpStateLess-existing li {
+	padding: 0px 20px;
+}
+.wpStateLess-existing li:hover, .wpStateLess-existing li.active {
 	cursor: pointer;
-	color: #a9a9a9;
+	background: #fbfbfb;
 }
 .wpStateLess-existing .btn {
 	margin-top: 15px;

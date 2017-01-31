@@ -23,7 +23,12 @@
 				list.children().remove();
 				jQuery('h5', existing).show();
 				jQuery.each(options.items, function(index, item){
-					list.append("<li data-id='" + item.id + "'>" + item.name + " ("  + item.id + ")</li>");
+					var selected = "";
+					if(typeof options.selected != 'undefined' && options.selected == index){
+						selected = " class= 'active' ";
+						_input.val(item.name + " ("  + item.id + ")");
+					}
+					list.append("<li " + selected + "data-id='" + item.id + "'>" + item.name + " ("  + item.id + ")</li>");
 				});
 			}
 
@@ -42,20 +47,21 @@
 			_input.on( 'change keyup', function(event){
 				event.stopPropagation();
 				event.stopImmediatePropagation();
-				var originalValue = jQuery(this).val()
+				var originalValue = jQuery(this).val().replace(/\(.*/,''); // Removing everithing after (
 				var value = originalValue.toLowerCase()
 							.replace(/\s/g, '-') // replacing space with -
-							.replace(/\(.*/,'') // Removing everithing after (
 							.replace(/^-+|-+$/g,''); // Trim hyphens.
 				var regex = /(^[a-zA-Z][\w-]{3,28}[\w]$)/;
 				var match = regex.exec(value);
 
 				jQuery('.wpStateLess-input-dropdown', _this).removeClass('active');
+				list.children().removeClass('active');
+				_new.parent().addClass('active');
+
 				if(!match || !match.length){
 					_this.find('.error').show().html("Name can contain lowercase alphanumeric characters and hyphens. It must start with a letter. Trailing hyphens are prohibited.");
 					
 				}else{
-					_new.parent().show();
 					_this.find('.error').hide();
 					_new.html( originalValue + " (" + value + ")" );
 					_id.val(value);
@@ -66,6 +72,8 @@
 			_this.on( 'click', '.wpStateLess-existing li', function(){
 				var id = jQuery(this).data('id');
 				var name = jQuery(this).text();
+				list.children().removeClass('active');
+				jQuery(this).addClass('active');
 				if(_this.find('.id').length > 0){
 					_this.find('.id').val(id);
 					_this.find('.name').val(name);
@@ -74,7 +82,7 @@
 					_this.find('.name').val(id);
 				}
 				_this.trigger('change');
-				_new.parent().hide();
+				_new.parent().removeClass('active');
 			});
 			_this.data('comboboxLoaded', true);
 		});

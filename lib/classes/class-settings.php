@@ -170,12 +170,14 @@ namespace wpCloud\StatelessMedia {
       public function setup_wizard_interface() {
         $step = !empty($_GET['step'])?$_GET['step']:'';
         switch ($step) {
-          case 'splash-screen':
-            include ud_get_stateless_media()->path( '/static/views/stateless_splash_screen.php', 'dir' );
+          case 'google-login':
+          case 'setup-project':
+          case 'finish':
+            include ud_get_stateless_media()->path( '/static/views/setup_wizard_interface.php', 'dir' );
             break;
           
           default:
-            include ud_get_stateless_media()->path( '/static/views/setup_wizard_interface.php', 'dir' );
+            include ud_get_stateless_media()->path( '/static/views/stateless_splash_screen.php', 'dir' );
             break;
         }
       }

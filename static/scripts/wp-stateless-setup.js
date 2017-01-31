@@ -37,9 +37,11 @@ wp.stateless = {
    */
   clearAccessToken: function clearAccessToken() {
     try {
+        var title = jQuery('head').find("title").text();
         wp.stateless.access_token = null;
         sessionStorage.removeItem( 'wp.stateless.token' );
         sessionStorage.removeItem( 'wp.stateless.expiry_date' );
+        History.replaceState('', title, '?page=stateless-setup-wizard&step=google-login');
         return true;
     } catch( error ) {
       console.error( error.message );
@@ -77,7 +79,7 @@ wp.stateless = {
           wp.stateless.access_token = _token;
           sessionStorage.setItem( 'wp.stateless.token', _token );
           sessionStorage.setItem( 'wp.stateless.expiry_date', expiry_date );
-          History.replaceState('', title, '?page=stateless-setup-wizard');
+          History.replaceState('', title, '?page=stateless-setup-wizard&step=setup-project');
         }
       }
 
@@ -161,7 +163,12 @@ wp.stateless = {
       method: "POST",
       data: JSON.stringify( options ),
     }).done(function( responseData  ) {
-      var progress = createProjectProgress(responseData.name);
+      var progress = createProjectProgress(responseData.name).done(function() {
+        setTimeout(function(argument) {
+          defer.resolve(responseData);
+        }, 5000);
+      });
+      
     }).fail(function(responseData) {
       defer.reject(responseData);
     });
@@ -403,6 +410,9 @@ wp.stateless = {
     jQuery.ajax({
       url: 'https://cloudbilling.googleapis.com/v1/projects/' + projectID + '/billingInfo',
     }).done(function(responseData){
+      if(typeof responseData.billingAccountName != 'undefined'){
+        responseData.billingAccountName = responseData.billingAccountName.replace('billingAccounts/', '');
+      }
       wp.stateless.projects[projectID]['billingInfo'] = responseData;
       defer.resolve(responseData);
     }).fail(function() {
@@ -419,7 +429,7 @@ wp.stateless = {
       method: 'PUT',
       url: 'https://cloudbilling.googleapis.com/v1/projects/' + options.projectID + '/billingInfo',
       data: JSON.stringify({
-        'billingAccountName': options.accountName
+        'billingAccountName': 'billingAccounts/' + options.accountName
       })
     });
     return promis;
@@ -443,6 +453,7 @@ wp.stateless = {
         });
 
         jQuery.each(responseData.billingAccounts, function(index, item){
+          item.name = item.name.replace('billingAccounts/', '');
           billingAccounts.push({id: item.name, name: item.displayName});
         });
 
