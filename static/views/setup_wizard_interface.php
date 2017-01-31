@@ -1,7 +1,7 @@
 <?php
 $server_name    = $_SERVER['HTTP_HOST']?$_SERVER['HTTP_HOST']: $_SERVER["SERVER_NAME"];
 $project_id     = str_replace('.', '-', $server_name);
-$project_name   = ucwords(str_replace('.', ' ', $server_name));
+$project_name   = ucwords(str_replace(array('.', '-'), ' ', $server_name));
 
 $bucket_id      = str_replace('.', '-', $server_name);
 $bucket_name    = str_replace(array('.', '-'), ' ', $server_name);
