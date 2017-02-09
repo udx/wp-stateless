@@ -165,7 +165,7 @@ wp.stateless = {
     }).done(function( responseData  ) {
       wp.stateless.createProjectProgress(responseData.name);
 
-      jQuery(document).on('project-created-' + responseData.name, function(argument) {
+      jQuery(document).on('wp-stateless-project-created-' + responseData.name, function(argument) {
         defer.resolve(responseData);
       });
       jQuery(document).on('project-creation-faild-' + responseData.name, function(argument) {
@@ -186,7 +186,7 @@ wp.stateless = {
       url: 'https://cloudresourcemanager.googleapis.com/v1/' + name,
     }).done(function(responseData){
       if(typeof responseData.done != 'undefined' && responseData.done == true){
-        jQuery(document).trigger('project-created-' + name);
+        jQuery(document).trigger('wp-stateless-project-created-' + name);
       }else{
         setTimeout(function(argument) {
           wp.stateless.createProjectProgress(name);

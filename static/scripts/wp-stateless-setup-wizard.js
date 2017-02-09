@@ -167,6 +167,8 @@ jQuery(document).ready(function ($) {
 			return;
 		}
 
+		jQuery(this).find('.wpStateLess-loading').addClass('active');
+
 
 		// Checking if user want to create new project.
 		if(!wp.stateless.projects[projectId]){
@@ -279,7 +281,9 @@ jQuery(document).ready(function ($) {
 							.filter('.step-final')
 							.addClass('active');
 					}
-				})
+				});
+
+				jQuery(this).find('.wpStateLess-loading').removeClass('active');
 			});
 		}
 		

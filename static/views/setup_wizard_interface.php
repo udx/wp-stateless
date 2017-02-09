@@ -125,7 +125,7 @@ $bucket_name    = str_replace(array('.', '-'), ' ', $server_name);
                                                 </div>
                                             </div>
                                             <div class="wpStateLess-single-step-input text-center input-submit">
-                                                <input class="btn btn-green get-json-key" type="submit" value="Continue">
+                                                <a class="btn btn-green get-json-key" type="submit">Continue <p class="wpStateLess-loading">(Checking <span>.</span><span>.</span><span>.</span>)</p></a>
                                             </div>
                                         </form>
                                     </div>
