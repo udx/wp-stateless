@@ -1,7 +1,8 @@
 <?php
 $server_name    = $_SERVER['HTTP_HOST']?$_SERVER['HTTP_HOST']: $_SERVER["SERVER_NAME"];
-$project_id     = str_replace('.', '-', $server_name);
-$project_name   = ucwords(str_replace(array('.', '-'), ' ', $server_name));
+$id             = str_replace('.', '-', $server_name);
+$project_name   = substr($id, 0, 30);
+$project_id     = substr($id, 0, 23) . "-" . rand(100000, 999999);
 
 $bucket_id      = str_replace('.', '-', $server_name);
 $bucket_name    = str_replace(array('.', '-'), ' ', $server_name);
@@ -53,10 +54,12 @@ $bucket_name    = str_replace(array('.', '-'), ' ', $server_name);
                                         <p>Create a Google Cloud Project and bucket that will store your WordPress media.</p>
                                     </div>
                                     <div class="wpStateLess-userinfo">
-                                        <img class="user-photo img-circle" src="<?php echo ud_get_stateless_media()->path( 'static/images/author-image.png'); ?>" alt="">
-                                        <div class="wpStateLess-user-detais">
-                                            <h4><span class="user-name">Paresh Khatri</span> <a class="logout" href="#google-logout">Logout</a></h4>
-                                            <p class="user-email">paresh.khatri@usabilitydynamics.com</p>
+                                        <div class="photo-wrapper">
+                                            <img class="user-photo img-circle" src="<?php echo ud_get_stateless_media()->path( 'static/images/author-image.png'); ?>" alt="">
+                                        </div>
+                                        <div class="wpStateLess-user-detais" style="display: none;">
+                                            <h4><span class="user-name"></span> <a class="logout" href="#google-logout">Logout</a></h4>
+                                            <p class="user-email"></p>
                                         </div>
                                     </div>
                                     <div class="wpStateLess-step-setup-form">
@@ -142,7 +145,7 @@ $bucket_name    = str_replace(array('.', '-'), ' ', $server_name);
                                         <h3>Congrats, Your Setup is Complete</h3>
                                         <p>Any media file you upload to WordPress will now be uploaded to Google and served to your users from Google servers! A background process is now running that will upload any existing media into Google Cloud Storage. </p>
                                     </div>
-                                    <p>To further customize your stateless media setup, visit the <a href="<?php echo admin_url('options-media.php#stateless-media');?>">settings panel!</a></p>
+                                    <p>To further customize your stateless media setup, visit the <a class="btn-link" href="<?php echo admin_url('options-media.php#stateless-media');?>">settings panel!</a></p>
                                     <a href="<?php echo admin_url('media-new.php');?>" class="btn btn-green">Upload Something!</a>
                                 </div>
                             </div>

@@ -326,7 +326,7 @@
 .wpStateLess-userinfo img {
 	float: left;
 	width: 60px;
-	height: :60px;
+	height:60px;
 }
 .wpStateLess-userinfo .wpStateLess-user-detais {
 	padding-left: 20px;
@@ -338,17 +338,17 @@
 	font-weight: 400;
 }
 
-.wpStateLess-userinfo .wpStateLess-user-detais h4 a.logout {
+.wpStateLess-userinfo .wpStateLess-user-detais a.logout {
 	display: inline-block;
 	margin-left: 10px;
 	border-radius: 30px;
 	border: 1px solid #6fd359;
 	padding: 5px 20px;
-	display: inline-block; 
 	color: #6fd359;
 	font-size: 14px;
 	font-weight: 600;
 	font-style: italic;
+	line-height: 1.1;
 }
 .wpStateLess-userinfo .wpStateLess-user-detais > * {
 	margin-bottom: 0px;
@@ -454,9 +454,12 @@
 	cursor: pointer;
 	background: #fbfbfb;
 }
-.wpStateLess-existing .btn {
+.wpStateLess-existing .create-billing-account {
 	margin-top: 15px;
 	font-size: 18px;
+	margin-left: 20px;
+	height: 40px;
+	line-height: 38px;
 }
 #wpStateLess-popup {
 	display: none;
@@ -547,4 +550,77 @@ body.wpStateLess-pops-active {
 
 .wpStateLess-loading span:nth-child(3) {
     animation-delay: .4s;
+}
+
+@media only screen and (max-width: 767px) {
+	#wp-stateless-wrapper {
+		/*padding-bottom: 0px;*/
+	}
+	.wpStateLess-setup-step-bars > ul, .wpStateLess-valigncenter {
+		display: block !important;
+	}
+	.wpStateLess-s-plan {
+		margin: 20px 0px;
+	}
+	.wpStateLess-setup-step-bars > ul > li {
+		-moz-flex: 0 1 auto;
+		-ms-flex: 0 1 auto;
+		-webkit-flex: 0 1 auto; 
+		flex: 0 1 auto;
+		padding: 15px;
+		text-align: left; 
+		border-bottom: 1px solid #f2f2f2;
+	}
+	.wpStateLess-setup-step-bars > ul > li::after {
+		display: none;
+	}
+	.wpStateLess-header-bg {
+		background-size: 155%;
+	}
+	.wpStateLess-s-step.step-google-login img {
+		max-width: 100%;
+	}
+	.wpStateLess-s-step{
+		padding: 20px;
+	}
+	.wpStateLess-userinfo {
+		display: block;
+		text-align: center;
+		margin: 25px 0px;
+	}
+	.photo-wrapper {
+		margin-bottom: 10px;
+	}
+	.wpStateLess-userinfo img {
+		float: none;
+	}
+	.wpStateLess-userinfo .wpStateLess-user-detais {
+		padding-left: 0px;
+	}
+	.wpStateLess-userinfo .wpStateLess-user-detais .user-name{
+		display: block;
+		padding-bottom: 7px;
+	}
+	.wpStateLess-userinfo .wpStateLess-user-detais a.logout {
+		margin-left: 0px;
+	}
+
+	a.btn.btn-green.create-billing-account {
+		max-width: 100%;
+		white-space: normal;
+		height: auto;
+		line-height: normal;
+		padding: 10px 10px;
+		margin-left: 10px;
+		margin-right: 10px;
+	}
+
+	/* Final step */
+	.wpStateLess-s-step.step-final {
+		font-size: 16px;
+	}
+	.wpStateLess-s-step.step-final .btn-link{
+		line-height: 50px;
+		display: inline-block;
+	}
 }

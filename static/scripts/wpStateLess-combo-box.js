@@ -48,28 +48,23 @@
 			_input.on( 'change keyup', function(event){
 				event.stopPropagation();
 				event.stopImmediatePropagation();
-				var originalValue = jQuery(this).val().replace(/\(.*/,''); // Removing everithing after (
-				var value = originalValue.toLowerCase()
-							.replace(/\s/g, '-') // replacing space with -
-							.replace(/^-+|-+$/g,''); // Trim hyphens.
-				var regex = /(^[a-zA-Z][\w-]{3,28}[\w]$)/;
-				var match = regex.exec(value);
+				var response = {};
 
-				jQuery('.wpStateLess-input-dropdown', _this).removeClass('active');
-				list.children().removeClass('active');
-				_new.parent().addClass('active');
+				var resp = jQuery(this).wppStatelessValidate({}, response);
 
-				if(value == 'localhost'){
+				if(response.id == 'localhost'){
 					_this.find('.error').show().html("localhost is not acceptable.");
 				}
-				else if(!match || !match.length){
-					_this.find('.error').show().html("Name can contain lowercase alphanumeric characters and hyphens. It must start with a letter. Trailing hyphens are prohibited.");
+				if(!response.success){
+					_this.find('.error').show().html(response.message);
+					_new.hide();
 				}else{
 					_this.find('.error').hide();
-					_new.html( originalValue + " (" + value + ")" );
-					_new.parent().attr('data-id', value).attr('data-name', originalValue);
-					_id.val(value);
+					_new.html( response.pName + " (" + response.id + ")" ).show();
 				}
+
+				_new.parent().attr('data-id', response.id).attr('data-name', response.pName);
+				_id.val(response.id);
 				
 			});
 

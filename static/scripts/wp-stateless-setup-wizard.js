@@ -6,6 +6,7 @@ jQuery(document).ready(function ($) {
 	var setupSteps = setupStepContainer.find('.wpStateLess-s-step');
 	var stepSetupProject = setupSteps.find('.step-setup-project');
 	var userInfo = setupSteps.find('.wpStateLess-userinfo');
+	var userDetails = userInfo.find('.wpStateLess-user-detais');
 	var setupForm = setupSteps.find('.wpStateLess-step-setup-form');
 	var projectDropdown = setupForm.find('.wpStateLess-combo-box.project');
 	var bucketDropdown = setupForm.find('.wpStateLess-combo-box.bucket');
@@ -47,8 +48,68 @@ jQuery(document).ready(function ($) {
 	// Remove any warning shown.
 	statelessWrapper.siblings().remove();
 
+	setupForm.find('.wpStateLess-combo-box.project .name').wppStatelessValidate({
+		name: {
+			empty:{
+				break: true,
+				regex: /.+/,
+				errorMessage: 'Project name can\'t be empty.',
+			},
+			length:{
+				regex: /^.{5,30}$/,
+				errorMessage: 'Project name must be between 5 and 30 characters.',
+			},
+			char:{
+				regex: /[a-zA-Z0-9-'"\s!]/,
+				errorMessage: 'Project name has invalid characters. Enter letters, numbers, quotes, hyphens, spaces or exclamation points.'
+			},
+		},
+		id: {
+			replace: {
+				''	: /\s/g,
+				'-'	: /^-+|-+$/g,
+				'-'	: '!',
+				'-'	: /-+/g	,
+				''	: '"',
+				''	: '\'',
+				''	: /\(.*/,
+			},
+			regex: /[a-z][a-z0-9-\s]{3,28}[a-z0-9]/ // 
+		},
+	});
+	setupForm.find('.wpStateLess-combo-box.bucket .name').wppStatelessValidate({
+		name: {
+			empty:{
+				break: true,
+				regex: /.+/,
+				errorMessage: 'Project name can\'t be empty.',
+			},
+			length:{
+				regex: /^.{5,30}$/,
+				errorMessage: 'Project name must be between 5 and 30 characters.',
+			},
+			char:{
+				regex: /[a-zA-Z0-9-'"\s!]/,
+				errorMessage: 'Project name has invalid characters. Enter letters, numbers, quotes, hyphens, spaces or exclamation points.'
+			},
+		},
+		id: {
+			replace: {
+				''	: /\s/g,
+				'-'	: /^-+|-+$/g,
+				'-'	: '!',
+				'-'	: /-+/g	,
+				''	: '"',
+				''	: '\'',
+				''	: /\(.*/,
+			},
+			regex: /[a-z][a-z0-9-\s]{3,28}[a-z0-9]/ // 
+		},
+	});
+
 	// Binding text input to create new in dropdown
 	setupForm.find('.wpStateLess-combo-box').wpStatelessComboBox();
+
 	
 	statelessWrapper.find('.learn-more').on('click', function(event){
 		event.preventDefault();
@@ -65,6 +126,7 @@ jQuery(document).ready(function ($) {
 			userInfo.find('img.user-photo').attr('src', profile.photo);
 			userInfo.find('.user-name').html(profile.name);
 			userInfo.find('.user-email').html(profile.email);
+			userDetails.show();
 		  });
 
 		var projects = wp.stateless.listProjects()
@@ -289,5 +351,22 @@ jQuery(document).ready(function ($) {
 		
 		return false;
 	});
+	var resizeId;
+	var repositionLogoutButton = function(e) {
+		if(jQuery(window).width() && jQuery(window).width() < 767){
+			userDetails.append(userInfo.find('h4 .logout'));
+		}
+		else{
+			userDetails.find('h4').append(userDetails.find('> .logout'));
+		}
+	};
+
+	repositionLogoutButton();
+
+	jQuery(window).on('orientationchange', repositionLogoutButton);
+	jQuery(window).on('resize', function(e) {
+		clearTimeout(resizeId);
+		resizeId = setTimeout(repositionLogoutButton, 400);
+	} );
 
 });
