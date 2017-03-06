@@ -111,7 +111,8 @@ $bucket_name    = str_replace(array('.', '-'), ' ', $server_name);
                                                     <h4>Google Cloud Billing</h4>
                                                     <p>You will need to set a billing account in order to activate your Google Cloud Storage.</p>
                                                 </label>
-                                                <div class="wpStateLess-combo-box billing-account">
+                                                <a  href="https://console.cloud.google.com/billing" class="btn btn-green create-billing-account no-billing-account">Create New Billing Account <span class="wpStateLess-loading">(Checking <span>.</span><span>.</span><span>.</span>)</span></a>
+                                                <div class="wpStateLess-combo-box billing-account" style="display: none;">
                                                     <input type="hidden" class="id" value="">
                                                     <input type="text" class="name" value="" readonly="readonly" placeholder="Select Billing Account">
                                                     <div class="wpStateLess-input-dropdown">
@@ -122,13 +123,13 @@ $bucket_name    = str_replace(array('.', '-'), ' ', $server_name);
                                                         <div class="wpStateLess-existing">
                                                             <h5>Existing Projects</h5>
                                                             <ul></ul>
-                                                            <a class="btn btn-green create-billing-account">Create New Billing Account</a>
+                                                            <a  href="https://console.cloud.google.com/billing" class="btn btn-green create-billing-account">Create New Billing Account <span class="wpStateLess-loading">(Checking <span>.</span><span>.</span><span>.</span>)</span></a>
                                                         </div>
                                                     </div>
                                                 </div>
                                             </div>
                                             <div class="wpStateLess-single-step-input text-center input-submit">
-                                                <a class="btn btn-green get-json-key" type="submit">Continue <p class="wpStateLess-loading">(Checking <span>.</span><span>.</span><span>.</span>)</p></a>
+                                                <a class="btn btn-green get-json-key" type="submit">Continue <span class="wpStateLess-loading">(Checking <span>.</span><span>.</span><span>.</span>)</span></a>
                                             </div>
                                         </form>
                                     </div>

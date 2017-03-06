@@ -11,6 +11,7 @@ jQuery(document).ready(function ($) {
 	var projectDropdown = setupForm.find('.wpStateLess-combo-box.project');
 	var bucketDropdown = setupForm.find('.wpStateLess-combo-box.bucket');
   	var billingDropdown = setupForm.find('.wpStateLess-combo-box.billing-account');
+  	var noBillingButton = billingDropdown.parent().find('.create-billing-account.no-billing-account');
 
 	var checkAuthentication = function checkAuthentication(options){
 		// Checking if we have access token is session.
@@ -38,10 +39,14 @@ jQuery(document).ready(function ($) {
 	var listBillingAccounts = function listBillingAccounts() {
 		return wp.stateless.listBillingAccounts()
 		  .done(function(accounts){
-		  	if(accounts && accounts.length)
+		  	if(accounts && accounts.length){
+		  		noBillingButton.hide();
 				billingDropdown.wpStatelessComboBox({items:accounts, selected: 0}).show();
-			else
+		  	}
+			else{
 				billingDropdown.hide();
+		  		noBillingButton.show();
+			}
 		  });
 	}
 
@@ -74,7 +79,7 @@ jQuery(document).ready(function ($) {
 				''	: '\'',
 				''	: /\(.*/,
 			},
-			regex: /[a-z][a-z0-9-\s]{3,28}[a-z0-9]/ // 
+			regex: /[a-z][a-z0-9\-\s]{3,28}[a-z0-9]/ // 
 		},
 	});
 	setupForm.find('.wpStateLess-combo-box.bucket .name').wppStatelessValidate({
@@ -82,15 +87,15 @@ jQuery(document).ready(function ($) {
 			empty:{
 				break: true,
 				regex: /.+/,
-				errorMessage: 'Project name can\'t be empty.',
+				errorMessage: 'Bucket name can\'t be empty.',
 			},
 			length:{
 				regex: /^.{5,30}$/,
-				errorMessage: 'Project name must be between 5 and 30 characters.',
+				errorMessage: 'Bucket name must be between 5 and 30 characters.',
 			},
 			char:{
-				regex: /[a-zA-Z0-9-'"\s!]/,
-				errorMessage: 'Project name has invalid characters. Enter letters, numbers, quotes, hyphens, spaces or exclamation points.'
+				regex: /[a-z0-9][a-z0-9\-]{3,28}[a-z0-9]/,
+				errorMessage: 'A bucket name can contain lowercase alphanumeric characters, hyphens, and underscores. Bucket names must start and end with an alphanumeric character.',
 			},
 		},
 		id: {
@@ -103,7 +108,16 @@ jQuery(document).ready(function ($) {
 				''	: '\'',
 				''	: /\(.*/,
 			},
-			regex: /[a-z][a-z0-9-\s]{3,28}[a-z0-9]/ // 
+			regex: /[a-z][a-z0-9\-]{3,28}[a-z0-9]/ // 
+		},
+	});
+	setupForm.find('.wpStateLess-combo-box.billing-account .name').wppStatelessValidate({
+		name: {
+			empty:{
+				break: true,
+				regex: /.+/,
+				errorMessage: 'Select a billing account.',
+			},
 		},
 	});
 
@@ -191,23 +205,33 @@ jQuery(document).ready(function ($) {
 
 	statelessWrapper.on('click', '.create-billing-account', function(event) {
 		event.preventDefault();
+		var counter = 5;
+		var interval = 100;
 		var _this = jQuery(this)
 		var href = _this.attr('href');
 		var new_window = window.open(href,'_newtab');
 
-		_this.find('.wpStateLess-loading').addClass('active');
-
+		var loader = _this.find('.wpStateLess-loading');
+		loader.addClass('active');
 		var billingChecker = setInterval(function() {
-			if(new_window.closed == true){
-				listBillingAccounts().done(function(argument) {
-					console.log("billingAccounts loaded");
-					jQuery('.wpStateLess-user-has-no-project-billing', statelessWrapper).hide();
-					setupForm.show();
+			if(new_window.closed == true || counter % 5 == 0){
+				counter += 5;
+				if(new_window.closed == true){
+					clearInterval(billingChecker);
+					loader.removeClass('active');
+				}
+
+				listBillingAccounts().done(function(accounts) {
+					if(accounts && accounts.length){
+						jQuery('.wpStateLess-user-has-no-project-billing', statelessWrapper).hide();
+						setupForm.show();
+						clearInterval(billingChecker);
+						loader.removeClass('active');
+					}
 				});
-				clearInterval(billingChecker);
-				console.log("window closed");
 			}
-		}, 100);
+			console.log('Checking..');
+		}, interval);
 
 		return false;
 	})

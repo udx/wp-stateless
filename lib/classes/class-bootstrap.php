@@ -461,10 +461,11 @@ namespace wpCloud\StatelessMedia {
             wp_enqueue_style( 'wp-stateless-setup-wizard', $this->path( 'static/styles/wp-stateless-setup-wizard.css', 'url'  ), array(), self::$version );
 
             wp_enqueue_script( 'jquery.history', ud_get_stateless_media()->path( 'static/scripts/jquery.history.js', 'url'  ), array( 'jquery' ), ud_get_stateless_media()->version, true );
-            wp_enqueue_script( 'wp-stateless-validation', ud_get_stateless_media()->path( 'static/scripts/validation.js', 'url'  ), array( 'jquery' ), ud_get_stateless_media()->version, true );
-            wp_enqueue_script( 'wp-stateless-comboBox', ud_get_stateless_media()->path( 'static/scripts/wpStateLess-combo-box.js', 'url'  ), array( 'jquery' ), ud_get_stateless_media()->version, true );
+            wp_enqueue_script( 'wp-stateless-validation', ud_get_stateless_media()->path( 'static/scripts/jquery.validation.js', 'url'  ), array( 'jquery' ), ud_get_stateless_media()->version, true );
+            wp_enqueue_script( 'wp-stateless-loading', ud_get_stateless_media()->path( 'static/scripts/jquery.loading.js', 'url'  ), array( 'jquery' ), ud_get_stateless_media()->version, true );
+            wp_enqueue_script( 'wp-stateless-comboBox', ud_get_stateless_media()->path( 'static/scripts/jquery.wpStateLess-combo-box.js', 'url'  ), array( 'jquery' ), ud_get_stateless_media()->version, true );
             wp_enqueue_script( 'wp-stateless-setup', ud_get_stateless_media()->path( 'static/scripts/wp-stateless-setup.js', 'url'  ), array( 'jquery-ui-core', 'wp-api', 'jquery.history' ), ud_get_stateless_media()->version, true );
-            wp_enqueue_script( 'wp-stateless-setup-wizard-js', ud_get_stateless_media()->path( 'static/scripts/wp-stateless-setup-wizard.js', 'url'  ), array( 'jquery', 'wp-api', 'wp-stateless-comboBox', 'wp-stateless-validation', 'wp-stateless-setup' ), ud_get_stateless_media()->version, true );
+            wp_enqueue_script( 'wp-stateless-setup-wizard-js', ud_get_stateless_media()->path( 'static/scripts/wp-stateless-setup-wizard.js', 'url'  ), array( 'jquery', 'wp-api', 'wp-stateless-setup', 'wp-stateless-comboBox', 'wp-stateless-validation', 'wp-stateless-loading' ), ud_get_stateless_media()->version, true );
             break;
 
           default: break;

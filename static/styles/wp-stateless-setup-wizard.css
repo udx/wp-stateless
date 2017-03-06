@@ -461,6 +461,15 @@
 	height: 40px;
 	line-height: 38px;
 }
+.wpStateLess-existing .create-billing-account:focus {
+	outline: none;
+}
+.create-billing-account.no-billing-account {
+	height: auto;
+	line-height: initial;
+	margin-top: 5px;
+	padding: 12px 30px;
+}
 #wpStateLess-popup {
 	display: none;
 	position: fixed;

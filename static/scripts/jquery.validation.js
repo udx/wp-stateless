@@ -32,7 +32,7 @@
             }
         });
 
-        if(response.success == false){
+        if(response.success == false || typeof settings.id == 'undefined' || settings.id.regex == 'undefined'){
             return response;
         }
 

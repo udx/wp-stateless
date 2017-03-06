@@ -216,6 +216,10 @@ wp.stateless = {
     }).done(function(responseData){
       var projects = [];
 
+      if(typeof responseData.projects == 'undefined'){
+        responseData.projects = {};
+      }
+
       responseData.projects = jQuery.grep(responseData.projects, function(project){
         return project.lifecycleState == "ACTIVE";
       });
