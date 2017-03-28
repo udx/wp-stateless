@@ -375,8 +375,15 @@
 .wpStateLess-combo-box {
 	position: relative;
 }
+.wpStateLess-combo-box.has-error input.name{
+	border-color: #f07373
+}
 .wpStateLess-combo-box .error{
+	display: none;
 	margin-left: 0px;
+}
+.wpStateLess-combo-box.has-error .error{
+	display: block;
 }
 .wpStateLess-combo-box > input.name {
     border: 1px solid #d9d9d9;

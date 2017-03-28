@@ -14,6 +14,7 @@
 			var _input = _this.find('.name');
 			var existing = _this.find('.wpStateLess-existing');
 			var currentAccount = _this.find('.wpStateLess-current-account');
+			var dropDown = jQuery('.wpStateLess-input-dropdown', _this);
 			var list = existing.find('ul');
 
 			jQuery('h5', existing).hide();
@@ -37,11 +38,11 @@
 				return;
 
 			_input.focus(function(){
-				jQuery('.wpStateLess-input-dropdown', _this).addClass('active');
+				dropDown.addClass('active');
 			});
 			_input.focusout(function(){
 				setTimeout(function(){
-					jQuery('.wpStateLess-input-dropdown', _this).removeClass('active');
+					dropDown.removeClass('active');
 				}, 100);
 			});
 
@@ -52,14 +53,16 @@
 
 				var resp = jQuery(this).wppStatelessValidate({}, response);
 
+				dropDown.removeClass('active');
+
 				if(response.id == 'localhost'){
-					_this.find('.error').show().html("localhost is not acceptable.");
+					_this.addClass('has-error').find('.error').html("localhost is not acceptable.");
 				}
 				if(!response.success){
-					_this.find('.error').show().html(response.message);
+					_this.addClass('has-error').find('.error').html(response.message);
 					_new.hide();
 				}else{
-					_this.find('.error').hide();
+					_this.removeClass('has-error').find('.error');
 					_new.html( response.pName + " (" + response.id + ")" ).show();
 				}
 

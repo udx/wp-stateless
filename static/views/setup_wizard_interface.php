@@ -18,8 +18,6 @@ $bucket_name    = str_replace(array('.', '-'), ' ', $server_name);
                         <div class="wpStateLess-welcome-text">
                             <h1>Stateless Setup</h1>
                             <p>Save your media files at one place. Start your free trial now</p>
-                            <!-- <a class="btn btn-green" href="<?php //echo admin_url('upload.php?page=stateless-setup-wizard&step=splash-screen');?>">Back to splash screen</a> -->
-
                         </div>
                     </div>
                 </div>
@@ -70,7 +68,6 @@ $bucket_name    = str_replace(array('.', '-'), ' ', $server_name);
                                                     <p>By default we create a new project for you, or if you prefer, select an existing project.</p>
                                                 </label>
                                                 <div class="wpStateLess-combo-box project">
-                                                    <div class="error" style="display: none;"></div>
                                                     <input type="hidden" class="id" value="<?php echo $project_id;?>">
                                                     <input type="text" class="name" value="<?php echo $project_name;?>" placeholder="Select or Create New Project">
                                                     <div class="wpStateLess-input-dropdown">
@@ -83,6 +80,7 @@ $bucket_name    = str_replace(array('.', '-'), ' ', $server_name);
                                                             <ul></ul>
                                                         </div>
                                                     </div>
+                                                    <div class="error"></div>
                                                 </div>
                                             </div>
                                             <div class="wpStateLess-single-step-input">
@@ -91,7 +89,6 @@ $bucket_name    = str_replace(array('.', '-'), ' ', $server_name);
                                                     <p>By default we create a new bucket for you, or if you prefer, select an existing bucket.</p>
                                                 </label>
                                                 <div class="wpStateLess-combo-box bucket">
-                                                    <div class="error" style="display: none;"></div>
                                                     <input type="hidden" class="id" value="stateless-<?php echo $bucket_id;?>">
                                                     <input type="text" class="name" value="Stateless <?php echo $bucket_name;?>" placeholder="Select or Create New Bucket">
                                                     <div class="wpStateLess-input-dropdown">
@@ -104,6 +101,7 @@ $bucket_name    = str_replace(array('.', '-'), ' ', $server_name);
                                                             <ul></ul>
                                                         </div>
                                                     </div>
+                                                    <div class="error"></div>
                                                 </div>
                                             </div>
                                             <div class="wpStateLess-single-step-input">
