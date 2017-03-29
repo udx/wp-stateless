@@ -640,7 +640,7 @@ body.wpStateLess-pops-active {
 		display: inline-block;
 	}
 }
-@media screen and (min-width: 782px){
+@media (min-width: 782px) and (max-width: 992px) {
 	.container {
 		width: auto;
 	}
