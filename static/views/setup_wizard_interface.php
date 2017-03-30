@@ -5,7 +5,7 @@ $project_name   = substr($id, 0, 30);
 $project_id     = substr($id, 0, 23) . "-" . rand(100000, 999999);
 
 $bucket_id      = substr($id, 0, 30);
-$bucket_name    = str_replace(array('.', '-'), ' ', substr($server_name, 0, 30););
+$bucket_name    = str_replace(array('.', '-'), ' ', substr($server_name, 0, 30));
 
 ?>
 <div id="wp-stateless-wrapper">
