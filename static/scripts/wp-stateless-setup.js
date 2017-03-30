@@ -423,7 +423,11 @@ wp.stateless = {
       if(typeof responseData.billingAccountName != 'undefined'){
         responseData.billingAccountName = responseData.billingAccountName.replace('billingAccounts/', '');
       }
-      wp.stateless.projects[projectID]['billingInfo'] = responseData;
+
+      if(typeof responseData.billingEnabled != 'undefined' && responseData.billingEnabled == true){
+        wp.stateless.projects[projectID]['billingInfo'] = responseData;
+      }
+
       defer.resolve(responseData);
     }).fail(function() {
       defer.reject();
