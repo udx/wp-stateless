@@ -160,6 +160,7 @@ namespace wpCloud\StatelessMedia {
              * Extends metadata by adding GS information.
              */
             add_filter( 'wp_get_attachment_metadata', array( $this, 'wp_get_attachment_metadata' ), 10, 2 );
+            add_filter( 'wp_update_attachment_metadata', array( $this, 'add_media' ), 100, 2 );
 
             /**
              * Add/Edit Media
