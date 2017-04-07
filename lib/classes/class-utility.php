@@ -145,7 +145,7 @@ namespace wpCloud\StatelessMedia {
       public static function add_media( $metadata, $attachment_id ) {
 
         /* Get metadata in case if method is called directly. */
-        if( current_filter() !== 'wp_generate_attachment_metadata' ) {
+        if( current_filter() !== 'wp_generate_attachment_metadata' && current_filter() !== 'wp_update_attachment_metadata' ) {
           $metadata = wp_get_attachment_metadata( $attachment_id );
         }
 
@@ -161,7 +161,7 @@ namespace wpCloud\StatelessMedia {
 
           $file = wp_normalize_path( $metadata[ 'file' ] );
 
-          $bucketLink = 'https://storage.googleapis.com/' . ud_get_stateless_media()->get( 'sm.bucket' );
+          $bucketLink = apply_filters('wp_stateless_bucket_link', 'https://storage.googleapis.com/' . ud_get_stateless_media()->get( 'sm.bucket' ));
 
           $_metadata = array(
             "width" => isset( $metadata[ 'width' ] ) ? $metadata[ 'width' ] : null,
