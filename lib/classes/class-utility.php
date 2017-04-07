@@ -145,7 +145,7 @@ namespace wpCloud\StatelessMedia {
       public static function add_media( $metadata, $attachment_id ) {
 
         /* Get metadata in case if method is called directly. */
-        if( current_filter() !== 'wp_generate_attachment_metadata' ) {
+        if( current_filter() !== 'wp_generate_attachment_metadata' && current_filter() !== 'wp_update_attachment_metadata' ) {
           $metadata = wp_get_attachment_metadata( $attachment_id );
         }
 
