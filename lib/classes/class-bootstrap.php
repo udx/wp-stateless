@@ -541,6 +541,28 @@ namespace wpCloud\StatelessMedia {
           $is_intermediate = true;
         }
         //die( '<pre>' . print_r( $intermediate, true ) . '</pre>' );
+
+        /**
+         * maybe try to get images info from sm_cloud
+         * this case may happen when no local files
+         * @author korotkov@ud
+         */
+        if ( !$width && !$height ) {
+          $sm_cloud = get_post_meta( $id, 'sm_cloud', true );
+          if ( !empty( $sm_cloud['sizes'] ) && !empty( $sm_cloud['sizes'][$size] ) ) {
+            global $_wp_additional_image_sizes;
+
+            $img_url = !empty( $sm_cloud['sizes'][$size]['fileLink'] ) ? $sm_cloud['sizes'][$size]['fileLink'] : $img_url;
+
+            if ( !empty( $_wp_additional_image_sizes[ $size ] ) ) {
+              $width = !empty( $_wp_additional_image_sizes[ $size ]['width'] ) ? $_wp_additional_image_sizes[ $size ]['width'] : $width;
+              $height = !empty( $_wp_additional_image_sizes[ $size ]['height'] ) ? $_wp_additional_image_sizes[ $size ]['height'] : $height;
+            }
+
+            $is_intermediate = true;
+          }
+        }
+
         if ( !$width && !$height && isset( $meta['width'], $meta['height'] ) ) {
 
           //** any other type: use the real image */
