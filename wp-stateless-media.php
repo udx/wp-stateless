@@ -8,7 +8,7 @@
  * Text Domain: stateless-media
  * Author URI: https://www.usabilitydynamics.com
  *
- * Copyright 2012 - 2016 Usability Dynamics, Inc.  ( email : info@usabilitydynamics.com )
+ * Copyright 2012 - 2017 Usability Dynamics, Inc.  ( email : info@usabilitydynamics.com )
  *
  */
 

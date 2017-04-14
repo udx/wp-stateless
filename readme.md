@@ -7,7 +7,6 @@ wpCloud Stateless Media for GCE
 [![Issues - Backlog](https://badge.waffle.io/wpCloud/wp-stateless.png?label=backlog&title=Backlog)](http://waffle.io/wpCloud/wp-stateless/)
 [![Issues - Active](https://badge.waffle.io/wpCloud/wp-stateless.png?label=in progress&title=Active)](http://waffle.io/wpCloud/wp-stateless/)
 ***
-[![Dependency Status](https://gemnasium.com/wpCloud/wp-stateless.svg)](https://gemnasium.com/wpCloud/wp-stateless)
 [![Scrutinizer Quality](http://img.shields.io/scrutinizer/g/wpCloud/wp-stateless.svg)](https://scrutinizer-ci.com/g/wpCloud/wp-stateless)
 [![Scrutinizer Coverage](http://img.shields.io/scrutinizer/coverage/g/wpCloud/wp-stateless.svg)](https://scrutinizer-ci.com/g/wpCloud/wp-stateless)
 [![Packagist Vesion](http://img.shields.io/packagist/v/wpCloud/wp-stateless.svg)](https://packagist.org/packages/wpCloud/wp-stateless)

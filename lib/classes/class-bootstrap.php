@@ -25,7 +25,7 @@ namespace wpCloud\StatelessMedia {
        * @property $version
        * @type {Object}
        */
-      public static $version = '1.9.1';
+      public static $version = '1.9.2';
 
       /**
        * Singleton Instance Reference.
@@ -41,6 +41,12 @@ namespace wpCloud\StatelessMedia {
        * Instantaite class.
        */
       public function init() {
+
+        // Parse feature falgs, set constants.
+        $this->parse_feature_flags();
+
+        // Invoke REST API
+        add_action( 'rest_api_init', array( $this, 'api_init' ) );
 
         /**
          * Register SM metaboxes
@@ -154,6 +160,7 @@ namespace wpCloud\StatelessMedia {
              * Extends metadata by adding GS information.
              */
             add_filter( 'wp_get_attachment_metadata', array( $this, 'wp_get_attachment_metadata' ), 10, 2 );
+            add_filter( 'wp_update_attachment_metadata', array( $this, 'add_media' ), 100, 2 );
 
             /**
              * Add/Edit Media
@@ -224,6 +231,27 @@ namespace wpCloud\StatelessMedia {
           'side',
           'low'
         );
+      }
+
+      /**
+       * Define REST API.
+       *
+       * // https://usabilitydynamics-sandbox-uds-io-stateless-testing.c.rabbit.ci/wp-json/wp-stateless/v1
+       *
+       * @author potanin@UD
+       */
+      public function api_init() {
+
+        register_rest_route( 'wp-stateless/v1', '/status', array(
+          'methods' => 'GET',
+          'callback' => array( 'wpCloud\StatelessMedia\API', 'status' ),
+        ) );
+
+        register_rest_route( 'wp-stateless/v1', '/jobs', array(
+          'methods' => 'GET',
+          'callback' => array( 'wpCloud\StatelessMedia\API', 'jobs' ),
+        ) );
+
       }
 
       /**
@@ -399,12 +427,19 @@ namespace wpCloud\StatelessMedia {
       /**
        *
        * @todo: it should not be loaded everywhere. peshkov@UD
+       * @param $hook
        */
       public function admin_enqueue_scripts( $hook ) {
 
         wp_enqueue_style( 'wp-stateless', $this->path( 'static/styles/wp-stateless.css', 'url'  ), array(), self::$version );
 
         switch( $hook ) {
+
+          case 'options-media.php':
+            //wp_enqueue_script( 'wp-api' );
+
+            wp_enqueue_script( 'wp-stateless-setup', ud_get_stateless_media()->path( 'static/scripts/wp-stateless-setup.js', 'url'  ), array( 'jquery-ui-core', 'wp-api' ), ud_get_stateless_media()->version, true );
+          break;
 
           case 'upload.php':
 
@@ -420,6 +455,16 @@ namespace wpCloud\StatelessMedia {
               wp_enqueue_script( 'wp-stateless-uploads-js', $this->path( 'static/scripts/wp-stateless-uploads.js', 'url'  ), array( 'jquery' ), self::$version );
             }
 
+            break;
+
+          case $this->settings->setup_wizerd_ui:
+            wp_enqueue_style( 'wp-stateless-bootstrap', $this->path( 'static/styles/bootstrap.min.css', 'url'  ), array(), '3.3.7' );
+            wp_enqueue_style( 'wp-stateless-setup-wizard', $this->path( 'static/styles/wp-stateless-setup-wizard.css', 'url'  ), array(), self::$version );
+
+            wp_enqueue_script( 'jquery.history', ud_get_stateless_media()->path( 'static/scripts/jquery.history.js', 'url'  ), array( 'jquery' ), ud_get_stateless_media()->version, true );
+            wp_enqueue_script( 'wpStatelessComboBox', ud_get_stateless_media()->path( 'static/scripts/wpStateLess-combo-box.js', 'url'  ), array( 'jquery' ), ud_get_stateless_media()->version, true );
+            wp_enqueue_script( 'wp-stateless-setup', ud_get_stateless_media()->path( 'static/scripts/wp-stateless-setup.js', 'url'  ), array( 'jquery-ui-core', 'wp-api', 'jquery.history' ), ud_get_stateless_media()->version, true );
+            wp_enqueue_script( 'wp-stateless-setup-wizard-js', ud_get_stateless_media()->path( 'static/scripts/wp-stateless-setup-wizard.js', 'url'  ), array( 'jquery', 'wp-api', 'wpStatelessComboBox' ), ud_get_stateless_media()->version, true );
             break;
 
           default: break;
@@ -496,6 +541,28 @@ namespace wpCloud\StatelessMedia {
           $is_intermediate = true;
         }
         //die( '<pre>' . print_r( $intermediate, true ) . '</pre>' );
+
+        /**
+         * maybe try to get images info from sm_cloud
+         * this case may happen when no local files
+         * @author korotkov@ud
+         */
+        if ( !$width && !$height ) {
+          $sm_cloud = get_post_meta( $id, 'sm_cloud', true );
+          if ( !empty( $sm_cloud['sizes'] ) && !empty( $sm_cloud['sizes'][$size] ) ) {
+            global $_wp_additional_image_sizes;
+
+            $img_url = !empty( $sm_cloud['sizes'][$size]['fileLink'] ) ? $sm_cloud['sizes'][$size]['fileLink'] : $img_url;
+
+            if ( !empty( $_wp_additional_image_sizes[ $size ] ) ) {
+              $width = !empty( $_wp_additional_image_sizes[ $size ]['width'] ) ? $_wp_additional_image_sizes[ $size ]['width'] : $width;
+              $height = !empty( $_wp_additional_image_sizes[ $size ]['height'] ) ? $_wp_additional_image_sizes[ $size ]['height'] : $height;
+            }
+
+            $is_intermediate = true;
+          }
+        }
+
         if ( !$width && !$height && isset( $meta['width'], $meta['height'] ) ) {
 
           //** any other type: use the real image */
@@ -677,6 +744,52 @@ namespace wpCloud\StatelessMedia {
         $data[ 'url' ] = $data[ 'baseurl' ] . $data[ 'subdir' ];
 
         return $data;
+
+      }
+
+      /**
+       * Set Feature Flag constants by parsing composer.json
+       *
+       * @todo Make sure settings from DB can override these.
+       *
+       * @author potanin@UD
+       * @return array|mixed|null|object
+       */
+      public function parse_feature_flags( ) {
+
+        try {
+
+          $_raw = file_get_contents( Utility::normalize_path( $this->root_path ) . 'composer.json' );
+
+          $_parsed = json_decode( $_raw  );
+
+          // @todo Catch poorly formatted JSON.
+          if( !is_object( $_parsed  ) ) {
+            // throw new Error( "unable to parse."  );
+          }
+
+          foreach( (array) $_parsed->extra->featureFlags as $_feature ) {
+
+            if( !defined( $_feature->constant  ) ) {
+              define( $_feature->constant, $_feature->enabled );
+
+              if( $_feature->enabled ) {
+                Utility::log( 'Feature flag ' . $_feature->name . ', [' . $_feature->constant . '] enabled.' );
+              } else {
+                Utility::log( 'Feature flag ' . $_feature->name . ', [' . $_feature->constant . '] disabled.' );
+              }
+            }
+
+          }
+
+        } catch ( Exception $e ) {
+          Utility::log( 'Unable to parse [composer.json] feature flags. Error: [' . $e->getMessage() . ']' );
+          // echo 'Caught exception: ', $e->getMessage(), "\n";
+        }
+
+
+        return isset( $_parsed ) ? $_parsed : null;
+
 
       }
 
