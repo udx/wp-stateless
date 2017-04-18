@@ -203,7 +203,6 @@ namespace wpCloud\StatelessMedia {
        */
       public function register_network_settings() {
         ?>
-dfsdfsdf
         <h3 id="stateless-media-settings"><?php _e( 'Stateless Media Settings', ud_get_stateless_media()->domain ); ?></h3>
         <p><?php $this->section_callback(); ?></p>
         <div class="key_type"><label><b><?php _e('Service Account JSON', ud_get_stateless_media()->domain) ?></b></label>
