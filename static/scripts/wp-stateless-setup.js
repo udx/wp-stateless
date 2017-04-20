@@ -14,7 +14,6 @@
 wp.stateless = {
   access_token: '',
   projects: {},
-  serviceAccounts: {},
   selectedSettings: {},
 
 
@@ -38,8 +37,11 @@ wp.stateless = {
    */
   clearAccessToken: function clearAccessToken() {
     try {
+        var title = jQuery('head').find("title").text();
+        wp.stateless.access_token = null;
         sessionStorage.removeItem( 'wp.stateless.token' );
         sessionStorage.removeItem( 'wp.stateless.expiry_date' );
+        History.replaceState('', title, '?page=stateless-setup-wizard&step=google-login');
         return true;
     } catch( error ) {
       console.error( error.message );
@@ -77,7 +79,7 @@ wp.stateless = {
           wp.stateless.access_token = _token;
           sessionStorage.setItem( 'wp.stateless.token', _token );
           sessionStorage.setItem( 'wp.stateless.expiry_date', expiry_date );
-          History.replaceState('', title, '?page=stateless-setup-wizerd');
+          History.replaceState('', title, '?page=stateless-setup-wizard&step=setup-project');
         }
       }
 
@@ -149,24 +151,50 @@ wp.stateless = {
    * @param options
    */
   createProject: function createProject( options ) {
+    var defer = new jQuery.Deferred();
+    
+    if(!wp.stateless.getAccessToken()){
+      defer.reject();
+      return defer.promise("In valid access token.");
+    }
 
     jQuery.ajax({
       url: 'https://cloudresourcemanager.googleapis.com/v1/projects',
       method: "POST",
       data: JSON.stringify( options ),
     }).done(function( responseData  ) {
-      jQuery.ajax({
-        url: 'https://cloudresourcemanager.googleapis.com/v1/' + responseData.name,
-      }).done(function(responseData){
-        jQuery('#google-storage').trigger('stateless::projectCreated', options);
-      });
+      wp.stateless.createProjectProgress(responseData.name);
 
-    }).fail(function( data ) {
-      jQuery('#google-storage').trigger('stateless::projectCreated', false);
-      console.log( "error", "data.responseText", JSON.parse( data.responseText ) );
+      jQuery(document).on('wp-stateless-project-created-' + responseData.name, function(argument) {
+        defer.resolve(responseData);
+      });
+      jQuery(document).on('project-creation-faild-' + responseData.name, function(argument) {
+        defer.reject(responseData);
+      });
+    }).fail(function(responseData) {
+      defer.reject(responseData);
     });
 
 
+
+    return defer.promise();
+  },
+
+
+  createProjectProgress: function createProjectProgress(name){
+    jQuery.ajax({
+      url: 'https://cloudresourcemanager.googleapis.com/v1/' + name,
+    }).done(function(responseData){
+      if(typeof responseData.done != 'undefined' && responseData.done == true){
+        jQuery(document).trigger('wp-stateless-project-created-' + name);
+      }else{
+        setTimeout(function(argument) {
+          wp.stateless.createProjectProgress(name);
+        }, 800);
+      }
+    }).fail(function(responseData) {
+      jQuery(document).trigger('project-creation-faild-' + name);
+    });
   },
 
   /**
@@ -188,6 +216,10 @@ wp.stateless = {
     }).done(function(responseData){
       var projects = [];
 
+      if(typeof responseData.projects == 'undefined'){
+        responseData.projects = {};
+      }
+
       responseData.projects = jQuery.grep(responseData.projects, function(project){
         return project.lifecycleState == "ACTIVE";
       });
@@ -196,6 +228,7 @@ wp.stateless = {
         projects.push({id: item.projectId, name: item.name});
         wp.stateless.projects[item.projectId] = item;
         wp.stateless.projects[item.projectId]['buckets'] = {};
+        wp.stateless.projects[item.projectId]['serviceAccounts'] = {};
       });
 
       defer.resolve(projects);
@@ -216,7 +249,7 @@ wp.stateless = {
       return false;
 
     var promis = jQuery.ajax({
-      url: 'https://www.googleapis.com/storage/v1/b/?project=' + options.project,
+      url: 'https://www.googleapis.com/storage/v1/b/?project=' + options.projectId,
       method: "POST",
       data: JSON.stringify({name: options.name}),
     });
@@ -243,8 +276,9 @@ wp.stateless = {
       var buckets = [];
 
       jQuery.each(responseData.items, function(index, item){
-        buckets.push({id: item.id, name: item.name});
-        wp.stateless.projects[projectId]['buckets'] = {};
+        var bucket = {id: item.id, name: item.name};
+        buckets.push(bucket);
+        wp.stateless.projects[projectId]['buckets'][item.id] = bucket;
       });
 
       defer.resolve(buckets);
@@ -268,12 +302,13 @@ wp.stateless = {
       return false;
 
     var _promis = jQuery.ajax({
-      url: 'https://iam.googleapis.com/v1/projects/' + options.project + '/serviceAccounts',
+      url: 'https://iam.googleapis.com/v1/projects/' + options.projectId + '/serviceAccounts',
       //data: JSON.stringify({name: options.name}),
     });
 
     _promis.done(function(responseData){
-      console.log( 'getServiceAccounts:done', responseData );
+      console.log( 'getServiceAccounts:done', responseData.accounts );
+      wp.stateless.projects[options.projectId]['serviceAccounts'] = responseData.accounts;
 
     });
 
@@ -289,13 +324,12 @@ wp.stateless = {
    * @returns {boolean}
    */
   createServiceAccount: function createServiceAccount(options) {
-    console.log( 'createServiceAccount' );
 
     if(!wp.stateless.getAccessToken() || !options)
       return false;
 
     var promis = jQuery.ajax({
-      url: 'https://iam.googleapis.com/v1/projects/' + options.project + '/serviceAccounts',
+      url: 'https://iam.googleapis.com/v1/projects/' + options.projectId + '/serviceAccounts',
       method: "POST",
       data: JSON.stringify({
         accountId: options.accountId,
@@ -315,7 +349,6 @@ wp.stateless = {
    * @returns {boolean}
    */
   listServiceAccountKeys: function listServiceAccountKeys(options) {
-    console.log( 'createServiceAccount' );
 
     if(!wp.stateless.getAccessToken() || !options)
       return false;
@@ -334,7 +367,6 @@ wp.stateless = {
    * @returns {boolean}
    */
   createServiceAccountKeys: function createServiceAccountKeys(options) {
-    console.log( 'createServiceAccount' );
 
     if(!wp.stateless.getAccessToken() || !options)
       return false;
@@ -357,7 +389,6 @@ wp.stateless = {
    * @returns {boolean}
    */
   insertBucketAccessControls: function insertBucketAccessControls(options) {
-    console.log( 'createServiceAccount' );
 
     if(!wp.stateless.getAccessToken() || !options)
       return false;
@@ -378,39 +409,47 @@ wp.stateless = {
    * Doc: https://cloud.google.com/storage/docs/json_api/v1/bucketAccessControls/insert
    * @param options
    * @returns {boolean}
-   * @errors 
-{
-  "error": {
-    "code": 403,
-    "message": "Project has not enabled the API. Please use Google Developers Console to activate the 'cloudbilling' API for your project.",
-    "status": "PERMISSION_DENIED",
-    "details": [
-      {
-        "@type": "type.googleapis.com/google.rpc.Help",
-        "links": [
-          {
-            "description": "Google developer console API activation",
-            "url": "https://console.developers.google.com/project/541786531381/apiui/api"
-          }
-        ]
-      }
-    ]
-  }
-}
-
+   * 
    */
   getProjectBillingInfo: function getProjectBillingInfo(projectID) {
-    console.log( 'createServiceAccount' );
+    var defer = new jQuery.Deferred();
 
     if(!wp.stateless.getAccessToken() || !projectID)
       return false;
-    var promis = jQuery.ajax({
+
+    jQuery.ajax({
       url: 'https://cloudbilling.googleapis.com/v1/projects/' + projectID + '/billingInfo',
+    }).done(function(responseData){
+      if(typeof responseData.billingAccountName != 'undefined'){
+        responseData.billingAccountName = responseData.billingAccountName.replace('billingAccounts/', '');
+      }
+
+      if(typeof responseData.billingEnabled != 'undefined' && responseData.billingEnabled == true){
+        wp.stateless.projects[projectID]['billingInfo'] = responseData;
+      }
+
+      defer.resolve(responseData);
+    }).fail(function() {
+      defer.reject();
+    });
+    return defer.promise();
+  },
+
+  updateProjectBillingInfo: function updateProjectBillingInfo(options) {
+
+    if(!wp.stateless.getAccessToken() || !options.projectID)
+      return false;
+    var promis = jQuery.ajax({
+      method: 'PUT',
+      url: 'https://cloudbilling.googleapis.com/v1/projects/' + options.projectID + '/billingInfo',
+      data: JSON.stringify({
+        'billingAccountName': 'billingAccounts/' + options.accountName
+      })
     });
     return promis;
   },
 
-  listProjectBillingAccounts: function listProjectBillingAccounts() {
+  listBillingAccounts: function listBillingAccounts() {
     var defer = new jQuery.Deferred();
 
     if(!wp.stateless.getAccessToken()){
@@ -428,6 +467,7 @@ wp.stateless = {
         });
 
         jQuery.each(responseData.billingAccounts, function(index, item){
+          item.name = item.name.replace('billingAccounts/', '');
           billingAccounts.push({id: item.name, name: item.displayName});
         });
 
@@ -441,220 +481,3 @@ wp.stateless = {
 
 };
 
-
-
-jQuery(document).ready(function($){
-  return;
-  var gs = $('#google-storage');
-  var message = gs.find('#message');
-  var projects_dropdown = gs.find('.projects');
-  var serviceAccountWrapper = gs.find('#service-account');
-  var bucketsWrapper = gs.find('#buckets-wrapper');
-  var loadProject = function(projectId){
-    var authorize = gs.find('a.button.authorize');
-    var $projects = wp.stateless.listProjects();
-    projectId = projectId?projectId:'';
-
-    if(!$projects){
-      authorize.show();
-      projects_dropdown.hide();
-      return;
-    }
-
-    $projects.done(function(responseData){      authorize.hide();
-      projects_dropdown.show();
-      if(responseData.projects){
-        responseData.projects = $.grep(responseData.projects, function(project){
-          return project.lifecycleState == "ACTIVE";
-        });
-      }
-      if(!responseData.projects || responseData.projects.length == 0){
-        projects_dropdown.hide();
-        gs.find('#new-project').show();
-        return;
-      }
-      projects_dropdown.find('option').remove();
-      projects_dropdown.append("<option value=''>Select Project</option>");
-      $.each(responseData.projects, function(index, item){
-        wp.stateless.projects[item.projectId] = item;
-        wp.stateless.projects[item.projectId]['buckets'] = {};
-        projects_dropdown.append("<option value='" + item.projectId + "'>" + item.name + "</option>");
-      });
-      if(projectId){
-        projects_dropdown.val(projectId);
-        projects_dropdown.trigger('change');
-      }
-    }).fail(function(response){
-      authorize.show();
-      projects_dropdown.hide();
-    });
-
-  }
-
-  loadProject();
-  gs.find('#create-bucket').on('click', function(e){
-    e.preventDefault();
-    var projectID = projects_dropdown.val();
-    var bucketName = gs.find('#bucket-name').val();
-    if(projectID == "" || bucketName == "")
-      return false;
-
-    var createdProject = wp.stateless.createBucket({
-      "project": projectID,
-      "name": bucketName
-    }).done(function(responseData){
-      refreshBucketDropdown(responseData.id);
-    });
-    console.log(createdProject);
-    return false;
-  });
-
-  gs.find('#create-project').on('click', function(e){
-    e.preventDefault();
-    var projectID = gs.find('#project-id').val();
-    var projectName = gs.find('#project-name').val();
-    if(projectID == "" || projectName == "")
-      return false;
-
-    var createdProject = wp.stateless.createProject({
-      "projectId": projectID,
-      "name": projectName
-    });
-    console.log(createdProject);
-    return false;
-  });
-
-  
-  gs.find('#create-service-account').on('click', function(e){
-    e.preventDefault();
-
-    var project = projects_dropdown.val();
-    var accountId = gs.find('#service-account-id').val();
-    var name = gs.find('#service-account-name').val();
-
-    wp.stateless.createServiceAccount({
-      'project': project,
-      'accountId': accountId,
-      'name': name,
-    }).done(function(responseData){
-      refreshServiceAccountDropdown(responseData.uniqueId);
-    });
-
-    return false;
-  });
-
-  serviceAccountWrapper.find('.generate-key').on('click', function(e){
-    e.preventDefault();
-    var projectID = projects_dropdown.val();
-    var serviceAccountId = serviceAccountWrapper.find('select').val();
-    if(projectID == "" || serviceAccountId == "")
-      return false;
-
-    wp.stateless.insertBucketAccessControls({
-      "bucket": bucketsWrapper.find('select').val(),
-      "user": wp.stateless.serviceAccounts[serviceAccountId].email
-    }).done(function(responseData){
-      console.log("Bucket Access Control inserted", responseData);
-    });
-
-    wp.stateless.createServiceAccountKeys({
-      "project": projectID,
-      "account": serviceAccountId
-    }).done(function(responseData){
-      var json = atob(responseData.privateKeyData);
-
-      jQuery('#sm_mode_cdn').prop("checked", true);
-      jQuery('#sm_bucket').val(bucketsWrapper.find('select').val());
-      jQuery('#sm_key_json').val(json);
-    });
-
-    return false;
-  });
-
-
-
-  projects_dropdown.on('change', checkBillingInfo);
-
-  projects_dropdown.on('change', refreshServiceAccountDropdown);
-
-  projects_dropdown.on('change', refreshBucketDropdown);
-
-  gs.find('.button.add-new').on('click', function(e){
-    e.preventDefault();
-    var id = $(this).attr('href');
-    gs.find(id).toggle();
-    return false;
-  });
-  gs.on('stateless::projectCreated', function(e, project){
-    if(!project){
-      message.addClass('error').html("Something went wrong.");
-      return;
-    }
-    message.hide();
-    setTimeout(function(){
-      loadProject(project.projectId);
-      gs.find('#new-project').hide();
-    }, 5000);
-    
-  });
-
-  function checkBillingInfo(){
-    var $billing = gs.find('#enable-billing');
-    var projectID = projects_dropdown.val();
-    var projectName = projects_dropdown.find('option:selected').text();
-    
-    $billing.hide();
-    if(!projectID){
-      return;
-    }
-
-    $billing.find('a').attr('href', 'https://console.cloud.google.com/billing?project=' + projectID);
-    $billing.find('.pname').html(projectName);
-
-    wp.stateless.getProjectBillingInfo(projectID).done(function(responseData){
-      if(responseData.billingEnabled != true)
-        $billing.show();
-    });
-  }
-
-  function refreshBucketDropdown(bucketID){
-    var projectID = projects_dropdown.val();
-    var projectName = projects_dropdown.find('option:selected').text();
-    var buckets = wp.stateless.listBucket(projectID);
-
-    buckets.done(function(responseData){
-      var bucket = bucketsWrapper.find('select');
-      bucket.find('option').remove();
-      bucket.append("<option value=''>Select Bucket</option>");
-      $.each(responseData.items, function(index, item){
-        wp.stateless.projects[projectID]['buckets'][item.id] = item;
-        bucket.append("<option value='" + item.id + "'>" + item.name + "</option>");
-      });
-      if(typeof bucketID == "string"){
-        bucket.val(bucketID);
-        bucket.trigger('change');
-      }
-      bucketsWrapper.show();
-    });
-  };
-
-  function refreshServiceAccountDropdown(uniqueId){
-    var projectID = projects_dropdown.val();
-    var buckets = wp.stateless.getServiceAccounts({project: projectID});
-    buckets.done(function(responseData){
-      var serviceAccount = serviceAccountWrapper.find('select');
-      serviceAccount.find('option').remove();
-      serviceAccount.append("<option value=''>Service Account</option>");
-      $.each(responseData.accounts, function(index, item){
-        wp.stateless.serviceAccounts[item.uniqueId] = item;
-        serviceAccount.append("<option value='" + item.uniqueId + "'>" + item.displayName + "</option>");
-      });
-      if(typeof uniqueId == "string"){
-        serviceAccount.val(uniqueId);
-        serviceAccount.trigger('change');
-      }
-      bucketsWrapper.show();
-
-    });
-  };
-});

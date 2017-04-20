@@ -22,7 +22,8 @@
     "composer/installers": "~1.0",
     "usabilitydynamics/lib-settings": "0.2.3",
     "usabilitydynamics/lib-wp-bootstrap": "1.2.1",
-    "usabilitydynamics/google-api-php-client": "^2.0.0"
+    "usabilitydynamics/google-api-php-client": "^2.0.0",
+    "ccampbell/chromephp": "^4.1"
   },
   "require-dev": {
     "php": ">=5.4",

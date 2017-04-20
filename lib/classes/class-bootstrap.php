@@ -457,14 +457,16 @@ namespace wpCloud\StatelessMedia {
 
             break;
 
-          case $this->settings->setup_wizerd_ui:
+          case $this->settings->setup_wizard_ui:
             wp_enqueue_style( 'wp-stateless-bootstrap', $this->path( 'static/styles/bootstrap.min.css', 'url'  ), array(), '3.3.7' );
             wp_enqueue_style( 'wp-stateless-setup-wizard', $this->path( 'static/styles/wp-stateless-setup-wizard.css', 'url'  ), array(), self::$version );
 
             wp_enqueue_script( 'jquery.history', ud_get_stateless_media()->path( 'static/scripts/jquery.history.js', 'url'  ), array( 'jquery' ), ud_get_stateless_media()->version, true );
-            wp_enqueue_script( 'wpStatelessComboBox', ud_get_stateless_media()->path( 'static/scripts/wpStateLess-combo-box.js', 'url'  ), array( 'jquery' ), ud_get_stateless_media()->version, true );
+            wp_enqueue_script( 'wp-stateless-validation', ud_get_stateless_media()->path( 'static/scripts/jquery.validation.js', 'url'  ), array( 'jquery' ), ud_get_stateless_media()->version, true );
+            wp_enqueue_script( 'wp-stateless-loading', ud_get_stateless_media()->path( 'static/scripts/jquery.loading.js', 'url'  ), array( 'jquery' ), ud_get_stateless_media()->version, true );
+            wp_enqueue_script( 'wp-stateless-comboBox', ud_get_stateless_media()->path( 'static/scripts/jquery.wpStateLess-combo-box.js', 'url'  ), array( 'jquery' ), ud_get_stateless_media()->version, true );
             wp_enqueue_script( 'wp-stateless-setup', ud_get_stateless_media()->path( 'static/scripts/wp-stateless-setup.js', 'url'  ), array( 'jquery-ui-core', 'wp-api', 'jquery.history' ), ud_get_stateless_media()->version, true );
-            wp_enqueue_script( 'wp-stateless-setup-wizard-js', ud_get_stateless_media()->path( 'static/scripts/wp-stateless-setup-wizard.js', 'url'  ), array( 'jquery', 'wp-api', 'wpStatelessComboBox' ), ud_get_stateless_media()->version, true );
+            wp_enqueue_script( 'wp-stateless-setup-wizard-js', ud_get_stateless_media()->path( 'static/scripts/wp-stateless-setup-wizard.js', 'url'  ), array( 'jquery', 'wp-api', 'wp-stateless-setup', 'wp-stateless-comboBox', 'wp-stateless-validation', 'wp-stateless-loading' ), ud_get_stateless_media()->version, true );
             break;
 
           default: break;
@@ -690,7 +692,16 @@ namespace wpCloud\StatelessMedia {
        * Plugin Activation
        *
        */
-      public function activate() {}
+      public function activate() {
+        add_action( 'activated_plugin', array($this, 'redirect_to_splash') );
+        wp_redirect(admin_url('upload.php?page=stateless-setup-wizard&step=splash-screen'));
+      }
+
+      public function redirect_to_splash($plugin =''){
+        if( $plugin == plugin_basename( $this->boot_file ) ) {
+          exit( wp_redirect(admin_url('upload.php?page=stateless-setup-wizard&step=splash-screen')));
+        }
+      }
 
       /**
        * Plugin Deactivation

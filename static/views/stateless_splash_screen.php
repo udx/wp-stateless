@@ -7,7 +7,7 @@
                         <div class="wpStateLess-welcome-text">
                             <h1>All Media Files in One Place</h1>
                             <p>Stores and serves WordPress media files directly from Google Cloud Storage.</p>
-                            <a class="btn btn-rounded btn-green" href="<?php echo admin_url('upload.php?page=stateless-setup-wizerd');?>">Get Started Now</a>
+                            <a class="btn btn-rounded btn-green" href="<?php echo admin_url('upload.php?page=stateless-setup-wizard&amp;step=google-login');?>">Get Started Now</a>
                         </div>
                     </div>
                 </div>
@@ -42,7 +42,7 @@
             <div class="container">
                 <div class="row">
                     <div class="col-xs-12">
-                        <h1 class="wpStateLess-section-title">Free & Paid Plans</h1>
+                        <h1 class="wpStateLess-section-title">Free &amp; Paid Plans</h1>
                     </div>
                 </div>
                 <div class="row wpStateLess-valigncenter">
@@ -58,7 +58,7 @@
                                 <li>SSL delivery of files</li>
                             </ul>
                             <div class="text-center">
-                                <a href="<?php echo admin_url('upload.php?page=stateless-setup-wizerd');?>" class="btn btn-green">Get Started Now</a>
+                                <a href="<?php echo admin_url('upload.php?page=stateless-setup-wizard&amp;step=google-login');?>" class="btn btn-green">Get Started Now</a>
                             </div>
                         </div>
                     </div>
@@ -75,7 +75,7 @@
                                 <li>Consolidated billing.</li>
                             </ul>
                             <div class="text-center">
-                                <a href="" class="btn btn-green">Learn More</a>
+                                <a href="https://www.usabilitydynamics.com/" class="btn learn-more btn-green">Learn More</a>
                             </div>
                         </div>
                     </div>
@@ -90,7 +90,7 @@
                                 <li>Branded domain.</li>
                             </ul>
                             <div class="text-center">
-                                <a href="" class="btn btn-green">Learn More</a>
+                                <a href="https://www.usabilitydynamics.com/" class="btn learn-more btn-green">Learn More</a>
                             </div>
                         </div>
                     </div>
@@ -98,7 +98,7 @@
             </div>
         </div>
 
-        <div id="wpStateLess-popup" class="active">
+        <div id="wpStateLess-popup" class="">
             <div class="wpStateLess-pop-area">
                 <div class="wpStateLess-pops">
                     <h3>Contact Us</h3>

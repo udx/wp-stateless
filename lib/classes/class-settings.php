@@ -18,7 +18,7 @@ namespace wpCloud\StatelessMedia {
       /**
        * @var false|null|string
        */
-      public $setup_wizerd_ui = null;
+      public $setup_wizard_ui = null;
 
       /**
        * Overriden construct
@@ -154,7 +154,7 @@ namespace wpCloud\StatelessMedia {
       public function admin_menu() {
         $this->regenerate_ui = add_management_page( __( 'Stateless Images Synchronisation', ud_get_stateless_media()->domain ), __( 'Stateless Sync', ud_get_stateless_media()->domain ), 'manage_options', 'stateless-regenerate', array($this, 'regenerate_interface') );
 
-        $this->setup_wizerd_ui = add_media_page( __( 'Stateless Setup Wizard', ud_get_stateless_media()->domain ), __( 'Stateless Setup Wizard', ud_get_stateless_media()->domain ), 'manage_options', 'stateless-setup-wizerd', array($this, 'setup_wizerd_interface') );
+        $this->setup_wizard_ui = add_media_page( __( 'Stateless Setup Wizard', ud_get_stateless_media()->domain ), __( 'Stateless Setup Wizard', ud_get_stateless_media()->domain ), 'manage_options', 'stateless-setup-wizard', array($this, 'setup_wizard_interface') );
       }
 
       /**
@@ -167,15 +167,17 @@ namespace wpCloud\StatelessMedia {
       /**
        * Draw interface
        */
-      public function setup_wizerd_interface() {
+      public function setup_wizard_interface() {
         $step = !empty($_GET['step'])?$_GET['step']:'';
         switch ($step) {
-          case 'splash-screen':
-            include ud_get_stateless_media()->path( '/static/views/stateless_splash_screen.php', 'dir' );
+          case 'google-login':
+          case 'setup-project':
+          case 'finish':
+            include ud_get_stateless_media()->path( '/static/views/setup_wizard_interface.php', 'dir' );
             break;
           
           default:
-            include ud_get_stateless_media()->path( '/static/views/setup_wizerd_interface.php', 'dir' );
+            include ud_get_stateless_media()->path( '/static/views/stateless_splash_screen.php', 'dir' );
             break;
         }
       }
@@ -201,8 +203,7 @@ namespace wpCloud\StatelessMedia {
        */
       public function register_network_settings() {
         ?>
-
-        <h3><?php _e( 'Stateless Media Settings', ud_get_stateless_media()->domain ); ?></h3>
+        <h3 id="stateless-media-settings"><?php _e( 'Stateless Media Settings', ud_get_stateless_media()->domain ); ?></h3>
         <p><?php $this->section_callback(); ?></p>
         <div class="key_type"><label><b><?php _e('Service Account JSON', ud_get_stateless_media()->domain) ?></b></label>
           <div class="_key_type _sm_key_json">
@@ -263,7 +264,6 @@ namespace wpCloud\StatelessMedia {
         add_settings_section( 'sm', __( 'Stateless Media', ud_get_stateless_media()->domain ),array( $this, 'section_callback' ), 'media' );
 
         //** Add Fields */
-        add_settings_field( 'sm.auth',  __( 'Google Auth', ud_get_stateless_media()->domain ),  array( $this, 'sm_fields_auth_callback' ), 'media',  'sm'  );
         add_settings_field( 'sm.mode',  __( 'Mode', ud_get_stateless_media()->domain ),  array( $this, 'sm_fields_mode_callback' ), 'media',  'sm'  );
 
         //** Add Fields */
@@ -406,84 +406,6 @@ namespace wpCloud\StatelessMedia {
         $inputs[] = '</section>';
 
         echo implode( "\n", (array) apply_filters( 'sm::settings::credentials', $inputs ) );
-
-      }
-
-      /**
-       * Show Login Button if not logged in.
-       *
-       * @todo Make the "Login" butotn only show up if the project/bucket/service account are not setup.
-       * @todo Switch to production API.
-       *
-       */
-      public function sm_fields_auth_callback() {
-
-        ?>
-        <div id="google-storage">
-          <div id="message"></div>
-          <a href="https://api.usabilitydynamics.com/product/stateless/v1/auth/google?state=<?php echo urlencode(admin_url( "options-media.php" )); ?>" class="button authorize">Google Login</a>
-          <div id="setup-wizard">
-            <div id="project-wrapper">
-              <select class="projects hidden"></select>&nbsp;&nbsp;&nbsp;
-              <span id="add-new">Or <a class="add-new button" href="#new-project">add new</a> </span>
-              <div id="new-project" class="hidden">
-                <p>
-                  <label for="project-id" class="project-id">Project ID</label>
-                  <input id="project-id" class="project-id" type="text" value="<?php echo $_SERVER['HTTP_HOST'] . "-" . rand(1000, 9999);?>"/>
-                </p>
-                <p>
-                  <label for="project-name" class="project-name">Project Name</label>
-                  <input id="project-name" class="project-name" type="text" value="<?php echo get_bloginfo('name');?>" />
-                </p>
-                <p>
-                <button id="create-project" class="button">Creat Project</button>
-                </p>
-              </div>
-              <div id="enable-billing" class="hidden">
-                Please enable billing for your project <b class="pname">{{project.name}}</b> if you didn't already. <br />
-                You can enable billing at <a class="button" target="_blank">Google cloud console</a>.
-              </div>
-            </div>
-            <div id="automatic">
-              
-            </div>
-            <div id="manual">
-              <div id="buckets-wrapper" class="hidden">
-                <select class="bucket"></select>&nbsp;&nbsp;&nbsp;
-                <span class="add-new">Or <a class="add-new button" href="#new-bucket">add new</a> </span>
-                <div id="new-bucket" class="hidden">
-                  <p>
-                    <label for="bucket-name" class="bucket-name">Bucket Name</label>
-                    <input id="bucket-name" class="bucket-name" type="text" value="<?php echo get_bloginfo('name');?> Bucket" />
-                  </p>
-                  <p>
-                  <button id="create-bucket" class="button">Creat Bucket</button>
-                  </p>
-                </div>
-              </div>
-              <div id="service-account">
-                <select class="service-account"></select>&nbsp;&nbsp;&nbsp;
-                <span class="add-new">Or <a class="add-new button" href="#new-service-account">add new</a> </span>
-                <div id="new-service-account" class="hidden">
-                  <p>
-                    <label for="service-account-name" class="service-account-name">Service Account Name</label>
-                    <input id="service-account-name" class="service-account-name" type="text" value="<?php echo get_bloginfo('name');?> service-account" />
-                  </p>
-                  <p>
-                    <label for="service-account-id" class="service-account-id">Service Account ID</label>
-                    <input id="service-account-id" class="service-account-id" type="text" value=""/>
-                  </p>
-                  <p>
-                  <button id="create-service-account" class="button">Creat Service Account</button>
-                  </p>
-                </div>
-                <a class="generate-key button">Generate Key</a>
-              </div>
-            </div>
-          </div>
-          
-        </div>
-        <?php
 
       }
 
