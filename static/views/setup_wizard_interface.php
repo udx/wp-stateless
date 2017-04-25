@@ -4,8 +4,7 @@ $id             = str_replace('.', '-', $server_name);
 $project_name   = substr($id, 0, 30);
 $project_id     = substr($id, 0, 23) . "-" . rand(100000, 999999);
 
-$bucket_id      = substr($id, 0, 30);
-$bucket_name    = str_replace(array('.', '-'), ' ', substr($server_name, 0, 30));
+$bucket_id      = "stateless-" . substr($id, 0, 20);
 
 ?>
 <div id="wp-stateless-wrapper">
@@ -89,12 +88,11 @@ $bucket_name    = str_replace(array('.', '-'), ' ', substr($server_name, 0, 30))
                                                     <p>By default we create a new bucket for you, or if you prefer, select an existing bucket.</p>
                                                 </label>
                                                 <div class="wpStateLess-combo-box bucket">
-                                                    <input type="hidden" class="id" value="stateless-<?php echo $bucket_id;?>">
-                                                    <input type="text" class="name" value="Stateless <?php echo $bucket_name;?>" placeholder="Select or Create New Bucket">
+                                                    <input type="text" class="name" value="<?php echo $bucket_id;?>" placeholder="Select or Create New Bucket">
                                                     <div class="wpStateLess-input-dropdown">
                                                         <div class="wpStateLess-create-new active" data-id="<?php echo $bucket_id?>" data-name="<?php echo $bucket_id?>">
                                                             <h5>Create New Bucket</h5>
-                                                            <span>stateless-<?php echo $bucket_id;?></span>
+                                                            <span><?php echo $bucket_id;?></span>
                                                         </div>
                                                         <div class="wpStateLess-existing">
                                                             <h5>Existing Projects</h5>
@@ -119,7 +117,7 @@ $bucket_name    = str_replace(array('.', '-'), ' ', substr($server_name, 0, 30))
                                                             <span></span>
                                                         </div>
                                                         <div class="wpStateLess-existing">
-                                                            <h5>Existing Projects</h5>
+                                                            <h5>Existing Billing Accounts</h5>
                                                             <ul></ul>
                                                             <a  href="https://console.cloud.google.com/billing" class="btn btn-green create-billing-account">Create New Billing Account <span class="wpStateLess-loading">(Checking <span>.</span><span>.</span><span>.</span>)</span></a>
                                                         </div>

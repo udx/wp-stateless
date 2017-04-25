@@ -424,10 +424,10 @@
 .wpStateLess-combo-box h5 {
 	color: #a9a9a9 !important;
 }
-.wpStateLess-create-new, .wpStateLess-current-account {
+.wpStateLess-create-new {
     padding: 20px;
 }
-.wpStateLess-create-new.active, .wpStateLess-create-new:hover, .wpStateLess-current-account {
+.wpStateLess-create-new.active, .wpStateLess-create-new:hover {
     background: #fbfbfb none repeat scroll 0 0;
 }
 .wpStateLess-create-new, 

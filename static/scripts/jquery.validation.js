@@ -23,6 +23,8 @@
         response.success = true;
         response.message = '';
 
+        var isExisting = /\((.+)\)/.exec(pName);
+
         jQuery.each(settings.name, function(index, item) {
             if(!item.regex.test(pName)){
                 response.success = false;
@@ -32,7 +34,7 @@
             }
         });
 
-        if(response.success == false || typeof settings.id == 'undefined' || settings.id.regex == 'undefined'){
+        if(response.success == false || typeof settings.id == 'undefined' || typeof settings.id.regex == 'undefined'){
             return response;
         }
 

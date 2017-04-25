@@ -276,7 +276,7 @@ wp.stateless = {
       var buckets = [];
 
       jQuery.each(responseData.items, function(index, item){
-        var bucket = {id: item.id, name: item.name};
+        var bucket = {name: item.name};
         buckets.push(bucket);
         wp.stateless.projects[projectId]['buckets'][item.id] = bucket;
       });
@@ -296,7 +296,6 @@ wp.stateless = {
    * @returns {boolean}
    */
   getServiceAccounts: function getServiceAccounts(options) {
-    console.log( 'getServiceAccounts', options );
 
     if(!wp.stateless.getAccessToken() || !options)
       return false;
@@ -307,7 +306,6 @@ wp.stateless = {
     });
 
     _promis.done(function(responseData){
-      console.log( 'getServiceAccounts:done', responseData.accounts );
       wp.stateless.projects[options.projectId]['serviceAccounts'] = responseData.accounts;
 
     });
@@ -420,17 +418,27 @@ wp.stateless = {
     jQuery.ajax({
       url: 'https://cloudbilling.googleapis.com/v1/projects/' + projectID + '/billingInfo',
     }).done(function(responseData){
+      var billingInfo = {
+        billingEnabled: responseData.billingEnabled,
+      };
+
       if(typeof responseData.billingAccountName != 'undefined'){
-        responseData.billingAccountName = responseData.billingAccountName.replace('billingAccounts/', '');
+        billingInfo.id = responseData.billingAccountName.replace('billingAccounts/', '');
       }
 
       if(typeof responseData.billingEnabled != 'undefined' && responseData.billingEnabled == true){
         wp.stateless.projects[projectID]['billingInfo'] = responseData;
       }
 
-      defer.resolve(responseData);
-    }).fail(function() {
-      defer.reject();
+      wp.stateless.getBillingAccount(responseData.billingAccountName).done(function(displayName) {
+        billingInfo.name = displayName;
+        defer.resolve(billingInfo);
+      }).fail(function(error) {
+        defer.resolve(billingInfo);
+      });
+
+    }).fail(function(responseData) {
+      defer.reject(responseData.responseJSON);
     });
     return defer.promise();
   },
@@ -473,6 +481,24 @@ wp.stateless = {
 
       }
       defer.resolve(billingAccounts);
+    }).fail(function(){
+      defer.reject();
+    });
+    return defer.promise();
+  },
+
+  getBillingAccount: function getBillingAccount(name) {
+    var defer = new jQuery.Deferred();
+
+    if(!wp.stateless.getAccessToken()){
+      defer.reject();
+      return defer.promise();
+    }
+
+    jQuery.ajax({
+      url: 'https://cloudbilling.googleapis.com/v1/' + name,
+    }).done(function(billingAccount){
+      defer.resolve(billingAccount.displayName);
     }).fail(function(){
       defer.reject();
     });

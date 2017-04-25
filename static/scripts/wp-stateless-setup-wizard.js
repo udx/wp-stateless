@@ -98,18 +98,6 @@ jQuery(document).ready(function ($) {
 				errorMessage: 'A bucket name can contain lowercase alphanumeric characters, hyphens, and underscores. Bucket names must start and end with an alphanumeric character.',
 			},
 		},
-		id: {
-			replace: {
-				''	: /\s/g,
-				'-'	: /^-+|-+$/g,
-				'-'	: '!',
-				'-'	: /-+/g	,
-				''	: '"',
-				''	: '\'',
-				''	: /\(.*/,
-			},
-			regex: /[a-z][a-z0-9\-]{3,28}[a-z0-9]/ // 
-		},
 	});
 	setupForm.find('.wpStateLess-combo-box.billing-account .name').wppStatelessValidate({
 		name: {
@@ -171,25 +159,39 @@ jQuery(document).ready(function ($) {
 				bucketDropdown.find('.wpStateLess-existing h5').html(wp.stateless.projects[projectId].name + " Buckets").show();
 		  	}
 			bucketDropdown.wpStatelessComboBox({items:buckets});
+		  }).fail(function(){
+			bucketDropdown.wpStatelessComboBox({items:{}});
 		  });
 
-		bucketDropdown.find('.name').val("stateless-" + projectId).trigger('change');
+		//bucketDropdown.find('.name').val("stateless-" + projectId).trigger('change');
 
 		wp.stateless.getServiceAccounts({projectId:projectId});
 
 		wp.stateless.getProjectBillingInfo(projectId)
 		  .done(function(billingInfo){
-		  	var currentAccount = setupForm.find('.wpStateLess-current-account');
-		  	var enabled = billingInfo.billingEnabled? "Enabled": "Disable";
-      		if(typeof billingInfo.billingAccountName != 'undefined'){
-			  	billingDropdown.find('.id').val(billingInfo.billingAccountName);
-			  	billingDropdown.find('.name').val(billingInfo.billingAccountName);
-			  	currentAccount.find('h5 .project').html(wp.stateless.projects[projectId].name);
-			  	currentAccount.find('span').html(billingInfo.billingAccountName + " (" + enabled + ")")
-			  	currentAccount.show();
+		  	var enabled = billingInfo.billingEnabled? "Active": "Inactive";
+		  	billingDropdown.find('.name').removeAttr('disabled');
+      		if(typeof billingInfo.id != 'undefined'){
+      			var namID = billingInfo.id;
+      			if(typeof billingInfo.name != 'undefined')
+	      			namID = billingInfo.name + " (" + billingInfo.id + ")";
+
+			  	billingDropdown.find('.id').val(billingInfo.id);
+			  	billingDropdown.find('.name').val(namID).attr('disabled', 'disabled');
 			}else{
-				currentAccount.hide();
 			}
+		  }).fail(function(responseData) {
+		  	var name = billingDropdown.find('.name').val('');
+		  	var id = billingDropdown.find('.id').val('');
+		  	var account = name.wpStatelessComboBox({get: 0});
+
+		  	console.log("account from ul list:", account);
+		  	name.removeAttr('disabled');
+		  	if(account){
+				name.val(account.name +  " (" + account.id + ")");
+				id.val(account.id);
+		  	}
+
 		  });
 	});
 

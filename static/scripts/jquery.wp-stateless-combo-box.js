@@ -7,18 +7,43 @@
 			value = value || this.val();
 
 		}
+
+		if(typeof options.get != 'undefined'){
+			var _items = jQuery(this).parent().find('.wpStateLess-existing').find('ul li');
+			console.log('options:', options)
+			if(options.get == 'all'){
+				var items = [];
+				_items.each(function(index, item) {
+					var id	 = jQuery(item).attr('data-id');
+					var name = jQuery(item).attr('data-name');
+					items.push({id: id, name: name});
+				});
+				return items;
+			}
+			else if(jQuery.isNumeric(options.get)){
+				var _item	= _items.eq(options.get);
+				console.log('_items:', _items)
+				console.log('_item:', _item)
+
+				if(_item.length){
+					var id		= _item.attr('data-id');
+					var name	= _item.attr('data-name');
+					return {id: id, name: name};
+				}
+			}
+			return;
+		}
+
 		return this.each(function() {
 			var _this = jQuery(this);
 			var _new = _this.find('.wpStateLess-create-new span');
 			var _id = _this.find('.id');
 			var _input = _this.find('.name');
 			var existing = _this.find('.wpStateLess-existing');
-			var currentAccount = _this.find('.wpStateLess-current-account');
 			var dropDown = jQuery('.wpStateLess-input-dropdown', _this);
 			var list = existing.find('ul');
 
 			jQuery('h5', existing).hide();
-			currentAccount.hide();
 			list.children().remove();
 
 			if(options.items && options.items.length > 0){
@@ -30,7 +55,11 @@
 						_id.val(item.id);
 						_input.val(item.name + " ("  + item.id + ")");
 					}
-					list.append("<li " + selected + "data-id='" + item.id + "' data-name='" + item.name + "'>" + item.name + " ("  + item.id + ")</li>");
+					var text = item.name;
+					if(typeof item.id != 'undefined')
+						text += " ("  + item.id + ")";
+					item.id = item.id || item.name;
+					list.append("<li " + selected + "data-id='" + item.id + "' data-name='" + item.name + "'>" + text + "</li>");
 				});
 			}
 
@@ -78,7 +107,7 @@
 				jQuery(this).addClass('active');
 				if(_this.find('.id').length > 0){
 					_this.find('.id').val(id);
-					_this.find('.name').val(name);
+					_this.find('.name').val(name + " (" + id + ")");
 				}
 				else{
 					_this.find('.name').val(id);
