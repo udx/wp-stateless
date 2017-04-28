@@ -1,0 +1,389 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: WP Stateless\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2017-04-26 12:57+0300\n"
+"PO-Revision-Date: 2017-04-28 13:16+0300\n"
+"Last-Translator: Roberto Di Sisto <roberto@disisto.de>\n"
+"Language-Team: Usability Dynamics, Inc\n"
+"Language: de\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Poedit-KeywordsList: __;_e;_n;_x\n"
+"X-Poedit-Basepath: ../..\n"
+"Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
+"%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
+"X-Poedit-SourceCharset: UTF-8\n"
+"X-Generator: Poedit 1.8.11\n"
+"X-Poedit-SearchPath-0: .\n"
+"X-Poedit-SearchPathExcluded-0: vendor\n"
+
+#: lib/classes/class-ajax.php:81
+msgid "Incorrect Request"
+msgstr "Ungültige Anfrage"
+
+#: lib/classes/class-ajax.php:103
+#, php-format
+msgid "Failed resize: %s is an invalid image ID."
+msgstr "Anpassung der Bildgröße fehlgeschlagen: %s ist keine gültige Bild ID."
+
+#: lib/classes/class-ajax.php:106
+msgid "Your user account doesn't have permission to resize images"
+msgstr "Deinem Benutzerkonto fehlt die Berechtigung, die Bildgröße anzupassen"
+
+#: lib/classes/class-ajax.php:119
+#, php-format
+msgid "Both local and remote files are missing. Unable to resize. (%s)"
+msgstr "Lokale und entfernte Datei fehlen. Anpassung nicht möglich. (%s)"
+
+#: lib/classes/class-ajax.php:133 lib/classes/class-ajax.php:188
+msgid "Unknown failure reason."
+msgstr "Unbekannter Fehler."
+
+#: lib/classes/class-ajax.php:142
+#, php-format
+msgid "%1$s (ID %2$s) was successfully resized in %3$s seconds."
+msgstr ""
+"%1$s (ID %2$s) wurde innerhalb von %3$s Sekunden erfolgreich angepasst."
+
+#: lib/classes/class-ajax.php:156
+#, php-format
+msgid "Attachment not found: %s is an invalid file ID."
+msgstr "Anhang nicht gefunden: %s ist eine ungültige ID."
+
+#: lib/classes/class-ajax.php:159
+msgid "You are not allowed to do this."
+msgstr "Sie sind nicht berechtigt diesen Vorgang durchzuführen."
+
+#: lib/classes/class-ajax.php:171
+#, php-format
+msgid "File not found (%s)"
+msgstr "Datei nicht gefunden (%s)"
+
+#: lib/classes/class-ajax.php:200
+#, php-format
+msgid "%1$s (ID %2$s) was successfully synchronised in %3$s seconds."
+msgstr ""
+"%1$s (ID %2$s) wurde innerhalb %3$s Sekunden erfolgreich synchronisiert."
+
+#: lib/classes/class-ajax.php:210
+msgid "No images media objects found."
+msgstr "Keine Bilddateien gefunden."
+
+#: lib/classes/class-ajax.php:228
+msgid "No files found."
+msgstr "Keine Dateien gefunden."
+
+#: lib/classes/class-bootstrap.php:204 lib/classes/class-bootstrap.php:269
+msgid "Regenerate and Sync with GCS"
+msgstr "Regeneriere und synchronisiere mit GCS"
+
+#: lib/classes/class-bootstrap.php:208 lib/classes/class-bootstrap.php:276
+msgid "Sync with GCS"
+msgstr "Synchronisiere mit GCS"
+
+#: lib/classes/class-bootstrap.php:221
+msgid "Google Cloud Storage"
+msgstr "Google Cloud Storage"
+
+#: lib/classes/class-bootstrap.php:241
+msgid "Cache Control:"
+msgstr "Cache-Steuerung:"
+
+#: lib/classes/class-bootstrap.php:247
+msgid "Storage Bucket URL:"
+msgstr "Storage Bucket URL:"
+
+#: lib/classes/class-bootstrap.php:247
+msgid "[view]"
+msgstr "[betrachten]"
+
+#: lib/classes/class-bootstrap.php:258
+msgid "Storage Bucket:"
+msgstr "Storage Bucket:"
+
+#: lib/classes/class-bootstrap.php:363 lib/classes/class-bootstrap.php:368
+#: lib/classes/class-settings.php:29
+msgid "Settings"
+msgstr "Einstellungen"
+
+#: lib/classes/class-bootstrap.php:460 lib/classes/class-settings.php:159
+msgid "Stateless Media"
+msgstr "Stateless Media"
+
+#: lib/classes/class-bootstrap.php:601
+#, php-format
+msgid ""
+"Could not connect to Google Storage bucket. Please, be sure that bucket with "
+"name <b>%s</b> exists."
+msgstr ""
+"Keine Verbindung zum Google Storage Bucket möglich. Bitte vergewissern Sie "
+"sich, das ein Bucket mit dem Namen <b>%s</b> existiert."
+
+#: lib/classes/class-bootstrap.php:608
+msgid "There is an Error on connection to Google Storage."
+msgstr "Bei der Verbindung zu Google Storage ist eine Fehler aufgetreten."
+
+#: lib/classes/class-gs-client.php:150
+msgid "Unable to locate file on disk"
+msgstr "Datei konnte nicht gefunden werden"
+
+#: lib/classes/class-gs-client.php:298
+msgid "<b>Bucket</b> parameter must be provided."
+msgstr "<b>Bucket</b> muss angegeben werden."
+
+#: lib/classes/class-gs-client.php:302
+msgid "<b>Service Account JSON</b> is invalid."
+msgstr "<b>Dienstkonto mit Schlüsseltyp JSON</b> ist ungültig."
+
+#: lib/classes/class-settings.php:109 static/views/regenerate_interface.php:22
+msgid "Stateless Images Synchronisation"
+msgstr "Stateless Bilder Synchronisierung"
+
+#: lib/classes/class-settings.php:109
+msgid "Stateless Sync"
+msgstr "Stateless Synchronisation"
+
+#: lib/classes/class-settings.php:140
+msgid "Stateless Media Settings"
+msgstr "Stateless Media Einstellungen"
+
+#: lib/classes/class-settings.php:142 lib/classes/class-settings.php:275
+#: lib/classes/class-settings.php:289
+msgid "Service Account JSON"
+msgstr "Dienstkonto mit Schlüsseltyp JSON"
+
+#: lib/classes/class-settings.php:162
+msgid "Mode"
+msgstr "Modus"
+
+#: lib/classes/class-settings.php:165
+msgid "Credentials"
+msgstr "Zugangsdaten"
+
+#: lib/classes/class-settings.php:166
+msgid "Advanced"
+msgstr "Erweitert"
+
+#: lib/classes/class-settings.php:169
+msgid "Debug"
+msgstr "Debuggen"
+
+#: lib/classes/class-settings.php:214
+msgid "Override default Cache Control"
+msgstr "Standard Cache-Steuerung überschreiben"
+
+#: lib/classes/class-settings.php:214
+msgid "(Use input bellow to change cache control)"
+msgstr "(Nutze das untere Feld um die Cache-Steuerung zu ändern)"
+
+#: lib/classes/class-settings.php:221
+msgid "Body content media URL rewrite."
+msgstr "Body content media URL rewrite."
+
+#: lib/classes/class-settings.php:225
+msgid "Upload on-fly generated (by third-party scripts) images to GCS."
+msgstr ""
+"On-the-fly generierte Bilder (durch Dritthersteller Skripts) zu GCS hochladen"
+
+#: lib/classes/class-settings.php:225
+msgid "(This option may slow down file upload processes)"
+msgstr "(Diese Option könnte den Upload-Vorgang verlangsamen)"
+
+#: lib/classes/class-settings.php:229
+msgid "Delete media from GCS when media is deleted from the site."
+msgstr "Lokal gelöschte Medien auch von GCS entfernen."
+
+#: lib/classes/class-settings.php:229
+msgid "(This option may slow down media deletion process)"
+msgstr "(Diese Option könnte den Löschvorgang verlangsamen)"
+
+#: lib/classes/class-settings.php:233
+msgid "Randomize the filename of newly uploaded media files."
+msgstr ""
+"System definierte Dateinamen vergeben, bei neu hochgeladenen Bilddateien."
+
+#: lib/classes/class-settings.php:233
+msgid "(May help to avoid unwanted GCS caching)"
+msgstr ""
+"(Hilft eventuell unerwünschte Zwischenspeicherung von GCS zu vermeiden)"
+
+#: lib/classes/class-settings.php:258 lib/classes/class-settings.php:260
+msgid "Bucket"
+msgstr "Bucket"
+
+#: lib/classes/class-settings.php:264 lib/classes/class-settings.php:266
+msgid "Root Directory"
+msgstr "Hauptverzeichnis"
+
+#: lib/classes/class-settings.php:264 lib/classes/class-settings.php:266
+msgid "(With trailing slash!)"
+msgstr "(mit abschließendem Slash!)"
+
+#: lib/classes/class-settings.php:282
+#, php-format
+msgid ""
+"The account name can not be changed because it is set via <a href=\"%s"
+"\">Network Settings.</a>"
+msgstr ""
+"Die Kontenbezeichnung kann nicht geändert werden, weil diese über die <a "
+"href=\"%s\">Netzwerkeinstellungen</a> gesetzt wurde."
+
+#: lib/classes/class-settings.php:308
+msgid "Disabled"
+msgstr "Deaktiviert"
+
+#: lib/classes/class-settings.php:309
+msgid "Disable Stateless Media."
+msgstr "Deaktiviere Stateless Media."
+
+#: lib/classes/class-settings.php:310
+msgid "Backup"
+msgstr "Datensicherung"
+
+#: lib/classes/class-settings.php:311
+msgid "Push media files to Google Storage but keep using local ones."
+msgstr ""
+"Übertrage die Bilddateien zu Google Storage, aber nutze weiterhin die lokal "
+"gespeicherten Dateien."
+
+#: lib/classes/class-settings.php:312
+msgid "CDN"
+msgstr "CDN"
+
+#: lib/classes/class-settings.php:313
+msgid "Push media files to Google Storage and use them directly from there."
+msgstr ""
+"Übertrage die Bilddateien zu Google Storage und verwende diese direkt von "
+"dort aus."
+
+#: lib/classes/class-settings.php:324
+msgid "Google Storage credentials and settings."
+msgstr "Google Storage Zugangsdaten und Einstellungen."
+
+#: lib/classes/class-settings.php:328
+msgid ""
+"Be advised, Imagick does not seem to be installed, thumbnails will not be "
+"generated not uploaded.."
+msgstr ""
+"Beachten Sie bitte, daß Imagick nicht installiert zu sein scheint und daher "
+"werden Vorschaubilder weder generiert und noch hochgeladen."
+
+#: lib/classes/class-settings.php:333
+msgid ""
+"Be advised, GD does not seem to be installed, thumbnails will not be "
+"generated not uploaded.."
+msgstr ""
+"Beachten Sie bitte, daß GD nicht installiert zu sein scheint und daher "
+"werden Vorschaubilder weder generiert und noch hochgeladen."
+
+#: static/views/regenerate_interface.php:24
+msgid "You must enable Javascript in order to proceed!"
+msgstr "Aktiviere Javascript um fortzufahren!"
+
+#: static/views/regenerate_interface.php:30
+msgid "Action"
+msgstr "Vorgang"
+
+#: static/views/regenerate_interface.php:35
+msgid ""
+"Regenerate all stateless images and synchronize Google Storage with local "
+"server"
+msgstr ""
+"Alle zustandslosen Bilder regenerieren und zwischen Google Storage und "
+"lokalen Server synchronisieren"
+
+#: static/views/regenerate_interface.php:42
+msgid "Synchronize non-images files between Google Storage and local server"
+msgstr ""
+"Alle weiteren Dateien (Bilder ausgenommen) zwischen Google Storage und "
+"lokalen Server synchronisieren"
+
+#: static/views/regenerate_interface.php:50
+msgid "Method"
+msgstr "Methode"
+
+#: static/views/regenerate_interface.php:55
+msgid "Start a new process"
+msgstr "Neuen Vorgang starten"
+
+#: static/views/regenerate_interface.php:57
+#: static/views/regenerate_interface.php:80
+msgid ""
+"<strong>Warning:</strong> This will make it impossible to continue the last "
+"process."
+msgstr ""
+"<strong>Warnung:</strong> Hierdurch lässt sich der letzte Vorgang nicht mehr "
+"weiterführen."
+
+#: static/views/regenerate_interface.php:65
+msgid "Continue the last process"
+msgstr "Letzten Vorgang weiterführen"
+
+#: static/views/regenerate_interface.php:73
+msgid "Fix errors"
+msgstr "Fehler beheben"
+
+#: static/views/regenerate_interface.php:78
+msgid "Try to fix previously failed items"
+msgstr "Versuche zuvor fehlgeschlagene Elemente zu beheben"
+
+#: static/views/regenerate_interface.php:89
+msgid "Bulk Size"
+msgstr "Menge"
+
+#: static/views/regenerate_interface.php:94
+msgid "How many items to process at once"
+msgstr "Anzahl der Dateien die gleichzeitig bearbeitet werden sollen"
+
+#: static/views/regenerate_interface.php:100
+msgid "Status:"
+msgstr "Status:"
+
+#: static/views/regenerate_interface.php:111
+msgid "Run (may take a while)"
+msgstr "Ausführen (kann eine Weile dauern)"
+
+#: static/views/regenerate_interface.php:112
+msgid "Stop"
+msgstr "Anhalten"
+
+#: static/views/regenerate_interface.php:113
+msgid "Clear Log"
+msgstr "Leere Protokoll"
+
+#: wp-stateless-media.php:46
+msgid ""
+"Distributive is broken. composer.json is missed. Try to remove and upload "
+"plugin again."
+msgstr ""
+"Der Verteiler funktioniert nicht. Die Datei composer.json fehlt. Versuchen "
+"Sie das Plugin zu entfernen und wieder hochzuladen."
+
+#: wp-stateless-media.php:54
+#, php-format
+msgid "Plugin requires PHP %s or higher. Your current PHP version is %s"
+msgstr "Plugin erfordert PHP %s oder höher. Ihre aktuelle Version ist PHP %s"
+
+#: wp-stateless-media.php:62
+#, php-format
+msgid ""
+"Distributive is broken. %s file is missed. Try to remove and upload plugin "
+"again."
+msgstr ""
+"Der Verteiler funktioniert nicht. Die Datei %s fehlt. Versuchen Sie das "
+"Plugin zu entfernen und wieder hochzuladen."
+
+#: wp-stateless-media.php:66
+msgid ""
+"Distributive is broken. Plugin loader is not available. Try to remove and "
+"upload plugin again."
+msgstr ""
+"Der Verteiler funktioniert nicht. Der Plugin-Loader ist nicht verfügbar. "
+"Versuchen Sie das Plugin zu entfernen und wieder hochzuladen."
+
+#: wp-stateless-media.php:87
+#, php-format
+msgid "<p><b>%s</b> can not be initialized. %s</p>"
+msgstr "<p><b>%s</b> kann nicht initialisiert werden. %s</p>"
