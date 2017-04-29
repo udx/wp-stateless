@@ -87,6 +87,49 @@ namespace wpCloud\StatelessMedia {
           $this->set( 'sm.root_dir', WP_STATELESS_MEDIA_ROOT_DIR );
         }
 
+
+
+        /**
+         * JSON key file path
+         */
+
+        /* Use constant value for JSON key file path, if set. */
+        if( defined( 'WP_STATELESS_MEDIA_KEY_FILE_PATH' ) ) {
+          /* Maybe fix the path to p12 file. */
+          $key_file_path = WP_STATELESS_MEDIA_KEY_FILE_PATH;
+
+          if( !empty( $key_file_path ) ) {
+            $upload_dir = wp_upload_dir();
+            /* Check if file exists */
+            switch( true ) {
+              /* Determine if default path is correct */
+              case (file_exists($key_file_path)):
+                /* Path is correct. Do nothing */
+                break;
+              /* Look using WP root. */
+              case (file_exists( ABSPATH . $key_file_path ) ):
+                $key_file_path = ABSPATH . $key_file_path;
+                break;
+              /* Look in wp-content dir */
+              case (file_exists( WP_CONTENT_DIR . $key_file_path ) ):
+                $key_file_path = WP_CONTENT_DIR . $key_file_path;
+                break;
+              /* Look in uploads dir */
+              case (file_exists( wp_normalize_path( $upload_dir[ 'basedir' ] ) . '/' . $key_file_path ) ):
+                $key_file_path = wp_normalize_path( $upload_dir[ 'basedir' ] ) . '/' . $key_file_path;
+                break;
+              /* Look using Plugin root */
+              case (file_exists($this->path( $key_file_path, 'dir') ) ):
+                $key_file_path = $this->path( $key_file_path, 'dir' );
+                break;
+
+            }
+            if(file_exists($key_file_path)){
+              $this->set( 'sm.key_json', file_get_contents($key_file_path) );
+            }
+          }
+        }
+
         /**
          * DELETE REMOTE
          */
@@ -396,9 +439,10 @@ namespace wpCloud\StatelessMedia {
 
         } else {
 
+          $kjsn_readonly = defined( 'WP_STATELESS_MEDIA_KEY_FILE_PATH' ) ? 'readonly="readonly"' : '';
           $inputs[] = '<div class="key_type"><label>'.__('Service Account JSON', ud_get_stateless_media()->domain).'</label>';
             $inputs[] = '<div class="_key_type _sm_key_json">';
-              $inputs[] = '<textarea id="sm_key_json" class="field regular-textarea sm_key_json" type="text" name="sm[key_json]" >'. esc_attr( $this->get( 'sm.key_json' ) ) .'</textarea>';
+              $inputs[] = '<textarea '.$kjsn_readonly.' id="sm_key_json" class="field regular-textarea sm_key_json" type="text" name="sm[key_json]" >'. esc_attr( $this->get( 'sm.key_json' ) ) .'</textarea>';
             $inputs[] = '</div>';
           $inputs[] = '</div>';
         }
@@ -422,12 +466,14 @@ namespace wpCloud\StatelessMedia {
 
         $_mode = $network_mode && $network_mode != 'false' ? $network_mode : $this->get( 'sm.mode' );
 
+        $mode_readonly = defined( 'WP_STATELESS_MEDIA_MODE' ) ? 'disabled="disabled"' : '';
+
         $inputs = array(
-          '<p class="sm-mode"><label for="sm_mode_disabled"><input '. disabled( true, $network_mode != 'false', false ) .'  id="sm_mode_disabled" '. checked( 'disabled', $_mode, false ) .' type="radio" name="sm[mode]" value="disabled" />'.__( 'Disabled', ud_get_stateless_media()->domain ).''
+          '<p class="sm-mode"><label for="sm_mode_disabled"><input '.$mode_readonly. disabled( true, $network_mode != 'false', false ) .'  id="sm_mode_disabled" '. checked( 'disabled', $_mode, false ) .' type="radio" name="sm[mode]" value="disabled" />'.__( 'Disabled', ud_get_stateless_media()->domain ).''
           . '<small class="description">'.__('Disable Stateless Media.', ud_get_stateless_media()->domain).'</small></label></p>',
-          '<p class="sm-mode"><label for="sm_mode_backup"><input '. disabled( true, $network_mode != 'false', false ) .' id="sm_mode_backup" '. checked( 'backup', $_mode, false ) .' type="radio" name="sm[mode]" value="backup" />'.__( 'Backup', ud_get_stateless_media()->domain ).''
+          '<p class="sm-mode"><label for="sm_mode_backup"><input '.$mode_readonly. disabled( true, $network_mode != 'false', false ) .' id="sm_mode_backup" '. checked( 'backup', $_mode, false ) .' type="radio" name="sm[mode]" value="backup" />'.__( 'Backup', ud_get_stateless_media()->domain ).''
           . '<small class="description">'.__('Push media files to Google Storage but keep using local ones.', ud_get_stateless_media()->domain).'</small></label></p>',
-          '<p class="sm-mode"><label for="sm_mode_cdn"><input '. disabled( true, $network_mode != 'false', false ) .' id="sm_mode_cdn" '. checked( 'cdn', $_mode, false ) .' type="radio" name="sm[mode]" value="cdn" />'.__( 'CDN', ud_get_stateless_media()->domain ).''
+          '<p class="sm-mode"><label for="sm_mode_cdn"><input '.$mode_readonly. disabled( true, $network_mode != 'false', false ) .' id="sm_mode_cdn" '. checked( 'cdn', $_mode, false ) .' type="radio" name="sm[mode]" value="cdn" />'.__( 'CDN', ud_get_stateless_media()->domain ).''
           . '<small class="description">'.__('Push media files to Google Storage and use them directly from there.', ud_get_stateless_media()->domain).'</small></label></p>'
         );
 
