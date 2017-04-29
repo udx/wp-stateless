@@ -563,7 +563,7 @@ namespace wpCloud\StatelessMedia {
          */
         if ( !$width && !$height ) {
           $sm_cloud = get_post_meta( $id, 'sm_cloud', true );
-          if ( !empty( $sm_cloud['sizes'] ) && !empty( $sm_cloud['sizes'][$size] ) ) {
+          if ( is_string($size) && !empty( $sm_cloud['sizes'] ) && !empty( $sm_cloud['sizes'][$size] ) ) {
             global $_wp_additional_image_sizes;
 
             $img_url = !empty( $sm_cloud['sizes'][$size]['fileLink'] ) ? $sm_cloud['sizes'][$size]['fileLink'] : $img_url;
