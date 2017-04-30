@@ -200,6 +200,9 @@ jQuery(document).ready(function ($) {
 	});
 
 	userInfo.on('click', '.logout', function(e){
+		var loginButton = jQuery('#google-login');
+		var loginUrl = loginButton.attr('href');
+		loginButton.attr('href', loginUrl + "&force_login=true");
 		e.preventDefault();
 		wp.stateless.clearAccessToken();
 		checkAuthentication();

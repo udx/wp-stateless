@@ -132,7 +132,14 @@ wp.stateless = {
         photo: photo.url
       }
       defer.resolve(profile);
-    }).fail(function(){
+    }).fail(function(xhr){
+      if(typeof xhr.responseJSON != 'undefined' 
+        &&typeof xhr.responseJSON.error != 'undefined' 
+        && typeof xhr.responseJSON.error.status != 'undefined' 
+        && xhr.responseJSON.error.status == 'UNAUTHENTICATED'
+      ){
+        wp.stateless.clearAccessToken();
+      } 
       defer.reject();
     });
     
@@ -232,7 +239,14 @@ wp.stateless = {
       });
 
       defer.resolve(projects);
-    }).fail(function(){
+    }).fail(function(xhr){
+      if(typeof xhr.responseJSON != 'undefined' 
+        &&typeof xhr.responseJSON.error != 'undefined' 
+        && typeof xhr.responseJSON.error.status != 'undefined' 
+        && xhr.responseJSON.error.status == 'UNAUTHENTICATED'
+      ){
+        wp.stateless.clearAccessToken();
+      }
       defer.reject();
     });
     return defer.promise();
@@ -499,8 +513,15 @@ wp.stateless = {
       url: 'https://cloudbilling.googleapis.com/v1/' + name,
     }).done(function(billingAccount){
       defer.resolve(billingAccount.displayName);
-    }).fail(function(){
-      defer.reject();
+    }).fail(function(xhr){
+      if(typeof xhr.responseJSON != 'undefined' 
+        &&typeof xhr.responseJSON.error != 'undefined' 
+        && typeof xhr.responseJSON.error.status != 'undefined' 
+        && xhr.responseJSON.error.status == 'UNAUTHENTICATED'
+      ){
+        wp.stateless.clearAccessToken();
+      }
+      defer.reject(xhr);
     });
     return defer.promise();
   },
