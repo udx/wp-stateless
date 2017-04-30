@@ -23,7 +23,13 @@
         response.success = true;
         response.message = '';
 
-        var isExisting = /\((.+)\)/.exec(pName);
+        var isExisting = /(.+)\((.+)\)/.exec(pName);
+
+        if(isExisting != null && isExisting.length){
+            response.id     = isExisting[2].trim();
+            response.pName  = isExisting[1].trim();
+            return response;
+        }
 
         jQuery.each(settings.name, function(index, item) {
             if(!item.regex.test(pName)){

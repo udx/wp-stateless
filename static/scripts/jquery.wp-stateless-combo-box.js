@@ -91,7 +91,7 @@
 					_this.addClass('has-error').find('.error').html(response.message);
 					_new.hide();
 				}else{
-					_this.removeClass('has-error').find('.error');
+					_this.removeClass('has-error').find('.error').html("");
 					_new.html( response.pName + " (" + response.id + ")" ).show();
 				}
 
@@ -112,7 +112,7 @@
 				else{
 					_this.find('.name').val(id);
 				}
-				_this.trigger('change');
+				_input.trigger('change');
 				_new.parent().removeClass('active');
 			});
 			_this.data('comboboxLoaded', true);

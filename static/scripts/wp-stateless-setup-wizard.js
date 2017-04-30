@@ -65,7 +65,7 @@ jQuery(document).ready(function ($) {
 				errorMessage: 'Project name must be between 5 and 30 characters.',
 			},
 			char:{
-				regex: /[a-zA-Z0-9-'"\s!]/,
+				regex: /^[a-zA-Z0-9-'"\s!]+$/,
 				errorMessage: 'Project name has invalid characters. Enter letters, numbers, quotes, hyphens, spaces or exclamation points.'
 			},
 		},
@@ -92,9 +92,10 @@ jQuery(document).ready(function ($) {
 			length:{
 				regex: /^.{5,30}$/,
 				errorMessage: 'Bucket name must be between 5 and 30 characters.',
+				break: true
 			},
 			char:{
-				regex: /[a-z0-9][a-z0-9\-]{3,28}[a-z0-9]/,
+				regex: /^[a-z0-9][a-z0-9\-]*[a-z0-9]$/,
 				errorMessage: 'A bucket name can contain lowercase alphanumeric characters, hyphens, and underscores. Bucket names must start and end with an alphanumeric character.',
 			},
 		},
