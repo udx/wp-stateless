@@ -34,7 +34,6 @@
   },
   "archive": {
     "exclude": [
-      "vendor",
       "node_modules",
       ".gitignore",
       "test",

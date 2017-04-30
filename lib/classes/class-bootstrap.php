@@ -42,6 +42,18 @@ namespace wpCloud\StatelessMedia {
        */
       public function init() {
 
+        /**
+         * Copied from wp-property
+         * Duplicates UsabilityDynamics\WP\Bootstrap_Plugin::load_textdomain();
+         *
+         * There is a bug with localisation in lib-wp-bootstrap 1.1.3 and lower.
+         * So we load textdomain here again, in case old version lib-wp-bootstrap is being loaded
+         * by another plugin.
+         *
+         * @since 1.9.1
+         */
+        load_plugin_textdomain($this->domain, false, dirname(plugin_basename($this->boot_file)) . '/static/languages/');
+        
         // Parse feature falgs, set constants.
         $this->parse_feature_flags();
 
@@ -160,6 +172,7 @@ namespace wpCloud\StatelessMedia {
              * Extends metadata by adding GS information.
              */
             add_filter( 'wp_get_attachment_metadata', array( $this, 'wp_get_attachment_metadata' ), 10, 2 );
+            add_filter( 'wp_update_attachment_metadata', array( $this, 'add_media' ), 100, 2 );
 
             /**
              * Add/Edit Media
@@ -542,6 +555,28 @@ namespace wpCloud\StatelessMedia {
           $is_intermediate = true;
         }
         //die( '<pre>' . print_r( $intermediate, true ) . '</pre>' );
+
+        /**
+         * maybe try to get images info from sm_cloud
+         * this case may happen when no local files
+         * @author korotkov@ud
+         */
+        if ( !$width && !$height ) {
+          $sm_cloud = get_post_meta( $id, 'sm_cloud', true );
+          if ( !empty( $sm_cloud['sizes'] ) && !empty( $sm_cloud['sizes'][$size] ) ) {
+            global $_wp_additional_image_sizes;
+
+            $img_url = !empty( $sm_cloud['sizes'][$size]['fileLink'] ) ? $sm_cloud['sizes'][$size]['fileLink'] : $img_url;
+
+            if ( !empty( $_wp_additional_image_sizes[ $size ] ) ) {
+              $width = !empty( $_wp_additional_image_sizes[ $size ]['width'] ) ? $_wp_additional_image_sizes[ $size ]['width'] : $width;
+              $height = !empty( $_wp_additional_image_sizes[ $size ]['height'] ) ? $_wp_additional_image_sizes[ $size ]['height'] : $height;
+            }
+
+            $is_intermediate = true;
+          }
+        }
+
         if ( !$width && !$height && isset( $meta['width'], $meta['height'] ) ) {
 
           //** any other type: use the real image */
