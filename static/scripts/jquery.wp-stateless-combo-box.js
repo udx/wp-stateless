@@ -61,6 +61,7 @@
 					item.id = item.id || item.name;
 					list.append("<li " + selected + "data-id='" + item.id + "' data-name='" + item.name + "'>" + text + "</li>");
 				});
+				_input.trigger('change');
 			}
 
 			if(_this.data('comboboxLoaded') == true)
@@ -72,7 +73,7 @@
 			_input.focusout(function(){
 				setTimeout(function(){
 					dropDown.removeClass('active');
-				}, 100);
+				}, 500);
 			});
 
 			_input.on( 'change keyup', function(event){
@@ -84,18 +85,24 @@
 
 				dropDown.removeClass('active');
 
-				if(response.id == 'localhost'){
+				if(response.id == 'localhost' || response.pName == 'localhost'){
 					_this.addClass('has-error').find('.error').html("localhost is not acceptable.");
 				}
-				if(!response.success){
+				else if(!response.success){
 					_this.addClass('has-error').find('.error').html(response.message);
 					_new.hide();
-				}else{
+				}else if(response.existing){
 					_this.removeClass('has-error').find('.error').html("");
-					_new.html( response.pName + " (" + response.id + ")" ).show();
+					_new.show();
+				}else{
+					var name = response.pName;
+					if(response.id)
+						name += " (" + response.id + ")";
+					_this.removeClass('has-error').find('.error').html("");
+					_new.html( name ).show();
+					_new.parent().attr('data-id', response.id).attr('data-name', response.pName);
 				}
 
-				_new.parent().attr('data-id', response.id).attr('data-name', response.pName);
 				_id.val(response.id);
 				
 			});
@@ -110,8 +117,9 @@
 					_this.find('.name').val(name + " (" + id + ")");
 				}
 				else{
-					_this.find('.name').val(id);
+					_this.find('.name').val(name);
 				}
+				_this.removeClass('has-error').find('.error').html("");
 				_this.trigger('change');
 				_input.trigger('change');
 				_new.parent().removeClass('active');

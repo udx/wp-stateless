@@ -42,6 +42,7 @@ jQuery(document).ready(function ($) {
 		  	if(accounts && accounts.length){
 		  		noBillingButton.hide();
 				billingDropdown.wpStatelessComboBox({items:accounts, selected: 0}).show();
+				billingDropdown.find('.name').trigger('change');
 		  	}
 			else{
 				billingDropdown.hide();
@@ -111,7 +112,7 @@ jQuery(document).ready(function ($) {
 	});
 
 	// Binding text input to create new in dropdown
-	setupForm.find('.wpStateLess-combo-box').wpStatelessComboBox();
+	setupForm.find('.wpStateLess-combo-box').wpStatelessComboBox().find('.name').trigger('change');
 
 	
 	statelessWrapper.find('.learn-more').on('click', function(event){
@@ -152,6 +153,21 @@ jQuery(document).ready(function ($) {
 		event.stopImmediatePropagation();
 		var _this = jQuery(this);
 		var projectId = _this.find('.id').val();
+        
+        if(typeof wp.stateless.projects[projectId] == 'undefined'){
+			bucketDropdown.wpStatelessComboBox({items:{}});
+		  	var name = billingDropdown.find('.name').val('');
+		  	var id = billingDropdown.find('.id').val('');
+		  	var account = name.wpStatelessComboBox({get: 0});
+
+		  	console.log("account from ul list:", account);
+		  	name.removeAttr('disabled');
+		  	if(account){
+				name.val(account.name +  " (" + account.id + ")");
+				id.val(account.id);
+		  	}
+		  	return;
+        }
 
 		// Need to check if it's existing project.
 		wp.stateless.listBucket(projectId)

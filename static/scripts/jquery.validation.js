@@ -21,6 +21,7 @@
         response.id      = '';
         response.pName   = pName;
         response.success = true;
+        response.existing = false;
         response.message = '';
 
         var isExisting = /(.+)\((.+)\)/.exec(pName);
@@ -28,7 +29,11 @@
         if(isExisting != null && isExisting.length){
             response.id     = isExisting[2].trim();
             response.pName  = isExisting[1].trim();
-            return response;
+            if(typeof wp.stateless.projects[response.id] != 'undefined'){
+                response.existing = true;
+                return response;
+            }
+            pName = response.pName;
         }
 
         jQuery.each(settings.name, function(index, item) {
