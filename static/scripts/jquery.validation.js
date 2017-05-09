@@ -29,11 +29,12 @@
         if(isExisting != null && isExisting.length){
             response.id     = isExisting[2].trim();
             response.pName  = isExisting[1].trim();
-            if(typeof wp.stateless.projects[response.id] != 'undefined'){
-                response.existing = true;
-                return response;
-            }
             pName = response.pName;
+        }
+
+        if(_this.wpStatelessComboBox({has: response.id || response.pName})){
+            response.existing = true;
+            return response;
         }
 
         jQuery.each(settings.name, function(index, item) {

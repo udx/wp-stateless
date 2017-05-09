@@ -34,6 +34,18 @@
 			return;
 		}
 
+		if(typeof options.has != 'undefined'){
+			var result = false;
+			var _items = jQuery(this).parent().find('.wpStateLess-existing').find('ul li');
+			_items.each(function(index, item) {
+				if(jQuery(item).attr('data-id') == options.has){
+					result	 = true;
+					return false; // to break each
+				}
+			});
+			return result;
+		}
+
 		return this.each(function() {
 			var _this = jQuery(this);
 			var _new = _this.find('.wpStateLess-create-new span');
@@ -45,6 +57,9 @@
 
 			jQuery('h5', existing).hide();
 			list.children().remove();
+
+			_id.val(_new.parent().attr('data-id'));
+			_input.val(_new.parent().attr('data-name'));
 
 			if(options.items && options.items.length > 0){
 				jQuery('h5', existing).show();
@@ -73,7 +88,7 @@
 			_input.focusout(function(){
 				setTimeout(function(){
 					dropDown.removeClass('active');
-				}, 500);
+				}, 200);
 			});
 
 			_input.on( 'change keyup', function(event){

@@ -432,16 +432,17 @@ wp.stateless = {
     jQuery.ajax({
       url: 'https://cloudbilling.googleapis.com/v1/projects/' + projectID + '/billingInfo',
     }).done(function(responseData){
-      var billingInfo = {
-        billingEnabled: responseData.billingEnabled,
-      };
+      var billingInfo = {};
 
       if(typeof responseData.billingAccountName != 'undefined'){
         billingInfo.id = responseData.billingAccountName.replace('billingAccounts/', '');
+      }else{
+        defer.reject();
       }
 
       if(typeof responseData.billingEnabled != 'undefined' && responseData.billingEnabled == true){
         wp.stateless.projects[projectID]['billingInfo'] = responseData;
+        billingInfo.billingEnabled = responseData.billingEnabled;
       }
 
       wp.stateless.getBillingAccount(responseData.billingAccountName).done(function(displayName) {

@@ -262,8 +262,8 @@ jQuery(document).ready(function ($) {
 		event.preventDefault();
 		var projectId = projectDropdown.find('.id').val();
 		var projectName = projectDropdown.find('.name').val().replace(/\(.*/, '').replace(/^\s+|\s+$/g,'');
-		var bucketId = bucketDropdown.find('.id').val();
-		var bucketName = bucketDropdown.find('.name').val().replace(/\(.*/, '').replace(/^\s+|\s+$/g,'');
+		var bucketName = bucketDropdown.find('.name').val();
+		var bucketId = bucketName;
 		var serviceAccountId = 'stateless-' + bucketId.replace('stateless-', '');
 		var serviceAccountName = 'Stateless ' + bucketName.replace('Stateless', '');
 		var billingAccount = billingDropdown.find('.id').val();
