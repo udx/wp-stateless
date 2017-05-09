@@ -112,6 +112,7 @@
 				else{
 					_this.find('.name').val(id);
 				}
+				_this.trigger('change');
 				_input.trigger('change');
 				_new.parent().removeClass('active');
 			});
