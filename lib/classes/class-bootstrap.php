@@ -664,7 +664,7 @@ namespace wpCloud\StatelessMedia {
        */
       public function is_connected_to_gs() {
 
-        //$trnst = get_transient( 'sm::is_connected_to_gs' );
+        $trnst = get_transient( 'sm::is_connected_to_gs' );
 
         if ( empty($trnst) || false === $trnst || !isset( $trnst[ 'hash' ] ) || $trnst[ 'hash' ] != md5( serialize( $this->get( 'sm' ) ) ) ) {
           $trnst = array(
