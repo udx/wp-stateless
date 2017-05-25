@@ -227,33 +227,41 @@ jQuery(document).ready(function ($) {
 
 	statelessWrapper.on('click', '.create-billing-account', function(event) {
 		event.preventDefault();
+		var xhr;
 		var counter = 5;
-		var interval = 100;
+		var interval = 200;
 		var _this = jQuery(this)
 		var href = _this.attr('href');
 		var new_window = window.open(href,'_newtab');
 
 		var loader = _this.find('.wpStateLess-loading');
 		loader.addClass('active');
-		var billingChecker = setInterval(function() {
-			if(new_window.closed == true || counter % 5 == 0){
-				counter += 5;
+		var checkBillingAccount = function(force) {
+			counter ++;
+			if(force === true || new_window.closed == true || counter % 35 == 0){
 				if(new_window.closed == true){
 					clearInterval(billingChecker);
 					loader.removeClass('active');
 				}
+				
+				if(xhr && typeof xhr.abort != 'undefined'){
+					xhr.abort();
+				}
 
-				listBillingAccounts().done(function(accounts) {
+				xhr = listBillingAccounts().done(function(accounts) {
 					if(accounts && accounts.length){
 						jQuery('.wpStateLess-user-has-no-project-billing', statelessWrapper).hide();
 						setupForm.show();
 						clearInterval(billingChecker);
 						loader.removeClass('active');
+						jQuery(window).off( 'focus', checkBillingAccount)
 					}
 				});
 			}
-			console.log('Checking..');
-		}, interval);
+		}
+		var billingChecker = setInterval(checkBillingAccount, interval);
+		
+		jQuery(window).focus( checkBillingAccount.bind(null, true));
 
 		return false;
 	})
