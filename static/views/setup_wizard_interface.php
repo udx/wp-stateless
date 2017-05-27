@@ -69,6 +69,9 @@ $bucket_id      = "stateless-" . substr($id, 0, 20);
                                                 <div class="wpStateLess-combo-box project">
                                                     <input type="hidden" class="id" value="<?php echo $project_id;?>">
                                                     <input type="text" class="name" value="<?php echo $project_name;?>" placeholder="Select or Create New Project">
+                                                    <div class="circle-loader">
+                                                        <div class="checkmark draw"></div>
+                                                    </div>
                                                     <div class="wpStateLess-input-dropdown">
                                                         <div class="wpStateLess-create-new active" data-id="<?php echo $project_id?>" data-name="<?php echo $project_name?>">
                                                             <h5>Create New Project</h5>
@@ -89,6 +92,9 @@ $bucket_id      = "stateless-" . substr($id, 0, 20);
                                                 </label>
                                                 <div class="wpStateLess-combo-box bucket">
                                                     <input type="text" class="name" value="<?php echo $bucket_id;?>" placeholder="Select or Create New Bucket">
+                                                    <div class="circle-loader">
+                                                        <div class="checkmark draw"></div>
+                                                    </div>
                                                     <div class="wpStateLess-input-dropdown">
                                                         <div class="wpStateLess-create-new active" data-id="<?php echo $bucket_id?>" data-name="<?php echo $bucket_id?>">
                                                             <h5>Create New Bucket</h5>
@@ -111,6 +117,9 @@ $bucket_id      = "stateless-" . substr($id, 0, 20);
                                                 <div class="wpStateLess-combo-box billing-account" style="display: none;">
                                                     <input type="hidden" class="id" value="">
                                                     <input type="text" class="name" value="" readonly="readonly" placeholder="Select Billing Account">
+                                                    <div class="circle-loader">
+                                                        <div class="checkmark draw"></div>
+                                                    </div>
                                                     <div class="wpStateLess-input-dropdown">
                                                         <div class="wpStateLess-existing">
                                                             <h5>Existing Billing Accounts</h5>

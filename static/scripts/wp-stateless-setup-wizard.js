@@ -7,7 +7,7 @@ jQuery(document).ready(function ($) {
 	var stepSetupProject = setupSteps.find('.step-setup-project');
 	var userInfo = setupSteps.find('.wpStateLess-userinfo');
 	var userDetails = userInfo.find('.wpStateLess-user-detais');
-	var setupForm = setupSteps.find('.wpStateLess-step-setup-form');
+	var setupForm = setupSteps.find('.wpStateLess-step-setup-form form');
 	var projectDropdown = setupForm.find('.wpStateLess-combo-box.project');
 	var bucketDropdown = setupForm.find('.wpStateLess-combo-box.bucket');
   	var billingDropdown = setupForm.find('.wpStateLess-combo-box.billing-account');
@@ -282,127 +282,166 @@ jQuery(document).ready(function ($) {
 			console.log("Form:: Input not valid.")
 			return;
 		}
-
+		setupForm.addClass('working');
 		jQuery(this).find('.wpStateLess-loading').addClass('active');
 
-
-		// Checking if user want to create new project.
-		if(!wp.stateless.projects[projectId]){
-			wp.stateless.createProject({"projectId": projectId, "name": projectName}).done(function(argument) {
-				_updateProjectBillingInfo();
-			}).fail(function(response) {
-				response = response.responseJSON;
-				console.log(response);
-				if(response && typeof response.error != 'undefined' && typeof response.error.status != 'undefined' && response.error.status == 'ALREADY_EXISTS'){
-					_updateProjectBillingInfo();
+		async.auto({
+			createProject: function(callback) {
+				if(!wp.stateless.projects[projectId]){
+					wp.stateless.createProject({"projectId": projectId, "name": projectName})
+					.done(function(argument) {
+						callback(null, {ok: true, task: 'createProject', message: "Project Created"});
+					}).fail(function(response) {
+						response = response.responseJSON || {};
+						console.log(response);
+						if(response && typeof response.error != 'undefined' && typeof response.error.status != 'undefined' && response.error.status == 'ALREADY_EXISTS'){
+							callback(null, {ok: true, task: 'createProject', message: "Project Exists"});
+						}
+						else{
+							callback(response.error, {ok: false, task: 'createProject', message: "Something went wrong"});
+						}
+					});
+				}else{
+					callback(null, {ok: true, task: 'createProject', message: "Project Exists"});
 				}
-			});
-		}else{
-			_updateProjectBillingInfo();
-		}
+			},
+			updateBilltingInfo: ['createProject', function(results, callback) {
+				if( typeof wp.stateless.projects[projectId] == 'undefined' || typeof wp.stateless.projects[projectId]['billingInfo'] == 'undefined'){
+					wp.stateless.updateProjectBillingInfo({"projectID": projectId, "accountName": billingAccount})
+					.done(function(argument) {
+						callback(null, {ok: true, task: 'updateBilltingInfo', message: "Billing Enabled"});
+					}).fail(function(response) {
+						callback(response, {ok: false, task: 'updateBilltingInfo', message: "Something went wrong"});
+					});
+				}
+				else{
+					callback(null, {ok: true, task: 'updateBilltingInfo', message: "Billing Info"});
+				}
+			}],
+			createBucket: ['updateBilltingInfo', function(results, callback){
+				if( typeof wp.stateless.projects[projectId] == 'undefined' || typeof wp.stateless.projects[projectId]['buckets'][bucketId] == 'undefined'){
+					// Bucket didn't exist.
+					wp.stateless.createBucket({"projectId": projectId, "name": bucketId})
+					.done(function(argument) {
+						callback(null, {ok: true, task: 'createBucket', message: "Bucket Created"});
+					}).fail(function(response) {
+						response = response.responseJSON;
+						if(response && typeof response.error != 'undefined' && typeof response.error.code != 'undefined' && response.error.code == 409){
+							callback(null, {ok: true, task: 'createBucket', message: response.error.message});
+						}
+						else{
+							callback(response, {ok: true, task: 'createBucket', message: "Something went wrong"});
+						}
+					});
+				}
+				else{
+					// Bucket exist
+					callback(null, {ok: true, task: 'bucket', message: "Bucket"});
+				}
+			}],
+			createServiceAccount: ['createBucket', function(results, callback){
+				if( typeof wp.stateless.projects[projectId] != 'undefined' && typeof wp.stateless.projects[projectId]['serviceAccounts'] != 'undefined'){
+					// Checking if service account exist.
+					var serviceAccounts = wp.stateless.projects[projectId]['serviceAccounts'];
+					var accountFound = false;
+					jQuery.each(serviceAccounts, function(index, item) {
+						if(item.displayName == bucketName || item.email.replace(/@.*/, '') == serviceAccountId){
+							callback(null, {ok: true, task: 'createServiceAccount', email: item.email, message: "Service Account Exists"});
+							accountFound = true;
+							return false;
+						}
+					});
+				}
 
-		function _updateProjectBillingInfo(){
-			if( typeof wp.stateless.projects[projectId] == 'undefined' || typeof wp.stateless.projects[projectId]['billingInfo'] == 'undefined'){
-				wp.stateless.updateProjectBillingInfo({"projectID": projectId, "accountName": billingAccount}).done(function(argument) {
-					_createBucket();
-				});
-			}
-			else{
-				_createBucket();
-			}
-		}
+				if(accountFound) return;
 
-		function _createBucket(){
-			if( typeof wp.stateless.projects[projectId] == 'undefined' || typeof wp.stateless.projects[projectId]['buckets'][bucketId] == 'undefined'){
-				wp.stateless.createBucket({"projectId": projectId, "name": bucketId}).done(function(argument) {
-					_createServiceAccount();
+				wp.stateless.createServiceAccount({
+					'projectId': projectId,
+					'accountId': serviceAccountId,
+					'name': serviceAccountName,
+				}).done(function(createdSerciceAccount){
+					callback(null, {ok: true, task: 'createServiceAccount', email: createdSerciceAccount.email, message: "Service Account Created"});
 				}).fail(function(response) {
-					response = response.responseJSON;
-					console.log(response);
-					if(response && typeof response.error != 'undefined' && typeof response.error.code != 'undefined' && response.error.code == 409){
-						_createServiceAccount();
-					}
+					callback(false, {ok: false, task: 'createServiceAccount', message: "Something went wrong"});
 				});
-			}
-			else{
-				_createServiceAccount();
-			}
-		};
-
-		function _createServiceAccount(){
-			console.log("wp::stateless::bucketCreated");
-			if( typeof wp.stateless.projects[projectId] != 'undefined' && typeof wp.stateless.projects[projectId]['serviceAccounts'] != 'undefined'){
-				var serviceAccounts = wp.stateless.projects[projectId]['serviceAccounts'];
-				var accountFound = false;
-				jQuery.each(serviceAccounts, function(index, item) {
-					if(item.displayName == bucketName || item.email.replace(/@.*/, '') == serviceAccountId){
-						_insertBucketAccessControls(item.email);
-						accountFound = true;
-						return false;
-					}
-				})
-			}
-
-			if(accountFound) return;
-
-
-			wp.stateless.createServiceAccount({
-				'projectId': projectId,
-				'accountId': serviceAccountId,
-				'name': serviceAccountName,
-			}).done(function(createdSerciceAccount){
-				_insertBucketAccessControls(createdSerciceAccount.email);
-			}).fail(function(response) {
-				alert("Something wrong."); // Remove
-			});
-		};
-
-		function _insertBucketAccessControls(createdSerciceAccountEmail) {
-			wp.stateless.insertBucketAccessControls({
-				"bucket": bucketId,
-				"user": createdSerciceAccountEmail
-			}).done(function(responseData){
-				console.log("Bucket Access Control inserted", responseData);
-				_createServiceAccountKeys(responseData.email);
-				
-			});
-		}
-
-		function _createServiceAccountKeys(createdSerciceAccountEmail) {
-			wp.stateless.createServiceAccountKeys({
-				"project": projectId,
-				"account": createdSerciceAccountEmail
-			}).done(function(ServiceAccountKey){
+			}],
+			insertBucketAccessControls: ['createServiceAccount', function(results, callback) {
+				wp.stateless.insertBucketAccessControls({
+					"bucket": bucketId,
+					"user": results.email,
+				}).done(function(responseData){
+					callback(null, {ok: true, task: 'insertBucketAccessControls', email: responseData.email, message: "Service Account Created"});
+				}).fail(function(response) {
+					callback(response, {ok: false, task: 'insertBucketAccessControls', message: "Something went wrong"});
+				});
+			}],
+			createServiceAccountKey: ['insertBucketAccessControls', function(results, callback) {
+				wp.stateless.createServiceAccountKeys({
+					"project": projectId,
+					"account": results.email
+				}).done(function(ServiceAccountKey){
+					callback(null, {ok: true, task: 'createServiceAccountKey', privateKeyData: ServiceAccountKey.privateKeyData, message: "Service Account Key Created"});
+				}).fail(function(response) {
+					callback(response, {ok: false, task: 'createServiceAccountKey', message: "Something went wrong"});
+				});
+			}],
+			saveServiceAccountKey: ['createServiceAccountKey', function(results, callback) {
 				jQuery.ajax({
 					url: ajaxurl,
 					method: "POST",
+					// We need to set header because we have se default header for google api auth.
 					headers: {
 						"content-type": "application/x-www-form-urlencoded",
 					},
 					data: {//JSON.stringify({
 						'action': 'stateless_wizard_update_settings',
 						'bucket': bucketId,
-						'privateKeyData': ServiceAccountKey.privateKeyData,
+						'privateKeyData': results.privateKeyData,
 					}//)
 				}).done(function(response) {
 					if(typeof response.success != undefined && response.success == true){
-						console.log("Option updated");
-
-						// We have access token.
-						setupStepsBars.find('li')
-							.removeClass('wpStateLess-done active')
-							.filter('.step-google-login, .step-setup-project')
-							.addClass('wpStateLess-done');
-						setupSteps.removeClass('active')
-							.filter('.step-final')
-							.addClass('active');
+						callback(null, {ok: true, task: 'saveServiceAccountKey', message: "Service Account Key Saved"});
 					}
+					else{
+						callback(response, {ok: false, task: 'saveServiceAccountKey', message: "Something went wrong"});
+					}
+				}).fail(function(response) {
+					callback(response, {ok: false, task: 'saveServiceAccountKey', message: "Something went wrong"});
 				});
-
+			}]
+		}, function(err, results) {
+				console.log("results: ", results);
+			if(err){// || results.task == 'saveServiceAccountKey'){
 				jQuery(this).find('.wpStateLess-loading').removeClass('active');
-			});
-		}
-		
+				setupForm.removeClass('working');
+				console.log("Error: ", err);
+				return;
+			}
+
+			if(results.task == 'createProject'){
+				projectDropdown.find('.circle-loader').addClass('load-complete');
+			}
+			else if(results.task == 'updateBilltingInfo'){
+				billingDropdown.find('.circle-loader').addClass('load-complete');
+			}
+			else if(results.task == 'createBucket'){
+				bucketDropdown.find('.circle-loader').addClass('load-complete');
+			}
+			else if(results.task == 'saveServiceAccountKey'){
+				// We have access token.
+				setupStepsBars.find('li')
+					.removeClass('wpStateLess-done active')
+					.filter('.step-google-login, .step-setup-project')
+					.addClass('wpStateLess-done');
+				setupSteps.removeClass('active')
+					.filter('.step-final')
+					.addClass('active');
+				setupForm.removeClass('working');
+
+			}
+
+		});
+				
 		return false;
 	});
 	var resizeId;
