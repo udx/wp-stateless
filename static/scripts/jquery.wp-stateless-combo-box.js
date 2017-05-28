@@ -8,6 +8,14 @@
 
 		}
 
+		if(options == 'validate'){
+			return this.each(function() {
+				var _this = jQuery(this);
+				var _input = _this.find('.name');
+				_input.trigger('change');
+			});
+		}
+
 		if(typeof options.get != 'undefined'){
 			var _items = jQuery(this).parent().find('.wpStateLess-existing').find('ul li');
 			console.log('options:', options)
@@ -101,9 +109,11 @@
 				dropDown.removeClass('active');
 
 				if(response.id == 'localhost' || response.pName == 'localhost'){
+					response.id = '';
 					_this.addClass('has-error').find('.error').html("localhost is not acceptable.");
 				}
 				else if(!response.success){
+					response.id = '';
 					_this.addClass('has-error').find('.error').html(response.message);
 					_new.hide();
 				}else if(response.existing){

@@ -51,8 +51,6 @@ wp.stateless = {
 
   },
   getAccessToken: function getAccessToken(options) {
-    if(wp.stateless.access_token)
-      return wp.stateless.access_token;
 
     if( 'string' !== typeof wp.stateless.$_GET('access_token') ) {
       // There is no token in query string. Lets look in session.
@@ -62,8 +60,11 @@ wp.stateless = {
       if( sessionStorage.getItem( 'wp.stateless.token' ) && !isExpired) {
         wp.stateless.access_token = sessionStorage.getItem( 'wp.stateless.token' );
       }
-      else if(typeof options == 'undefined' || options.triggerEvent !== false){
-        jQuery(document).trigger('tokenExpired');
+      else{
+        if(typeof options == 'undefined' || options.triggerEvent !== false){
+          jQuery(document).trigger('tokenExpired');
+        }
+        wp.stateless.clearAccessToken();
         return false;
       }
     }
@@ -133,13 +134,6 @@ wp.stateless = {
       }
       defer.resolve(profile);
     }).fail(function(xhr){
-      if(typeof xhr.responseJSON != 'undefined' 
-        &&typeof xhr.responseJSON.error != 'undefined' 
-        && typeof xhr.responseJSON.error.status != 'undefined' 
-        && xhr.responseJSON.error.status == 'UNAUTHENTICATED'
-      ){
-        wp.stateless.clearAccessToken();
-      } 
       defer.reject();
     });
     
@@ -240,13 +234,6 @@ wp.stateless = {
 
       defer.resolve(projects);
     }).fail(function(xhr){
-      if(typeof xhr.responseJSON != 'undefined' 
-        &&typeof xhr.responseJSON.error != 'undefined' 
-        && typeof xhr.responseJSON.error.status != 'undefined' 
-        && xhr.responseJSON.error.status == 'UNAUTHENTICATED'
-      ){
-        wp.stateless.clearAccessToken();
-      }
       defer.reject();
     });
     return defer.promise();
@@ -515,13 +502,6 @@ wp.stateless = {
     }).done(function(billingAccount){
       defer.resolve(billingAccount.displayName);
     }).fail(function(xhr){
-      if(typeof xhr.responseJSON != 'undefined' 
-        &&typeof xhr.responseJSON.error != 'undefined' 
-        && typeof xhr.responseJSON.error.status != 'undefined' 
-        && xhr.responseJSON.error.status == 'UNAUTHENTICATED'
-      ){
-        wp.stateless.clearAccessToken();
-      }
       defer.reject(xhr);
     });
     return defer.promise();

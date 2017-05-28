@@ -573,6 +573,10 @@ body.wpStateLess-pops-active {
 .wpStateLess-loading span:nth-child(3) {
     animation-delay: .4s;
 }
+#stateless-notification {
+    margin-left: 0px;
+    display: none;
+}
 
 /* Circle loader */
 .circle-loader {
@@ -590,9 +594,10 @@ body.wpStateLess-pops-active {
   top: 10px;
 }
 
-.wpStateLess-step-setup-form form.working .circle-loader {
+.wpStateLess-combo-box.loading .circle-loader {
   display: inline-block;
 }
+
 .circle-loader,
 .circle-loader:after {
   border-radius: 50%;

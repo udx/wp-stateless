@@ -61,6 +61,9 @@ $bucket_id      = "stateless-" . substr($id, 0, 20);
                                     </div>
                                     <div class="wpStateLess-step-setup-form">
                                         <form action="#" method="POST">
+                                            <div id="stateless-notification" class="error">
+                                                
+                                            </div>
                                             <div class="wpStateLess-single-step-input">
                                                 <label for="">
                                                     <h4>Google Cloud Project</h4>

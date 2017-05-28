@@ -8,9 +8,10 @@ jQuery(document).ready(function ($) {
 	var userInfo = setupSteps.find('.wpStateLess-userinfo');
 	var userDetails = userInfo.find('.wpStateLess-user-detais');
 	var setupForm = setupSteps.find('.wpStateLess-step-setup-form form');
-	var projectDropdown = setupForm.find('.wpStateLess-combo-box.project');
-	var bucketDropdown = setupForm.find('.wpStateLess-combo-box.bucket');
-  	var billingDropdown = setupForm.find('.wpStateLess-combo-box.billing-account');
+	var comboBox = setupForm.find('.wpStateLess-combo-box');
+	var projectDropdown = comboBox.filter('.project');
+	var bucketDropdown = comboBox.filter('.bucket');
+  	var billingDropdown = comboBox.filter('.billing-account');
   	var noBillingButton = billingDropdown.parent().find('.create-billing-account.no-billing-account');
 
 	var checkAuthentication = function checkAuthentication(options){
@@ -154,6 +155,8 @@ jQuery(document).ready(function ($) {
 		var _this = jQuery(this);
 		var projectId = _this.find('.id').val();
         
+        billingDropdown.addClass('loading').find('.circle-loader').removeClass('load-complete');
+        
         if(typeof wp.stateless.projects[projectId] == 'undefined'){
 			bucketDropdown.wpStatelessComboBox({items:{}});
 		  	var name = billingDropdown.find('.name').val('');
@@ -166,8 +169,10 @@ jQuery(document).ready(function ($) {
 				name.val(account.name +  " (" + account.id + ")");
 				id.val(account.id);
 		  	}
+		  	billingDropdown.find('.circle-loader').fadeOut(200).removeClass('loading');
 		  	return;
         }
+
 
 		// Need to check if it's existing project.
 		wp.stateless.listBucket(projectId)
@@ -195,19 +200,21 @@ jQuery(document).ready(function ($) {
 
 			  	billingDropdown.find('.id').val(billingInfo.id);
 			  	billingDropdown.find('.name').val(namID).attr('disabled', 'disabled');
+        		billingDropdown.find('.circle-loader').addClass('load-complete');
 			}else{
+		  		console.log("Something went wrong.");
 			}
 		  }).fail(function(responseData) {
 		  	var name = billingDropdown.find('.name').val('');
 		  	var id = billingDropdown.find('.id').val('');
 		  	var account = name.wpStatelessComboBox({get: 0});
 
-		  	console.log("account from ul list:", account);
 		  	name.removeAttr('disabled');
 		  	if(account){
 				name.val(account.name +  " (" + account.id + ")");
 				id.val(account.id);
 		  	}
+		  	billingDropdown.find('.circle-loader').addClass('load-complete').fadeOut(200);
 
 		  });
 	});
@@ -271,20 +278,23 @@ jQuery(document).ready(function ($) {
 		var projectId = projectDropdown.find('.id').val();
 		var projectName = projectDropdown.find('.name').val().replace(/\(.*/, '').replace(/^\s+|\s+$/g,'');
 		var bucketName = bucketDropdown.find('.name').val();
-		var bucketId = bucketName;
+		var bucketId = bucketName == 'localhost'?'':bucketName;
 		var serviceAccountId = 'stateless-' + bucketId.replace('stateless-', '');
 		var serviceAccountName = 'Stateless ' + bucketName.replace('Stateless', '');
 		var billingAccount = billingDropdown.find('.id').val();
 		var isValid = true;
+		
+		setupForm.find('#stateless-notification').html('').hide();
+		setupForm.find('.wpStateLess-combo-box').wpStatelessComboBox('validate');
 
 		if(!projectId || !projectName || !bucketId || !billingAccount){ // No valid project id
 			isValid = false;
 			console.log("Form:: Input not valid.")
 			return;
 		}
-		setupForm.addClass('working');
+		comboBox.addClass('loading');
 		jQuery(this).find('.wpStateLess-loading').addClass('active');
-
+		return;
 		async.auto({
 			createProject: function(callback) {
 				if(!wp.stateless.projects[projectId]){
@@ -298,7 +308,7 @@ jQuery(document).ready(function ($) {
 							callback(null, {ok: true, task: 'createProject', message: "Project Exists"});
 						}
 						else{
-							callback(response.error, {ok: false, task: 'createProject', message: "Something went wrong"});
+							callback({ok: false, task: 'createProject', message: "Something went wrong"});
 						}
 					});
 				}else{
@@ -311,7 +321,7 @@ jQuery(document).ready(function ($) {
 					.done(function(argument) {
 						callback(null, {ok: true, task: 'updateBilltingInfo', message: "Billing Enabled"});
 					}).fail(function(response) {
-						callback(response, {ok: false, task: 'updateBilltingInfo', message: "Something went wrong"});
+						callback({ok: false, task: 'updateBilltingInfo', message: "Something went wrong"});
 					});
 				}
 				else{
@@ -330,7 +340,7 @@ jQuery(document).ready(function ($) {
 							callback(null, {ok: true, task: 'createBucket', message: response.error.message});
 						}
 						else{
-							callback(response, {ok: true, task: 'createBucket', message: "Something went wrong"});
+							callback({ok: true, task: 'createBucket', message: "Something went wrong"});
 						}
 					});
 				}
@@ -362,27 +372,27 @@ jQuery(document).ready(function ($) {
 				}).done(function(createdSerciceAccount){
 					callback(null, {ok: true, task: 'createServiceAccount', email: createdSerciceAccount.email, message: "Service Account Created"});
 				}).fail(function(response) {
-					callback(false, {ok: false, task: 'createServiceAccount', message: "Something went wrong"});
+					callback({ok: false, task: 'createServiceAccount', message: "Something went wrong"});
 				});
 			}],
 			insertBucketAccessControls: ['createServiceAccount', function(results, callback) {
 				wp.stateless.insertBucketAccessControls({
 					"bucket": bucketId,
-					"user": results.email,
+					"user": results['createServiceAccount'].email,
 				}).done(function(responseData){
 					callback(null, {ok: true, task: 'insertBucketAccessControls', email: responseData.email, message: "Service Account Created"});
 				}).fail(function(response) {
-					callback(response, {ok: false, task: 'insertBucketAccessControls', message: "Something went wrong"});
+					callback({ok: false, task: 'insertBucketAccessControls', message: "Something went wrong"});
 				});
 			}],
 			createServiceAccountKey: ['insertBucketAccessControls', function(results, callback) {
 				wp.stateless.createServiceAccountKeys({
 					"project": projectId,
-					"account": results.email
+					"account": results['insertBucketAccessControls'].email
 				}).done(function(ServiceAccountKey){
 					callback(null, {ok: true, task: 'createServiceAccountKey', privateKeyData: ServiceAccountKey.privateKeyData, message: "Service Account Key Created"});
 				}).fail(function(response) {
-					callback(response, {ok: false, task: 'createServiceAccountKey', message: "Something went wrong"});
+					callback({ok: false, task: 'createServiceAccountKey', message: "Something went wrong"});
 				});
 			}],
 			saveServiceAccountKey: ['createServiceAccountKey', function(results, callback) {
@@ -396,24 +406,26 @@ jQuery(document).ready(function ($) {
 					data: {//JSON.stringify({
 						'action': 'stateless_wizard_update_settings',
 						'bucket': bucketId,
-						'privateKeyData': results.privateKeyData,
+						'privateKeyData': results['createServiceAccountKey'].privateKeyData,
 					}//)
 				}).done(function(response) {
 					if(typeof response.success != undefined && response.success == true){
 						callback(null, {ok: true, task: 'saveServiceAccountKey', message: "Service Account Key Saved"});
 					}
 					else{
-						callback(response, {ok: false, task: 'saveServiceAccountKey', message: "Something went wrong"});
+						callback({ok: false, task: 'saveServiceAccountKey', message: "Something went wrong"});
 					}
 				}).fail(function(response) {
-					callback(response, {ok: false, task: 'saveServiceAccountKey', message: "Something went wrong"});
+					callback({ok: false, task: 'saveServiceAccountKey', message: "Something went wrong"});
 				});
 			}]
 		}, function(err, results) {
-				console.log("results: ", results);
+			console.log("results: ", results);
+
 			if(err){// || results.task == 'saveServiceAccountKey'){
 				jQuery(this).find('.wpStateLess-loading').removeClass('active');
-				setupForm.removeClass('working');
+				comboBox.removeClass('loading');
+				setupForm.find('#stateless-notification').html(err.message).show();
 				console.log("Error: ", err);
 				return;
 			}
@@ -436,7 +448,7 @@ jQuery(document).ready(function ($) {
 				setupSteps.removeClass('active')
 					.filter('.step-final')
 					.addClass('active');
-				setupForm.removeClass('working');
+				comboBox.removeClass('loading');
 
 			}
 
