@@ -349,8 +349,12 @@ namespace wpCloud\StatelessMedia {
             $baseurl = preg_replace('/https?:\/\//','',$upload_data['baseurl']);
             $root_dir = trim( $this->get( 'sm.root_dir' ) );
             $root_dir = !empty( $root_dir ) ? $root_dir : false;
+            $image_host = 'storage.googleapis.com/';
+            if ( $this->get( 'sm.static_host' )) {
+                $image_host = '';  // bucketname will be host
+            }
             $content = preg_replace( '/(href|src)=(\'|")(https?:\/\/'.str_replace('/', '\/', $baseurl).')\/(.+?)(\.jpg|\.png|\.gif|\.jpeg)(\'|")/i',
-                '$1=$2https://storage.googleapis.com/'.$this->get( 'sm.bucket' ).'/'.($root_dir?$root_dir:'').'$4$5$6', $content);
+                '$1=$2https://'.$image_host.$this->get( 'sm.bucket' ).'/'.($root_dir?$root_dir:'').'$4$5$6', $content);
           }
         }
 

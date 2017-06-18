@@ -161,7 +161,11 @@ namespace wpCloud\StatelessMedia {
 
           $file = wp_normalize_path( $metadata[ 'file' ] );
 
-          $bucketLink = apply_filters('wp_stateless_bucket_link', 'https://storage.googleapis.com/' . ud_get_stateless_media()->get( 'sm.bucket' ));
+          $image_host = 'storage.googleapis.com/';
+          if ( ud_get_stateless_media()->get( 'sm.static_host' ) ) {
+            $image_host = '';
+          }
+          $bucketLink = apply_filters('wp_stateless_bucket_link', 'https://'.$image_host.ud_get_stateless_media()->get( 'sm.bucket' ));
 
           $_metadata = array(
             "width" => isset( $metadata[ 'width' ] ) ? $metadata[ 'width' ] : null,
