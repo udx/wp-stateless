@@ -402,7 +402,7 @@
     background-color: #eee;
 }
 .wpStateLess-combo-box > input.name[readonly] {
-    background-color: rgba(241, 241, 241, 0.43);
+    background-color: #fff;
 }
 .wpStateLess-input-dropdown {
     transform: scaleY(0);
