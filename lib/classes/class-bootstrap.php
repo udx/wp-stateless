@@ -767,7 +767,12 @@ namespace wpCloud\StatelessMedia {
        */
       public function upload_dir( $data ) {
 
-        $data[ 'baseurl' ] = '//storage.googleapis.com/' . ( $this->get( 'sm.bucket' ) );
+        $image_host = 'https://storage.googleapis.com/';
+        if ( ud_get_stateless_media()->get( 'sm.static_host' ) ) {
+          $image_host = 'https://';
+        }
+
+        $data[ 'baseurl' ] = $image_host . ( $this->get( 'sm.bucket' ) );
         $data[ 'url' ] = $data[ 'baseurl' ] . $data[ 'subdir' ];
 
         return $data;
