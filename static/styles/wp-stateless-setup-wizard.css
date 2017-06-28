@@ -398,11 +398,11 @@
     border-color: #d9d9d9;
     border-radius: 5px 5px 0 0;
 }
-.wpStateLess-combo-box > input.name:disabled {
-    background-color: #eee;
-}
 .wpStateLess-combo-box > input.name[readonly] {
     background-color: #fff;
+}
+.wpStateLess-combo-box > input.name:disabled {
+    background-color: #eee;
 }
 .wpStateLess-input-dropdown {
     transform: scaleY(0);
@@ -433,9 +433,6 @@
 .wpStateLess-create-new {
     padding: 20px;
 }
-.wpStateLess-create-new.active, .wpStateLess-create-new:hover {
-    background: #fbfbfb none repeat scroll 0 0;
-}
 .wpStateLess-create-new, 
 .wpStateLess-existing {
     color: #5a6c7a;
@@ -463,7 +460,7 @@
     padding: 1.5px 20px;
     margin: 0px;
 }
-.wpStateLess-existing li:hover, .wpStateLess-existing li.active, .wpStateLess-create-new:hover {
+.wpStateLess-input-dropdown li:hover, .wpStateLess-input-dropdown li.active {
     cursor: pointer;
     background: #fbfbfb;
 }

@@ -156,6 +156,7 @@ jQuery(document).ready(function ($) {
 		var projectId = _this.find('.id').val();
         
         billingDropdown.addClass('loading').find('.circle-loader').removeClass('load-complete');
+        bucketDropdown.find('.project-derived-name').html('stateless-' + projectId).attr('data-name', 'stateless-' + projectId);
         
         if(typeof wp.stateless.projects[projectId] == 'undefined'){
 			bucketDropdown.wpStatelessComboBox({items:{}});

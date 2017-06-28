@@ -76,9 +76,14 @@ $bucket_id      = "stateless-" . substr($id, 0, 20);
                                                         <div class="checkmark draw"></div>
                                                     </div>
                                                     <div class="wpStateLess-input-dropdown">
-                                                        <div class="wpStateLess-create-new active" data-id="<?php echo $project_id?>" data-name="<?php echo $project_name?>">
+                                                        <div class="wpStateLess-create-new">
                                                             <h5>Create New Project</h5>
-                                                            <span><?php echo "$project_name ($project_id)";?></span>
+                                                            <ul>
+                                                                <li class="custom-name"></li>
+                                                                <li class="predefined-name active" data-id="<?php echo $project_id?>" data-name="<?php echo $project_name?>">
+                                                                    <?php echo "$project_name ($project_id)";?>
+                                                                </li>
+                                                            </ul>
                                                         </div>
                                                         <div class="wpStateLess-existing">
                                                             <h5>Existing Projects</h5>
@@ -99,9 +104,15 @@ $bucket_id      = "stateless-" . substr($id, 0, 20);
                                                         <div class="checkmark draw"></div>
                                                     </div>
                                                     <div class="wpStateLess-input-dropdown">
-                                                        <div class="wpStateLess-create-new active" data-id="<?php echo $bucket_id?>" data-name="<?php echo $bucket_id?>">
+                                                        <div class="wpStateLess-create-new">
                                                             <h5>Create New Bucket</h5>
-                                                            <span><?php echo $bucket_id;?></span>
+                                                            <ul>
+                                                                <li class="custom-name"></li>
+                                                                <li class="project-derived-name"></li>
+                                                                <li class="predefined-name active" data-id="<?php echo $bucket_id?>" data-name="<?php echo $bucket_id?>">
+                                                                    <?php echo $bucket_id;?>
+                                                                </li>
+                                                            </ul>
                                                         </div>
                                                         <div class="wpStateLess-existing">
                                                             <h5>Existing Projects</h5>

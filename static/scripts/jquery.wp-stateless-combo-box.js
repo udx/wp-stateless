@@ -56,7 +56,8 @@
 
 		return this.each(function() {
 			var _this = jQuery(this);
-			var _new = _this.find('.wpStateLess-create-new span');
+			var custom_name = _this.find('.wpStateLess-create-new .custom-name');
+			var predefined_name = _this.find('.wpStateLess-create-new .predefined-name');
 			var _id = _this.find('.id');
 			var _input = _this.find('.name');
 			var existing = _this.find('.wpStateLess-existing');
@@ -66,8 +67,8 @@
 			jQuery('h5', existing).hide();
 			list.children().remove();
 
-			_id.val(_new.parent().attr('data-id'));
-			_input.val(_new.parent().attr('data-name'));
+			//_id.val(custom_name.attr('data-id'));
+			//_input.val(custom_name.attr('data-name'));
 
 			if(options.items && options.items.length > 0){
 				jQuery('h5', existing).show();
@@ -108,6 +109,8 @@
 
 				dropDown.removeClass('active');
 
+				_this.removeClass('has-error').find('.error').html("");
+
 				if(response.id == 'localhost' || response.pName == 'localhost'){
 					response.id = '';
 					_this.addClass('has-error').find('.error').html("localhost is not acceptable.");
@@ -115,27 +118,35 @@
 				else if(!response.success){
 					response.id = '';
 					_this.addClass('has-error').find('.error').html(response.message);
-					_new.hide();
+					custom_name.hide();
 				}else if(response.existing){
-					_this.removeClass('has-error').find('.error').html("");
-					_new.show();
+					custom_name.show();
+					if(custom_name.attr('data-name') == predefined_name.attr('data-name')){
+						custom_name.hide();
+					}
 				}else{
 					var name = response.pName;
-					if(response.id)
-						name += " (" + response.id + ")";
-					_this.removeClass('has-error').find('.error').html("");
-					_new.html( name ).show();
-					_new.parent().attr('data-id', response.id).attr('data-name', response.pName);
+					var data_predefined_name = predefined_name.attr('data-name');
+					var project_derived_name = dropDown.find('.project-derived-name').attr('data-name');
+					if(name == data_predefined_name || name == project_derived_name){
+						//custom_name.hide();
+					}
+					else{
+						if(response.id)
+							name += " (" + response.id + ")";
+						custom_name.html( name ).addClass('active').show();
+						custom_name.attr('data-id', response.id).attr('data-name', response.pName);
+					}
 				}
 
 				_id.val(response.id);
 				
 			});
 
-			_this.on( 'click', '.wpStateLess-existing li, .wpStateLess-create-new', function(){
-				var id = jQuery(this).data('id');
-				var name = jQuery(this).data('name');
-				list.children().removeClass('active');
+			_this.on( 'click', '.wpStateLess-input-dropdown li', function(){
+				var id = jQuery(this).attr('data-id');
+				var name = jQuery(this).attr('data-name');
+				dropDown.find('li').removeClass('active');
 				jQuery(this).addClass('active');
 				if(_this.find('.id').length > 0){
 					_this.find('.id').val(id);
@@ -147,7 +158,7 @@
 				_this.removeClass('has-error').find('.error').html("");
 				_this.trigger('change');
 				_input.trigger('change');
-				_new.parent().removeClass('active');
+				//custom_name.removeClass('active');
 			});
 			_this.data('comboboxLoaded', true);
 		});
