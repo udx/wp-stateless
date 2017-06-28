@@ -55,7 +55,9 @@
             response.id = _id[0];
         }
 
-        jQuery.each(settings.id.replace, function(replace, search) {
+        jQuery.each(settings.id.replace, function(index, array) {
+            var search  = array[1];
+            var replace = array[0];
             response.id = response.id.replace(search, replace);
         });
 

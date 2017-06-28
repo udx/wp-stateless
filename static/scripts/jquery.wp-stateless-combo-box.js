@@ -18,7 +18,6 @@
 
 		if(typeof options.get != 'undefined'){
 			var _items = jQuery(this).parent().find('.wpStateLess-existing').find('ul li');
-			console.log('options:', options)
 			if(options.get == 'all'){
 				var items = [];
 				_items.each(function(index, item) {
@@ -30,8 +29,6 @@
 			}
 			else if(jQuery.isNumeric(options.get)){
 				var _item	= _items.eq(options.get);
-				console.log('_items:', _items)
-				console.log('_item:', _item)
 
 				if(_item.length){
 					var id		= _item.attr('data-id');
@@ -108,7 +105,7 @@
 				var resp = jQuery(this).wppStatelessValidate({}, response);
 
 				dropDown.removeClass('active');
-
+				dropDown.find('li').removeClass('active');
 				_this.removeClass('has-error').find('.error').html("");
 
 				if(response.id == 'localhost' || response.pName == 'localhost'){

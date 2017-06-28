@@ -72,15 +72,15 @@ jQuery(document).ready(function ($) {
 			},
 		},
 		id: {
-			replace: {
-				''	: /\s/g,
-				'-'	: /^-+|-+$/g,
-				'-'	: '!',
-				'-'	: /-+/g	,
-				''	: '"',
-				''	: '\'',
-				''	: /\(.*/,
-			},
+			replace: [
+				['-', /\s/g],
+				['-', /^-+|-+$/g],
+				['-', '!'],
+				['-', /-+/g	],
+				[''	, '"'],
+				[''	, '\''],
+				[''	, /\(.*/],
+			],
 			regex: /[a-z][a-z0-9\-\s]{3,28}[a-z0-9]/ // 
 		},
 	});
@@ -154,10 +154,12 @@ jQuery(document).ready(function ($) {
 		event.stopImmediatePropagation();
 		var _this = jQuery(this);
 		var projectId = _this.find('.id').val();
+		// Project ID without random digit at the end.
+		var _projectId = projectId.replace(/-\d+$/, '');
         
         billingDropdown.addClass('loading').find('.circle-loader').removeClass('load-complete').show();
         bucketDropdown.addClass('loading').find('.circle-loader').removeClass('load-complete').show();
-        bucketDropdown.find('.project-derived-name').html('stateless-' + projectId).attr('data-name', 'stateless-' + projectId);
+        bucketDropdown.find('.project-derived-name').html('stateless-' + _projectId).attr('data-name', 'stateless-' + _projectId);
         
         if(typeof wp.stateless.projects[projectId] == 'undefined'){
 			bucketDropdown.wpStatelessComboBox({items:{}});
@@ -165,7 +167,6 @@ jQuery(document).ready(function ($) {
 		  	var id = billingDropdown.find('.id').val('');
 		  	var account = name.wpStatelessComboBox({get: 0});
 
-		  	console.log("account from ul list:", account);
 		  	name.removeAttr('disabled');
 		  	if(account){
 				name.val(account.name +  " (" + account.id + ")");
@@ -307,7 +308,6 @@ jQuery(document).ready(function ($) {
 						callback(null, {ok: true, task: 'createProject', message: "Project Created"});
 					}).fail(function(response) {
 						response = response.responseJSON || {};
-						console.log(response);
 						if(response && typeof response.error != 'undefined' && typeof response.error.status != 'undefined' && response.error.status == 'ALREADY_EXISTS'){
 							callback(null, {ok: true, task: 'createProject', message: "Project Exists"});
 						}
@@ -424,13 +424,11 @@ jQuery(document).ready(function ($) {
 				});
 			}]
 		}, function(err, results) {
-			console.log("results: ", results);
 
 			if(err){// || results.task == 'saveServiceAccountKey'){
 				jQuery(this).find('.wpStateLess-loading').removeClass('active');
 				comboBox.removeClass('loading');
 				setupForm.find('#stateless-notification').html(err.message).show();
-				console.log("Error: ", err);
 				return;
 			}
 
