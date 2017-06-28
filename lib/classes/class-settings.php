@@ -45,6 +45,7 @@ namespace wpCloud\StatelessMedia {
               'bucket' => get_option( 'sm_bucket' ),
               'root_dir' => get_option( 'sm_root_dir' ),
               'key_json' => get_option( 'sm_key_json' ),
+              'static_host' => get_option( 'sm_static_host' ),
               'body_rewrite' => get_option( 'sm_body_rewrite' ),
               'on_fly' => get_option( 'sm_on_fly' ),
               'delete_remote' => get_option( 'sm_delete_remote' ),
@@ -182,6 +183,7 @@ namespace wpCloud\StatelessMedia {
           'bucket' => get_option( 'sm_bucket' ),
           'root_dir' => get_option( 'sm_root_dir' ),
           'key_json' => get_option( 'sm_key_json' ),
+          'static_host' => get_option( 'sm_static_host' ),
           'body_rewrite' => get_option( 'sm_body_rewrite' ),
           'on_fly' => get_option( 'sm_on_fly' ),
           'delete_remote' => get_option( 'sm_delete_remote' ),
@@ -363,6 +365,11 @@ namespace wpCloud\StatelessMedia {
 
         // cache control input
         $inputs[] = '<input id="sm_cache_control" class="regular-text" type="text" name="sm[cache_control]" value="'.$this->get( 'sm.cache_control' ).'" />';
+
+        // use bucketname for static hosting
+        $inputs[] = '<input type="hidden" name="sm[static_host]" value="false" />';
+        $inputs[] = '<label for="sm_static_host"><input id="sm_static_host" type="checkbox" name="sm[static_host]" value="true" '. checked( 'true', $this->get
+( 'sm.static_host' ), false ) .'/>'.__( 'Use bucketname as hostname.', ud_get_stateless_media()->domain ).'</label>';
 
         // body content rewrite
         $inputs[] = '<input type="hidden" name="sm[body_rewrite]" value="false" />';
