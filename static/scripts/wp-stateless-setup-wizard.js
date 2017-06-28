@@ -155,11 +155,12 @@ jQuery(document).ready(function ($) {
 		var _this = jQuery(this);
 		var projectId = _this.find('.id').val();
 		// Project ID without random digit at the end.
-		var _projectId = projectId.replace(/-\d+$/, '');
-        
+		var PDBName = 'stateless-' + projectId.replace(/-\d+$/, '');
+		PDBName = PDBName.substring(0, 29).replace(/-$/, '');
+
         billingDropdown.addClass('loading').find('.circle-loader').removeClass('load-complete').show();
         bucketDropdown.addClass('loading').find('.circle-loader').removeClass('load-complete').show();
-        bucketDropdown.find('.project-derived-name').html('stateless-' + _projectId).attr('data-name', 'stateless-' + _projectId);
+        bucketDropdown.find('.project-derived-name').html(PDBName).attr('data-name', PDBName);
         
         if(typeof wp.stateless.projects[projectId] == 'undefined'){
 			bucketDropdown.wpStatelessComboBox({items:{}});
