@@ -144,7 +144,7 @@ $bucket_id      = "stateless-" . substr($id, 0, 20);
                                                 </div>
                                             </div>
                                             <div class="wpStateLess-single-step-input text-center input-submit">
-                                                <a class="btn btn-green get-json-key" type="submit">Continue <span class="wpStateLess-loading">(Checking <span>.</span><span>.</span><span>.</span>)</span></a>
+                                                <a class="btn btn-green get-json-key" type="submit"><span class="submit-button-text">Continue </span><span class="wpStateLess-loading">Building <span>.</span><span>.</span><span>.</span></span></a>
                                             </div>
                                         </form>
                                     </div>

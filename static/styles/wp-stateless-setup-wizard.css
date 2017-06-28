@@ -553,8 +553,11 @@ body.wpStateLess-pops-active {
  font-size: 20px !important;
  display: none;
 }
-.wpStateLess-loading.active {
+.active>.wpStateLess-loading, .wpStateLess-loading.active{
  display: inline;
+}
+.active>.submit-button-text{
+ display: none;
 }
 .wpStateLess-loading span {
     animation-name: wpStateLessblink;

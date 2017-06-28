@@ -155,7 +155,8 @@ jQuery(document).ready(function ($) {
 		var _this = jQuery(this);
 		var projectId = _this.find('.id').val();
         
-        billingDropdown.addClass('loading').find('.circle-loader').removeClass('load-complete');
+        billingDropdown.addClass('loading').find('.circle-loader').removeClass('load-complete').show();
+        bucketDropdown.addClass('loading').find('.circle-loader').removeClass('load-complete').show();
         bucketDropdown.find('.project-derived-name').html('stateless-' + projectId).attr('data-name', 'stateless-' + projectId);
         
         if(typeof wp.stateless.projects[projectId] == 'undefined'){
@@ -171,6 +172,7 @@ jQuery(document).ready(function ($) {
 				id.val(account.id);
 		  	}
 		  	billingDropdown.find('.circle-loader').fadeOut(200).removeClass('loading');
+		  	bucketDropdown.find('.circle-loader').fadeOut(200).removeClass('loading');
 		  	return;
         }
 
@@ -182,8 +184,10 @@ jQuery(document).ready(function ($) {
 				bucketDropdown.find('.wpStateLess-existing h5').html(wp.stateless.projects[projectId].name + " Buckets").show();
 		  	}
 			bucketDropdown.wpStatelessComboBox({items:buckets});
+		  	bucketDropdown.find('.circle-loader').fadeOut(200).removeClass('loading');
 		  }).fail(function(){
 			bucketDropdown.wpStatelessComboBox({items:{}});
+		  	bucketDropdown.find('.circle-loader').fadeOut(200).removeClass('loading');
 		  });
 
 		//bucketDropdown.find('.name').val("stateless-" + projectId).trigger('change');
@@ -201,10 +205,10 @@ jQuery(document).ready(function ($) {
 
 			  	billingDropdown.find('.id').val(billingInfo.id);
 			  	billingDropdown.find('.name').val(namID).attr('disabled', 'disabled');
-        		billingDropdown.find('.circle-loader').addClass('load-complete');
 			}else{
 		  		console.log("Something went wrong.");
 			}
+        	billingDropdown.find('.circle-loader').addClass('load-complete');
 		  }).fail(function(responseData) {
 		  	var name = billingDropdown.find('.name').val('');
 		  	var id = billingDropdown.find('.id').val('');
@@ -294,8 +298,7 @@ jQuery(document).ready(function ($) {
 			return;
 		}
 		comboBox.addClass('loading');
-		jQuery(this).find('.wpStateLess-loading').addClass('active');
-		return;
+		jQuery(this).addClass('active');
 		async.auto({
 			createProject: function(callback) {
 				if(!wp.stateless.projects[projectId]){
