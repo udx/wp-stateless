@@ -140,6 +140,7 @@
 				}
 
 				_id.val(response.id);
+				_this.trigger('change');
 				
 			});
 
