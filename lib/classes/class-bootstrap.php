@@ -711,12 +711,12 @@ namespace wpCloud\StatelessMedia {
        */
       public function activate() {
         add_action( 'activated_plugin', array($this, 'redirect_to_splash') );
-        wp_redirect(admin_url('upload.php?page=stateless-setup-wizard&step=splash-screen'));
+        wp_redirect(admin_url('upload.php?page=stateless-setup&step=splash-screen'));
       }
 
       public function redirect_to_splash($plugin =''){
         if( $plugin == plugin_basename( $this->boot_file ) ) {
-          exit( wp_redirect(admin_url('upload.php?page=stateless-setup-wizard&step=splash-screen')));
+          exit( wp_redirect(admin_url('upload.php?page=stateless-setup&step=splash-screen')));
         }
       }
 

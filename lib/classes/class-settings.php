@@ -199,7 +199,7 @@ namespace wpCloud\StatelessMedia {
       public function admin_menu() {
         $this->regenerate_ui = add_management_page( __( 'Stateless Images Synchronisation', ud_get_stateless_media()->domain ), __( 'Stateless Sync', ud_get_stateless_media()->domain ), 'manage_options', 'stateless-regenerate', array($this, 'regenerate_interface') );
 
-        $this->setup_wizard_ui = add_media_page( __( 'Stateless Setup Wizard', ud_get_stateless_media()->domain ), __( 'Stateless Setup Wizard', ud_get_stateless_media()->domain ), 'manage_options', 'stateless-setup-wizard', array($this, 'setup_wizard_interface') );
+        $this->setup_wizard_ui = add_media_page( __( 'Stateless Media', ud_get_stateless_media()->domain ), __( 'Stateless Media', ud_get_stateless_media()->domain ), 'manage_options', 'stateless-setup', array($this, 'setup_wizard_interface') );
       }
 
       /**

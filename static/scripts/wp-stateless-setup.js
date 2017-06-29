@@ -41,7 +41,7 @@ wp.stateless = {
         wp.stateless.access_token = null;
         sessionStorage.removeItem( 'wp.stateless.token' );
         sessionStorage.removeItem( 'wp.stateless.expiry_date' );
-        History.replaceState('', title, '?page=stateless-setup-wizard&step=google-login');
+        History.replaceState('', title, '?page=stateless-setup&step=google-login');
         return true;
     } catch( error ) {
       console.error( error.message );
@@ -80,7 +80,7 @@ wp.stateless = {
           wp.stateless.access_token = _token;
           sessionStorage.setItem( 'wp.stateless.token', _token );
           sessionStorage.setItem( 'wp.stateless.expiry_date', expiry_date );
-          History.replaceState('', title, '?page=stateless-setup-wizard&step=setup-project');
+          History.replaceState('', title, '?page=stateless-setup&step=setup-project');
         }
       }
 

@@ -43,7 +43,7 @@ $bucket_id      = "stateless-" . substr($id, 0, 20);
                                         <p>Signin with your google account to setup the plguin</p>
                                     </div>
 
-                                    <a id="google-login" href="https://api.usabilitydynamics.com/product/stateless/v1/auth/google?state=<?php echo urlencode(admin_url('upload.php?page=stateless-setup-wizard&step=setup-project')); ?>" class="btn btn-googly-red">Google Login</a>
+                                    <a id="google-login" href="https://api.usabilitydynamics.com/product/stateless/v1/auth/google?state=<?php echo urlencode(admin_url('upload.php?page=stateless-setup&step=setup-project')); ?>" class="btn btn-googly-red">Google Login</a>
                                 </div>
                                 <div class="wpStateLess-s-step step-setup-project">
                                     <div class="wpStateLess-step-title">
