@@ -350,7 +350,7 @@ namespace wpCloud\StatelessMedia {
             $root_dir = trim( $this->get( 'sm.root_dir' ) );
             $root_dir = !empty( $root_dir ) ? $root_dir : false;
             $image_host = 'storage.googleapis.com/';
-            if ( $this->get( 'sm.static_host' )) {
+            if ( $this->get( 'sm.static_host' ) == 'true') {
                 $image_host = '';  // bucketname will be host
             }
             $content = preg_replace( '/(href|src)=(\'|")(https?:\/\/'.str_replace('/', '\/', $baseurl).')\/(.+?)(\.jpg|\.png|\.gif|\.jpeg)(\'|")/i',
@@ -768,7 +768,7 @@ namespace wpCloud\StatelessMedia {
       public function upload_dir( $data ) {
 
         $image_host = 'https://storage.googleapis.com/';
-        if ( ud_get_stateless_media()->get( 'sm.static_host' ) ) {
+        if ( ud_get_stateless_media()->get( 'sm.static_host' ) == 'true' ) {
           $image_host = 'https://';
         }
 
