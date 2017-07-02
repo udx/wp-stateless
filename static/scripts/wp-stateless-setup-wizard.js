@@ -354,7 +354,7 @@ jQuery(document).ready(function ($) {
 					callback(null, {ok: true, task: 'bucket', message: "Bucket"});
 				}
 			}],
-			createServiceAccount: ['createBucket', function(results, callback){
+			createServiceAccount: ['createProject', function(results, callback){
 				if( typeof wp.stateless.projects[projectId] != 'undefined' && typeof wp.stateless.projects[projectId]['serviceAccounts'] != 'undefined'){
 					// Checking if service account exist.
 					var serviceAccounts = wp.stateless.projects[projectId]['serviceAccounts'];
@@ -380,7 +380,7 @@ jQuery(document).ready(function ($) {
 					callback({ok: false, task: 'createServiceAccount', message: "Something went wrong"});
 				});
 			}],
-			insertBucketAccessControls: ['createServiceAccount', function(results, callback) {
+			insertBucketAccessControls: ['createBucket', 'createServiceAccount', function(results, callback) {
 				wp.stateless.insertBucketAccessControls({
 					"bucket": bucketId,
 					"user": results['createServiceAccount'].email,
