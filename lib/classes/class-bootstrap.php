@@ -147,7 +147,7 @@ namespace wpCloud\StatelessMedia {
            */
           if( !$this->has_errors() ) {
 
-            if( $this->get( 'sm.mode' ) === 'cdn' ) {
+            if( $this->get( 'sm.mode' ) === 'cdn' || $this->get( 'sm.mode' ) === 'stateless' ) {
               add_filter( 'wp_get_attachment_image_attributes', array( $this, 'wp_get_attachment_image_attributes' ), 20, 3 );
               add_filter( 'wp_get_attachment_url', array( $this, 'wp_get_attachment_url' ), 20, 2 );
               add_filter( 'attachment_url_to_postid', array( $this, 'attachment_url_to_postid' ), 20, 2 );
@@ -543,7 +543,7 @@ namespace wpCloud\StatelessMedia {
         /**
          * Check if enabled
          */
-        if ( $this->get( 'sm.mode' ) !== 'cdn' ) {
+        if ( $this->get( 'sm.mode' ) !== 'cdn' && $this->get( 'sm.mode' ) !== 'stateless' ) {
           return $false;
         }
 

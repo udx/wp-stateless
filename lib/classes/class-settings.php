@@ -489,7 +489,9 @@ namespace wpCloud\StatelessMedia {
           '<p class="sm-mode"><label for="sm_mode_backup"><input '.$mode_readonly. disabled( true, $network_mode != 'false', false ) .' id="sm_mode_backup" '. checked( 'backup', $_mode, false ) .' type="radio" name="sm[mode]" value="backup" />'.__( 'Backup', ud_get_stateless_media()->domain ).''
           . '<small class="description">'.__('Push media files to Google Storage but keep using local ones.', ud_get_stateless_media()->domain).'</small></label></p>',
           '<p class="sm-mode"><label for="sm_mode_cdn"><input '.$mode_readonly. disabled( true, $network_mode != 'false', false ) .' id="sm_mode_cdn" '. checked( 'cdn', $_mode, false ) .' type="radio" name="sm[mode]" value="cdn" />'.__( 'CDN', ud_get_stateless_media()->domain ).''
-          . '<small class="description">'.__('Push media files to Google Storage and use them directly from there.', ud_get_stateless_media()->domain).'</small></label></p>'
+          . '<small class="description">'.__('Push media files to Google Storage and use them directly from there.', ud_get_stateless_media()->domain).'</small></label></p>',
+          '<p class="sm-mode"><label for="sm_mode_stateless"><input '.$mode_readonly. disabled( true, $network_mode != 'false', false ) .' id="sm_mode_stateless" '. checked( 'stateless', $_mode, false ) .' type="radio" name="sm[mode]" value="stateless" />'.__( 'Stateless', ud_get_stateless_media()->domain ).''
+          . '<small class="description">'.__('Uploads and serves your media library items to and from GCS. Your local copy is removed.', ud_get_stateless_media()->domain).'</small></label></p>',
         );
 
         if( $network_mode != 'false' ) {
