@@ -1,0 +1,8 @@
+
+/* settings css */
+.stless_settings_content {
+  display: none;
+}
+.stless_settings_content.active {
+  display: block;
+}
