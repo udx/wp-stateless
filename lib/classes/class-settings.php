@@ -206,7 +206,14 @@ namespace wpCloud\StatelessMedia {
        * Draw interface
        */
       public function regenerate_interface() {
-        include ud_get_stateless_media()->path( '/static/views/regenerate_interface.php', 'dir' );
+        $_mode = get_site_option( 'sm_mode' );
+
+        if($_mode == 'cdn_only'){
+          echo __('Regenerate unavailable on <strong>CDN only</strong> mode', ud_get_stateless_media()->domain);
+        }else{
+          include ud_get_stateless_media()->path( '/static/views/regenerate_interface.php', 'dir' );
+        }
+
       }
 
       /**
@@ -220,7 +227,7 @@ namespace wpCloud\StatelessMedia {
           case 'finish':
             include ud_get_stateless_media()->path( '/static/views/setup_wizard_interface.php', 'dir' );
             break;
-          
+
           default:
             include ud_get_stateless_media()->path( '/static/views/stateless_splash_screen.php', 'dir' );
             break;
@@ -248,17 +255,17 @@ namespace wpCloud\StatelessMedia {
        */
       public function register_network_settings() {
         ?>
-        <h3 id="stateless-media-settings"><?php _e( 'Stateless Media Settings', ud_get_stateless_media()->domain ); ?></h3>
-        <p><?php $this->section_callback(); ?></p>
-        <div class="key_type"><label><b><?php _e('Service Account JSON', ud_get_stateless_media()->domain) ?></b></label>
-          <div class="_key_type _sm_key_json">
-            <textarea id="sm_key_json" class="field regular-textarea sm_key_json" type="text" name="sm[key_json]"><?php echo get_site_option( 'sm_key_json' ); ?></textarea>
+          <h3 id="stateless-media-settings"><?php _e( 'Stateless Media Settings', ud_get_stateless_media()->domain ); ?></h3>
+          <p><?php $this->section_callback(); ?></p>
+          <div class="key_type"><label><b><?php _e('Service Account JSON', ud_get_stateless_media()->domain) ?></b></label>
+              <div class="_key_type _sm_key_json">
+                  <textarea id="sm_key_json" class="field regular-textarea sm_key_json" type="text" name="sm[key_json]"><?php echo get_site_option( 'sm_key_json' ); ?></textarea>
+              </div>
           </div>
-        </div>
 
-        <div class="sm_mode">
-         <label><b><?php _e('Mode', ud_get_stateless_media()->domain); ?></b></label>
-          <?php
+          <div class="sm_mode">
+              <label><b><?php _e('Mode', ud_get_stateless_media()->domain); ?></b></label>
+            <?php
 
             $_mode = get_site_option( 'sm_mode' );
 
@@ -273,27 +280,27 @@ namespace wpCloud\StatelessMedia {
               . '<small class="description">'.__('Push media files to Google Storage and use them directly from there.', ud_get_stateless_media()->domain).'</small></label></p>'
             );
             echo implode( "\n", (array)apply_filters( 'sm::network::settings::mode', $inputs ) );
-          ?>
-        </div>
+            ?>
+          </div>
 
-        <div class="sm_advanced">
-          <label><b><?php _e('Advanced', ud_get_stateless_media()->domain); ?></b></label>
-          <?php
+          <div class="sm_advanced">
+              <label><b><?php _e('Advanced', ud_get_stateless_media()->domain); ?></b></label>
+            <?php
 
-          $_delete_remote = get_site_option( 'sm_delete_remote' );
+            $_delete_remote = get_site_option( 'sm_delete_remote' );
 
-          $inputs = array();
-          $inputs[] = '<p><input type="hidden" name="sm[delete_remote]" value="0" />';
-          $inputs[] = '<label for="sm_delete_remote"><input id="sm_delete_remote" type="checkbox" name="sm[delete_remote]" value="1" '. checked( '1', $_delete_remote, false ) .'/>'.__( 'Delete media from GCS when media is deleted from the site.', ud_get_stateless_media()->domain ).'<small> '.__( '(This option may slow down media deletion process)', ud_get_stateless_media()->domain ).'</small></label></p>';
+            $inputs = array();
+            $inputs[] = '<p><input type="hidden" name="sm[delete_remote]" value="0" />';
+            $inputs[] = '<label for="sm_delete_remote"><input id="sm_delete_remote" type="checkbox" name="sm[delete_remote]" value="1" '. checked( '1', $_delete_remote, false ) .'/>'.__( 'Delete media from GCS when media is deleted from the site.', ud_get_stateless_media()->domain ).'<small> '.__( '(This option may slow down media deletion process)', ud_get_stateless_media()->domain ).'</small></label></p>';
 
-          $_hashify_file_name = get_site_option( 'sm_hashify_file_name' );
+            $_hashify_file_name = get_site_option( 'sm_hashify_file_name' );
 
-          $inputs[] = '<p><input type="hidden" name="sm[hashify_file_name]" value="0" />';
-          $inputs[] = '<label for="sm_hashify_file_name"><input id="sm_hashify_file_name" type="checkbox" name="sm[hashify_file_name]" value="1" '. checked( '1', $_hashify_file_name, false ) .'/>'.__( 'Randomize the filename of newly uploaded media files.', ud_get_stateless_media()->domain ).'<small> '.__( '(May help to avoid unwanted GCS caching)', ud_get_stateless_media()->domain ).'</small></label></p>';
+            $inputs[] = '<p><input type="hidden" name="sm[hashify_file_name]" value="0" />';
+            $inputs[] = '<label for="sm_hashify_file_name"><input id="sm_hashify_file_name" type="checkbox" name="sm[hashify_file_name]" value="1" '. checked( '1', $_hashify_file_name, false ) .'/>'.__( 'Randomize the filename of newly uploaded media files.', ud_get_stateless_media()->domain ).'<small> '.__( '(May help to avoid unwanted GCS caching)', ud_get_stateless_media()->domain ).'</small></label></p>';
 
-          echo implode( "\n", (array)apply_filters( 'sm::network::settings::advanced', $inputs ) );
-          ?>
-        </div>
+            echo implode( "\n", (array)apply_filters( 'sm::network::settings::advanced', $inputs ) );
+            ?>
+          </div>
         <?php
       }
 
@@ -369,7 +376,7 @@ namespace wpCloud\StatelessMedia {
         // use bucketname for static hosting
         $inputs[] = '<input type="hidden" name="sm[static_host]" value="false" />';
         $inputs[] = '<label for="sm_static_host"><input id="sm_static_host" type="checkbox" name="sm[static_host]" value="true" '. checked( 'true', $this->get
-( 'sm.static_host' ), false ) .'/>'.__( 'Use bucketname as hostname.', ud_get_stateless_media()->domain ).'</label>';
+          ( 'sm.static_host' ), false ) .'/>'.__( 'Use bucketname as hostname.', ud_get_stateless_media()->domain ).'</label>';
 
         // body content rewrite
         $inputs[] = '<input type="hidden" name="sm[body_rewrite]" value="false" />';
@@ -448,9 +455,9 @@ namespace wpCloud\StatelessMedia {
 
           $kjsn_readonly = defined( 'WP_STATELESS_MEDIA_KEY_FILE_PATH' ) ? 'readonly="readonly"' : '';
           $inputs[] = '<div class="key_type"><label>'.__('Service Account JSON', ud_get_stateless_media()->domain).'</label>';
-            $inputs[] = '<div class="_key_type _sm_key_json">';
-              $inputs[] = '<textarea '.$kjsn_readonly.' id="sm_key_json" class="field regular-textarea sm_key_json" type="text" name="sm[key_json]" >'. esc_attr( $this->get( 'sm.key_json' ) ) .'</textarea>';
-            $inputs[] = '</div>';
+          $inputs[] = '<div class="_key_type _sm_key_json">';
+          $inputs[] = '<textarea '.$kjsn_readonly.' id="sm_key_json" class="field regular-textarea sm_key_json" type="text" name="sm[key_json]" >'. esc_attr( $this->get( 'sm.key_json' ) ) .'</textarea>';
+          $inputs[] = '</div>';
           $inputs[] = '</div>';
         }
 
@@ -481,7 +488,9 @@ namespace wpCloud\StatelessMedia {
           '<p class="sm-mode"><label for="sm_mode_backup"><input '.$mode_readonly. disabled( true, $network_mode != 'false', false ) .' id="sm_mode_backup" '. checked( 'backup', $_mode, false ) .' type="radio" name="sm[mode]" value="backup" />'.__( 'Backup', ud_get_stateless_media()->domain ).''
           . '<small class="description">'.__('Push media files to Google Storage but keep using local ones.', ud_get_stateless_media()->domain).'</small></label></p>',
           '<p class="sm-mode"><label for="sm_mode_cdn"><input '.$mode_readonly. disabled( true, $network_mode != 'false', false ) .' id="sm_mode_cdn" '. checked( 'cdn', $_mode, false ) .' type="radio" name="sm[mode]" value="cdn" />'.__( 'CDN', ud_get_stateless_media()->domain ).''
-          . '<small class="description">'.__('Push media files to Google Storage and use them directly from there.', ud_get_stateless_media()->domain).'</small></label></p>'
+          . '<small class="description">'.__('Push media files to Google Storage and use them directly from there.', ud_get_stateless_media()->domain).'</small></label></p>',
+          '<p class="sm-mode"><label for="sm_mode_cdn_only"><input id="sm_mode_cdn_only" '. checked( 'cdn_only', $_mode, false ) .' type="radio" name="sm[mode]" value="cdn_only" />'.__( 'CDN Only', ud_get_stateless_media()->domain ).''
+          . '<small class="description">'.__('Push media files to Google Storage <strong>only</strong> and use them directly from there.', ud_get_stateless_media()->domain).'</small></label></p>'
         );
 
         if( $network_mode != 'false' ) {

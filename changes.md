@@ -1,3 +1,6 @@
+#### 1.9.3
+* Added CDN Only mode
+
 #### 1.9.2
 * Improvements to onboarding process. [wip]
 * Added Featre Flag support for globally enabling/disabling functionality.
