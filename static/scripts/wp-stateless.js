@@ -515,4 +515,10 @@ var wpStatelessApp = angular.module('wpStatelessApp', [])
 
   }
 
-}]);
+}])
+.controller('wpStatelessSettings', function($scope) {
+  $scope.sm = wp_stateless_settings || {};
+  $scope.myFunc = function(argument) {
+    console.log(this);
+  }
+});

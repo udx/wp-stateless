@@ -1,6 +1,6 @@
 @import url('https://fonts.googleapis.com/css?family=Cabin:400,500,600');
 
-.wp-admin.media_page_stateless-setup #wpcontent {
+.wp-admin.media_page_stateless-setup #wpcontent, .wp-admin.settings_page_stateless-setup #wpcontent {
     padding-left: 0px
 }
 

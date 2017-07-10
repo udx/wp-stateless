@@ -4,20 +4,11 @@
    */
   global $wpdb;
 
-  if ( wp_script_is( 'jquery-ui-widget', 'registered' ) )
-    wp_enqueue_script( 'jquery-ui-progressbar', ud_get_stateless_media()->path('static/scripts/jquery-ui/jquery.ui.progressbar.min.js', 'url'), array( 'jquery-ui-core', 'jquery-ui-widget' ), '1.8.6' );
-  else
-    wp_enqueue_script( 'jquery-ui-progressbar', ud_get_stateless_media()->path( 'static/scripts/jquery-ui/jquery.ui.progressbar.min.1.7.2.js', 'url' ), array( 'jquery-ui-core' ), '1.7.2' );
-
-  wp_enqueue_script( 'wp-stateless-angular', 'https://ajax.googleapis.com/ajax/libs/angularjs/1.5.0/angular.min.js', array(), '1.5.0', true );
-  wp_enqueue_script( 'wp-stateless', ud_get_stateless_media()->path( 'static/scripts/wp-stateless.js', 'url'  ), array( 'jquery-ui-core' ), ud_get_stateless_media()->version, true );
-
-  wp_enqueue_style( 'jquery-ui-regenthumbs', ud_get_stateless_media()->path( 'static/scripts/jquery-ui/redmond/jquery-ui-1.7.2.custom.css', 'url' ), array(), '1.7.2' );
 ?>
 
-<div id="message" class="error fade" ng-show="error"><p>{{error}}</p></div>
+<div id="message1" class="error fade" ng-show="error"><p>{{error}}</p></div>
 
-<div class="wrap" ng-app="wpStatelessApp" ng-controller="wpStatelessTools" ng-init="init()">
+<div class="wrap" ng-controller="wpStatelessTools" ng-init="init()">
 
   <h1><?php _e('Stateless Images Synchronisation', ud_get_stateless_media()->domain); ?></h1>
 

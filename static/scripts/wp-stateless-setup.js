@@ -64,7 +64,9 @@ wp.stateless = {
         if(typeof options == 'undefined' || options.triggerEvent !== false){
           jQuery(document).trigger('tokenExpired');
         }
-        wp.stateless.clearAccessToken();
+        if(isExpired){
+          wp.stateless.clearAccessToken();
+        }
         return false;
       }
     }

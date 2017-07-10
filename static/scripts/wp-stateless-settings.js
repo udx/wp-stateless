@@ -10,7 +10,7 @@ jQuery(document).ready(function($){
 
     console.log(selector);
 
-    $(this).addClass('active').siblings().removeClass('active');
+    $(this).addClass('nav-tab-active').siblings().removeClass('nav-tab-active');
 
     $(selector).addClass('active').siblings().removeClass('active');
 
