@@ -354,12 +354,12 @@ namespace wpCloud\StatelessMedia {
             $baseurl = preg_replace('/https?:\/\//','',$upload_data['baseurl']);
             $root_dir = trim( $this->get( 'sm.root_dir' ) );
             $root_dir = !empty( $root_dir ) ? $root_dir : false;
-            $image_host = 'storage.googleapis.com/';
-            if ( $this->get( 'sm.static_host' ) == 'true') {
-                $image_host = '';  // bucketname will be host
+            $image_host = 'https://storage.googleapis.com/';
+            if ( $this->get( 'sm.custom_domain' ) == $this->get( 'sm.bucket' )) {
+                $image_host = 'http://';  // bucketname will be host
             }
             $content = preg_replace( '/(href|src)=(\'|")(https?:\/\/'.str_replace('/', '\/', $baseurl).')\/(.+?)(\.jpg|\.png|\.gif|\.jpeg)(\'|")/i',
-                '$1=$2https://'.$image_host.$this->get( 'sm.bucket' ).'/'.($root_dir?$root_dir:'').'$4$5$6', $content);
+                '$1=$2'.$image_host.$this->get( 'sm.bucket' ).'/'.($root_dir?$root_dir:'').'$4$5$6', $content);
           }
         }
 
@@ -796,7 +796,8 @@ namespace wpCloud\StatelessMedia {
       public function wp_get_attachment_url( $url = '', $post_id = '' ) {
         $sm_cloud = get_post_meta( $post_id, 'sm_cloud', 1 );
         if( is_array( $sm_cloud ) && !empty( $sm_cloud[ 'fileLink' ] ) ) {
-          return strpos( $sm_cloud[ 'fileLink' ], 'https://' ) === false ? ( 'https:' . $sm_cloud[ 'fileLink' ] ) : $sm_cloud[ 'fileLink' ];
+          $_url = parse_url($sm_cloud[ 'fileLink' ]);
+          return !isset($_url['scheme']) ? ( 'https:' . $sm_cloud[ 'fileLink' ] ) : $sm_cloud[ 'fileLink' ];
         }
         return $url;
       }
@@ -829,8 +830,8 @@ namespace wpCloud\StatelessMedia {
       public function upload_dir( $data ) {
 
         $image_host = 'https://storage.googleapis.com/';
-        if ( ud_get_stateless_media()->get( 'sm.static_host' ) == 'true' ) {
-          $image_host = 'https://';
+        if ( $this->get( 'sm.custom_domain' ) == $this->get( 'sm.bucket' ) ) {
+          $image_host = 'http://';
         }
 
         $data[ 'baseurl' ] = $image_host . ( $this->get( 'sm.bucket' ) );

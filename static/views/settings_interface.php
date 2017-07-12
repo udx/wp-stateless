@@ -137,7 +137,10 @@
                                             <input name="sm[custom_domain]" ng-model="sm.custom_domain" type="text" id="bucket_folder_name" class="regular-text ltr" placeholder="storage.googleapis.com">
                                         </label>
                                     </p>
-                                    <p class="description">Replace the default GCS domain with your own custom domain. This will require you to <a href="https://cloud.google.com/storage/docs/xml-api/reference-uris#cname" target="_blank">configure a CNAME</a>.</p>
+                                    <p class="description">Replace the default GCS domain with your own custom domain. This will require you to <a href="https://cloud.google.com/storage/docs/xml-api/reference-uris#cname" target="_blank">configure a CNAME</a>.<br>
+                                    <strong>Note:</strong> Bucket name and Domain must be same to make this work.<br>
+                                    <strong>Note:</strong> You won't be able to use <strong>https</strong> if you use custom domain.
+                                    </p>
                                     <hr>
 
                                     <h4>Organization</h4>

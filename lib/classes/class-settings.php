@@ -67,15 +67,12 @@ namespace wpCloud\StatelessMedia {
           'mode' => array('WP_STATELESS_MEDIA_MODE', 'cdn'), 
           'body_rewrite' => array('WP_STATELESS_MEDIA_BODY_REWTITE', 'true'), 
           'on_fly' => array('WP_STATELESS_MEDIA_ON_FLY', 'false'), 
-
           'bucket' => array('WP_STATELESS_MEDIA_BUCKET', ''), 
           'root_dir' => array('WP_STATELESS_MEDIA_ROOT_DIR', ''), 
           'key_json' => array('WP_STATELESS_MEDIA_KEY_FILE_PATH', ''), 
-
           'override_cache_cont' => array('WP_STATELESS_MEDIA_OVERRIDE_CACHE_CONTROL', 'false'), 
           'cache_control' => array('WP_STATELESS_MEDIA_CACHE_CONTROL', 'public, max-age=36000, must-revalidate'), 
           'delete_remote' => array('WP_STATELESS_MEDIA_DELETE_REMOTE', 'true'), 
-          
           'custom_domain' => array('WP_STATELESS_MEDIA_CUSTOM_DOMAIN', ''), 
           'organize_media' => array('WP_STATELESS_MEDIA_ORGANIZE_MEDIA', 'true'), 
           'hashify_file_name' => array('WP_STATELESS_MEDIA_HASH_FILENAME', 'true'), 
@@ -301,7 +298,6 @@ namespace wpCloud\StatelessMedia {
         $settings = apply_filters('stateless::settings::save', $_POST['sm']);
         if(wp_verify_nonce( $_POST['_smnonce'], 'wp-stateless-settings' )){
           foreach ( $settings as $name => $value ) {
-            $value = stripslashes($value);
             if(is_network_admin()){
               update_site_option( 'sm_'. $name, $value );
             }
@@ -310,6 +306,7 @@ namespace wpCloud\StatelessMedia {
             }
           }
         }
+        ud_get_stateless_media()->flush_transients();
       }
 
       /**

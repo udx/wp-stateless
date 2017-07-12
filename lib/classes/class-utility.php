@@ -161,11 +161,11 @@ namespace wpCloud\StatelessMedia {
 
           $file = wp_normalize_path( $metadata[ 'file' ] );
 
-          $image_host = 'storage.googleapis.com/';
-          if ( ud_get_stateless_media()->get( 'sm.static_host' ) == 'true' ) {
-            $image_host = '';
+          $image_host = 'https://storage.googleapis.com/';
+          if ( ud_get_stateless_media()->get( 'sm.custom_domain' ) == ud_get_stateless_media()->get( 'sm.bucket' ) ) {
+            $image_host = 'http://';
           }
-          $bucketLink = apply_filters('wp_stateless_bucket_link', 'https://'.$image_host.ud_get_stateless_media()->get( 'sm.bucket' ));
+          $bucketLink = apply_filters('wp_stateless_bucket_link', $image_host . ud_get_stateless_media()->get( 'sm.bucket' ));
 
           $_metadata = array(
             "width" => isset( $metadata[ 'width' ] ) ? $metadata[ 'width' ] : null,
