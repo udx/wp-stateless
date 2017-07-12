@@ -160,6 +160,10 @@ namespace wpCloud\StatelessMedia {
               if ( $this->get( 'sm.body_rewrite' ) == 'true' ) {
                 add_filter( 'the_content', array( $this, 'the_content_filter' ) );
               }
+
+              if ( $this->get( 'sm.custom_domain' ) == $this->get( 'sm.bucket' ) ) {
+                add_filter( 'wp_stateless_bucket_link', array( $this, 'wp_stateless_bucket_link' ) );
+              }
             }
 
             if ( $root_dir = $this->get( 'sm.root_dir' ) ) {
@@ -203,6 +207,36 @@ namespace wpCloud\StatelessMedia {
 
         }
 
+      }
+
+      /**
+       * Return gs host.
+       * If custom domain is set it's return bucket name as host,
+       * else return storage.googleapis.com as host and append bucket name at the end.
+       * @param none
+       * @return Host name to use
+       */
+      public function get_gs_host() {
+        $image_host = 'https://storage.googleapis.com/';
+        if ( $this->get( 'sm.custom_domain' ) == $this->get( 'sm.bucket' )) {
+            $image_host = 'http://';  // bucketname will be host
+        }
+        return $image_host . $this->get( 'sm.bucket' );
+      }
+
+      /**
+       * Filter for wp_stateless_bucket_link if custom domain is set.
+       * It's get attachment url and remove "storage.googleapis.com" from url.
+       * So that custom url can be used.
+       * @param $new_blog
+       * @param $prev_blog_id
+       */
+      public function wp_stateless_bucket_link($fileLink) {
+        $bucketname = $this->get( 'sm.bucket' );
+        if ( strpos($fileLink, $bucketname) > 8) {
+          $fileLink = 'http://' . substr($fileLink, strpos($fileLink, $bucketname));
+        }
+        return $fileLink;
       }
 
       /**
@@ -354,12 +388,9 @@ namespace wpCloud\StatelessMedia {
             $baseurl = preg_replace('/https?:\/\//','',$upload_data['baseurl']);
             $root_dir = trim( $this->get( 'sm.root_dir' ) );
             $root_dir = !empty( $root_dir ) ? $root_dir : false;
-            $image_host = 'https://storage.googleapis.com/';
-            if ( $this->get( 'sm.custom_domain' ) == $this->get( 'sm.bucket' )) {
-                $image_host = 'http://';  // bucketname will be host
-            }
+            $image_host = $this->get_gs_host();
             $content = preg_replace( '/(href|src)=(\'|")(https?:\/\/'.str_replace('/', '\/', $baseurl).')\/(.+?)(\.jpg|\.png|\.gif|\.jpeg)(\'|")/i',
-                '$1=$2'.$image_host.$this->get( 'sm.bucket' ).'/'.($root_dir?$root_dir:'').'$4$5$6', $content);
+                '$1=$2'.$image_host.'/'.($root_dir?$root_dir:'').'$4$5$6', $content);
           }
         }
 
@@ -651,7 +682,7 @@ namespace wpCloud\StatelessMedia {
 
           //** we have the actual image size, but might need to further constrain it if content_width is narrower */
           list( $width, $height ) = image_constrain_size_for_editor( $width, $height, $size );
-
+          $img_url = apply_filters('wp_stateless_bucket_link', $img_url);
           return array( $img_url, $width, $height, $is_intermediate );
         }
 
@@ -676,14 +707,14 @@ namespace wpCloud\StatelessMedia {
         /* Determine if the media file has GS data at all. */
         $sm_cloud = get_post_meta( $attachment_id, 'sm_cloud', true );
         if( is_array( $sm_cloud ) && !empty( $sm_cloud[ 'fileLink' ] ) ) {
-          $metadata[ 'gs_link' ] = $sm_cloud[ 'fileLink' ];
+          $metadata[ 'gs_link' ] = apply_filters('wp_stateless_bucket_link', $sm_cloud[ 'fileLink' ]);
           $metadata[ 'gs_name' ] = isset( $sm_cloud[ 'name' ] ) ? $sm_cloud[ 'name' ] : false;
           $metadata[ 'gs_bucket' ] = isset( $sm_cloud[ 'bucket' ] ) ? $sm_cloud[ 'bucket' ] : false;
           if( !empty( $metadata[ 'sizes' ] ) && is_array( $metadata[ 'sizes' ] ) ) {
             foreach( $metadata[ 'sizes' ] as $k => $v ) {
               if( !empty( $sm_cloud[ 'sizes' ][ $k ][ 'name' ] ) ) {
                 $metadata['sizes'][$k]['gs_name'] = $sm_cloud[ 'sizes' ][ $k ][ 'name' ];
-                $metadata['sizes'][$k]['gs_link'] = $sm_cloud[ 'sizes' ][ $k ][ 'fileLink' ];
+                $metadata['sizes'][$k]['gs_link'] = apply_filters('wp_stateless_bucket_link', $sm_cloud[ 'sizes' ][ $k ][ 'fileLink' ]);
               }
             }
           }
@@ -797,7 +828,8 @@ namespace wpCloud\StatelessMedia {
         $sm_cloud = get_post_meta( $post_id, 'sm_cloud', 1 );
         if( is_array( $sm_cloud ) && !empty( $sm_cloud[ 'fileLink' ] ) ) {
           $_url = parse_url($sm_cloud[ 'fileLink' ]);
-          return !isset($_url['scheme']) ? ( 'https:' . $sm_cloud[ 'fileLink' ] ) : $sm_cloud[ 'fileLink' ];
+          $url = !isset($_url['scheme']) ? ( 'https:' . $sm_cloud[ 'fileLink' ] ) : $sm_cloud[ 'fileLink' ];
+          return apply_filters('wp_stateless_bucket_link', $url);
         }
         return $url;
       }
@@ -828,13 +860,7 @@ namespace wpCloud\StatelessMedia {
        * @return mixed
        */
       public function upload_dir( $data ) {
-
-        $image_host = 'https://storage.googleapis.com/';
-        if ( $this->get( 'sm.custom_domain' ) == $this->get( 'sm.bucket' ) ) {
-          $image_host = 'http://';
-        }
-
-        $data[ 'baseurl' ] = $image_host . ( $this->get( 'sm.bucket' ) );
+        $data[ 'baseurl' ] = $this->get_gs_host();
         $data[ 'url' ] = $data[ 'baseurl' ] . $data[ 'subdir' ];
 
         return $data;
