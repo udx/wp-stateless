@@ -86,12 +86,12 @@ namespace wpCloud\StatelessMedia {
       public function list_objects( $bucket, $options = array() ) {
 
         $options = wp_parse_args( $options, array(
-            'delimiter'  => '',
-            'maxResults' => 1000,
-            'pageToken'  => '',
-            'prefix'     => '',
-            'projection' => 'noAcl',
-            'versions'   => false
+          'delimiter'  => '',
+          'maxResults' => 1000,
+          'pageToken'  => '',
+          'prefix'     => '',
+          'projection' => 'noAcl',
+          'versions'   => false
         ) );
 
         return $this->service->objects->listObjects( $bucket, $options );
@@ -125,13 +125,13 @@ namespace wpCloud\StatelessMedia {
           return $this->temp_objects;
         }
       }
-      
+
       /**
        * Add/Update Media Object to Bucket
        *
        * @author peshkov@UD
        * @param array $args
-       * @return bool
+       * @return array|WP_Error
        */
       public function add_media( $args = array() ) {
         try {
@@ -180,10 +180,10 @@ namespace wpCloud\StatelessMedia {
 
           /* Upload Media file to Google storage */
           $media = $this->service->objects->insert($this->bucket, $media, array_filter(array(
-              'data' => file_get_contents($args['absolutePath']),
-              'uploadType' => 'media',
-              'mimeType' => $args['mimeType'],
-              'predefinedAcl' => 'bucketOwnerFullControl',
+            'data' => file_get_contents($args['absolutePath']),
+            'uploadType' => 'media',
+            'mimeType' => $args['mimeType'],
+            'predefinedAcl' => 'bucketOwnerFullControl',
           )));
 
           /* Make Media Public READ for all on success */
@@ -230,7 +230,7 @@ namespace wpCloud\StatelessMedia {
       /**
        * Check if media exists
        * @param $path
-       * @return bool
+       * @return bool|\Google_Service_Storage_StorageObject
        */
       public function media_exists( $path ) {
         try {
@@ -244,7 +244,7 @@ namespace wpCloud\StatelessMedia {
         if ( empty( $media->id ) ) return false;
         return $media;
       }
-      
+
       /**
        * Fired for every file remove action
        *
