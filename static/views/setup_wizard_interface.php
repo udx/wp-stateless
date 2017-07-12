@@ -54,7 +54,7 @@ $bucket_id      = "stateless-" . substr($id, 0, 20);
                                         <div class="photo-wrapper">
                                             <img class="user-photo img-circle" src="<?php echo ud_get_stateless_media()->path( 'static/images/author-image.png'); ?>" alt="">
                                         </div>
-                                        <div class="wpStateLess-user-detais" style="display: none;">
+                                        <div class="wpStateLess-user-detais">
                                             <h4><span class="user-name"></span> <a class="logout" href="#google-logout">Logout</a></h4>
                                             <p class="user-email"></p>
                                         </div>

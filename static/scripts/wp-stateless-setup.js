@@ -113,7 +113,8 @@ wp.stateless = {
 
     var defer = new jQuery.Deferred();
     var getPrimaryData = function getPrimaryData(items){
-      var primaryItem = items[0];
+
+      var primaryItem = items && typeof items[0] != 'undefined'? items[0] : '';
       jQuery.each(items, function(index, item){
         if(item.metadata.primary == true){
           primaryItem = item;
