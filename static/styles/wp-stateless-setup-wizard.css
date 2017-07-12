@@ -49,7 +49,6 @@
 
 /* Common Styles */
 .wpStateLess-s-feature p, .wpStateLess-welcome-text p,
-.wpStateLess-plan-name p, 
 .wpStateLess-s-step p,
 .wpStateLess-step-title p {
     font-size: inherit;
@@ -130,79 +129,6 @@
 }
 .wpStateLess-s-feature img {
     margin-bottom: 20px;
-}
-
-/* wpStateLess Plan Styles */
-
-.wpStateLess-s-plan {
-    height: 100%;
-    position: relative;
-    border-radius: 10px;
-    border: 1px solid #e7e7e7;
-    text-align: center;
-    padding-bottom: 50px;
-    display: flex;
-    flex-direction: column;
-}
-
-.wpStateLess-free-plan {
-    border-color: #008abd;
- }
-.wpStateLess-free-plan::before {
-    background-color: #008abd;
-    background-image: url("../images/shape.png");
-    background-position: center center;
-    background-repeat: no-repeat;
-    content: "";
-    height: 40px;
-    left: 15px;
-    position: absolute;
-    top: 0;
-    width: 40px;
-    z-index: 2;
-}
-.wpStateLess-free-plan::after {
-    border-color: #008abd #008abd transparent;
-    border-style: solid;
-    border-width: 20px;
-    content: "";
-    height: 0;
-    left: 15px;
-    position: absolute;
-    top: 20px;
-    width: 0;
-    z-index: 1;
-}
-
-
-.wpStateLess-plan-name {
-    height: 110px;
-    line-height: 110px;
-    border-radius: 10px 10px 0 0;
-    border-bottom: 1px solid #e7e7e7;
-    background-color: #fbfbfb;
-    color: #5a6c7a;
-    font-size: 24px;
-    font-weight: 500;
-    flex-basis: 110px;
-}
-.wpStateLess-s-plan > ul {
-    flex-basis: 80%;
-    margin: 0;
-}
-.wpStateLess-s-plan > ul li {
-    border-bottom: 1px solid #e7e7e7;
-    padding: 25px 50px;
-}
-.wpStateLess-s-plan > ul li:last-child {
-    border-bottom: 0px;
-}
-.wpStateLess-s-plan > a.btn {
-    height: auto;
-    line-height: 1;
-    padding: 15px 45px;
-    font-size: 18px;
-    font-weight: 600;
 }
 
 /* Setup Styles */
@@ -480,48 +406,6 @@
     margin-top: 5px;
     padding: 12px 30px;
 }
-#wpStateLess-popup {
-    display: none;
-    position: fixed;
-    left: 160px;
-    top: 0;
-    width: calc(100% - 160px);
-    height: 100vh;
-    background-color: rgba(255, 255, 255, 0.95);
-    z-index: 9;
-}
-body.wpStateLess-pops-active {
-    overflow: hidden;
-}
-#wpStateLess-popup.active {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-.wpStateLess-pops {
-    text-align: center;
-    padding: 80px 60px;
-    background-color: #fff; 
-    width: 777px;
-}
-
-.wpStateLess-pops .wpStateLess-contact-input {
-    text-align: left;
-    margin-bottom: 15px;
-}
-.wpStateLess-pops .wpStateLess-contact-input input {
-    display: block;
-    width: 100%;
-    padding: 10px 20px;
-    border: 1px solid #d9d9d9;
-    border-radius: 5px;
-    color: #5a6c7a;
-}
-.wpStateLess-pops .wpStateLess-contact-input input:focus {
-    border-color: #d9d9d9;
-    box-shadow: none;
-}
-
 .wpStateLess-user-has-no-project-billing {
  display: none;
 }
@@ -678,9 +562,6 @@ body.wpStateLess-pops-active {
     }
     .wpStateLess-setup-step-bars > ul, .wpStateLess-valigncenter {
         display: block !important;
-    }
-    .wpStateLess-s-plan {
-        margin: 20px 0px;
     }
     .wpStateLess-setup-step-bars > ul > li {
         -moz-flex: 0 1 auto;

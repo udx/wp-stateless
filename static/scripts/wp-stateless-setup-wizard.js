@@ -115,13 +115,6 @@ jQuery(document).ready(function ($) {
 	// Binding text input to create new in dropdown
 	setupForm.find('.wpStateLess-combo-box').wpStatelessComboBox().find('.name').trigger('change');
 
-	
-	statelessWrapper.find('.learn-more').on('click', function(event){
-		event.preventDefault();
-		statelessWrapper.find('#wpStateLess-popup').addClass('active');
-		return false;
-	});
-
 	// Check if authenticated with google then move to step 2.
 	if(checkAuthentication()){
 
