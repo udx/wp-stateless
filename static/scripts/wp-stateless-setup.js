@@ -41,7 +41,7 @@ wp.stateless = {
         wp.stateless.access_token = null;
         sessionStorage.removeItem( 'wp.stateless.token' );
         sessionStorage.removeItem( 'wp.stateless.expiry_date' );
-        History.replaceState('', title, '?page=stateless-setup-wizard&step=google-login');
+        History.replaceState('', title, '?page=stateless-setup&step=google-login');
         return true;
     } catch( error ) {
       console.error( error.message );
@@ -51,8 +51,6 @@ wp.stateless = {
 
   },
   getAccessToken: function getAccessToken(options) {
-    if(wp.stateless.access_token)
-      return wp.stateless.access_token;
 
     if( 'string' !== typeof wp.stateless.$_GET('access_token') ) {
       // There is no token in query string. Lets look in session.
@@ -62,8 +60,13 @@ wp.stateless = {
       if( sessionStorage.getItem( 'wp.stateless.token' ) && !isExpired) {
         wp.stateless.access_token = sessionStorage.getItem( 'wp.stateless.token' );
       }
-      else if(typeof options == 'undefined' || options.triggerEvent !== false){
-        jQuery(document).trigger('tokenExpired');
+      else{
+        if(typeof options == 'undefined' || options.triggerEvent !== false){
+          jQuery(document).trigger('tokenExpired');
+        }
+        if(isExpired){
+          wp.stateless.clearAccessToken();
+        }
         return false;
       }
     }
@@ -79,7 +82,7 @@ wp.stateless = {
           wp.stateless.access_token = _token;
           sessionStorage.setItem( 'wp.stateless.token', _token );
           sessionStorage.setItem( 'wp.stateless.expiry_date', expiry_date );
-          History.replaceState('', title, '?page=stateless-setup-wizard&step=setup-project');
+          History.replaceState('', title, '?page=stateless-setup&step=setup-project');
         }
       }
 
@@ -110,7 +113,8 @@ wp.stateless = {
 
     var defer = new jQuery.Deferred();
     var getPrimaryData = function getPrimaryData(items){
-      var primaryItem = items[0];
+
+      var primaryItem = items && typeof items[0] != 'undefined'? items[0] : '';
       jQuery.each(items, function(index, item){
         if(item.metadata.primary == true){
           primaryItem = item;
@@ -132,7 +136,7 @@ wp.stateless = {
         photo: photo.url
       }
       defer.resolve(profile);
-    }).fail(function(){
+    }).fail(function(xhr){
       defer.reject();
     });
     
@@ -232,7 +236,7 @@ wp.stateless = {
       });
 
       defer.resolve(projects);
-    }).fail(function(){
+    }).fail(function(xhr){
       defer.reject();
     });
     return defer.promise();
@@ -276,7 +280,7 @@ wp.stateless = {
       var buckets = [];
 
       jQuery.each(responseData.items, function(index, item){
-        var bucket = {id: item.id, name: item.name};
+        var bucket = {name: item.name};
         buckets.push(bucket);
         wp.stateless.projects[projectId]['buckets'][item.id] = bucket;
       });
@@ -296,7 +300,6 @@ wp.stateless = {
    * @returns {boolean}
    */
   getServiceAccounts: function getServiceAccounts(options) {
-    console.log( 'getServiceAccounts', options );
 
     if(!wp.stateless.getAccessToken() || !options)
       return false;
@@ -307,7 +310,6 @@ wp.stateless = {
     });
 
     _promis.done(function(responseData){
-      console.log( 'getServiceAccounts:done', responseData.accounts );
       wp.stateless.projects[options.projectId]['serviceAccounts'] = responseData.accounts;
 
     });
@@ -420,17 +422,28 @@ wp.stateless = {
     jQuery.ajax({
       url: 'https://cloudbilling.googleapis.com/v1/projects/' + projectID + '/billingInfo',
     }).done(function(responseData){
+      var billingInfo = {};
+
       if(typeof responseData.billingAccountName != 'undefined'){
-        responseData.billingAccountName = responseData.billingAccountName.replace('billingAccounts/', '');
+        billingInfo.id = responseData.billingAccountName.replace('billingAccounts/', '');
+      }else{
+        defer.reject();
       }
 
       if(typeof responseData.billingEnabled != 'undefined' && responseData.billingEnabled == true){
         wp.stateless.projects[projectID]['billingInfo'] = responseData;
+        billingInfo.billingEnabled = responseData.billingEnabled;
       }
 
-      defer.resolve(responseData);
-    }).fail(function() {
-      defer.reject();
+      wp.stateless.getBillingAccount(responseData.billingAccountName).done(function(displayName) {
+        billingInfo.name = displayName;
+        defer.resolve(billingInfo);
+      }).fail(function(error) {
+        defer.resolve(billingInfo);
+      });
+
+    }).fail(function(responseData) {
+      defer.reject(responseData.responseJSON);
     });
     return defer.promise();
   },
@@ -475,6 +488,24 @@ wp.stateless = {
       defer.resolve(billingAccounts);
     }).fail(function(){
       defer.reject();
+    });
+    return defer.promise();
+  },
+
+  getBillingAccount: function getBillingAccount(name) {
+    var defer = new jQuery.Deferred();
+
+    if(!wp.stateless.getAccessToken()){
+      defer.reject();
+      return defer.promise();
+    }
+
+    jQuery.ajax({
+      url: 'https://cloudbilling.googleapis.com/v1/' + name,
+    }).done(function(billingAccount){
+      defer.resolve(billingAccount.displayName);
+    }).fail(function(xhr){
+      defer.reject(xhr);
     });
     return defer.promise();
   },

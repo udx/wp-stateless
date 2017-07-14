@@ -21,7 +21,21 @@
         response.id      = '';
         response.pName   = pName;
         response.success = true;
+        response.existing = false;
         response.message = '';
+
+        var isExisting = /(.+)\((.+)\)/.exec(pName);
+
+        if(isExisting != null && isExisting.length){
+            response.id     = isExisting[2].trim();
+            response.pName  = isExisting[1].trim();
+            pName = response.pName;
+        }
+
+        if(_this.wpStatelessComboBox({has: response.id || response.pName})){
+            response.existing = true;
+            return response;
+        }
 
         jQuery.each(settings.name, function(index, item) {
             if(!item.regex.test(pName)){
@@ -32,7 +46,7 @@
             }
         });
 
-        if(response.success == false || typeof settings.id == 'undefined' || settings.id.regex == 'undefined'){
+        if(response.success == false || typeof settings.id == 'undefined' || typeof settings.id.regex == 'undefined'){
             return response;
         }
 
@@ -41,7 +55,9 @@
             response.id = _id[0];
         }
 
-        jQuery.each(settings.id.replace, function(replace, search) {
+        jQuery.each(settings.id.replace, function(index, array) {
+            var search  = array[1];
+            var replace = array[0];
             response.id = response.id.replace(search, replace);
         });
 

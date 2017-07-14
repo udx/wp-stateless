@@ -4,8 +4,7 @@ $id             = str_replace('.', '-', $server_name);
 $project_name   = substr($id, 0, 30);
 $project_id     = substr($id, 0, 23) . "-" . rand(100000, 999999);
 
-$bucket_id      = substr($id, 0, 30);
-$bucket_name    = str_replace(array('.', '-'), ' ', substr($server_name, 0, 30));
+$bucket_id      = "stateless-" . substr($id, 0, 20);
 
 ?>
 <div id="wp-stateless-wrapper">
@@ -43,7 +42,6 @@ $bucket_name    = str_replace(array('.', '-'), ' ', substr($server_name, 0, 30))
                                         <h3>Autheticate the Login</h3>
                                         <p>Signin with your google account to setup the plguin</p>
                                     </div>
-
                                   <a href="https://api.usabilitydynamics.com/product/stateless/v1/auth/google?state=<?php echo urlencode((isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && !empty($_SERVER['HTTP_X_FORWARDED_PROTO']) ? $_SERVER['HTTP_X_FORWARDED_PROTO'] : 'http') . '://' . (defined('WP_HOME') ? WP_HOME : $_SERVER['HTTP_HOST']) . '/wp-admin/upload.php?page=stateless-setup-wizard&step=setup-project'); ?>" class="btn btn-googly-red">Google Login</a>
                                 </div>
                                 <div class="wpStateLess-s-step step-setup-project">
@@ -55,13 +53,16 @@ $bucket_name    = str_replace(array('.', '-'), ' ', substr($server_name, 0, 30))
                                         <div class="photo-wrapper">
                                             <img class="user-photo img-circle" src="<?php echo ud_get_stateless_media()->path( 'static/images/author-image.png'); ?>" alt="">
                                         </div>
-                                        <div class="wpStateLess-user-detais" style="display: none;">
+                                        <div class="wpStateLess-user-detais">
                                             <h4><span class="user-name"></span> <a class="logout" href="#google-logout">Logout</a></h4>
                                             <p class="user-email"></p>
                                         </div>
                                     </div>
                                     <div class="wpStateLess-step-setup-form">
                                         <form action="#" method="POST">
+                                            <div id="stateless-notification" class="error">
+                                                
+                                            </div>
                                             <div class="wpStateLess-single-step-input">
                                                 <label for="">
                                                     <h4>Google Cloud Project</h4>
@@ -70,10 +71,18 @@ $bucket_name    = str_replace(array('.', '-'), ' ', substr($server_name, 0, 30))
                                                 <div class="wpStateLess-combo-box project">
                                                     <input type="hidden" class="id" value="<?php echo $project_id;?>">
                                                     <input type="text" class="name" value="<?php echo $project_name;?>" placeholder="Select or Create New Project">
+                                                    <div class="circle-loader">
+                                                        <div class="checkmark draw"></div>
+                                                    </div>
                                                     <div class="wpStateLess-input-dropdown">
-                                                        <div class="wpStateLess-create-new active" data-id="<?php echo $project_id?>" data-name="<?php echo $project_name?>">
+                                                        <div class="wpStateLess-create-new">
                                                             <h5>Create New Project</h5>
-                                                            <span><?php echo "$project_name ($project_id)";?></span>
+                                                            <ul>
+                                                                <li class="custom-name"></li>
+                                                                <li class="predefined-name active" data-id="<?php echo $project_id?>" data-name="<?php echo $project_name?>">
+                                                                    <?php echo "$project_name ($project_id)";?>
+                                                                </li>
+                                                            </ul>
                                                         </div>
                                                         <div class="wpStateLess-existing">
                                                             <h5>Existing Projects</h5>
@@ -89,12 +98,20 @@ $bucket_name    = str_replace(array('.', '-'), ' ', substr($server_name, 0, 30))
                                                     <p>By default we create a new bucket for you, or if you prefer, select an existing bucket.</p>
                                                 </label>
                                                 <div class="wpStateLess-combo-box bucket">
-                                                    <input type="hidden" class="id" value="stateless-<?php echo $bucket_id;?>">
-                                                    <input type="text" class="name" value="Stateless <?php echo $bucket_name;?>" placeholder="Select or Create New Bucket">
+                                                    <input type="text" class="name" value="<?php echo $bucket_id;?>" placeholder="Select or Create New Bucket">
+                                                    <div class="circle-loader">
+                                                        <div class="checkmark draw"></div>
+                                                    </div>
                                                     <div class="wpStateLess-input-dropdown">
-                                                        <div class="wpStateLess-create-new active" data-id="<?php echo $bucket_id?>" data-name="<?php echo $bucket_id?>">
+                                                        <div class="wpStateLess-create-new">
                                                             <h5>Create New Bucket</h5>
-                                                            <span>stateless-<?php echo $bucket_id;?></span>
+                                                            <ul>
+                                                                <li class="custom-name"></li>
+                                                                <li class="project-derived-name"></li>
+                                                                <li class="predefined-name active" data-id="<?php echo $bucket_id?>" data-name="<?php echo $bucket_id?>">
+                                                                    <?php echo $bucket_id;?>
+                                                                </li>
+                                                            </ul>
                                                         </div>
                                                         <div class="wpStateLess-existing">
                                                             <h5>Existing Projects</h5>
@@ -113,13 +130,12 @@ $bucket_name    = str_replace(array('.', '-'), ' ', substr($server_name, 0, 30))
                                                 <div class="wpStateLess-combo-box billing-account" style="display: none;">
                                                     <input type="hidden" class="id" value="">
                                                     <input type="text" class="name" value="" readonly="readonly" placeholder="Select Billing Account">
+                                                    <div class="circle-loader">
+                                                        <div class="checkmark draw"></div>
+                                                    </div>
                                                     <div class="wpStateLess-input-dropdown">
-                                                        <div class="wpStateLess-current-account">
-                                                            <h5>Billing Account for Project <b class="project"></b></h5>
-                                                            <span></span>
-                                                        </div>
                                                         <div class="wpStateLess-existing">
-                                                            <h5>Existing Projects</h5>
+                                                            <h5>Existing Billing Accounts</h5>
                                                             <ul></ul>
                                                             <a  href="https://console.cloud.google.com/billing" class="btn btn-green create-billing-account">Create New Billing Account <span class="wpStateLess-loading">(Checking <span>.</span><span>.</span><span>.</span>)</span></a>
                                                         </div>
@@ -127,7 +143,7 @@ $bucket_name    = str_replace(array('.', '-'), ' ', substr($server_name, 0, 30))
                                                 </div>
                                             </div>
                                             <div class="wpStateLess-single-step-input text-center input-submit">
-                                                <a class="btn btn-green get-json-key" type="submit">Continue <span class="wpStateLess-loading">(Checking <span>.</span><span>.</span><span>.</span>)</span></a>
+                                                <a class="btn btn-green get-json-key" type="submit"><span class="submit-button-text">Continue </span><span class="wpStateLess-loading">Building <span>.</span><span>.</span><span>.</span></span></a>
                                             </div>
                                         </form>
                                     </div>

@@ -1,0 +1,68 @@
+
+/* settings css */
+
+.regular-text {
+    width: 40em;
+}
+
+#service_account_json{
+	height: 20em;
+}
+.stless_settings_content {
+  display: none;
+}
+.stless_settings_content.active {
+  display: block;
+}
+
+.nav-tab-active:focus {
+	box-shadow: none;
+} 
+
+.stless_settings_content tr td h4:first-of-type {
+	margin-top: 5px;
+}
+
+#stless_supports_tab {
+	padding: 20px 0;
+}
+
+
+.stless_settings_content tr {
+	position: relative;
+	display: block;
+}
+
+.stless_settings_content tr:after {
+	border-top: 1px solid #ddd;
+    border-bottom: 1px solid #fafafa;
+    position: absolute;
+    left: 0px;
+    bottom: 0px;
+    width: 100%;
+    height: 0px;
+    content: "";
+}
+
+.wpStateLess-support {
+	width: 60%;
+	margin: 0 auto;
+	display: flex;
+}
+
+.wpStateLess-sprt-plan {
+	float: left;
+	width: 45%;
+	margin: 0px 15px;
+	text-align: center;
+	border: 1px solid #e4e4e4;
+	box-shadow: 0px 5px 35px -19px #000;
+}
+.wpStateLess-sprt-plan .wpStateLess-plan-name p {
+	font-size: 30px;
+}
+
+.wpStateLess-sprt-plan ul li {
+	border-top: 1px solid #e4e4e4;
+	padding: 5px;
+}

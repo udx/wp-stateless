@@ -143,6 +143,7 @@ namespace wpCloud\StatelessMedia {
        * @return bool|string
        */
       public static function add_media( $metadata, $attachment_id ) {
+        $upload_dir = wp_upload_dir();
 
         /* Get metadata in case if method is called directly. */
         if( current_filter() !== 'wp_generate_attachment_metadata' && current_filter() !== 'wp_update_attachment_metadata' ) {
@@ -155,17 +156,13 @@ namespace wpCloud\StatelessMedia {
 
           // Make non-images uploadable.
           if( empty( $metadata['file'] ) && $attachment_id ) {
-            $upload_dir = wp_upload_dir();
             $metadata = array( "file" => str_replace( trailingslashit( $upload_dir[ 'basedir' ] ), '', get_attached_file( $attachment_id ) ) );
           }
 
           $file = wp_normalize_path( $metadata[ 'file' ] );
 
-          $image_host = 'storage.googleapis.com/';
-          if ( ud_get_stateless_media()->get( 'sm.static_host' ) == 'true' ) {
-            $image_host = '';
-          }
-          $bucketLink = apply_filters('wp_stateless_bucket_link', 'https://'.$image_host.ud_get_stateless_media()->get( 'sm.bucket' ));
+          $image_host = ud_get_stateless_media()->get_gs_host();
+          $bucketLink = apply_filters('wp_stateless_bucket_link', $image_host);
 
           $_metadata = array(
             "width" => isset( $metadata[ 'width' ] ) ? $metadata[ 'width' ] : null,
@@ -258,9 +255,19 @@ namespace wpCloud\StatelessMedia {
                   'mediaLink' => $media[ 'mediaLink' ],
                   'selfLink' => $media[ 'selfLink' ]
                 );
-
+                
+                // Stateless mode: we don't need the local version.
+                if(ud_get_stateless_media()->get( 'sm.mode' ) === 'stateless'){
+                  unlink($absolutePath);
+                }
               }
 
+
+            }
+
+            // Stateless mode: we don't need the local version.
+            if(ud_get_stateless_media()->get( 'sm.mode' ) === 'stateless'){
+              unlink($upload_dir[ 'basedir' ] . '/' . $file);
             }
 
           }
