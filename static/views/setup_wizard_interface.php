@@ -159,9 +159,9 @@ $bucket_id      = "stateless-" . substr($id, 0, 20);
                                     <img src="<?php echo ud_get_stateless_media()->path( 'static/images/setup-complete.png'); ?>" alt="">
                                      <div class="wpStateLess-step-title">
                                         <h3>Congrats, Your Setup is Complete</h3>
-                                        <p>Any media file you upload to WordPress will now be uploaded to Google and served to your users from Google servers! A background process is now running that will upload any existing media into Google Cloud Storage. </p>
+                                        <p>Any media file you upload to WordPress will now be uploaded to Google and served to your users from Google servers!</p>
                                     </div>
-                                    <p>To further customize your stateless media setup, visit the <a class="btn-link" href="<?php echo admin_url('options-media.php#stateless-media');?>">settings panel!</a></p>
+                                    <p>To further customize your stateless media setup, visit the <a class="btn-link" href="<?php echo ud_get_stateless_media()->get('page_url.stateless_settings');?>">settings panel!</a></p>
                                     <a href="<?php echo admin_url('media-new.php');?>" class="btn btn-green">Upload Something!</a>
                                 </div>
                             </div>

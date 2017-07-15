@@ -15,7 +15,9 @@
 
         var pName = _this.val();
         var settings = _settings || _this.data('settings');
-
+        if(pName){
+            pName = pName.trim().replace(/-$/, '');
+        }
         response = response || {};
 
         response.id      = '';

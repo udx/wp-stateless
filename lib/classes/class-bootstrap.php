@@ -176,6 +176,7 @@ namespace wpCloud\StatelessMedia {
              * Rewrite Image URLS
              */
             add_filter( 'image_downsize', array( $this, 'image_downsize' ), 99, 3 );
+            add_filter( 'wp_calculate_image_srcset', array($this, 'wp_calculate_image_srcset'), 10, 5 );
 
             /**
              * Extends metadata by adding GS information.
@@ -210,18 +211,38 @@ namespace wpCloud\StatelessMedia {
       }
 
       /**
+       * Rebuild srcset from gs_link.
+       * 
+       * 
+       */
+      public function wp_calculate_image_srcset($sources, $size_array, $image_src, $image_meta, $attachment_id){
+        foreach ($sources as $width => &$image) {
+          if(isset($image_meta['sizes']) && is_array($image_meta['sizes'])){
+            foreach ($image_meta['sizes'] as $key => $meta) {
+              if($width == $meta['width'] && isset($meta['gs_link']) && $meta['gs_link']){
+                $image['url'] = $meta['gs_link'];
+              }
+            }
+          }
+        }
+
+        return $sources;
+      }
+
+      /**
        * Return gs host.
        * If custom domain is set it's return bucket name as host,
        * else return storage.googleapis.com as host and append bucket name at the end.
        * @param none
        * @return Host name to use
        */
-      public function get_gs_host() {
+      public function get_gs_host($sm = array()) {
+        $sm = $sm?$sm: $this->get( 'sm');
         $image_host = 'https://storage.googleapis.com/';
-        if ( $this->get( 'sm.custom_domain' ) == $this->get( 'sm.bucket' )) {
+        if ( $sm['bucket'] && $sm['custom_domain'] == $sm['bucket']) {
             $image_host = 'http://';  // bucketname will be host
         }
-        return $image_host . $this->get( 'sm.bucket' );
+        return $image_host . $sm['bucket'];
       }
 
       /**
@@ -240,12 +261,43 @@ namespace wpCloud\StatelessMedia {
       }
 
       /**
+       * Return settings page url.
+       * @param $path
+       */
+      public function get_settings_page_url( $path = '' ) {
+        $protocol = is_ssl() ? 'https://' : 'http://';
+        $wp_home = defined('WP_HOME') ? (!strstr(WP_HOME, 'http') ? $protocol : '') . WP_HOME : '';
+        
+        if($wp_home){
+          $url = $wp_home . '/wp-admin/';
+        }else{
+          $url = admin_url();
+        }
+
+        if(is_network_admin()){
+          $url .= 'network/settings.php';
+        }
+        else{
+          $url .= 'upload.php';
+        }
+
+        return $url . $path;
+      }
+
+      /**
        * Get new blog settings once switched blog.
        * @param $new_blog
        * @param $prev_blog_id
        */
       public function on_switch_blog( $new_blog, $prev_blog_id ) {
         $this->settings->refresh();
+      }
+
+      /**
+       * Remove all settings.
+       */
+      public function reset($network = false) {
+        $this->settings->reset($network);
       }
 
       /**
@@ -803,9 +855,9 @@ namespace wpCloud\StatelessMedia {
 
       public function redirect_to_splash($plugin =''){
         if( $plugin == plugin_basename( $this->boot_file ) ) {
-          $url = admin_url('upload.php?page=stateless-setup&step=splash-screen');
-          if($this->is_network_detected()){
-            $url = network_admin_url( "settings.php?page=stateless-setup&step=splash-screen" );
+          $url = $this->get_settings_page_url('?page=stateless-setup&step=splash-screen');
+          if(json_decode(get_site_option('sm_key_json'))){
+            $url = $this->get_settings_page_url('?page=stateless-settings');
           }
           exit( wp_redirect($url));
         }

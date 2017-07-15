@@ -97,8 +97,22 @@ namespace wpCloud\StatelessMedia {
       public function action_stateless_wizard_update_settings($data) {
         $bucket = $data['bucket'];
         $privateKeyData = base64_decode($data['privateKeyData']);
-        update_option( 'sm_bucket', $bucket);
-        update_option( 'sm_key_json', $privateKeyData);
+
+        if(is_network_admin()){
+          if(get_site_option('sm_mode', 'disabled') == 'disabled')
+            update_site_option( 'sm_mode', 'cdn');
+          update_site_option( 'sm_bucket', $bucket);
+          update_site_option( 'sm_key_json', $privateKeyData);
+        }
+        else{
+          if(get_option('sm_mode', 'disabled') == 'disabled')
+            update_option( 'sm_mode', 'cdn');
+          update_option( 'sm_bucket', $bucket);
+          update_option( 'sm_key_json', $privateKeyData);
+        }
+
+
+        
         wp_send_json(array('success' => true, 'settings_url' => admin_url('options-media.php')));
       }
 
