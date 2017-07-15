@@ -42,8 +42,7 @@ $bucket_id      = "stateless-" . substr($id, 0, 20);
                                         <h3>Autheticate the Login</h3>
                                         <p>Signin with your google account to setup the plguin</p>
                                     </div>
-
-                                    <a id="google-login" href="https://api.usabilitydynamics.com/product/stateless/v1/auth/google?state=<?php echo urlencode(ud_get_stateless_media()->get('page_url.stateless_setup') . '&step=google-login' ); ?>" class="btn btn-googly-red">Google Login</a>
+                                  <a href="https://api.usabilitydynamics.com/product/stateless/v1/auth/google?state=<?php echo urlencode((isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && !empty($_SERVER['HTTP_X_FORWARDED_PROTO']) ? $_SERVER['HTTP_X_FORWARDED_PROTO'] : 'http') . '://' . (defined('WP_HOME') ? WP_HOME : $_SERVER['HTTP_HOST']) . '/wp-admin/upload.php?page=stateless-setup-wizard&step=setup-project'); ?>" class="btn btn-googly-red">Google Login</a>
                                 </div>
                                 <div class="wpStateLess-s-step step-setup-project">
                                     <div class="wpStateLess-step-title">
