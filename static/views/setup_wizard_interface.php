@@ -1,10 +1,10 @@
 <?php
 $server_name    = $_SERVER['HTTP_HOST']?$_SERVER['HTTP_HOST']: $_SERVER["SERVER_NAME"];
 $id             = str_replace('.', '-', $server_name);
-$project_name   = substr($id, 0, 30);
-$project_id     = substr($id, 0, 23) . "-" . rand(100000, 999999);
+$project_name   = trim(substr($id, 0, 30), '-');
+$project_id     = trim(substr($id, 0, 23), '-') . "-" . rand(100000, 999999);
 
-$bucket_id      = "stateless-" . substr($id, 0, 20);
+$bucket_id      = trim("stateless-" . substr($id, 0, 20), '-');
 
 ?>
 <div id="wp-stateless-wrapper">
@@ -42,7 +42,7 @@ $bucket_id      = "stateless-" . substr($id, 0, 20);
                                         <h3>Autheticate the Login</h3>
                                         <p>Signin with your google account to setup the plguin</p>
                                     </div>
-                                  <a href="https://api.usabilitydynamics.com/product/stateless/v1/auth/google?state=<?php echo urlencode((isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && !empty($_SERVER['HTTP_X_FORWARDED_PROTO']) ? $_SERVER['HTTP_X_FORWARDED_PROTO'] : 'http') . '://' . (defined('WP_HOME') ? WP_HOME : $_SERVER['HTTP_HOST']) . '/wp-admin/upload.php?page=stateless-setup-wizard&step=setup-project'); ?>" class="btn btn-googly-red">Google Login</a>
+                                    <a id="google-login" href="https://api.usabilitydynamics.com/product/stateless/v1/auth/google?state=<?php echo urlencode(ud_get_stateless_media()->get_settings_page_url('?page=stateless-setup&step=google-login') ); ?>" class="btn btn-googly-red">Google Login</a>
                                 </div>
                                 <div class="wpStateLess-s-step step-setup-project">
                                     <div class="wpStateLess-step-title">

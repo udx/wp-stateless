@@ -1,6 +1,6 @@
 <div class="wrap" ng-app="wpStatelessApp">
-    <h2>Stateless Settings</h2>
-    <div class="description"></div>
+    <h2>WP-Stateless</h2>
+    <div class="description">Upload and serve your WordPress media files from Google Cloud Storage.</div>
     <?php settings_errors(); ?> 
 
     <h2 class="nav-tab-wrapper">  
