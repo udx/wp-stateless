@@ -5,6 +5,15 @@
     width: 50em;
 }
 
+.sm-notice {
+    background-color: #fff8e5;
+    margin: 20px 0px 0px;
+    padding: 15px;
+    border-left: 3px solid #f79191;
+}
+#stateless-settings-page-title{
+	margin-bottom: 20px;
+}
 #service_account_json{
 	height: 20em;
 }
