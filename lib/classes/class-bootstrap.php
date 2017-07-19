@@ -159,7 +159,7 @@ namespace wpCloud\StatelessMedia {
 
               if ( $this->get( 'sm.body_rewrite' ) == 'true' ) {
                 add_filter( 'the_content', array( $this, 'the_content_filter' ) );
-                //add_filter( 'get_post_metadata', array( $this, 'post_metadata_filter' ), 2, 4 );
+                add_filter( 'get_post_metadata', array( $this, 'post_metadata_filter' ), 2, 4 );
               }
 
               if ( $this->get( 'sm.custom_domain' ) == $this->get( 'sm.bucket' ) ) {
@@ -458,10 +458,10 @@ namespace wpCloud\StatelessMedia {
        * @return mixed
        */
       public function post_metadata_filter($value, $object_id, $meta_key, $single){
-        // return;
         if(empty($value)){
           $meta_type = 'post';
           $meta_cache = wp_cache_get($object_id, $meta_type . '_meta');
+
           if ( !$meta_cache ) {
               $meta_cache = update_meta_cache( $meta_type, array( $object_id ) );
               $meta_cache = $meta_cache[$object_id];
@@ -470,12 +470,9 @@ namespace wpCloud\StatelessMedia {
           if ( ! $meta_key ) {
               return $this->convert_to_gs_link($meta_cache);
           }
-       
+          
           if ( isset($meta_cache[$meta_key]) ) {
-              if ( $single )
-                  return $this->convert_to_gs_link(maybe_unserialize( $meta_cache[$meta_key][0] ));
-              else
-                  return $this->convert_to_gs_link(array_map('maybe_unserialize', $meta_cache[$meta_key]));
+              return $this->convert_to_gs_link(array_map('maybe_unserialize', $meta_cache[$meta_key]));
           }
        
           if ($single)
@@ -516,7 +513,7 @@ namespace wpCloud\StatelessMedia {
 
             if(is_array($meta)){
               foreach ($meta as $key => $value) {
-                $meta[$key] = $this->convert_to_gs_link($value);
+                $meta[$key] = $this->_convert_to_gs_link($value);
               }
               return $meta;
             }
