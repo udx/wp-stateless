@@ -159,6 +159,7 @@ namespace wpCloud\StatelessMedia {
 
               if ( $this->get( 'sm.body_rewrite' ) == 'true' ) {
                 add_filter( 'the_content', array( $this, 'the_content_filter' ) );
+                //add_filter( 'get_post_metadata', array( $this, 'post_metadata_filter' ), 2, 4 );
               }
 
               if ( $this->get( 'sm.custom_domain' ) == $this->get( 'sm.bucket' ) ) {
@@ -448,6 +449,87 @@ namespace wpCloud\StatelessMedia {
 
         return $content;
       }
+
+      /**
+       * @param $value null unless other filter hooked in this function.
+       * @param $object_id post id
+       * @param $meta_key 
+       * @param $single
+       * @return mixed
+       */
+      public function post_metadata_filter($value, $object_id, $meta_key, $single){
+        // return;
+        if(empty($value)){
+          $meta_type = 'post';
+          $meta_cache = wp_cache_get($object_id, $meta_type . '_meta');
+          if ( !$meta_cache ) {
+              $meta_cache = update_meta_cache( $meta_type, array( $object_id ) );
+              $meta_cache = $meta_cache[$object_id];
+          }
+       
+          if ( ! $meta_key ) {
+              return $this->convert_to_gs_link($meta_cache);
+          }
+       
+          if ( isset($meta_cache[$meta_key]) ) {
+              if ( $single )
+                  return $this->convert_to_gs_link(maybe_unserialize( $meta_cache[$meta_key][0] ));
+              else
+                  return $this->convert_to_gs_link(array_map('maybe_unserialize', $meta_cache[$meta_key]));
+          }
+       
+          if ($single)
+              return '';
+          else
+              return array();
+        }
+
+        return $this->convert_to_gs_link($value);
+
+      }
+
+      /**
+       * Rplace all image link with gs link and return only if meta modified.
+       * @param $meta
+       * @return mixed
+       */
+      public function convert_to_gs_link($meta){
+        $updated = $this->_convert_to_gs_link($meta);
+        if($updated == $meta){
+          return null; // Not changed.
+        }
+        return $updated;
+      }
+
+      /**
+       * Rplace all image link with gs link
+       * @param $meta
+       * @return mixed
+       */
+      public function _convert_to_gs_link($meta){
+        if ( $meta && $upload_data = wp_upload_dir() ) {
+          if ( !empty( $upload_data['baseurl'] ) && !empty( $meta ) ) {
+            $baseurl = preg_replace('/https?:\/\//','',$upload_data['baseurl']);
+            $root_dir = trim( $this->get( 'sm.root_dir' ) );
+            $root_dir = !empty( $root_dir ) ? $root_dir : false;
+            $image_host = $this->get_gs_host().'/'.($root_dir?$root_dir:'');
+
+            if(is_array($meta)){
+              foreach ($meta as $key => $value) {
+                $meta[$key] = $this->convert_to_gs_link($value);
+              }
+              return $meta;
+            }
+            else{
+              return preg_replace( '/(https?:\/\/'.str_replace('/', '\/', $baseurl).')\/(.+?)(\.jpg|\.png|\.gif|\.jpeg)/i', $image_host.'$2$3', $meta);
+            }
+          }
+        }
+
+        return $meta;
+      }
+
+
 
       /**
        * Handle images on fly

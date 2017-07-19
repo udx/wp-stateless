@@ -111,17 +111,16 @@ namespace wpCloud\StatelessMedia {
           // If constant is set then override by constant
           if(defined($constant)){
             $value = constant($constant);
-            $constant_mode = true;
           }
 
           $this->set( "sm.$option", $value);
         }
 
-        $this->set( 'sm.constant_mode', $constant_mode );
-
-        if(!is_network_admin()){
-          $this->set( 'sm.network_mode', $network_mode );
+        if(is_network_admin()){
+          $network_mode = false;
         }
+        
+        $this->set( 'sm.network_mode', $network_mode );
         update_site_option('sm_network_mode', $network_mode);
 
         /**
@@ -154,15 +153,19 @@ namespace wpCloud\StatelessMedia {
                 $key_file_path = wp_normalize_path( $upload_dir[ 'basedir' ] ) . '/' . $key_file_path;
                 break;
               /* Look using Plugin root */
-              case (file_exists($this->path( $key_file_path, 'dir') ) ):
-                $key_file_path = $this->path( $key_file_path, 'dir' );
+              case (file_exists(ud_get_stateless_media()->path( $key_file_path, 'dir') ) ):
+                $key_file_path = ud_get_stateless_media()->path( $key_file_path, 'dir' );
                 break;
 
             }
             if(file_exists($key_file_path)){
               $this->set( 'sm.key_json', file_get_contents($key_file_path) );
+              $constant_mode = true;
             }
           }
+        }
+        elseif (defined('WP_STATELESS_MEDIA_JSON_KEY') && json_decode(WP_STATELESS_MEDIA_JSON_KEY)) {
+          $constant_mode = true;
         }
 
         /* Set default cacheControl in case it is empty */
@@ -171,6 +174,8 @@ namespace wpCloud\StatelessMedia {
           $this->set( 'sm.cache_control', 'public, max-age=36000, must-revalidate' );
         }
         
+        $this->set( 'sm.constant_mode', $constant_mode );
+        $this->set( 'sm.readonly', $constant_mode ||  $network_mode );
       }
 
       /**
