@@ -50,9 +50,6 @@ namespace wpCloud\StatelessMedia {
           )
         ));
 
-        /**
-         * MODE
-         */
         /* Use Network setting for mode if needed. */
         $network_mode = get_site_option( 'sm_mode' );
         if( $network_mode && $network_mode != 'false' ) {
@@ -64,46 +61,14 @@ namespace wpCloud\StatelessMedia {
           $this->set( 'sm.mode', WP_STATELESS_MEDIA_MODE );
         }
 
-        /**
-         * BUCKET
-         */
-
         /* Use constant value for Bucket, if set. */
         if( defined( 'WP_STATELESS_MEDIA_BUCKET' ) ) {
           $this->set( 'sm.bucket', WP_STATELESS_MEDIA_BUCKET );
         }
 
-        /**
-         * ROOT DIR
-         */
-
         /* Use constant value for Root Dir, if set. */
         if( defined( 'WP_STATELESS_MEDIA_ROOT_DIR' ) ) {
           $this->set( 'sm.root_dir', WP_STATELESS_MEDIA_ROOT_DIR );
-        }
-
-        /**
-         * DELETE REMOTE
-         */
-
-        $network_delete_remote = get_site_option( 'sm_delete_remote' );
-        if( $network_delete_remote && $network_delete_remote == '1' ) {
-          $this->set( 'sm.delete_remote', 'true' );
-        }
-        if( defined( 'WP_STATELESS_MEDIA_DELETE_REMOTE' ) ) {
-          $this->set( 'sm.delete_remote', WP_STATELESS_MEDIA_DELETE_REMOTE );
-        }
-
-        /**
-         * HASH FILENAME
-         */
-
-        $network_hashify = get_site_option( 'sm_hashify_file_name' );
-        if( $network_hashify && $network_hashify == '1' ) {
-          $this->set( 'sm.hashify_file_name', 'true' );
-        }
-        if( defined( 'WP_STATELESS_MEDIA_HASH_FILENAME' ) ) {
-          $this->set( 'sm.hashify_file_name', WP_STATELESS_MEDIA_HASH_FILENAME );
         }
 
         /* Set default cacheControl in case it is empty */
@@ -205,25 +170,6 @@ namespace wpCloud\StatelessMedia {
             echo implode( "\n", (array)apply_filters( 'sm::network::settings::mode', $inputs ) );
           ?>
         </div>
-
-        <div class="sm_advanced">
-          <label><b><?php _e('Advanced', ud_get_stateless_media()->domain); ?></b></label>
-          <?php
-
-          $_delete_remote = get_site_option( 'sm_delete_remote' );
-
-          $inputs = array();
-          $inputs[] = '<p><input type="hidden" name="sm[delete_remote]" value="0" />';
-          $inputs[] = '<label for="sm_delete_remote"><input id="sm_delete_remote" type="checkbox" name="sm[delete_remote]" value="1" '. checked( '1', $_delete_remote, false ) .'/>'.__( 'Delete media from GCS when media is deleted from the site.', ud_get_stateless_media()->domain ).'<small> '.__( '(This option may slow down media deletion process)', ud_get_stateless_media()->domain ).'</small></label></p>';
-
-          $_hashify_file_name = get_site_option( 'sm_hashify_file_name' );
-
-          $inputs[] = '<p><input type="hidden" name="sm[hashify_file_name]" value="0" />';
-          $inputs[] = '<label for="sm_hashify_file_name"><input id="sm_hashify_file_name" type="checkbox" name="sm[hashify_file_name]" value="1" '. checked( '1', $_hashify_file_name, false ) .'/>'.__( 'Randomize the filename of newly uploaded media files.', ud_get_stateless_media()->domain ).'<small> '.__( '(This option may slow down media deletion process)', ud_get_stateless_media()->domain ).'</small></label></p>';
-
-          echo implode( "\n", (array)apply_filters( 'sm::network::settings::advanced', $inputs ) );
-          ?>
-        </div>
         <?php
       }
 
@@ -305,14 +251,12 @@ namespace wpCloud\StatelessMedia {
         $inputs[] = '<label for="sm_on_fly"><input id="sm_on_fly" type="checkbox" name="sm[on_fly]" value="true" '. checked( 'true', $this->get( 'sm.on_fly' ), false ) .'/>'.__( 'Upload on-fly generated (by third-party scripts) images to GCS.', ud_get_stateless_media()->domain ).'<small> '.__( '(This option may slow down file upload processes)', ud_get_stateless_media()->domain ).'</small></label>';
 
         // delete remote
-        $network_delete_remote = get_site_option( 'sm_delete_remote' );
         $inputs[] = '<input type="hidden" name="sm[delete_remote]" value="false" />';
-        $inputs[] = '<label for="sm_delete_remote"><input '. disabled( true, $network_delete_remote == '1', false ) .' title="'.($network_delete_remote == '1'?__('This option cannot be changed because it is set in Network Settings', ud_get_stateless_media()->domain):'').'" id="sm_delete_remote" type="checkbox" name="sm[delete_remote]" value="true" '. checked( 'true', $this->get( 'sm.delete_remote' ), false ) .'/>'.__( 'Delete media from GCS when media is deleted from the site.', ud_get_stateless_media()->domain ).'<small> '.__( '(This option may slow down media deletion process)', ud_get_stateless_media()->domain ).'</small></label>';
+        $inputs[] = '<label for="sm_delete_remote"><input id="sm_delete_remote" type="checkbox" name="sm[delete_remote]" value="true" '. checked( 'true', $this->get( 'sm.delete_remote' ), false ) .'/>'.__( 'Delete media from GCS when media is deleted from the site.', ud_get_stateless_media()->domain ).'<small> '.__( '(This option may slow down media deletion process)', ud_get_stateless_media()->domain ).'</small></label>';
 
         // hashify
-        $network_hashify = get_site_option( 'sm_hashify_file_name' );
         $inputs[] = '<input type="hidden" name="sm[hashify_file_name]" value="false" />';
-        $inputs[] = '<label for="sm_hashify_file_name"><input '. disabled( true, $network_hashify == '1', false ) .' title="'.($network_hashify == '1'?__('This option cannot be changed because it is set in Network Settings', ud_get_stateless_media()->domain):'').'" id="sm_hashify_file_name" type="checkbox" name="sm[hashify_file_name]" value="true" '. checked( 'true', $this->get( 'sm.hashify_file_name' ), false ) .'/>'.__( 'Randomize the filename of newly uploaded media files.', ud_get_stateless_media()->domain ).'<small> '.__( '(May help to avoid unwanted GCS caching)', ud_get_stateless_media()->domain ).'</small></label>';
+        $inputs[] = '<label for="sm_hashify_file_name"><input id="sm_hashify_file_name" type="checkbox" name="sm[hashify_file_name]" value="true" '. checked( 'true', $this->get( 'sm.hashify_file_name' ), false ) .'/>'.__( 'Randomize the filename of newly uploaded media files.', ud_get_stateless_media()->domain ).'<small> '.__( '(May help to avoid unwanted GCS caching)', ud_get_stateless_media()->domain ).'</small></label>';
 
         echo '<section class="wp-stateless-media-options wp-stateless-media-advanced-options"><p>' . implode( "</p>\n<p>", (array) apply_filters( 'sm::settings::advanced', $inputs ) ) . '</p></section>';
 
@@ -393,17 +337,13 @@ namespace wpCloud\StatelessMedia {
         $_mode = $network_mode && $network_mode != 'false' ? $network_mode : $this->get( 'sm.mode' );
 
         $inputs = array(
-          '<p class="sm-mode"><label for="sm_mode_disabled"><input '. disabled( true, $network_mode != 'false', false ) .'  id="sm_mode_disabled" '. checked( 'disabled', $_mode, false ) .' type="radio" name="sm[mode]" value="disabled" />'.__( 'Disabled', ud_get_stateless_media()->domain ).''
+          '<p class="sm-mode"><label for="sm_mode_disabled"><input id="sm_mode_disabled" '. checked( 'disabled', $_mode, false ) .' type="radio" name="sm[mode]" value="disabled" />'.__( 'Disabled', ud_get_stateless_media()->domain ).''
           . '<small class="description">'.__('Disable Stateless Media.', ud_get_stateless_media()->domain).'</small></label></p>',
-          '<p class="sm-mode"><label for="sm_mode_backup"><input '. disabled( true, $network_mode != 'false', false ) .' id="sm_mode_backup" '. checked( 'backup', $_mode, false ) .' type="radio" name="sm[mode]" value="backup" />'.__( 'Backup', ud_get_stateless_media()->domain ).''
+          '<p class="sm-mode"><label for="sm_mode_backup"><input id="sm_mode_backup" '. checked( 'backup', $_mode, false ) .' type="radio" name="sm[mode]" value="backup" />'.__( 'Backup', ud_get_stateless_media()->domain ).''
           . '<small class="description">'.__('Push media files to Google Storage but keep using local ones.', ud_get_stateless_media()->domain).'</small></label></p>',
-          '<p class="sm-mode"><label for="sm_mode_cdn"><input '. disabled( true, $network_mode != 'false', false ) .' id="sm_mode_cdn" '. checked( 'cdn', $_mode, false ) .' type="radio" name="sm[mode]" value="cdn" />'.__( 'CDN', ud_get_stateless_media()->domain ).''
+          '<p class="sm-mode"><label for="sm_mode_cdn"><input id="sm_mode_cdn" '. checked( 'cdn', $_mode, false ) .' type="radio" name="sm[mode]" value="cdn" />'.__( 'CDN', ud_get_stateless_media()->domain ).''
           . '<small class="description">'.__('Push media files to Google Storage and use them directly from there.', ud_get_stateless_media()->domain).'</small></label></p>'
         );
-
-        if( $network_mode != 'false' ) {
-          $inputs[] = '<p class="description">' . sprintf( __( 'Mode cannot be changed because it is set via <a href="%s">Network Settings.</a>' ), network_admin_url( 'settings.php' ) ) . '</p>';
-        }
 
         echo implode( "\n", (array)apply_filters( 'sm::settings::mode', $inputs ) );
 
