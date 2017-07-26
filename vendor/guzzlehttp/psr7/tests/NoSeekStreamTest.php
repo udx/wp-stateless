@@ -26,15 +26,13 @@ class NoSeekStreamTest extends \PHPUnit_Framework_TestCase
         $wrapped->seek(2);
     }
 
-    /**
-     * @expectedException \RuntimeException
-     * @expectedExceptionMessage Cannot write to a non-writable stream
-     */
-    public function testHandlesClose()
+    public function testToStringDoesNotSeek()
     {
-        $s = Psr7\stream_for('foo');
+        $s = \GuzzleHttp\Psr7\stream_for('foo');
+        $s->seek(1);
         $wrapped = new NoSeekStream($s);
+        $this->assertEquals('oo', (string) $wrapped);
+
         $wrapped->close();
-        $wrapped->write('foo');
     }
 }

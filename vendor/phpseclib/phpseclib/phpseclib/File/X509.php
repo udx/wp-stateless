@@ -244,7 +244,7 @@ class X509
     /**
      * The signature subject
      *
-     * There's no guarantee \phpseclib\File\X509 is going to reencode an X.509 cert in the same way it was originally
+     * There's no guarantee \phpseclib\File\X509 is going to re-encode an X.509 cert in the same way it was originally
      * encoded so we take save the portion of the original cert that the signature would have made for.
      *
      * @var string
@@ -1484,7 +1484,9 @@ class X509
 
         $this->signatureSubject = substr($cert, $decoded[0]['content'][0]['start'], $decoded[0]['content'][0]['length']);
 
-        $this->_mapInExtensions($x509, 'tbsCertificate/extensions', $asn1);
+        if ($this->_isSubArrayValid($x509, 'tbsCertificate/extensions')) {
+            $this->_mapInExtensions($x509, 'tbsCertificate/extensions', $asn1);
+        }
         $this->_mapInDNs($x509, 'tbsCertificate/issuer/rdnSequence', $asn1);
         $this->_mapInDNs($x509, 'tbsCertificate/subject/rdnSequence', $asn1);
 
@@ -1588,9 +1590,9 @@ class X509
      */
     function _mapInExtensions(&$root, $path, $asn1)
     {
-        $extensions = &$this->_subArray($root, $path);
+        $extensions = &$this->_subArrayUnchecked($root, $path);
 
-        if (is_array($extensions)) {
+        if ($extensions) {
             for ($i = 0; $i < count($extensions); $i++) {
                 $id = $extensions[$i]['extnId'];
                 $value = &$extensions[$i]['extnValue'];
@@ -1722,7 +1724,7 @@ class X509
                             if ($mapped !== false) {
                                 $values[$j] = $mapped;
                             }
-                            if ($id == 'pkcs-9-at-extensionRequest') {
+                            if ($id == 'pkcs-9-at-extensionRequest' && $this->_isSubArrayValid($values, $j)) {
                                 $this->_mapInExtensions($values, $j, $asn1);
                             }
                         } elseif ($map) {
@@ -1905,6 +1907,9 @@ class X509
             // "SET Secure Electronic Transaction Specification"
             // http://www.maithean.com/docs/set_bk3.pdf
             case '2.23.42.7.0': // id-set-hashedRootKey
+            // "Certificate Transparency"
+            // https://tools.ietf.org/html/rfc6962
+            case '1.3.6.1.4.1.11129.2.4.2':
                 return true;
 
             // CSR attributes
@@ -3099,7 +3104,7 @@ class X509
 
         $asn1 = new ASN1();
 
-        // OpenSSL produces SPKAC's that are preceeded by the string SPKAC=
+        // OpenSSL produces SPKAC's that are preceded by the string SPKAC=
         $temp = preg_replace('#(?:SPKAC=)|[ \r\n\\\]#', '', $spkac);
         $temp = preg_match('#^[a-zA-Z\d/+]*={0,2}$#', $temp) ? base64_decode($temp) : false;
         if ($temp != false) {
@@ -3186,7 +3191,7 @@ class X509
                 return $spkac;
             // case self::FORMAT_PEM:
             default:
-                // OpenSSL's implementation of SPKAC requires the SPKAC be preceeded by SPKAC= and since there are pretty much
+                // OpenSSL's implementation of SPKAC requires the SPKAC be preceded by SPKAC= and since there are pretty much
                 // no other SPKAC decoders phpseclib will use that same format
                 return 'SPKAC=' . base64_encode($spkac);
         }
@@ -3240,11 +3245,18 @@ class X509
         $this->signatureSubject = substr($orig, $decoded[0]['content'][0]['start'], $decoded[0]['content'][0]['length']);
 
         $this->_mapInDNs($crl, 'tbsCertList/issuer/rdnSequence', $asn1);
-        $this->_mapInExtensions($crl, 'tbsCertList/crlExtensions', $asn1);
-        $rclist = &$this->_subArray($crl, 'tbsCertList/revokedCertificates');
-        if (is_array($rclist)) {
-            foreach ($rclist as $i => $extension) {
-                $this->_mapInExtensions($rclist, "$i/crlEntryExtensions", $asn1);
+        if ($this->_isSubArrayValid($crl, 'tbsCertList/crlExtensions')) {
+            $this->_mapInExtensions($crl, 'tbsCertList/crlExtensions', $asn1);
+        }
+        if ($this->_isSubArrayValid($crl, 'tbsCertList/revokedCertificates')) {
+            $rclist_ref = &$this->_subArrayUnchecked($crl, 'tbsCertList/revokedCertificates');
+            if ($rclist_ref) {
+                $rclist = $crl['tbsCertList']['revokedCertificates'];
+                foreach ($rclist as $i => $extension) {
+                    if ($this->_isSubArrayValid($rclist, "$i/crlEntryExtensions", $asn1)) {
+                        $this->_mapInExtensions($rclist_ref, "$i/crlEntryExtensions", $asn1);
+                    }
+                }
             }
         }
 
@@ -3454,8 +3466,8 @@ class X509
 
         $altName = array();
 
-        if (isset($subject->domains) && count($subject->domains) > 1) {
-            $altName = array_map(array('X509', '_dnsName'), $subject->domains);
+        if (isset($subject->domains) && count($subject->domains)) {
+            $altName = array_map(array('\phpseclib\File\X509', '_dnsName'), $subject->domains);
         }
 
         if (isset($subject->ipAddresses) && count($subject->ipAddresses)) {
@@ -3859,6 +3871,74 @@ class X509
     function makeCA()
     {
         $this->caFlag = true;
+    }
+
+    /**
+     * Check for validity of subarray
+     *
+     * This is intended for use in conjunction with _subArrayUnchecked(),
+     * implementing the checks included in _subArray() but without copying
+     * a potentially large array by passing its reference by-value to is_array().
+     *
+     * @param array $root
+     * @param string $path
+     * @return boolean
+     * @access private
+     */
+    function _isSubArrayValid($root, $path)
+    {
+        if (!is_array($root)) {
+            return false;
+        }
+
+        foreach (explode('/', $path) as $i) {
+            if (!is_array($root)) {
+                return false;
+            }
+
+            if (!isset($root[$i])) {
+                return true;
+            }
+
+            $root = $root[$i];
+        }
+
+        return true;
+    }
+
+    /**
+     * Get a reference to a subarray
+     *
+     * This variant of _subArray() does no is_array() checking,
+     * so $root should be checked with _isSubArrayValid() first.
+     *
+     * This is here for performance reasons:
+     * Passing a reference (i.e. $root) by-value (i.e. to is_array())
+     * creates a copy. If $root is an especially large array, this is expensive.
+     *
+     * @param array $root
+     * @param string $path  absolute path with / as component separator
+     * @param bool $create optional
+     * @access private
+     * @return array|false
+     */
+    function &_subArrayUnchecked(&$root, $path, $create = false)
+    {
+        $false = false;
+
+        foreach (explode('/', $path) as $i) {
+            if (!isset($root[$i])) {
+                if (!$create) {
+                    return $false;
+                }
+
+                $root[$i] = array();
+            }
+
+            $root = &$root[$i];
+        }
+
+        return $root;
     }
 
     /**

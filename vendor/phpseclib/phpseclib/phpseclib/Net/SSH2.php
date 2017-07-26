@@ -126,6 +126,10 @@ class SSH2
      * Dumps the content real-time to a file
      */
     const LOG_REALTIME_FILE = 4;
+    /**
+     * Make sure that the log never gets larger than this
+     */
+    const LOG_MAX_SIZE = 1048576; // 1024 * 1024
     /**#@-*/
 
     /**#@+
@@ -141,9 +145,9 @@ class SSH2
      */
     const READ_REGEX = 2;
     /**
-     * Make sure that the log never gets larger than this
+     * Returns when a string matching the regular expression $expect is found
      */
-    const LOG_MAX_SIZE = 1048576; // 1024 * 1024
+    const READ_NEXT = 3;
     /**#@-*/
 
     /**
@@ -395,7 +399,7 @@ class SSH2
     var $server_public_host_key;
 
     /**
-     * Session identifer
+     * Session identifier
      *
      * "The exchange hash H from the first key exchange is additionally
      *  used as the session identifier, which is a unique identifier for
@@ -1005,7 +1009,10 @@ class SSH2
 
         if (!is_resource($this->fsock)) {
             $start = microtime(true);
-            $this->fsock = @fsockopen($this->host, $this->port, $errno, $errstr, $this->curTimeout);
+            // with stream_select a timeout of 0 means that no timeout takes place;
+            // with fsockopen a timeout of 0 means that you instantly timeout
+            // to resolve this incompatibility a timeout of 100,000 will be used for fsockopen if timeout is 0
+            $this->fsock = @fsockopen($this->host, $this->port, $errno, $errstr, $this->curTimeout == 0 ? 100000 : $this->curTimeout);
             if (!$this->fsock) {
                 $host = $this->host . ':' . $this->port;
                 user_error(rtrim("Cannot connect to $host. Error $errno. $errstr"));
@@ -1020,6 +1027,10 @@ class SSH2
                 return false;
             }
         }
+
+        $this->identifier = $this->_generate_identifier();
+
+        fputs($this->fsock, $this->identifier . "\r\n");
 
         /* According to the SSH2 specs,
 
@@ -1058,10 +1069,20 @@ class SSH2
                 }
 
                 $line.= "$temp\n";
-                if (substr($line, -2) == "\r\n") {
-                    break;
-                }
+
+                // quoting RFC4253, "Implementers who wish to maintain
+                // compatibility with older, undocumented versions of this protocol may
+                // want to process the identification string without expecting the
+                // presence of the carriage return character for reasons described in
+                // Section 5 of this document."
+
+                //if (substr($line, -2) == "\r\n") {
+                //    break;
+                //}
+
+                break;
             }
+
             $data.= $line;
         }
 
@@ -1071,8 +1092,6 @@ class SSH2
         }
 
         $extra = $matches[1];
-
-        $this->identifier = $this->_generate_identifier();
 
         if (defined('NET_SSH2_LOGGING')) {
             $this->_append_log('<-', $matches[0]);
@@ -1089,15 +1108,13 @@ class SSH2
             return false;
         }
 
-        fputs($this->fsock, $this->identifier . "\r\n");
-
         $response = $this->_get_binary_packet();
         if ($response === false) {
             user_error('Connection closed by server');
             return false;
         }
 
-        if (ord($response[0]) != NET_SSH2_MSG_KEXINIT) {
+        if (!strlen($response) || ord($response[0]) != NET_SSH2_MSG_KEXINIT) {
             user_error('Expected SSH_MSG_KEXINIT');
             return false;
         }
@@ -1274,8 +1291,9 @@ class SSH2
         );
 
         // some SSH servers have buggy implementations of some of the above algorithms
-        switch ($this->server_identifier) {
-            case 'SSH-2.0-SSHD':
+        switch (true) {
+            case $this->server_identifier == 'SSH-2.0-SSHD':
+            case substr($this->server_identifier, 0, 13) == 'SSH-2.0-DLINK':
                 $mac_algorithms = array_values(array_diff(
                     $mac_algorithms,
                     array('hmac-sha1-96', 'hmac-md5-96')
@@ -1294,36 +1312,69 @@ class SSH2
         $this->_string_shift($response, 1); // skip past the message number (it should be SSH_MSG_KEXINIT)
         $server_cookie = $this->_string_shift($response, 16);
 
+        if (strlen($response) < 4) {
+            return false;
+        }
         $temp = unpack('Nlength', $this->_string_shift($response, 4));
         $this->kex_algorithms = explode(',', $this->_string_shift($response, $temp['length']));
 
+        if (strlen($response) < 4) {
+            return false;
+        }
         $temp = unpack('Nlength', $this->_string_shift($response, 4));
         $this->server_host_key_algorithms = explode(',', $this->_string_shift($response, $temp['length']));
 
+        if (strlen($response) < 4) {
+            return false;
+        }
         $temp = unpack('Nlength', $this->_string_shift($response, 4));
         $this->encryption_algorithms_client_to_server = explode(',', $this->_string_shift($response, $temp['length']));
 
+        if (strlen($response) < 4) {
+            return false;
+        }
         $temp = unpack('Nlength', $this->_string_shift($response, 4));
         $this->encryption_algorithms_server_to_client = explode(',', $this->_string_shift($response, $temp['length']));
 
+        if (strlen($response) < 4) {
+            return false;
+        }
         $temp = unpack('Nlength', $this->_string_shift($response, 4));
         $this->mac_algorithms_client_to_server = explode(',', $this->_string_shift($response, $temp['length']));
 
+        if (strlen($response) < 4) {
+            return false;
+        }
         $temp = unpack('Nlength', $this->_string_shift($response, 4));
         $this->mac_algorithms_server_to_client = explode(',', $this->_string_shift($response, $temp['length']));
 
+        if (strlen($response) < 4) {
+            return false;
+        }
         $temp = unpack('Nlength', $this->_string_shift($response, 4));
         $this->compression_algorithms_client_to_server = explode(',', $this->_string_shift($response, $temp['length']));
 
+        if (strlen($response) < 4) {
+            return false;
+        }
         $temp = unpack('Nlength', $this->_string_shift($response, 4));
         $this->compression_algorithms_server_to_client = explode(',', $this->_string_shift($response, $temp['length']));
 
+        if (strlen($response) < 4) {
+            return false;
+        }
         $temp = unpack('Nlength', $this->_string_shift($response, 4));
         $this->languages_client_to_server = explode(',', $this->_string_shift($response, $temp['length']));
 
+        if (strlen($response) < 4) {
+            return false;
+        }
         $temp = unpack('Nlength', $this->_string_shift($response, 4));
         $this->languages_server_to_client = explode(',', $this->_string_shift($response, $temp['length']));
 
+        if (!strlen($response)) {
+            return false;
+        }
         extract(unpack('Cfirst_kex_packet_follows', $this->_string_shift($response, 1)));
         $first_kex_packet_follows = $first_kex_packet_follows != 0;
 
@@ -1422,10 +1473,16 @@ class SSH2
                     return false;
                 }
 
+                if (strlen($response) < 4) {
+                    return false;
+                }
                 extract(unpack('NprimeLength', $this->_string_shift($response, 4)));
                 $primeBytes = $this->_string_shift($response, $primeLength);
                 $prime = new BigInteger($primeBytes, -256);
 
+                if (strlen($response) < 4) {
+                    return false;
+                }
                 extract(unpack('NgLength', $this->_string_shift($response, 4)));
                 $gBytes = $this->_string_shift($response, $gLength);
                 $g = new BigInteger($gBytes, -256);
@@ -1508,6 +1565,9 @@ class SSH2
             user_error('Connection closed by server');
             return false;
         }
+        if (!strlen($response)) {
+            return false;
+        }
         extract(unpack('Ctype', $this->_string_shift($response, 1)));
 
         if ($type != $serverKexReplyMessage) {
@@ -1515,18 +1575,33 @@ class SSH2
             return false;
         }
 
+        if (strlen($response) < 4) {
+            return false;
+        }
         $temp = unpack('Nlength', $this->_string_shift($response, 4));
         $this->server_public_host_key = $server_public_host_key = $this->_string_shift($response, $temp['length']);
 
+        if (strlen($server_public_host_key) < 4) {
+            return false;
+        }
         $temp = unpack('Nlength', $this->_string_shift($server_public_host_key, 4));
         $public_key_format = $this->_string_shift($server_public_host_key, $temp['length']);
 
+        if (strlen($response) < 4) {
+            return false;
+        }
         $temp = unpack('Nlength', $this->_string_shift($response, 4));
         $fBytes = $this->_string_shift($response, $temp['length']);
 
+        if (strlen($response) < 4) {
+            return false;
+        }
         $temp = unpack('Nlength', $this->_string_shift($response, 4));
         $this->signature = $this->_string_shift($response, $temp['length']);
 
+        if (strlen($this->signature) < 4) {
+            return false;
+        }
         $temp = unpack('Nlength', $this->_string_shift($this->signature, 4));
         $this->signature_format = $this->_string_shift($this->signature, $temp['length']);
 
@@ -1597,6 +1672,9 @@ class SSH2
             return false;
         }
 
+        if (!strlen($response)) {
+            return false;
+        }
         extract(unpack('Ctype', $this->_string_shift($response, 1)));
 
         if ($type != NET_SSH2_MSG_NEWKEYS) {
@@ -1927,6 +2005,9 @@ class SSH2
                 return false;
             }
 
+            if (strlen($response) < 4) {
+                return false;
+            }
             extract(unpack('Ctype', $this->_string_shift($response, 1)));
 
             if ($type != NET_SSH2_MSG_SERVICE_ACCEPT) {
@@ -1976,6 +2057,9 @@ class SSH2
                 return false;
             }
 
+            if (!strlen($response)) {
+                return false;
+            }
             extract(unpack('Ctype', $this->_string_shift($response, 1)));
 
             switch ($type) {
@@ -2031,6 +2115,9 @@ class SSH2
             return false;
         }
 
+        if (!strlen($response)) {
+            return false;
+        }
         extract(unpack('Ctype', $this->_string_shift($response, 1)));
 
         switch ($type) {
@@ -2038,14 +2125,23 @@ class SSH2
                 if (defined('NET_SSH2_LOGGING')) {
                     $this->message_number_log[count($this->message_number_log) - 1] = 'NET_SSH2_MSG_USERAUTH_PASSWD_CHANGEREQ';
                 }
+                if (strlen($response) < 4) {
+                    return false;
+                }
                 extract(unpack('Nlength', $this->_string_shift($response, 4)));
                 $this->errors[] = 'SSH_MSG_USERAUTH_PASSWD_CHANGEREQ: ' . utf8_decode($this->_string_shift($response, $length));
                 return $this->_disconnect(NET_SSH2_DISCONNECT_AUTH_CANCELLED_BY_USER);
             case NET_SSH2_MSG_USERAUTH_FAILURE:
                 // can we use keyboard-interactive authentication?  if not then either the login is bad or the server employees
                 // multi-factor authentication
+                if (strlen($response) < 4) {
+                    return false;
+                }
                 extract(unpack('Nlength', $this->_string_shift($response, 4)));
                 $auth_methods = explode(',', $this->_string_shift($response, $length));
+                if (!strlen($response)) {
+                    return false;
+                }
                 extract(unpack('Cpartial_success', $this->_string_shift($response, 1)));
                 $partial_success = $partial_success != 0;
 
@@ -2120,16 +2216,31 @@ class SSH2
             }
         }
 
+        if (!strlen($response)) {
+            return false;
+        }
         extract(unpack('Ctype', $this->_string_shift($response, 1)));
 
         switch ($type) {
             case NET_SSH2_MSG_USERAUTH_INFO_REQUEST:
+                if (strlen($response) < 4) {
+                    return false;
+                }
                 extract(unpack('Nlength', $this->_string_shift($response, 4)));
                 $this->_string_shift($response, $length); // name; may be empty
+                if (strlen($response) < 4) {
+                    return false;
+                }
                 extract(unpack('Nlength', $this->_string_shift($response, 4)));
                 $this->_string_shift($response, $length); // instruction; may be empty
+                if (strlen($response) < 4) {
+                    return false;
+                }
                 extract(unpack('Nlength', $this->_string_shift($response, 4)));
                 $this->_string_shift($response, $length); // language tag; may be empty
+                if (strlen($response) < 4) {
+                    return false;
+                }
                 extract(unpack('Nnum_prompts', $this->_string_shift($response, 4)));
 
                 for ($i = 0; $i < count($responses); $i++) {
@@ -2144,6 +2255,9 @@ class SSH2
 
                 if (isset($this->keyboard_requests_responses)) {
                     for ($i = 0; $i < $num_prompts; $i++) {
+                        if (strlen($response) < 4) {
+                            return false;
+                        }
                         extract(unpack('Nlength', $this->_string_shift($response, 4)));
                         // prompt - ie. "Password: "; must not be empty
                         $prompt = $this->_string_shift($response, $length);
@@ -2289,10 +2403,16 @@ class SSH2
             return false;
         }
 
+        if (!strlen($response)) {
+            return false;
+        }
         extract(unpack('Ctype', $this->_string_shift($response, 1)));
 
         switch ($type) {
             case NET_SSH2_MSG_USERAUTH_FAILURE:
+                if (strlen($response) < 4) {
+                    return false;
+                }
                 extract(unpack('Nlength', $this->_string_shift($response, 4)));
                 $this->errors[] = 'SSH_MSG_USERAUTH_FAILURE: ' . $this->_string_shift($response, $length);
                 return false;
@@ -2324,6 +2444,9 @@ class SSH2
             return false;
         }
 
+        if (!strlen($response)) {
+            return false;
+        }
         extract(unpack('Ctype', $this->_string_shift($response, 1)));
 
         switch ($type) {
@@ -2379,13 +2502,18 @@ class SSH2
         $this->is_timeout = false;
         $this->stdErrorLog = '';
 
-        if (!($this->bitmap & self::MASK_LOGIN)) {
+        if (!$this->isAuthenticated()) {
+            return false;
+        }
+
+        if ($this->in_request_pty_exec) {
+            user_error('If you want to run multiple exec()\'s you will need to disable (and re-enable if appropriate) a PTY for each one.');
             return false;
         }
 
         // RFC4254 defines the (client) window size as "bytes the other party can send before it must wait for the window to
         // be adjusted".  0x7FFFFFFF is, at 2GB, the max size.  technically, it should probably be decremented, but,
-        // honestly, if you're transfering more than 2GB, you probably shouldn't be using phpseclib, anyway.
+        // honestly, if you're transferring more than 2GB, you probably shouldn't be using phpseclib, anyway.
         // see http://tools.ietf.org/html/rfc4254#section-5.2 for more info
         $this->window_size_server_to_client[self::CHANNEL_EXEC] = $this->window_size;
         // 0x8000 is the maximum max packet size, per http://tools.ietf.org/html/rfc4253#section-6.1, although since PuTTy
@@ -2442,6 +2570,9 @@ class SSH2
                 return false;
             }
 
+            if (!strlen($response)) {
+                return false;
+            }
             list(, $type) = unpack('C', $this->_string_shift($response, 1));
 
             switch ($type) {
@@ -2578,6 +2709,9 @@ class SSH2
             return false;
         }
 
+        if (!strlen($response)) {
+            return false;
+        }
         list(, $type) = unpack('C', $this->_string_shift($response, 1));
 
         switch ($type) {
@@ -2671,7 +2805,7 @@ class SSH2
         $this->curTimeout = $this->timeout;
         $this->is_timeout = false;
 
-        if (!($this->bitmap & self::MASK_LOGIN)) {
+        if (!$this->isAuthenticated()) {
             user_error('Operation disallowed prior to login()');
             return false;
         }
@@ -2682,6 +2816,10 @@ class SSH2
         }
 
         $channel = $this->_get_interactive_channel();
+
+        if ($mode == self::READ_NEXT) {
+            return $this->_get_channel_packet($channel);
+        }
 
         $match = $expect;
         while (true) {
@@ -2713,7 +2851,7 @@ class SSH2
      */
     function write($cmd)
     {
-        if (!($this->bitmap & self::MASK_LOGIN)) {
+        if (!$this->isAuthenticated()) {
             user_error('Operation disallowed prior to login()');
             return false;
         }
@@ -2913,6 +3051,9 @@ class SSH2
             return false;
         }
 
+        if (strlen($raw) < 5) {
+            return false;
+        }
         extract(unpack('Npacket_length/Cpadding_length', $this->_string_shift($raw, 5)));
 
         $remaining_length = $packet_length + 4 - $this->decrypt_block_size;
@@ -2988,6 +3129,9 @@ class SSH2
         switch (ord($payload[0])) {
             case NET_SSH2_MSG_DISCONNECT:
                 $this->_string_shift($payload, 1);
+                if (strlen($payload) < 8) {
+                    return false;
+                }
                 extract(unpack('Nreason_code/Nlength', $this->_string_shift($payload, 8)));
                 $this->errors[] = 'SSH_MSG_DISCONNECT: ' . $this->disconnect_reasons[$reason_code] . "\r\n" . utf8_decode($this->_string_shift($payload, $length));
                 $this->bitmap = 0;
@@ -2997,6 +3141,9 @@ class SSH2
                 break;
             case NET_SSH2_MSG_DEBUG:
                 $this->_string_shift($payload, 2);
+                if (strlen($payload) < 4) {
+                    return false;
+                }
                 extract(unpack('Nlength', $this->_string_shift($payload, 4)));
                 $this->errors[] = 'SSH_MSG_DEBUG: ' . utf8_decode($this->_string_shift($payload, $length));
                 $payload = $this->_get_binary_packet();
@@ -3014,17 +3161,23 @@ class SSH2
         }
 
         // see http://tools.ietf.org/html/rfc4252#section-5.4; only called when the encryption has been activated and when we haven't already logged in
-        if (($this->bitmap & self::MASK_CONNECTED) && !($this->bitmap & self::MASK_LOGIN) && ord($payload[0]) == NET_SSH2_MSG_USERAUTH_BANNER) {
+        if (($this->bitmap & self::MASK_CONNECTED) && !$this->isAuthenticated() && ord($payload[0]) == NET_SSH2_MSG_USERAUTH_BANNER) {
             $this->_string_shift($payload, 1);
+            if (strlen($payload) < 4) {
+                return false;
+            }
             extract(unpack('Nlength', $this->_string_shift($payload, 4)));
             $this->banner_message = utf8_decode($this->_string_shift($payload, $length));
             $payload = $this->_get_binary_packet();
         }
 
         // only called when we've already logged in
-        if (($this->bitmap & self::MASK_CONNECTED) && ($this->bitmap & self::MASK_LOGIN)) {
+        if (($this->bitmap & self::MASK_CONNECTED) && $this->isAuthenticated()) {
             switch (ord($payload[0])) {
                 case NET_SSH2_MSG_GLOBAL_REQUEST: // see http://tools.ietf.org/html/rfc4254#section-4
+                    if (strlen($payload) < 4) {
+                        return false;
+                    }
                     extract(unpack('Nlength', $this->_string_shift($payload, 4)));
                     $this->errors[] = 'SSH_MSG_GLOBAL_REQUEST: ' . $this->_string_shift($payload, $length);
 
@@ -3036,8 +3189,14 @@ class SSH2
                     break;
                 case NET_SSH2_MSG_CHANNEL_OPEN: // see http://tools.ietf.org/html/rfc4254#section-5.1
                     $this->_string_shift($payload, 1);
+                    if (strlen($payload) < 4) {
+                        return false;
+                    }
                     extract(unpack('Nlength', $this->_string_shift($payload, 4)));
                     $data = $this->_string_shift($payload, $length);
+                    if (strlen($payload) < 4) {
+                        return false;
+                    }
                     extract(unpack('Nserver_channel', $this->_string_shift($payload, 4)));
                     switch ($data) {
                         case 'auth-agent':
@@ -3045,6 +3204,9 @@ class SSH2
                             if (isset($this->agent)) {
                                 $new_channel = self::CHANNEL_AGENT_FORWARD;
 
+                                if (strlen($payload) < 8) {
+                                    return false;
+                                }
                                 extract(unpack('Nremote_window_size', $this->_string_shift($payload, 4)));
                                 extract(unpack('Nremote_maximum_packet_size', $this->_string_shift($payload, 4)));
 
@@ -3090,6 +3252,9 @@ class SSH2
                     break;
                 case NET_SSH2_MSG_CHANNEL_WINDOW_ADJUST:
                     $this->_string_shift($payload, 1);
+                    if (strlen($payload) < 8) {
+                        return false;
+                    }
                     extract(unpack('Nchannel', $this->_string_shift($payload, 4)));
                     extract(unpack('Nwindow_size', $this->_string_shift($payload, 4)));
                     $this->window_size_client_to_server[$channel]+= $window_size;
@@ -3155,6 +3320,10 @@ class SSH2
      */
     function disablePTY()
     {
+        if ($this->in_request_pty_exec) {
+            $this->_close_channel(self::CHANNEL_EXEC);
+            $this->in_request_pty_exec = false;
+        }
         $this->request_pty = false;
     }
 
@@ -3220,8 +3389,14 @@ class SSH2
                 return '';
             }
 
+            if (!strlen($response)) {
+                return false;
+            }
             extract(unpack('Ctype', $this->_string_shift($response, 1)));
 
+            if (strlen($response) < 4) {
+                return false;
+            }
             if ($type == NET_SSH2_MSG_CHANNEL_OPEN) {
                 extract(unpack('Nlength', $this->_string_shift($response, 4)));
             } else {
@@ -3245,14 +3420,23 @@ class SSH2
                     case NET_SSH2_MSG_CHANNEL_OPEN:
                         switch ($type) {
                             case NET_SSH2_MSG_CHANNEL_OPEN_CONFIRMATION:
+                                if (strlen($response) < 4) {
+                                    return false;
+                                }
                                 extract(unpack('Nserver_channel', $this->_string_shift($response, 4)));
                                 $this->server_channels[$channel] = $server_channel;
+                                if (strlen($response) < 4) {
+                                    return false;
+                                }
                                 extract(unpack('Nwindow_size', $this->_string_shift($response, 4)));
                                 if ($window_size < 0) {
                                     $window_size&= 0x7FFFFFFF;
                                     $window_size+= 0x80000000;
                                 }
                                 $this->window_size_client_to_server[$channel] = $window_size;
+                                if (strlen($response) < 4) {
+                                     return false;
+                                }
                                 $temp = unpack('Npacket_size_client_to_server', $this->_string_shift($response, 4));
                                 $this->packet_size_client_to_server[$channel] = $temp['packet_size_client_to_server'];
                                 $result = $client_channel == $channel ? true : $this->_get_channel_packet($client_channel, $skip_extended);
@@ -3292,6 +3476,9 @@ class SSH2
                         $this->_send_channel_packet($channel, chr(0));
                     }
                     */
+                    if (strlen($response) < 4) {
+                        return false;
+                    }
                     extract(unpack('Nlength', $this->_string_shift($response, 4)));
                     $data = $this->_string_shift($response, $length);
 
@@ -3318,6 +3505,9 @@ class SSH2
                     }
                     */
                     // currently, there's only one possible value for $data_type_code: NET_SSH2_EXTENDED_DATA_STDERR
+                    if (strlen($response) < 8) {
+                        return false;
+                    }
                     extract(unpack('Ndata_type_code/Nlength', $this->_string_shift($response, 8)));
                     $data = $this->_string_shift($response, $length);
                     $this->stdErrorLog.= $data;
@@ -3333,14 +3523,23 @@ class SSH2
                     $this->channel_buffers[$channel][] = $data;
                     break;
                 case NET_SSH2_MSG_CHANNEL_REQUEST:
+                    if (strlen($response) < 4) {
+                        return false;
+                    }
                     extract(unpack('Nlength', $this->_string_shift($response, 4)));
                     $value = $this->_string_shift($response, $length);
                     switch ($value) {
                         case 'exit-signal':
                             $this->_string_shift($response, 1);
+                            if (strlen($response) < 4) {
+                                return false;
+                            }
                             extract(unpack('Nlength', $this->_string_shift($response, 4)));
                             $this->errors[] = 'SSH_MSG_CHANNEL_REQUEST (exit-signal): ' . $this->_string_shift($response, $length);
                             $this->_string_shift($response, 1);
+                            if (strlen($response) < 4) {
+                                return false;
+                            }
                             extract(unpack('Nlength', $this->_string_shift($response, 4)));
                             if ($length) {
                                 $this->errors[count($this->errors)].= "\r\n" . $this->_string_shift($response, $length);
@@ -3353,6 +3552,9 @@ class SSH2
 
                             break;
                         case 'exit-status':
+                            if (strlen($response) < 5) {
+                                return false;
+                            }
                             extract(unpack('Cfalse/Nexit_status', $this->_string_shift($response, 5)));
                             $this->exit_status = $exit_status;
 
@@ -3377,7 +3579,9 @@ class SSH2
                     }
 
                     $this->channel_status[$channel] = NET_SSH2_MSG_CHANNEL_CLOSE;
-                    return true;
+                    if ($client_channel == $channel) {
+                        return true;
+                    }
                 case NET_SSH2_MSG_CHANNEL_EOF:
                     break;
                 default:
@@ -3684,10 +3888,9 @@ class SSH2
         switch (NET_SSH2_LOGGING) {
             case self::LOG_SIMPLE:
                 return $this->message_number_log;
-                break;
             case self::LOG_COMPLEX:
-                return $this->_format_log($this->message_log, $this->message_number_log);
-                break;
+                $log = $this->_format_log($this->message_log, $this->message_number_log);
+                return PHP_SAPI == 'cli' ? $log : '<pre>' . $log . '</pre>';
             default:
                 return false;
         }
@@ -3979,6 +4182,9 @@ class SSH2
         $signature = $this->signature;
         $server_public_host_key = $this->server_public_host_key;
 
+        if (strlen($server_public_host_key) < 4) {
+            return false;
+        }
         extract(unpack('Nlength', $this->_string_shift($server_public_host_key, 4)));
         $this->_string_shift($server_public_host_key, $length);
 
@@ -3994,15 +4200,27 @@ class SSH2
             case 'ssh-dss':
                 $zero = new BigInteger();
 
+                if (strlen($server_public_host_key) < 4) {
+                    return false;
+                }
                 $temp = unpack('Nlength', $this->_string_shift($server_public_host_key, 4));
                 $p = new BigInteger($this->_string_shift($server_public_host_key, $temp['length']), -256);
 
+                if (strlen($server_public_host_key) < 4) {
+                    return false;
+                }
                 $temp = unpack('Nlength', $this->_string_shift($server_public_host_key, 4));
                 $q = new BigInteger($this->_string_shift($server_public_host_key, $temp['length']), -256);
 
+                if (strlen($server_public_host_key) < 4) {
+                    return false;
+                }
                 $temp = unpack('Nlength', $this->_string_shift($server_public_host_key, 4));
                 $g = new BigInteger($this->_string_shift($server_public_host_key, $temp['length']), -256);
 
+                if (strlen($server_public_host_key) < 4) {
+                    return false;
+                }
                 $temp = unpack('Nlength', $this->_string_shift($server_public_host_key, 4));
                 $y = new BigInteger($this->_string_shift($server_public_host_key, $temp['length']), -256);
 
@@ -4049,15 +4267,24 @@ class SSH2
 
                 break;
             case 'ssh-rsa':
+                if (strlen($server_public_host_key) < 4) {
+                    return false;
+                }
                 $temp = unpack('Nlength', $this->_string_shift($server_public_host_key, 4));
                 $e = new BigInteger($this->_string_shift($server_public_host_key, $temp['length']), -256);
 
+                if (strlen($server_public_host_key) < 4) {
+                    return false;
+                }
                 $temp = unpack('Nlength', $this->_string_shift($server_public_host_key, 4));
                 $rawN = $this->_string_shift($server_public_host_key, $temp['length']);
                 $n = new BigInteger($rawN, -256);
                 $nLength = strlen(ltrim($rawN, "\0"));
 
                 /*
+                if (strlen($signature) < 4) {
+                    return false;
+                }
                 $temp = unpack('Nlength', $this->_string_shift($signature, 4));
                 $signature = $this->_string_shift($signature, $temp['length']);
 
@@ -4070,6 +4297,9 @@ class SSH2
                 }
                 */
 
+                if (strlen($signature) < 4) {
+                    return false;
+                }
                 $temp = unpack('Nlength', $this->_string_shift($signature, 4));
                 $s = new BigInteger($this->_string_shift($signature, $temp['length']), 256);
 

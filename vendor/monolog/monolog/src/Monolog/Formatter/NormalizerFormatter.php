@@ -70,13 +70,13 @@ class NormalizerFormatter implements FormatterInterface
             return $data;
         }
 
-        if (is_array($data) || $data instanceof \Traversable) {
+        if (is_array($data)) {
             $normalized = array();
 
             $count = 1;
             foreach ($data as $key => $value) {
                 if ($count++ >= 1000) {
-                    $normalized['...'] = 'Over 1000 items, aborting normalization';
+                    $normalized['...'] = 'Over 1000 items ('.count($data).' total), aborting normalization';
                     break;
                 }
                 $normalized[$key] = $this->normalize($value);
@@ -126,6 +126,20 @@ class NormalizerFormatter implements FormatterInterface
             'code' => $e->getCode(),
             'file' => $e->getFile().':'.$e->getLine(),
         );
+
+        if ($e instanceof \SoapFault) {
+            if (isset($e->faultcode)) {
+                $data['faultcode'] = $e->faultcode;
+            }
+
+            if (isset($e->faultactor)) {
+                $data['faultactor'] = $e->faultactor;
+            }
+
+            if (isset($e->detail)) {
+                $data['detail'] = $e->detail;
+            }
+        }
 
         $trace = $e->getTrace();
         foreach ($trace as $frame) {

@@ -38,7 +38,7 @@ class Stream implements StreamInterface
      * This constructor accepts an associative array of options.
      *
      * - size: (int) If a read stream would otherwise have an indeterminate
-     *   size, but the size is known due to foreknownledge, then you can
+     *   size, but the size is known due to foreknowledge, then you can
      *   provide that size, in bytes.
      * - metadata: (array) Any additional metadata to return when the metadata
      *   of the stream is accessed.
@@ -70,15 +70,6 @@ class Stream implements StreamInterface
         $this->uri = $this->getMetadata('uri');
     }
 
-    public function __get($name)
-    {
-        if ($name == 'stream') {
-            throw new \RuntimeException('The stream is detached');
-        }
-
-        throw new \BadMethodCallException('No value for ' . $name);
-    }
-
     /**
      * Closes the stream when the destructed
      */
@@ -99,6 +90,10 @@ class Stream implements StreamInterface
 
     public function getContents()
     {
+        if (!isset($this->stream)) {
+            throw new \RuntimeException('Stream is detached');
+        }
+
         $contents = stream_get_contents($this->stream);
 
         if ($contents === false) {
@@ -173,11 +168,19 @@ class Stream implements StreamInterface
 
     public function eof()
     {
-        return !$this->stream || feof($this->stream);
+        if (!isset($this->stream)) {
+            throw new \RuntimeException('Stream is detached');
+        }
+
+        return feof($this->stream);
     }
 
     public function tell()
     {
+        if (!isset($this->stream)) {
+            throw new \RuntimeException('Stream is detached');
+        }
+
         $result = ftell($this->stream);
 
         if ($result === false) {
@@ -194,9 +197,13 @@ class Stream implements StreamInterface
 
     public function seek($offset, $whence = SEEK_SET)
     {
+        if (!isset($this->stream)) {
+            throw new \RuntimeException('Stream is detached');
+        }
         if (!$this->seekable) {
             throw new \RuntimeException('Stream is not seekable');
-        } elseif (fseek($this->stream, $offset, $whence) === -1) {
+        }
+        if (fseek($this->stream, $offset, $whence) === -1) {
             throw new \RuntimeException('Unable to seek to stream position '
                 . $offset . ' with whence ' . var_export($whence, true));
         }
@@ -204,15 +211,33 @@ class Stream implements StreamInterface
 
     public function read($length)
     {
+        if (!isset($this->stream)) {
+            throw new \RuntimeException('Stream is detached');
+        }
         if (!$this->readable) {
             throw new \RuntimeException('Cannot read from non-readable stream');
         }
+        if ($length < 0) {
+            throw new \RuntimeException('Length parameter cannot be negative');
+        }
 
-        return fread($this->stream, $length);
+        if (0 === $length) {
+            return '';
+        }
+
+        $string = fread($this->stream, $length);
+        if (false === $string) {
+            throw new \RuntimeException('Unable to read from stream');
+        }
+
+        return $string;
     }
 
     public function write($string)
     {
+        if (!isset($this->stream)) {
+            throw new \RuntimeException('Stream is detached');
+        }
         if (!$this->writable) {
             throw new \RuntimeException('Cannot write to a non-writable stream');
         }

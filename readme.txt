@@ -5,7 +5,7 @@ Tags: admin, google, bucket, CDN, google cloud storage, media, mirror, uploads, 
 License: GPLv2 or later
 Requires at least: 4.0
 Tested up to: 4.8.0
-Stable tag: 1.9.1
+Stable tag: 1.9.2
 
 == Description ==
 
@@ -65,8 +65,11 @@ See Installation tab.
 
 == Changelog ==
 
-= 1.9.1 =
+= 1.9.2 =
 * Added ability to modify default bucket link via 'wp_stateless_bucket_link' filter.
+* Replaced outdated forked Google SDK with latest original Google SDK version.
+* Updated Composer Autoload stuff.
+* Reverted all changes included to 1.9.1 version because of conflicts.
 
 = 1.9.0 =
 * Added new ability to define cacheControl for remote objects.

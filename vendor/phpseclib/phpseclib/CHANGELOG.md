@@ -1,5 +1,42 @@
 # Changelog
 
+## 2.0.6 - 2017-06-05
+
+- Crypt: fix OpenSSL engine on <= PHP 5.3.6 (#1122)
+- Random: suppress possible E_DEPRECATED errors
+- RSA: reset variables if bad key was loaded
+
+## 2.0.5 - 2017-05-07
+
+- SSH2: don't use timeout value of 0 for fsockopen (#775)
+- SSH2: make it so disabling PTY closes exec() channel if it's open (#1009)
+- SSH2: include `<pre>` tags in getLog result when SAPI isn't CLI
+- SFTP: don't assume current directory when $path parameter for delete is null (#1059)
+- SFTP: fix put() with php://input as source (#1119)
+- ASN1: fix UTCTime parsing (#1110)
+- X509: ignore certificate transparency extension (#1073)
+- Crypt: OpenSSL apparently supports variable size keys (#1085)
+
+## 2.0.4 - 2016-10-03
+
+- fix E_DEPRECATED errors on PHP 7.1 (#1041)
+- SFTP: speed up downloads (#945)
+- SFTP: fix infinite loop when uploading empty file (#995)
+- ASN1: fix possible infinite loop in decode (#1027)
+
+## 2.0.3 - 2016-08-18
+
+- BigInteger/RSA: don't compare openssl versions > 1.0 (#946)
+- RSA: don't attempt to use the CRT when zero value components exist (#980)
+- RSA: zero salt length RSA signatures don't work (#1002)
+- ASN1: fix PHP Warning on PHP 7.1 (#1013)
+- X509: set parameter fields to null for CSR's / RSA (#914)
+- CRL optimizations (#1000)
+- SSH2: fix "Expected SSH_FXP_STATUS or ..." error (#999)
+- SSH2: use stream_get_* instead of fread() / fgets() (#967)
+- SFTP: make symlinks support relative target's (#1004)
+- SFTP: fix sending stream resulting in zero byte file (#995)
+
 ## 2.0.2 - 2016-06-04
 
 - All Ciphers: fix issue with CBC mode / OpenSSL / continuous buffers / decryption (#938)
@@ -30,15 +67,56 @@
 - Classes were renamed and namespaced ([#243](https://github.com/phpseclib/phpseclib/issues/243))
 - The use of an autoloader is now required (e.g. Composer)
 
+## 1.0.7 - 2017-06-05
+
+- Crypt: fix OpenSSL engine on <= PHP 5.3.6 (#1122)
+- Random: suppress possible E_DEPRECATED errors
+- RSA: reset variables if bad key was loaded
+
+## 1.0.6 - 2017-05-07
+
+- SSH2: don't use timeout value of 0 for fsockopen (#775)
+- SSH2: make it so disabling PTY closes exec() channel if it's open (#1009)
+- SSH2: include `<pre>` tags in getLog result when SAPI isn't CLI
+- SFTP: don't assume current directory when $path parameter for delete is null (#1059)
+- SFTP: fix put() with php://input as source (#1119)
+- ASN1: fix UTCTime parsing (#1110)
+- X509: ignore certificate transparency extension (#1073)
+- Crypt: OpenSSL apparently supports variable size keys (#1085)
+
+## 1.0.5 - 2016-10-22
+
+- fix issue preventing installation of 1.0.x via Composer (#1048)
+
+## 1.0.4 - 2016-10-03
+
+- fix E_DEPRECATED errors on PHP 7.0 and 7.1 (#1041)
+- fix float to int conversions on 32-bit Linux pre-PHP 5.3 (#1038, #1034)
+- SFTP: speed up downloads (#945)
+- SFTP: fix infinite loop when uploading empty file (#995)
+- ASN1: fix possible infinite loop in decode (#1027)
+
+## 1.0.3 - 2016-08-18
+
+- BigInteger/RSA: don't compare openssl versions > 1.0 (#946)
+- RSA: don't attempt to use the CRT when zero value components exist (#980)
+- RSA: zero salt length RSA signatures don't work (#1002)
+- ASN1: fix PHP Warning on PHP 7.1 (#1013)
+- X509: set parameter fields to null for CSR's / RSA (#914)
+- CRL optimizations (#1000)
+- SSH2: fix "Expected SSH_FXP_STATUS or ..." error (#999)
+- SFTP: make symlinks support relative target's (#1004)
+- SFTP: fix sending stream resulting in zero byte file (#995)
+
 ## 1.0.2 - 2016-05-07
 
 - All Ciphers: fix issue with CBC mode / OpenSSL / continuous buffers / decryption (#938)
 - Random: fix issues with serialize() (#932)
 - RC2: fix issue with decrypting
 - RC4: fix issue with key not being truncated correctly
-- SFTP: nlist() on a non-existant directory resulted in error
+- SFTP: nlist() on a non-existent directory resulted in error
 - SFTP: add is_writable, is_writeable, is_readable
-- RSA: fix PHP4 compatability issue
+- RSA: fix PHP4 compatibility issue
 
 ## 1.0.1 - 2016-01-18
 
@@ -115,7 +193,7 @@
  - truncate
  - improved file type detection
  - put() can write to te middle of a file
- - mkdir accepts the same paramters that PHP's mkdir does
+ - mkdir accepts the same parameters that PHP's mkdir does
  - the ability to upload/download 2GB files
 - across-the-board speedups for the various encryption algorithms
 - multi-factor authentication support for Net_SSH2

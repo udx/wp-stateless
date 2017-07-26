@@ -31,7 +31,7 @@ class InflateStreamtest extends \PHPUnit_Framework_TestCase
         $header[6]=0;
         $header[7]=8;
         // make a dummy filename
-        $filename = "64756d6d7900";
+        $filename = '64756d6d7900';
         $rest = substr($gzipped, 20);
 
         return hex2bin($header . $filename . $rest);

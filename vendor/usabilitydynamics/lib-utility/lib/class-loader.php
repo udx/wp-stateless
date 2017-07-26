@@ -295,7 +295,7 @@ namespace UsabilityDynamics {
        * @version 0.0.2
        * @since 0.0.2
        */
-      public function register( $prepend = false, $throw = false, $prepend = false ) {
+      public function register( $throw = false, $prepend = false ) {
         spl_autoload_register( array( $this, 'load_class' ), $throw, $prepend );
       }
 

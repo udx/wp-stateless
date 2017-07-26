@@ -72,23 +72,59 @@ class AppendStreamTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('baz', $a->read(3));
     }
 
+    public function testDetachWithoutStreams()
+    {
+        $s = new AppendStream();
+        $s->detach();
+
+        $this->assertSame(0, $s->getSize());
+        $this->assertTrue($s->eof());
+        $this->assertTrue($s->isReadable());
+        $this->assertSame('', (string) $s);
+        $this->assertTrue($s->isSeekable());
+        $this->assertFalse($s->isWritable());
+    }
+
     public function testDetachesEachStream()
     {
-        $s1 = Psr7\stream_for('foo');
+        $handle = fopen('php://temp', 'r');
+
+        $s1 = Psr7\stream_for($handle);
         $s2 = Psr7\stream_for('bar');
         $a = new AppendStream([$s1, $s2]);
-        $this->assertSame('foobar', (string) $a);
+
         $a->detach();
-        $this->assertSame('', (string) $a);
+
         $this->assertSame(0, $a->getSize());
+        $this->assertTrue($a->eof());
+        $this->assertTrue($a->isReadable());
+        $this->assertSame('', (string) $a);
+        $this->assertTrue($a->isSeekable());
+        $this->assertFalse($a->isWritable());
+
+        $this->assertNull($s1->detach());
+        $this->assertTrue(is_resource($handle), 'resource is not closed when detaching');
+        fclose($handle);
     }
 
     public function testClosesEachStream()
     {
-        $s1 = Psr7\stream_for('foo');
-        $a = new AppendStream([$s1]);
+        $handle = fopen('php://temp', 'r');
+
+        $s1 = Psr7\stream_for($handle);
+        $s2 = Psr7\stream_for('bar');
+        $a = new AppendStream([$s1, $s2]);
+
         $a->close();
+
+        $this->assertSame(0, $a->getSize());
+        $this->assertTrue($a->eof());
+        $this->assertTrue($a->isReadable());
         $this->assertSame('', (string) $a);
+        $this->assertTrue($a->isSeekable());
+        $this->assertFalse($a->isWritable());
+
+        $this->assertFalse(is_resource($handle));
     }
 
     /**
@@ -169,12 +205,6 @@ class AppendStreamTest extends \PHPUnit_Framework_TestCase
         $a = new AppendStream([$s]);
         $this->assertFalse($a->eof());
         $this->assertSame('', (string) $a);
-    }
-
-    public function testCanDetach()
-    {
-        $s = new AppendStream();
-        $s->detach();
     }
 
     public function testReturnsEmptyMetadata()

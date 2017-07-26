@@ -3,6 +3,7 @@ namespace GuzzleHttp\Tests\Psr7;
 
 use GuzzleHttp\Psr7;
 use GuzzleHttp\Psr7\CachingStream;
+use GuzzleHttp\Psr7\Stream;
 
 /**
  * @covers GuzzleHttp\Psr7\CachingStream
@@ -10,16 +11,17 @@ use GuzzleHttp\Psr7\CachingStream;
 class CachingStreamTest extends \PHPUnit_Framework_TestCase
 {
     /** @var CachingStream */
-    protected $body;
-    protected $decorated;
+    private $body;
+    /** @var Stream */
+    private $decorated;
 
-    public function setUp()
+    protected function setUp()
     {
         $this->decorated = Psr7\stream_for('testing');
         $this->body = new CachingStream($this->decorated);
     }
 
-    public function tearDown()
+    protected function tearDown()
     {
         $this->decorated->close();
         $this->body->close();
