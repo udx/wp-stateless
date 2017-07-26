@@ -1,6 +1,3 @@
-#### 1.9.1
-* Extended Network Settings 
-
 #### 1.9.0
 * Added new ability to define cacheControl for remote objects.
 * Added new option that adds random hashes to file names.
