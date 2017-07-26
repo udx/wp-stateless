@@ -1,3 +1,6 @@
+#### 1.9.1
+* Added ability to modify default bucket link via 'wp_stateless_bucket_link' filter.
+
 #### 1.9.0
 * Added new ability to define cacheControl for remote objects.
 * Added new option that adds random hashes to file names.
