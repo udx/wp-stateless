@@ -101,12 +101,6 @@ namespace wpCloud\StatelessMedia {
           add_filter('sanitize_file_name', array( $this, 'randomize_filename' ), 10);
         }
 
-        echo '<pre>';
-        print_r( $this->get( 'sm.mode' ) );
-        echo '</pre>';
-
-        die();
-
         /* Initialize plugin only if Mode is not 'disabled'. */
         if ( $this->get( 'sm.mode' ) !== 'disabled' ) {
 

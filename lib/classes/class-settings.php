@@ -50,12 +50,6 @@ namespace wpCloud\StatelessMedia {
           )
         ));
 
-        /* Use Network setting for mode if needed. */
-        $network_mode = get_site_option( 'sm_mode' );
-        if( $network_mode && $network_mode != 'false' ) {
-          $this->set( 'sm.mode', $network_mode );
-        }
-
         /* Use constant value for mode, if set. */
         if( defined( 'WP_STATELESS_MEDIA_MODE' ) ) {
           $this->set( 'sm.mode', WP_STATELESS_MEDIA_MODE );
@@ -150,27 +144,7 @@ namespace wpCloud\StatelessMedia {
             <textarea id="sm_key_json" class="field regular-textarea sm_key_json" type="text" name="sm[key_json]"><?php echo get_site_option( 'sm_key_json' ); ?></textarea>
           </div>
         </div>
-
-        <div class="sm_mode">
-         <label><b><?php _e('Mode', ud_get_stateless_media()->domain); ?></b></label>
-          <?php
-
-            $_mode = get_site_option( 'sm_mode' );
-
-            $inputs = array(
-              '<p class="sm-mode"><label for="sm_mode_override"><input id="sm_mode_override" '. checked( 'false', $_mode, false ) .' type="radio" name="sm[mode]" value="false" />'.__( 'Do not override', ud_get_stateless_media()->domain ).''
-              . '<small class="description">'.__('Do not override site settings by network settings.', ud_get_stateless_media()->domain).'</small></label></p>',
-              '<p class="sm-mode"><label for="sm_mode_disabled"><input id="sm_mode_disabled" '. checked( 'disabled', $_mode, false ) .' type="radio" name="sm[mode]" value="disabled" />'.__( 'Disabled', ud_get_stateless_media()->domain ).''
-              . '<small class="description">'.__('Disable Stateless Media.', ud_get_stateless_media()->domain).'</small></label></p>',
-              '<p class="sm-mode"><label for="sm_mode_backup"><input id="sm_mode_backup" '. checked( 'backup', $_mode, false ) .' type="radio" name="sm[mode]" value="backup" />'.__( 'Backup', ud_get_stateless_media()->domain ).''
-              . '<small class="description">'.__('Push media files to Google Storage but keep using local ones.', ud_get_stateless_media()->domain).'</small></label></p>',
-              '<p class="sm-mode"><label for="sm_mode_cdn"><input id="sm_mode_cdn" '. checked( 'cdn', $_mode, false ) .' type="radio" name="sm[mode]" value="cdn" />'.__( 'CDN', ud_get_stateless_media()->domain ).''
-              . '<small class="description">'.__('Push media files to Google Storage and use them directly from there.', ud_get_stateless_media()->domain).'</small></label></p>'
-            );
-            echo implode( "\n", (array)apply_filters( 'sm::network::settings::mode', $inputs ) );
-          ?>
-        </div>
-        <?php
+      <?php
       }
 
       /**
@@ -278,7 +252,6 @@ namespace wpCloud\StatelessMedia {
        */
       public function sm_fields_credentials_callback() {
 
-        $network_key = false;
         $inputs = array( '<section class="wp-stateless-media-options wp-stateless-credentials-options">' );
 
         if( !defined( 'WP_STATELESS_MEDIA_BUCKET' ) ) {
@@ -297,13 +270,11 @@ namespace wpCloud\StatelessMedia {
 
           if( is_super_admin() ) {
 
-            $network_key = get_site_option( 'sm_key_json' );
-
-            $kjsn_readonly = $network_key || defined( 'WP_STATELESS_MEDIA_KEY_FILE_PATH' ) ? 'readonly="readonly"' : '';
+            $kjsn_readonly = get_site_option( 'sm_key_json' ) || defined( 'WP_STATELESS_MEDIA_KEY_FILE_PATH' ) ? 'readonly="readonly"' : '';
 
             $inputs[] = '<div class="key_type"><label>'.__('Service Account JSON', ud_get_stateless_media()->domain).'</label>';
             $inputs[] = '<div class="_key_type _sm_key_json">';
-            $inputs[] = '<textarea '.$kjsn_readonly.' id="sm_key_json" class="field regular-textarea sm_key_json" type="text" name="sm[key_json]" >'. esc_attr( $network_key ? $network_key : $this->get( 'sm.key_json' ) ) .'</textarea>';
+            $inputs[] = '<textarea '.$kjsn_readonly.' id="sm_key_json" class="field regular-textarea sm_key_json" type="text" name="sm[key_json]" >'. esc_attr( $this->get( 'sm.key_json' ) ) .'</textarea>';
             $inputs[] = '</div>';
             $inputs[] = '</div>';
 
@@ -333,15 +304,12 @@ namespace wpCloud\StatelessMedia {
        */
       public function sm_fields_mode_callback() {
 
-        $network_mode = get_site_option( 'sm_mode' );
-        $_mode = $network_mode && $network_mode != 'false' ? $network_mode : $this->get( 'sm.mode' );
-
         $inputs = array(
-          '<p class="sm-mode"><label for="sm_mode_disabled"><input id="sm_mode_disabled" '. checked( 'disabled', $_mode, false ) .' type="radio" name="sm[mode]" value="disabled" />'.__( 'Disabled', ud_get_stateless_media()->domain ).''
+          '<p class="sm-mode"><label for="sm_mode_disabled"><input id="sm_mode_disabled" '. checked( 'disabled', $this->get( 'sm.mode' ), false ) .' type="radio" name="sm[mode]" value="disabled" />'.__( 'Disabled', ud_get_stateless_media()->domain ).''
           . '<small class="description">'.__('Disable Stateless Media.', ud_get_stateless_media()->domain).'</small></label></p>',
-          '<p class="sm-mode"><label for="sm_mode_backup"><input id="sm_mode_backup" '. checked( 'backup', $_mode, false ) .' type="radio" name="sm[mode]" value="backup" />'.__( 'Backup', ud_get_stateless_media()->domain ).''
+          '<p class="sm-mode"><label for="sm_mode_backup"><input id="sm_mode_backup" '. checked( 'backup', $this->get( 'sm.mode' ), false ) .' type="radio" name="sm[mode]" value="backup" />'.__( 'Backup', ud_get_stateless_media()->domain ).''
           . '<small class="description">'.__('Push media files to Google Storage but keep using local ones.', ud_get_stateless_media()->domain).'</small></label></p>',
-          '<p class="sm-mode"><label for="sm_mode_cdn"><input id="sm_mode_cdn" '. checked( 'cdn', $_mode, false ) .' type="radio" name="sm[mode]" value="cdn" />'.__( 'CDN', ud_get_stateless_media()->domain ).''
+          '<p class="sm-mode"><label for="sm_mode_cdn"><input id="sm_mode_cdn" '. checked( 'cdn', $this->get( 'sm.mode' ), false ) .' type="radio" name="sm[mode]" value="cdn" />'.__( 'CDN', ud_get_stateless_media()->domain ).''
           . '<small class="description">'.__('Push media files to Google Storage and use them directly from there.', ud_get_stateless_media()->domain).'</small></label></p>'
         );
 
