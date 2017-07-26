@@ -25,7 +25,7 @@ namespace wpCloud\StatelessMedia {
        * @property $version
        * @type {Object}
        */
-      public static $version = '1.9.0';
+      public static $version = '1.9.2';
 
       /**
        * Singleton Instance Reference.
@@ -583,7 +583,7 @@ namespace wpCloud\StatelessMedia {
        */
       public function is_connected_to_gs() {
 
-        //$trnst = get_transient( 'sm::is_connected_to_gs' );
+        $trnst = get_transient( 'sm::is_connected_to_gs' );
 
         if ( empty($trnst) || false === $trnst || !isset( $trnst[ 'hash' ] ) || $trnst[ 'hash' ] != md5( serialize( $this->get( 'sm' ) ) ) ) {
           $trnst = array(
@@ -601,7 +601,7 @@ namespace wpCloud\StatelessMedia {
               $trnst[ 'error' ] = sprintf( __( 'Could not connect to Google Storage bucket. Please, be sure that bucket with name <b>%s</b> exists.', $this->domain ), $this->get( 'sm.bucket' ) );
             }
           }
-          set_transient( 'sm::is_connected_to_gs', $trnst, 24 * HOUR_IN_SECONDS );
+          set_transient( 'sm::is_connected_to_gs', $trnst, 4 * HOUR_IN_SECONDS );
         }
 
         if( isset( $trnst[ 'success' ] ) && $trnst[ 'success' ] == 'false' ) {
@@ -667,6 +667,8 @@ namespace wpCloud\StatelessMedia {
 
       /**
        * Change Upload BaseURL when CDN Used.
+       *
+       * @todo: is it used somewhere? peshkov@UD
        *
        * @param $data
        * @return mixed

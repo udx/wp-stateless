@@ -63,6 +63,10 @@ namespace wpCloud\StatelessMedia {
         $this->bucket = $args[ 'bucket' ];
         $this->key_json = json_decode($args['key_json'], 1);
 
+        if( !class_exists( 'Google_Client' ) ) {
+          include_once(ud_get_stateless_media()->path('lib/Google/vendor/autoload.php', 'dir'));
+        }
+
         /* Initialize our client */
         $this->client = new Google_Client();
 

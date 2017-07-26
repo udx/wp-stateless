@@ -67,8 +67,10 @@ See Installation tab.
 
 = 1.9.2 =
 * Added ability to modify default bucket link via 'wp_stateless_bucket_link' filter.
-* Replaced outdated forked Google SDK with latest original Google SDK version.
-* Updated Composer Autoload stuff.
+* Added checking of connection to GCS once per four hours instead of doing it on every page load.
+* Replaced outdated forked Google SDK (2.0.0) with latest original Google SDK version (2.2.0).
+* Google SDK is not loaded on every page load anymore, but only when it's required.
+* Updated Composer Autoload logic.
 * Reverted all changes included to 1.9.1 version because of conflicts.
 
 = 1.9.0 =
