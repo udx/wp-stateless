@@ -219,7 +219,7 @@ namespace wpCloud\StatelessMedia {
           $_hashify_file_name = get_site_option( 'sm_hashify_file_name' );
 
           $inputs[] = '<p><input type="hidden" name="sm[hashify_file_name]" value="0" />';
-          $inputs[] = '<label for="sm_hashify_file_name"><input id="sm_hashify_file_name" type="checkbox" name="sm[hashify_file_name]" value="1" '. checked( '1', $_hashify_file_name, false ) .'/>'.__( 'Randomize the filename of newly uploaded media files.', ud_get_stateless_media()->domain ).'<small> '.__( '(May help to avoid unwanted GCS caching)', ud_get_stateless_media()->domain ).'</small></label></p>';
+          $inputs[] = '<label for="sm_hashify_file_name"><input id="sm_hashify_file_name" type="checkbox" name="sm[hashify_file_name]" value="1" '. checked( '1', $_hashify_file_name, false ) .'/>'.__( 'Randomize the filename of newly uploaded media files.', ud_get_stateless_media()->domain ).'<small> '.__( '(This option may slow down media deletion process)', ud_get_stateless_media()->domain ).'</small></label></p>';
 
           echo implode( "\n", (array)apply_filters( 'sm::network::settings::advanced', $inputs ) );
           ?>
