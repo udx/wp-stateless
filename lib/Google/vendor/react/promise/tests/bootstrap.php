@@ -1,4 +1,7 @@
 <?php
 
-$loader = require __DIR__.'/../vendor/autoload.php';
-$loader->add('React\Promise', __DIR__);
+$loader = @include __DIR__.'/../vendor/autoload.php';
+if (!$loader) {
+    $loader = require __DIR__.'/../../../../vendor/autoload.php';
+}
+$loader->addPsr4('React\\Promise\\', __DIR__);

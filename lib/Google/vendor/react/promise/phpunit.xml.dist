@@ -13,13 +13,16 @@
 >
     <testsuites>
         <testsuite name="Promise Test Suite">
-            <directory>./tests/React/Promise/</directory>
+            <directory>./tests/</directory>
         </testsuite>
     </testsuites>
 
     <filter>
         <whitelist>
             <directory>./src/</directory>
+            <exclude>
+                <file>./src/functions_include.php</file>
+            </exclude>
         </whitelist>
     </filter>
 </phpunit>

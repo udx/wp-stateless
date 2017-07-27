@@ -19,65 +19,50 @@ namespace Google\Auth;
 
 trait CacheTrait
 {
-    private $maxKeyLength = 64;
-
-    /**
-     * Gets the cached value if it is present in the cache when that is
-     * available.
-     */
-    private function getCachedValue($k)
-    {
-        if (is_null($this->cache)) {
-            return;
-        }
-
-        $key = $this->getFullCacheKey($k);
-        if (is_null($key)) {
-            return;
-        }
-
-        $cacheItem = $this->cache->getItem($key);
-        if ($cacheItem->isHit()) {
-            return $cacheItem->get();
-        }
+  /**
+   * Gets the cached value if it is present in the cache when that is
+   * available.
+   */
+  private function getCachedValue()
+  {
+    if (is_null($this->cache)) {
+      return null;
     }
 
-    /**
-     * Saves the value in the cache when that is available.
-     */
-    private function setCachedValue($k, $v)
-    {
-        if (is_null($this->cache)) {
-            return;
-        }
-
-        $key = $this->getFullCacheKey($k);
-        if (is_null($key)) {
-            return;
-        }
-
-        $cacheItem = $this->cache->getItem($key);
-        $cacheItem->set($v);
-        $cacheItem->expiresAfter($this->cacheConfig['lifetime']);
-        return $this->cache->save($cacheItem);
+    if (isset($this->fetcher)) {
+      $fetcherKey = $this->fetcher->getCacheKey();
+    } else {
+      $fetcherKey = $this->getCacheKey();
     }
 
-    private function getFullCacheKey($key)
-    {
-        if (is_null($key)) {
-            return;
-        }
-
-        $key = $this->cacheConfig['prefix'] . $key;
-
-        // ensure we do not have illegal characters
-        $key = preg_replace('|[^a-zA-Z0-9_\.!]|', '', $key);
-
-        // Hash keys if they exceed $maxKeyLength (defaults to 64)
-        if ($this->maxKeyLength && strlen($key) > $this->maxKeyLength) {
-            $key = substr(hash('sha256', $key), 0, $this->maxKeyLength);
-        }
-
-        return $key;
+    if (is_null($fetcherKey)) {
+      return null;
     }
+
+    $key = $this->cacheConfig['prefix'] . $fetcherKey;
+    return $this->cache->get($key, $this->cacheConfig['lifetime']);
+  }
+
+  /**
+   * Saves the value in the cache when that is available.
+   */
+  private function setCachedValue($v)
+  {
+    if (is_null($this->cache)) {
+      return;
+    }
+
+    if (isset($this->fetcher)) {
+      $fetcherKey = $this->fetcher->getCacheKey();
+    } else {
+      $fetcherKey = $this->getCacheKey();
+    }
+
+    if (is_null($fetcherKey)) {
+      return;
+    }
+    $key = $this->cacheConfig['prefix'] . $fetcherKey;
+    $this->cache->set($key, $v);
+  }
 }
+

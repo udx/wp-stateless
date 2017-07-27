@@ -51,7 +51,7 @@ class Google_Http_REST
         array($client, $request, $expectedClass)
     );
 
-    if (null !== $retryMap) {
+    if (!is_null($retryMap)) {
       $runner->setRetryMap($retryMap);
     }
 
@@ -110,7 +110,7 @@ class Google_Http_REST
     $code = $response->getStatusCode();
 
     // retry strategy
-    if (intVal($code) >= 400) {
+    if ((intVal($code)) >= 400) {
       // if we errored out, it should be safe to grab the response body
       $body = (string) $response->getBody();
 
@@ -149,7 +149,7 @@ class Google_Http_REST
     }
 
     // if we don't have a request, we just use what's passed in
-    if (null === $request) {
+    if (is_null($request)) {
       return $expectedClass;
     }
 

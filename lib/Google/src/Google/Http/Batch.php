@@ -42,20 +42,10 @@ class Google_Http_Batch
   /** @var Google_Client */
   private $client;
 
-  private $rootUrl;
-
-  private $batchPath;
-
-  public function __construct(
-      Google_Client $client,
-      $boundary = false,
-      $rootUrl = null,
-      $batchPath = null
-  ) {
+  public function __construct(Google_Client $client)
+  {
     $this->client = $client;
-    $this->boundary = $boundary ?: mt_rand();
-    $this->rootUrl = rtrim($rootUrl ?: $this->client->getConfig('base_path'), '/');
-    $this->batchPath = $batchPath ?: self::BATCH_PATH;
+    $this->boundary = mt_rand();
   }
 
   public function add(RequestInterface $request, $key = false)
@@ -114,7 +104,7 @@ EOF;
 
     $body .= "--{$this->boundary}--";
     $body = trim($body);
-    $url = $this->rootUrl . '/' . $this->batchPath;
+    $url = Google_Client::API_BASE_PATH . '/' . self::BATCH_PATH;
     $headers = array(
       'Content-Type' => sprintf('multipart/mixed; boundary=%s', $this->boundary),
       'Content-Length' => strlen($body),
@@ -138,7 +128,7 @@ EOF;
     $contentType = explode(';', $contentType);
     $boundary = false;
     foreach ($contentType as $part) {
-      $part = explode('=', $part, 2);
+      $part = (explode('=', $part, 2));
       if (isset($part[0]) && 'boundary' == trim($part[0])) {
         $boundary = $part[1];
       }
@@ -170,6 +160,10 @@ EOF;
 
           // Need content id.
           $key = $headers['content-id'];
+          $class = '';
+          if (!empty($this->expected_classes[$key])) {
+            $class = $this->expected_classes[$key];
+          }
 
           try {
             $response = Google_Http_REST::decodeHttpResponse($response, $requests[$i-1]);

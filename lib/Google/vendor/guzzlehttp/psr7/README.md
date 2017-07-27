@@ -6,6 +6,9 @@ functionality like query string parsing.  Currently missing
 ServerRequestInterface and UploadedFileInterface; a pull request for these features is welcome.
 
 
+[![Build Status](https://travis-ci.org/guzzle/psr7.svg?branch=master)](https://travis-ci.org/guzzle/psr7)
+
+
 # Stream implementation
 
 This package comes with a number of stream implementations and stream
@@ -25,7 +28,7 @@ $a = Psr7\stream_for('abc, ');
 $b = Psr7\stream_for('123.');
 $composed = new Psr7\AppendStream([$a, $b]);
 
-$composed->addStream(Psr7\stream_for(' Above all listen to me').
+$composed->addStream(Psr7\stream_for(' Above all listen to me'));
 
 echo $composed(); // abc, 123. Above all listen to me.
 ```
@@ -35,7 +38,7 @@ echo $composed(); // abc, 123. Above all listen to me.
 
 `GuzzleHttp\Psr7\BufferStream`
 
-Provides a buffer stream that can be written to to fill a buffer, and read
+Provides a buffer stream that can be written to fill a buffer, and read
 from to remove bytes from the buffer.
 
 This stream returns a "hwm" metadata value that tells upstream consumers
@@ -103,7 +106,7 @@ echo $stream; // 0123456789
 
 Compose stream implementations based on a hash of functions.
 
-Allows for easy testing and extension of a provided stream without needing to
+Allows for easy testing and extension of a provided stream without needing 
 to create a concrete class for a simple extension point.
 
 ```php

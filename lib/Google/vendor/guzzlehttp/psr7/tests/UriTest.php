@@ -154,7 +154,7 @@ class UriTest extends \PHPUnit_Framework_TestCase
             [self::RFC3986_BASE, 'g;x=1/../y',    'http://a/b/c/y'],
             ['http://u@a/b/c/d;p?q', '.',         'http://u@a/b/c/'],
             ['http://u:p@a/b/c/d;p?q', '.',       'http://u:p@a/b/c/'],
-            //[self::RFC3986_BASE, 'http:g',        'http:g'],
+            ['http://a/b/c/d/', 'e',              'http://a/b/c/d/e'],
         ];
     }
 
@@ -243,5 +243,39 @@ class UriTest extends \PHPUnit_Framework_TestCase
         $uri = (new Uri)->withPath('foo')->withHost('bar.com');
         $this->assertEquals('foo', $uri->getPath());
         $this->assertEquals('bar.com/foo', (string) $uri);
+    }
+
+    /**
+     * @dataProvider pathTestNoAuthority
+     */
+    public function testNoAuthority($input)
+    {
+        $uri = new Uri($input);
+
+        $this->assertEquals($input, (string) $uri);
+    }
+
+    public function pathTestNoAuthority()
+    {
+        return [
+            // path-rootless
+            ['urn:example:animal:ferret:nose'],
+            // path-absolute
+            ['urn:/example:animal:ferret:nose'],
+            ['urn:/'],
+            // path-empty
+            ['urn:'],
+            ['urn'],
+        ];
+    }
+
+    /**
+     * @expectedException \InvalidArgumentException
+     * @expectedExceptionMessage Unable to parse URI
+     */
+    public function testNoAuthorityWithInvalidPath()
+    {
+        $input = 'urn://example:animal:ferret:nose';
+        $uri = new Uri($input);
     }
 }

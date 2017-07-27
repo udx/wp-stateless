@@ -45,20 +45,18 @@ class Google_AccessToken_Revoke
    * Revoke an OAuth2 access token or refresh token. This method will revoke the current access
    * token, if a token isn't provided.
    *
-   * @param string|array $token The token (access token or a refresh token) that should be revoked.
+   * @param string|null $token The token (access token or a refresh token) that should be revoked.
    * @return boolean Returns True if the revocation was successful, otherwise False.
    */
-  public function revokeToken($token)
+  public function revokeToken(array $token)
   {
-    if (is_array($token)) {
-      if (isset($token['refresh_token'])) {
-        $token = $token['refresh_token'];
-      } else {
-        $token = $token['access_token'];
-      }
+    if (isset($token['refresh_token'])) {
+      $tokenString = $token['refresh_token'];
+    } else {
+      $tokenString = $token['access_token'];
     }
 
-    $body = Psr7\stream_for(http_build_query(array('token' => $token)));
+    $body = Psr7\stream_for(http_build_query(array('token' => $tokenString)));
     $request = new Request(
         'POST',
         Google_Client::OAUTH2_REVOKE_URI,
@@ -72,7 +70,10 @@ class Google_AccessToken_Revoke
     $httpHandler = HttpHandlerFactory::build($this->http);
 
     $response = $httpHandler($request);
+    if ($response->getStatusCode() == 200) {
+      return true;
+    }
 
-    return $response->getStatusCode() == 200;
+    return false;
   }
 }
