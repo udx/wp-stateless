@@ -470,7 +470,7 @@ namespace wpCloud\StatelessMedia {
           foreach (wp_get_active_network_plugins() as $path) {
             // Trying again using readlink in case it's a symlink file.
             // boot_file is already solved.
-            if ($this->boot_file == $path || $this->boot_file == readlink($path)) {
+            if ($this->boot_file == $path || (is_link($path) AND $this->boot_file == readlink($path))) {
               return true;
             }
           }
