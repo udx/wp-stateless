@@ -10,15 +10,11 @@
 
 <div class="wrap" ng-controller="wpStatelessTools" ng-init="init()">
 
-  <h1><?php _e('Stateless Images Synchronisation', ud_get_stateless_media()->domain); ?></h1>
-
   <noscript><p><em><?php _e( 'You must enable Javascript in order to proceed!', ud_get_stateless_media()->domain ); ?></em></p></noscript>
 
   <form id="go" ng-submit="processStart($event)">
 
     <div>
-
-      <h2><?php _e( 'Action', ud_get_stateless_media()->domain ); ?></h2>
 
       <div class="option">
         <label>
