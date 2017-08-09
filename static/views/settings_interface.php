@@ -6,6 +6,7 @@
     <h2 class="nav-tab-wrapper">  
         <a href="#stless_settings_tab" class="stless_setting_tab nav-tab  nav-tab-active">Settings</a>  
         <a href="#stless_sync_tab" class="stless_setting_tab nav-tab">Sync</a>  
+        <a href="#stless_questions_tab" class="stless_setting_tab nav-tab">Questions</a>  
     </h2>  
 
     <div class="stless_settings">
@@ -176,6 +177,18 @@
         </div>
         <div id="stless_sync_tab" class="stless_settings_content">
             <?php include 'regenerate_interface.php'; ?>
+        </div>
+        <div id="stless_questions_tab" class="stless_settings_content">
+            <!--[if lte IE 8]>
+            <script charset="utf-8" type="text/javascript" src="//js.hsforms.net/forms/v2-legacy.js"></script>
+            <![endif]-->
+            <script charset="utf-8" type="text/javascript" src="//js.hsforms.net/forms/v2.js"></script>
+            <script>
+              hbspt.forms.create({ 
+                portalId: '3453418',
+                formId: 'cad1f6e1-7825-4e6d-a3e7-278c91abce7e'
+              });
+            </script>
         </div>
     </div>
 

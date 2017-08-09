@@ -70,8 +70,7 @@
 }
 /* Header Styles */
 .wpStateLess-header-bg {
-    /*background-image: url('../images/wp-stateless-dashboard-header-bg.png');*/
-    background-image: url('../images/45-layers.png');
+    background-image: url('../images/wp-stateless-dashboard-header-bg.png');
     background-repeat: no-repeat;
     background-position: bottom center;
     height: 750px;
