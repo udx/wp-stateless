@@ -13,11 +13,14 @@ Upload and serve your WordPress media files from Google Cloud Storage.
 
 Upload and serve your WordPress media from Google Cloud Storage (GCS) with the WP-Stateless plugin. In as little as two minutes, you will be benefitting from serving your media from Google Cloud's distributed servers.
 
+New to Google Cloud? Google is offering you a [$300 credit](https://cloud.google.com/free/) to get you started.
+
 = Benefits =
 * Store and deliver media files on Google Cloud Storage instead of your server.
 * Google Cloud Storage is geo-redundant, meaning your media is delivered by the closest server - reducing latency and improving page speed.
 * Scale your WordPress website across multiple servers without the need of synchronizing media files.
 * Native integration between Google Cloud Storage and WordPress.
+* $300 free trial from Google Cloud. Nice!
 
 = Modes =
 * Backup - Upload media files to Google Storage and serve local file urls.
