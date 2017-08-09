@@ -27,13 +27,13 @@
                                         <label for="sm_mode_disabled"><input id="sm_mode_disabled" type="radio" name="sm[mode]" value="disabled" ng-checked="sm.mode == 'disabled'" ng-disabled="sm.readonly">Disabled<small class="description">Disable Stateless Media.</small></label>
                                     </p>
                                     <p class="sm-mode">
-                                        <label for="sm_mode_backup"><input id="sm_mode_backup" type="radio" name="sm[mode]" value="backup" ng-checked="sm.mode == 'backup'" ng-disabled="sm.readonly">Backup<small class="description">Push media files to Google Storage but keep using local ones.</small></label>
+                                        <label for="sm_mode_backup"><input id="sm_mode_backup" type="radio" name="sm[mode]" value="backup" ng-checked="sm.mode == 'backup'" ng-disabled="sm.readonly">Backup<small class="description">Upload media files to Google Storage and serve local file urls.</small></label>
                                     </p>
                                     <p class="sm-mode">
-                                        <label for="sm_mode_cdn"><input id="sm_mode_cdn" type="radio" name="sm[mode]" value="cdn" ng-checked="sm.mode == 'cdn'"  ng-disabled="sm.readonly">CDN<small class="description">Push media files to Google Storage and use them directly from there.</small></label>
+                                        <label for="sm_mode_cdn"><input id="sm_mode_cdn" type="radio" name="sm[mode]" value="cdn" ng-checked="sm.mode == 'cdn'"  ng-disabled="sm.readonly">CDN<small class="description">Copy media files to Google Storage and serve them directly from there.</small></label>
                                     </p>
                                     <p class="sm-mode">
-                                        <label for="sm_mode_stateless"><input id="sm_mode_stateless" type="radio" name="sm[mode]" value="stateless" ng-checked="sm.mode == 'stateless'" ng-disabled="sm.readonly">Stateless<small class="description">Uploads and serves your media library items to and from GCS. Your local copy is removed.</small></label>
+                                        <label for="sm_mode_stateless"><input id="sm_mode_stateless" type="radio" name="sm[mode]" value="stateless" ng-checked="sm.mode == 'stateless'" ng-disabled="sm.readonly">Stateless<small class="description">Store and serve media files with Google Cloud Storage. Media files are not stored locally.</small></label>
                                     </p>
                                     <hr>
 

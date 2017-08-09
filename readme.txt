@@ -1,5 +1,5 @@
 ﻿=== WP-Stateless - Google Cloud Storage ===
-Contributors: usability_dynamics, andypotanin, ideric, maxim.peshkov, Anton Korotkoff, MariaKravchenko
+Contributors: usability_dynamics, andypotanin, ideric, maxim.peshkov, Anton Korotkoff, MariaKravchenko, alimuzzamanalim
 Donate link: https://www.usabilitydynamics.com
 Tags: google cloud, google cloud storage, cdn, uploads, media, stateless, backup
 License: GPLv2 or later
@@ -17,12 +17,12 @@ Upload and serve your WordPress media from Google Cloud Storage (GCS) with the W
 * Store and deliver media files on Google Cloud Storage instead of your server.
 * Google Cloud Storage is geo-redundant, meaning your media is delivered by the closest server - reducing latency and improving page speed.
 * Scale your WordPress website across multiple servers without the need of synchronizing media files.
-* Native integration with WordPress and Google Cloud.
+* Native integration between Google Cloud Storage and WordPress.
 
 = Modes =
-* Backup - Upload media files to Google Storage but keep using local file urls.
-* CDN - Copy media files to Google Storage and use them directly from there.
-* Stateless - Store and serve media files with Google Cloud Storage. No need to store files on your server.
+* Backup - Upload media files to Google Storage and serve local file urls.
+* CDN - Copy media files to Google Storage and serve them directly from there.
+* Stateless - Store and serve media files with Google Cloud Storage. Media files are not stored locally.
 
 = Features =
 * Setup assistant makes getting started fast and easy.
