@@ -186,7 +186,8 @@
             <script>
               hbspt.forms.create({ 
                 portalId: '3453418',
-                formId: 'cad1f6e1-7825-4e6d-a3e7-278c91abce7e'
+                formId: 'cad1f6e1-7825-4e6d-a3e7-278c91abce7e',
+                submitButtonClass: 'button button-primary',
               });
             </script>
         </div>
