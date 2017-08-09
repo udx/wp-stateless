@@ -1,45 +1,55 @@
-﻿=== WP-Stateless - Google Cloud Media Storage ===
-Contributors: usability_dynamics, andypotanin, maxim.peshkov, Anton Korotkoff, ideric, MariaKravchenko, flixos90, lena60942
+﻿=== WP-Stateless - Google Cloud Storage ===
+Contributors: usability_dynamics, andypotanin, ideric, maxim.peshkov, Anton Korotkoff, MariaKravchenko
 Donate link: https://www.usabilitydynamics.com
-Tags: admin, google, bucket, CDN, google cloud storage, media, mirror, uploads, stateless
+Tags: google cloud, google cloud storage, cdn, uploads, media, stateless, backup
 License: GPLv2 or later
 Requires at least: 4.0
-Tested up to: 4.5.3
-Stable tag: 1.9.1
+Tested up to: 4.8.1
+Stable tag: 2.0.0
+
+Upload and serve your WordPress media files from Google Cloud Storage.
 
 == Description ==
 
-The WP-Stateless plugin copies your media uploads to Google Cloud Storage in real-time as you add items to your Media Library. The uploaded files are then served directly from the Google bucket, making your media files load quicker from the distributed Google servers. The plugin will handle all media uploads including image thumbnails, PDF documents, audio files, and more.
+Upload and serve your WordPress media from Google Cloud Storage (GCS) with the WP-Stateless plugin. In as little as two minutes, you will be benefitting from serving your media from Google Cloud's distributed servers.
 
-This plugin is useful for running multiple environments or instances of your WordPress site.
+= Benefits =
+* Store and deliver media files on Google Cloud Storage instead of your server.
+* Google Cloud Storage is geo-redundant, meaning your media is delivered by the closest server - reducing latency and improving page speed.
+* Scale your WordPress website across multiple servers without the need of synchronizing media files.
+* Native integration with WordPress and Google Cloud.
 
-Plugin requires PHP 5.4 or higher.
-
-Overview
-https://www.youtube.com/watch?v=aGntFnKwkE0
-
-Setting Up
-https://www.youtube.com/watch?v=szf5hTns4Ak
-
-> See the plugin on [GitHub](https://github.com/wpCloud/wp-stateless)
+= Modes =
+* Backup - Upload media files to Google Storage but keep using local file urls.
+* CDN - Copy media files to Google Storage and use them directly from there.
+* Stateless - Store and serve media files with Google Cloud Storage. No need to store files on your server.
 
 = Features =
-* Run batch synchronization that will copy all files to Google Cloud Storage bucket.
-* Run batch image regeneration that will update thumbnail sizes and copy them to Google Cloud Storage bucket.
-* Automatically replace hardcoded URLs found in content with URLs using the Google Cloud Storage url.
-* All files are served in HTTPS mode.
-* Support for MultiSite configuration.
-* Configuration of plugin via constants from the wp-config.php file.
-* Stores backup of uploaded media files on your server as well.
+* Setup assistant makes getting started fast and easy.
+* No need to manually create service accounts or buckets - handled automatically.
+* Settings panel provides you with further GCS configuration and file url customization.
+* Mask the default GCS URL with your own custom domain.
+* Automatically replace hardcoded media URLs with GCS equivalents in post editor and meta.
+* Batch image thumbnail regeneration.
+* Synchronization tools for uploading existing files and images.
+* All settings supported with wp-config constants and network setting overrides.
+* Multiple modes: Backup, CDN, Stateless.
+* All files served in HTTPS mode.
+* Multisite compatible.
+
+= Support, Feedback, & Contribute =
+We welcome community involvement via the [GitHub repository](https://github.com/wpCloud/wp-stateless).
+
+= Custom Development =
+Looking for a unique feature for your next project? [Hire us!](https://www.usabilitydynamics.com/contact)
 
 == Installation ==
 
-1. Activate the WP-Stateless plugin and navigate to the Settings > Media page to review needed options.
-2. Open Google Cloud Storage settings page (https://console.cloud.google.com/storage/) and create a new bucket.
-3. Enter the bucket name you specified in previous step into Settings > Media > "Bucket".
-4. Open Google Cloud Storage Permissions page (https://console.cloud.google.com/permissions/serviceaccounts) and create new Service Account.
-5. Copy and paste the JSON key provided to you by the previous step into Settings > Media > "Service Account JSON" textarea.
-6. On the Media > Settings page enable the "CDN" mode to enable the plugin
+1. Search, install, and activate the *WP-Stateless* plugin via your WordPress dashboard.
+2. Begin WP-Stateless setup assistant at *Media > Stateless Setup* and click "Get Started Now."
+3. Click "Google Login" and sign-in with your Google account.
+4. Set a Google Cloud Project, Google Cloud Storage Bucket, and Google Cloud Billing Account and click "Continue."
+5. Installation and setup is now complete. Visit *Media > Stateless Settings* for more options.
 
 == Screenshots ==
 
@@ -51,19 +61,16 @@ https://www.youtube.com/watch?v=szf5hTns4Ak
 6. Resized Images Appear in Bucket
 7. The synchronized images now use GCS url
 
-== Frequently Asked Questions ==
-
-= How to configure the plugin? =
-See Installation tab.
-
-[For any kind of support just contact us by this link](https://www.usabilitydynamics.com/contact-us)
-
-== Upgrade Notice ==
-
-= 1.7.3 =
-* Initial public release.
-
 == Changelog ==
+
+= 2.0.0 =
+* NEW - Added stateless mode.
+* NEW - Dedicated settings panel.
+* NEW - Setup assistant for initial plugin activation.
+* NEW - Support for replacing default GCS domain with custom domain.
+* ENHANCEMENT - Expanded network setting overrides.
+* ENHANCEMENT - Expanded wp-config constants.
+* ENHANCEMENT - Relocated synchronization and regeneration tools to new settings panel.
 
 = 1.9.1 =
 * Extended Network Settings.
