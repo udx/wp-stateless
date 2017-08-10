@@ -25,7 +25,7 @@ New to Google Cloud? Google is offering you a [$300 credit](https://cloud.google
 = Modes =
 * Backup - Upload media files to Google Storage and serve local file urls.
 * CDN - Copy media files to Google Storage and serve them directly from there.
-* Stateless - Store and serve media files with Google Cloud Storage. Media files are not stored locally.
+* Stateless - Store and serve media files with Google Cloud Storage only. Media files are not stored locally.
 
 = Features =
 * Setup assistant makes getting started fast and easy.

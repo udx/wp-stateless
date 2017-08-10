@@ -34,7 +34,7 @@
                                         <label for="sm_mode_cdn"><input id="sm_mode_cdn" type="radio" name="sm[mode]" value="cdn" ng-checked="sm.mode == 'cdn'"  ng-disabled="sm.readonly">CDN<small class="description">Copy media files to Google Storage and serve them directly from there.</small></label>
                                     </p>
                                     <p class="sm-mode">
-                                        <label for="sm_mode_stateless"><input id="sm_mode_stateless" type="radio" name="sm[mode]" value="stateless" ng-checked="sm.mode == 'stateless'" ng-disabled="sm.readonly">Stateless<small class="description">Store and serve media files with Google Cloud Storage. Media files are not stored locally.</small></label>
+                                        <label for="sm_mode_stateless"><input id="sm_mode_stateless" type="radio" name="sm[mode]" value="stateless" ng-checked="sm.mode == 'stateless'" ng-disabled="sm.readonly">Stateless<small class="description">Store and serve media files with Google Cloud Storage only. Media files are not stored locally.</small></label>
                                     </p>
                                     <hr>
 
