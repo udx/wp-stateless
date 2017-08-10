@@ -130,7 +130,7 @@ namespace wpCloud\StatelessMedia {
           /**
            * Override Cache Control is option is enabled
            */
-          if ( $this->get( 'sm.override_cache_control' ) == 'true' ) {
+          if ( !empty(trim($this->get( 'sm.cache_control' ))) ) {
             add_filter( 'sm:item:cacheControl', array( $this, 'override_cache_control' ) );
           }
 
@@ -168,7 +168,7 @@ namespace wpCloud\StatelessMedia {
             }
 
             if ( $root_dir = $this->get( 'sm.root_dir' ) ) {
-              if ( trim( $root_dir ) !== '' ) {
+              if ( trim( $root_dir, '/ ' ) !== '' ) { // Remove any forward slash and empty space.
                 add_filter( 'wp_stateless_file_name', array( $this, 'handle_root_dir' ) );
               }
             }
@@ -420,10 +420,10 @@ namespace wpCloud\StatelessMedia {
        */
       public function handle_root_dir( $current_path ) {
         $root_dir = $this->get( 'sm.root_dir' );
-        $root_dir = trim( $root_dir );
+        $root_dir = trim( $root_dir, '/ ' ); // Remove any forward slash and empty space.
 
         if ( !empty( $root_dir ) ) {
-          return $root_dir . $current_path;
+          return $root_dir . '/' . $current_path;
         }
 
         return $current_path;
@@ -439,8 +439,8 @@ namespace wpCloud\StatelessMedia {
 
           if ( !empty( $upload_data['baseurl'] ) && !empty( $content ) ) {
             $baseurl = preg_replace('/https?:\/\//','',$upload_data['baseurl']);
-            $root_dir = trim( $this->get( 'sm.root_dir' ) );
-            $root_dir = !empty( $root_dir ) ? $root_dir : false;
+            $root_dir = trim( $this->get( 'sm.root_dir' ), '/ ' ); // Remove any forward slash and empty space.
+            $root_dir = !empty( $root_dir ) ? $root_dir . '/' : false;
             $image_host = $this->get_gs_host();
             $content = preg_replace( '/(href|src)=(\'|")(https?:\/\/'.str_replace('/', '\/', $baseurl).')\/(.+?)(\.jpg|\.png|\.gif|\.jpeg)(\'|")/i',
                 '$1=$2'.$image_host.'/'.($root_dir?$root_dir:'').'$4$5$6', $content);
@@ -507,8 +507,8 @@ namespace wpCloud\StatelessMedia {
         if ( $meta && $upload_data = wp_upload_dir() ) {
           if ( !empty( $upload_data['baseurl'] ) && !empty( $meta ) ) {
             $baseurl = preg_replace('/https?:\/\//','',$upload_data['baseurl']);
-            $root_dir = trim( $this->get( 'sm.root_dir' ) );
-            $root_dir = !empty( $root_dir ) ? $root_dir : false;
+            $root_dir = trim( $this->get( 'sm.root_dir' ), '/ ' ); // Remove any forward slash and empty space.
+            $root_dir = !empty( $root_dir ) ? $root_dir . '/ ': false;
             $image_host = $this->get_gs_host().'/'.($root_dir?$root_dir:'');
 
             if(is_array($meta)){

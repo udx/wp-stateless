@@ -518,7 +518,14 @@ var wpStatelessApp = angular.module('wpStatelessApp', [])
 }])
 .controller('wpStatelessSettings', function($scope, $filter) {
   $scope.sm = wp_stateless_settings || {};
-  window.sm_network_mode = $scope.sm.network_mode;
+
+  $scope.sm.showNotice = function(option){
+    if($scope.sm.readonly && $scope.sm.readonly[option]){
+      var slug = $scope.sm.readonly[option];
+      return $scope.sm.strings[slug];
+    }
+  }
+
   $scope.sm.generatePreviewUrl = function() {
     var host = 'https://storage.googleapis.com/';
 
@@ -526,7 +533,6 @@ var wpStatelessApp = angular.module('wpStatelessApp', [])
       host = 'http://';  // bucketname will be host
     }
     host += $scope.sm.bucket ? $scope.sm.bucket : '{bucket-name}';
-    console.log('$scope.sm.bucket:', $scope.sm.bucket)
     var subdir = $scope.sm.organize_media == '1' ? $filter('date')(Date.now(), 'yyyy/MM') + '/' : '';
     var hash = $scope.sm.hashify_file_name == 'true' ? Date.now().toString(36) + '-' : '';
     $scope.sm.preview_url = host + "/" + subdir + hash + "your-image-name.jpeg";
