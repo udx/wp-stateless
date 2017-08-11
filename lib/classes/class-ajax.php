@@ -114,6 +114,7 @@ namespace wpCloud\StatelessMedia {
 
         
         wp_send_json(array('success' => true, 'settings_url' => admin_url('options-media.php')));
+        ud_get_stateless_media()->flush_transients();
       }
 
       /**
