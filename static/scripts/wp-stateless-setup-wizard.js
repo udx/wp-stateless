@@ -326,7 +326,7 @@ jQuery(document).ready(function ($) {
 					callback(null, {ok: true, task: 'updateBilltingInfo', message: "Billing Info"});
 				}
 			}],
-			createBucket: ['updateBilltingInfo', function(results, callback){
+			createBucket: ['updateBilltingInfo', async.retryable({times: 3, interval: 800}, function(results, callback){
 				if( typeof wp.stateless.projects[projectId] == 'undefined' || typeof wp.stateless.projects[projectId]['buckets'][bucketId] == 'undefined'){
 					// Bucket didn't exist.
 					wp.stateless.createBucket({"projectId": projectId, "name": bucketId})
@@ -346,7 +346,7 @@ jQuery(document).ready(function ($) {
 					// Bucket exist
 					callback(null, {ok: true, task: 'bucket', message: "Bucket"});
 				}
-			}],
+			})],
 			createServiceAccount: ['createProject', function(results, callback){
 				if( typeof wp.stateless.projects[projectId] != 'undefined' && typeof wp.stateless.projects[projectId]['serviceAccounts'] != 'undefined'){
 					// Checking if service account exist.

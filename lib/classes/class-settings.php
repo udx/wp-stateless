@@ -114,7 +114,7 @@ namespace wpCloud\StatelessMedia {
             $this->set( "sm.readonly.{$option}", "constant" );
           }
           // Getting network settings
-          elseif(is_multisite()){
+          elseif(is_multisite() && $option != 'organize_media'){
             $network = get_site_option( $_option );
             // If network settings available then override by network settings.
             if($network || is_network_admin()){
