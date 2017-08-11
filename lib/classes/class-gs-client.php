@@ -271,7 +271,7 @@ namespace wpCloud\StatelessMedia {
         try {
           $bucket = $this->service->buckets->get( $this->bucket );
         } catch( Exception $e ) {
-          return false;
+          return $e;
         }
         return true;
       }

@@ -111,10 +111,12 @@ namespace wpCloud\StatelessMedia {
           update_option( 'sm_key_json', $privateKeyData);
         }
 
-
-        
-        wp_send_json(array('success' => true, 'settings_url' => admin_url('options-media.php')));
         ud_get_stateless_media()->flush_transients();
+
+        $client = ud_get_stateless_media()->get_client();
+        $connected = $client->is_connected();
+        
+        wp_send_json(array('success' => true, 'settings_url' => admin_url('options-media.php'), 'error' => make_clickable($error['message'])));
       }
 
       /**

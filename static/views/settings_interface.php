@@ -200,7 +200,7 @@
                                     </p>
                                     <p class="description">
                                         <p>Organize uploads into year and month based folders.</p>
-                                        <p class="notice notice-error"><strong>Note:</strong> This will update default wordpress setting ( <b>Organize my uploads into month- and year-based folders</b> in <b>Settings</b> >> <b>Media</b> page).</p>
+                                        <p class=""><strong>Note:</strong> This will update default wordpress setting ( <b>Organize my uploads into month- and year-based folders</b> in <b>Settings</b> >> <b>Media</b> page).</p>
                                     </p>
                                     <?php endif; ?>    
 

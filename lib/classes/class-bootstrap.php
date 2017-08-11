@@ -902,9 +902,14 @@ namespace wpCloud\StatelessMedia {
             $trnst[ 'success' ] = 'false';
             $trnst[ 'error' ] = $client->get_error_message();
           } else {
-            if( !$client->is_connected() ) {
+            $connected = $client->is_connected();
+            if( $connected !== true ) {
+              $error = $connected->getErrors();
+              $error = reset($error);
               $trnst[ 'success' ] = 'false';
               $trnst[ 'error' ] = sprintf( __( 'Could not connect to Google Storage bucket. Please, be sure that bucket with name <b>%s</b> exists.', $this->domain ), $this->get( 'sm.bucket' ) );
+              if($error['reason'] == 'accessNotConfigured')
+                $trnst[ 'error' ] .= "<br>" . make_clickable($error['message']);
             }
           }
           set_transient( 'sm::is_connected_to_gs', $trnst, 24 * HOUR_IN_SECONDS );
