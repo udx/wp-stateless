@@ -115,6 +115,8 @@ namespace wpCloud\StatelessMedia {
 
         $client = ud_get_stateless_media()->get_client();
         $connected = $client->is_connected();
+        $error = $connected->getErrors();
+        $error = reset($error);
         
         wp_send_json(array('success' => true, 'settings_url' => admin_url('options-media.php'), 'error' => make_clickable($error['message'])));
       }

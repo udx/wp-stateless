@@ -275,6 +275,10 @@ jQuery(document).ready(function ($) {
 
 	setupForm.find('.get-json-key').on('click', function(event){
 		event.preventDefault();
+		var btnGetJson = jQuery(this);
+		if(btnGetJson.hasClass('disabled')){
+			return false;
+		}
 		var projectId = projectDropdown.find('.id').val();
 		var projectName = projectDropdown.find('.name').val().replace(/\(.*/, '').replace(/^\s+|\s+$/g,'');
 		var bucketName = bucketDropdown.find('.name').val();
@@ -293,27 +297,59 @@ jQuery(document).ready(function ($) {
 			return;
 		}
 		comboBox.addClass('loading');
-		jQuery(this).addClass('active');
+		btnGetJson.addClass('active disabled');
 		async.auto({
 			createProject: function(callback) {
 				if(!wp.stateless.projects[projectId]){
 					wp.stateless.createProject({"projectId": projectId, "name": projectName})
-					.done(function(argument) {
-						callback(null, {ok: true, task: 'createProject', message: "Project Created"});
+					.done(function(response) {
+						callback(null, {ok: true, task: 'createProject', action: 'project_created', message: "Project Created", operation: response.name});
 					}).fail(function(response) {
 						response = response.responseJSON || {};
 						if(response && typeof response.error != 'undefined' && typeof response.error.status != 'undefined' && response.error.status == 'ALREADY_EXISTS'){
-							callback(null, {ok: true, task: 'createProject', message: "Project Exists"});
+							callback(null, {ok: true, task: 'createProject', action: 'project_exists', message: "Project Exists"});
 						}
 						else{
-							callback({ok: false, task: 'createProject', message: "Something went wrong"});
+							callback({ok: false, task: 'createProject', action: 'failed', message: response.error});
 						}
 					});
 				}else{
-					callback(null, {ok: true, task: 'createProject', message: "Project Exists"});
+					callback(null, {ok: true, task: 'createProject', action: 'project_exists', message: "Project Exists"});
 				}
 			},
-			updateBilltingInfo: ['createProject', function(results, callback) {
+			createProjectProgress: ['createProject', async.retryable({times: 10, interval: 1500, errorFilter: function(err) {
+					return err.action === 'retry'; // only retry on a specific error
+				}
+			}, function(results, callback) {
+				if( results['createProject'].action == 'project_created'){
+					wp.stateless.createProjectProgress(results['createProject'].operation)
+					.done(function(argument) {
+						callback(null, {ok: true, task: 'createProjectProgress', action: 'project_creation_complete', message: "Project creation complete."});
+					}).fail(function(response) {
+						if(typeof response.error != 'undefined' && typeof response.error.message != 'undefined')
+							callback({ok: false, task: 'createProjectProgress', action: 'failed', message: response.error.message});
+						else
+							callback({ok: false, task: 'createProjectProgress', action: 'retry', message: "Project creation fieled."});
+					});
+				}
+				else{
+					callback(null, {ok: true, task: 'enableAPI', action: 'old_project', message: "Existing project"});
+				}
+			})],
+			enableAPI: ['createProjectProgress', function(results, callback) {
+				if( results['createProject'].action == 'project_created'){
+					wp.stateless.enableAPI(projectId)
+					.done(function(argument) {
+						callback(null, {ok: true, task: 'enableAPI', action: 'service_enabled', message: "Google Cloud Storage JSON API Service Enabled"});
+					}).fail(function(response) {
+						callback({ok: false, task: 'enableAPI', action: 'failed', message: "Google Cloud Storage JSON API Service fieled."});
+					});
+				}
+				else{
+					callback(null, {ok: true, task: 'enableAPI', action: 'old_project', message: "Service not enabled"});
+				}
+			}],
+			updateBilltingInfo: ['createProjectProgress', function(results, callback) {
 				if( typeof wp.stateless.projects[projectId] == 'undefined' || typeof wp.stateless.projects[projectId]['billingInfo'] == 'undefined'){
 					wp.stateless.updateProjectBillingInfo({"projectID": projectId, "accountName": billingAccount})
 					.done(function(argument) {
@@ -347,7 +383,7 @@ jQuery(document).ready(function ($) {
 					callback(null, {ok: true, task: 'bucket', message: "Bucket"});
 				}
 			})],
-			createServiceAccount: ['createProject', function(results, callback){
+			createServiceAccount: ['createProjectProgress', function(results, callback){
 				if( typeof wp.stateless.projects[projectId] != 'undefined' && typeof wp.stateless.projects[projectId]['serviceAccounts'] != 'undefined'){
 					// Checking if service account exist.
 					var serviceAccounts = wp.stateless.projects[projectId]['serviceAccounts'];
@@ -405,6 +441,7 @@ jQuery(document).ready(function ($) {
 						'action': 'stateless_wizard_update_settings',
 						'bucket': bucketId,
 						'privateKeyData': results['createServiceAccountKey'].privateKeyData,
+						'enableAPI': results['enableAPI'].action,
 					}//)
 				}).done(function(response) {
 					if(typeof response.success != undefined && response.success == true){
@@ -423,11 +460,15 @@ jQuery(document).ready(function ($) {
 				jQuery(this).find('.wpStateLess-loading').removeClass('active');
 				comboBox.removeClass('loading');
 				setupForm.find('#stateless-notification').html(err.message).show();
+				btnGetJson.removeClass('active disabled');
 				return;
 			}
 
-			if(results.task == 'createProject'){
+			if(results.task == 'createProjectProgress'){
 				projectDropdown.find('.circle-loader').addClass('load-complete');
+			}
+			else if(results.task == 'enableAPI'){
+				
 			}
 			else if(results.task == 'updateBilltingInfo'){
 				billingDropdown.find('.circle-loader').addClass('load-complete');

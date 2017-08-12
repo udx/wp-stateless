@@ -167,14 +167,7 @@ wp.stateless = {
       method: "POST",
       data: JSON.stringify( options ),
     }).done(function( responseData  ) {
-      wp.stateless.createProjectProgress(responseData.name);
-
-      jQuery(document).on('wp-stateless-project-created-' + responseData.name, function(argument) {
-        defer.resolve(responseData);
-      });
-      jQuery(document).on('project-creation-faild-' + responseData.name, function(argument) {
-        defer.reject(responseData);
-      });
+      defer.resolve(responseData);
     }).fail(function(responseData) {
       defer.reject(responseData);
     });
@@ -186,19 +179,25 @@ wp.stateless = {
 
 
   createProjectProgress: function createProjectProgress(name){
+    var defer = new jQuery.Deferred();
+  
+    if(!wp.stateless.getAccessToken() || !name){
+      defer.reject();
+      return defer.promise();
+    }
+
     jQuery.ajax({
       url: 'https://cloudresourcemanager.googleapis.com/v1/' + name,
     }).done(function(responseData){
-      if(typeof responseData.done != 'undefined' && responseData.done == true){
-        jQuery(document).trigger('wp-stateless-project-created-' + name);
+      if(typeof responseData.done != 'undefined' && responseData.done == true && typeof responseData.error == 'undefined'){
+        defer.resolve(responseData);
       }else{
-        setTimeout(function(argument) {
-          wp.stateless.createProjectProgress(name);
-        }, 800);
+        defer.reject(responseData);
       }
     }).fail(function(responseData) {
-      jQuery(document).trigger('project-creation-faild-' + name);
+      defer.resolve(responseData);
     });
+    return defer.promise();
   },
 
   /**
@@ -258,6 +257,69 @@ wp.stateless = {
       data: JSON.stringify({name: options.name}),
     });
     return promis;
+  },
+
+  /**
+   * Get Projects
+   * https://cloud.google.com/service-management/enable-disable
+   * wp.stateless.listProjects()
+   *
+   */
+  enableAPI: function enableAPI(projectId) {
+    var defer = new jQuery.Deferred();
+
+    if(!wp.stateless.getAccessToken() || !projectId){
+      defer.reject();
+      return defer.promise();
+    }
+
+    jQuery.ajax({
+      url: 'https://servicemanagement.googleapis.com/v1/services/storage-api.googleapis.com:enable',
+      method: "POST",
+      data: JSON.stringify({consumerId: 'project:' + projectId}),
+    }).done(function(responseData){
+      wp.stateless.enableAPIStatus(responseData.name).done(function(operation){
+        defer.resolve();
+      }).fail(function(){
+        defer.reject();
+      });
+    }).fail(function(){
+      defer.reject();
+    });
+
+    return defer.promise();
+  },
+
+  /**
+   * Get Projects
+   *
+   * wp.stateless.listProjects()
+   *
+   */
+  enableAPIStatus: function enableAPIStatus(operation) {
+    var defer = new jQuery.Deferred();
+  
+    if(!wp.stateless.getAccessToken() || !operation){
+      defer.reject();
+      return defer.promise();
+    }
+
+    jQuery.ajax({
+      url: 'https://servicemanagement.googleapis.com/v1/' + operation,
+      method: "GET",
+    }).done(function(responseData){
+      if(typeof responseData.done != 'undefined' && responseData.done == true && typeof responseData.error == 'undefined'){
+        defer.resolve();
+      }else{
+        setTimeout(function(argument) {
+          wp.stateless.enableAPIStatus(operation);
+        }, 1000);
+      }
+    }).fail(function(responseData) {
+      defer.reject();
+    });
+
+    return defer.promise();
   },
   /**
    * Get Projects
