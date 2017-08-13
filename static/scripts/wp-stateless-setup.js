@@ -296,8 +296,10 @@ wp.stateless = {
    * wp.stateless.listProjects()
    *
    */
-  enableAPIStatus: function enableAPIStatus(operation) {
-    var defer = new jQuery.Deferred();
+  enableAPIStatus: function enableAPIStatus(operation, defer) {
+    if (!defer) {
+      defer = new jQuery.Deferred();
+    }
   
     if(!wp.stateless.getAccessToken() || !operation){
       defer.reject();
@@ -310,9 +312,11 @@ wp.stateless = {
     }).done(function(responseData){
       if(typeof responseData.done != 'undefined' && responseData.done == true && typeof responseData.error == 'undefined'){
         defer.resolve();
+      }else if(typeof responseData.error != 'undefined'){
+        defer.reject();
       }else{
         setTimeout(function(argument) {
-          wp.stateless.enableAPIStatus(operation);
+          wp.stateless.enableAPIStatus(operation, defer);
         }, 1000);
       }
     }).fail(function(responseData) {

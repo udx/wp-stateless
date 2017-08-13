@@ -333,7 +333,7 @@ jQuery(document).ready(function ($) {
 					});
 				}
 				else{
-					callback(null, {ok: true, task: 'enableAPI', action: 'old_project', message: "Existing project"});
+					callback(null, {ok: true, task: 'createProjectProgress', action: 'old_project', message: "Existing project"});
 				}
 			})],
 			enableAPI: ['createProjectProgress', function(results, callback) {
@@ -346,7 +346,31 @@ jQuery(document).ready(function ($) {
 					});
 				}
 				else{
-					callback(null, {ok: true, task: 'enableAPI', action: 'old_project', message: "Service not enabled"});
+					callback(null, {ok: true, task: 'enableAPI', action: 'old_project', message: "Service not enabled. Will try again."});
+				}
+			}],
+			enableAPI: ['createProjectProgress', function(results, callback) {
+				if( results['createProject'].action == 'project_created'){
+					wp.stateless.enableAPI(projectId)
+					.done(function(argument) {
+						callback(null, {ok: true, task: 'enableAPI', action: 'service_enabled', message: "Google Cloud Storage JSON API Service Enabled"});
+					}).fail(function(response) {
+						callback({ok: false, task: 'enableAPI', action: 'failed', message: "Google Cloud Storage JSON API Service fieled."});
+					});
+				}
+				else{
+					callback(null, {ok: true, task: 'enableAPI', action: 'old_project', message: "Service not enabled. Will try again."});
+				}
+			}],
+			flashCache: ['enableAPI', function(results, callback) {
+				if( results['enableAPI'].action == 'old_project'){
+					jQuery.get(ajaxurl,
+					{
+						'action': 'stateless_wizard_flush_transients',
+					});
+				}
+				else{
+					callback(null, {ok: true, task: 'enableAPI', action: 'old_project', message: "Service not enabled. Will try again."});
 				}
 			}],
 			updateBilltingInfo: ['createProjectProgress', function(results, callback) {
@@ -409,7 +433,7 @@ jQuery(document).ready(function ($) {
 					callback({ok: false, task: 'createServiceAccount', message: "Something went wrong"});
 				});
 			}],
-			insertBucketAccessControls: ['createBucket', 'createServiceAccount', function(results, callback) {
+			insertBucketAccessControls: ['createBucket', 'createServiceAccount', async.retryable({times: 5, interval: 1500}, function(results, callback) {
 				wp.stateless.insertBucketAccessControls({
 					"bucket": bucketId,
 					"user": results['createServiceAccount'].email,
@@ -418,7 +442,7 @@ jQuery(document).ready(function ($) {
 				}).fail(function(response) {
 					callback({ok: false, task: 'insertBucketAccessControls', message: "Something went wrong"});
 				});
-			}],
+			})],
 			createServiceAccountKey: ['insertBucketAccessControls', function(results, callback) {
 				wp.stateless.createServiceAccountKeys({
 					"project": projectId,
@@ -429,7 +453,7 @@ jQuery(document).ready(function ($) {
 					callback({ok: false, task: 'createServiceAccountKey', message: "Something went wrong"});
 				});
 			}],
-			saveServiceAccountKey: ['createServiceAccountKey', function(results, callback) {
+			saveServiceAccountKey: ['createServiceAccountKey', 'enableAPI', function(results, callback) {
 				jQuery.ajax({
 					url: ajaxurl,
 					method: "POST",
@@ -445,7 +469,18 @@ jQuery(document).ready(function ($) {
 					}//)
 				}).done(function(response) {
 					if(typeof response.success != undefined && response.success == true){
-						callback(null, {ok: true, task: 'saveServiceAccountKey', message: "Service Account Key Saved"});
+						if(typeof response.enableAPI != undefined && response.enableAPI == 'retry'){
+							wp.stateless.enableAPI(projectId)
+							.done(function(argument) {
+								callback(null, {ok: true, task: 'saveServiceAccountKey', enableAPI: 'service_enabled', message: "Service Enabled"});
+							}).fail(function(response) {
+								callback(null, {ok: true, task: 'saveServiceAccountKey', enableAPI: 'failed', message: "Service not Enabled"});
+							});
+						}
+						else{
+							callback(null, {ok: true, task: 'saveServiceAccountKey', message: "Service Account Key Saved"});
+						}
+						
 					}
 					else{
 						callback({ok: false, task: 'saveServiceAccountKey', message: "Something went wrong"});
@@ -464,11 +499,16 @@ jQuery(document).ready(function ($) {
 				return;
 			}
 
+			if(typeof results.message != 'undefined'){
+				console.log(results.message);
+			}
+				console.log(results);
+
 			if(results.task == 'createProjectProgress'){
 				projectDropdown.find('.circle-loader').addClass('load-complete');
 			}
 			else if(results.task == 'enableAPI'){
-				
+				console.log(results.message);
 			}
 			else if(results.task == 'updateBilltingInfo'){
 				billingDropdown.find('.circle-loader').addClass('load-complete');
@@ -476,7 +516,7 @@ jQuery(document).ready(function ($) {
 			else if(results.task == 'createBucket'){
 				bucketDropdown.find('.circle-loader').addClass('load-complete');
 			}
-			else if(results.task == 'saveServiceAccountKey'){
+			else if(results.task == 'saveServiceAccountKey' || (typeof results['saveServiceAccountKey'] != 'undefined' && results['saveServiceAccountKey'].ok == true)){
 				// We have access token.
 				setupStepsBars.find('li')
 					.removeClass('wpStateLess-done active')
