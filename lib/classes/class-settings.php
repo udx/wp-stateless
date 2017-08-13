@@ -299,9 +299,6 @@ namespace wpCloud\StatelessMedia {
 
           ud_get_stateless_media()->flush_transients();
         }
-        else if(isset($_POST['enableAPI']) && $_POST['enableAPI'] == 'service_enabled'){ 
-          ud_get_stateless_media()->flush_transients();
-        }
       }
 
       /**

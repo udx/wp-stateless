@@ -22,7 +22,7 @@ namespace wpCloud\StatelessMedia {
         'stateless_process_file',
         'stateless_get_current_progresses',
         'stateless_wizard_update_settings',
-        'stateless_wizard_flush_transients',
+        'stateless_wizard_is_connected_to_gs',
         'stateless_reset_progress',
         'stateless_get_all_fails'
       );
@@ -95,9 +95,20 @@ namespace wpCloud\StatelessMedia {
       /**
        * Flash cache of is connected function.
        */
-      public function action_stateless_wizard_flush_transients() {
+      public function action_stateless_wizard_is_connected_to_gs() {
+        $enableAPI = '';
+        $connected = false;
         ud_get_stateless_media()->flush_transients();
-        wp_send_json(array('success' => true));
+        $client = ud_get_stateless_media()->get_client();
+        $connected = $client->is_connected();
+        if( $connected !== true ) {
+          $error = $connected->getErrors();
+          $error = reset($error);
+          if($error['reason'] == 'accessNotConfigured')
+            $enableAPI = 'retry';
+        }
+        
+        wp_send_json(array('success' => true, 'enableAPI' => $enableAPI, 'connected' => $connected));
       }
 
 
@@ -123,20 +134,7 @@ namespace wpCloud\StatelessMedia {
         }
 
         ud_get_stateless_media()->flush_transients();
-
-        if(!empty($data['enableAPI']) && $data['enableAPI'] != 'service_enabled'){
-          $client = ud_get_stateless_media()->get_client();
-          $connected = $client->is_connected();
-          if( $connected !== true ) {
-            $error = $connected->getErrors();
-            $error = reset($error);
-            if($error['reason'] == 'accessNotConfigured')
-              $enableAPI = 'retry';
-          }
-        }
-        
-        
-        wp_send_json(array('success' => true, 'enableAPI' => $enableAPI, 'connected' => $connected));
+        wp_send_json(array('success' => true));
       }
 
       /**
