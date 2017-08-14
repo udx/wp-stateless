@@ -337,17 +337,17 @@ jQuery(document).ready(function ($) {
 				}
 			})],
 			enableAPI: ['createProjectProgress', function(results, callback) {
-				if( results['createProject'].action == 'project_created'){
+				//if( results['createProject'].action == 'project_created'){
 					wp.stateless.enableAPI(projectId)
 					.done(function(argument) {
 						callback(null, {ok: true, task: 'enableAPI', action: 'service_enabled', message: "Google Cloud Storage JSON API Service Enabled"});
 					}).fail(function(response) {
 						callback({ok: false, task: 'enableAPI', action: 'failed', message: "Google Cloud Storage JSON API Service fieled."});
 					});
-				}
-				else{
-					callback(null, {ok: true, task: 'enableAPI', action: 'old_project', message: "Service not enabled. Will try again."});
-				}
+				//}
+				//else{
+				//	callback(null, {ok: true, task: 'enableAPI', action: 'old_project', message: "Service not enabled. Will try again."});
+				//}
 			}],
 			updateBilltingInfo: ['createProjectProgress', function(results, callback) {
 				if( typeof wp.stateless.projects[projectId] == 'undefined' || typeof wp.stateless.projects[projectId]['billingInfo'] == 'undefined'){
