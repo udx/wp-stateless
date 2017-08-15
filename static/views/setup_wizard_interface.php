@@ -15,8 +15,8 @@ $bucket_id      = trim("stateless-" . substr($id, 0, 20), '-');
                 <div class="row">
                     <div class="col-xs-12 text-center">
                         <div class="wpStateLess-welcome-text">
-                            <h1>Stateless Setup</h1>
-                            <p>Save your media files at one place. Start your free trial now</p>
+                            <h1><?php _e( 'Stateless Setup', ud_get_stateless_media()->domain ); ?></h1>
+                            <p><?php _e( 'Save your media files at one place. Start your free trial now', ud_get_stateless_media()->domain ); ?></p>
                         </div>
                     </div>
                 </div>
@@ -30,31 +30,31 @@ $bucket_id      = trim("stateless-" . substr($id, 0, 20), '-');
                         <div class="wpStateLess-setup-step">
                             <div class="wpStateLess-setup-step-bars">
                                 <ul>
-                                    <li class="step-google-login"> <span>1</span> Login to Google</li>
-                                    <li class="step-setup-project"> <span>2</span> Setup Project</li>
-                                    <li class="step-final"> <span>3</span> Complete</li>
+                                    <li class="step-google-login"> <span>1</span> <?php _e( 'Login to Google', ud_get_stateless_media()->domain ); ?></li>
+                                    <li class="step-setup-project"> <span>2</span> <?php _e( 'Setup Project', ud_get_stateless_media()->domain ); ?></li>
+                                    <li class="step-final"> <span><?php echo number_format_i18n(3);?></span> <?php _e( 'Complete', ud_get_stateless_media()->domain ); ?></li>
                                 </ul>
                             </div>
                             <div class="wpStateLess-setup-steps">
                                 <div class="wpStateLess-s-step active step-google-login">
                                     <img src="<?php echo ud_get_stateless_media()->path( 'static/images/authenticate-login.png'); ?>" alt=""/>
                                     <div class="wpStateLess-step-title">
-                                        <h3>Autheticate the Login</h3>
-                                        <p>Signin with your google account to setup the plguin</p>
+                                        <h3><?php _e( 'Autheticate the Login', ud_get_stateless_media()->domain ); ?></h3>
+                                        <p><?php _e( 'Signin with your google account to setup the plguin', ud_get_stateless_media()->domain ); ?></p>
                                     </div>
-                                    <a id="google-login" href="https://api.usabilitydynamics.com/product/stateless/v1/auth/google?state=<?php echo urlencode(ud_get_stateless_media()->get_settings_page_url('?page=stateless-setup&step=google-login') ); ?>" class="btn btn-googly-red">Google Login</a>
+                                    <a id="google-login" href="https://api.usabilitydynamics.com/product/stateless/v1/auth/google?state=<?php echo urlencode(ud_get_stateless_media()->get_settings_page_url('?page=stateless-setup&step=google-login') ); ?>" class="btn btn-googly-red"><?php _e( 'Google Login', ud_get_stateless_media()->domain ); ?></a>
                                 </div>
                                 <div class="wpStateLess-s-step step-setup-project">
                                     <div class="wpStateLess-step-title">
-                                        <h3>Set Project &amp; Bucket</h3>
-                                        <p>Create a Google Cloud Project and bucket that will store your WordPress media.</p>
+                                        <h3><?php _e( 'Set Project &amp; Bucket', ud_get_stateless_media()->domain ); ?></h3>
+                                        <p><?php _e( 'Create a Google Cloud Project and bucket that will store your WordPress media.', ud_get_stateless_media()->domain ); ?></p>
                                     </div>
                                     <div class="wpStateLess-userinfo">
                                         <div class="photo-wrapper">
                                             <img class="user-photo img-circle" src="<?php echo ud_get_stateless_media()->path( 'static/images/author-image.png'); ?>" alt="">
                                         </div>
                                         <div class="wpStateLess-user-detais">
-                                            <h4><span class="user-name"></span> <a class="logout" href="#google-logout">Logout</a></h4>
+                                            <h4><span class="user-name"></span> <a class="logout" href="#google-logout"><?php _e( 'Logout', ud_get_stateless_media()->domain ); ?></a></h4>
                                             <p class="user-email"></p>
                                         </div>
                                     </div>
@@ -65,8 +65,8 @@ $bucket_id      = trim("stateless-" . substr($id, 0, 20), '-');
                                             </div>
                                             <div class="wpStateLess-single-step-input">
                                                 <label for="">
-                                                    <h4>Google Cloud Project</h4>
-                                                    <p>By default we create a new project for you, or if you prefer, select an existing project.</p>
+                                                    <h4><?php _e( 'Google Cloud Project', ud_get_stateless_media()->domain ); ?></h4>
+                                                    <p><?php _e( 'By default we create a new project for you, or if you prefer, select an existing project.', ud_get_stateless_media()->domain ); ?></p>
                                                 </label>
                                                 <div class="wpStateLess-combo-box project">
                                                     <input type="hidden" class="id" value="<?php echo $project_id;?>">
@@ -76,7 +76,7 @@ $bucket_id      = trim("stateless-" . substr($id, 0, 20), '-');
                                                     </div>
                                                     <div class="wpStateLess-input-dropdown">
                                                         <div class="wpStateLess-create-new">
-                                                            <h5>Create New Project</h5>
+                                                            <h5><?php _e( 'Create New Project', ud_get_stateless_media()->domain ); ?></h5>
                                                             <ul>
                                                                 <li class="custom-name"></li>
                                                                 <li class="predefined-name active" data-id="<?php echo $project_id?>" data-name="<?php echo $project_name?>">
@@ -85,7 +85,7 @@ $bucket_id      = trim("stateless-" . substr($id, 0, 20), '-');
                                                             </ul>
                                                         </div>
                                                         <div class="wpStateLess-existing">
-                                                            <h5>Existing Projects</h5>
+                                                            <h5><?php _e( 'Existing Projects', ud_get_stateless_media()->domain ); ?></h5>
                                                             <ul></ul>
                                                         </div>
                                                     </div>
@@ -94,8 +94,8 @@ $bucket_id      = trim("stateless-" . substr($id, 0, 20), '-');
                                             </div>
                                             <div class="wpStateLess-single-step-input">
                                                 <label for="">
-                                                    <h4>Google Cloud Bucket</h4>
-                                                    <p>By default we create a new bucket for you, or if you prefer, select an existing bucket.</p>
+                                                    <h4><?php _e( 'Google Cloud Bucket', ud_get_stateless_media()->domain ); ?></h4>
+                                                    <p><?php _e( 'By default we create a new bucket for you, or if you prefer, select an existing bucket.', ud_get_stateless_media()->domain ); ?></p>
                                                 </label>
                                                 <div class="wpStateLess-combo-box bucket">
                                                     <input type="text" class="name" value="<?php echo $bucket_id;?>" placeholder="Select or Create New Bucket">
@@ -104,7 +104,7 @@ $bucket_id      = trim("stateless-" . substr($id, 0, 20), '-');
                                                     </div>
                                                     <div class="wpStateLess-input-dropdown">
                                                         <div class="wpStateLess-create-new">
-                                                            <h5>Create New Bucket</h5>
+                                                            <h5><?php _e( 'Create New Bucket', ud_get_stateless_media()->domain ); ?></h5>
                                                             <ul>
                                                                 <li class="custom-name"></li>
                                                                 <li class="project-derived-name"></li>
@@ -114,7 +114,7 @@ $bucket_id      = trim("stateless-" . substr($id, 0, 20), '-');
                                                             </ul>
                                                         </div>
                                                         <div class="wpStateLess-existing">
-                                                            <h5>Existing Projects</h5>
+                                                            <h5><?php _e( 'Existing Projects', ud_get_stateless_media()->domain ); ?></h5>
                                                             <ul></ul>
                                                         </div>
                                                     </div>
@@ -123,10 +123,10 @@ $bucket_id      = trim("stateless-" . substr($id, 0, 20), '-');
                                             </div>
                                             <div class="wpStateLess-single-step-input">
                                                 <label for="">
-                                                    <h4>Google Cloud Billing</h4>
-                                                    <p>You will need to set a billing account in order to activate your Google Cloud Storage.</p>
+                                                    <h4><?php _e( 'Google Cloud Billing', ud_get_stateless_media()->domain ); ?></h4>
+                                                    <p><?php _e( 'You will need to set a billing account in order to activate your Google Cloud Storage.', ud_get_stateless_media()->domain ); ?></p>
                                                 </label>
-                                                <a  href="https://console.cloud.google.com/billing" class="btn btn-green create-billing-account no-billing-account">Create New Billing Account <span class="wpStateLess-loading">(Checking <span>.</span><span>.</span><span>.</span>)</span></a>
+                                                <a  href="https://console.cloud.google.com/billing" class="btn btn-green create-billing-account no-billing-account"><?php _e( 'Create New Billing Account', ud_get_stateless_media()->domain ); ?> <span class="wpStateLess-loading">(<?php _e( 'Checking', ud_get_stateless_media()->domain ); ?> <span>.</span><span>.</span><span>.</span>)</span></a>
                                                 <div class="wpStateLess-combo-box billing-account" style="display: none;">
                                                     <input type="hidden" class="id" value="">
                                                     <input type="text" class="name" value="" readonly="readonly" placeholder="Select Billing Account">
@@ -135,33 +135,33 @@ $bucket_id      = trim("stateless-" . substr($id, 0, 20), '-');
                                                     </div>
                                                     <div class="wpStateLess-input-dropdown">
                                                         <div class="wpStateLess-existing">
-                                                            <h5>Existing Billing Accounts</h5>
+                                                            <h5><?php _e( 'Existing Billing Accounts', ud_get_stateless_media()->domain ); ?></h5>
                                                             <ul></ul>
-                                                            <a  href="https://console.cloud.google.com/billing" class="btn btn-green create-billing-account">Create New Billing Account <span class="wpStateLess-loading">(Checking <span>.</span><span>.</span><span>.</span>)</span></a>
+                                                            <a  href="https://console.cloud.google.com/billing" class="btn btn-green create-billing-account"><?php _e( 'Create New Billing Account', ud_get_stateless_media()->domain ); ?> <span class="wpStateLess-loading">(<?php _e( 'Checking', ud_get_stateless_media()->domain ); ?> <span>.</span><span>.</span><span>.</span>)</span></a>
                                                         </div>
                                                     </div>
                                                 </div>
                                             </div>
                                             <div class="wpStateLess-single-step-input text-center input-submit">
-                                                <a class="btn btn-green get-json-key" type="submit"><span class="submit-button-text">Continue </span><span class="wpStateLess-loading">Building <span>.</span><span>.</span><span>.</span></span></a>
+                                                <a class="btn btn-green get-json-key" type="submit"><span class="submit-button-text"><?php _e( 'Continue', ud_get_stateless_media()->domain ); ?> </span><span class="wpStateLess-loading"><?php _e( 'Building', ud_get_stateless_media()->domain ); ?> <span>.</span><span>.</span><span>.</span></span></a>
                                             </div>
                                         </form>
                                     </div>
                                     <div class="wpStateLess-user-has-no-project-billing">
-                                        <h4>Set Google Cloud Billing Account</h4>
-                                        <p>Click the button below to setup a billing account with Google Cloud. Once configured, return here and click continue.</p>
-                                        <a href="https://console.cloud.google.com/billing" class="btn btn-green create-billing-account" target="_blank"><span class="">Set Google Billing</span> <p class="wpStateLess-loading">(Checking <span>.</span><span>.</span><span>.</span>)</p></a>
+                                        <h4><?php _e( 'Set Google Cloud Billing Account', ud_get_stateless_media()->domain ); ?></h4>
+                                        <p><?php _e( 'Click the button below to setup a billing account with Google Cloud. Once configured, return here and click continue.', ud_get_stateless_media()->domain ); ?></p>
+                                        <a href="https://console.cloud.google.com/billing" class="btn btn-green create-billing-account" target="_blank"><span class=""><?php _e( 'Set Google Billing', ud_get_stateless_media()->domain ); ?></span> <p class="wpStateLess-loading">(<?php _e( 'Checking', ud_get_stateless_media()->domain ); ?> <span>.</span><span>.</span><span>.</span>)</p></a>
                                         
                                     </div>
                                 </div>
                                 <div class="wpStateLess-s-step step-final">
                                     <img src="<?php echo ud_get_stateless_media()->path( 'static/images/setup-complete.png'); ?>" alt="">
                                      <div class="wpStateLess-step-title">
-                                        <h3>Congrats, Your Setup is Complete</h3>
-                                        <p>Any media file you upload to WordPress will now be uploaded to Google and served to your users from Google servers!</p>
+                                        <h3><?php _e( 'Congrats, Your Setup is Complete', ud_get_stateless_media()->domain ); ?></h3>
+                                        <p><?php _e( 'Any media file you upload to WordPress will now be uploaded to Google and served to your users from Google servers!', ud_get_stateless_media()->domain ); ?></p>
                                     </div>
-                                    <p>To further customize your stateless media setup, visit the <a class="btn-link" href="<?php echo ud_get_stateless_media()->get('page_url.stateless_settings');?>">settings panel!</a></p>
-                                    <a href="<?php echo admin_url('media-new.php');?>" class="btn btn-green">Upload Something!</a>
+                                    <p><?php printf(__( 'To further customize your stateless media setup, visit the <a class="btn-link" href="%s">settings panel!</a>', ud_get_stateless_media()->domain ), ud_get_stateless_media()->get('page_url.stateless_settings')); ?></p>
+                                    <a href="<?php echo admin_url('media-new.php');?>" class="btn btn-green"><?php _e( 'Upload Something!', ud_get_stateless_media()->domain ); ?></a>
                                 </div>
                             </div>
                         </div>

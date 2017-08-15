@@ -5,9 +5,9 @@
                 <div class="row">
                     <div class="col-xs-12 text-center">
                         <div class="wpStateLess-welcome-text">
-                            <h1>WP-Stateless</h1>
-                            <p>Upload and serve your WordPress media files from Google Cloud Storage.</p>
-                            <a class="btn btn-rounded btn-green" href="<?php echo ud_get_stateless_media()->get_settings_page_url('?page=stateless-setup&step=google-login');?>">Get Started Now</a>
+                            <h1><?php _e( 'WP-Stateless', ud_get_stateless_media()->domain ); ?></h1>
+                            <p><?php _e( 'Upload and serve your WordPress media files from Google Cloud Storage.', ud_get_stateless_media()->domain ); ?></p>
+                            <a class="btn btn-rounded btn-green" href="<?php echo ud_get_stateless_media()->get_settings_page_url('?page=stateless-setup&step=google-login');?>"><?php _e( 'Get Started Now', ud_get_stateless_media()->domain ); ?></a>
                         </div>
                     </div>
                 </div>
@@ -19,23 +19,33 @@
                     <div class="col-md-4">
                         <div class="wpStateLess-s-feature text-center">
                             <img src="<?php echo ud_get_stateless_media()->path( 'static/images/ficon1.png', 'url'  ); ?>" alt="" />
-                            <p>Media Uploaded to Google Cloud</p>
+                            <p><?php _e( 'Media Uploaded to Google Cloud', ud_get_stateless_media()->domain ); ?></p>
                         </div>
                     </div>
                     <div class="col-md-4">
                         <div class="wpStateLess-s-feature text-center">
                             <img src="<?php echo ud_get_stateless_media()->path( 'static/images/ficon2.png'); ?>" alt="" />
-                            <p>Google Cloud Serves Media</p>
+                            <p><?php _e( 'Google Cloud Serves Media', ud_get_stateless_media()->domain ); ?></p>
                         </div>
                     </div>
                     <div class="col-md-4">
                         <div class="wpStateLess-s-feature text-center">
                             <img src="<?php echo ud_get_stateless_media()->path( 'static/images/ficon3.png'); ?>" alt="" />
-                            <p>Managed by WP-Stateless</p>
+                            <p><?php _e( 'Managed by WP-Stateless', ud_get_stateless_media()->domain ); ?></p>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+    <div class="wpStateLess-footerLogo">
+        <div class="container">
+            <div class="row">
+                <div class="col-xs-12 text-center">
+                    <img src="https://www.usabilitydynamics.com/assets/powered-by-usability-dynamics.png">
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
+

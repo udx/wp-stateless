@@ -15,6 +15,9 @@
 #wp-stateless-wrapper {
     padding-bottom: 100px;
 }
+.wpStateLess-footerLogo {
+    padding-top: 100px;
+}
 #wpStatelessInner {
     font-family: 'Cabin', sans-serif;
     position: relative;
