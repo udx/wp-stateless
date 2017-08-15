@@ -160,10 +160,10 @@
                             </td>
                         </tr>  
                         <tr>
-                            <th scope="row">File URL group</th>
+                            <th scope="row">File URL</th>
                             <td>
                                 <fieldset>
-                                    <legend class="screen-reader-text"><span>File URL group</span></legend>
+                                    <legend class="screen-reader-text"><span>File URL</span></legend>
                                     <h4>Preview</h4>
                                     <p>
                                         <label for="file_url_grp_preview">
