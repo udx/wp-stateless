@@ -160,10 +160,10 @@
                             </td>
                         </tr>  
                         <tr>
-                            <th scope="row"><?php _e( 'File URL group', ud_get_stateless_media()->domain ); ?></th>
+                            <th scope="row"><?php _e( 'File URL', ud_get_stateless_media()->domain ); ?></th>
                             <td>
                                 <fieldset>
-                                    <legend class="screen-reader-text"><span><?php _e( 'File URL group', ud_get_stateless_media()->domain ); ?></span></legend>
+                                    <legend class="screen-reader-text"><span><?php _e( 'File URL', ud_get_stateless_media()->domain ); ?></span></legend>
                                     <h4><?php _e( 'Preview', ud_get_stateless_media()->domain ); ?></h4>
                                     <p>
                                         <label for="file_url_grp_preview">
