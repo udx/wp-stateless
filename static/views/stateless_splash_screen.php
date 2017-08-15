@@ -42,7 +42,7 @@
         <div class="container">
             <div class="row">
                 <div class="col-xs-12 text-center">
-                    <a href="https://www.usabilitydynamics.com/"><img src="https://www.usabilitydynamics.com/assets/powered-by-usability-dynamics.png"></a>
+                    <a href="https://www.usabilitydynamics.com/" target="_blank"><img src="https://www.usabilitydynamics.com/assets/powered-by-usability-dynamics.png"></a>
                 </div>
             </div>
         </div>
