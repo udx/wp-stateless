@@ -15,8 +15,8 @@ $bucket_id      = trim("stateless-" . substr($id, 0, 20), '-');
                 <div class="row">
                     <div class="col-xs-12 text-center">
                         <div class="wpStateLess-welcome-text">
-                            <h1>Stateless Setup</h1>
-                            <p>Save your media files at one place. Start your free trial now</p>
+                            <h1>WP-Stateless Setup</h1>
+                            <p>Get up and running in less than 90 seconds! Just follow these three steps.</p>
                         </div>
                     </div>
                 </div>
@@ -30,8 +30,8 @@ $bucket_id      = trim("stateless-" . substr($id, 0, 20), '-');
                         <div class="wpStateLess-setup-step">
                             <div class="wpStateLess-setup-step-bars">
                                 <ul>
-                                    <li class="step-google-login"> <span>1</span> Login to Google</li>
-                                    <li class="step-setup-project"> <span>2</span> Setup Project</li>
+                                    <li class="step-google-login"> <span>1</span> Google Login</li>
+                                    <li class="step-setup-project"> <span>2</span> Project &amp; Bucket</li>
                                     <li class="step-final"> <span>3</span> Complete</li>
                                 </ul>
                             </div>
@@ -39,15 +39,15 @@ $bucket_id      = trim("stateless-" . substr($id, 0, 20), '-');
                                 <div class="wpStateLess-s-step active step-google-login">
                                     <img src="<?php echo ud_get_stateless_media()->path( 'static/images/authenticate-login.png'); ?>" alt=""/>
                                     <div class="wpStateLess-step-title">
-                                        <h3>Autheticate the Login</h3>
-                                        <p>Signin with your google account to setup the plguin</p>
+                                        <h3>Google Login</h3>
+                                        <p>Login with the Google account you want associated with this website.</p>
                                     </div>
                                     <a id="google-login" href="https://api.usabilitydynamics.com/product/stateless/v1/auth/google?state=<?php echo urlencode(ud_get_stateless_media()->get_settings_page_url('?page=stateless-setup&step=google-login') ); ?>" class="btn btn-googly-red">Google Login</a>
                                 </div>
                                 <div class="wpStateLess-s-step step-setup-project">
                                     <div class="wpStateLess-step-title">
                                         <h3>Set Project &amp; Bucket</h3>
-                                        <p>Create a Google Cloud Project and bucket that will store your WordPress media.</p>
+                                        <p>Create a Google Cloud project and bucket that will store your WordPress media files.</p>
                                     </div>
                                     <div class="wpStateLess-userinfo">
                                         <div class="photo-wrapper">
@@ -157,10 +157,10 @@ $bucket_id      = trim("stateless-" . substr($id, 0, 20), '-');
                                 <div class="wpStateLess-s-step step-final">
                                     <img src="<?php echo ud_get_stateless_media()->path( 'static/images/setup-complete.png'); ?>" alt="">
                                      <div class="wpStateLess-step-title">
-                                        <h3>Congrats, Your Setup is Complete</h3>
-                                        <p>Any media file you upload to WordPress will now be uploaded to Google and served to your users from Google servers!</p>
+                                        <h3>Setup is Complete!</h3>
+                                        <p>Any media file you upload to WordPress will now be uploaded to Google Cloud Storage and served to your users from Google servers!</p>
                                     </div>
-                                    <p>To further customize your stateless media setup, visit the <a class="btn-link" href="<?php echo ud_get_stateless_media()->get('page_url.stateless_settings');?>">settings panel!</a></p>
+                                    <p>To further customize your WP-Stateless setup, visit the <a class="btn-link" href="<?php echo ud_get_stateless_media()->get('page_url.stateless_settings');?>">WP-Stateless settings panel!</a></p>
                                     <a href="<?php echo admin_url('media-new.php');?>" class="btn btn-green">Upload Something!</a>
                                 </div>
                             </div>
