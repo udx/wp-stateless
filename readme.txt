@@ -1,7 +1,7 @@
 ﻿=== WP-Stateless - Google Cloud Storage ===
 Contributors: usability_dynamics, andypotanin, ideric, maxim.peshkov, Anton Korotkoff, MariaKravchenko, alimuzzamanalim
 Donate link: https://www.usabilitydynamics.com
-Tags: google cloud, google cloud storage, cdn, uploads, media, stateless, backup
+Tags: google, google cloud, google cloud storage, cdn, uploads, media, stateless, backup
 License: GPLv2 or later
 Requires at least: 4.0
 Tested up to: 4.8.1
@@ -56,13 +56,41 @@ Looking for a unique feature for your next project? [Hire us!](https://www.usabi
 
 == Screenshots ==
 
-1. Create a bucket on Google Cloud Storage
-2. Create a Service Account Key
-3. Use JSON key type
-4. Copy and paste JSON into WP-Stateless settings
-5. Tools > Stateless Sync
-6. Resized Images Appear in Bucket
-7. The synchronized images now use GCS url
+1. Settings Panel: Supports network setting and wp-config constant overrides.
+2. Setup Assistant 
+3. Setup Assistant: Google Login
+4. Setup Assistant: Approve Permissions
+5. Setup Assistant: Project & Bucket
+6. Setup Assistant: Complete
+7. Edit Media: Image stored on Google Cloud Storage.
+
+== Frequently Asked Questions ==
+
+= What wp-config constants are supported? =
+
+For a complete list of supported wp-config constants, please consult the [GitHub wiki](https://github.com/wpCloud/wp-stateless/wiki/Constants).
+
+= How do I manually generate the Service Account JSON? =
+
+The WP-Stateless setup assistant will create the Service Account JSON automatically for you, but you can follow these steps if you choose to create it manually.
+
+1. Visit Google Cloud Console, and go to *IAM & Admin > Service accounts*.
+2. Click *Create Service Account* and name it *wp-stateless*.
+3. Set the role to *Storage > Storage Admin*.
+4. Check *Furnish a new private key* and select *JSON* as the key type.
+5. Open the JSON file and copy the contents into the *Service Account JSON* textarea within the WP-Stateless settings panel.
+
+= Where can I submit feature requests or bug reports? =
+
+We encourage community feedback and discussion through issues on the [GitHub repository](https://github.com/wpCloud/wp-stateless/issues).
+
+= Can I test new features before they are released? =
+
+To ensure new releases cause as little disruption as possible, we rely on a number of early adopters who assist us by testing out new features before they are released. [Please contact us](https://www.usabilitydynamics.com/contact) if you are interested in becoming an early adopter.
+
+= Who maintains this plugin? =
+
+[Usability Dynamics](https://www.usabilitydynamics.com/) maintains this plugin by continuing development through it's own staff, reviewing pull requests, testing, and steering the overall release schedule. Usability Dynamics is located in Durham, North Carolina and provides WordPress engineering and hosting services to clients throughout the United States.
 
 == Changelog ==
 
@@ -76,18 +104,18 @@ Looking for a unique feature for your next project? [Hire us!](https://www.usabi
 * ENHANCEMENT - Relocated synchronization and regeneration tools to new settings panel.
 
 = 1.9.1 =
-* Extended Network Settings.
+* ENHANCEMENT - Extended Network Settings.
 
 = 1.9.0 =
-* Added new ability to define cacheControl for remote objects.
-* Added new option that adds random hashes to file names.
+* NEW - Added new ability to define cacheControl for remote objects.
+* NEW - Added new option that adds random hashes to file names.
 
 = 1.8.0 =
-* Added the ability to regenerate and synchronize separate Media file from the list.
-* Added the ability to regenerate and synchronize Media file from edit screen.
-* Fixed the issue on multisite setup (switch_to_blog now works as expected).
-* Performance fixes.
-* UI cleanup.
+* FIX - Fixed the issue on multisite setup (switch_to_blog now works as expected).
+* FIX - Performance fixes.
+* NEW - Added the ability to regenerate and synchronize separate Media file from the list.
+* NEW - Added the ability to regenerate and synchronize Media file from edit screen.
+* ENHANCEMENT - UI cleanup.
 
 = 1.7.3 =
 * Initial public release.
