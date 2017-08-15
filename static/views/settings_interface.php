@@ -1,6 +1,6 @@
 <div class="wrap" ng-app="wpStatelessApp">
     <div id="stateless-settings-page-title">
-        <h2>WP-Stateless</h2>
+        <h1>WP-Stateless</h1>
         <div class="description">Upload and serve your WordPress media files from Google Cloud Storage.</div>
     </div>
     <h2 class="nav-tab-wrapper">  
@@ -30,7 +30,7 @@
                                             <option value="true">Hidden</option>
                                         </select>
                                     </p>
-                                    <p class="description"></p>                  
+                                    <p class="description">Control the visibility and access of the WP-Stateless settings panel within individual network sites.</p>                  
                                 </fieldset>
                             </td>
                         </tr>
@@ -45,7 +45,7 @@
                                             <option value="true">Hidden</option>
                                         </select>
                                     </p>
-                                    <p class="description"></p>                  
+                                    <p class="description">Control the visibility and access of the WP-Stateless setup assistant within individual network sites.</p>                  
                                 </fieldset>
                             </td>
                         </tr>
@@ -179,12 +179,7 @@
                                             <input name="sm[custom_domain]" ng-model="sm.custom_domain" type="text" id="bucket_folder_name" class="regular-text ltr" placeholder="storage.googleapis.com" ng-change="sm.generatePreviewUrl()" ng-disabled="sm.readonly.custom_domain">
                                         </label>
                                     </p>
-                                    <p class="description">
-                                    <strong ng-bind="sm.showNotice('custom_domain')" ></strong> <br>
-                                    Replace the default GCS domain with your own custom domain. This will require you to <a href="https://cloud.google.com/storage/docs/xml-api/reference-uris#cname" target="_blank">configure a CNAME</a>.<br>
-                                    <strong>Note:</strong> Bucket name and Domain must be same to make this work.<br>
-                                    <strong>Note:</strong> You won't be able to use <strong>https</strong> if you use custom domain.
-                                    </p>
+                                    <p class="description"><strong ng-bind="sm.showNotice('custom_domain')" ></strong> Replace the default GCS domain with your own custom domain. This will require you to <a href="https://cloud.google.com/storage/docs/xml-api/reference-uris#cname" target="_blank">configure a CNAME</a>. Be advised that the bucket name and domain name must match exactly and HTTPS is not supported with a custom domain.</p>
                                     <hr>
 
                                     <?php if(!is_network_admin()): ?>
@@ -198,10 +193,7 @@
                                             <option value="">Disable</option>
                                         </select>
                                     </p>
-                                    <p class="description">
-                                        <p>Organize uploads into year and month based folders.</p>
-                                        <p class=""><strong>Note:</strong> This will update default wordpress setting ( <b>Organize my uploads into month- and year-based folders</b> in <b>Settings</b> >> <b>Media</b> page).</p>
-                                    </p>
+                                    <p class="description">Organize uploads into year and month based folders. This will update the <a href="<?php echo admin_url("options-media.php"); ?>">related WordPress media setting</a>.</p>
                                     <?php endif; ?>    
 
                                     <hr>
@@ -215,7 +207,7 @@
                                             <option value="false">Disable</option>
                                         </select>
                                     </p>
-                                    <p class="description"><strong ng-bind="sm.showNotice('hashify_file_name')" ></strong>Prepends a random set of numbers and letters to the filename. This is useful for preventing caching issues when uploading files that have the same filename.</p>
+                                    <p class="description"><strong ng-bind="sm.showNotice('hashify_file_name')" ></strong> Prepends a random set of numbers and letters to the filename. This is useful for preventing caching issues when uploading files that have the same filename.</p>
                                 </fieldset>
                             </td>
                         </tr> 
