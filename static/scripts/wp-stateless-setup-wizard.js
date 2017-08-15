@@ -429,7 +429,7 @@ jQuery(document).ready(function ($) {
 					callback({ok: false, task: 'createServiceAccountKey', message: stateless_l10n.something_went_wrong});
 				});
 			}],
-			saveServiceAccountKey: ['createServiceAccountKey', function(results, callback) {
+			saveServiceAccountKey: ['createServiceAccountKey', 'enableAPI', function(results, callback) {
 				jQuery.ajax({
 					url: ajaxurl,
 					method: "POST",
