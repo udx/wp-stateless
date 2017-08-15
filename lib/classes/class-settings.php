@@ -224,7 +224,7 @@ namespace wpCloud\StatelessMedia {
        * Add menu options
        */
       public function admin_menu() {
-        if($this->get('sm.hide_setup_assistant') != 'true'){
+        if($this->get('sm.hide_setup_assistant') != 'true' && empty($this->get('sm.key_json')) ){
           $this->setup_wizard_ui = add_media_page( __( 'Stateless Setup', ud_get_stateless_media()->domain ), __( 'Stateless Setup', ud_get_stateless_media()->domain ), 'manage_options', 'stateless-setup', array($this, 'setup_wizard_interface') );
         }
 

@@ -481,6 +481,18 @@ jQuery(document).ready(function ($) {
 			else if(results.task == 'createBucket'){
 				bucketDropdown.find('.circle-loader').addClass('load-complete');
 			}
+			else if(results.task == 'saveServiceAccountKey'){
+				// We have access token.
+				setupStepsBars.find('li')
+					.removeClass('wpStateLess-done active')
+					.filter('.step-google-login, .step-setup-project')
+					.addClass('wpStateLess-done');
+				setupSteps.removeClass('active')
+					.filter('.step-final')
+					.addClass('active');
+				comboBox.removeClass('loading');
+
+			}
 
 		});
 				
