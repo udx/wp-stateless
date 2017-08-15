@@ -56,6 +56,7 @@
                                 <fieldset>
                                     <legend class="screen-reader-text"><span><?php _e( 'General', ud_get_stateless_media()->domain ); ?></span></legend>
                                     <h4><?php _e( 'Mode', ud_get_stateless_media()->domain ); ?></h4>
+                                    <p class="description"><strong ng-bind="sm.showNotice('mode')" ></strong></p>
                                     <?php if(is_network_admin()): ?>
                                     <p class="sm-mode">
                                         <label for="sm_mode_disabled"><input id="sm_mode_not_override" type="radio" name="sm[mode]" value="" ng-checked="sm.mode == ''" ng-disabled="sm.readonly.mode"><?php _e( 'Don\'t override', ud_get_stateless_media()->domain ); ?><small class="description"><?php _e( 'Don\'t override.', ud_get_stateless_media()->domain ); ?></small></label>
@@ -73,7 +74,6 @@
                                     <p class="sm-mode">
                                         <label for="sm_mode_stateless"><input id="sm_mode_stateless" type="radio" name="sm[mode]" value="stateless" ng-checked="sm.mode == 'stateless'" ng-disabled="sm.readonly.mode"><?php _e( 'Stateless', ud_get_stateless_media()->domain ); ?><small class="description"><?php _e( 'Store and serve media files with Google Cloud Storage only. Media files are not stored locally.', ud_get_stateless_media()->domain ); ?></small></label>
                                     </p>
-                                    <p class="description"><strong ng-bind="sm.showNotice('mode')" ></strong></p>
                                     <hr>
 
                                     <h4><?php _e( 'File URL Replacement', ud_get_stateless_media()->domain ); ?></h4>
@@ -121,7 +121,7 @@
                                     <h4><?php _e( 'Bucket Folder', ud_get_stateless_media()->domain ); ?></h4>
                                     <p>
                                         <label for="bucket_folder_name">
-                                            <input name="sm[root_dir]" type="text" id="bucket_folder_name" class="regular-text ltr" ng-model="sm.root_dir" ng-disabled="sm.readonly.root_dir">
+                                            <input name="sm[root_dir]" type="text" id="bucket_folder_name" class="regular-text ltr" ng-model="sm.root_dir" ng-disabled="sm.readonly.root_dir" ng-change="sm.generatePreviewUrl()">
                                         </label>
                                     </p>
                                     <p class="description"><strong ng-bind="sm.showNotice('root_dir')" ></strong> <?php _e( 'If you would like files to be uploaded into a particular folder within the bucket, define that path here.', ud_get_stateless_media()->domain ); ?></p>
@@ -212,7 +212,7 @@
                                             <option value="false"><?php _e( 'Disable', ud_get_stateless_media()->domain ); ?></option>
                                         </select>
                                     </p>
-                                    <p class="description"><strong ng-bind="sm.showNotice('hashify_file_name')" ></strong><?php _e( 'Prepends a random set of numbers and letters to the filename. This is useful for preventing caching issues when uploading files that have the same filename.', ud_get_stateless_media()->domain ); ?></p>
+                                    <p class="description"><strong ng-bind="sm.showNotice('hashify_file_name')" ></strong> <?php _e( 'Prepends a random set of numbers and letters to the filename. This is useful for preventing caching issues when uploading files that have the same filename.', ud_get_stateless_media()->domain ); ?></p>
                                 </fieldset>
                             </td>
                         </tr> 

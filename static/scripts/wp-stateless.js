@@ -533,9 +533,10 @@ var wpStatelessApp = angular.module('wpStatelessApp', [])
       host = 'http://';  // bucketname will be host
     }
     host += $scope.sm.bucket ? $scope.sm.bucket : '{bucket-name}';
+    var rootdir = $scope.sm.root_dir ? $scope.sm.root_dir + '/' : '';
     var subdir = $scope.sm.organize_media == '1' ? $filter('date')(Date.now(), 'yyyy/MM') + '/' : '';
     var hash = $scope.sm.hashify_file_name == 'true' ? Date.now().toString(36) + '-' : '';
-    $scope.sm.preview_url = host + "/" + subdir + hash + "your-image-name.jpeg";
+    $scope.sm.preview_url = host + "/" + rootdir + subdir + hash + "your-image-name.jpeg";
   }
 
   $scope.sm.generatePreviewUrl();

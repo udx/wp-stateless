@@ -237,7 +237,7 @@ namespace wpCloud\StatelessMedia {
        * Add menu options
        */
       public function network_admin_menu($slug) {
-        $this->setup_wizard_ui = add_submenu_page( 'settings.php', __( 'Stateless Media', ud_get_stateless_media()->domain ), __( 'Stateless Media', ud_get_stateless_media()->domain ), 'manage_options', 'stateless-setup', array($this, 'setup_wizard_interface') );
+        $this->setup_wizard_ui = add_submenu_page( 'settings.php', __( 'Stateless Setup', ud_get_stateless_media()->domain ), __( 'Stateless Setup', ud_get_stateless_media()->domain ), 'manage_options', 'stateless-setup', array($this, 'setup_wizard_interface') );
         $this->stateless_settings = add_submenu_page( 'settings.php', __( 'Stateless Settings', ud_get_stateless_media()->domain ), __( 'Stateless Settings', ud_get_stateless_media()->domain ), 'manage_options', 'stateless-settings', array($this, 'settings_interface') );
       }
 
