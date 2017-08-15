@@ -1,3 +1,12 @@
+#### 2.0.0
+* NEW - Added stateless mode.
+* NEW - Dedicated settings panel.
+* NEW - Setup assistant for initial plugin activation.
+* NEW - Support for replacing default GCS domain with a custom domain.
+* ENHANCEMENT - Expanded network setting overrides.
+* ENHANCEMENT - Expanded wp-config constants.
+* ENHANCEMENT - Relocated synchronization and regeneration tools to the new settings panel.
+
 #### 1.9.2
 * Improvements to onboarding process. [wip]
 * Added Featre Flag support for globally enabling/disabling functionality.
