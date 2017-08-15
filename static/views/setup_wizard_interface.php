@@ -15,8 +15,8 @@ $bucket_id      = trim("stateless-" . substr($id, 0, 20), '-');
                 <div class="row">
                     <div class="col-xs-12 text-center">
                         <div class="wpStateLess-welcome-text">
-                            <h1><?php _e( 'Stateless Setup', ud_get_stateless_media()->domain ); ?></h1>
-                            <p><?php _e( 'Save your media files at one place. Start your free trial now', ud_get_stateless_media()->domain ); ?></p>
+                            <h1><?php _e( 'WP-Stateless Setup', ud_get_stateless_media()->domain ); ?></h1>
+                            <p><?php _e( 'Get up and running in less than 90 seconds! Just follow these three steps.', ud_get_stateless_media()->domain ); ?></p>
                         </div>
                     </div>
                 </div>
@@ -30,8 +30,8 @@ $bucket_id      = trim("stateless-" . substr($id, 0, 20), '-');
                         <div class="wpStateLess-setup-step">
                             <div class="wpStateLess-setup-step-bars">
                                 <ul>
-                                    <li class="step-google-login"> <span>1</span> <?php _e( 'Login to Google', ud_get_stateless_media()->domain ); ?></li>
-                                    <li class="step-setup-project"> <span>2</span> <?php _e( 'Setup Project', ud_get_stateless_media()->domain ); ?></li>
+                                    <li class="step-google-login"> <span>1</span> <?php _e( 'Google Login', ud_get_stateless_media()->domain ); ?></li>
+                                    <li class="step-setup-project"> <span>2</span> <?php _e( 'Project &amp; Bucket', ud_get_stateless_media()->domain ); ?></li>
                                     <li class="step-final"> <span><?php echo number_format_i18n(3);?></span> <?php _e( 'Complete', ud_get_stateless_media()->domain ); ?></li>
                                 </ul>
                             </div>
@@ -39,15 +39,15 @@ $bucket_id      = trim("stateless-" . substr($id, 0, 20), '-');
                                 <div class="wpStateLess-s-step active step-google-login">
                                     <img src="<?php echo ud_get_stateless_media()->path( 'static/images/authenticate-login.png'); ?>" alt=""/>
                                     <div class="wpStateLess-step-title">
-                                        <h3><?php _e( 'Autheticate the Login', ud_get_stateless_media()->domain ); ?></h3>
-                                        <p><?php _e( 'Signin with your google account to setup the plguin', ud_get_stateless_media()->domain ); ?></p>
+                                        <h3><?php _e( 'Google Login', ud_get_stateless_media()->domain ); ?></h3>
+                                        <p><?php _e( 'Login with the Google account you want associated with this website.', ud_get_stateless_media()->domain ); ?></p>
                                     </div>
                                     <a id="google-login" href="https://api.usabilitydynamics.com/product/stateless/v1/auth/google?state=<?php echo urlencode(ud_get_stateless_media()->get_settings_page_url('?page=stateless-setup&step=google-login') ); ?>" class="btn btn-googly-red"><?php _e( 'Google Login', ud_get_stateless_media()->domain ); ?></a>
                                 </div>
                                 <div class="wpStateLess-s-step step-setup-project">
                                     <div class="wpStateLess-step-title">
                                         <h3><?php _e( 'Set Project &amp; Bucket', ud_get_stateless_media()->domain ); ?></h3>
-                                        <p><?php _e( 'Create a Google Cloud Project and bucket that will store your WordPress media.', ud_get_stateless_media()->domain ); ?></p>
+                                        <p><?php _e( 'Create a Google Cloud project and bucket that will store your WordPress media files.', ud_get_stateless_media()->domain ); ?></p>
                                     </div>
                                     <div class="wpStateLess-userinfo">
                                         <div class="photo-wrapper">
@@ -157,10 +157,10 @@ $bucket_id      = trim("stateless-" . substr($id, 0, 20), '-');
                                 <div class="wpStateLess-s-step step-final">
                                     <img src="<?php echo ud_get_stateless_media()->path( 'static/images/setup-complete.png'); ?>" alt="">
                                      <div class="wpStateLess-step-title">
-                                        <h3><?php _e( 'Congrats, Your Setup is Complete', ud_get_stateless_media()->domain ); ?></h3>
-                                        <p><?php _e( 'Any media file you upload to WordPress will now be uploaded to Google and served to your users from Google servers!', ud_get_stateless_media()->domain ); ?></p>
+                                        <h3><?php _e( 'Setup is Complete!', ud_get_stateless_media()->domain ); ?></h3>
+                                        <p><?php _e( 'Any media file you upload to WordPress will now be uploaded to Google Cloud Storage and served to your users from Google servers!', ud_get_stateless_media()->domain ); ?></p>
                                     </div>
-                                    <p><?php printf(__( 'To further customize your stateless media setup, visit the <a class="btn-link" href="%s">settings panel!</a>', ud_get_stateless_media()->domain ), ud_get_stateless_media()->get('page_url.stateless_settings')); ?></p>
+                                    <p><?php printf(__( 'To further customize your WP-Stateless setup, visit the <a class="btn-link" href="%s"> WP-Stateless settings panel!</a>', ud_get_stateless_media()->domain ), ud_get_stateless_media()->get('page_url.stateless_settings')); ?></p>
                                     <a href="<?php echo admin_url('media-new.php');?>" class="btn btn-green"><?php _e( 'Upload Something!', ud_get_stateless_media()->domain ); ?></a>
                                 </div>
                             </div>

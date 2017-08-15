@@ -1,6 +1,6 @@
 <div class="wrap" ng-app="wpStatelessApp">
     <div id="stateless-settings-page-title">
-        <h2><?php _e( 'WP-Stateless', ud_get_stateless_media()->domain ); ?></h2>
+        <h1><?php _e( 'WP-Stateless', ud_get_stateless_media()->domain ); ?></h1>
         <div class="description"><?php _e( 'Upload and serve your WordPress media files from Google Cloud Storage.', ud_get_stateless_media()->domain ); ?></div>
     </div>
     <h2 class="nav-tab-wrapper">  
@@ -30,7 +30,7 @@
                                             <option value="true"><?php _e( 'Hidden', ud_get_stateless_media()->domain ); ?></option>
                                         </select>
                                     </p>
-                                    <p class="description"></p>                  
+                                    <p class="description">Control the visibility and access of the WP-Stateless settings panel within individual network sites.</p>                  
                                 </fieldset>
                             </td>
                         </tr>
@@ -45,7 +45,7 @@
                                             <option value="true"><?php _e( 'Hidden', ud_get_stateless_media()->domain ); ?></option>
                                         </select>
                                     </p>
-                                    <p class="description"></p>                  
+                                    <p class="description">Control the visibility and access of the WP-Stateless setup assistant within individual network sites.</p>                  
                                 </fieldset>
                             </td>
                         </tr>
@@ -181,9 +181,7 @@
                                     </p>
                                     <p class="description">
                                     <strong ng-bind="sm.showNotice('custom_domain')" ></strong> <br>
-                                    <?php printf(__( 'Replace the default GCS domain with your own custom domain. This will require you to <a href="%s" target="_blank">configure a CNAME</a>.', ud_get_stateless_media()->domain ), 'https://cloud.google.com/storage/docs/xml-api/reference-uris#cname'); ?><br>
-                                    <?php _e( '<strong>Note:</strong> Bucket name and Domain must be same to make this work.<br>', ud_get_stateless_media()->domain ); ?>
-                                    <?php _e( '<strong>Note:</strong> You won\'t be able to use <strong>https</strong> if you use custom domain.', ud_get_stateless_media()->domain ); ?>
+                                    <?php printf(__( 'Replace the default GCS domain with your own custom domain. This will require you to <a href="%s" target="_blank">configure a CNAME</a>. Be advised that the bucket name and domain name must match exactly and HTTPS is not supported with a custom domain.', ud_get_stateless_media()->domain ), 'https://cloud.google.com/storage/docs/xml-api/reference-uris#cname'); ?>
                                     </p>
                                     <hr>
 
@@ -199,8 +197,7 @@
                                         </select>
                                     </p>
                                     <p class="description">
-                                        <p><?php _e( 'Organize uploads into year and month based folders.', ud_get_stateless_media()->domain ); ?></p>
-                                        <p class=""><?php _e( '<b>Note:</b> This will update default wordpress setting ( <b>Organize my uploads into month- and year-based folders</b> in <b>Settings</b> >> <b>Media</b> page).', ud_get_stateless_media()->domain ); ?></p>
+                                    <?php printf(__( 'Organize uploads into year and month based folders. This will update the <a href="%s">related WordPress media setting</a>.', ud_get_stateless_media()->domain ), admin_url("options-media.php")); ?>
                                     </p>
                                     <?php endif; ?>    
 
