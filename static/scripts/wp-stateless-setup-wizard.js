@@ -60,15 +60,15 @@ jQuery(document).ready(function ($) {
 			empty:{
 				break: true,
 				regex: /.+/,
-				errorMessage: 'Project name can\'t be empty.',
+				errorMessage: stateless_l10n.project_cant_be_empty,
 			},
 			length:{
 				regex: /^.{5,30}$/,
-				errorMessage: 'Project name must be between 5 and 30 characters.',
+				errorMessage: stateless_l10n.project_length_notice,
 			},
 			char:{
 				regex: /^[a-zA-Z0-9-'"\s!]+$/,
-				errorMessage: 'Project name has invalid characters. Enter letters, numbers, quotes, hyphens, spaces or exclamation points.'
+				errorMessage: stateless_l10n.project_invalid_char
 			},
 		},
 		id: {
@@ -89,16 +89,16 @@ jQuery(document).ready(function ($) {
 			empty:{
 				break: true,
 				regex: /.+/,
-				errorMessage: 'Bucket name can\'t be empty.',
+				errorMessage: stateless_l10n.bucket_cant_be_empty,
 			},
 			length:{
 				regex: /^.{5,30}$/,
-				errorMessage: 'Bucket name must be between 5 and 30 characters.',
+				errorMessage: stateless_l10n.bucket_length_notice,
 				break: true
 			},
 			char:{
 				regex: /^[a-z0-9][a-z0-9\-]*[a-z0-9]$/,
-				errorMessage: 'A bucket name can contain lowercase alphanumeric characters, hyphens, and underscores. Bucket names must start and end with an alphanumeric character.',
+				errorMessage: stateless_l10n.bucket_invalid_char,
 			},
 		},
 	});
@@ -107,7 +107,7 @@ jQuery(document).ready(function ($) {
 			empty:{
 				break: true,
 				regex: /.+/,
-				errorMessage: 'Select a billing account.',
+				errorMessage: stateless_l10n.select_billing_account,
 			},
 		},
 	});
@@ -303,18 +303,18 @@ jQuery(document).ready(function ($) {
 				if(!wp.stateless.projects[projectId]){
 					wp.stateless.createProject({"projectId": projectId, "name": projectName})
 					.done(function(response) {
-						callback(null, {ok: true, task: 'createProject', action: 'project_created', message: "Project Created", operation: response.name});
+						callback(null, {ok: true, task: 'createProject', action: 'project_created', message: stateless_l10n.project_created, operation: response.name});
 					}).fail(function(response) {
 						response = response.responseJSON || {};
 						if(response && typeof response.error != 'undefined' && typeof response.error.status != 'undefined' && response.error.status == 'ALREADY_EXISTS'){
-							callback(null, {ok: true, task: 'createProject', action: 'project_exists', message: "Project Exists"});
+							callback(null, {ok: true, task: 'createProject', action: 'project_exists', message: stateless_l10n.project_exists});
 						}
 						else{
 							callback({ok: false, task: 'createProject', action: 'failed', message: response.error});
 						}
 					});
 				}else{
-					callback(null, {ok: true, task: 'createProject', action: 'project_exists', message: "Project Exists"});
+					callback(null, {ok: true, task: 'createProject', action: 'project_exists', message: stateless_l10n.project_exists});
 				}
 			},
 			createProjectProgress: ['createProject', async.retryable({times: 10, interval: 1500, errorFilter: function(err) {
@@ -324,25 +324,25 @@ jQuery(document).ready(function ($) {
 				if( results['createProject'].action == 'project_created'){
 					wp.stateless.createProjectProgress(results['createProject'].operation)
 					.done(function(argument) {
-						callback(null, {ok: true, task: 'createProjectProgress', action: 'project_creation_complete', message: "Project creation complete."});
+						callback(null, {ok: true, task: 'createProjectProgress', action: 'project_creation_complete', message: stateless_l10n.project_creation_complete});
 					}).fail(function(response) {
 						if(typeof response.error != 'undefined' && typeof response.error.message != 'undefined')
 							callback({ok: false, task: 'createProjectProgress', action: 'failed', message: response.error.message});
 						else
-							callback({ok: false, task: 'createProjectProgress', action: 'retry', message: "Project creation fieled."});
+							callback({ok: false, task: 'createProjectProgress', action: 'retry', message: stateless_l10n.project_creation_failed});
 					});
 				}
 				else{
-					callback(null, {ok: true, task: 'createProjectProgress', action: 'old_project', message: "Existing project"});
+					callback(null, {ok: true, task: 'createProjectProgress', action: 'old_project', message: stateless_l10n.project_exists});
 				}
 			})],
 			enableAPI: ['createProjectProgress', function(results, callback) {
 				//if( results['createProject'].action == 'project_created'){
 					wp.stateless.enableAPI(projectId)
 					.done(function(argument) {
-						callback(null, {ok: true, task: 'enableAPI', action: 'service_enabled', message: "Google Cloud Storage JSON API Service Enabled"});
+						callback(null, {ok: true, task: 'enableAPI', action: 'service_enabled', message: stateless_l10n.json_api_enabled});
 					}).fail(function(response) {
-						callback({ok: false, task: 'enableAPI', action: 'failed', message: "Google Cloud Storage JSON API Service fieled."});
+						callback({ok: false, task: 'enableAPI', action: 'failed', message: stateless_l10n.json_api_enabled_failed});
 					});
 				//}
 				//else{
@@ -353,13 +353,13 @@ jQuery(document).ready(function ($) {
 				if( typeof wp.stateless.projects[projectId] == 'undefined' || typeof wp.stateless.projects[projectId]['billingInfo'] == 'undefined'){
 					wp.stateless.updateProjectBillingInfo({"projectID": projectId, "accountName": billingAccount})
 					.done(function(argument) {
-						callback(null, {ok: true, task: 'updateBilltingInfo', message: "Billing Enabled"});
+						callback(null, {ok: true, task: 'updateBilltingInfo', message: stateless_l10n.billing_enabled});
 					}).fail(function(response) {
-						callback({ok: false, task: 'updateBilltingInfo', message: "Something went wrong"});
+						callback({ok: false, task: 'updateBilltingInfo', message: stateless_l10n.something_went_wrong});
 					});
 				}
 				else{
-					callback(null, {ok: true, task: 'updateBilltingInfo', message: "Billing Info"});
+					callback(null, {ok: true, task: 'updateBilltingInfo', message: stateless_l10n.billing_info});
 				}
 			}],
 			createBucket: ['updateBilltingInfo', async.retryable({times: 10, interval: 1500}, function(results, callback){
@@ -367,20 +367,20 @@ jQuery(document).ready(function ($) {
 					// Bucket didn't exist.
 					wp.stateless.createBucket({"projectId": projectId, "name": bucketId})
 					.done(function(argument) {
-						callback(null, {ok: true, task: 'createBucket', message: "Bucket Created"});
+						callback(null, {ok: true, task: 'createBucket', message: stateless_l10n.bucket_created});
 					}).fail(function(response) {
 						response = response.responseJSON;
 						if(response && typeof response.error != 'undefined' && typeof response.error.code != 'undefined' && response.error.code == 409){
 							callback(null, {ok: true, task: 'createBucket', message: response.error.message});
 						}
 						else{
-							callback({ok: true, task: 'createBucket', message: "Something went wrong"});
+							callback({ok: true, task: 'createBucket', message: stateless_l10n.something_went_wrong});
 						}
 					});
 				}
 				else{
 					// Bucket exist
-					callback(null, {ok: true, task: 'bucket', message: "Bucket"});
+					callback(null, {ok: true, task: 'bucket', message: stateless_l10n.bucket_exists});
 				}
 			})],
 			createServiceAccount: ['createProjectProgress', function(results, callback){
@@ -390,7 +390,7 @@ jQuery(document).ready(function ($) {
 					var accountFound = false;
 					jQuery.each(serviceAccounts, function(index, item) {
 						if(item.displayName == bucketName || item.email.replace(/@.*/, '') == serviceAccountId){
-							callback(null, {ok: true, task: 'createServiceAccount', email: item.email, message: "Service Account Exists"});
+							callback(null, {ok: true, task: 'createServiceAccount', email: item.email, message: stateless_l10n.service_account_exist});
 							accountFound = true;
 							return false;
 						}
@@ -404,9 +404,9 @@ jQuery(document).ready(function ($) {
 					'accountId': serviceAccountId,
 					'name': serviceAccountName,
 				}).done(function(createdSerciceAccount){
-					callback(null, {ok: true, task: 'createServiceAccount', email: createdSerciceAccount.email, message: "Service Account Created"});
+					callback(null, {ok: true, task: 'createServiceAccount', email: createdSerciceAccount.email, message: stateless_l10n.service_account_created});
 				}).fail(function(response) {
-					callback({ok: false, task: 'createServiceAccount', message: "Something went wrong"});
+					callback({ok: false, task: 'createServiceAccount', message: stateless_l10n.something_went_wrong});
 				});
 			}],
 			insertBucketAccessControls: ['createBucket', 'createServiceAccount', async.retryable({times: 5, interval: 1500}, function(results, callback) {
@@ -414,9 +414,9 @@ jQuery(document).ready(function ($) {
 					"bucket": bucketId,
 					"user": results['createServiceAccount'].email,
 				}).done(function(responseData){
-					callback(null, {ok: true, task: 'insertBucketAccessControls', email: responseData.email, message: "Service Account Created"});
+					callback(null, {ok: true, task: 'insertBucketAccessControls', email: responseData.email, message: stateless_l10n.service_account_created});
 				}).fail(function(response) {
-					callback({ok: false, task: 'insertBucketAccessControls', message: "Something went wrong"});
+					callback({ok: false, task: 'insertBucketAccessControls', message: stateless_l10n.something_went_wrong});
 				});
 			})],
 			createServiceAccountKey: ['insertBucketAccessControls', function(results, callback) {
@@ -424,9 +424,9 @@ jQuery(document).ready(function ($) {
 					"project": projectId,
 					"account": results['insertBucketAccessControls'].email
 				}).done(function(ServiceAccountKey){
-					callback(null, {ok: true, task: 'createServiceAccountKey', privateKeyData: ServiceAccountKey.privateKeyData, message: "Service Account Key Created"});
+					callback(null, {ok: true, task: 'createServiceAccountKey', privateKeyData: ServiceAccountKey.privateKeyData, message: stateless_l10n.service_account_key_created});
 				}).fail(function(response) {
-					callback({ok: false, task: 'createServiceAccountKey', message: "Something went wrong"});
+					callback({ok: false, task: 'createServiceAccountKey', message: stateless_l10n.something_went_wrong});
 				});
 			}],
 			saveServiceAccountKey: ['createServiceAccountKey', function(results, callback) {
@@ -445,50 +445,13 @@ jQuery(document).ready(function ($) {
 					}//)
 				}).done(function(response) {
 					if(typeof response.success != undefined && response.success == true){
-						callback(null, {ok: true, task: 'saveServiceAccountKey', message: "Service Account Key Saved"});
+						callback(null, {ok: true, task: 'saveServiceAccountKey', message: stateless_l10n.service_account_key_saved});
 					}
 					else{
-						callback({ok: false, task: 'saveServiceAccountKey', message: "Something went wrong"});
+						callback({ok: false, task: 'saveServiceAccountKey', message: stateless_l10n.something_went_wrong});
 					}
 				}).fail(function(response) {
-					callback({ok: false, task: 'saveServiceAccountKey', message: "Something went wrong"});
-				});
-			}],
-			isAPIEnabled: ['saveServiceAccountKey', 'enableAPI', function(results, callback) {
-				if(results['enableAPI'].action == 'service_enabled'){
-					callback(null, {ok: true, task: 'isAPIEnabled', enableAPI: 'service_enabled', message: "Service Enabled"});
-					return;
-				}
-
-				jQuery.ajax({
-					url: ajaxurl,
-					// We need to set header because we have se default header for google api auth.
-					headers: {
-						"content-type": "application/x-www-form-urlencoded",
-					},
-					data: {//JSON.stringify({
-						'action': 'stateless_wizard_is_connected_to_gs',
-					}//)
-				}).done(function(response) {
-					if(typeof response.success != undefined && response.success == true){
-						if(typeof response.enableAPI != undefined && response.enableAPI == 'retry'){
-							wp.stateless.enableAPI(projectId)
-							.done(function(argument) {
-								callback(null, {ok: true, task: 'isAPIEnabled', enableAPI: 'service_enabled', message: "Service Enabled"});
-							}).fail(function(response) {
-								callback(null, {ok: true, task: 'isAPIEnabled', enableAPI: 'failed', message: "Service not Enabled"});
-							});
-						}
-						else{
-							callback(null, {ok: true, task: 'isAPIEnabled', message: "Service not Enabled"});
-						}
-						
-					}
-					else{
-						callback({ok: false, task: 'isAPIEnabled', message: "Service not Enabled"});
-					}
-				}).fail(function(response) {
-					callback({ok: false, task: 'isAPIEnabled', message: "Service not Enabled"});
+					callback({ok: false, task: 'saveServiceAccountKey', message: stateless_l10n.something_went_wrong});
 				});
 			}]
 		}, function(err, results) {
@@ -517,18 +480,6 @@ jQuery(document).ready(function ($) {
 			}
 			else if(results.task == 'createBucket'){
 				bucketDropdown.find('.circle-loader').addClass('load-complete');
-			}
-			else if(results.task == 'isAPIEnabled' || (typeof results['isAPIEnabled'] != 'undefined' && results['isAPIEnabled'].ok == true)){
-				// We have access token.
-				setupStepsBars.find('li')
-					.removeClass('wpStateLess-done active')
-					.filter('.step-google-login, .step-setup-project')
-					.addClass('wpStateLess-done');
-				setupSteps.removeClass('active')
-					.filter('.step-final')
-					.addClass('active');
-				comboBox.removeClass('loading');
-
 			}
 
 		});
