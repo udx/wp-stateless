@@ -149,11 +149,12 @@ namespace wpCloud\StatelessMedia {
         /**
          * JSON key file path
          */
+        $google_app_key_file = getenv('GOOGLE_APPLICATION_CREDENTIALS', true) ?: getenv('GOOGLE_APPLICATION_CREDENTIALS');
 
         /* Use constant value for JSON key file path, if set. */
-        if( defined( 'WP_STATELESS_MEDIA_KEY_FILE_PATH' ) ) {
+        if (defined('WP_STATELESS_MEDIA_KEY_FILE_PATH') || $google_app_key_file !== false) {
           /* Maybe fix the path to p12 file. */
-          $key_file_path = WP_STATELESS_MEDIA_KEY_FILE_PATH;
+          $key_file_path = (defined('WP_STATELESS_MEDIA_KEY_FILE_PATH')) ? WP_STATELESS_MEDIA_KEY_FILE_PATH : $google_app_key_file;
 
           if( !empty( $key_file_path ) ) {
             $upload_dir = wp_upload_dir();

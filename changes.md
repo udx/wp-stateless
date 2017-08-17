@@ -1,3 +1,6 @@
+#### 2.1.0
+* NEW - Added support for <code>GOOGLE_APPLICATION_CREDENTIALS</code> environment variable.
+
 #### 2.0.0
 * NEW - Added stateless mode.
 * NEW - Dedicated settings panel.
