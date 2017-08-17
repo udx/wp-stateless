@@ -46,6 +46,11 @@ Setting a setting via constants will prevent ability to make changes in control 
 * WP_STATELESS_MEDIA_MODE - Set to "disabled", "backup" or "cdn" to configure mode. 
 * WP_STATELESS_MEDIA_KEY_FILE_PATH - Absolute, or relative to web-root, path to JSON key file.
 
+### Available Environment Variables
+Setting a setting via environment variables will prevent ability to make changes in control panel.
+
+* GOOGLE_APPLICATION_CREDENTIALS - Absolute, or relative to web-root, path to JSON key file.
+
 ### Response Headers
 
 * x-goog-meta-object-id
