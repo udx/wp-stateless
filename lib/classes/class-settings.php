@@ -26,7 +26,7 @@ namespace wpCloud\StatelessMedia {
           'on_fly'                 => array('WP_STATELESS_MEDIA_ON_FLY', 'false'), 
           'bucket'                 => array('WP_STATELESS_MEDIA_BUCKET', ''), 
           'root_dir'               => array('WP_STATELESS_MEDIA_ROOT_DIR', ''), 
-          'key_json'               => array('WP_STATELESS_MEDIA_JSON_KEY', ''), 
+          'key_json'               => array('WP_STATELESS_MEDIA_KEY_FILE_PATH', ''),
           'cache_control'          => array('WP_STATELESS_MEDIA_CACHE_CONTROL', ''), 
           'delete_remote'          => array('WP_STATELESS_MEDIA_DELETE_REMOTE', 'true'), 
           'custom_domain'          => array('WP_STATELESS_MEDIA_CUSTOM_DOMAIN', ''), 
@@ -42,6 +42,7 @@ namespace wpCloud\StatelessMedia {
       private $strings = array(
           'network' => 'Currently configured via Network Settings.',
           'constant' => 'Currently configured via a constant.',
+          'environment' => 'Currently configured via an environment variable.',
         );
 
       /**
@@ -94,6 +95,7 @@ namespace wpCloud\StatelessMedia {
       public function refresh() {
         $constant_mode = false;
         $upload_data = wp_upload_dir();
+        $google_app_key_file = getenv('GOOGLE_APPLICATION_CREDENTIALS', true) ?: getenv('GOOGLE_APPLICATION_CREDENTIALS');
 
         foreach ($this->settings as $option => $array) {
           $value    = '';
@@ -112,6 +114,11 @@ namespace wpCloud\StatelessMedia {
           if(defined($constant)){
             $value = constant($constant);
             $this->set( "sm.readonly.{$option}", "constant" );
+          }
+          // For key_json, check enviroment variable exists
+          elseif ($option == 'key_json' && $google_app_key_file !== false) {
+            $value = $google_app_key_file;
+            $this->set("sm.readonly.{$option}", "environment");
           }
           // Getting network settings
           elseif(is_multisite() && $option != 'organize_media'){
@@ -137,6 +144,9 @@ namespace wpCloud\StatelessMedia {
           // If constant is set then override by constant
           if(defined($constant)){
             $value = constant($constant);
+          } // For key_json, check enviroment variable exists
+          elseif ($option == 'key_json' && $google_app_key_file !== false) {
+            $value = $google_app_key_file;
           }
           // Getting network settings
           elseif(is_multisite()){
@@ -149,8 +159,6 @@ namespace wpCloud\StatelessMedia {
         /**
          * JSON key file path
          */
-        $google_app_key_file = getenv('GOOGLE_APPLICATION_CREDENTIALS', true) ?: getenv('GOOGLE_APPLICATION_CREDENTIALS');
-
         /* Use constant value for JSON key file path, if set. */
         if (defined('WP_STATELESS_MEDIA_KEY_FILE_PATH') || $google_app_key_file !== false) {
           /* Maybe fix the path to p12 file. */
