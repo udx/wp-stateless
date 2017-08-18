@@ -5,7 +5,7 @@ Tags: google, google cloud, google cloud storage, cdn, uploads, media, stateless
 License: GPLv2 or later
 Requires at least: 4.0
 Tested up to: 4.8.1
-Stable tag: v2.0.0-rc1
+Stable tag: 2.0.0
 
 Upload and serve your WordPress media files from Google Cloud Storage.
 
