@@ -146,7 +146,6 @@ namespace wpCloud\StatelessMedia {
 
           if ( $googleSDKVersionConflictError = get_transient( "wp_stateless_google_sdk_conflict" ) ) {
             $this->errors->add( $googleSDKVersionConflictError, 'warning' );
-            delete_transient( 'wp_stateless_google_sdk_conflict' );
           }
 
           /** Temporary fix to WP 4.4 srcset feature **/
