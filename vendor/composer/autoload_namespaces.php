@@ -6,5 +6,5 @@ $vendorDir = dirname(dirname(__FILE__));
 $baseDir = dirname($vendorDir);
 
 return array(
-    'Google_' => array($vendorDir . '/usabilitydynamics/google-api-php-client/src'),
+    'ChromePhp' => array($vendorDir . '/ccampbell/chromephp'),
 );

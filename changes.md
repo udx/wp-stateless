@@ -1,3 +1,7 @@
+#### 2.0.1
+* ENHANCEMENT - Added compatibility with Google SDK v1.x version to prevent conflicts with third-party plugins.
+* ENHANCEMENT - Included missing enhancement: Google SDK was moved from vendor dir. So it's not loaded on every page load anymore, but only when it's required.
+
 #### 2.0.0
 * NEW - Added stateless mode.
 * NEW - Dedicated settings panel.
@@ -8,14 +12,11 @@
 * ENHANCEMENT - Relocated synchronization and regeneration tools to the new settings panel.
 
 #### 1.9.2
-* Improvements to onboarding process. [wip]
-* Added Featre Flag support for globally enabling/disabling functionality.
-* Added ChromeLogger and a utility method for using it.
-* Added REST API scaffold for [wp-stateless/v1/status] and [wp-stateless/v1/jobs].
-* Added [wp-stateless-setup] JavaScript library for setup UX.
-
-#### 1.9.1
-* Extended Network Settings 
+* ENHANCEMENT - Added ability to modify default bucket link via 'wp_stateless_bucket_link' filter.
+* ENHANCEMENT - Added checking of connection to GCS once per four hours instead of doing it on every page load.
+* ENHANCEMENT - Google SDK was moved from vendor dir. So it's not loaded on every page load anymore, but only when it's required.
+* ENHANCEMENT - Updated Composer Autoload logic.
+* ENHANCEMENT - Reverted all changes included to 1.9.1 version because of conflicts.
 
 #### 1.9.0
 * Added new ability to define cacheControl for remote objects.

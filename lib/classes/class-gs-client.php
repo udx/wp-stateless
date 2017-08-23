@@ -63,10 +63,37 @@ namespace wpCloud\StatelessMedia {
         $this->bucket = $args[ 'bucket' ];
         $this->key_json = json_decode($args['key_json'], 1);
 
+        // May be Loading Google SDK....
+        include_once( ud_get_stateless_media()->path('lib/Google/vendor/autoload.php', 'dir') );
+
+        /**
+        $reflector = new \ReflectionClass('Google_Client');
+        echo $reflector->getFileName();
+        die();
+        //*/
+
         /* Initialize our client */
         $this->client = new Google_Client();
 
-        $this->client->setAuthConfig($this->key_json);
+        // We're supporting Google SDK 1.X version since
+        // The plugins which also are using Google SDK may have its old version
+        // what may cause conflicts
+        //
+        if( version_compare( $this->client->getLibraryVersion(), '2.0', '<'  ) ) {
+          $wp_upload_dir = wp_upload_dir();
+          $dir = $wp_upload_dir[ 'path' ];
+          $filename = md5( wp_generate_password() ) . '.tmp';
+          $path = wp_normalize_path( $dir . '/' .$filename );
+          @file_put_contents( $path, json_encode( $this->key_json ) );
+          $cred = $this->client->loadServiceAccountJson( $path, ['https://www.googleapis.com/auth/devstorage.full_control'] );
+          $this->client->setAssertionCredentials($cred);
+          if ($this->client->getAuth()->isAccessTokenExpired()) {
+            $this->client->getAuth()->refreshTokenWithAssertion($cred);
+          }
+          @unlink( $path );
+        } else {
+          $this->client->setAuthConfig($this->key_json);
+        }
 
         if( isset( $current_blog ) && isset( $current_blog->domain ) ) {
           $this->client->setApplicationName( $current_blog->domain );
@@ -78,6 +105,7 @@ namespace wpCloud\StatelessMedia {
 
         /* Now, Initialize our Google Storage Service */
         $this->service = new Google_Service_Storage( $this->client );
+
       }
 
       /**
@@ -269,7 +297,12 @@ namespace wpCloud\StatelessMedia {
        */
       public function is_connected() {
         try {
-          $bucket = $this->service->buckets->get( $this->bucket );
+          /**
+          $reflector = new \ReflectionClass('Google_Http_REST');
+          echo $reflector->getFileName();
+          die();
+          //*/
+          $this->service->buckets->get( $this->bucket );
         } catch( Exception $e ) {
           return $e;
         }
