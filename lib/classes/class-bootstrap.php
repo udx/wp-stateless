@@ -903,7 +903,7 @@ namespace wpCloud\StatelessMedia {
        */
       public function is_connected_to_gs() {
 
-        //$trnst = get_transient( 'sm::is_connected_to_gs' );
+        $trnst = get_transient( 'sm::is_connected_to_gs' );
 
         if ( empty($trnst) || false === $trnst || !isset( $trnst[ 'hash' ] ) || $trnst[ 'hash' ] != md5( serialize( $this->get( 'sm' ) ) ) ) {
           $trnst = array(
@@ -927,7 +927,7 @@ namespace wpCloud\StatelessMedia {
                 $trnst[ 'error' ] .= "<br>" . make_clickable($error['message']);
             }
           }
-          set_transient( 'sm::is_connected_to_gs', $trnst, 24 * HOUR_IN_SECONDS );
+          set_transient( 'sm::is_connected_to_gs', $trnst, 4 * HOUR_IN_SECONDS );
         }
 
         if( isset( $trnst[ 'success' ] ) && $trnst[ 'success' ] == 'false' ) {
