@@ -96,6 +96,7 @@ To ensure new releases cause as little disruption as possible, we rely on a numb
 
 = 2.0.1 =
 * ENHANCEMENT - Added compatibility with Google SDK v1.x version to prevent conflicts with third-party plugins.
+* ENHANCEMENT - Added warning message if old Google SDK version is loaded by third-party plugin.
 * ENHANCEMENT - Included missing enhancement: Google SDK was moved from vendor dir. So it's not loaded on every page load anymore, but only when it's required.
 
 = 2.0.0 =

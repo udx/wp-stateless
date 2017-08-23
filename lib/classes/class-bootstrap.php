@@ -144,6 +144,11 @@ namespace wpCloud\StatelessMedia {
             $this->errors->add( $is_connected->get_error_message() );
           }
 
+          if ( $googleSDKVersionConflictError = get_transient( "wp_stateless_google_sdk_conflict" ) ) {
+            $this->errors->add( $googleSDKVersionConflictError, 'warning' );
+            delete_transient( 'wp_stateless_google_sdk_conflict' );
+          }
+
           /** Temporary fix to WP 4.4 srcset feature **/
           //add_filter( 'max_srcset_image_width', create_function( '', 'return 1;' ) );
 
