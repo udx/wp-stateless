@@ -92,6 +92,8 @@ namespace wpCloud\StatelessMedia {
           }
           @unlink( $path );
         } else {
+          // May be delete warning transient if it was set
+          $this->_deleteWarning();
           $this->client->setAuthConfig($this->key_json);
         }
 
@@ -102,6 +104,11 @@ namespace wpCloud\StatelessMedia {
         }
 
         $this->client->setScopes(['https://www.googleapis.com/auth/devstorage.full_control']);
+
+        // May be Loading Google SDK. Because some bad plugins may load their Google SDK with not included Google_Service_Storage.
+        if( !class_exists( 'Google_Service_Storage' ) ) {
+          include_once( ud_get_stateless_media()->path('lib/Google/vendor/autoload.php', 'dir') );
+        }
 
         /* Now, Initialize our Google Storage Service */
         $this->service = new Google_Service_Storage( $this->client );
@@ -379,6 +386,14 @@ namespace wpCloud\StatelessMedia {
         );
 
         set_transient( "wp_stateless_google_sdk_conflict", $error );
+      }
+
+      /**
+       * Removes Warning if it exists
+       *
+       */
+      private function _deleteWarning() {
+        delete_transient( "wp_stateless_google_sdk_conflict" );
       }
 
     }
