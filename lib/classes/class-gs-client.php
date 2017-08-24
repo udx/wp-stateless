@@ -63,10 +63,39 @@ namespace wpCloud\StatelessMedia {
         $this->bucket = $args[ 'bucket' ];
         $this->key_json = json_decode($args['key_json'], 1);
 
+        // May be Loading Google SDK....
+        if( !class_exists( 'Google_Client' ) ) {
+          include_once( ud_get_stateless_media()->path('lib/Google/vendor/autoload.php', 'dir') );
+        }
+
         /* Initialize our client */
         $this->client = new Google_Client();
 
-        $this->client->setAuthConfig($this->key_json);
+        // We're supporting Google SDK 1.X version since
+        // The plugins which also are using Google SDK may have its old version
+        // what may cause conflicts
+        //
+        if( version_compare( $this->client->getLibraryVersion(), '2.0', '<'  ) ) {
+          // We should set the warning about potential issue
+          // If Google SDK has different version with already included
+          $this->_setWarning();
+
+          $wp_upload_dir = wp_upload_dir();
+          $dir = $wp_upload_dir[ 'path' ];
+          $filename = md5( wp_generate_password() ) . '.tmp';
+          $path = wp_normalize_path( $dir . '/' .$filename );
+          @file_put_contents( $path, json_encode( $this->key_json ) );
+          $cred = $this->client->loadServiceAccountJson( $path, ['https://www.googleapis.com/auth/devstorage.full_control'] );
+          $this->client->setAssertionCredentials($cred);
+          if ($this->client->getAuth()->isAccessTokenExpired()) {
+            $this->client->getAuth()->refreshTokenWithAssertion($cred);
+          }
+          @unlink( $path );
+        } else {
+          // May be delete warning transient if it was set
+          $this->_deleteWarning();
+          $this->client->setAuthConfig($this->key_json);
+        }
 
         if( isset( $current_blog ) && isset( $current_blog->domain ) ) {
           $this->client->setApplicationName( $current_blog->domain );
@@ -76,8 +105,14 @@ namespace wpCloud\StatelessMedia {
 
         $this->client->setScopes(['https://www.googleapis.com/auth/devstorage.full_control']);
 
+        // May be Loading Google SDK. Because some bad plugins may load their Google SDK with not included Google_Service_Storage.
+        if( !class_exists( 'Google_Service_Storage' ) ) {
+          include_once( ud_get_stateless_media()->path('lib/Google/vendor/autoload.php', 'dir') );
+        }
+
         /* Now, Initialize our Google Storage Service */
         $this->service = new Google_Service_Storage( $this->client );
+
       }
 
       /**
@@ -269,7 +304,7 @@ namespace wpCloud\StatelessMedia {
        */
       public function is_connected() {
         try {
-          $bucket = $this->service->buckets->get( $this->bucket );
+          $this->service->buckets->get( $this->bucket );
         } catch( Exception $e ) {
           return $e;
         }
@@ -314,6 +349,51 @@ namespace wpCloud\StatelessMedia {
           }
         }
         return self::$instance;
+      }
+
+      /**
+       * Set warning about potential conflict with Google SDK
+       *
+       * @since 2.0.1
+       */
+      private function _setWarning() {
+
+        $reflector = new \ReflectionClass('Google_Client');
+        $pluginBasename = wp_normalize_path( plugin_basename( $reflector->getFileName() ) );
+
+        // Check if get_plugins() function exists. This is required on the front end of the
+        // site, since it is in a file that is normally only loaded in the admin.
+        if ( ! function_exists( 'get_plugins' ) ) {
+          require_once ABSPATH . 'wp-admin/includes/plugin.php';
+        }
+
+        $pluginBasenameParts = explode( '/', $pluginBasename );
+        $pluginName = __( "UNDEFINED", ud_get_stateless_media()->domain );
+
+        foreach( get_plugins() as $path => $meta ) {
+          if( strpos( $path, trailingslashit( $pluginBasenameParts[0] ) ) === 0 ) {
+            $pluginName = $meta['Name'];
+          }
+        };
+
+        $error = sprintf( __( "%s plugin may have potential Google SDK version conflicts with %s plugin. %s is using Google SDK %s, when %s loads old Google SDK version %s.", ud_get_stateless_media()->domain ),
+          "<b>" . 'WP-Stateless' . "</b>",
+          "<b>" . $pluginName . "</b>",
+          'WP-Stateless',
+          "<b>v2.0</b>",
+          $pluginName,
+          "<b>v" . Google_Client::LIBVER . "</b>"
+        );
+
+        set_transient( "wp_stateless_google_sdk_conflict", $error );
+      }
+
+      /**
+       * Removes Warning if it exists
+       *
+       */
+      private function _deleteWarning() {
+        delete_transient( "wp_stateless_google_sdk_conflict" );
       }
 
     }

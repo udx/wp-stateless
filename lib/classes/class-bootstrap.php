@@ -144,6 +144,10 @@ namespace wpCloud\StatelessMedia {
             $this->errors->add( $is_connected->get_error_message() );
           }
 
+          if ( $googleSDKVersionConflictError = get_transient( "wp_stateless_google_sdk_conflict" ) ) {
+            $this->errors->add( $googleSDKVersionConflictError, 'warning' );
+          }
+
           /** Temporary fix to WP 4.4 srcset feature **/
           //add_filter( 'max_srcset_image_width', create_function( '', 'return 1;' ) );
 
@@ -907,6 +911,7 @@ namespace wpCloud\StatelessMedia {
             'hash' => md5( serialize( $this->get( 'sm' ) ) ),
           );
           $client = $this->get_client();
+
           if ( is_wp_error( $client ) ) {
             $trnst[ 'success' ] = 'false';
             $trnst[ 'error' ] = $client->get_error_message();
@@ -921,7 +926,7 @@ namespace wpCloud\StatelessMedia {
                 $trnst[ 'error' ] .= "<br>" . make_clickable($error['message']);
             }
           }
-          set_transient( 'sm::is_connected_to_gs', $trnst, 24 * HOUR_IN_SECONDS );
+          set_transient( 'sm::is_connected_to_gs', $trnst, 4 * HOUR_IN_SECONDS );
         }
 
         if( isset( $trnst[ 'success' ] ) && $trnst[ 'success' ] == 'false' ) {

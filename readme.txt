@@ -5,7 +5,7 @@ Tags: google, google cloud, google cloud storage, cdn, uploads, media, stateless
 License: GPLv2 or later
 Requires at least: 4.0
 Tested up to: 4.8.1
-Stable tag: v2.0.0-rc1
+Stable tag: 2.0.1
 
 Upload and serve your WordPress media files from Google Cloud Storage.
 
@@ -94,6 +94,10 @@ To ensure new releases cause as little disruption as possible, we rely on a numb
 
 == Changelog ==
 
+= 2.0.1 =
+* ENHANCEMENT - Added compatibility with Google SDK v1.x version to prevent conflicts with third-party plugins.
+* ENHANCEMENT - Added warning message if old Google SDK version is loaded by third-party plugin.
+
 = 2.0.0 =
 * NEW - Added stateless mode.
 * NEW - Dedicated settings panel.
@@ -103,8 +107,12 @@ To ensure new releases cause as little disruption as possible, we rely on a numb
 * ENHANCEMENT - Expanded wp-config constants.
 * ENHANCEMENT - Relocated synchronization and regeneration tools to new settings panel.
 
-= 1.9.1 =
-* ENHANCEMENT - Extended Network Settings.
+= 1.9.2 =
+* ENHANCEMENT - Added ability to modify default bucket link via 'wp_stateless_bucket_link' filter.
+* ENHANCEMENT - Added checking of connection to GCS once per four hours instead of doing it on every page load.
+* ENHANCEMENT - Google SDK was moved from vendor dir. So it's not loaded on every page load anymore, but only when it's required.
+* ENHANCEMENT - Updated Composer Autoload logic.
+* ENHANCEMENT - Reverted all changes included to 1.9.1 version because of conflicts.
 
 = 1.9.0 =
 * NEW - Added new ability to define cacheControl for remote objects.
