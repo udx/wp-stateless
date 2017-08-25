@@ -130,7 +130,8 @@ namespace wpCloud\StatelessMedia {
           /**
            * Override Cache Control is option is enabled
            */
-          if ( !empty(trim($this->get( 'sm.cache_control' ))) ) {
+          $cacheControl = trim($this->get( 'sm.cache_control' ));
+          if ( !empty($cacheControl) ) {
             add_filter( 'sm:item:cacheControl', array( $this, 'override_cache_control' ) );
           }
 
