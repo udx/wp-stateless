@@ -95,7 +95,7 @@ namespace wpCloud\StatelessMedia {
       public function refresh() {
         $constant_mode = false;
         $upload_data = wp_upload_dir();
-        $google_app_key_file = getenv('GOOGLE_APPLICATION_CREDENTIALS', true) ?: getenv('GOOGLE_APPLICATION_CREDENTIALS');
+        $google_app_key_file = getenv('GOOGLE_APPLICATION_CREDENTIALS') ?: getenv('GOOGLE_APPLICATION_CREDENTIALS');
 
         foreach ($this->settings as $option => $array) {
           $value    = '';
