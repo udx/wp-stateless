@@ -97,7 +97,9 @@ To ensure new releases cause as little disruption as possible, we rely on a numb
 = 2.0.2 =
 * FIX - Fixed Fatal Error which is caused by using PHP 5.4 and less.
 * FIX - Fixed Fatal Error which is caused on Media page when WP Smush Pro plugin is activated.
-* ENHANCEMENT - Updated the minimum requirements for PHP to 5.6 to prevent fatal errors.
+* FIX - Fixed detection of plugin files paths. The issue was occurring on installations with custom file structures ( e.g. Bedrock platform ).
+* FIX - Fixed redirection URL to Setup Wizard on plugin activation.
+* ENHANCEMENT - Updated the minimum requirements for PHP to 5.5 to prevent fatal errors and possible warnings.
 
 = 2.0.1 =
 * ENHANCEMENT - Added compatibility with Google SDK v1.x version to prevent conflicts with third-party plugins.

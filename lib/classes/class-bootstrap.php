@@ -149,9 +149,9 @@ namespace wpCloud\StatelessMedia {
             $this->errors->add( $googleSDKVersionConflictError, 'warning' );
           }
 
-          // To prevent fatal errors for users who use PHP 5.6 or less.
-          if( version_compare(PHP_VERSION, '5.6', '<') ) {
-            $this->errors->add( sprintf( __( 'The plugin requires PHP %s or higher. You current PHP version %s is too old.', ud_get_stateless_media()->domain ), '<b>5.6</b>', '<b>' . PHP_VERSION . '</b>' ) );
+          // To prevent fatal errors for users who use PHP 5.5 or less.
+          if( version_compare(PHP_VERSION, '5.5', '<') ) {
+            $this->errors->add( sprintf( __( 'The plugin requires PHP %s or higher. You current PHP version %s is too old.', ud_get_stateless_media()->domain ), '<b>5.5</b>', '<b>' . PHP_VERSION . '</b>' ) );
           }
 
           /** Temporary fix to WP 4.4 srcset feature **/
