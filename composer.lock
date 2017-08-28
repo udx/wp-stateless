@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "36e7bce0ff0b066ae3548c3f2534481d",
+    "content-hash": "7281424f7094d1a457772c7fcfde06da",
     "packages": [
         {
             "name": "ccampbell/chromephp",
@@ -297,16 +297,16 @@
         },
         {
             "name": "usabilitydynamics/lib-wp-bootstrap",
-            "version": "1.2.1",
+            "version": "1.2.2",
             "source": {
                 "type": "git",
                 "url": "git@github.com:UsabilityDynamics/lib-wp-bootstrap",
-                "reference": "1.2.1"
+                "reference": "1.2.2"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://github.com/UsabilityDynamics/lib-wp-bootstrap/archive/1.2.1.zip",
-                "reference": "1.2.1",
+                "url": "https://github.com/UsabilityDynamics/lib-wp-bootstrap/archive/1.2.2.zip",
+                "reference": "1.2.2",
                 "shasum": null
             },
             "require": {
@@ -653,7 +653,7 @@
             ],
             "authors": [
                 {
-                    "name": "Padraic Brady",
+                    "name": "Pádraic Brady",
                     "email": "padraic.brady@gmail.com",
                     "homepage": "http://blog.astrumfutura.com"
                 }
@@ -843,12 +843,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/console.git",
-                "reference": "094d1ac303515f276cd3f7c0fc96926064312ae0"
+                "reference": "b789be584eeefa72bcc0d726b6da451e5d24a6df"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/console/zipball/094d1ac303515f276cd3f7c0fc96926064312ae0",
-                "reference": "094d1ac303515f276cd3f7c0fc96926064312ae0",
+                "url": "https://api.github.com/repos/symfony/console/zipball/b789be584eeefa72bcc0d726b6da451e5d24a6df",
+                "reference": "b789be584eeefa72bcc0d726b6da451e5d24a6df",
                 "shasum": ""
             },
             "require": {
@@ -904,7 +904,7 @@
             ],
             "description": "Symfony Console Component",
             "homepage": "https://symfony.com",
-            "time": "2017-08-15T13:32:22+00:00"
+            "time": "2017-08-24T14:43:56+00:00"
         },
         {
             "name": "symfony/debug",
@@ -1185,19 +1185,22 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/yaml.git",
-                "reference": "1395ddba6f65bf46cdf1d80d59223cbab8ff3ccc"
+                "reference": "5a58daa633a14651d7b2a34613c9b62c02faf873"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/yaml/zipball/1395ddba6f65bf46cdf1d80d59223cbab8ff3ccc",
-                "reference": "1395ddba6f65bf46cdf1d80d59223cbab8ff3ccc",
+                "url": "https://api.github.com/repos/symfony/yaml/zipball/5a58daa633a14651d7b2a34613c9b62c02faf873",
+                "reference": "5a58daa633a14651d7b2a34613c9b62c02faf873",
                 "shasum": ""
             },
             "require": {
                 "php": "^5.5.9|>=7.0.8"
             },
+            "conflict": {
+                "symfony/console": "<3.4"
+            },
             "require-dev": {
-                "symfony/console": "~2.8|~3.0|~4.0"
+                "symfony/console": "~3.4|~4.0"
             },
             "suggest": {
                 "symfony/console": "For validating YAML files using the lint command"
@@ -1232,7 +1235,7 @@
             ],
             "description": "Symfony Yaml Component",
             "homepage": "https://symfony.com",
-            "time": "2017-08-04T13:29:48+00:00"
+            "time": "2017-08-24T14:43:56+00:00"
         }
     ],
     "aliases": [],

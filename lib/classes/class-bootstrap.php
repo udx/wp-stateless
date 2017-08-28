@@ -25,6 +25,7 @@ namespace wpCloud\StatelessMedia {
        * @property $version
        * @type {Object}
        */
+
       public static $version = '2.1';
 
       /**
@@ -130,7 +131,8 @@ namespace wpCloud\StatelessMedia {
           /**
            * Override Cache Control is option is enabled
            */
-          if ( !empty(trim($this->get( 'sm.cache_control' ))) ) {
+          $cacheControl = trim($this->get( 'sm.cache_control' ));
+          if ( !empty($cacheControl) ) {
             add_filter( 'sm:item:cacheControl', array( $this, 'override_cache_control' ) );
           }
 
@@ -146,6 +148,11 @@ namespace wpCloud\StatelessMedia {
 
           if ( $googleSDKVersionConflictError = get_transient( "wp_stateless_google_sdk_conflict" ) ) {
             $this->errors->add( $googleSDKVersionConflictError, 'warning' );
+          }
+
+          // To prevent fatal errors for users who use PHP 5.5 or less.
+          if( version_compare(PHP_VERSION, '5.5', '<') ) {
+            $this->errors->add( sprintf( __( 'The plugin requires PHP %s or higher. You current PHP version %s is too old.', ud_get_stateless_media()->domain ), '<b>5.5</b>', '<b>' . PHP_VERSION . '</b>' ) );
           }
 
           /** Temporary fix to WP 4.4 srcset feature **/
@@ -270,22 +277,7 @@ namespace wpCloud\StatelessMedia {
        * @param $path
        */
       public function get_settings_page_url( $path = '' ) {
-        $protocol = is_ssl() ? 'https://' : 'http://';
-        $wp_home = defined('WP_HOME') ? (!strstr(WP_HOME, 'http') ? $protocol : '') . WP_HOME : '';
-        
-        if($wp_home){
-          $url = $wp_home . '/wp-admin/';
-        }else{
-          $url = admin_url();
-        }
-
-        if(is_network_admin()){
-          $url .= 'network/settings.php';
-        }
-        else{
-          $url .= 'upload.php';
-        }
-
+        $url = get_admin_url( get_current_blog_id(), ( is_network_admin() ? 'network/settings.php' : 'upload.php' ) );
         return $url . $path;
       }
 
@@ -520,8 +512,12 @@ namespace wpCloud\StatelessMedia {
                 $meta[$key] = $this->_convert_to_gs_link($value);
               }
               return $meta;
-            }
-            else{
+            } elseif (is_object($meta) && $meta instanceof \stdClass ) {
+              foreach (get_object_vars($meta) as $key => $value) {
+                $meta->{$key} = $this->_convert_to_gs_link($value);
+              }
+              return $meta;
+            } elseif(is_string($meta)){
               return preg_replace( '/(https?:\/\/'.str_replace('/', '\/', $baseurl).')\/(.+?)(\.jpg|\.png|\.gif|\.jpeg)/i', $image_host.'$2$3', $meta);
             }
           }

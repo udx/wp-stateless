@@ -2,6 +2,13 @@
 * NEW - Added support for <code>GOOGLE_APPLICATION_CREDENTIALS</code> environment variable.
 * Fixed read only for Service Account JSON if constant or environment variable is defined. 
 
+#### 2.0.2
+* FIX - Fixed Fatal Errors which were caused by using PHP 5.4 and less.
+* FIX - Fixed Fatal Error which was caused on Media page when WP Smush Pro plugin is activated.
+* FIX - Fixed detection of plugin files paths. The issue was occurring on installations with custom file structures ( e.g. Bedrock platform ).
+* FIX - Fixed redirection URL to Setup Wizard on plugin activation.
+* ENHANCEMENT - Updated the minimum requirements for PHP to 5.5 to prevent fatal errors and possible warnings.
+
 #### 2.0.1
 * ENHANCEMENT - Added compatibility with Google SDK v1.x version to prevent conflicts with third-party plugins.
 * ENHANCEMENT - Added warning message if old Google SDK version is loaded by third-party plugin.

@@ -253,17 +253,17 @@
     },
     {
         "name": "usabilitydynamics/lib-wp-bootstrap",
-        "version": "1.2.1",
-        "version_normalized": "1.2.1.0",
+        "version": "1.2.2",
+        "version_normalized": "1.2.2.0",
         "source": {
             "type": "git",
             "url": "git@github.com:UsabilityDynamics/lib-wp-bootstrap",
-            "reference": "1.2.1"
+            "reference": "1.2.2"
         },
         "dist": {
             "type": "zip",
-            "url": "https://github.com/UsabilityDynamics/lib-wp-bootstrap/archive/1.2.1.zip",
-            "reference": "1.2.1",
+            "url": "https://github.com/UsabilityDynamics/lib-wp-bootstrap/archive/1.2.2.zip",
+            "reference": "1.2.2",
             "shasum": null
         },
         "require": {
