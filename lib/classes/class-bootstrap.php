@@ -276,22 +276,7 @@ namespace wpCloud\StatelessMedia {
        * @param $path
        */
       public function get_settings_page_url( $path = '' ) {
-        $protocol = is_ssl() ? 'https://' : 'http://';
-        $wp_home = defined('WP_HOME') ? (!strstr(WP_HOME, 'http') ? $protocol : '') . WP_HOME : '';
-        
-        if($wp_home){
-          $url = $wp_home . '/wp-admin/';
-        }else{
-          $url = admin_url();
-        }
-
-        if(is_network_admin()){
-          $url .= 'network/settings.php';
-        }
-        else{
-          $url .= 'upload.php';
-        }
-
+        $url = get_admin_url( get_current_blog_id(), ( is_network_admin() ? 'network/settings.php' : 'upload.php' ) );
         return $url . $path;
       }
 

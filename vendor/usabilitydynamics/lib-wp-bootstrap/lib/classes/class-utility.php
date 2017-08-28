@@ -21,6 +21,9 @@ namespace UsabilityDynamics\WP {
         if( defined( 'WPMU_PLUGIN_DIR' ) && strpos( wp_normalize_path( dirname(__FILE__) ), wp_normalize_path( WPMU_PLUGIN_DIR ) ) !== false
         ) {
           $instance = 'mu-plugin';
+        } elseif ( defined( 'WP_PLUGIN_DIR' ) &&  strpos( wp_normalize_path( dirname(__FILE__) ), wp_normalize_path( WP_PLUGIN_DIR ) ) !== false
+        ){
+          $instance = 'plugin';
         } elseif ( defined( 'PLUGINDIR' ) &&  strpos( wp_normalize_path( dirname(__FILE__) ), wp_normalize_path( PLUGINDIR ) ) !== false
         ){
           $instance = 'plugin';
