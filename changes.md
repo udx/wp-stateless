@@ -1,3 +1,8 @@
+#### 2.0.2
+* FIX - Fixed Fatal Error which is caused by using PHP 5.4 and less.
+* FIX - Fixed Fatal Error which is caused on Media page when WP Smush Pro plugin is activated.
+* ENHANCEMENT - Updated the minimum requirements for PHP to 5.6 to prevent fatal errors.
+
 #### 2.0.1
 * ENHANCEMENT - Added compatibility with Google SDK v1.x version to prevent conflicts with third-party plugins.
 * ENHANCEMENT - Added warning message if old Google SDK version is loaded by third-party plugin.

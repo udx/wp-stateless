@@ -25,7 +25,7 @@ namespace wpCloud\StatelessMedia {
        * @property $version
        * @type {Object}
        */
-      public static $version = '1.9.2';
+      public static $version = '2.0.2';
 
       /**
        * Singleton Instance Reference.
@@ -147,6 +147,11 @@ namespace wpCloud\StatelessMedia {
 
           if ( $googleSDKVersionConflictError = get_transient( "wp_stateless_google_sdk_conflict" ) ) {
             $this->errors->add( $googleSDKVersionConflictError, 'warning' );
+          }
+
+          // To prevent fatal errors for users who use PHP 5.6 or less.
+          if( version_compare(PHP_VERSION, '5.6', '<') ) {
+            $this->errors->add( sprintf( __( 'The plugin requires PHP %s or higher. You current PHP version %s is too old.', ud_get_stateless_media()->domain ), '<b>5.6</b>', '<b>' . PHP_VERSION . '</b>' ) );
           }
 
           /** Temporary fix to WP 4.4 srcset feature **/
@@ -521,8 +526,12 @@ namespace wpCloud\StatelessMedia {
                 $meta[$key] = $this->_convert_to_gs_link($value);
               }
               return $meta;
-            }
-            else{
+            } elseif (is_object($meta) && $meta instanceof \stdClass ) {
+              foreach (get_object_vars($meta) as $key => $value) {
+                $meta->{$key} = $this->_convert_to_gs_link($value);
+              }
+              return $meta;
+            } elseif(is_string($meta)){
               return preg_replace( '/(https?:\/\/'.str_replace('/', '\/', $baseurl).')\/(.+?)(\.jpg|\.png|\.gif|\.jpeg)/i', $image_host.'$2$3', $meta);
             }
           }

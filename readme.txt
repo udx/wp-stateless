@@ -5,7 +5,7 @@ Tags: google, google cloud, google cloud storage, cdn, uploads, media, stateless
 License: GPLv2 or later
 Requires at least: 4.0
 Tested up to: 4.8.1
-Stable tag: 2.0.1
+Stable tag: 2.0.2
 
 Upload and serve your WordPress media files from Google Cloud Storage.
 
@@ -93,6 +93,11 @@ To ensure new releases cause as little disruption as possible, we rely on a numb
 [Usability Dynamics](https://www.usabilitydynamics.com/) maintains this plugin by continuing development through it's own staff, reviewing pull requests, testing, and steering the overall release schedule. Usability Dynamics is located in Durham, North Carolina and provides WordPress engineering and hosting services to clients throughout the United States.
 
 == Changelog ==
+
+= 2.0.2 =
+* FIX - Fixed Fatal Error which is caused by using PHP 5.4 and less.
+* FIX - Fixed Fatal Error which is caused on Media page when WP Smush Pro plugin is activated.
+* ENHANCEMENT - Updated the minimum requirements for PHP to 5.6 to prevent fatal errors.
 
 = 2.0.1 =
 * ENHANCEMENT - Added compatibility with Google SDK v1.x version to prevent conflicts with third-party plugins.
