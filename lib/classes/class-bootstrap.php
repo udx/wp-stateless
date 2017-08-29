@@ -437,7 +437,7 @@ namespace wpCloud\StatelessMedia {
             $root_dir = trim( $this->get( 'sm.root_dir' ), '/ ' ); // Remove any forward slash and empty space.
             $root_dir = !empty( $root_dir ) ? $root_dir . '/' : false;
             $image_host = $this->get_gs_host();
-            $content = preg_replace( '/(href|src)=(\'|")(https?:\/\/'.str_replace('/', '\/', $baseurl).')\/(.+?)(\.jpg|\.png|\.gif|\.jpeg)(\'|")/i',
+            $content = preg_replace( '/(href|src)=(\'|")(https?:\/\/'.str_replace('/', '\/', $baseurl).')\/(.+?)(\.jpg|\.png|\.gif|\.jpeg|\.pdf)(\'|")/i',
                 '$1=$2'.$image_host.'/'.($root_dir?$root_dir:'').'$4$5$6', $content);
           }
         }
@@ -517,7 +517,7 @@ namespace wpCloud\StatelessMedia {
               }
               return $meta;
             } elseif(is_string($meta)){
-              return preg_replace( '/(https?:\/\/'.str_replace('/', '\/', $baseurl).')\/(.+?)(\.jpg|\.png|\.gif|\.jpeg)/i', $image_host.'$2$3', $meta);
+              return preg_replace( '/(https?:\/\/'.str_replace('/', '\/', $baseurl).')\/(.+?)(\.jpg|\.png|\.gif|\.jpeg|\.pdf)/i', $image_host.'$2$3', $meta);
             }
           }
         }
