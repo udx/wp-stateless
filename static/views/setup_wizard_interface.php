@@ -123,6 +123,29 @@ $bucket_id      = trim("stateless-" . substr($id, 0, 20), '-');
                                             </div>
                                             <div class="wpStateLess-single-step-input">
                                                 <label for="">
+                                                    <h4><?php _e( 'Google Cloud Bucket Multi-Regional Location', ud_get_stateless_media()->domain ); ?></h4>
+                                                    <p><?php _e( 'Your newly created bucket will be provisioned with a multi-regional storage class. Select the region that is closest to the majority of your website\'s visitors.', ud_get_stateless_media()->domain ); ?></p>
+                                                </label>
+                                                <div class="wpStateLess-combo-box region">
+                                                    <input type="hidden" class="id" value="us">
+                                                    <input type="text" class="name" readonly="readonly" value="United States" placeholder="Select Location">
+                                                    <div class="circle-loader">
+                                                        <div class="checkmark draw"></div>
+                                                    </div>
+                                                    <div class="wpStateLess-input-dropdown">
+                                                        <div class="wpStateLess-static">
+                                                            <ul>
+                                                                <li data-id="asia" data-name="Asia Pacific">Asia Pacific</li>
+                                                                <li data-id="eu"   data-name="European Union">European Union</li>
+                                                                <li data-id="us"   data-name="United States">United States</li>
+                                                            </ul>
+                                                        </div>
+                                                    </div>
+                                                    <div class="error"></div>
+                                                </div>
+                                            </div>
+                                            <div class="wpStateLess-single-step-input">
+                                                <label for="">
                                                     <h4><?php _e( 'Google Cloud Billing', ud_get_stateless_media()->domain ); ?></h4>
                                                     <p><?php _e( 'You will need to set a billing account in order to activate your Google Cloud Storage.', ud_get_stateless_media()->domain ); ?></p>
                                                 </label>

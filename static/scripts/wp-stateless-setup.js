@@ -254,7 +254,11 @@ wp.stateless = {
     var promis = jQuery.ajax({
       url: 'https://www.googleapis.com/storage/v1/b/?project=' + options.projectId,
       method: "POST",
-      data: JSON.stringify({name: options.name}),
+      data: JSON.stringify({
+        name: options.name,
+        storageClass: 'MULTI_REGIONAL',
+        location: options.location || 'us',
+      }),
     });
     return promis;
   },

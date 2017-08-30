@@ -358,7 +358,7 @@
 .wpStateLess-combo-box h5 {
     color: #a9a9a9 !important;
 }
-.wpStateLess-create-new {
+.wpStateLess-create-new, .wpStateLess-static {
     padding: 20px;
 }
 .wpStateLess-create-new, 
