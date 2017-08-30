@@ -25,7 +25,6 @@ namespace wpCloud\StatelessMedia {
        * @property $version
        * @type {Object}
        */
-
       public static $version = '2.1';
 
       /**
@@ -57,6 +56,19 @@ namespace wpCloud\StatelessMedia {
         
         // Parse feature falgs, set constants.
         $this->parse_feature_flags();
+
+        /**
+         * Define settings and UI.
+         *
+         * Example:
+         *
+         * Get option
+         * $this->get( 'sm.client_id' )
+         *
+         * Manually Update/Add option
+         * $this->set( 'sm.client_id', 'zxcvv12adffse' );
+         */
+        $this->settings = new Settings();
 
         // Invoke REST API
         add_action( 'rest_api_init', array( $this, 'api_init' ) );
@@ -99,19 +111,6 @@ namespace wpCloud\StatelessMedia {
         }
 
         $this->is_network_detected();
-
-        /**
-         * Define settings and UI.
-         *
-         * Example:
-         *
-         * Get option
-         * $this->get( 'sm.client_id' )
-         *
-         * Manually Update/Add option
-         * $this->set( 'sm.client_id', 'zxcvv12adffse' );
-         */
-        $this->settings = new Settings();
 
         /**
          * Add scripts
@@ -438,7 +437,7 @@ namespace wpCloud\StatelessMedia {
             $root_dir = trim( $this->get( 'sm.root_dir' ), '/ ' ); // Remove any forward slash and empty space.
             $root_dir = !empty( $root_dir ) ? $root_dir . '/' : false;
             $image_host = $this->get_gs_host();
-            $content = preg_replace( '/(href|src)=(\'|")(https?:\/\/'.str_replace('/', '\/', $baseurl).')\/(.+?)(\.jpg|\.png|\.gif|\.jpeg)(\'|")/i',
+            $content = preg_replace( '/(href|src)=(\'|")(https?:\/\/'.str_replace('/', '\/', $baseurl).')\/(.+?)(\.jpg|\.png|\.gif|\.jpeg|\.pdf)(\'|")/i',
                 '$1=$2'.$image_host.'/'.($root_dir?$root_dir:'').'$4$5$6', $content);
           }
         }
@@ -518,7 +517,7 @@ namespace wpCloud\StatelessMedia {
               }
               return $meta;
             } elseif(is_string($meta)){
-              return preg_replace( '/(https?:\/\/'.str_replace('/', '\/', $baseurl).')\/(.+?)(\.jpg|\.png|\.gif|\.jpeg)/i', $image_host.'$2$3', $meta);
+              return preg_replace( '/(https?:\/\/'.str_replace('/', '\/', $baseurl).')\/(.+?)(\.jpg|\.png|\.gif|\.jpeg|\.pdf)/i', $image_host.'$2$3', $meta);
             }
           }
         }
@@ -913,8 +912,7 @@ namespace wpCloud\StatelessMedia {
             $trnst[ 'error' ] = $client->get_error_message();
           } else {
             $connected = $client->is_connected();
-            if( $connected !== true ) {
-              $error = $connected->getErrors();
+            if( $connected !== true && $error = $connected->getErrors()) {
               $error = reset($error);
               $trnst[ 'success' ] = 'false';
               $trnst[ 'error' ] = sprintf( __( 'Could not connect to Google Storage bucket. Please, be sure that bucket with name <b>%s</b> exists.', $this->domain ), $this->get( 'sm.bucket' ) );
