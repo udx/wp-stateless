@@ -1,3 +1,7 @@
+#### 2.0.3
+* FIX - Fixed Fatal Error which was occurring on WordPress Multisite after upgrading plugin from 1.x to 2.x.
+* ENHANCEMENT - Improved supporting of PDF files.
+
 #### 2.0.2
 * FIX - Fixed Fatal Errors which were caused by using PHP 5.4 and less.
 * FIX - Fixed Fatal Error which was caused on Media page when WP Smush Pro plugin is activated.
