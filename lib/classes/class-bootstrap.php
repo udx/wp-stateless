@@ -57,6 +57,19 @@ namespace wpCloud\StatelessMedia {
         // Parse feature falgs, set constants.
         $this->parse_feature_flags();
 
+        /**
+         * Define settings and UI.
+         *
+         * Example:
+         *
+         * Get option
+         * $this->get( 'sm.client_id' )
+         *
+         * Manually Update/Add option
+         * $this->set( 'sm.client_id', 'zxcvv12adffse' );
+         */
+        $this->settings = new Settings();
+
         // Invoke REST API
         add_action( 'rest_api_init', array( $this, 'api_init' ) );
 
@@ -98,19 +111,6 @@ namespace wpCloud\StatelessMedia {
         }
 
         $this->is_network_detected();
-
-        /**
-         * Define settings and UI.
-         *
-         * Example:
-         *
-         * Get option
-         * $this->get( 'sm.client_id' )
-         *
-         * Manually Update/Add option
-         * $this->set( 'sm.client_id', 'zxcvv12adffse' );
-         */
-        $this->settings = new Settings();
 
         /**
          * Add scripts
@@ -912,8 +912,7 @@ namespace wpCloud\StatelessMedia {
             $trnst[ 'error' ] = $client->get_error_message();
           } else {
             $connected = $client->is_connected();
-            if( $connected !== true ) {
-              $error = $connected->getErrors();
+            if( $connected !== true && $error = $connected->getErrors()) {
               $error = reset($error);
               $trnst[ 'success' ] = 'false';
               $trnst[ 'error' ] = sprintf( __( 'Could not connect to Google Storage bucket. Please, be sure that bucket with name <b>%s</b> exists.', $this->domain ), $this->get( 'sm.bucket' ) );
