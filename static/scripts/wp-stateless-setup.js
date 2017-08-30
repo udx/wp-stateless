@@ -457,20 +457,33 @@ wp.stateless = {
    *
    * wp.stateless.createServiceAccount()
    * Doc: https://cloud.google.com/storage/docs/json_api/v1/bucketAccessControls/insert
+   * Doc: https://cloud.google.com/storage/docs/json_api/v1/buckets/setIamPolicy
    * @param options
    * @returns {boolean}
    */
   insertBucketAccessControls: function insertBucketAccessControls(options) {
+    var promis = new jQuery.Deferred();
 
     if(!wp.stateless.getAccessToken() || !options)
       return false;
-    var promis = jQuery.ajax({
-      url: 'https://www.googleapis.com/storage/v1/b/' + options.bucket + '/acl',
-      method: "POST",
-      data: JSON.stringify({
-        entity: "user-" + options.user,
-        role: options.role || 'OWNER',
-      }),
+
+    jQuery.get('https://www.googleapis.com/storage/v1/b/' + options.bucket + '/iam')
+    .done(function(iam){
+      iam.bindings.push({
+        role: options.role || 'roles/storage.admin',
+        members: [ "serviceAccount:" + options.user ]
+      });
+      jQuery.ajax({
+        url: 'https://www.googleapis.com/storage/v1/b/' + options.bucket + '/iam',
+        method: "PUT",
+        data: JSON.stringify(iam),
+      }).done(function(response){
+        promis.resolve(response);
+      }).fail(function(error) {
+        promis.resolve(error);
+      });
+    }).fail(function(error) {
+      promis.resolve(error);
     });
     return promis;
   },

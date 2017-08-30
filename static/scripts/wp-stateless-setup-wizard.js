@@ -415,8 +415,8 @@ jQuery(document).ready(function ($) {
 				wp.stateless.insertBucketAccessControls({
 					"bucket": bucketId,
 					"user": results['createServiceAccount'].email,
-				}).done(function(responseData){
-					callback(null, {ok: true, task: 'insertBucketAccessControls', email: responseData.email, message: stateless_l10n.service_account_created});
+				}).done(function(iam){
+					callback(null, {ok: true, task: 'insertBucketAccessControls', iam: iam});
 				}).fail(function(response) {
 					callback({ok: false, task: 'insertBucketAccessControls', message: stateless_l10n.something_went_wrong});
 				});
@@ -424,7 +424,7 @@ jQuery(document).ready(function ($) {
 			createServiceAccountKey: ['insertBucketAccessControls', function(results, callback) {
 				wp.stateless.createServiceAccountKeys({
 					"project": projectId,
-					"account": results['insertBucketAccessControls'].email
+					"account": results['createServiceAccount'].email
 				}).done(function(ServiceAccountKey){
 					callback(null, {ok: true, task: 'createServiceAccountKey', privateKeyData: ServiceAccountKey.privateKeyData, message: stateless_l10n.service_account_key_created});
 				}).fail(function(response) {
