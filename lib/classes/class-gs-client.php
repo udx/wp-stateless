@@ -194,6 +194,10 @@ namespace wpCloud\StatelessMedia {
 
           // If media exists we just return it
           if ( $media = $this->media_exists( $name ) ) {
+            if($media->getCacheControl() != $args['cacheControl']){
+              $media->setCacheControl($args['cacheControl']);
+              $media = $this->service->objects->patch($this->bucket, $name, $media);
+            }
             return get_object_vars( $media );
           }
 
