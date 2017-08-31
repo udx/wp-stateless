@@ -88,6 +88,16 @@
                                     </p>
                                     <p class="description"><strong ng-bind="sm.showNotice('body_rewrite')" ></strong> <?php _e( 'Scans post content and meta during presentation and replaces local media file urls with GCS urls. This setting does not modify your database.', ud_get_stateless_media()->domain ); ?></p>
                                     <hr>
+                                    <h4 ng-show="sm.body_rewrite == 'true'"><?php _e( 'Supported File Types', ud_get_stateless_media()->domain ); ?></h4>
+                                    <div ng-show="sm.body_rewrite == 'true'" class="body_rewrite_types">
+                                        <p>
+                                            <label for="body_rewrite_types">
+                                                <input name="sm[body_rewrite_types]" type="text" id="body_rewrite_types" class="regular-text ltr" ng-model="sm.body_rewrite_types" ng-disabled="sm.readonly.body_rewrite_types">
+                                            </label>
+                                        </p>
+                                        <p class="description"><strong ng-bind="sm.showNotice('body_rewrite')" ></strong> <?php _e( 'Define the file types you would like supported. Separate each type by a space.', ud_get_stateless_media()->domain ); ?></p>
+                                    </div>
+                                    <hr>
 
                                     <h4><?php _e( 'Dynamic Image Support', ud_get_stateless_media()->domain ); ?></h4>
                                     <p class="dynamic_img_sprt">

@@ -23,6 +23,7 @@ namespace wpCloud\StatelessMedia {
       private $settings = array(
           'mode'                   => array('WP_STATELESS_MEDIA_MODE', 'cdn'), 
           'body_rewrite'           => array('WP_STATELESS_MEDIA_BODY_REWTITE', 'true'), 
+          'body_rewrite_types'     => array('WP_STATELESS_MEDIA_BODY_REWRITE_TYPES', 'jpg jpeg png gif pdf'), 
           'on_fly'                 => array('WP_STATELESS_MEDIA_ON_FLY', 'false'), 
           'bucket'                 => array('WP_STATELESS_MEDIA_BUCKET', ''), 
           'root_dir'               => array('WP_STATELESS_MEDIA_ROOT_DIR', ''), 
@@ -109,6 +110,10 @@ namespace wpCloud\StatelessMedia {
 
           // Getting settings
           $value = get_option($_option, $default);
+          
+          if ($option == 'body_rewrite_types' && empty($value) && !is_multisite()) {
+            $value = $default;
+          }
 
           // If constant is set then override by constant
           if(defined($constant)){
@@ -144,9 +149,6 @@ namespace wpCloud\StatelessMedia {
           // If constant is set then override by constant
           if(defined($constant)){
             $value = constant($constant);
-          } // For key_json, check enviroment variable exists
-          elseif ($option == 'key_json' && $google_app_key_file !== false) {
-            $value = $google_app_key_file;
           }
           // Getting network settings
           elseif(is_multisite()){

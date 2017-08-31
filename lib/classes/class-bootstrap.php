@@ -437,12 +437,28 @@ namespace wpCloud\StatelessMedia {
             $root_dir = trim( $this->get( 'sm.root_dir' ), '/ ' ); // Remove any forward slash and empty space.
             $root_dir = !empty( $root_dir ) ? $root_dir . '/' : false;
             $image_host = $this->get_gs_host();
-            $content = preg_replace( '/(href|src)=(\'|")(https?:\/\/'.str_replace('/', '\/', $baseurl).')\/(.+?)(\.jpg|\.png|\.gif|\.jpeg|\.pdf)(\'|")/i',
+            $file_ext = $this->replaceable_file_types();
+            $content = preg_replace( '/(href|src)=(\'|")(https?:\/\/'.str_replace('/', '\/', $baseurl).')\/(.+?)('.$file_ext.')(\'|")/i',
                 '$1=$2'.$image_host.'/'.($root_dir?$root_dir:'').'$4$5$6', $content);
           }
         }
 
         return $content;
+      }
+
+      /**
+       * Return file types supported by File URL Replacement.
+       *
+       */
+      public function replaceable_file_types(){
+        $types = $this->get('sm.body_rewrite_types');
+
+        // Removing extra space.
+        $types = trim($types);
+        $types = preg_replace("/\s{2,}/", ' ', $types);
+
+        $types_arr = explode(' ', $types);
+        return '\.' . implode('|\.', $types_arr);
       }
 
       /**
