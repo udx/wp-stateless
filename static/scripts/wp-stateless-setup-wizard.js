@@ -285,7 +285,9 @@ jQuery(document).ready(function ($) {
 		var bucketName = bucketDropdown.find('.name').val();
 		var bucketId = bucketName == 'localhost'?'':bucketName;
 		var regionId = regionDropdown.find('.id').val();
-		var serviceAccountId = 'stateless-' + bucketId.replace('stateless-', '');
+		var serviceAccountId = 'stateless-' + bucketId.replace('stateless-', '')
+			.replace(/\./g, '-').replace(/_/g, '-')
+			.slice(0, 23) + '-' + Math.floor((Math.random() * 1000000) + 1000000);
 		var serviceAccountName = 'Stateless ' + bucketName.replace('Stateless', '');
 		var billingAccount = billingDropdown.find('.id').val();
 		var isValid = true;
