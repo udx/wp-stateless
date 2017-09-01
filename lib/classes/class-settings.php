@@ -27,7 +27,7 @@ namespace wpCloud\StatelessMedia {
           'on_fly'                 => array('WP_STATELESS_MEDIA_ON_FLY', 'false'), 
           'bucket'                 => array('WP_STATELESS_MEDIA_BUCKET', ''), 
           'root_dir'               => array('WP_STATELESS_MEDIA_ROOT_DIR', ''), 
-          'key_json'               => array('WP_STATELESS_MEDIA_KEY_FILE_PATH', ''),
+          'key_json'               => array('WP_STATELESS_MEDIA_JSON_KEY', ''),
           'cache_control'          => array('WP_STATELESS_MEDIA_CACHE_CONTROL', ''), 
           'delete_remote'          => array('WP_STATELESS_MEDIA_DELETE_REMOTE', 'true'), 
           'custom_domain'          => array('WP_STATELESS_MEDIA_CUSTOM_DOMAIN', ''), 
@@ -120,11 +120,6 @@ namespace wpCloud\StatelessMedia {
             $value = constant($constant);
             $this->set( "sm.readonly.{$option}", "constant" );
           }
-          // For key_json, check enviroment variable exists
-          elseif ($option == 'key_json' && $google_app_key_file !== false) {
-            $value = $google_app_key_file;
-            $this->set("sm.readonly.{$option}", "environment");
-          }
           // Getting network settings
           elseif(is_multisite() && $option != 'organize_media'){
             $network = get_site_option( $_option );
@@ -194,7 +189,10 @@ namespace wpCloud\StatelessMedia {
             }
             if(file_exists($key_file_path)){
               $this->set( 'sm.key_json', file_get_contents($key_file_path) );
-              $this->set( "sm.readonly.key_json", "constant" );
+              if(defined('WP_STATELESS_MEDIA_KEY_FILE_PATH'))
+                $this->set( "sm.readonly.key_json", "constant" );
+              else
+                $this->set("sm.readonly.key_json", "environment");
             }
           }
         }
