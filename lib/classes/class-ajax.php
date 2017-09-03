@@ -138,6 +138,39 @@ namespace wpCloud\StatelessMedia {
       }
 
       /**
+       * Fail over to image URL if not found on disk
+       * In case image not available on both local and bucket
+       * try to pull image from image URL in case it is accessible by some sort of proxy.
+       * 
+       * @param:
+       * $url (int/string): URL of the image.
+       * $save_to (string): Path where to save the image.
+       * 
+       * @return:
+       * boolean (true/false)
+       * 
+       */
+      public function get_attachment_if_exist($url, $save_to){
+        if(is_int($url))
+          $url = wp_get_attachment_url($url);
+
+        $response = wp_remote_get( $url );
+        if ( !is_wp_error($response) && is_array( $response ) ) {
+          if(!empty($response['response']['code']) && $response['response']['code'] == 200){
+            try{
+              if(wp_mkdir_p(dirname($save_to))){
+                return file_put_contents($save_to, $response['body']);
+              }
+            }
+            catch(Exception $e){
+              throw $e;
+            }
+          }
+        }
+        return false;
+      }
+
+      /**
        * Regenerate image sizes.
        */
       public function action_stateless_process_image() {
@@ -163,8 +196,10 @@ namespace wpCloud\StatelessMedia {
           $result_code = ud_get_stateless_media()->get_client()->get_media( apply_filters( 'wp_stateless_file_name', str_replace( trailingslashit( $upload_dir[ 'basedir' ] ), '', $fullsizepath )), true, $fullsizepath );
 
           if ( $result_code !== 200 ) {
-            $this->store_failed_attachment( $image->ID, 'images' );
-            throw new \Exception(sprintf(__('Both local and remote files are missing. Unable to resize. (%s)', ud_get_stateless_media()->domain), $image->guid));
+            if(!$this->get_attachment_if_exist($image->ID, $fullsizepath)){ // Save file to local from proxy.
+              $this->store_failed_attachment( $image->ID, 'images' );
+              throw new \Exception(sprintf(__('Both local and remote files are missing. Unable to resize. (%s)', ud_get_stateless_media()->domain), $image->guid));
+            }
           }
         }
 
@@ -207,18 +242,25 @@ namespace wpCloud\StatelessMedia {
           throw new \Exception( __( "You are not allowed to do this.", ud_get_stateless_media()->domain ) );
 
         $fullsizepath = get_attached_file( $file->ID );
+        $local_image_exists = file_exists( $fullsizepath );
 
-        if ( false === $fullsizepath || ! file_exists( $fullsizepath ) ) {
+        if ( false === $fullsizepath || ! $local_image_exists ) {
           $upload_dir = wp_upload_dir();
 
           // Try get it and save
           $result_code = ud_get_stateless_media()->get_client()->get_media( str_replace( trailingslashit( $upload_dir[ 'basedir' ] ), '', $fullsizepath ), true, $fullsizepath );
 
           if ( $result_code !== 200 ) {
-            $this->store_failed_attachment( $file->ID, 'other' );
-            throw new \Exception(sprintf(__('File not found (%s)', ud_get_stateless_media()->domain), $file->guid));
+            if(!$this->get_attachment_if_exist($image->ID, $fullsizepath)){ // Save file to local from proxy.
+              $this->store_failed_attachment( $file->ID, 'other' );
+              throw new \Exception(sprintf(__('File not found (%s)', ud_get_stateless_media()->domain), $file->guid));
+            }
+            else{
+              $local_image_exists = true;
+            }
           }
-        } else {
+        // } else {
+        if($local_image_exists)
           $upload_dir = wp_upload_dir();
 
           if ( !ud_get_stateless_media()->get_client()->media_exists( str_replace( trailingslashit( $upload_dir[ 'basedir' ] ), '', $fullsizepath ) ) ) {
