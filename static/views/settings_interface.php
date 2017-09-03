@@ -95,7 +95,7 @@
                                                 <input name="sm[body_rewrite_types]" type="text" id="body_rewrite_types" class="regular-text ltr" ng-model="sm.body_rewrite_types" ng-disabled="sm.readonly.body_rewrite_types">
                                             </label>
                                         </p>
-                                        <p class="description"><strong ng-bind="sm.showNotice('body_rewrite')" ></strong> <?php _e( 'Define the file types you would like supported. Separate each type by a space.', ud_get_stateless_media()->domain ); ?></p>
+                                        <p class="description"><strong ng-bind="sm.showNotice('body_rewrite_types')" ></strong> <?php _e( 'Define the file types you would like supported. Separate each type by a space.', ud_get_stateless_media()->domain ); ?></p>
                                     </div>
                                     <hr>
 
@@ -165,7 +165,7 @@
                                             <option value="false"><?php _e( 'Disable', ud_get_stateless_media()->domain ); ?></option>
                                         </select>
                                     </p>
-                                    <p class="description"><strong ng-bind="sm.showNotice('on_fly')" ></strong> <?php _e( 'Delete the GCS file when the file is deleted from WordPress.', ud_get_stateless_media()->domain ); ?></p>
+                                    <p class="description"><strong ng-bind="sm.showNotice('delete_remote')" ></strong> <?php _e( 'Delete the GCS file when the file is deleted from WordPress.', ud_get_stateless_media()->domain ); ?></p>
                                 </fieldset>
                             </td>
                         </tr>  
