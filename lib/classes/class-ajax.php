@@ -251,7 +251,7 @@ namespace wpCloud\StatelessMedia {
           $result_code = ud_get_stateless_media()->get_client()->get_media( str_replace( trailingslashit( $upload_dir[ 'basedir' ] ), '', $fullsizepath ), true, $fullsizepath );
 
           if ( $result_code !== 200 ) {
-            if(!$this->get_attachment_if_exist($image->ID, $fullsizepath)){ // Save file to local from proxy.
+            if(!$this->get_attachment_if_exist($file->ID, $fullsizepath)){ // Save file to local from proxy.
               $this->store_failed_attachment( $file->ID, 'other' );
               throw new \Exception(sprintf(__('File not found (%s)', ud_get_stateless_media()->domain), $file->guid));
             }
