@@ -195,7 +195,7 @@ wp.stateless = {
         defer.reject(responseData);
       }
     }).fail(function(responseData) {
-      defer.resolve(responseData);
+      defer.reject(responseData);
     });
     return defer.promise();
   },
@@ -467,12 +467,40 @@ wp.stateless = {
     if(!wp.stateless.getAccessToken() || !options)
       return false;
 
+    var lagecyAccess = function(){
+      jQuery.ajax({
+        url: 'https://www.googleapis.com/storage/v1/b/' + options.bucket + '/acl',
+        method: "POST",
+        data: JSON.stringify({
+          entity: "user-" + options.user,
+          role: options.role || 'OWNER',
+        })
+      }).done(function(response){
+        promis.resolve(response);
+      }).fail(function(error) {
+        promis.reject(error);
+      });;
+    }
+
     jQuery.get('https://www.googleapis.com/storage/v1/b/' + options.bucket + '/iam')
     .done(function(iam){
-      iam.bindings.push({
-        role: options.role || 'roles/storage.admin',
-        members: [ "serviceAccount:" + options.user ]
+      var existing = false;
+      iam.bindings.forEach(function(item, index){
+        if(item.role == "roles/storage.admin"){
+          existing = item.members.indexOf("serviceAccount:" + options.user);
+          if(existing == -1){
+            item.members.push("serviceAccount:" + options.user);
+          }
+        }
       });
+
+      if(existing === false){
+        iam.bindings.push({
+          role: options.role || 'roles/storage.admin',
+          members: [ "serviceAccount:" + options.user ]
+        });
+      }
+
       jQuery.ajax({
         url: 'https://www.googleapis.com/storage/v1/b/' + options.bucket + '/iam',
         method: "PUT",
@@ -480,10 +508,10 @@ wp.stateless = {
       }).done(function(response){
         promis.resolve(response);
       }).fail(function(error) {
-        promis.resolve(error);
+        lagecyAccess();
       });
     }).fail(function(error) {
-      promis.resolve(error);
+      lagecyAccess();
     });
     return promis;
   },

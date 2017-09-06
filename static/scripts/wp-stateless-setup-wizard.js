@@ -314,7 +314,10 @@ jQuery(document).ready(function ($) {
 							callback(null, {ok: true, task: 'createProject', action: 'project_exists', message: stateless_l10n.project_exists});
 						}
 						else{
-							callback({ok: false, task: 'createProject', action: 'failed', message: response.error});
+							if(typeof response.error != 'undefined' && typeof response.error.message != 'undefined')
+								callback({ok: false, task: 'createProject', action: 'failed', message: response.error.message});
+							else
+								callback({ok: false, task: 'createProject', action: 'failed', message: stateless_l10n.project_creation_failed});
 						}
 					});
 				}else{
@@ -341,29 +344,27 @@ jQuery(document).ready(function ($) {
 				}
 			})],
 			enableAPI: ['createProjectProgress', function(results, callback) {
-				//if( results['createProject'].action == 'project_created'){
-					wp.stateless.enableAPI(projectId)
-					.done(function(argument) {
-						callback(null, {ok: true, task: 'enableAPI', action: 'service_enabled', message: stateless_l10n.json_api_enabled});
-					}).fail(function(response) {
-						callback({ok: false, task: 'enableAPI', action: 'failed', message: stateless_l10n.json_api_enabled_failed});
-					});
-				//}
-				//else{
-				//	callback(null, {ok: true, task: 'enableAPI', action: 'old_project', message: "Service not enabled. Will try again."});
-				//}
+				wp.stateless.enableAPI(projectId)
+				.done(function(argument) {
+					callback(null, {ok: true, task: 'enableAPI', action: 'service_enabled', message: stateless_l10n.json_api_enabled});
+				}).fail(function(response) {
+					callback({ok: false, task: 'enableAPI', action: 'failed', message: stateless_l10n.json_api_enabled_failed});
+				});
 			}],
 			updateBilltingInfo: ['createProjectProgress', function(results, callback) {
 				if( typeof wp.stateless.projects[projectId] == 'undefined' || typeof wp.stateless.projects[projectId]['billingInfo'] == 'undefined'){
 					wp.stateless.updateProjectBillingInfo({"projectID": projectId, "accountName": billingAccount})
 					.done(function(argument) {
-						callback(null, {ok: true, task: 'updateBilltingInfo', message: stateless_l10n.billing_enabled});
+						callback(null, {ok: true, task: 'updateBilltingInfo', action: 'enabled', message: stateless_l10n.billing_enabled});
 					}).fail(function(response) {
-						callback({ok: false, task: 'updateBilltingInfo', message: stateless_l10n.something_went_wrong});
+						if(typeof response.error != 'undefined' && typeof response.error.message != 'undefined')
+							callback({ok: false, task: 'updateBilltingInfo', action: 'failed', message: response.error.message});
+						else
+							callback({ok: false, task: 'updateBilltingInfo', action: 'failed', message: stateless_l10n.billing_failed});
 					});
 				}
 				else{
-					callback(null, {ok: true, task: 'updateBilltingInfo', message: stateless_l10n.billing_info});
+					callback(null, {ok: true, task: 'updateBilltingInfo', action: 'already_enabled', message: stateless_l10n.billing_already_enabled});
 				}
 			}],
 			createBucket: ['updateBilltingInfo', async.retryable({times: 10, interval: 1500}, function(results, callback){
@@ -371,20 +372,21 @@ jQuery(document).ready(function ($) {
 					// Bucket didn't exist.
 					wp.stateless.createBucket({"projectId": projectId, "name": bucketId, location: regionId})
 					.done(function(argument) {
-						callback(null, {ok: true, task: 'createBucket', message: stateless_l10n.bucket_created});
+						callback(null, {ok: true, task: 'createBucket', action: 'created', message: stateless_l10n.bucket_created});
 					}).fail(function(response) {
 						response = response.responseJSON;
 						if(response && typeof response.error != 'undefined' && typeof response.error.code != 'undefined' && response.error.code == 409){
-							callback(null, {ok: true, task: 'createBucket', message: response.error.message});
+							// Bucket already exist with this name.
+							callback(null, {ok: true, task: 'createBucket', action: 'existing', message: stateless_l10n.bucket_exists});
 						}
 						else{
-							callback({ok: true, task: 'createBucket', message: stateless_l10n.something_went_wrong});
+							callback({ok: false, task: 'createBucket', action: 'failed', message: stateless_l10n.bucket_creation_failed});
 						}
 					});
 				}
 				else{
 					// Bucket exist
-					callback(null, {ok: true, task: 'bucket', message: stateless_l10n.bucket_exists});
+					callback(null, {ok: true, task: 'bucket', action: 'existing', message: stateless_l10n.bucket_exists});
 				}
 			})],
 			createServiceAccount: ['createProjectProgress', function(results, callback){
@@ -393,8 +395,8 @@ jQuery(document).ready(function ($) {
 					var serviceAccounts = wp.stateless.projects[projectId]['serviceAccounts'];
 					var accountFound = false;
 					jQuery.each(serviceAccounts, function(index, item) {
-						if(item.displayName == bucketName || item.email.replace(/@.*/, '') == serviceAccountId){
-							callback(null, {ok: true, task: 'createServiceAccount', email: item.email, message: stateless_l10n.service_account_exist});
+						if(item.email.replace(/@.*/, '') == serviceAccountId){ //item.displayName == serviceAccountName || 
+							callback(null, {ok: true, task: 'createServiceAccount', action: 'existing', email: item.email, message: stateless_l10n.service_account_exist});
 							accountFound = true;
 							return false;
 						}
@@ -408,19 +410,19 @@ jQuery(document).ready(function ($) {
 					'accountId': serviceAccountId,
 					'name': serviceAccountName,
 				}).done(function(createdSerciceAccount){
-					callback(null, {ok: true, task: 'createServiceAccount', email: createdSerciceAccount.email, message: stateless_l10n.service_account_created});
+					callback(null, {ok: true, task: 'createServiceAccount', action: 'created', email: createdSerciceAccount.email, message: stateless_l10n.service_account_created});
 				}).fail(function(response) {
-					callback({ok: false, task: 'createServiceAccount', message: stateless_l10n.something_went_wrong});
+					callback({ok: false, task: 'createServiceAccount', action: 'failed', message: stateless_l10n.service_account_creation_failed});
 				});
 			}],
-			insertBucketAccessControls: ['createBucket', 'createServiceAccount', async.retryable({times: 5, interval: 1500}, function(results, callback) {
+			insertBucketAccessControls: ['createBucket', 'enableAPI', 'createServiceAccount', async.retryable({times: 5, interval: 1500}, function(results, callback) {
 				wp.stateless.insertBucketAccessControls({
 					"bucket": bucketId,
 					"user": results['createServiceAccount'].email,
 				}).done(function(iam){
-					callback(null, {ok: true, task: 'insertBucketAccessControls', iam: iam});
+					callback(null, {ok: true, task: 'insertBucketAccessControls', iam: iam, action: 'inserted', message: stateless_l10n.bucket_access_controls_success});
 				}).fail(function(response) {
-					callback({ok: false, task: 'insertBucketAccessControls', message: stateless_l10n.something_went_wrong});
+					callback({ok: false, task: 'insertBucketAccessControls', action: 'failed', message: stateless_l10n.bucket_access_controls_failed});
 				});
 			})],
 			createServiceAccountKey: ['insertBucketAccessControls', function(results, callback) {
@@ -428,9 +430,9 @@ jQuery(document).ready(function ($) {
 					"project": projectId,
 					"account": results['createServiceAccount'].email
 				}).done(function(ServiceAccountKey){
-					callback(null, {ok: true, task: 'createServiceAccountKey', privateKeyData: ServiceAccountKey.privateKeyData, message: stateless_l10n.service_account_key_created});
+					callback(null, {ok: true, task: 'createServiceAccountKey', privateKeyData: ServiceAccountKey.privateKeyData, action: 'created', message: stateless_l10n.service_account_key_created});
 				}).fail(function(response) {
-					callback({ok: false, task: 'createServiceAccountKey', message: stateless_l10n.something_went_wrong});
+					callback({ok: false, task: 'createServiceAccountKey', action: 'failed', message: stateless_l10n.service_account_key_creation_failed});
 				});
 			}],
 			saveServiceAccountKey: ['createServiceAccountKey', 'enableAPI', function(results, callback) {
@@ -449,13 +451,13 @@ jQuery(document).ready(function ($) {
 					}//)
 				}).done(function(response) {
 					if(typeof response.success != undefined && response.success == true){
-						callback(null, {ok: true, task: 'saveServiceAccountKey', message: stateless_l10n.service_account_key_saved});
+						callback(null, {ok: true, task: 'saveServiceAccountKey', action: 'saved', message: stateless_l10n.service_account_key_saved});
 					}
 					else{
-						callback({ok: false, task: 'saveServiceAccountKey', message: stateless_l10n.something_went_wrong});
+						callback({ok: false, task: 'saveServiceAccountKey', action: 'failed', message: stateless_l10n.service_account_key_save_failed});
 					}
 				}).fail(function(response) {
-					callback({ok: false, task: 'saveServiceAccountKey', message: stateless_l10n.something_went_wrong});
+					callback({ok: false, task: 'saveServiceAccountKey', action: 'failed', message: stateless_l10n.service_account_key_save_failed});
 				});
 			}]
 		}, function(err, results) {
@@ -463,15 +465,15 @@ jQuery(document).ready(function ($) {
 			if(err){// || results.task == 'saveServiceAccountKey'){
 				jQuery(this).find('.wpStateLess-loading').removeClass('active');
 				comboBox.removeClass('loading');
-				setupForm.find('#stateless-notification').html(err.message).show();
+				setupForm.find('#stateless-notification').html(err.message).addClass('error').removeClass('info').show();
 				btnGetJson.removeClass('active disabled');
 				return;
 			}
 
 			if(typeof results.message != 'undefined'){
 				console.log(results.message);
+				setupForm.find('#stateless-notification').html(results.message).addClass('notice notice-info').removeClass('error').show();
 			}
-				console.log(results);
 
 			if(results.task == 'createProjectProgress'){
 				projectDropdown.find('.circle-loader').addClass('load-complete');

@@ -1609,8 +1609,8 @@ var auto = function (tasks, concurrency, callback) {
                 callback(err, safeResults);
             } else {
                 results[key] = result;
-                taskComplete(key);
                 callback(err, result);
+                taskComplete(key);
             }
         };
 
