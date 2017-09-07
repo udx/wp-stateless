@@ -352,7 +352,7 @@ wp.stateless = {
       jQuery.each(responseData.items, function(index, item){
         var bucket = {name: item.name};
         buckets.push(bucket);
-        wp.stateless.projects[projectId]['buckets'][item.id] = bucket;
+        wp.stateless.projects[projectId]['buckets'][item.id] = item;
       });
 
       defer.resolve(buckets);

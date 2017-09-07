@@ -151,24 +151,28 @@ jQuery(document).ready(function ($) {
 		// Project ID without random digit at the end.
 		var PDBName = 'stateless-' + projectId.replace(/-\d+$/, '');
 		PDBName = PDBName.substring(0, 29).replace(/-$/, '');
+		billingDropdown.find('.circle-loader:not(.get-json-loading)').addClass('loading').removeClass('load-complete').show();
+		bucketDropdown.find('.circle-loader:not(.get-json-loading)').addClass('loading').removeClass('load-complete').show();
+		regionDropdown.find('.name').removeAttr('disabled');
+		regionDropdown.find('.circle-loader:not(.get-json-loading)')
+						.addClass('loading')
+						.removeClass('load-complete').show();
 
-        billingDropdown.addClass('loading').find('.circle-loader').removeClass('load-complete').show();
-        bucketDropdown.addClass('loading').find('.circle-loader').removeClass('load-complete').show();
-        bucketDropdown.find('.project-derived-name').html(PDBName).attr('data-name', PDBName);
+		bucketDropdown.find('.project-derived-name').html(PDBName).attr('data-name', PDBName).attr('data-id', PDBName).show();
         
         if(typeof wp.stateless.projects[projectId] == 'undefined'){
 			bucketDropdown.wpStatelessComboBox({items:{}});
 		  	var name = billingDropdown.find('.name').val('');
 		  	var id = billingDropdown.find('.id').val('');
-		  	var account = name.wpStatelessComboBox({get: 0});
+		  	var account = billingDropdown.wpStatelessComboBox({get: 0});
 
 		  	name.removeAttr('disabled');
 		  	if(account){
 				name.val(account.name +  " (" + account.id + ")");
 				id.val(account.id);
 		  	}
-		  	billingDropdown.find('.circle-loader').fadeOut(200).removeClass('loading');
-		  	bucketDropdown.find('.circle-loader').fadeOut(200).removeClass('loading');
+		  	billingDropdown.find('.circle-loader:not(.get-json-loading)').fadeOut(200).removeClass('loading');
+		  	bucketDropdown.find('.circle-loader:not(.get-json-loading)').fadeOut(200).removeClass('loading');
 		  	return;
         }
 
@@ -180,10 +184,13 @@ jQuery(document).ready(function ($) {
 				bucketDropdown.find('.wpStateLess-existing h5').html(wp.stateless.projects[projectId].name + " Buckets").show();
 		  	}
 			bucketDropdown.wpStatelessComboBox({items:buckets});
-		  	bucketDropdown.find('.circle-loader').fadeOut(200).removeClass('loading');
+		  	bucketDropdown.find('.circle-loader:not(.get-json-loading)').fadeOut(200).removeClass('loading');
+		  	if(bucketDropdown.wpStatelessComboBox({has: PDBName}))
+				bucketDropdown.find('.project-derived-name').html('').hide();
+	        
 		  }).fail(function(){
 			bucketDropdown.wpStatelessComboBox({items:{}});
-		  	bucketDropdown.find('.circle-loader').fadeOut(200).removeClass('loading');
+		  	bucketDropdown.find('.circle-loader:not(.get-json-loading)').fadeOut(200).removeClass('loading');
 		  });
 
 		//bucketDropdown.find('.name').val("stateless-" + projectId).trigger('change');
@@ -204,20 +211,55 @@ jQuery(document).ready(function ($) {
 			}else{
 		  		console.log("Something went wrong.");
 			}
-        	billingDropdown.find('.circle-loader').addClass('load-complete');
+        	billingDropdown.find('.circle-loader:not(.get-json-loading)').addClass('load-complete');
 		  }).fail(function(responseData) {
 		  	var name = billingDropdown.find('.name').val('');
 		  	var id = billingDropdown.find('.id').val('');
-		  	var account = name.wpStatelessComboBox({get: 0});
+		  	var account = billingDropdown.wpStatelessComboBox({get: 0});
 
 		  	name.removeAttr('disabled');
 		  	if(account){
 				name.val(account.name +  " (" + account.id + ")");
 				id.val(account.id);
 		  	}
-		  	billingDropdown.find('.circle-loader').addClass('load-complete').fadeOut(200);
+		  	billingDropdown.find('.circle-loader:not(.get-json-loading)').addClass('load-complete').fadeOut(200);
 
 		  });
+	});
+
+	bucketDropdown.on('change', function(event){
+		console.log('ssss');
+		var projectId = projectDropdown.find('.id').val();
+		var bucketName = bucketDropdown.find('.name').val();
+		var bucketId = bucketName == 'localhost'?'':bucketName;
+		var regionId;
+		
+
+		regionDropdown.wpStatelessComboBox({select: 'us'}).find('.name').removeAttr('disabled');
+		regionDropdown.find('.circle-loader:not(.get-json-loading)')
+						.addClass('loading')
+						.removeClass('load-complete').show();
+
+		if( typeof wp.stateless.projects[projectId] != 'undefined' &&
+			typeof wp.stateless.projects[projectId]['buckets'] != 'undefined' &&
+			typeof wp.stateless.projects[projectId]['buckets'][bucketId] != 'undefined' &&
+			typeof wp.stateless.projects[projectId]['buckets'][bucketId]['location'] != 'undefined'
+		){
+			regionId = wp.stateless.projects[projectId]['buckets'][bucketId]['location'].toLowerCase()
+			regionDropdown.wpStatelessComboBox({select: regionId})
+				.find('.name')
+					.attr('disabled', 'disabled');
+
+			regionDropdown.find('.circle-loader:not(.get-json-loading)')
+						.addClass('load-complete');
+		}
+		else{
+			regionDropdown.find('.circle-loader:not(.get-json-loading)')
+						.addClass('load-complete')
+						.fadeOut(200);
+
+		}
+
 	});
 
 	jQuery(document).on('tokenExpired', function(){
@@ -293,15 +335,21 @@ jQuery(document).ready(function ($) {
 		var isValid = true;
 		
 		setupForm.find('#stateless-notification').html('').hide();
+		comboBox.find('.circle-loader').addClass('get-json-loading');
 		setupForm.find('.wpStateLess-combo-box').wpStatelessComboBox('validate');
 
 		if(!projectId || !projectName || !bucketId || !billingAccount){ // No valid project id
 			isValid = false;
 			console.log("Form:: Input not valid.")
+			setupForm.find('#stateless-notification')
+					 .html(stateless_l10n.invalid_input)
+					 .addClass('error')
+					 .removeClass('notice notice-info')
+					 .show();
 			return;
 		}
-		comboBox.addClass('loading');
 		btnGetJson.addClass('active disabled');
+		// return ;
 		async.auto({
 			createProject: function(callback) {
 				if(!wp.stateless.projects[projectId]){
@@ -464,8 +512,8 @@ jQuery(document).ready(function ($) {
 
 			if(err){// || results.task == 'saveServiceAccountKey'){
 				jQuery(this).find('.wpStateLess-loading').removeClass('active');
-				comboBox.removeClass('loading');
-				setupForm.find('#stateless-notification').html(err.message).addClass('error').removeClass('info').show();
+				comboBox.find('.circle-loader').removeClass('get-json-loading');
+				setupForm.find('#stateless-notification').html(err.message).addClass('error').removeClass('notice notice-info').show();
 				btnGetJson.removeClass('active disabled');
 				return;
 			}
@@ -496,7 +544,7 @@ jQuery(document).ready(function ($) {
 				setupSteps.removeClass('active')
 					.filter('.step-final')
 					.addClass('active');
-				comboBox.removeClass('loading');
+				comboBox.find('.circle-loader').removeClass('get-json-loading');
 
 			}
 

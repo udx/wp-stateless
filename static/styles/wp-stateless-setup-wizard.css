@@ -480,7 +480,7 @@
   top: 10px;
 }
 
-.wpStateLess-combo-box.loading .circle-loader {
+.wpStateLess-combo-box .circle-loader.loading, .wpStateLess-combo-box .circle-loader.get-json-loading {
   display: inline-block;
 }
 
@@ -491,26 +491,26 @@
   height: 30px;
 }
 
-.load-complete {
+.circle-loader.load-complete {
   -webkit-animation: none;
   animation: none;
   border-color: #5cb85c;
   transition: border 500ms ease-out;
 }
 
-.checkmark {
+.circle-loader .checkmark {
   display: none;
 }
-.load-complete .checkmark {
+.circle-loader.load-complete .checkmark {
   display: block;
 }
-.checkmark.draw:after {
+.circle-loader .checkmark.draw:after {
   animation-duration: 1.2s;
   animation-timing-function: ease;
   animation-name: checkmark;
   transform: scaleX(-1) rotate(135deg);
 }
-.checkmark:after {
+.circle-loader .checkmark:after {
   opacity: 1;
   height: 15px;
   width: 7.5px;

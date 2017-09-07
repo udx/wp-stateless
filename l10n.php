@@ -11,6 +11,7 @@ $l10n = array(
 
   //** Edit Stateless page */
   'something_went_wrong'                  => __( "Something went wrong", ud_get_stateless_media()->domain ),
+  'invalid_input'                         => __( "Form has invalid input. Please fix them.", ud_get_stateless_media()->domain ),
 
   'json_api_enabled'                      => __( "Google Cloud Storage JSON API Service Enabled", ud_get_stateless_media()->domain ),
   'json_api_enabled_failed'               => __( "Google Cloud Storage JSON API Service failed.", ud_get_stateless_media()->domain ),
