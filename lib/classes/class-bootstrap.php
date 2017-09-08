@@ -963,7 +963,7 @@ namespace wpCloud\StatelessMedia {
       }
 
       public function redirect_to_splash($plugin =''){
-        if( $plugin == plugin_basename( $this->boot_file ) ) {
+        if( !defined( 'WP_CLI' ) && $plugin == plugin_basename( $this->boot_file ) ) {
           $url = $this->get_settings_page_url('?page=stateless-setup&step=splash-screen');
           if(json_decode(get_site_option('sm_key_json'))){
             $url = $this->get_settings_page_url('?page=stateless-settings');
