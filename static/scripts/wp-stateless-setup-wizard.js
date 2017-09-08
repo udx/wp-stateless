@@ -341,15 +341,15 @@ jQuery(document).ready(function ($) {
 		var serviceAccountName = 'Stateless ' + bucketName.replace('Stateless', '');
 		var billingAccount = billingDropdown.find('.id').val();
 		var isValid = true;
-		
-		setupForm.find('#stateless-notification').html('').hide();
-		comboBox.find('.circle-loader').addClass('get-json-loading');
+		var errorWrapper = setupForm.find('#stateless-notification').removeClass('error');
+		errorWrapper.html('').hide();
+		comboBox.find('.circle-loader').addClass('get-json-loading').show();
 		setupForm.find('.wpStateLess-combo-box').wpStatelessComboBox('validate');
 
 		if(!projectId || !projectName || !bucketId || !billingAccount){ // No valid project id
 			isValid = false;
 			console.log("Form:: Input not valid.")
-			setupForm.find('#stateless-notification')
+			errorWrapper
 					 .html(stateless_l10n.invalid_input)
 					 .addClass('error')
 					 .removeClass('notice notice-info')
@@ -357,13 +357,13 @@ jQuery(document).ready(function ($) {
 			return;
 		}
 		btnGetJson.addClass('active disabled');
-		// return ;
+		// return;
 		async.auto({
 			createProject: function(callback) {
 				if(!wp.stateless.projects[projectId]){
 					wp.stateless.createProject({"projectId": projectId, "name": projectName})
 					.done(function(response) {
-						callback(null, {ok: true, task: 'createProject', action: 'project_created', message: stateless_l10n.project_created, operation: response.name});
+						callback(null, {ok: true, task: 'createProject', action: 'project_created', message: stateless_l10n.project_creation_started, operation: response.name});
 					}).fail(function(response) {
 						response = response.responseJSON || {};
 						if(response && typeof response.error != 'undefined' && typeof response.error.status != 'undefined' && response.error.status == 'ALREADY_EXISTS'){
@@ -521,14 +521,17 @@ jQuery(document).ready(function ($) {
 			if(err){// || results.task == 'saveServiceAccountKey'){
 				jQuery(this).find('.wpStateLess-loading').removeClass('active');
 				comboBox.find('.circle-loader').removeClass('get-json-loading');
-				setupForm.find('#stateless-notification').html(err.message).addClass('error').removeClass('notice notice-info').show();
+				errorWrapper.html(err.message).addClass('error').removeClass('notice notice-info').show();
 				btnGetJson.removeClass('active disabled');
 				return;
 			}
 
+			if(errorWrapper.hasClass('error'))
+				return;
+
 			if(typeof results.message != 'undefined'){
 				console.log(results.message);
-				setupForm.find('#stateless-notification').html(results.message).addClass('notice notice-info').removeClass('error').show();
+				errorWrapper.html(results.message).addClass('notice notice-info').removeClass('error').show();
 			}
 
 			if(results.task == 'createProjectProgress'){
