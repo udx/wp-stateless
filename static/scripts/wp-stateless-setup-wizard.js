@@ -150,7 +150,7 @@ jQuery(document).ready(function ($) {
 		var projectId = _this.find('.id').val();
 		// Project ID without random digit at the end.
 		var PDBName = 'stateless-' + projectId.replace(/-\d+$/, '');
-		PDBName = PDBName.substring(0, 29).replace(/-$/, '');
+		PDBName = PDBName.substring(0, 30).replace(/-$/, '');
 		billingDropdown.find('.circle-loader:not(.get-json-loading)').addClass('loading').removeClass('load-complete').show();
 		bucketDropdown.find('.circle-loader:not(.get-json-loading)').addClass('loading').removeClass('load-complete').show();
 		regionDropdown.find('.name').removeAttr('disabled');
@@ -158,7 +158,12 @@ jQuery(document).ready(function ($) {
 						.addClass('loading')
 						.removeClass('load-complete').show();
 
-		bucketDropdown.find('.project-derived-name').html(PDBName).attr('data-name', PDBName).attr('data-id', PDBName).show();
+		bucketDropdown.find('.project-derived-name')
+			.html(PDBName)
+			.attr('data-name', PDBName)
+			.attr('data-id', PDBName)
+			.show();
+		bucketDropdown.find('.name').trigger('change'); // To hide project derived name if it's already exists.
         
         if(typeof wp.stateless.projects[projectId] == 'undefined'){
 			bucketDropdown.wpStatelessComboBox({items:{}});
@@ -185,8 +190,11 @@ jQuery(document).ready(function ($) {
 		  	}
 			bucketDropdown.wpStatelessComboBox({items:buckets});
 		  	bucketDropdown.find('.circle-loader:not(.get-json-loading)').fadeOut(200).removeClass('loading');
+		  	// If project derived name found more than once then hide it.
 		  	if(bucketDropdown.wpStatelessComboBox({has: PDBName}))
 				bucketDropdown.find('.project-derived-name').html('').hide();
+			else
+				bucketDropdown.find('.project-derived-name').show();
 	        
 		  }).fail(function(){
 			bucketDropdown.wpStatelessComboBox({items:{}});

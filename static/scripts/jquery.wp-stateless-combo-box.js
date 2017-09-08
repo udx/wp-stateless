@@ -65,12 +65,11 @@
 		}
 
 		if(typeof options.has != 'undefined'){
-			var result = false;
+			var result = 0;
 			var _items = jQuery(this).find('.wpStateLess-existing ul').children();
 			_items.each(function(index, item) {
 				if(jQuery(item).attr('data-id') == options.has){
-					result	 = true;
-					return false; // to break each
+					result++;
 				}
 			});
 			return result;
@@ -78,12 +77,13 @@
 
 		return this.each(function() {
 			var _this = jQuery(this);
+			var dropDown = jQuery('.wpStateLess-input-dropdown', _this);
 			var custom_name = _this.find('.wpStateLess-create-new .custom-name');
-			var predefined_name = _this.find('.wpStateLess-create-new .predefined-name');
+			var predefined_name = dropDown.find('.wpStateLess-create-new .predefined-name');
+			var project_derived_name = jQuery('.wpStateLess-create-new .project-derived-name', dropDown);
 			var _id = _this.find('.id');
 			var _input = _this.find('.name');
 			var existing = _this.find('.wpStateLess-existing');
-			var dropDown = jQuery('.wpStateLess-input-dropdown', _this);
 			var list = existing.find('ul');
 
 			jQuery('h5', existing).hide();
@@ -128,10 +128,15 @@
 				var response = {};
 
 				var resp = jQuery(this).wppStatelessValidate({}, response);
+				var data_predefined_name = predefined_name.attr('data-name');
+				var data_project_derived_name = project_derived_name.attr('data-name');
 
 				dropDown.removeClass('active');
 				dropDown.find('li').removeClass('active');
 				_this.removeClass('has-error').find('.error').html("");
+
+				if(data_predefined_name == data_project_derived_name)
+					project_derived_name.hide();
 
 				if(response.id == 'localhost' || response.pName == 'localhost'){
 					response.id = '';
@@ -149,9 +154,8 @@
 				}else{
 					var name = response.pName;
 					var data_predefined_name = predefined_name.attr('data-name');
-					var project_derived_name = dropDown.find('.project-derived-name').attr('data-name');
-					if(name == data_predefined_name || name == project_derived_name){
-						//custom_name.hide();
+					if(name == data_predefined_name || name == data_project_derived_name){
+						custom_name.hide();
 					}
 					else{
 						if(response.id)
