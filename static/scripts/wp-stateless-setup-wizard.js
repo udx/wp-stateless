@@ -263,7 +263,8 @@ jQuery(document).ready(function ($) {
 		}
 		else{
 			regionDropdown.find('.circle-loader:not(.get-json-loading)')
-						.addClass('load-complete')
+						.removeClass('loading')
+						.removeClass('load-complete')
 						.fadeOut(200);
 
 		}
@@ -337,7 +338,7 @@ jQuery(document).ready(function ($) {
 		var regionId = regionDropdown.find('.id').val();
 		var serviceAccountId = 'stateless-' + bucketId.replace('stateless-', '')
 			.replace(/\./g, '-').replace(/_/g, '-')
-			.slice(0, 23) + '-' + Math.floor((Math.random() * 1000000) + 1000000);
+			.slice(0, 16) + '-' + Math.floor((Math.random() * 100) + 100);
 		var serviceAccountName = 'Stateless ' + bucketName.replace('Stateless', '');
 		var billingAccount = billingDropdown.find('.id').val();
 		var isValid = true;
@@ -423,7 +424,10 @@ jQuery(document).ready(function ($) {
 					callback(null, {ok: true, task: 'updateBilltingInfo', action: 'already_enabled', message: stateless_l10n.billing_already_enabled});
 				}
 			}],
-			createBucket: ['updateBilltingInfo', async.retryable({times: 10, interval: 1500}, function(results, callback){
+			createBucket: ['updateBilltingInfo', async.retryable({times: 10, interval: 1500, errorFilter: function(err) {
+					return err.code != 409; // don't retry if Bucket already exist with this name.
+				}
+			}, function(results, callback){
 				if( typeof wp.stateless.projects[projectId] == 'undefined' || typeof wp.stateless.projects[projectId]['buckets'][bucketId] == 'undefined'){
 					// Bucket didn't exist.
 					wp.stateless.createBucket({"projectId": projectId, "name": bucketId, location: regionId})
@@ -431,9 +435,9 @@ jQuery(document).ready(function ($) {
 						callback(null, {ok: true, task: 'createBucket', action: 'created', message: stateless_l10n.bucket_created});
 					}).fail(function(response) {
 						response = response.responseJSON;
-						if(response && typeof response.error != 'undefined' && typeof response.error.code != 'undefined' && response.error.code == 409){
+						if(response && typeof response.error != 'undefined' && typeof response.error.message != 'undefined'){
 							// Bucket already exist with this name.
-							callback(null, {ok: true, task: 'createBucket', action: 'existing', message: stateless_l10n.bucket_exists});
+							callback({ok: true, task: 'createBucket', action: 'existing', code: response.error.code, message: response.error.message});
 						}
 						else{
 							callback({ok: false, task: 'createBucket', action: 'failed', message: stateless_l10n.bucket_creation_failed});
@@ -526,14 +530,6 @@ jQuery(document).ready(function ($) {
 				return;
 			}
 
-			if(errorWrapper.hasClass('error'))
-				return;
-
-			if(typeof results.message != 'undefined'){
-				console.log(results.message);
-				errorWrapper.html(results.message).addClass('notice notice-info').removeClass('error').show();
-			}
-
 			if(results.task == 'createProjectProgress'){
 				projectDropdown.find('.circle-loader').addClass('load-complete');
 			}
@@ -545,6 +541,7 @@ jQuery(document).ready(function ($) {
 			}
 			else if(results.task == 'createBucket'){
 				bucketDropdown.find('.circle-loader').addClass('load-complete');
+				regionDropdown.find('.circle-loader').addClass('load-complete');
 			}
 			else if(results.task == 'saveServiceAccountKey'){
 				// We have access token.
@@ -557,6 +554,14 @@ jQuery(document).ready(function ($) {
 					.addClass('active');
 				comboBox.find('.circle-loader').removeClass('get-json-loading');
 
+			}
+
+			if(errorWrapper.hasClass('error'))
+				return;
+
+			if(typeof results.message != 'undefined'){
+				console.log(results.message);
+				errorWrapper.html(results.message).addClass('notice notice-info').removeClass('error').show();
 			}
 
 		});
