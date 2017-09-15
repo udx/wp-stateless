@@ -219,9 +219,9 @@ namespace wpCloud\StatelessMedia {
           throw new \Exception( __( "You are not allowed to do this.", ud_get_stateless_media()->domain ) );
 
         $fullsizepath = get_attached_file( $file->ID );
-        $local_image_exists = file_exists( $fullsizepath );
+        $local_file_exists = file_exists( $fullsizepath );
 
-        if ( false === $fullsizepath || ! $local_image_exists ) {
+        if ( false === $fullsizepath || ! $local_file_exists ) {
           $upload_dir = wp_upload_dir();
 
           // Try get it and save
@@ -233,11 +233,15 @@ namespace wpCloud\StatelessMedia {
               throw new \Exception(sprintf(__('File not found (%s)', ud_get_stateless_media()->domain), $file->guid));
             }
             else{
-              $local_image_exists = true;
+              $local_file_exists = true;
             }
           }
-        // } else {
-        if($local_image_exists)
+          else{
+            $local_file_exists = true;
+          }
+        }
+
+        if($local_file_exists){
           $upload_dir = wp_upload_dir();
 
           if ( !ud_get_stateless_media()->get_client()->media_exists( str_replace( trailingslashit( $upload_dir[ 'basedir' ] ), '', $fullsizepath ) ) ) {
@@ -257,6 +261,12 @@ namespace wpCloud\StatelessMedia {
 
             wp_update_attachment_metadata( $file->ID, $metadata );
 
+          }
+          else{
+            // Stateless mode: we don't need the local version.
+            if(ud_get_stateless_media()->get( 'sm.mode' ) === 'stateless'){
+              unlink($fullsizepath);
+            }
           }
 
         }

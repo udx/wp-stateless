@@ -154,6 +154,7 @@ namespace wpCloud\StatelessMedia {
 
         if( !is_wp_error( $client ) ) {
 
+          $fullsizepath = wp_normalize_path( get_attached_file( $attachment_id ) );
           // Make non-images uploadable.
           if( empty( $metadata['file'] ) && $attachment_id ) {
             $metadata = array( "file" => str_replace( trailingslashit( $upload_dir[ 'basedir' ] ), '', get_attached_file( $attachment_id ) ) );
@@ -265,11 +266,11 @@ namespace wpCloud\StatelessMedia {
 
             }
 
-            // Stateless mode: we don't need the local version.
-            if(ud_get_stateless_media()->get( 'sm.mode' ) === 'stateless'){
-              unlink($upload_dir[ 'basedir' ] . '/' . $file);
-            }
+          }
 
+          // Stateless mode: we don't need the local version.
+          if(ud_get_stateless_media()->get( 'sm.mode' ) === 'stateless'){
+            unlink($fullsizepath);
           }
 
           update_post_meta( $attachment_id, 'sm_cloud', $cloud_meta );
