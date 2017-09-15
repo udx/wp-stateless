@@ -337,8 +337,9 @@ jQuery(document).ready(function ($) {
 		var bucketId = bucketName == 'localhost'?'':bucketName;
 		var regionId = regionDropdown.find('.id').val();
 		var serviceAccountId = 'stateless-' + bucketId.replace('stateless-', '')
-			.replace(/\./g, '-').replace(/_/g, '-')
-			.slice(0, 16) + '-' + Math.floor((Math.random() * 100) + 100);
+			.replace(/[._]/g, '-')
+			.slice(0, 16)
+			.replace(/-$/, '') + '-' + Math.floor((Math.random() * 100) + 100);
 		var serviceAccountName = 'Stateless ' + bucketName.replace('Stateless', '');
 		var billingAccount = billingDropdown.find('.id').val();
 		var isValid = true;
