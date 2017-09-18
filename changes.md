@@ -1,9 +1,9 @@
 #### 2.1.0
-* NEW - Added support for <code>GOOGLE_APPLICATION_CREDENTIALS</code> environment variable.
 * FIX - Fixed read only for Service Account JSON if constant or environment variable is defined. 
 * FIX - Override default cache control.
 * FIX - Fixed custom domain bucket support with setup assistant.
 * FIX - Improved support for wp_calculate_image_srcset.
+* FIX - Fixed error appeared when trying to sync non-images.
 * NEW - Support for GOOGLE_APPLICATION_CREDENTIALS environment variable.
 * NEW - Added bucket region option to setup assistant.
 * NEW - Added custom file type support for File URL Replacement setting.
