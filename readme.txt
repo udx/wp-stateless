@@ -94,7 +94,7 @@ To ensure new releases cause as little disruption as possible, we rely on a numb
 
 == Changelog ==
 
-= 2.1.0=
+= 2.1.0 =
 * FIX - Fixed read only for Service Account JSON if constant or environment variable is defined. 
 * FIX - Override default cache control.
 * FIX - Fixed custom domain bucket support with setup assistant.
