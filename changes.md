@@ -1,6 +1,14 @@
 #### 2.1.0
 * NEW - Added support for <code>GOOGLE_APPLICATION_CREDENTIALS</code> environment variable.
-* Fixed read only for Service Account JSON if constant or environment variable is defined. 
+* FIX - Fixed read only for Service Account JSON if constant or environment variable is defined. 
+* FIX - Override default cache control.
+* FIX - Fixed custom domain bucket support with setup assistant.
+* FIX - Improved support for wp_calculate_image_srcset.
+* NEW - Support for GOOGLE_APPLICATION_CREDENTIALS environment variable.
+* NEW - Added bucket region option to setup assistant.
+* NEW - Added custom file type support for File URL Replacement setting.
+* NEW - Added failover to image url when not found on disk for sync tool.
+* ENHANCEMENT - updated service account role to Storage Object Admin.
 
 #### 2.0.3
 * FIX - Fixed Fatal Error which was occurring on WordPress Multisite after upgrading plugin from 1.x to 2.x.
