@@ -187,7 +187,7 @@ namespace wpCloud\StatelessMedia {
                 break;
 
             }
-            if(file_exists($key_file_path)){
+            if(is_readable($key_file_path)) {
               $this->set( 'sm.key_json', file_get_contents($key_file_path) );
               if(defined('WP_STATELESS_MEDIA_KEY_FILE_PATH'))
                 $this->set( "sm.readonly.key_json", "constant" );
