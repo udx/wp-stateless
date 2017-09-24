@@ -162,6 +162,17 @@ namespace wpCloud\StatelessMedia {
            */
           if( !$this->has_errors() ) {
 
+            if( $this->get( 'sm.mode' ) === 'stateless' ) {
+              /**
+               * In stateless mode no local copy of images is available.
+               * So we need to filter full image path before generate_cropped_image() function uses to 
+               * get image editor using wp_get_image_editor.
+               * We will hook into acf-image-crop/full_image_path filter and return GCS link if available.
+               * 
+               */
+              add_action( 'acf-image-crop/full_image_path', array( $this, 'acf_image_crop_full_image_path' ), 10, 3 );
+            }
+
             if( $this->get( 'sm.mode' ) === 'cdn' || $this->get( 'sm.mode' ) === 'stateless' ) {
               add_filter( 'wp_get_attachment_image_attributes', array( $this, 'wp_get_attachment_image_attributes' ), 20, 3 );
               add_filter( 'wp_get_attachment_url', array( $this, 'wp_get_attachment_url' ), 20, 2 );
@@ -221,6 +232,24 @@ namespace wpCloud\StatelessMedia {
 
       }
 
+
+      /**
+       * Only for stateless mode.
+       * Filter image link generate_cropped_image() uses to get image editor.
+       * As no local copy of the image is available we need to filter the image path.
+       *
+       * @param $full_image_path: Expected local image path.
+       * @param $id: Image/attachment ID
+       * @param $meta_data: Image/attachment meta data.
+       *
+       * @return GCS link if it has gs_link in meta data.
+       */
+      public function acf_image_crop_full_image_path( $full_image_path, $id, $meta_data ){
+        if(!empty($meta_data['gs_link']))
+          $full_image_path = $meta_data['gs_link'];
+        return $full_image_path;
+      }
+      
       /**
        * Rebuild srcset from gs_link.
        * 
