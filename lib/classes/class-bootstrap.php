@@ -162,6 +162,18 @@ namespace wpCloud\StatelessMedia {
            */
           if( !$this->has_errors() ) {
 
+            if( $this->get( 'sm.mode' ) === 'stateless' ) {
+              /**
+               * ACF image crop addons compatibility.
+               * We hook into image crops admin_ajax crop request and alter
+               * wp_upload_dir() using upload_dir filter.
+               * Then we remove the filter once the plugin get the GCS image link.
+               * 
+               */
+              add_action( 'wp_ajax_acf_image_crop_perform_crop', array( $this, 'acf_image_crop_perform_crop' ), 1 );
+
+            }
+
             if( $this->get( 'sm.mode' ) === 'cdn' || $this->get( 'sm.mode' ) === 'stateless' ) {
               add_filter( 'wp_get_attachment_image_attributes', array( $this, 'wp_get_attachment_image_attributes' ), 20, 3 );
               add_filter( 'wp_get_attachment_url', array( $this, 'wp_get_attachment_url' ), 20, 2 );
@@ -219,6 +231,30 @@ namespace wpCloud\StatelessMedia {
 
         }
 
+      }
+
+      /**
+       * Alter wp_upload_dir() using upload_dir filter.
+       * Then we remove the filter once the plugin get the GCS image link.
+       * 
+       */
+      public function acf_image_crop_perform_crop(){
+        add_filter('upload_dir', array( $this, 'upload_dir') );
+        // Removing upload_dir filter.
+        add_filter('acf-image-crop/filename_postfix', array( $this, 'remove_filter_upload_dir') );
+
+      }
+
+      /**
+       * Remove upload_dir filter as it's work is done.
+       * Used acf-image-crop/filename_postfix as intermediate/temporary hook.
+       * We need to remove the upload_dir filter before that function tries to 
+       * insert attachment to media library. Unless media library would get confused.
+       * 
+       */
+      public function remove_filter_upload_dir($postfix=''){
+        remove_filter('upload_dir', array( $this, 'upload_dir') );
+        return $postfix;
       }
 
       /**
@@ -1024,6 +1060,7 @@ namespace wpCloud\StatelessMedia {
        * @return mixed
        */
       public function upload_dir( $data ) {
+        $data[ 'basedir' ] = $this->get_gs_host();
         $data[ 'baseurl' ] = $this->get_gs_host();
         $data[ 'url' ] = $data[ 'baseurl' ] . $data[ 'subdir' ];
 
