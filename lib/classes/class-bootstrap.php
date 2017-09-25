@@ -168,9 +168,18 @@ namespace wpCloud\StatelessMedia {
                * We hook into image crops admin_ajax crop request and alter
                * wp_upload_dir() using upload_dir filter.
                * Then we remove the filter once the plugin get the GCS image link.
-               * 
+               *
                */
               add_action( 'wp_ajax_acf_image_crop_perform_crop', array( $this, 'acf_image_crop_perform_crop' ), 1 );
+
+              /*
+               * In stateless mode no local copy of images is available.
+               * So we need to filter full image path before generate_cropped_image() function uses to
+               * get image editor using wp_get_image_editor.
+               * We will hook into acf-image-crop/full_image_path filter and return GCS link if available.
+               *
+               */
+              add_action( 'acf-image-crop/full_image_path', array( $this, 'acf_image_crop_full_image_path' ), 10, 3 );
 
             }
 
@@ -232,30 +241,68 @@ namespace wpCloud\StatelessMedia {
 
         }
 
+        /**
+         * Support for Easy Digital Downloads download method
+         */
+        add_action( 'edd_process_download_headers', array( $this, 'edd_download_method_support' ), 10, 4);
+
       }
 
       /**
+       * If EDD download method is Forced (direct) and file goes from GCS then make it to be downloaded right away.
+       *
+       * @param $requested_file
+       * @param $download
+       * @param $email
+       * @param $payment
+       */
+      public function edd_download_method_support( $requested_file, $download, $email, $payment ) {
+        if ( !function_exists( 'edd_is_local_file' ) || !function_exists( 'edd_get_file_download_method' ) ) return;
+        if ( edd_get_file_download_method() != 'direct' ) return;
+        if ( !edd_is_local_file( $requested_file ) && strstr( $requested_file, 'storage.googleapis.com' ) ) {
+          header('Content-Type: application/octet-stream');
+          header("Content-Transfer-Encoding: Binary");
+          header("Content-disposition: attachment; filename=\"".apply_filters( 'edd_requested_file_name', basename( $requested_file ) )."\"");
+          readfile($requested_file);
+          exit;
+        }
+      }
+      /**
        * Alter wp_upload_dir() using upload_dir filter.
        * Then we remove the filter once the plugin get the GCS image link.
-       * 
+       *
        */
       public function acf_image_crop_perform_crop(){
         add_filter('upload_dir', array( $this, 'upload_dir') );
         // Removing upload_dir filter.
         add_filter('acf-image-crop/filename_postfix', array( $this, 'remove_filter_upload_dir') );
-
       }
-
       /**
        * Remove upload_dir filter as it's work is done.
        * Used acf-image-crop/filename_postfix as intermediate/temporary hook.
-       * We need to remove the upload_dir filter before that function tries to 
+       * We need to remove the upload_dir filter before that function tries to
        * insert attachment to media library. Unless media library would get confused.
-       * 
+       *
        */
       public function remove_filter_upload_dir($postfix=''){
         remove_filter('upload_dir', array( $this, 'upload_dir') );
         return $postfix;
+      }
+      /*
+       * Only for stateless mode.
+       * Filter image link generate_cropped_image() uses to get image editor.
+       * As no local copy of the image is available we need to filter the image path.
+       *
+       * @param $full_image_path: Expected local image path.
+       * @param $id: Image/attachment ID
+       * @param $meta_data: Image/attachment meta data.
+       *
+       * @return GCS link if it has gs_link in meta data.
+       */
+      public function acf_image_crop_full_image_path( $full_image_path, $id, $meta_data ){
+        if(!empty($meta_data['gs_link']))
+          $full_image_path = $meta_data['gs_link'];
+        return $full_image_path;
       }
 
       /**
