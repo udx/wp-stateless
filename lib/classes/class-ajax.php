@@ -19,7 +19,9 @@ namespace wpCloud\StatelessMedia {
         'stateless_process_image',
         'get_images_media_ids',
         'get_other_media_ids',
+        'get_non_library_files_id',
         'stateless_process_file',
+        'stateless_process_non_library_file',
         'stateless_get_current_progresses',
         'stateless_wizard_update_settings',
         'stateless_reset_progress',
@@ -278,6 +280,79 @@ namespace wpCloud\StatelessMedia {
       }
 
       /**
+       * @return string
+       * @throws \Exception
+       */
+      public function action_stateless_process_non_library_file() {
+        @error_reporting( 0 );
+        $upload_dir = wp_upload_dir();
+        $client = ud_get_stateless_media()->get_client();
+
+        $file_path = trim($_REQUEST['file_path'], '/');
+        $fullsizepath = $upload_dir['basedir'] . '/' . $file_path;
+
+        if ( ! current_user_can( 'manage_options' ) )
+          throw new \Exception( __( "You are not allowed to do this.", ud_get_stateless_media()->domain ) );
+
+        $local_file_exists = file_exists( $fullsizepath );
+
+        if ( !$local_file_exists ) {
+
+          // Try get it and save
+          $result_code = ud_get_stateless_media()->get_client()->get_media( $fullsizepath, true, $fullsizepath );
+
+          if ( $result_code !== 200 ) {
+            // if(!$this->get_attachment_if_exist($file->ID, $fullsizepath)){ // Save file to local from proxy.
+              $this->store_failed_attachment( $file->ID, 'other' );
+              throw new \Exception(sprintf(__('File not found (%s)', ud_get_stateless_media()->domain), $file->guid));
+            // }
+            // else{
+              // $local_file_exists = true;
+            // }
+          }
+          else{
+            $local_file_exists = true;
+          }
+        }
+
+        if($local_file_exists){
+
+          if ( !ud_get_stateless_media()->get_client()->media_exists( $file_path )) {
+
+            @set_time_limit( -1 );
+            $file_type = wp_check_filetype($fullsizepath);
+            /* Add 'image size' image */
+            $media = $client->add_media( array(
+              'name' => $file_path,
+              'absolutePath' => $fullsizepath,
+              'cacheControl' => apply_filters( 'sm:item:cacheControl', 'public, max-age=36000, must-revalidate', $fullsizepath),
+              'contentDisposition' => apply_filters( 'sm:item:contentDisposition', null, $fullsizepath),
+              'mimeType' => $file_type['type'],
+              'metadata' => array(
+                'child-of' => dirname($file_path),
+                'file-hash' => md5( $file_path ),
+              ),
+            ));
+
+
+
+          }
+          else{
+            // Stateless mode: we don't need the local version.
+            if(ud_get_stateless_media()->get( 'sm.mode' ) === 'stateless'){
+              unlink($fullsizepath);
+            }
+          }
+
+        }
+
+        $this->store_current_progress( 'other', $id );
+        $this->maybe_fix_failed_attachment( 'other', $file->ID );
+
+        return sprintf( __( '%1$s (ID %2$s) was successfully synchronised in %3$s seconds.', ud_get_stateless_media()->domain ), esc_html( get_the_title( $file->ID ) ), $file->ID, timer_stop() );
+      }
+
+      /**
        * Returns IDs of images media objects
        */
       public function action_get_images_media_ids() {
@@ -311,6 +386,22 @@ namespace wpCloud\StatelessMedia {
         }
 
         return $this->get_non_processed_media_ids( 'other', $files, $continue );
+      }
+
+      /**
+       * Returns IDs of non media library files
+       */
+      public function action_get_non_library_files_id() {
+        $files = array();
+        $upload_dir = wp_upload_dir();
+        $siteorigin_dir = '/siteorigin-widgets/';
+        if(is_dir($upload_dir['basedir'] . $siteorigin_dir)){
+          $files = glob( $upload_dir['basedir'] . $siteorigin_dir . "*" );
+          foreach ($files as $id => $file) {
+            $files[$id] = str_replace(wp_normalize_path($upload_dir['basedir']), '', wp_normalize_path($file));
+          }
+        }
+        return $files;
       }
 
       /**
