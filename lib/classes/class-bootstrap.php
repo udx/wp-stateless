@@ -177,6 +177,7 @@ namespace wpCloud\StatelessMedia {
               add_filter( 'wp_get_attachment_image_attributes', array( $this, 'wp_get_attachment_image_attributes' ), 20, 3 );
               add_filter( 'wp_get_attachment_url', array( $this, 'wp_get_attachment_url' ), 20, 2 );
               add_filter( 'attachment_url_to_postid', array( $this, 'attachment_url_to_postid' ), 20, 2 );
+              add_filter( 'set_url_scheme', array( $this, 'set_url_scheme' ), 20, 3 );
 
               if ( $this->get( 'sm.body_rewrite' ) == 'true' ) {
                 add_filter( 'the_content', array( $this, 'the_content_filter' ) );
@@ -1086,6 +1087,20 @@ namespace wpCloud\StatelessMedia {
 
         return $data;
 
+      }
+
+      /**
+       * Change Upload BaseURL when CDN Used.
+       *
+       * @param $data
+       * @return mixed
+       */
+      public function set_url_scheme( $url, $scheme, $orig_scheme ) {
+        $position = strpos($url, '/siteorigin-widgets/');
+        if( $position !== false ){
+          $url = $this->get_gs_host() . substr($url, $position);
+        }
+        return $url;
       }
 
       /**

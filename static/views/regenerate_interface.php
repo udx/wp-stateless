@@ -30,6 +30,13 @@
         </label>
       </div>
 
+      <div class="option">
+        <label>
+          <input ng-disabled="isRunning || isLoading" type="radio" name="action" value="sync_non_library_files" ng-model="action" />
+          <?php _e( 'Synchronize non media library files between Google Storage and local server', ud_get_stateless_media()->domain ); ?>
+        </label>
+      </div>
+
     </div>
 
     <div ng-if="action == 'regenerate_images' && progresses.images || action == 'sync_non_images' && progresses.other">
