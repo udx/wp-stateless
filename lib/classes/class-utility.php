@@ -230,7 +230,7 @@ namespace wpCloud\StatelessMedia {
 
               /* Add 'image size' image */
               $media = $client->add_media( array(
-                'name' => $file_path = $mediaPath . '/' . $data[ 'file' ],
+                'name' => $file_path = trim($mediaPath . '/' . $data[ 'file' ], '/'),
                 'absolutePath' => $absolutePath,
                 'cacheControl' => $_cacheControl,
                 'contentDisposition' => $_contentDisposition,
