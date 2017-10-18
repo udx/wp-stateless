@@ -597,6 +597,7 @@ namespace wpCloud\StatelessMedia {
 
         $file_path = str_replace( trailingslashit( $upload_dir[ 'basedir' ] ), '', $file );
         $file_info = @getimagesize( $file );
+        $mimeType = wp_check_filetype( $file );
 
         if ( $file_info ) {
           $_metadata = array(
@@ -613,6 +614,7 @@ namespace wpCloud\StatelessMedia {
           'absolutePath' => wp_normalize_path( $file ),
           'cacheControl' => apply_filters( 'sm:item:cacheControl', 'public, max-age=36000, must-revalidate', $_metadata ),
           'contentDisposition' => null,
+          'mimeType' => $mimeType['type'],
           'metadata' => $_metadata
         ) ) ) );
 
