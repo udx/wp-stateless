@@ -164,6 +164,8 @@ namespace wpCloud\StatelessMedia {
 
             if( $this->get( 'sm.mode' ) === 'stateless' ) {
               /**
+
+
                * ACF image crop addons compatibility.
                * We hook into image crops admin_ajax crop request and alter
                * wp_upload_dir() using upload_dir filter.
@@ -172,12 +174,21 @@ namespace wpCloud\StatelessMedia {
                */
               add_action( 'wp_ajax_acf_image_crop_perform_crop', array( $this, 'acf_image_crop_perform_crop' ), 1 );
 
+               * In stateless mode no local copy of images is available.
+               * So we need to filter full image path before generate_cropped_image() function uses to 
+               * get image editor using wp_get_image_editor.
+               * We will hook into acf-image-crop/full_image_path filter and return GCS link if available.
+               * 
+               */
+              add_action( 'acf-image-crop/full_image_path', array( $this, 'acf_image_crop_full_image_path' ), 10, 3 );
+
             }
 
             if( $this->get( 'sm.mode' ) === 'cdn' || $this->get( 'sm.mode' ) === 'stateless' ) {
               add_filter( 'wp_get_attachment_image_attributes', array( $this, 'wp_get_attachment_image_attributes' ), 20, 3 );
               add_filter( 'wp_get_attachment_url', array( $this, 'wp_get_attachment_url' ), 20, 2 );
               add_filter( 'attachment_url_to_postid', array( $this, 'attachment_url_to_postid' ), 20, 2 );
+              add_filter( 'set_url_scheme', array( $this, 'set_url_scheme' ), 20, 3 );
 
               if ( $this->get( 'sm.body_rewrite' ) == 'true' ) {
                 add_filter( 'the_content', array( $this, 'the_content_filter' ) );
@@ -231,6 +242,35 @@ namespace wpCloud\StatelessMedia {
 
         }
 
+        /**
+         * Support for Easy Digital Downloads download method
+         */
+        add_action( 'edd_process_download_headers', array( $this, 'edd_download_method_support' ), 10, 4);
+
+      }
+
+      /**
+       * If EDD download method is Forced (direct) and file goes from GCS then make it to be downloaded right away.
+       *
+       * @param $requested_file
+       * @param $download
+       * @param $email
+       * @param $payment
+       */
+      public function edd_download_method_support( $requested_file, $download, $email, $payment ) {
+
+        if ( !function_exists( 'edd_is_local_file' ) || !function_exists( 'edd_get_file_download_method' ) ) return;
+
+        if ( edd_get_file_download_method() != 'direct' ) return;
+
+        if ( !edd_is_local_file( $requested_file ) && strstr( $requested_file, 'storage.googleapis.com' ) ) {
+          header('Content-Type: application/octet-stream');
+          header("Content-Transfer-Encoding: Binary");
+          header("Content-disposition: attachment; filename=\"".apply_filters( 'edd_requested_file_name', basename( $requested_file ) )."\"");
+          readfile($requested_file);
+          exit;
+        }
+
       }
 
       /**
@@ -257,6 +297,22 @@ namespace wpCloud\StatelessMedia {
         return $postfix;
       }
 
+       * Only for stateless mode.
+       * Filter image link generate_cropped_image() uses to get image editor.
+       * As no local copy of the image is available we need to filter the image path.
+       *
+       * @param $full_image_path: Expected local image path.
+       * @param $id: Image/attachment ID
+       * @param $meta_data: Image/attachment meta data.
+       *
+       * @return GCS link if it has gs_link in meta data.
+       */
+      public function acf_image_crop_full_image_path( $full_image_path, $id, $meta_data ){
+        if(!empty($meta_data['gs_link']))
+          $full_image_path = $meta_data['gs_link'];
+        return $full_image_path;
+      }
+      
       /**
        * Rebuild srcset from gs_link.
        * 
@@ -264,7 +320,7 @@ namespace wpCloud\StatelessMedia {
        */
       public function wp_calculate_image_srcset($sources, $size_array, $image_src, $image_meta, $attachment_id){
         foreach ($sources as $width => &$image) {
-          if($width == $image_meta['width']){
+          if($width == $image_meta['width'] && isset( $image_meta['gs_link'] ) && $image_meta['gs_link'] ){
             $image['url'] = $image_meta['gs_link'];
           }
           elseif(isset($image_meta['sizes']) && is_array($image_meta['sizes'])){
@@ -1073,6 +1129,20 @@ namespace wpCloud\StatelessMedia {
 
         return $data;
 
+      }
+
+      /**
+       * Change Upload BaseURL when CDN Used.
+       *
+       * @param $data
+       * @return mixed
+       */
+      public function set_url_scheme( $url, $scheme, $orig_scheme ) {
+        $position = strpos($url, '/siteorigin-widgets/');
+        if( $position !== false ){
+          $url = $this->get_gs_host() . substr($url, $position);
+        }
+        return $url;
       }
 
       /**
