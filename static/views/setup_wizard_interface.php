@@ -42,7 +42,7 @@ $bucket_id      = trim("stateless-" . substr($id, 0, 20), '-');
                                         <h3><?php _e( 'Google Login', ud_get_stateless_media()->domain ); ?></h3>
                                         <p><?php _e( 'Login with the Google account you want associated with this website.', ud_get_stateless_media()->domain ); ?></p>
                                     </div>
-                                    <a id="google-login" href="https://api.usabilitydynamics.com/product/stateless/v1/auth/google?state=<?php echo urlencode(ud_get_stateless_media()->get_settings_page_url('?page=stateless-setup&step=google-login') ); ?>" class="btn btn-googly-red"><?php _e( 'Google Login', ud_get_stateless_media()->domain ); ?></a>
+                                    <a id="google-login" href="https://api.stateless.ci/v1/auth/google?state=<?php echo urlencode(ud_get_stateless_media()->get_settings_page_url('?page=stateless-setup&step=google-login') ); ?>" class="btn btn-googly-red"><?php _e( 'Google Login', ud_get_stateless_media()->domain ); ?></a>
                                 </div>
                                 <div class="wpStateLess-s-step step-setup-project">
                                     <div class="wpStateLess-step-title">

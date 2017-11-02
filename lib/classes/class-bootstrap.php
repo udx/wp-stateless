@@ -296,6 +296,7 @@ namespace wpCloud\StatelessMedia {
         return $postfix;
       }
 
+      /*
        * Only for stateless mode.
        * Filter image link generate_cropped_image() uses to get image editor.
        * As no local copy of the image is available we need to filter the image path.
