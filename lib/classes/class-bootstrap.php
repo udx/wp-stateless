@@ -164,8 +164,6 @@ namespace wpCloud\StatelessMedia {
 
             if( $this->get( 'sm.mode' ) === 'stateless' ) {
               /**
-
-
                * ACF image crop addons compatibility.
                * We hook into image crops admin_ajax crop request and alter
                * wp_upload_dir() using upload_dir filter.
@@ -173,7 +171,8 @@ namespace wpCloud\StatelessMedia {
                * 
                */
               add_action( 'wp_ajax_acf_image_crop_perform_crop', array( $this, 'acf_image_crop_perform_crop' ), 1 );
-
+              
+              /*
                * In stateless mode no local copy of images is available.
                * So we need to filter full image path before generate_cropped_image() function uses to 
                * get image editor using wp_get_image_editor.
