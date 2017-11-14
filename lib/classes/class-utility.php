@@ -28,12 +28,13 @@ namespace wpCloud\StatelessMedia {
           include_once( __DIR__ . '/class-logger.php' );
         }
 
-
         if( !class_exists( 'wpCloud\StatelessMedia\Logger' )) {
           return;
         }
 
-        Logger::log( '[wp-stateless]', $data );
+        if( defined( 'WP_STATELESS_CONSOLE_LOG' ) && WP_STATELESS_CONSOLE_LOG ) {
+          Logger::log( '[wp-stateless]', $data );
+        }
 
       }
 
