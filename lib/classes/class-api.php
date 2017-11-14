@@ -39,6 +39,53 @@ namespace wpCloud\StatelessMedia {
 
       }
 
+      /**
+       * Get settings Endpoint.
+       *
+       * @return array
+       */
+      static public function getSettings() {
+
+        $settings = apply_filters('stateless::get_settings', array());
+
+        return array(
+            "ok" => true,
+            "message" => "getSettings endpoint.",
+            "settings" => $settings
+        );
+
+      }
+
+      /**
+       * Get media library Endpoint.
+       *
+       * @return array
+       */
+      static public function getMediaLibrary() {
+
+        return array(
+            "ok" => true,
+            "message" => "getMediaLibrary endpoint.",
+            "mediaLibrary" => array()
+        );
+
+      }
+
+      /**
+       * Get media item Endpoint.
+       *
+       * @return array
+       */
+      static public function getMediaItem() {
+
+        return array(
+            "ok" => true,
+            "message" => "getMediaItem endpoint.",
+            "mediaItem" => array()
+        );
+
+      }
+
     }
 
   }

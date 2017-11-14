@@ -94,6 +94,11 @@ namespace wpCloud\StatelessMedia {
         add_action( 'switch_blog', array( $this, 'on_switch_blog' ), 10, 2 );
 
         /**
+         * Filter for getting stateless settings
+         */
+        add_filter( 'stateless::get_settings', array( $this, 'get_settings' ), 10);
+
+        /**
          * Init AJAX jobs
          */
         new Ajax();
@@ -387,6 +392,43 @@ namespace wpCloud\StatelessMedia {
       }
 
       /**
+       * Get settings handler.
+       * Filling array if some settings missing.
+       *
+       * @param $settings
+       * @return
+       */
+      public function get_settings($settings) {
+
+        $settings_list =  array(
+            'mode',
+            'body_rewrite',
+            'body_rewrite_types',
+            'on_fly',
+            'bucket',
+            'root_dir',
+            'key_json',
+            'cache_control',
+            'delete_remote',
+            'custom_domain',
+            'organize_media',
+            'hashify_file_name'
+        );
+
+        foreach ($settings_list as $setting){
+
+            /** If setting is already exist, just skip it */
+            if(isset($settings[$setting])){
+                continue;
+            }
+
+            $settings[$setting] = $this->get( 'sm.' . $setting );
+        }
+
+        return $settings;
+      }
+
+      /**
        * Remove all settings.
        */
       public function reset($network = false) {
@@ -438,15 +480,57 @@ namespace wpCloud\StatelessMedia {
        */
       public function api_init() {
 
-        register_rest_route( 'wp-stateless/v1', '/status', array(
+        $route_namespace = 'wp-stateless/v1';
+        $api_namespace = 'wpCloud\StatelessMedia\API';
+
+        register_rest_route( $route_namespace, '/status', array(
           'methods' => 'GET',
-          'callback' => array( 'wpCloud\StatelessMedia\API', 'status' ),
+          'callback' => array( $api_namespace, 'status' ),
         ) );
 
-        register_rest_route( 'wp-stateless/v1', '/jobs', array(
+        register_rest_route( $route_namespace, '/jobs', array(
           'methods' => 'GET',
-          'callback' => array( 'wpCloud\StatelessMedia\API', 'jobs' ),
+          'callback' => array( $api_namespace, 'jobs' ),
         ) );
+
+        /**
+         * Return stateless settings.
+         *
+         * Request parameter: none
+         *
+         * Response:
+         *    ok: Whether API is up or not
+         *    message: Describe what is done or error message on error.
+         *    settings: array of stateless settings
+         *
+         */
+        register_rest_route( $route_namespace, '/getSettings', array( 'methods' => 'GET', 'callback' => array( $api_namespace, 'getSettings' ), ) );
+
+        /**
+         * Essentially for scrolling through media library to build our index.
+         *
+         * Request parameter: none
+         *
+         * Response:
+         *    ok: Whether API is up or not
+         *    message: Describe what is done or error message on error.
+         *    settings: array of media files
+         *
+         */
+        register_rest_route( $route_namespace, '/getMediaLibrary', array( 'methods' => 'GET', 'callback' => array( $api_namespace, 'getMediaLibrary' ), ) );
+
+        /**
+         * Get detailed information of media file
+         *
+         * Request parameter: none
+         *
+         * Response:
+         *    ok: Whether API is up or not
+         *    message: Describe what is done or error message on error.
+         *    settings: media file array
+         *
+         */
+        register_rest_route( $route_namespace, '/getMediaItem', array( 'methods' => 'GET', 'callback' => array( $api_namespace, 'getMediaItem' ), ) );
 
       }
 
