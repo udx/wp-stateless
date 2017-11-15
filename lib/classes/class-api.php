@@ -2,11 +2,14 @@
 /**
  * API Handler
  *
+ *
+ *
  * @since 1.0.0
  */
 namespace wpCloud\StatelessMedia {
 
   if( !class_exists( 'wpCloud\StatelessMedia\API' ) ) {
+
 
     final class API {
 
@@ -42,9 +45,14 @@ namespace wpCloud\StatelessMedia {
       /**
        * Get settings Endpoint.
        *
+       * @param $request
        * @return array
        */
-      static public function getSettings() {
+      static public function getSettings( $request ) {
+
+        if( !self::authRequest( $request ) ) {
+          return array("ok" => false, "message" => __( "Auth fail." ));
+        }
 
         $settings = apply_filters('stateless::get_settings', array());
 
@@ -59,9 +67,14 @@ namespace wpCloud\StatelessMedia {
       /**
        * Get media library Endpoint.
        *
+       * @param $request
        * @return array
        */
-      static public function getMediaLibrary() {
+      static public function getMediaLibrary( $request ) {
+
+        if( !self::authRequest( $request ) ) {
+          return array("ok" => false, "message" => __( "Auth fail." ));
+        }
 
         return array(
             "ok" => true,
@@ -74,15 +87,53 @@ namespace wpCloud\StatelessMedia {
       /**
        * Get media item Endpoint.
        *
+       * @param $request
        * @return array
        */
-      static public function getMediaItem() {
+      static public function getMediaItem( $request ) {
+
+        if( !self::authRequest( $request ) ) {
+          return array("ok" => false, "message" => __( "Auth fail." ));
+        }
 
         return array(
             "ok" => true,
             "message" => "getMediaItem endpoint.",
             "mediaItem" => array()
         );
+
+      }
+
+      /**
+       * Handle Auth.
+       *
+       * @param $request
+       * @return bool
+       */
+      static public function authRequest( $request = false ) {
+
+        //die( '<pre>' . print_r($request->get_param('key'),true) . '</pre>' );
+
+        if( !$request ) {
+          return false;
+        }
+
+        if( !$request->get_param('key') ) {
+          return false;
+        }
+
+        $settings = apply_filters('stateless::get_settings', array());
+
+        if( !$settings[ 'api_key' ] ) {
+          return false;
+        }
+
+        if( $request->get_param('key') !== $settings[ 'api_key' ] ) {
+          return false;
+        }
+
+        return true;
+
 
       }
 
