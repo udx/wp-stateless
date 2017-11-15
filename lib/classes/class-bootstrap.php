@@ -415,14 +415,22 @@ namespace wpCloud\StatelessMedia {
             'hashify_file_name'
         );
 
-        foreach ($settings_list as $setting){
+        foreach ($settings_list as $setting) {
 
-            /** If setting is already exist, just skip it */
-            if(isset($settings[$setting])){
-                continue;
-            }
+          /** If setting is already exist, just skip it */
+          if( isset( $settings[ $setting ] ) ) {
+            continue;
+          }
 
-            $settings[$setting] = $this->get( 'sm.' . $setting );
+          $value = $this->get( 'sm.' . $setting );
+
+          /** Decode json to array */
+          if( $value && is_string( $value ) && $setting === 'key_json' ) {
+            $value = json_decode( $value, true );
+            $setting = 'key';
+          }
+
+          $settings[ $setting ] = $value;
         }
 
         return $settings;
