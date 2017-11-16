@@ -76,6 +76,10 @@ namespace wpCloud\StatelessMedia {
           return array("ok" => false, "message" => __( "Auth fail." ));
         }
 
+        if( !self::switchBlog( $request ) ){
+          return array("ok" => false, "message" => __( "Missed blog param." ));
+        }
+
         $query_images_args = array(
             'post_type' => 'attachment',
             'post_mime_type' =>'image',
@@ -107,6 +111,10 @@ namespace wpCloud\StatelessMedia {
 
         if( !self::authRequest( $request ) ) {
           return array("ok" => false, "message" => __( "Auth fail." ));
+        }
+
+        if( !self::switchBlog( $request ) ){
+          return array("ok" => false, "message" => __( "Missed blog param." ));
         }
 
         $attachment_id = $request->get_param('attachment_id');
@@ -161,6 +169,35 @@ namespace wpCloud\StatelessMedia {
         return true;
 
 
+      }
+
+      /**
+       * Check blog param and switch to requested blog
+       *
+       * @param bool $request
+       * @return bool
+       */
+      static public function switchBlog( $request = false ){
+
+        if(!is_multisite()){
+          return true;
+        }
+
+        if( !$request ) {
+          return false;
+        }
+
+        $blog_id = $request->get_param('blog');
+        if( !$blog_id ) {
+          return false;
+        }
+
+        $current_blog_id = get_current_blog_id();
+        if($current_blog_id == $blog_id){
+          return true;
+        }
+
+        return switch_to_blog( $blog_id );
       }
 
       /**
