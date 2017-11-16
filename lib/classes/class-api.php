@@ -76,10 +76,23 @@ namespace wpCloud\StatelessMedia {
           return array("ok" => false, "message" => __( "Auth fail." ));
         }
 
+        $query_images_args = array(
+            'post_type' => 'attachment',
+            'post_mime_type' =>'image',
+            'post_status' => 'inherit',
+            'posts_per_page' => -1,
+        );
+
+        $query_images = new \WP_Query( $query_images_args );
+        $media = array();
+        foreach ( $query_images->posts as $image) {
+          $media[] = self::mediaMapping($image);
+        }
+
         return array(
             "ok" => true,
             "message" => "getMediaLibrary endpoint.",
-            "mediaLibrary" => array()
+            "mediaLibrary" => $media
         );
 
       }
@@ -96,10 +109,23 @@ namespace wpCloud\StatelessMedia {
           return array("ok" => false, "message" => __( "Auth fail." ));
         }
 
+        $attachment_id = $request->get_param('attachment_id');
+        if(!$attachment_id){
+          return array("ok" => false, "message" => __( "Missing attachment id." ));
+        }
+
+        $attachment = get_post($attachment_id);
+
+        if(!$attachment){
+          return array("ok" => false, "message" => __( "Wrong attachment id." ));
+        }
+
+        $item = self::mediaMapping($attachment);
+
         return array(
             "ok" => true,
             "message" => "getMediaItem endpoint.",
-            "mediaItem" => array()
+            "mediaItem" => $item
         );
 
       }
@@ -135,6 +161,29 @@ namespace wpCloud\StatelessMedia {
         return true;
 
 
+      }
+
+      /**
+       * Applying mapping for media item
+       *
+       * @param $image
+       * @return array
+       */
+      static private function mediaMapping($image){
+
+        if(!$image){
+          return array();
+        }
+
+        return array(
+            'attachment_id' => $image->ID,
+            'date_create' => $image->post_date,
+            'parent' => $image->post_parent,
+            'link' => wp_get_attachment_url($image->ID),
+            'title' => $image->post_title,
+            'description' => $image->post_content,
+            'thumbnail' => wp_get_attachment_image_src($image->ID)[0]
+        );
       }
 
     }
