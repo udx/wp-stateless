@@ -4,8 +4,8 @@ Donate link: https://www.usabilitydynamics.com
 Tags: google, google cloud, google cloud storage, cdn, uploads, media, stateless, backup
 License: GPLv2 or later
 Requires at least: 4.0
-Tested up to: 4.8.1
-Stable tag: 2.1.0
+Tested up to: 4.9
+Stable tag: 2.1.1
 
 Upload and serve your WordPress media files from Google Cloud Storage.
 
@@ -93,6 +93,13 @@ To ensure new releases cause as little disruption as possible, we rely on a numb
 [Usability Dynamics](https://www.usabilitydynamics.com/) maintains this plugin by continuing development through it's own staff, reviewing pull requests, testing, and steering the overall release schedule. Usability Dynamics is located in Durham, North Carolina and provides WordPress engineering and hosting services to clients throughout the United States.
 
 == Changelog ==
+
+= 2.1.1 =
+* FIX - Fixed double slash when Organization is disabled.
+* FIX - Fatal error with GuzzleHttp.
+* FIX - Fixed content-type assignment.
+* ENHANCEMENT - Added support for https URLs in Domain field.
+* COMPATIBILITY - Advanced Custom Fields Image Crop Addon.
 
 = 2.1.0 =
 * FIX - Fixed read only for Service Account JSON if constant or environment variable is defined. 

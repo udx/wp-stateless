@@ -1,3 +1,10 @@
+#### 2.1.1
+* FIX - Fixed double slash when Organization is disabled.
+* FIX - Fatal error with GuzzleHttp.
+* FIX - Fixed content-type assignment.
+* ENHANCEMENT - Added support for https URLs in Domain field.
+* COMPATIBILITY - Advanced Custom Fields Image Crop Addon.
+
 #### 2.1.0
 * FIX - Fixed read only for Service Account JSON if constant or environment variable is defined. 
 * FIX - Override default cache control.
