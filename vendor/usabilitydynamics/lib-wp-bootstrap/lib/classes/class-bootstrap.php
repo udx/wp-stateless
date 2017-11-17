@@ -215,6 +215,16 @@ namespace UsabilityDynamics\WP {
           /* Run Upgrade handlers */
           add_action( 'plugins_loaded', array( $this, '_run_upgrade_process' ), 0 );
         }
+        // Need to save current version on plugins_loaded action,
+        // unless _run_install_process and _run_upgrade_process not get called.
+        add_action( 'plugins_loaded', array( $this, 'save_version_no' ), 100 );
+      }
+
+      /**
+       * Saving version no to database.
+       * 
+       */
+      public function save_version_no($value=''){
         update_option( $this->slug . '-current-version', $this->args['version'] );
       }
 
