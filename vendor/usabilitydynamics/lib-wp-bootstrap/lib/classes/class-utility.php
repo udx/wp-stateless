@@ -64,14 +64,14 @@ namespace UsabilityDynamics\WP {
             $path = plugin_dir_url( __FILE__ );
             break;
           case 'template':
-            $s = str_replace( wp_normalize_path( ABSPATH ), '', get_template_directory() );
+            $s = str_replace( wp_normalize_path( ABSPATH ), '', wp_normalize_path(get_template_directory()) );
             $s = str_replace( '/', '\/', $s );
             $reg = '|^(.)*(' . $s . ')(.*)$|';
             $p = preg_replace( $reg, '$3', wp_normalize_path( dirname( __FILE__ ) ) );
             $path = get_template_directory_uri() . $p;
             break;
           case 'stylesheet':
-            $s = str_replace( wp_normalize_path( ABSPATH ), '', get_stylesheet_directory() );
+            $s = str_replace( wp_normalize_path( ABSPATH ), '', wp_normalize_path(get_stylesheet_directory()) );
             $s = str_replace( '/', '\/', $s );
             $reg = '|^(.)*(' . $s . ')(.*)$|';
             $p = preg_replace( $reg, '$3', wp_normalize_path( dirname( __FILE__ ) ) );
