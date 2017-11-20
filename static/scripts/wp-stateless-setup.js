@@ -454,6 +454,54 @@ wp.stateless = {
   },
 
   /**
+   * grantServiceAccountRole
+   * @param projectID
+   * @returns {jQuery.Deferred}
+   */
+  grantServiceAccountRole: function grantServiceAccountRole(account, projectID) {
+
+    if(!wp.stateless.getAccessToken() || !projectID || !account)
+      return false;
+
+    var promise = new jQuery.Deferred();
+
+    jQuery.post( 'https://cloudresourcemanager.googleapis.com/v1/projects/'+projectID+':getIamPolicy' )
+      .done(function(policy){
+        var existing = false;
+
+        policy.bindings.forEach(function(item, index){
+          if(item.role == "roles/storage.admin"){
+            existing = item.members.indexOf("serviceAccount:" + account);
+            if(existing == -1){
+              item.members.push("serviceAccount:" + account);
+            }
+          }
+        });
+
+        if(existing === false){
+          policy.bindings.push({
+            role: 'roles/storage.admin',
+            members: [ "serviceAccount:" + account ]
+          });
+        }
+
+        jQuery.post( 'https://cloudresourcemanager.googleapis.com/v1/projects/'+projectID+':setIamPolicy', JSON.stringify({policy:policy}) )
+          .done(function(response){
+            promise.resolve(response);
+          })
+          .fail(function(error) {
+            promise.reject(error);
+          });
+
+      })
+      .fail(function(error){
+        promise.reject(error);
+      });
+
+    return promise;
+  },
+
+  /**
    *
    * wp.stateless.createServiceAccount()
    * Doc: https://cloud.google.com/storage/docs/json_api/v1/bucketAccessControls/insert

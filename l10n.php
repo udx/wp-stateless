@@ -50,5 +50,8 @@ $l10n = array(
   'service_account_key_saved'             => __( "Service Account Key Saved", ud_get_stateless_media()->domain ),
   'service_account_key_save_failed'       => __( "Failed to  Save Service Account Key", ud_get_stateless_media()->domain ),
 
+  'service_account_role_granted'          => __( "Service Account Role Granted", ud_get_stateless_media()->domain ),
+  'service_account_role_grant_failed'     => __( "Service Account Role Grant Failed", ud_get_stateless_media()->domain )
+
 );
 

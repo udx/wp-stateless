@@ -236,7 +236,6 @@ jQuery(document).ready(function ($) {
 	});
 
 	bucketDropdown.on('change', function(event){
-		console.log('ssss');
 		var projectId = projectDropdown.find('.id').val();
 		var bucketName = bucketDropdown.find('.name').val();
 		var bucketId = bucketName == 'localhost'?'':bucketName;
@@ -474,6 +473,13 @@ jQuery(document).ready(function ($) {
 					callback(null, {ok: true, task: 'createServiceAccount', action: 'created', email: createdSerciceAccount.email, message: stateless_l10n.service_account_created});
 				}).fail(function(response) {
 					callback({ok: false, task: 'createServiceAccount', action: 'failed', message: stateless_l10n.service_account_creation_failed});
+				});
+			}],
+			grantServiceAccountRole: [ 'createServiceAccount', function( results, callback ) {
+				wp.stateless.grantServiceAccountRole(results['createServiceAccount'].email, projectId).done(function(policy){
+					callback(null, {ok: true, task: 'grantServiceAccountRole', policy: policy, action: 'granted', message: stateless_l10n.service_account_role_granted});
+				}).fail(function(response) {
+					callback({ok: false, task: 'grantServiceAccountRole', action: 'failed', message: stateless_l10n.service_account_role_grant_failed});
 				});
 			}],
 			insertBucketAccessControls: ['createBucket', 'enableAPI', 'createServiceAccount', async.retryable({times: 5, interval: 1500}, function(results, callback) {
