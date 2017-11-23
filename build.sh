@@ -194,6 +194,7 @@ else
   rm -rf makefile
   rm -rf package.json
   rm -rf test
+  rm -rf package-lock.json
   echo "Be sure we do not add .git directories"
   find ./vendor -name .git -exec rm -rf '{}' \;
   echo "Be sure we do not add .svn directories"
