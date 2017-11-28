@@ -173,7 +173,7 @@ namespace wpCloud\StatelessMedia {
                * We hook into image crops admin_ajax crop request and alter
                * wp_upload_dir() using upload_dir filter.
                * Then we remove the filter once the plugin get the GCS image link.
-               * 
+               *
                */
               add_action( 'wp_ajax_acf_image_crop_perform_crop', array( $this, 'acf_image_crop_perform_crop' ), 1 );
               
@@ -262,11 +262,8 @@ namespace wpCloud\StatelessMedia {
        * @param $payment
        */
       public function edd_download_method_support( $requested_file, $download, $email, $payment ) {
-
         if ( !function_exists( 'edd_is_local_file' ) || !function_exists( 'edd_get_file_download_method' ) ) return;
-
         if ( edd_get_file_download_method() != 'direct' ) return;
-
         if ( !edd_is_local_file( $requested_file ) && strstr( $requested_file, 'storage.googleapis.com' ) ) {
           header('Content-Type: application/octet-stream');
           header("Content-Transfer-Encoding: Binary");
@@ -274,27 +271,25 @@ namespace wpCloud\StatelessMedia {
           readfile($requested_file);
           exit;
         }
-
       }
 
       /**
        * Alter wp_upload_dir() using upload_dir filter.
        * Then we remove the filter once the plugin get the GCS image link.
-       * 
+       *
        */
       public function acf_image_crop_perform_crop(){
         add_filter('upload_dir', array( $this, 'upload_dir') );
         // Removing upload_dir filter.
         add_filter('acf-image-crop/filename_postfix', array( $this, 'remove_filter_upload_dir') );
-
       }
 
       /**
        * Remove upload_dir filter as it's work is done.
        * Used acf-image-crop/filename_postfix as intermediate/temporary hook.
-       * We need to remove the upload_dir filter before that function tries to 
+       * We need to remove the upload_dir filter before that function tries to
        * insert attachment to media library. Unless media library would get confused.
-       * 
+       *
        */
       public function remove_filter_upload_dir($postfix=''){
         remove_filter('upload_dir', array( $this, 'upload_dir') );
