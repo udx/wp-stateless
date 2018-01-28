@@ -227,7 +227,7 @@ namespace wpCloud\StatelessMedia {
              *
              * Once added or edited we can get into Attachment ID then get all image sizes and sync them with GS
              */
-            add_filter( 'wp_generate_attachment_metadata', array( $this, 'add_media' ), 100, 2 );
+            // add_filter( 'wp_generate_attachment_metadata', array( $this, 'add_media' ), 100, 2 );
 
             if ( $this->get( 'sm.on_fly' ) == 'true' ) {
               /**
