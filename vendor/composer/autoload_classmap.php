@@ -28,6 +28,7 @@ return array(
     'wpCloud\\StatelessMedia\\Ajax' => $baseDir . '/lib/classes/class-ajax.php',
     'wpCloud\\StatelessMedia\\Bootstrap' => $baseDir . '/lib/classes/class-bootstrap.php',
     'wpCloud\\StatelessMedia\\CompatibilityAcfImageCrop' => $baseDir . '/lib/classes/compatibility/acf-image-crop.php',
+    'wpCloud\\StatelessMedia\\EDDDownloadMethod' => $baseDir . '/lib/classes/compatibility/edd-download-method.php',
     'wpCloud\\StatelessMedia\\GS_Client' => $baseDir . '/lib/classes/class-gs-client.php',
     'wpCloud\\StatelessMedia\\ICompatibility' => $baseDir . '/lib/classes/class-compatibility.php',
     'wpCloud\\StatelessMedia\\Logger' => $baseDir . '/lib/classes/class-logger.php',

@@ -248,7 +248,7 @@
                     <?php foreach(wpCloud\StatelessMedia\Module::get_modules() as $module):?>
                         <div class="row">
                             <div class="col-md-1"><input type="checkbox" name="stateless-modules[]" id="<?php echo $module['id'];?>" value="<?php echo $module['id'];?>" <?php echo $module['enabled'] ? 'checked="checked"' : '';?> /></div>
-                            <div class="col-md-3"><label for="acf-image-crop"><?php echo $module['title'];?></label></div>
+                            <div class="col-md-3"><label for="<?php echo $module['id'];?>"><?php echo $module['title'];?></label></div>
                             <div class="col-md-8"><?php echo $module['description'];?></div>
                         </div>
                     <?php endforeach;?>
