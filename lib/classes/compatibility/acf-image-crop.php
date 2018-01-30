@@ -18,7 +18,7 @@ namespace wpCloud\StatelessMedia {
             
             public function __construct(){
                 $modules = get_option('stateless-modules', array());
-                // var_dump($modules);
+                
                 Module::register_module(self::ID, self::TITLE, self::DESCRIPTION, in_array(self::ID, $modules));
 
                 if (in_array(self::ID, $modules)) {

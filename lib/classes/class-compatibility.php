@@ -17,8 +17,15 @@ namespace wpCloud\StatelessMedia {
         public function __construct(){
             $this->save_modules();
 
+            /**
+             * ACF image crop addons compatibility.
+             */
             new CompatibilityAcfImageCrop();
             
+            /**
+             * Support for Easy Digital Downloads download method
+             */
+            new EDDDownloadMethod();
         }
 
         public static function register_module($id, $title , $description, $enabled = false){
@@ -36,8 +43,6 @@ namespace wpCloud\StatelessMedia {
 
         /**
          * Handles saving module data.
-         *
-         * @author alim@UD
          */
         public function save_modules(){
             if (isset($_POST['action']) && $_POST['action'] == 'stateless_modules' && wp_verify_nonce($_POST['_smnonce'], 'wp-stateless-modules')) {
