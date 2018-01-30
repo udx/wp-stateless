@@ -7,7 +7,8 @@
         <a href="#stless_settings_tab" class="stless_setting_tab nav-tab  nav-tab-active"><?php _e( 'Settings', ud_get_stateless_media()->domain ); ?></a>  
         <?php if(!is_network_admin()): ?>
         <a href="#stless_sync_tab" class="stless_setting_tab nav-tab"><?php _e( 'Sync', ud_get_stateless_media()->domain ); ?></a>  
-        <?php endif; ?>    
+        <?php endif; ?>
+        <a href="#stless_compatibility_tab" class="stless_setting_tab nav-tab"><?php _e( 'Compatibility', ud_get_stateless_media()->domain ); ?></a>  
         <a href="#stless_questions_tab" class="stless_setting_tab nav-tab"><?php _e( 'Questions', ud_get_stateless_media()->domain ); ?></a>  
     </h2>  
 
@@ -237,7 +238,24 @@
         <div id="stless_sync_tab" class="stless_settings_content">
             <?php include 'regenerate_interface.php'; ?>
         </div>
-        <?php endif; ?>    
+        <?php endif; ?>
+        <div id="stless_compatibility_tab" class="stless_settings_content">
+            <div class="container-fluid">
+                <h2>Enable or disable compatibility with other plugins.</h2>
+                <form method="post" action=""> 
+                    <input type="hidden" name="action" value="stateless_modules">
+                    <?php wp_nonce_field('wp-stateless-modules', '_smnonce');?>
+                    <?php foreach(wpCloud\StatelessMedia\Module::get_modules() as $module):?>
+                        <div class="row">
+                            <div class="col-md-1"><input type="checkbox" name="stateless-modules[]" id="<?php echo $module['id'];?>" value="<?php echo $module['id'];?>" <?php echo $module['enabled'] ? 'checked="checked"' : '';?> /></div>
+                            <div class="col-md-3"><label for="acf-image-crop"><?php echo $module['title'];?></label></div>
+                            <div class="col-md-8"><?php echo $module['description'];?></div>
+                        </div>
+                    <?php endforeach;?>
+                    <?php submit_button(); ?> 
+                </form> 
+            </div>
+        </div>
         <div id="stless_questions_tab" class="stless_settings_content">
             <!--[if lte IE 8]>
             <script charset="utf-8" type="text/javascript" src="//js.hsforms.net/forms/v2-legacy.js"></script>

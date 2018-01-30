@@ -57,6 +57,9 @@ namespace wpCloud\StatelessMedia {
         // Parse feature falgs, set constants.
         $this->parse_feature_flags();
 
+        // Initialize compatibility modules.
+        new Module();
+        
         /**
          * Define settings and UI.
          *
@@ -167,26 +170,7 @@ namespace wpCloud\StatelessMedia {
            */
           if( !$this->has_errors() ) {
 
-            if( $this->get( 'sm.mode' ) === 'stateless' ) {
-              /**
-               * ACF image crop addons compatibility.
-               * We hook into image crops admin_ajax crop request and alter
-               * wp_upload_dir() using upload_dir filter.
-               * Then we remove the filter once the plugin get the GCS image link.
-               *
-               */
-              add_action( 'wp_ajax_acf_image_crop_perform_crop', array( $this, 'acf_image_crop_perform_crop' ), 1 );
-              
-              /*
-               * In stateless mode no local copy of images is available.
-               * So we need to filter full image path before generate_cropped_image() function uses to 
-               * get image editor using wp_get_image_editor.
-               * We will hook into acf-image-crop/full_image_path filter and return GCS link if available.
-               * 
-               */
-              add_action( 'acf-image-crop/full_image_path', array( $this, 'acf_image_crop_full_image_path' ), 10, 3 );
-
-            }
+            do_action('sm::module::init', $this->get( 'sm' ));
 
             if( $this->get( 'sm.mode' ) === 'cdn' || $this->get( 'sm.mode' ) === 'stateless' ) {
               add_filter( 'wp_get_attachment_image_attributes', array( $this, 'wp_get_attachment_image_attributes' ), 20, 3 );
@@ -220,12 +204,18 @@ namespace wpCloud\StatelessMedia {
              * Extends metadata by adding GS information.
              */
             add_filter( 'wp_get_attachment_metadata', array( $this, 'wp_get_attachment_metadata' ), 10, 2 );
-            add_filter( 'wp_update_attachment_metadata', array( $this, 'add_media' ), 100, 2 );
 
             /**
              * Add/Edit Media
              *
              * Once added or edited we can get into Attachment ID then get all image sizes and sync them with GS
+             */
+            add_filter( 'wp_update_attachment_metadata', array( $this, 'add_media' ), 100, 2 );
+
+            /**
+             * Add Media
+             *
+             * Once added we can get into Attachment ID then get all image sizes and sync them with GS
              */
             // add_filter( 'wp_generate_attachment_metadata', array( $this, 'add_media' ), 100, 2 );
 
@@ -271,46 +261,6 @@ namespace wpCloud\StatelessMedia {
           readfile($requested_file);
           exit;
         }
-      }
-
-      /**
-       * Alter wp_upload_dir() using upload_dir filter.
-       * Then we remove the filter once the plugin get the GCS image link.
-       *
-       */
-      public function acf_image_crop_perform_crop(){
-        add_filter('upload_dir', array( $this, 'upload_dir') );
-        // Removing upload_dir filter.
-        add_filter('acf-image-crop/filename_postfix', array( $this, 'remove_filter_upload_dir') );
-      }
-
-      /**
-       * Remove upload_dir filter as it's work is done.
-       * Used acf-image-crop/filename_postfix as intermediate/temporary hook.
-       * We need to remove the upload_dir filter before that function tries to
-       * insert attachment to media library. Unless media library would get confused.
-       *
-       */
-      public function remove_filter_upload_dir($postfix=''){
-        remove_filter('upload_dir', array( $this, 'upload_dir') );
-        return $postfix;
-      }
-
-      /*
-       * Only for stateless mode.
-       * Filter image link generate_cropped_image() uses to get image editor.
-       * As no local copy of the image is available we need to filter the image path.
-       *
-       * @param $full_image_path: Expected local image path.
-       * @param $id: Image/attachment ID
-       * @param $meta_data: Image/attachment meta data.
-       *
-       * @return GCS link if it has gs_link in meta data.
-       */
-      public function acf_image_crop_full_image_path( $full_image_path, $id, $meta_data ){
-        if(!empty($meta_data['gs_link']))
-          $full_image_path = $meta_data['gs_link'];
-        return $full_image_path;
       }
       
       /**
@@ -823,6 +773,7 @@ namespace wpCloud\StatelessMedia {
 
         /* Setup wizard styles and scripts. */
         wp_register_style( 'wp-stateless-bootstrap', $this->path( 'static/styles/bootstrap.min.css', 'url'  ), array(), '3.3.7' );
+        wp_register_style( 'bootstrap-grid-v4', $this->path( 'static/styles/bootstrap-grid.min.css', 'url'  ), array(), '3.3.7' );
         wp_register_style( 'wp-stateless-setup-wizard', $this->path( 'static/styles/wp-stateless-setup-wizard.css', 'url'  ), array(), self::$version );
 
         wp_register_script( 'async.min', ud_get_stateless_media()->path( 'static/scripts/async.js', 'url'  ), array(), ud_get_stateless_media()->version );
@@ -909,6 +860,7 @@ namespace wpCloud\StatelessMedia {
             break;
           case $this->settings->stateless_settings:
             wp_enqueue_script( 'wp-stateless-settings' );
+            wp_enqueue_style( 'bootstrap-grid-v4' );
             wp_enqueue_style( 'wp-stateless-settings' );
             
             // Sync tab
