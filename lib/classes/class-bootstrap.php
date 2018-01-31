@@ -219,13 +219,6 @@ namespace wpCloud\StatelessMedia {
              */
             // add_filter( 'wp_generate_attachment_metadata', array( $this, 'add_media' ), 100, 2 );
 
-            if ( $this->get( 'sm.on_fly' ) == 'true' ) {
-              /**
-               * Handle any other on fly generated media
-               */
-              add_filter('image_make_intermediate_size', array($this, 'handle_on_fly'));
-            }
-
             if ( $this->get( 'sm.delete_remote' ) == 'true' ) {
               /**
                * On physical file deletion we remove any from GS
@@ -323,7 +316,6 @@ namespace wpCloud\StatelessMedia {
             'mode',
             'body_rewrite',
             'body_rewrite_types',
-            'on_fly',
             'bucket',
             'root_dir',
             'key_json',
@@ -650,44 +642,6 @@ namespace wpCloud\StatelessMedia {
       }
 
 
-
-      /**
-       * Handle images on fly
-       *
-       * @param $file
-       * @return mixed
-       */
-      public function handle_on_fly( $file ) {
-
-        $client = ud_get_stateless_media()->get_client();
-        $upload_dir = wp_upload_dir();
-
-        $file_path = str_replace( trailingslashit( $upload_dir[ 'basedir' ] ), '', $file );
-        $file_info = @getimagesize( $file );
-        $mimeType = wp_check_filetype( $file );
-
-        if ( $file_info ) {
-          $_metadata = array(
-            'width'  => $file_info[0],
-            'height' => $file_info[1],
-            'object-id' => 'unknown', // we really don't know it
-            'source-id' => md5( $file.ud_get_stateless_media()->get( 'sm.bucket' ) ),
-            'file-hash' => md5( $file )
-          );
-        }
-
-        $client->add_media( apply_filters('sm:item:on_fly:before_add', array_filter( array(
-          'name' => $file_path,
-          'absolutePath' => wp_normalize_path( $file ),
-          'cacheControl' => apply_filters( 'sm:item:cacheControl', 'public, max-age=36000, must-revalidate', $_metadata ),
-          'contentDisposition' => null,
-          'mimeType' => $mimeType['type'],
-          'metadata' => $_metadata
-        ) ) ) );
-
-        return $file;
-      }
-
       /**
        * @param $links
        * @param $file
@@ -778,6 +732,7 @@ namespace wpCloud\StatelessMedia {
         wp_register_script( 'wp-stateless', ud_get_stateless_media()->path( 'static/scripts/wp-stateless.js', 'url'  ), array( 'jquery-ui-core' ), ud_get_stateless_media()->version, true );
 
         wp_localize_script('wp-stateless', 'wp_stateless_settings', ud_get_stateless_media()->get('sm'));
+        wp_localize_script('wp-stateless', 'wp_stateless_compatibility', Module::get_modules());
         wp_register_style( 'jquery-ui-regenthumbs', ud_get_stateless_media()->path( 'static/scripts/jquery-ui/redmond/jquery-ui-1.7.2.custom.css', 'url' ), array(), '1.7.2' );
 
       }

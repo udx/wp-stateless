@@ -18,6 +18,11 @@ namespace wpCloud\StatelessMedia {
             $this->save_modules();
 
             /**
+             * Dynamic Image Support
+             */
+            new DynamicImageSupport();
+
+            /**
              * ACF image crop addons compatibility.
              */
             new CompatibilityAcfImageCrop();
@@ -28,12 +33,17 @@ namespace wpCloud\StatelessMedia {
             new EDDDownloadMethod();
         }
 
-        public static function register_module($id, $title , $description, $enabled = false){
+        public static function register_module($id, $title , $description, $enabled = 'false', $is_constant = false){
+            if (is_bool($enabled)) {
+                $enabled = $enabled ? 'true' : 'false';
+            }
+            
             self::$modules[] = array(
                 'id'            => $id,
                 'title'         => $title,
                 'enabled'       => $enabled,
                 'description'   => $description,
+                'is_constant'   => $is_constant,
             );
         }
 
@@ -55,9 +65,31 @@ namespace wpCloud\StatelessMedia {
     }
 
     abstract class ICompatibility{
-        const ID = '';
-        const TITLE = '';
-        const DESCRIPTION = '';
+        protected $id = '';
+        protected $title = '';
+        protected $constant = '';
+        protected $description = '';
+
+        public function init(){
+            $is_constant = false;
+
+            if (defined($this->constant)) {
+                $this->enabled = constant($this->constant);
+                $is_constant = true;
+            }
+            else {
+                $modules = get_option('stateless-modules', array());
+                if (empty($this->enabled)) {
+                    $this->enabled = !empty($modules[$this->id]) && $modules[$this->id] == 'true' ? true : false;
+                }
+            }
+            
+            Module::register_module($this->id, $this->title, $this->description, $this->enabled, $is_constant);
+
+            if ($this->enabled) {
+                add_action('sm::module::init', array($this, 'module_init'));
+            }
+        }
     }
 
  }

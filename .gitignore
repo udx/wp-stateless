@@ -1,4 +1,5 @@
 temp
+.vscode**
 node_modules
 static/cache
 static/codex

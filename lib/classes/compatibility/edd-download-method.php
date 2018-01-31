@@ -1,7 +1,7 @@
 <?php
 /**
- * Plugin Name: Advanced Custom Fields: Image Crop Add-on
- * Plugin URI: https://wordpress.org/plugins/acf-image-crop-add-on/
+ * Plugin Name: Easy Digital Downloads
+ * Plugin URI: https://wordpress.org/plugins/easy-digital-downloads/
  *
  * Compatibility Description: 
  *
@@ -12,18 +12,13 @@ namespace wpCloud\StatelessMedia {
     if(!class_exists('wpCloud\StatelessMedia\EDDDownloadMethod')) {
         
         class EDDDownloadMethod extends ICompatibility {
-            const ID = 'edd-download-method';
-            const TITLE = 'EDD Download Method';
-            const DESCRIPTION = 'EDD Download Method compatibility mode';
+            protected $id = 'edd-download-method';
+            protected $title = 'Easy Digital Downloads';
+            protected $constant = 'WP_STATELESS_COMPATIBILITY_EDD';
+            protected $description = 'Ensures compatibility with the forced download method and WP-Stateless.';
             
             public function __construct(){
-                $modules = get_option('stateless-modules', array());
-
-                Module::register_module(self::ID, self::TITLE, self::DESCRIPTION, in_array(self::ID, $modules));
-
-                if (in_array(self::ID, $modules)) {
-                    add_action('sm::module::init', array($this, 'module_init'));
-                }
+                $this->init();
             }
 
             public function module_init($sm){

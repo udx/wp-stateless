@@ -12,18 +12,13 @@ namespace wpCloud\StatelessMedia {
     if(!class_exists('wpCloud\StatelessMedia\CompatibilityAcfImageCrop')) {
         
         class CompatibilityAcfImageCrop extends ICompatibility {
-            const ID = 'acf-image-crop';
-            const TITLE = 'Acf Image Crop';
-            const DESCRIPTION = 'ACF image crop addons compatibility';
+            protected $id = 'acf-image-crop';
+            protected $title = 'Advanced Custom Fields Image Crop Addon';
+            protected $constant = 'WP_STATELESS_COMPATIBILITY_ACFIC';
+            protected $description = 'Ensures compatibility with image cropping and WP-Stateless in the Stateless mode.';
             
             public function __construct(){
-                $modules = get_option('stateless-modules', array());
-                
-                Module::register_module(self::ID, self::TITLE, self::DESCRIPTION, in_array(self::ID, $modules));
-
-                if (in_array(self::ID, $modules)) {
-                    add_action('sm::module::init', array($this, 'module_init'));
-                }
+                $this->init();
             }
 
             public function module_init($sm){
@@ -84,9 +79,22 @@ namespace wpCloud\StatelessMedia {
             * @return GCS link if it has gs_link in meta data.
             */
             public function acf_image_crop_full_image_path( $full_image_path, $id, $meta_data ){
-                if(!empty($meta_data['gs_link']))
-                $full_image_path = $meta_data['gs_link'];
+                if (!empty($meta_data['gs_link']))
+                    $full_image_path = $meta_data['gs_link'];
                 return $full_image_path;
+            }
+
+            /**
+             * Change Upload BaseURL when CDN Used.
+             *
+             * @param $data
+             * @return mixed
+             */
+            public function upload_dir( $data ) {
+                $data[ 'basedir' ] = ud_get_stateless_media()->get_gs_host();
+                $data[ 'baseurl' ] = ud_get_stateless_media()->get_gs_host();
+                $data[ 'url' ] = $data[ 'baseurl' ] . $data[ 'subdir' ];
+                return $data;
             }
         }
 
