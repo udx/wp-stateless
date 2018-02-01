@@ -48,10 +48,17 @@ namespace wpCloud\StatelessMedia {
                 return $url;
             }
 
-            public function clear_file_cache(){
+            /**
+             * Clear all SO CSS files from GCS
+             */
+            public function clear_file_cache($value, $expiration, $transient){
                 do_action( 'sm:sync::deleteFiles', 'siteorigin-widgets/' );
+                return $value;
             }
 
+            /**
+             * Remove single file from GCS
+             */
             public function delete_file($new_instance, $form_options, $so_widget){
 
                 $style = $so_widget->get_style_name($new_instance);
@@ -60,6 +67,7 @@ namespace wpCloud\StatelessMedia {
 
                 $file = '/siteorigin-widgets/' . $name . '.css';
                 do_action( 'sm:sync::deleteFile', $file );
+                return $new_instance;
             }
 
             
