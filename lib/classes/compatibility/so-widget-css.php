@@ -1,0 +1,59 @@
+<?php
+/**
+ * Plugin Name: Page Builder by SiteOrigin
+ * Plugin URI: https://wordpress.org/plugins/easy-digital-downloads/
+ *
+ * Compatibility Description: add support for siteorigin generated CSS files
+ *
+ */
+
+namespace wpCloud\StatelessMedia {
+
+    if (!class_exists('wpCloud\StatelessMedia\SOWidgetCSS')) {
+        
+        class SOWidgetCSS extends ICompatibility {
+            protected $id = 'so-widget-css';
+            protected $title = 'SiteOrigin CSS files';
+            protected $constant = 'WP_STATELESS_COMPATIBILITY_SO_CSS';
+            protected $description = 'Add support for siteorigin generated CSS files';
+            
+            public function __construct(){
+                $this->init();
+            }
+
+            public function module_init($sm){
+                add_filter( 'set_url_scheme', array( $this, 'set_url_scheme' ), 20, 3 );
+                add_filter( 'pre_set_transient_sow:cleared', array( $this, 'clear_file_cache' ), 20, 3 );
+
+            }
+
+            
+
+            /**
+             * Change Upload BaseURL when CDN Used.
+             *
+             * @param $data
+             * @return mixed
+             */
+            public function set_url_scheme( $url, $scheme, $orig_scheme ) {
+                $position = strpos($url, 'siteorigin-widgets/');
+                if( $position !== false ){
+                    $upload_data = wp_upload_dir();
+                    $name = substr($url, $position);
+                    $absolutePath = $upload_data['basedir'] . '/' .  $name;
+                    do_action( 'sm:sync::syncFile', $name, $absolutePath);
+                    $url = ud_get_stateless_media()->get_gs_host() . '/' . $name;
+                }
+                return $url;
+            }
+
+            public function clear_file_cache(){
+                do_action( 'sm:sync::deleteFiles', 'siteorigin-widgets/' );
+            }
+
+            
+        }
+
+    }
+
+}

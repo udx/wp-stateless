@@ -34,8 +34,10 @@ return array(
     'wpCloud\\StatelessMedia\\ICompatibility' => $baseDir . '/lib/classes/class-compatibility.php',
     'wpCloud\\StatelessMedia\\Logger' => $baseDir . '/lib/classes/class-logger.php',
     'wpCloud\\StatelessMedia\\Module' => $baseDir . '/lib/classes/class-compatibility.php',
+    'wpCloud\\StatelessMedia\\SOWidgetCSS' => $baseDir . '/lib/classes/compatibility/so-widget-css.php',
     'wpCloud\\StatelessMedia\\Settings' => $baseDir . '/lib/classes/class-settings.php',
     'wpCloud\\StatelessMedia\\Sync' => $baseDir . '/lib/classes/class-sync.php',
+    'wpCloud\\StatelessMedia\\SyncNonMedia' => $baseDir . '/lib/classes/class-sync-non-media.php',
     'wpCloud\\StatelessMedia\\Upgrader' => $baseDir . '/lib/classes/class-upgrader.php',
     'wpCloud\\StatelessMedia\\Utility' => $baseDir . '/lib/classes/class-utility.php',
 );
