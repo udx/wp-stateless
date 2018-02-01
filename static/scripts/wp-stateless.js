@@ -656,6 +656,6 @@ var wpStatelessApp = angular.module('wpStatelessApp', [])
   $scope.sm.generatePreviewUrl();
 
 })
-.controller('wpStatelessSettings', function($scope, $filter) {
+.controller('wpStatelessCompatibility', function($scope, $filter) {
   $scope.modules = wp_stateless_compatibility || {};
 });
