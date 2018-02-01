@@ -87,6 +87,7 @@ namespace wpCloud\StatelessMedia {
             }
 
             public function delete_file($file){
+                $file = trim($file, '/');
                 if(in_array($file, $this->registered_files)){
                     if(empty($this->client)){
                         $this->client = ud_get_stateless_media()->get_client();

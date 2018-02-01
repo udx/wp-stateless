@@ -24,6 +24,7 @@ namespace wpCloud\StatelessMedia {
             public function module_init($sm){
                 add_filter( 'set_url_scheme', array( $this, 'set_url_scheme' ), 20, 3 );
                 add_filter( 'pre_set_transient_sow:cleared', array( $this, 'clear_file_cache' ), 20, 3 );
+                add_filter( 'siteorigin_widgets_sanitize_instance', array($this, 'delete_file'), 10, 3);
 
             }
 
@@ -49,6 +50,16 @@ namespace wpCloud\StatelessMedia {
 
             public function clear_file_cache(){
                 do_action( 'sm:sync::deleteFiles', 'siteorigin-widgets/' );
+            }
+
+            public function delete_file($new_instance, $form_options, $so_widget){
+
+                $style = $so_widget->get_style_name($new_instance);
+                $hash = $so_widget->get_style_hash( $new_instance );
+                $name = $so_widget->id_base.'-'.$style.'-'.$hash;
+
+                $file = '/siteorigin-widgets/' . $name . '.css';
+                do_action( 'sm:sync::deleteFile', $file );
             }
 
             
