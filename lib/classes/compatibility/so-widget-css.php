@@ -49,7 +49,7 @@ namespace wpCloud\StatelessMedia {
             }
 
             /**
-             * Clear all SO CSS files from GCS
+             * Clear all SO CSS files from GCS after expired. 7 days
              */
             public function clear_file_cache($value, $expiration, $transient){
                 do_action( 'sm:sync::deleteFiles', 'siteorigin-widgets/' );
@@ -60,7 +60,7 @@ namespace wpCloud\StatelessMedia {
              * Remove single file from GCS
              */
             public function delete_file($new_instance, $form_options, $so_widget){
-
+                $new_instance = $so_widget->modify_instance($new_instance);
                 $style = $so_widget->get_style_name($new_instance);
                 $hash = $so_widget->get_style_hash( $new_instance );
                 $name = $so_widget->id_base.'-'.$style.'-'.$hash;

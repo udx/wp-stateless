@@ -62,6 +62,11 @@ namespace wpCloud\StatelessMedia {
                         'file-hash' => md5( $name ),
                     ),
                 ));
+
+                if(ud_get_stateless_media()->get( 'sm.mode' ) === 'stateless'){
+                    unlink($absolutePath);
+                }
+
                 return $media;
             }
 
