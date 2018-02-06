@@ -31,6 +31,11 @@ namespace wpCloud\StatelessMedia {
              * Support for Easy Digital Downloads download method
              */
             new EDDDownloadMethod();
+            
+            /**
+             * Support for SiteOrigin CSS files
+             */
+            new SOWidgetCSS();
         }
 
         public static function register_module($id, $title , $description, $enabled = 'false', $is_constant = false){

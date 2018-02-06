@@ -392,15 +392,7 @@ namespace wpCloud\StatelessMedia {
        * Returns IDs of non media library files
        */
       public function action_get_non_library_files_id() {
-        $files = array();
-        $upload_dir = wp_upload_dir();
-        $siteorigin_dir = '/siteorigin-widgets/';
-        if(is_dir($upload_dir['basedir'] . $siteorigin_dir)){
-          $files = glob( $upload_dir['basedir'] . $siteorigin_dir . "*" );
-          foreach ($files as $id => $file) {
-            $files[$id] = str_replace(wp_normalize_path($upload_dir['basedir']), '', wp_normalize_path($file));
-          }
-        }
+        $files = apply_filters( 'sm:sync::nonMediaFiles', array() );
         return $files;
       }
 
