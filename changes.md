@@ -1,3 +1,15 @@
+#### 2.1.2
+* ENHANCEMENT - Improved support for Easy Digital Downloads.
+* ENHANCEMENT - Added constant WP_STATELESS_CONSOLE_LOG check before logging to console.
+* ENHANCEMENT - Changed service account default permissions on creation.
+* COMPATIBILITY - Added support for SiteOrigin generated CSS files.
+* ENHANCEMENT - Moved Dynamic Image Support to Capability tab.
+* COMPATIBILITY - Added support for ACF Image Crop addon.
+* FIX - Fixed compatibility issue with wp-smush plugin.
+* FIX - Added required blog param for multi-sites.
+* FIX - Updated media library and mediaItem API endpoints.
+* COMPATIBILITY - Added support for EDD download method option.
+
 #### 2.1.1
 * FIX - Fixed double slash when Organization is disabled.
 * FIX - Fatal error with GuzzleHttp.

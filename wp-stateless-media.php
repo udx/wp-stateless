@@ -4,11 +4,11 @@
  * Plugin URI: https://www.usabilitydynamics.com
  * Description: Upload and serve your WordPress media files from Google Cloud Storage.
  * Author: Usability Dynamics, Inc.
- * Version: 2.1.1
+ * Version: 2.1.2
  * Text Domain: stateless-media
  * Author URI: https://www.usabilitydynamics.com
  *
- * Copyright 2012 - 2017 Usability Dynamics, Inc.  ( email : info@usabilitydynamics.com )
+ * Copyright 2012 - 2018 Usability Dynamics, Inc.  ( email : info@usabilitydynamics.com )
  *
  */
 
