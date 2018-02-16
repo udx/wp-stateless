@@ -523,6 +523,28 @@
   position: absolute;
 }
 
+.manual-instruction{
+    margin-top: 15px;
+}
+
+.manual-instruction a{
+    color: #12599b;
+}
+
+.step-google-login .description{
+    line-height: 1.5;
+    margin-top: 15px;
+}
+
+.step-google-login input[type=checkbox]{
+    vertical-align: baseline;
+}
+
+.cursor-normal{
+    cursor: auto;
+}
+
+
 @keyframes loader-spin {
   0% {
     transform: rotate(0deg);

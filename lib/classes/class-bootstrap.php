@@ -619,7 +619,7 @@ namespace wpCloud\StatelessMedia {
           if ( !empty( $upload_data['baseurl'] ) && !empty( $meta ) ) {
             $baseurl = preg_replace('/https?:\/\//','',$upload_data['baseurl']);
             $root_dir = trim( $this->get( 'sm.root_dir' ), '/ ' ); // Remove any forward slash and empty space.
-            $root_dir = !empty( $root_dir ) ? $root_dir . '/ ': false;
+            $root_dir = !empty( $root_dir ) ? $root_dir . '/': false;
             $image_host = $this->get_gs_host().'/'.($root_dir?$root_dir:'');
 
             if(is_array($meta)){
@@ -1033,7 +1033,26 @@ namespace wpCloud\StatelessMedia {
       }
 
       public function redirect_to_splash($plugin =''){
-        if( !defined( 'WP_CLI' ) && $plugin == plugin_basename( $this->boot_file ) ) {
+        $this->settings = new Settings();
+
+        if(defined( 'WP_CLI' ) || !empty($this->settings->get('key_json')) || isset($_POST['checked']) && count($_POST['checked']) > 1){
+          return;
+        }
+        
+        if( 
+          empty($this->settings->get('key_json')) && 
+          defined('WP_STATELESS_MEDIA_HIDE_SETUP_ASSISTANT') && WP_STATELESS_MEDIA_HIDE_SETUP_ASSISTANT == true && 
+          defined('WP_STATELESS_MEDIA_HIDE_SETTINGS_PANEL') && WP_STATELESS_MEDIA_HIDE_SETTINGS_PANEL == true 
+        ) {
+          return;
+        }
+        
+        if( empty($this->settings->get('key_json')) && defined('WP_STATELESS_MEDIA_HIDE_SETUP_ASSISTANT') && WP_STATELESS_MEDIA_HIDE_SETUP_ASSISTANT == true ) {
+          $url = $this->get_settings_page_url('?page=stateless-settings');
+          exit( wp_redirect($url));
+        }
+        
+        if( $plugin == plugin_basename( $this->boot_file ) ) {
           $url = $this->get_settings_page_url('?page=stateless-setup&step=splash-screen');
           if(json_decode(get_site_option('sm_key_json'))){
             $url = $this->get_settings_page_url('?page=stateless-settings');

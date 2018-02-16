@@ -14,6 +14,18 @@ jQuery(document).ready(function ($) {
 	var regionDropdown = comboBox.filter('.region');
   	var billingDropdown = comboBox.filter('.billing-account');
   	var noBillingButton = billingDropdown.parent().find('.create-billing-account.no-billing-account');
+	var gLoginUrl = $('#google-login').attr('href');
+
+	$("#google-login").attr("href", gLoginUrl + "&allowNotifications=true");
+	
+	$("#allow-notifications").on('change', function(){
+		if($(this).prop('checked'))
+			allowNotifications = 'true';
+		else
+			allowNotifications = "false";
+		$("#google-login").attr("href", gLoginUrl + "&allowNotifications=" + allowNotifications);
+		
+	});
 
 	var checkAuthentication = function checkAuthentication(options){
 		// Checking if we have access token is session.
