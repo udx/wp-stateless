@@ -619,7 +619,7 @@ namespace wpCloud\StatelessMedia {
           if ( !empty( $upload_data['baseurl'] ) && !empty( $meta ) ) {
             $baseurl = preg_replace('/https?:\/\//','',$upload_data['baseurl']);
             $root_dir = trim( $this->get( 'sm.root_dir' ), '/ ' ); // Remove any forward slash and empty space.
-            $root_dir = !empty( $root_dir ) ? $root_dir . '/ ': false;
+            $root_dir = !empty( $root_dir ) ? $root_dir . '/': false;
             $image_host = $this->get_gs_host().'/'.($root_dir?$root_dir:'');
 
             if(is_array($meta)){
