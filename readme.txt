@@ -5,7 +5,7 @@ Tags: google, google cloud, google cloud storage, cdn, uploads, media, stateless
 License: GPLv2 or later
 Requires at least: 4.0
 Tested up to: 4.9.4
-Stable tag: 2.1.2
+Stable tag: 2.1.3
 
 Upload and serve your WordPress media files from Google Cloud Storage.
 
@@ -93,6 +93,11 @@ To ensure new releases cause as little disruption as possible, we rely on a numb
 [Usability Dynamics](https://www.usabilitydynamics.com/) maintains this plugin by continuing development through it's own staff, reviewing pull requests, testing, and steering the overall release schedule. Usability Dynamics is located in Durham, North Carolina and provides WordPress engineering and hosting services to clients throughout the United States.
 
 == Changelog ==
+
+= 2.1.3 =
+* ENHANCEMENT - Updates to text explainers in Setup Assistant.
+* ENHANCEMENT - Refined redireciton logic when activating plugin.
+* FIX - Removed extra space in converted URLs.
 
 = 2.1.2 =
 * ENHANCEMENT - Improved support for Easy Digital Downloads.
