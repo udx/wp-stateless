@@ -1,6 +1,7 @@
 <?php
 /**
  * To do: check if client is connected to google before doing any action.
+ * Need to improve workflow.
  */
 
 namespace wpCloud\StatelessMedia {
@@ -14,8 +15,15 @@ namespace wpCloud\StatelessMedia {
             
             public function __construct(){
                 $this->registered_files = get_option('sm_synced_files', array());
+                // Manual sync using sync tab. 
+                // called from ajax action_get_non_library_files_id
+                // Return files to be manualy sync from sync tab.
                 add_filter( 'sm:sync::nonMediaFiles', array($this, 'sync_non_media_files') );
+
+                // register a dir to sync from sync tab
+                add_action( 'sm:sync::register_dir', array($this, 'register_dir') );
                 add_action( 'sm:sync::addFile', array($this, 'add_file') );
+                // Sync a file.
                 add_action( 'sm:sync::syncFile', array($this, 'sync_file'), 10, 2 );
                 add_action( 'sm:sync::deleteFile', array($this, 'delete_file') );
                 add_action( 'sm:sync::deleteFiles', array($this, 'delete_files') );
@@ -75,21 +83,47 @@ namespace wpCloud\StatelessMedia {
              */
             public function sync_non_media_files($files){
                 $upload_dir = wp_upload_dir();
-                $files = array_merge($files, $this->registered_files);
+                // $files = array_merge($files, $this->registered_files);
                 foreach ($this->registered_dir as $key => $dir) {
                     $dir = $upload_dir['basedir'] . "/" . trim($dir, '/') . "/";
                     if(is_dir($dir)){
-                        $files = glob( $upload_dir['basedir'] . $dir . "*" );
-                        foreach ($files as $id => $file) {
+                        $_files = $this->get_files( $dir );
+                        foreach ($_files as $id => $file) {
+                            if(!file_exists($file)){
+                                continue;
+                            }
+
                             $_file = str_replace(wp_normalize_path($upload_dir['basedir']), '', wp_normalize_path($file));
                             if(!in_array($_file, $files)){
-                                $files[] = $_file;
+                                $files[] = trim($_file, '/');
                             }
                         }
                     }
                 }
+
+                $files = array_values(array_unique($files));
                 return $files;
             }
+            
+            function get_files($dir) {
+                $return = array();
+                if(is_dir($dir) && $dh = opendir($dir)) {
+                    while($file = readdir($dh)){
+                        if($file != '.' && $file != '..'){
+                            if(is_dir($dir . $file)){
+                                // since it is a directory we recurse it.
+                                $arr = $this->get_files($dir . $file . '/');
+                                $return = array_merge($return, $arr);
+                            }else{
+                                $return[] = $dir . $file;   
+                            }
+                        }
+                    }
+                    closedir($dh);         
+                }
+                return $return;
+            }
+
 
             public function delete_file($file){
                 $file = trim($file, '/');

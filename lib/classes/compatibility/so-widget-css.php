@@ -16,10 +16,6 @@ namespace wpCloud\StatelessMedia {
             protected $title = 'SiteOrigin CSS files';
             protected $constant = 'WP_STATELESS_COMPATIBILITY_SO_CSS';
             protected $description = 'Add support for siteorigin generated CSS files';
-            
-            public function __construct(){
-                $this->init();
-            }
 
             public function module_init($sm){
                 add_filter( 'set_url_scheme', array( $this, 'set_url_scheme' ), 20, 3 );
@@ -27,8 +23,6 @@ namespace wpCloud\StatelessMedia {
                 add_filter( 'siteorigin_widgets_sanitize_instance', array($this, 'delete_file'), 10, 3);
 
             }
-
-            
 
             /**
              * Change Upload BaseURL when CDN Used.

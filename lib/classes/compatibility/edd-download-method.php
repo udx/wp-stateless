@@ -16,10 +16,6 @@ namespace wpCloud\StatelessMedia {
             protected $title = 'Easy Digital Downloads';
             protected $constant = 'WP_STATELESS_COMPATIBILITY_EDD';
             protected $description = 'Ensures compatibility with the forced download method and WP-Stateless.';
-            
-            public function __construct(){
-                $this->init();
-            }
 
             public function module_init($sm){
                 add_action('edd_process_download_headers', array( $this, 'edd_download_method_support' ), 10, 4);

@@ -303,8 +303,8 @@ namespace wpCloud\StatelessMedia {
 
           if ( $result_code !== 200 ) {
             // if(!$this->get_attachment_if_exist($file->ID, $fullsizepath)){ // Save file to local from proxy.
-              $this->store_failed_attachment( $file->ID, 'other' );
-              throw new \Exception(sprintf(__('File not found (%s)', ud_get_stateless_media()->domain), $file->guid));
+              $this->store_failed_attachment( $file_path, 'other' );
+              throw new \Exception(sprintf(__('File not found (%s)', ud_get_stateless_media()->domain), $file_path));
             // }
             // else{
               // $local_file_exists = true;
@@ -334,8 +334,8 @@ namespace wpCloud\StatelessMedia {
               ),
             ));
 
-
-
+            // Addon can hook this function to modify database after manual sync done.
+            do_action( 'sm::synced::nonMediaFiles', $file_path, $fullsizepath, $media);
           }
           else{
             // Stateless mode: we don't need the local version.
@@ -346,10 +346,10 @@ namespace wpCloud\StatelessMedia {
 
         }
 
-        $this->store_current_progress( 'other', $id );
-        $this->maybe_fix_failed_attachment( 'other', $file->ID );
+        // $this->store_current_progress( 'other', $file_path );
+        // $this->maybe_fix_failed_attachment( 'other', $file_path );
 
-        return sprintf( __( '%1$s (ID %2$s) was successfully synchronised in %3$s seconds.', ud_get_stateless_media()->domain ), esc_html( get_the_title( $file->ID ) ), $file->ID, timer_stop() );
+        return sprintf( __( '%1$s (ID %2$s) was successfully synchronised in %3$s seconds.', ud_get_stateless_media()->domain ), esc_html( get_the_title( $file_path ) ), $file_path, timer_stop() );
       }
 
       /**
@@ -390,6 +390,7 @@ namespace wpCloud\StatelessMedia {
 
       /**
        * Returns IDs of non media library files
+       * Return files to be manualy sync from sync tab.
        */
       public function action_get_non_library_files_id() {
         $files = apply_filters( 'sm:sync::nonMediaFiles', array() );

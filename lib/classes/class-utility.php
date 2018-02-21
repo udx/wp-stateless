@@ -87,7 +87,13 @@ namespace wpCloud\StatelessMedia {
           $_parts[] = '-';
           $_parts[] = strtolower($info['filename']);
         }
-        return join('', $_parts) . '.' . $ext;
+
+        $filename = join('', $_parts);
+        if(!empty($ext)){
+          $filename .= '.' . $ext;
+        }
+        
+        return $filename;
       }
 
       /**

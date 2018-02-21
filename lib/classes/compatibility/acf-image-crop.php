@@ -16,10 +16,6 @@ namespace wpCloud\StatelessMedia {
             protected $title = 'Advanced Custom Fields Image Crop Addon';
             protected $constant = 'WP_STATELESS_COMPATIBILITY_ACFIC';
             protected $description = 'Ensures compatibility with image cropping and WP-Stateless in the Stateless mode.';
-            
-            public function __construct(){
-                $this->init();
-            }
 
             public function module_init($sm){
                 if ($sm['mode'] === 'stateless') {
