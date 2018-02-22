@@ -86,3 +86,13 @@
 	padding-top: 20px;
 }
 
+.hbspt-form {
+	margin-left: 10px;
+}
+
+.hbspt-form input.hs-input[type=checkbox] {
+	border: 1px solid #b4b9be;
+	height: 16px;
+	width: 16px;
+	margin-top: -2px;
+}
