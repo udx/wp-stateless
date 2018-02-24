@@ -22,6 +22,8 @@ namespace wpCloud\StatelessMedia {
                 do_action('sm:sync::register_dir', '/gravity_forms/');
                 add_filter( 'gform_save_field_value', array($this, 'gform_save_field_value'), 10, 5 );
                 add_action( 'sm::synced::nonMediaFiles', array($this, 'modify_db'), 10, 3);
+
+                add_action( 'gform_file_path_pre_delete_file', array($this, 'gform_file_path_pre_delete_file'), 10, 2);
             }
             
             
@@ -69,6 +71,25 @@ namespace wpCloud\StatelessMedia {
                     );
                     $entries = $wpdb->get_results( $query );
                 }
+            }
+
+            public function gform_file_path_pre_delete_file( $file_path, $url ){
+                $file_path = wp_normalize_path($file_path);
+                $gs_host = wp_normalize_path( ud_get_stateless_media()->get_gs_host() );
+                $dir = wp_upload_dir();
+                $is_stateless = strpos($file_path, $gs_host);
+                
+                if($is_stateless !== false){
+                    $gs_name = substr($file_path, strpos($file_path, '/gravity_forms/'));
+                    $file_path = $dir['basedir'] . $gs_name;
+                    
+                    $client = ud_get_stateless_media()->get_client();
+                    if( !is_wp_error( $client ) ) {
+                        $client->remove_media( trim($gs_name, '/') );
+                    }
+                }
+
+		        return $file_path;
             }
         }
 
