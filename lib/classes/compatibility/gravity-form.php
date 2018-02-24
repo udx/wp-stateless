@@ -49,6 +49,27 @@ namespace wpCloud\StatelessMedia {
                         $value = ud_get_stateless_media()->get_gs_host() . '/' . $name;
                     }
                 }
+                else if($type == 'post_image'){
+                    add_action( 'gform_after_create_post', function($post_id, $lead, $form) use ($value, $field){
+                        global $wpdb;
+                        $dir = wp_upload_dir();
+                        $lead_detail_id         = $lead['id'];
+                        $gf_upload_root        = \GFFormsModel::get_upload_root();
+                        $gf_upload_url_root    = \GFFormsModel::get_upload_url_root();
+                        $lead_detail_table      = \GFFormsModel::get_lead_details_table_name();
+
+                        $position = strpos($value, 'gravity_forms/');
+                        $_name = substr($value, $position);
+                        $arr_name = explode('|:|', $_name);
+                        $name = rgar( $arr_name, 0 );
+                        
+                        do_action( 'sm:sync::syncFile', $name, $dir['basedir'] . '/' .  $name);
+
+                        $value = ud_get_stateless_media()->get_gs_host() . '/' . $_name;
+                        
+				        $result = $wpdb->update( $lead_detail_table, array( 'value' => $value ), array( 'lead_id' => $lead_detail_id, 'form_id' => $form['id'], 'field_number' => $field['id'], ), array( '%s' ), array( '%d' ) );
+                    }, 10, 3);
+                }
                 return $value;
             }
 
@@ -60,14 +81,14 @@ namespace wpCloud\StatelessMedia {
                 if( $position !== false && !$is_index ){
                     $file_path = trim($file_path, '/');
                     
-                    $_file_path = ud_get_stateless_media()->get_gs_host() . '/' . $file_path;
+                    $file_url = ud_get_stateless_media()->get_gs_host() . '/' . $file_path;
                     $query = sprintf(
                         "
                         UPDATE {$wpdb->prefix}rg_lead_detail
                         SET value = '%s'
                         WHERE value like '%s'
                         "
-                        , $_file_path, '%' . $file_path
+                        , $file_url, '%' . $file_path
                     );
                     $entries = $wpdb->get_results( $query );
                 }
