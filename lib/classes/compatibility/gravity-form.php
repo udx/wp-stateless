@@ -47,6 +47,7 @@ namespace wpCloud\StatelessMedia {
                         $absolutePath = $dir['basedir'] . '/' .  $name;
                         do_action( 'sm:sync::syncFile', $name, $absolutePath);
                         $value = ud_get_stateless_media()->get_gs_host() . '/' . $name;
+                        // Todo add filter.
                     }
                 }
                 else if($type == 'post_image'){
@@ -59,38 +60,62 @@ namespace wpCloud\StatelessMedia {
                         $lead_detail_table      = \GFFormsModel::get_lead_details_table_name();
 
                         $position = strpos($value, 'gravity_forms/');
-                        $_name = substr($value, $position);
+                        $_name = substr($value, $position); // gravity_forms/
                         $arr_name = explode('|:|', $_name);
-                        $name = rgar( $arr_name, 0 );
+                        $name = rgar( $arr_name, 0 ); // Remoed |:| fron end of the url.
                         
+                        // doing sync
                         do_action( 'sm:sync::syncFile', $name, $dir['basedir'] . '/' .  $name);
 
                         $value = ud_get_stateless_media()->get_gs_host() . '/' . $_name;
-                        
+                        // Todo add filter.
 				        $result = $wpdb->update( $lead_detail_table, array( 'value' => $value ), array( 'lead_id' => $lead_detail_id, 'form_id' => $form['id'], 'field_number' => $field['id'], ), array( '%s' ), array( '%d' ) );
                     }, 10, 3);
                 }
                 return $value;
             }
 
+            /**
+             * Manual sync will lose title description from Post Image field if any set.
+             * To do fix missing metadata.
+             */
             public function modify_db( $file_path, $fullsizepath, $media ){
                 global $wpdb;
                 $position = strpos($file_path, 'gravity_forms/');
                 $is_index = strpos($file_path, 'index.html');
 
                 if( $position !== false && !$is_index ){
+                    $dir = wp_upload_dir();
                     $file_path = trim($file_path, '/');
                     
                     $file_url = ud_get_stateless_media()->get_gs_host() . '/' . $file_path;
+                    // Todo add filter.
                     $query = sprintf(
                         "
-                        UPDATE {$wpdb->prefix}rg_lead_detail
-                        SET value = '%s'
-                        WHERE value like '%s'
+                        SELECT id, value FROM {$wpdb->prefix}rg_lead_detail
+                        WHERE value like '%s';
                         "
-                        , $file_url, '%' . $file_path
+                        , '%' . $file_path . '%'
                     );
-                    $entries = $wpdb->get_results( $query );
+                    $results = $wpdb->get_results( $query );
+
+                    foreach ($results as $result) {
+                        $position = strpos($result->value, $dir['baseurl']);
+                        if($position !== false){
+                            $result->value = str_replace($dir['baseurl'], ud_get_stateless_media()->get_gs_host(), $result->value);
+                            $query = sprintf(
+                                "
+                                UPDATE {$wpdb->prefix}rg_lead_detail
+                                SET value = '%s'
+                                WHERE id = %d
+                                "
+                                , $result->value, $result->id
+                            );
+                            $entries = $wpdb->get_results( $query );
+                        }
+
+                    }
+                    
                 }
             }
 

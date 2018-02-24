@@ -335,15 +335,13 @@ namespace wpCloud\StatelessMedia {
             ));
 
             // Addon can hook this function to modify database after manual sync done.
-            do_action( 'sm::synced::nonMediaFiles', $file_path, $fullsizepath, $media);
-          }
-          else{
-            // Stateless mode: we don't need the local version.
-            if(ud_get_stateless_media()->get( 'sm.mode' ) === 'stateless'){
-              unlink($fullsizepath);
-            }
+            do_action( 'sm::synced::nonMediaFiles', $file_path, $fullsizepath); // , $media
           }
 
+          // Stateless mode: we don't need the local version.
+          if(ud_get_stateless_media()->get( 'sm.mode' ) === 'stateless'){
+            unlink($fullsizepath);
+          }
         }
 
         // $this->store_current_progress( 'other', $file_path );
