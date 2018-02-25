@@ -12,9 +12,9 @@ namespace wpCloud\StatelessMedia {
     if(!class_exists('wpCloud\StatelessMedia\WPBakeryPageBuilder')) {
         
         class WPBakeryPageBuilder extends ICompatibility {
-            protected $id = 'visual-composer';
+            protected $id = 'wp-bakery-page-builder';
             protected $title = 'WPBakery Page Builder';
-            protected $constant = 'WP_STATELESS_COMPATIBILITY_VC';
+            protected $constant = 'WP_STATELESS_COMPATIBILITY_WPB';
             protected $description = 'Ensures compatibility with WPBakery Page Builder Single Image.';
 
             public function __construct(){
