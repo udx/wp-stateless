@@ -41,6 +41,11 @@ namespace wpCloud\StatelessMedia {
              * Support for Gravity Form file upload field
              */
             new GravityForm();
+            
+            /**
+             * Support for Gravity Form file upload field
+             */
+            new WPBakeryPageBuilder();
         }
 
         public static function register_module($id, $title , $description, $enabled = 'false', $is_constant = false){

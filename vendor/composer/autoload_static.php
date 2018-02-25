@@ -66,6 +66,7 @@ class ComposerStaticInitc00cd3c666f8dfa818cb7edfd488ed20
         'wpCloud\\StatelessMedia\\SyncNonMedia' => __DIR__ . '/../..' . '/lib/classes/class-sync-non-media.php',
         'wpCloud\\StatelessMedia\\Upgrader' => __DIR__ . '/../..' . '/lib/classes/class-upgrader.php',
         'wpCloud\\StatelessMedia\\Utility' => __DIR__ . '/../..' . '/lib/classes/class-utility.php',
+        'wpCloud\\StatelessMedia\\WPBakeryPageBuilder' => __DIR__ . '/../..' . '/lib/classes/compatibility/wpbakery-single-image.php',
     );
 
     public static function getInitializer(ClassLoader $loader)

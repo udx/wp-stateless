@@ -41,4 +41,5 @@ return array(
     'wpCloud\\StatelessMedia\\SyncNonMedia' => $baseDir . '/lib/classes/class-sync-non-media.php',
     'wpCloud\\StatelessMedia\\Upgrader' => $baseDir . '/lib/classes/class-upgrader.php',
     'wpCloud\\StatelessMedia\\Utility' => $baseDir . '/lib/classes/class-utility.php',
+    'wpCloud\\StatelessMedia\\WPBakeryPageBuilder' => $baseDir . '/lib/classes/compatibility/wpbakery-single-image.php',
 );
