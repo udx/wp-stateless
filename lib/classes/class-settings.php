@@ -74,7 +74,6 @@ namespace wpCloud\StatelessMedia {
          * Manage specific Network Settings
          */
         if( is_network_admin() ) {
-          add_action( 'update_wpmu_options', array( $this, 'save_network_settings' ) );
           add_action( 'network_admin_menu', array( $this, 'network_admin_menu' ));
         }
 
