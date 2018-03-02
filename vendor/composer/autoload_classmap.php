@@ -33,6 +33,7 @@ return array(
     'wpCloud\\StatelessMedia\\GS_Client' => $baseDir . '/lib/classes/class-gs-client.php',
     'wpCloud\\StatelessMedia\\GravityForm' => $baseDir . '/lib/classes/compatibility/gravity-form.php',
     'wpCloud\\StatelessMedia\\ICompatibility' => $baseDir . '/lib/classes/compatibility/ICompatibility.php',
+    'wpCloud\\StatelessMedia\\Imagify' => $baseDir . '/lib/classes/compatibility/imagify.php',
     'wpCloud\\StatelessMedia\\Logger' => $baseDir . '/lib/classes/class-logger.php',
     'wpCloud\\StatelessMedia\\Module' => $baseDir . '/lib/classes/class-compatibility.php',
     'wpCloud\\StatelessMedia\\SOWidgetCSS' => $baseDir . '/lib/classes/compatibility/so-widget-css.php',
