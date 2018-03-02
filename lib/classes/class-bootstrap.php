@@ -37,6 +37,20 @@ namespace wpCloud\StatelessMedia {
        */
       protected static $instance = null;
 
+      
+      /**
+       * Constructor
+       * Attention: MUST NOT BE CALLED DIRECTLY! USE get_instance() INSTEAD!
+       *
+       * @author peshkov@UD
+       */
+      protected function __construct( $args ) {
+        parent::__construct( $args );
+        
+        // Initialize compatibility modules.
+        new Module();
+      }
+
       /**
        * Instantaite class.
        */
@@ -57,8 +71,6 @@ namespace wpCloud\StatelessMedia {
         // Parse feature falgs, set constants.
         $this->parse_feature_flags();
 
-        // Initialize compatibility modules.
-        new Module();
         new SyncNonMedia();
         
         /**
