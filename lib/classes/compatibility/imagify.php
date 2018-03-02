@@ -17,8 +17,14 @@ namespace wpCloud\StatelessMedia {
             protected $constant = 'WP_STATELESS_COMPATIBILITY_IMAGIFY';
             protected $description = 'Ensures compatibility with Imagify compression plugin.';
             
-            public function module_init($sm){
+            public function __construct(){
+                parent::__construct();
+
+                // We need to add the filter on construct. Init is too late.
                 add_action( 'after_imagify_optimize_attachment', array($this, 'after_imagify_optimize_attachment') );
+            }
+
+            public function module_init($sm){
 
             }
 
