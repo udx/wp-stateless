@@ -90,6 +90,9 @@ namespace wpCloud\StatelessMedia {
                     
                     $file_url = ud_get_stateless_media()->get_gs_host() . '/' . $file_path;
                     // Todo add filter.
+
+                    // We need to get results from db because of post image field have extra data at the end of url.
+                    // xyz.jpg|:|tile|:|description|:|
                     $query = sprintf(
                         "
                         SELECT id, value FROM {$wpdb->prefix}rg_lead_detail

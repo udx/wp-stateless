@@ -31,7 +31,7 @@
                                             <option value="true"><?php _e( 'Hidden', ud_get_stateless_media()->domain ); ?></option>
                                         </select>
                                     </p>
-                                    <p class="description">Control the visibility and access of the WP-Stateless settings panel within individual network sites.</p>                  
+                                    <p class="description"><?php _e("Control the visibility and access of the WP-Stateless settings panel within individual network sites.");?></p>                  
                                 </fieldset>
                             </td>
                         </tr>
@@ -46,7 +46,7 @@
                                             <option value="true"><?php _e( 'Hidden', ud_get_stateless_media()->domain ); ?></option>
                                         </select>
                                     </p>
-                                    <p class="description">Control the visibility and access of the WP-Stateless setup assistant within individual network sites.</p>                  
+                                    <p class="description"><?php _e("Control the visibility and access of the WP-Stateless setup assistant within individual network sites.");?></p>                  
                                 </fieldset>
                             </td>
                         </tr>
@@ -81,7 +81,7 @@
                                     <p class="sm-file-url">
                                         <select name="sm[body_rewrite]" id="sm_file_url" ng-model="sm.body_rewrite" ng-disabled="sm.readonly.body_rewrite">
                                             <?php if(is_network_admin()): ?>
-                                            <option value="">Don't override</option>
+                                            <option value=""><?php _e("Don't override");?></option>
                                             <?php endif; ?>
                                             <option value="true"><?php _e( 'Enable', ud_get_stateless_media()->domain ); ?></option>
                                             <option value="false"><?php _e( 'Disable', ud_get_stateless_media()->domain ); ?></option>
@@ -227,7 +227,8 @@
         </div>
         <div id="stless_compatibility_tab" class="stless_settings_content" ng-controller="wpStatelessCompatibility">
             <div class="container-fluid">
-                <h2>Enable or disable compatibility with other plugins.</h2>
+                <h2><?php _e("Enable or disable compatibility with other plugins.");?></h2>
+                <p><?php _e(sprintf("Having an issue with another plugin? <a class='stless_setting_tab' href='%s'>Submit feedback</a> and let us know your issue!", "#stless_questions_tab"));?></p>
                 <form method="post" action=""> 
                     <input type="hidden" name="action" value="stateless_modules">
                     <?php wp_nonce_field('wp-stateless-modules', '_smnonce');?>
@@ -243,7 +244,7 @@
                                     <option value="true"><?php _e( 'Enable', ud_get_stateless_media()->domain ); ?></option>
                                 </select>
                                 <p class="description">
-                                    <strong ng-show="module.is_constant">Currently configured via a constant.</strong>
+                                    <strong ng-show="module.is_constant"><?php _e("Currently configured via a constant.");?></strong>
                                     {{module.description}}
                                 </p>  
                             </td>
