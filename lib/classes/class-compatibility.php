@@ -15,7 +15,7 @@ namespace wpCloud\StatelessMedia {
         private static $modules = array();
 
         public function __construct(){
-            $this->save_modules();
+            add_action( 'admin_init', array($this, 'save_modules'), 1 );
 
             /**
              * Dynamic Image Support
@@ -85,6 +85,7 @@ namespace wpCloud\StatelessMedia {
                 $modules = apply_filters('stateless::modules::save', $modules);
                 
                 update_option('stateless-modules', $modules, true);
+                wp_redirect( $_POST['_wp_http_referer'] );
             }
         }
     }
