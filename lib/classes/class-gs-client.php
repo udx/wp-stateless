@@ -174,6 +174,7 @@ namespace wpCloud\StatelessMedia {
           @set_time_limit( -1 );
 
           extract( $args = wp_parse_args( $args, array(
+            'force' => false,
             'name' => false,
             'absolutePath' => false,
             'mimeType' => 'image/jpeg',
@@ -193,7 +194,7 @@ namespace wpCloud\StatelessMedia {
           $name = apply_filters( 'wp_stateless_file_name', $name );
 
           // If media exists we just return it
-          if ( $media = $this->media_exists( $name ) ) {
+          if ( !$force && $media = $this->media_exists( $name ) ) {
             if($media->getCacheControl() != $args['cacheControl']){
               $media->setCacheControl($args['cacheControl']);
               $media = $this->service->objects->patch($this->bucket, $name, $media);

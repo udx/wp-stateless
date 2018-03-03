@@ -37,6 +37,9 @@ namespace wpCloud\StatelessMedia {
              *   )
              */
             public function vc_wpb_getimagesize($args, $attach_id, $params){
+                if (!$this->enabled)
+                    return $args;
+                
                 $gs_host = ud_get_stateless_media()->get_gs_host();
                 $meta_data = wp_get_attachment_metadata( $attach_id );
                 preg_match("/src=[\"|'](.*?)[\"|']/", $args['thumbnail'], $match);

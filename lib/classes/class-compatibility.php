@@ -43,14 +43,19 @@ namespace wpCloud\StatelessMedia {
             new GravityForm();
             
             /**
-             * Support for Gravity Form file upload field
+             * Support for WPBakery Page Builder
              */
             new WPBakeryPageBuilder();
             
             /**
-             * Support for Gravity Form file upload field
+             * Support for Imagify
              */
             new Imagify();
+            
+            /**
+             * Support for ShortPixel Image Optimizer
+             */
+            new ShortPixel();
         }
 
         public static function register_module($id, $title , $description, $enabled = 'false', $is_constant = false){

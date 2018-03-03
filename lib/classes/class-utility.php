@@ -147,9 +147,10 @@ namespace wpCloud\StatelessMedia {
        * @author peshkov@UD
        * @param $metadata
        * @param $attachment_id
+       * @param $force Whether to force the upload incase of it's already exists.
        * @return bool|string
        */
-      public static function add_media( $metadata, $attachment_id ) {
+      public static function add_media( $metadata, $attachment_id, $force = false ) {
         $upload_dir = wp_upload_dir();
 
         /* Get metadata in case if method is called directly. */
@@ -182,6 +183,7 @@ namespace wpCloud\StatelessMedia {
 
           /* Add default image */
           $media = $client->add_media( $_mediaOptions = array_filter( array(
+            'force' => $force,
             'name' => $file,
             'absolutePath' => wp_normalize_path( get_attached_file( $attachment_id ) ),
             'cacheControl' => $_cacheControl = self::getCacheControl( $attachment_id, $metadata, null ),
@@ -237,6 +239,7 @@ namespace wpCloud\StatelessMedia {
 
               /* Add 'image size' image */
               $media = $client->add_media( array(
+                'force' => $force,
                 'name' => $file_path = trim($mediaPath . '/' . $data[ 'file' ], '/'),
                 'absolutePath' => $absolutePath,
                 'cacheControl' => $_cacheControl,
