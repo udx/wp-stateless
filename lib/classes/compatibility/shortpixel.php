@@ -23,7 +23,7 @@ namespace wpCloud\StatelessMedia {
                     // We need to add the filter on construct. Init is too late.
                     // We need to remove the regular handler for sync 
                     // unless in stateless mode we would remove the attachment before it's get optimized.
-                    remove_filter( 'wp_update_attachment_metadata', array( ud_get_stateless_media(), 'add_media' ), 999 );
+                    remove_filter( 'wp_update_attachment_metadata', array( "wpCloud\StatelessMedia\Bootstrap", 'add_media' ), 999 );
                     add_action( 'shortpixel_image_optimised', array($this, 'shortpixel_image_optimised') );
                 }
             }
