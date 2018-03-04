@@ -183,8 +183,6 @@ namespace wpCloud\StatelessMedia {
            */
           if( !$this->has_errors() ) {
 
-            do_action('sm::module::init', $this->get( 'sm' ));
-
             if( $this->get( 'sm.mode' ) === 'cdn' || $this->get( 'sm.mode' ) === 'stateless' ) {
               add_filter( 'wp_get_attachment_image_attributes', array( $this, 'wp_get_attachment_image_attributes' ), 20, 3 );
               add_filter( 'wp_get_attachment_url', array( $this, 'wp_get_attachment_url' ), 20, 2 );
@@ -237,6 +235,9 @@ namespace wpCloud\StatelessMedia {
                */
               add_filter('delete_attachment', array($this, 'remove_media'));
             }
+
+            // Trigger module initialization and registration.
+            do_action('sm::module::init', $this->get( 'sm' ));
           }
 
         }
