@@ -219,8 +219,9 @@ namespace wpCloud\StatelessMedia {
              * Add/Edit Media
              *
              * Once added or edited we can get into Attachment ID then get all image sizes and sync them with GS
+             * We can't use this. That's prevent removing this filter.
              */
-            add_filter( 'wp_update_attachment_metadata', array( $this, 'add_media' ), 999, 2 );
+            add_filter( 'wp_update_attachment_metadata', array( '\wpCloud\StatelessMedia\Bootstrap', 'add_media' ), 999, 2 );
 
             /**
              * Add Media
