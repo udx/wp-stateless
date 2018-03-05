@@ -3,6 +3,7 @@
  * Compatibility abstract class
  *
  * Must be extends in every compatibility module.
+ * @todo check if the plugin Active or not.
  *
  * @class ICompatibility
  */

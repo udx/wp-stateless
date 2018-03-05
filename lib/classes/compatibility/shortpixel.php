@@ -3,7 +3,7 @@
  * Plugin Name: Easy Digital Downloads
  * Plugin URI: https://wordpress.org/plugins/easy-digital-downloads/
  *
- * Compatibility Description: 
+ * Compatibility Description: Shortpixel lazy sync
  *
  */
 
@@ -16,9 +16,8 @@ namespace wpCloud\StatelessMedia {
             protected $title = 'ShortPixel Image Optimizer';
             protected $constant = 'WP_STATELESS_COMPATIBILITY_SHORTPIXEL';
             protected $description = 'Ensures compatibility with ShortPixel Image Optimizer.';
-            
-            public function __construct(){
-                parent::__construct();
+
+            public function module_init($sm){
                 if($this->enabled){
                     // We need to add the filter on construct. Init is too late.
                     // We need to remove the regular handler for sync 
@@ -26,10 +25,6 @@ namespace wpCloud\StatelessMedia {
                     remove_filter( 'wp_update_attachment_metadata', array( "\wpCloud\StatelessMedia\Utility", 'add_media' ), 999 );
                     add_action( 'shortpixel_image_optimised', array($this, 'shortpixel_image_optimised') );
                 }
-            }
-
-            public function module_init($sm){
-
             }
 
             /**
@@ -44,7 +39,6 @@ namespace wpCloud\StatelessMedia {
                 $metadata = wp_get_attachment_metadata( $id );
                 ud_get_stateless_media()->add_media( $metadata, $id, true );
             }
-            
             
         }
 
