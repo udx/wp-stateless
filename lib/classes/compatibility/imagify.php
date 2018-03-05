@@ -16,21 +16,15 @@ namespace wpCloud\StatelessMedia {
             protected $title = 'Imagify';
             protected $constant = 'WP_STATELESS_COMPATIBILITY_IMAGIFY';
             protected $description = 'Ensures compatibility with Imagify compression plugin.';
-            
-            public function __construct(){
-                parent::__construct();
-                
+
+            public function module_init($sm){
+
                 if($this->enabled){
-                    // We need to add the filter on construct. Init is too late.
                     // We need to remove the regular handler for sync 
                     // unless in stateless mode we would remove the attachment before it's get optimized.
                     remove_filter( 'wp_update_attachment_metadata', array( "\wpCloud\StatelessMedia\Utility", 'add_media' ), 999 );
                     add_action( 'after_imagify_optimize_attachment', array($this, 'after_imagify_optimize_attachment'), 10, 2 );
                 }
-            }
-
-            public function module_init($sm){
-
             }
 
             /**
