@@ -1,5 +1,6 @@
 <?php
 /**
+ * To do: Create seperate table to keep track of files.
  * To do: check if client is connected to google before doing any action.
  * Need to improve workflow.
  */
