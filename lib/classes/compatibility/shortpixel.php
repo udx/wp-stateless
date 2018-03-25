@@ -16,14 +16,13 @@ namespace wpCloud\StatelessMedia {
             protected $title = 'ShortPixel Image Optimizer';
             protected $constant = 'WP_STATELESS_COMPATIBILITY_SHORTPIXEL';
             protected $description = 'Ensures compatibility with ShortPixel Image Optimizer.';
+            protected $plugin_constant = 'SHORTPIXEL_IMAGE_OPTIMISER_VERSION';
 
             public function module_init($sm){
-                if($this->enabled){
-                    // We need to remove the regular handler for sync 
-                    // unless in stateless mode we would remove the attachment before it's get optimized.
-                    remove_filter( 'wp_update_attachment_metadata', array( "wpCloud\StatelessMedia\Utility", 'add_media' ), 999 );
-                    add_action( 'shortpixel_image_optimised', array($this, 'shortpixel_image_optimised') );
-                }
+                // We need to remove the regular handler for sync 
+                // unless in stateless mode we would remove the attachment before it's get optimized.
+                remove_filter( 'wp_update_attachment_metadata', array( "wpCloud\StatelessMedia\Utility", 'add_media' ), 999 );
+                add_action( 'shortpixel_image_optimised', array($this, 'shortpixel_image_optimised') );
             }
 
             /**

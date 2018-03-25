@@ -14,20 +14,35 @@ namespace wpCloud\StatelessMedia {
         protected $id = '';
         protected $title = '';
         protected $constant = '';
+        protected $enabled = false;
         protected $description = '';
+        protected $plugin_constant = null;
+        protected $plugin_class = null;
 
         public function __construct(){
             $this->init();
         }
         
+        public function is_plugin_active(){
+            if(!empty($this->plugin_constant)){
+                return defined($this->plugin_constant) ? true : false;
+            }
+
+            if(!empty($this->plugin_class)){
+                return class_exists($this->plugin_class) ? true : false;
+            }
+
+            return true;
+        }
+        
         public function init(){
             $is_constant = false;
 
-            if (defined($this->constant)) {
+            if (defined($this->constant) && $this->is_plugin_active()) {
                 $this->enabled = constant($this->constant);
                 $is_constant = true;
             }
-            else {
+            elseif($this->is_plugin_active()) {
                 $modules = get_option('stateless-modules', array());
                 if (empty($this->enabled)) {
                     $this->enabled = !empty($modules[$this->id]) && $modules[$this->id] == 'true' ? true : false;

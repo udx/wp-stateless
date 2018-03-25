@@ -16,12 +16,15 @@ namespace wpCloud\StatelessMedia {
             protected $title = 'WPBakery Page Builder';
             protected $constant = 'WP_STATELESS_COMPATIBILITY_WPB';
             protected $description = 'Ensures compatibility with WPBakery Page Builder Single Image.';
+            protected $plugin_constant = 'WPB_VC_VERSION';
 
             public function __construct(){
                 parent::__construct();
-
-                // We need to add the filter on construct. Init is too late.
-                add_filter('vc_wpb_getimagesize', array($this, 'vc_wpb_getimagesize'), 10, 3);
+                    
+                if ($this->enabled) {
+                    // We need to add the filter on construct. Init is too late.
+                    add_filter('vc_wpb_getimagesize', array($this, 'vc_wpb_getimagesize'), 10, 3);
+                }
             }
 
             public function module_init($sm){

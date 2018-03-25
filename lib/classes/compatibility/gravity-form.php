@@ -16,6 +16,7 @@ namespace wpCloud\StatelessMedia {
             protected $title = 'Gravity Form File Upload';
             protected $constant = 'WP_STATELESS_COMPATIBILITY_GF';
             protected $description = 'Ensures compatibility with Gravity Form File Upload field.';
+            protected $plugin_class = 'GFForms';
 
             public function module_init($sm){
                 // add_filter( 'gform_upload_path', array($this, 'gform_upload_path'), 10, 2 );
