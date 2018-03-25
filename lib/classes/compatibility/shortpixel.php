@@ -21,7 +21,7 @@ namespace wpCloud\StatelessMedia {
                 if($this->enabled){
                     // We need to remove the regular handler for sync 
                     // unless in stateless mode we would remove the attachment before it's get optimized.
-                    remove_filter( 'wp_update_attachment_metadata', array( "\wpCloud\StatelessMedia\Utility", 'add_media' ), 999 );
+                    remove_filter( 'wp_update_attachment_metadata', array( "wpCloud\StatelessMedia\Utility", 'add_media' ), 999 );
                     add_action( 'shortpixel_image_optimised', array($this, 'shortpixel_image_optimised') );
                 }
             }
