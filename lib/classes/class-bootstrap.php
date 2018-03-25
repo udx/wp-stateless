@@ -250,6 +250,11 @@ namespace wpCloud\StatelessMedia {
        * 
        */
       public function wp_calculate_image_srcset($sources, $size_array, $image_src, $image_meta, $attachment_id){
+
+        if ( empty( $image_meta['gs_link'] ) ) {
+          $image_meta = wp_get_attachment_metadata($attachment_id);
+        }
+
         foreach ($sources as $width => &$image) {
           if($width == $image_meta['width'] && isset( $image_meta['gs_link'] ) && $image_meta['gs_link'] ){
             $image['url'] = $image_meta['gs_link'];
