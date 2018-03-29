@@ -44,7 +44,7 @@ $bucket_id      = trim("stateless-" . substr($id, 0, 20), '-');
                                     </div>
                                     <p>
                                         <input id="allow-notifications" type="checkbox" checked="checked" />
-                                        <label class="cursor-normal" for="allow-notifications"><?php _e( sprintf('Receive email updates from plugin author (<a href="%s">Usability Dynamics</a>)?', 'https://www.usabilitydynamics.com/'));?></label>
+                                        <label class="cursor-normal" for="allow-notifications"><?php _e( sprintf('Receive email updates from plugin author (<a target="_blank" href="%s">Usability Dynamics</a>)?', 'https://www.usabilitydynamics.com/'));?></label>
                                     </p>
                                     <a id="google-login" href="https://api.usabilitydynamics.com/product/stateless/v1/auth/google?state=<?php echo urlencode(ud_get_stateless_media()->get_settings_page_url('?page=stateless-setup&step=google-login') ); ?>" class="btn btn-googly-red"><?php _e( 'Google Login', ud_get_stateless_media()->domain ); ?></a>
                                 </div>
