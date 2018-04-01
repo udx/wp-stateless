@@ -22,6 +22,7 @@ namespace wpCloud\StatelessMedia {
             public function module_init($sm){
                 add_action( 'shortpixel_image_optimised', array($this, 'shortpixel_image_optimised') );
                 add_filter( 'get_attached_file', array($this, 'fix_missing_file'), 10, 2 );
+                add_action('admin_action_shortpixel_restore_backup', array($this, 'handleRestoreBackup'), 11);
             }
 
             /**
@@ -109,6 +110,12 @@ namespace wpCloud\StatelessMedia {
 
                 $metadata = wp_get_attachment_metadata( $id );
                 ud_get_stateless_media()->add_media( $metadata, $id, true );
+            }
+
+            public function handleRestoreBackup(){
+                $attachmentID = intval($_GET['attachment_ID']);
+                $metadata = wp_get_attachment_metadata( $attachmentID );
+                ud_get_stateless_media()->add_media( $metadata, $attachmentID, true );
             }
             
         }

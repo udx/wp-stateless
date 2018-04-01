@@ -23,7 +23,8 @@ namespace wpCloud\StatelessMedia {
                 // unless in stateless mode we would remove the attachment before it's get optimized.
                 remove_filter( 'wp_update_attachment_metadata', array( "wpCloud\StatelessMedia\Utility", 'add_media' ), 999 );
                 add_filter( 'wp_update_attachment_metadata', array( $this, 'add_media_wrapper' ), 999, 2 );
-                add_action( 'after_imagify_optimize_attachment', array($this, 'after_imagify_optimize_attachment'), 10, 2 );
+                add_action( 'after_imagify_optimize_attachment', array($this, 'after_imagify_optimize_attachment'), 10 );
+                add_action( 'after_imagify_restore_attachment', array($this, 'after_imagify_optimize_attachment'), 10 );
                 // add_filter( 'get_attached_file', array($this, 'fix_missing_file'), 10, 2 );
                 add_filter( 'before_imagify_optimize_attachment', array($this, 'fix_missing_file'), 10);
                 
@@ -110,7 +111,7 @@ namespace wpCloud\StatelessMedia {
              *      'p_img_large' => $p_img_large,
              *   )
              */
-            public function after_imagify_optimize_attachment($id, $optimized_data){
+            public function after_imagify_optimize_attachment($id){
                 /**
                  * Restore stateless mode if needed
                  */
