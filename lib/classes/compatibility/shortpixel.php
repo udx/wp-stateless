@@ -22,7 +22,7 @@ namespace wpCloud\StatelessMedia {
             public function module_init($sm){
                 add_action( 'shortpixel_image_optimised', array($this, 'shortpixel_image_optimised') );
                 add_filter( 'get_attached_file', array($this, 'fix_missing_file'), 10, 2 );
-                add_action('admin_action_shortpixel_restore_backup', array($this, 'handleRestoreBackup'), 11);
+                add_action('admin_action_shortpixel_restore_backup', array($this, 'handleRestoreBackup'), 999);
             }
 
             /**
@@ -112,12 +112,110 @@ namespace wpCloud\StatelessMedia {
                 ud_get_stateless_media()->add_media( $metadata, $id, true );
             }
 
+            /**
+             * Sync images after shortpixel restore them from backup.
+             */
             public function handleRestoreBackup(){
                 $attachmentID = intval($_GET['attachment_ID']);
                 $metadata = wp_get_attachment_metadata( $attachmentID );
-                ud_get_stateless_media()->add_media( $metadata, $attachmentID, true );
+                $this->add_media( $metadata, $attachmentID );
             }
             
+            /**
+             * Customized version of wpCloud\StatelessMedia\Utility::add_media()
+             * to satisfied our need in restore backup
+             * If a image isn't restored from backup then ignore it.
+             */
+            public static function add_media( $metadata, $attachment_id ) {
+                $upload_dir = wp_upload_dir();
+
+                $client = ud_get_stateless_media()->get_client();
+
+                if( !is_wp_error( $client ) ) {
+
+                    $fullsizepath = wp_normalize_path( get_attached_file( $attachment_id ) );
+                    // Make non-images uploadable.
+                    if( empty( $metadata['file'] ) && $attachment_id ) {
+                        $metadata = array( "file" => str_replace( trailingslashit( $upload_dir[ 'basedir' ] ), '', get_attached_file( $attachment_id ) ) );
+                    }
+
+                    $file = wp_normalize_path( $metadata[ 'file' ] );
+                    $image_host = ud_get_stateless_media()->get_gs_host();
+                    $bucketLink = apply_filters('wp_stateless_bucket_link', $image_host);
+                    $_cacheControl = \wpCloud\StatelessMedia\Utility::getCacheControl( $attachment_id, $metadata, null );
+                    $_contentDisposition = \wpCloud\StatelessMedia\Utility::getContentDisposition( $attachment_id, $metadata, null );
+                    $_metadata = array(
+                        "width" => isset( $metadata[ 'width' ] ) ? $metadata[ 'width' ] : null,
+                        "height" => isset( $metadata[ 'height' ] )  ? $metadata[ 'height' ] : null,
+                        'object-id' => $attachment_id,
+                        'source-id' => md5( $attachment_id . ud_get_stateless_media()->get( 'sm.bucket' ) ),
+                        'file-hash' => md5( $metadata[ 'file' ] )
+                    );
+
+                    if(file_exists($fullsizepath)){
+
+                        /* Add default image */
+                        $media = $client->add_media( $_mediaOptions = array_filter( array(
+                            'force' => true,
+                            'name' => $file,
+                            'absolutePath' => wp_normalize_path( get_attached_file( $attachment_id ) ),
+                            'cacheControl' => $_cacheControl,
+                            'contentDisposition' => $_contentDisposition,
+                            'mimeType' => get_post_mime_type( $attachment_id ),
+                            'metadata' => $_metadata
+                        ) ));
+
+                        // Stateless mode: we don't need the local version.
+                        if(ud_get_stateless_media()->get( 'sm.mode' ) === 'stateless'){
+                            unlink($fullsizepath);
+                        }
+                    }
+
+                    /* Now we go through all available image sizes and upload them to Google Storage */
+                    if( !empty( $metadata[ 'sizes' ] ) && is_array( $metadata[ 'sizes' ] ) ) {
+
+                        $path = wp_normalize_path( dirname( get_attached_file( $attachment_id ) ) );
+                        $mediaPath = wp_normalize_path( trim( str_replace( basename( $metadata[ 'file' ] ), '', $metadata[ 'file' ] ), '\/\\' ) );
+
+                        foreach( (array) $metadata[ 'sizes' ] as $image_size => $data ) {
+
+                            $absolutePath = wp_normalize_path( $path . '/' . $data[ 'file' ] );
+
+                            if( !file_exists($absolutePath)){
+                                continue;
+                            }
+                            
+                            /* Add 'image size' image */
+                            $media = $client->add_media( array(
+                                'force' => true,
+                                'name' => $file_path = trim($mediaPath . '/' . $data[ 'file' ], '/'),
+                                'absolutePath' => $absolutePath,
+                                'cacheControl' => $_cacheControl,
+                                'contentDisposition' => $_contentDisposition,
+                                'mimeType' => $data[ 'mime-type' ],
+                                'metadata' => array_merge( $_metadata, array(
+                                    'width' => $data['width'],
+                                    'height' => $data['height'],
+                                    'child-of' => $attachment_id,
+                                    'file-hash' => md5( $data[ 'file' ] )
+                                ))
+                            ));
+
+                            /* Break if we have errors. */
+                            if( !is_wp_error( $media ) ) {
+                                // Stateless mode: we don't need the local version.
+                                if(ud_get_stateless_media()->get( 'sm.mode' ) === 'stateless'){
+                                    unlink($absolutePath);
+                                }
+                            }
+
+                        }
+
+                    }
+
+                }
+            }
+            // End add_media
         }
 
     }
