@@ -22,8 +22,30 @@ namespace wpCloud\StatelessMedia {
             public function module_init($sm){
                 add_action( 'shortpixel_image_optimised', array($this, 'shortpixel_image_optimised') );
                 add_filter( 'get_attached_file', array($this, 'fix_missing_file'), 10, 2 );
-                add_action('admin_action_shortpixel_restore_backup', array($this, 'handleRestoreBackup'), 999);
+                add_action( 'admin_action_shortpixel_restore_backup', array($this, 'handleRestoreBackup'), 999 );
+                add_action( 'admin_enqueue_scripts', array( $this, 'shortPixelJS') );
             }
+
+            public function shortPixelJS(){
+                $upload_dir = wp_upload_dir();
+                $jsSuffix = '.min.js';
+
+                if (defined('SHORTPIXEL_DEBUG') && SHORTPIXEL_DEBUG === true) {
+                    $jsSuffix = '.js'; //use unminified versions for easier debugging
+                }
+                $dep = 'short-pixel' . $jsSuffix;
+                wp_enqueue_script('stateless-short-pixel', ud_get_stateless_media()->path( 'lib/classes/compatibility/js/shortpixel.js', 'url'), array($dep), '', true);
+                
+                $image_host = ud_get_stateless_media()->get_gs_host();
+                $bucketLink = apply_filters('wp_stateless_bucket_link', $image_host);
+                
+                wp_localize_script( 'stateless-short-pixel', '_stateless_short_pixel', array(
+                    'baseurl' => $upload_dir[ 'baseurl' ],
+                    'bucketLink' => $bucketLink,
+                ));
+
+            }
+
 
             /**
              * Try to restore images before compression
