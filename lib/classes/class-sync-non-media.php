@@ -3,6 +3,7 @@
  * To do: Create seperate table to keep track of files.
  * To do: check if client is connected to google before doing any action.
  * Need to improve workflow.
+ * Maybe add a transient of few days to keep track of synced files.
  */
 
 namespace wpCloud\StatelessMedia {
@@ -77,6 +78,10 @@ namespace wpCloud\StatelessMedia {
                     $this->client = ud_get_stateless_media()->get_client();
                 }
 
+                if( is_wp_error( $client ) ) {
+                    return;
+                }
+                
                 $file_copied_from_gcs = false;
                 $local_file_exists = file_exists( $absolutePath );
 
@@ -191,7 +196,10 @@ namespace wpCloud\StatelessMedia {
                     if(empty($this->client)){
                         $this->client = ud_get_stateless_media()->get_client();
                     }
-                    
+
+                    if( is_wp_error( $client ) ) {
+                        return;
+                    }
                     // Removing file for GCS
                     $this->client->remove_media($file);
                     
@@ -214,6 +222,10 @@ namespace wpCloud\StatelessMedia {
             public function delete_files($dir){
                 if(empty($this->client)){
                     $this->client = ud_get_stateless_media()->get_client();
+                }
+
+                if( is_wp_error( $client ) ) {
+                    return;
                 }
 
                 foreach ($this->registered_files as $key => $file) {

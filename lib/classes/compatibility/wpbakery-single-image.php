@@ -32,7 +32,7 @@ namespace wpCloud\StatelessMedia {
             }
 
             /**
-             * If image size not exist then upload it to GS.
+             * If image size not exist then generate size info and update attachment metadata.
              * 
              * $args = array(
              *      'thumbnail' => $thumbnail,
