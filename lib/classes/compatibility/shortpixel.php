@@ -132,8 +132,58 @@ namespace wpCloud\StatelessMedia {
 
                 $metadata = wp_get_attachment_metadata( $id );
                 ud_get_stateless_media()->add_media( $metadata, $id, true );
+
+
+                /* Now we go through all available image sizes and upload them to Google Storage */
+                if( !empty( $metadata[ 'sizes' ] ) && is_array( $metadata[ 'sizes' ] ) ) {
+
+                    // Sync backup file with GCS
+                    $file_path = get_attached_file( $id );
+                    $fullSubDir = $this->returnSubDir($file_path);
+                    $backup_path = SHORTPIXEL_BACKUP_FOLDER . '/' . $fullSubDir;
+
+                    foreach( (array) $metadata[ 'sizes' ] as $image_size => $data ) {
+                        $absolutePath = $backup_path . $data[ 'file' ];
+                        $name = apply_filters( 'wp_stateless_file_name',  $fullSubDir . $data[ 'file' ]);
+
+                        if( !file_exists($absolutePath)){
+                            continue;
+                        }
+
+                        do_action( 'sm:sync::syncFile', $name, $absolutePath, true);
+                    }
+
+
+                }
+
             }
 
+            /**
+             * return subdir for that particular attached file - if it's media library then last 3 path items, otherwise substract the uploads path
+             * Has trailing directory separator (/)
+             * @param type $file
+             * @return string
+             */
+            public function returnSubDir($file)
+            {
+                $hp = wp_normalize_path(get_home_path());
+                $file = wp_normalize_path($file);
+                $sp__uploads = wp_upload_dir();
+                if(strstr($file, $hp)) {
+                    $path = str_replace( $hp, "", $file);
+                } elseif( strstr($file, dirname( WP_CONTENT_DIR ))) { //in some situations the content dir is not inside the root, check this also (ex. single.shortpixel.com)
+                    $path = str_replace( trailingslashit(dirname( WP_CONTENT_DIR )), "", $file);
+                } elseif( (strstr(realpath($file), realpath($hp)))) {
+                    $path = str_replace( realpath($hp), "", realpath($file));
+                } elseif( strstr($file, trailingslashit(dirname(dirname( $sp__uploads['basedir'] )))) ) {
+                    $path = str_replace( trailingslashit(dirname(dirname( $sp__uploads['basedir'] ))), "", $file);
+                } else {
+                    $path = (substr($file, 1));
+                }
+                $pathArr = explode('/', $path);
+                unset($pathArr[count($pathArr) - 1]);
+                return implode('/', $pathArr) . '/';
+            }
             /**
              * Sync images after shortpixel restore them from backup.
              */
