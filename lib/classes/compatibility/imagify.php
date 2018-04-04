@@ -1,9 +1,10 @@
 <?php
 /**
- * Plugin Name: Easy Digital Downloads
- * Plugin URI: https://wordpress.org/plugins/easy-digital-downloads/
+ * Plugin Name: Imagify
+ * Plugin URI: https://wordpress.org/plugins/imagify/
  *
- * Compatibility Description: 
+ * Compatibility Description: Enables support for these Imagify Image Optimizer features: 
+ * auto-optimize images on upload, bulk optimizer, resize larger images, optimization levels (normal, aggressive, ultra).
  *
  */
 
@@ -23,13 +24,20 @@ namespace wpCloud\StatelessMedia {
                 // unless in stateless mode we would remove the attachment before it's get optimized.
                 remove_filter( 'wp_update_attachment_metadata', array( "wpCloud\StatelessMedia\Utility", 'add_media' ), 999 );
                 add_filter( 'wp_update_attachment_metadata', array( $this, 'add_media_wrapper' ), 999, 2 );
-                add_action( 'after_imagify_optimize_attachment', array($this, 'after_imagify_optimize_attachment'), 10 );
-                add_action( 'after_imagify_restore_attachment', array($this, 'after_imagify_optimize_attachment'), 10 );
-                // add_filter( 'get_attached_file', array($this, 'fix_missing_file'), 10, 2 );
+
                 add_filter( 'before_imagify_optimize_attachment', array($this, 'fix_missing_file'), 10);
+                add_action( 'after_imagify_optimize_attachment', array($this, 'after_imagify_optimize_attachment'), 10 );
+
+                add_filter( 'before_imagify_restore_attachment', array($this, 'get_image_from_gcs'), 10);
+                add_action( 'after_imagify_restore_attachment', array($this, 'after_imagify_optimize_attachment'), 10 );
                 
             }
 
+            /**
+             * Replacement for default wp_update_attachment_metadata filter of bootstrap class.
+             * To avoid sync same image twice, once on upload and again after optimization.
+             * We also avoid downloading image before optimization on stateless mode.
+             */
             public function add_media_wrapper($metadata, $attachment_id){
                 $imagify = new \Imagify_Attachment($attachment_id);
                 if ( ! $imagify->is_extension_supported() ) {
@@ -122,6 +130,33 @@ namespace wpCloud\StatelessMedia {
 
                 $metadata = wp_get_attachment_metadata( $id );
                 ud_get_stateless_media()->add_media( $metadata, $id, true );
+
+                // Sync backup file with GCS
+                // if( current_filter() == 'after_imagify_optimize_attachment' ) {
+                //     $file_path = get_attached_file( $id );
+                //     $backup_path = get_imagify_attachment_backup_path( $file_path );
+                //     if(file_exists($backup_path)){
+                //         $upload_dir = wp_upload_dir();
+                //         $overwrite = apply_filters( 'imagify_backup_overwrite_backup', false, $file_path, $backup_path );
+                //         $name = str_replace(trailingslashit( $upload_dir[ 'basedir' ] ), '', $backup_path);
+                //         $name = apply_filters( 'wp_stateless_file_name', $name);
+                //         do_action( 'sm:sync::syncFile', $name, $backup_path, $overwrite);
+                //     }
+                // }
+            }
+
+
+            public function get_image_from_gcs($id){
+
+                $file_path = get_attached_file( $id );
+                $backup_path = get_imagify_attachment_backup_path( $file_path );
+                if(!file_exists($backup_path)){
+                    $upload_dir = wp_upload_dir();
+                    $overwrite = apply_filters( 'imagify_backup_overwrite_backup', false, $file_path, $backup_path );
+                    $name = str_replace(trailingslashit( $upload_dir[ 'basedir' ] ), '', $backup_path);
+                    $name = apply_filters( 'wp_stateless_file_name', $name);
+                    ud_get_stateless_media()->get_client()->get_media( apply_filters( 'wp_stateless_file_name', $name), true, $backup_path );
+                }
             }
             
             

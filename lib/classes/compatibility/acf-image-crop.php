@@ -3,7 +3,7 @@
  * Plugin Name: Advanced Custom Fields: Image Crop Add-on
  * Plugin URI: https://wordpress.org/plugins/acf-image-crop-add-on/
  *
- * Compatibility Description: 
+ * Compatibility Description: Ensures compatibility with image cropping and WP-Stateless in the Stateless mode.
  *
  */
 

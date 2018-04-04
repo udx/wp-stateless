@@ -23,6 +23,13 @@ namespace wpCloud\StatelessMedia {
             $this->init();
         }
         
+        /**
+         * Checking whether the plugin is active or not.
+         * If the plugin_constant is specified then check whether plugin_constant is defined or not.
+         * If the plugin_class is specified then check whether plugin_class exist or not.
+         * 
+         * By defult return true.
+         */
         public function is_plugin_active(){
             if(!empty($this->plugin_constant)){
                 return defined($this->plugin_constant) ? true : false;
@@ -35,6 +42,13 @@ namespace wpCloud\StatelessMedia {
             return true;
         }
         
+        /**
+         * Initialize the module
+         * Check whether plugin is active or not.
+         * Register module.
+         * 
+         * Add action for sm::module::init hook for module_init, which is fired(do_action) on Bootstrap::init()
+         */
         public function init(){
             $is_constant = false;
 

@@ -3,7 +3,7 @@
  * Plugin Name: ShortPixel Image Optimizer
  * Plugin URI: https://wordpress.org/plugins/shortpixel-image-optimiser/
  *
- * Compatibility Description: Shortpixel lazy sync
+ * Compatibility Description: Ensures compatibility with ShortPixel Image Optimizer.
  *
  */
 

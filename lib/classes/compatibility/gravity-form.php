@@ -1,9 +1,10 @@
 <?php
 /**
- * Plugin Name: Easy Digital Downloads
- * Plugin URI: https://wordpress.org/plugins/easy-digital-downloads/
+ * Plugin Name: Gravity Forms
+ * Plugin URI: https://www.gravityforms.com/
  *
- * Compatibility Description: 
+ * Compatibility Description: Enables support for these Gravity Forms features: 
+ * file upload field, post image field, custom file upload field type.
  *
  */
 

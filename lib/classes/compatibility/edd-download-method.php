@@ -3,7 +3,7 @@
  * Plugin Name: Easy Digital Downloads
  * Plugin URI: https://wordpress.org/plugins/easy-digital-downloads/
  *
- * Compatibility Description: 
+ * Compatibility Description: Ensures compatibility with the forced download method and WP-Stateless.
  *
  */
 

@@ -294,55 +294,8 @@ namespace wpCloud\StatelessMedia {
         if ( ! current_user_can( 'manage_options' ) )
           throw new \Exception( __( "You are not allowed to do this.", ud_get_stateless_media()->domain ) );
 
-        $local_file_exists = file_exists( $fullsizepath );
 
-        if ( !$local_file_exists ) {
-
-          // Try get it and save
-          $result_code = ud_get_stateless_media()->get_client()->get_media( $fullsizepath, true, $fullsizepath );
-
-          if ( $result_code !== 200 ) {
-            // if(!$this->get_attachment_if_exist($file->ID, $fullsizepath)){ // Save file to local from proxy.
-              $this->store_failed_attachment( $file_path, 'other' );
-              throw new \Exception(sprintf(__('File not found (%s)', ud_get_stateless_media()->domain), $file_path));
-            // }
-            // else{
-              // $local_file_exists = true;
-            // }
-          }
-          else{
-            $local_file_exists = true;
-          }
-        }
-
-        if($local_file_exists){
-
-          if ( !ud_get_stateless_media()->get_client()->media_exists( $file_path )) {
-
-            @set_time_limit( -1 );
-            $file_type = wp_check_filetype($fullsizepath);
-            /* Add 'image size' image */
-            $media = $client->add_media( array(
-              'name' => $file_path,
-              'absolutePath' => $fullsizepath,
-              'cacheControl' => apply_filters( 'sm:item:cacheControl', 'public, max-age=36000, must-revalidate', $fullsizepath),
-              'contentDisposition' => apply_filters( 'sm:item:contentDisposition', null, $fullsizepath),
-              'mimeType' => $file_type['type'],
-              'metadata' => array(
-                'child-of' => dirname($file_path),
-                'file-hash' => md5( $file_path ),
-              ),
-            ));
-
-            // Addon can hook this function to modify database after manual sync done.
-            do_action( 'sm::synced::nonMediaFiles', $file_path, $fullsizepath); // , $media
-          }
-
-          // Stateless mode: we don't need the local version.
-          if(ud_get_stateless_media()->get( 'sm.mode' ) === 'stateless'){
-            unlink($fullsizepath);
-          }
-        }
+        do_action( 'sm:sync::syncFile', $file_path, $fullsizepath, true);
 
         // $this->store_current_progress( 'other', $file_path );
         // $this->maybe_fix_failed_attachment( 'other', $file_path );

@@ -1,9 +1,9 @@
 <?php
 /**
- * Plugin Name: Easy Digital Downloads
- * Plugin URI: https://wordpress.org/plugins/easy-digital-downloads/
+ * Plugin Name: WPBakery Page Builder
+ * Plugin URI: http://vc.wpbakery.com/
  *
- * Compatibility Description: 
+ * Compatibility Description: Ensures compatibility with WPBakery Page Builder Single Image.
  *
  */
 
