@@ -13,9 +13,9 @@ namespace wpCloud\StatelessMedia {
         
         class Imagify extends ICompatibility {
             protected $id = 'imagify';
-            protected $title = 'Imagify';
+            protected $title = 'Imagify Image Optimizer';
             protected $constant = 'WP_STATELESS_COMPATIBILITY_IMAGIFY';
-            protected $description = 'Ensures compatibility with Imagify compression plugin.';
+            protected $description = 'Enables support for these Imagify Image Optimizer features: auto-optimize images on upload, bulk optimizer, resize larger images, optimization levels (normal, aggressive, ultra).';
             protected $plugin_constant = 'IMAGIFY_VERSION';
 
             public function module_init($sm){
