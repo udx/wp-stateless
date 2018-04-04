@@ -132,22 +132,23 @@ namespace wpCloud\StatelessMedia {
                 ud_get_stateless_media()->add_media( $metadata, $id, true );
 
                 // Sync backup file with GCS
-                // if( current_filter() == 'after_imagify_optimize_attachment' ) {
-                //     $file_path = get_attached_file( $id );
-                //     $backup_path = get_imagify_attachment_backup_path( $file_path );
-                //     if(file_exists($backup_path)){
-                //         $upload_dir = wp_upload_dir();
-                //         $overwrite = apply_filters( 'imagify_backup_overwrite_backup', false, $file_path, $backup_path );
-                //         $name = str_replace(trailingslashit( $upload_dir[ 'basedir' ] ), '', $backup_path);
-                //         $name = apply_filters( 'wp_stateless_file_name', $name);
-                //         do_action( 'sm:sync::syncFile', $name, $backup_path, $overwrite);
-                //     }
-                // }
+                if( current_filter() == 'after_imagify_optimize_attachment' && ud_get_stateless_media()->get( 'sm.mode' ) !== 'stateless' ) {
+                    $file_path = get_attached_file( $id );
+                    $backup_path = get_imagify_attachment_backup_path( $file_path );
+                    if(file_exists($backup_path)){
+                        $upload_dir = wp_upload_dir();
+                        $overwrite = apply_filters( 'imagify_backup_overwrite_backup', false, $file_path, $backup_path );
+                        $name = str_replace(trailingslashit( $upload_dir[ 'basedir' ] ), '', $backup_path);
+                        $name = apply_filters( 'wp_stateless_file_name', $name);
+                        do_action( 'sm:sync::syncFile', $name, $backup_path, $overwrite);
+                    }
+                }
             }
 
-
+            /**
+             * Restore backup file from GCS if not exist.
+             */
             public function get_image_from_gcs($id){
-
                 $file_path = get_attached_file( $id );
                 $backup_path = get_imagify_attachment_backup_path( $file_path );
                 if(!file_exists($backup_path)){

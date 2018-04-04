@@ -3,7 +3,7 @@
  * Plugin Name: WPBakery Page Builder
  * Plugin URI: http://vc.wpbakery.com/
  *
- * Compatibility Description: Ensures compatibility with WPBakery Page Builder Single Image.
+ * Compatibility Description: Enables support for these WPBakery Page Builder features: single image element.
  *
  */
 
@@ -15,7 +15,7 @@ namespace wpCloud\StatelessMedia {
             protected $id = 'wp-bakery-page-builder';
             protected $title = 'WPBakery Page Builder';
             protected $constant = 'WP_STATELESS_COMPATIBILITY_WPB';
-            protected $description = 'Ensures compatibility with WPBakery Page Builder Single Image.';
+            protected $description = 'Enables support for these WPBakery Page Builder features: single image element.';
             protected $plugin_constant = 'WPB_VC_VERSION';
 
             public function __construct(){
