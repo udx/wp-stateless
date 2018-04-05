@@ -25,7 +25,7 @@ namespace wpCloud\StatelessMedia {
                 add_action( 'admin_action_shortpixel_restore_backup', array($this, 'handleRestoreBackup'), 999 );
                 add_action( 'admin_enqueue_scripts', array( $this, 'shortPixelJS') );
                 // Sync from sync tab
-                add_action( 'sm:synced::image', array( $this, 'sync_backup_file') );
+                add_action( 'sm:synced::image', array( $this, 'sync_backup_file'), 10, 2 );
             }
 
             public function shortPixelJS(){
@@ -165,15 +165,10 @@ namespace wpCloud\StatelessMedia {
                         ud_get_stateless_media()->set( 'sm.mode', 'cdn' );
                         $wp_stateless_shortpixel_mode = 'stateless';
                     }
-                    
                     foreach( (array) $metadata[ 'sizes' ] as $image_size => $data ) {
                         $absolutePath = $backup_path . $data[ 'file' ];
                         $name = apply_filters( 'wp_stateless_file_name',  basename(SHORTPIXEL_BACKUP_FOLDER) . '/' . $fullSubDir . $data[ 'file' ]);
-
-                        if( !file_exists($absolutePath)){
-                            continue;
-                        }
-
+                        
                         do_action( 'sm:sync::syncFile', $name, $absolutePath, true);
                     }
 

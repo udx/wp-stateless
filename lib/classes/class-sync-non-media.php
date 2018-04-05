@@ -88,13 +88,9 @@ namespace wpCloud\StatelessMedia {
                 if ( !$local_file_exists && ud_get_stateless_media()->get( 'sm.mode' ) !== 'stateless') {
 
                     // Try get it and save
-                    $result_code = $this->client->get_media( $file_path, true, $absolutePath );
+                    $result_code = $this->client->get_media( $name, true, $absolutePath );
 
-                    if ( $result_code !== 200 ) {
-                        $this->store_failed_attachment( $file_path, 'other' );
-                        throw new \Exception(sprintf(__('File not found (%s)', ud_get_stateless_media()->domain), $file_path));
-                    }
-                    else{
+                    if ( $result_code == 200 ) {
                         $local_file_exists = true;
                         $file_copied_from_gcs = true;
                     }
