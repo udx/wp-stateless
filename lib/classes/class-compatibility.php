@@ -38,9 +38,14 @@ namespace wpCloud\StatelessMedia {
             new EDDDownloadMethod();
             
             /**
-             * Support for SiteOrigin CSS files
+             * Support for SiteOrigin widget CSS files
              */
             new SOWidgetCSS();
+            
+            /**
+             * Support for SiteOrigin CSS files
+             */
+            new SOCSS();
             
             /**
              * Support for Gravity Form file upload field
