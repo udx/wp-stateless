@@ -78,7 +78,7 @@ namespace wpCloud\StatelessMedia {
                     $this->client = ud_get_stateless_media()->get_client();
                 }
 
-                if( is_wp_error( $client ) ) {
+                if( is_wp_error( $this->client ) ) {
                     return;
                 }
                 
@@ -197,7 +197,7 @@ namespace wpCloud\StatelessMedia {
                         $this->client = ud_get_stateless_media()->get_client();
                     }
 
-                    if( is_wp_error( $client ) ) {
+                    if( is_wp_error( $this->client ) ) {
                         return;
                     }
                     // Removing file for GCS
@@ -224,7 +224,7 @@ namespace wpCloud\StatelessMedia {
                     $this->client = ud_get_stateless_media()->get_client();
                 }
 
-                if( is_wp_error( $client ) ) {
+                if( is_wp_error( $this->client ) ) {
                     return;
                 }
 
