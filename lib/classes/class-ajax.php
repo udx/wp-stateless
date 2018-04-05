@@ -200,6 +200,7 @@ namespace wpCloud\StatelessMedia {
 
         $this->store_current_progress( 'images', $id );
         $this->maybe_fix_failed_attachment( 'images', $image->ID );
+        do_action( 'sm:synced::image', $id, $metadata);
 
         return sprintf( __( '%1$s (ID %2$s) was successfully resized in %3$s seconds.', ud_get_stateless_media()->domain ), esc_html( get_the_title( $image->ID ) ), $image->ID, timer_stop() );
       }
@@ -262,6 +263,7 @@ namespace wpCloud\StatelessMedia {
             }
 
             wp_update_attachment_metadata( $file->ID, $metadata );
+            do_action( 'sm:synced::nonImage', $id, $metadata);
 
           }
           else{

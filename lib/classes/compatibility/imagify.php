@@ -30,6 +30,8 @@ namespace wpCloud\StatelessMedia {
 
                 add_filter( 'before_imagify_restore_attachment', array($this, 'get_image_from_gcs'), 10);
                 add_action( 'after_imagify_restore_attachment', array($this, 'after_imagify_optimize_attachment'), 10 );
+                // Sync from sync tab
+                add_action( 'sm:synced::image', array( $this, 'get_image_from_gcs') );
                 
             }
 
@@ -156,7 +158,7 @@ namespace wpCloud\StatelessMedia {
                     $overwrite = apply_filters( 'imagify_backup_overwrite_backup', false, $file_path, $backup_path );
                     $name = str_replace(trailingslashit( $upload_dir[ 'basedir' ] ), '', $backup_path);
                     $name = apply_filters( 'wp_stateless_file_name', $name);
-                    ud_get_stateless_media()->get_client()->get_media( apply_filters( 'wp_stateless_file_name', $name), true, $backup_path );
+                    do_action( 'sm:sync::syncFile', $name, $backup_path, true);
                 }
             }
             

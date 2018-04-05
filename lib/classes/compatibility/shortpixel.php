@@ -24,6 +24,8 @@ namespace wpCloud\StatelessMedia {
                 add_filter( 'get_attached_file', array($this, 'fix_missing_file'), 10, 2 );
                 add_action( 'admin_action_shortpixel_restore_backup', array($this, 'handleRestoreBackup'), 999 );
                 add_action( 'admin_enqueue_scripts', array( $this, 'shortPixelJS') );
+                // Sync from sync tab
+                add_action( 'sm:synced::image', array( $this, 'sync_backup_file') );
             }
 
             public function shortPixelJS(){
@@ -133,7 +135,18 @@ namespace wpCloud\StatelessMedia {
                 $metadata = wp_get_attachment_metadata( $id );
                 ud_get_stateless_media()->add_media( $metadata, $id, true );
 
+                $this->sync_backup_file($id, $metadata);
+            }
 
+            /**
+             * Sync backup image
+             */
+            public function sync_backup_file($id, $metadata){
+                
+                /* Get metadata in case if method is called directly. */
+                if( empty($metadata) ) {
+                    $metadata = wp_get_attachment_metadata( $id );
+                }
                 /* Now we go through all available image sizes and upload them to Google Storage */
                 if( !empty( $metadata[ 'sizes' ] ) && is_array( $metadata[ 'sizes' ] ) ) {
 
@@ -142,9 +155,20 @@ namespace wpCloud\StatelessMedia {
                     $fullSubDir = $this->returnSubDir($file_path);
                     $backup_path = SHORTPIXEL_BACKUP_FOLDER . '/' . $fullSubDir;
 
+                    /**
+                     * If mode is stateless then we change it to cdn in order images not being deleted before optimization
+                     * Remember that we changed mode via global var
+                     */
+                    $wp_stateless_shortpixel_mode;
+                    
+                    if ( ud_get_stateless_media()->get( 'sm.mode' ) == 'stateless' ) {
+                        ud_get_stateless_media()->set( 'sm.mode', 'cdn' );
+                        $wp_stateless_shortpixel_mode = 'stateless';
+                    }
+                    
                     foreach( (array) $metadata[ 'sizes' ] as $image_size => $data ) {
                         $absolutePath = $backup_path . $data[ 'file' ];
-                        $name = apply_filters( 'wp_stateless_file_name',  $fullSubDir . $data[ 'file' ]);
+                        $name = apply_filters( 'wp_stateless_file_name',  basename(SHORTPIXEL_BACKUP_FOLDER) . '/' . $fullSubDir . $data[ 'file' ]);
 
                         if( !file_exists($absolutePath)){
                             continue;
@@ -153,9 +177,12 @@ namespace wpCloud\StatelessMedia {
                         do_action( 'sm:sync::syncFile', $name, $absolutePath, true);
                     }
 
+                    if ( $wp_stateless_shortpixel_mode == 'stateless' ) {
+                        ud_get_stateless_media()->set( 'sm.mode', 'stateless' );
+                    }
+
 
                 }
-
             }
 
             /**
@@ -164,8 +191,7 @@ namespace wpCloud\StatelessMedia {
              * @param type $file
              * @return string
              */
-            public function returnSubDir($file)
-            {
+            public function returnSubDir($file){
                 $hp = wp_normalize_path(get_home_path());
                 $file = wp_normalize_path($file);
                 $sp__uploads = wp_upload_dir();
@@ -184,6 +210,7 @@ namespace wpCloud\StatelessMedia {
                 unset($pathArr[count($pathArr) - 1]);
                 return implode('/', $pathArr) . '/';
             }
+
             /**
              * Sync images after shortpixel restore them from backup.
              */
