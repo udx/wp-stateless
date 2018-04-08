@@ -20,7 +20,26 @@ namespace wpCloud\StatelessMedia {
 
             public function module_init($sm){
                 add_filter( 'set_url_scheme', array( $this, 'set_url_scheme' ), 20, 3 );
+                add_action( 'admin_menu', array($this, 'action_admin_menu'), 3 );
+            }
 
+            /**
+             * Change Upload BaseURL when CDN Used.
+             *
+             * @param $data
+             * @return mixed
+             */
+            public function action_admin_menu() {
+                if ( current_user_can('edit_theme_options') && isset( $_POST['siteorigin_custom_css_save'] ) ) {
+                    try{
+                        $object_list = ud_get_stateless_media()->get_client()->list_objects("prefix=so-css");
+                        $files_array = $object_list->getItems();
+                        foreach ($files_array as $file) {
+                            do_action( 'sm:sync::deleteFile', $file->name );
+                        }
+                    }
+                    catch(Exception $e){}
+                }
             }
 
             /**
