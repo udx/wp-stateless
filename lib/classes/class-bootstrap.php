@@ -948,7 +948,12 @@ namespace wpCloud\StatelessMedia {
       public function wp_get_attachment_metadata( $metadata, $attachment_id  ) {
         /* Determine if the media file has GS data at all. */
         $sm_cloud = get_post_meta( $attachment_id, 'sm_cloud', true );
-        if( is_array( $sm_cloud ) && !empty( $sm_cloud[ 'fileLink' ] ) ) {
+        // If metadata not passed the get metadata from post meta.
+        if(empty($metadata)){
+          $metadata = get_post_meta( $attachment_id, '_wp_attachment_metadata', true );
+        }
+
+        if( is_array( $metadata ) && is_array( $sm_cloud ) && !empty( $sm_cloud[ 'fileLink' ] ) ) {
           $metadata[ 'gs_link' ] = apply_filters('wp_stateless_bucket_link', $sm_cloud[ 'fileLink' ]);
           $metadata[ 'gs_name' ] = isset( $sm_cloud[ 'name' ] ) ? $sm_cloud[ 'name' ] : false;
           $metadata[ 'gs_bucket' ] = isset( $sm_cloud[ 'bucket' ] ) ? $sm_cloud[ 'bucket' ] : false;
