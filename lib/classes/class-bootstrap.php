@@ -286,7 +286,7 @@ namespace wpCloud\StatelessMedia {
         if ( $sm['bucket'] && $custom_domain == $sm['bucket']) {
             $image_host = $is_ssl === 0 ? 'https://' : 'http://';  // bucketname will be host
         }
-        return $image_host . $sm['bucket'];
+        return apply_filters( 'get_gs_host', $image_host . $sm['bucket'], $image_host, $sm['bucket'], $is_ssl );
       }
 
       /**

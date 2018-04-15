@@ -5,9 +5,15 @@ $project_name   = trim(substr($id, 0, 30), '-');
 $project_id     = trim(substr($id, 0, 23), '-') . "-" . rand(100000, 999999);
 
 $bucket_id      = trim("stateless-" . substr($id, 0, 20), '-');
+if(is_network_admin()){
+    $nonce = wp_create_nonce( 'network_update_json' );
+}
+else{
+    $nonce = wp_create_nonce( 'update_json' );
+}
 
 ?>
-<div id="wp-stateless-wrapper">
+<div id="wp-stateless-wrapper" data-nonce="<?php echo $nonce;?>">
     <div id="wpStatelessInner">
 
         <div class="wpStateLess-header">

@@ -99,13 +99,13 @@ namespace wpCloud\StatelessMedia {
         $bucket = $data['bucket'];
         $privateKeyData = base64_decode($data['privateKeyData']);
 
-        if(is_network_admin()){
+        if(current_user_can('manage_network_options') && wp_verify_nonce( $data['nonce'], 'network_update_json')){
           if(get_site_option('sm_mode', 'disabled') == 'disabled')
             update_site_option( 'sm_mode', 'cdn');
           update_site_option( 'sm_bucket', $bucket);
           update_site_option( 'sm_key_json', $privateKeyData);
         }
-        else{
+        elseif(wp_verify_nonce( $data['nonce'], 'update_json')){
           if(get_option('sm_mode', 'disabled') == 'disabled')
             update_option( 'sm_mode', 'cdn');
           update_option( 'sm_bucket', $bucket);
