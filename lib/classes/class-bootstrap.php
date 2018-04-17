@@ -1059,19 +1059,19 @@ namespace wpCloud\StatelessMedia {
       public function redirect_to_splash($plugin =''){
         $this->settings = new Settings();
 
-        if(defined( 'WP_CLI' ) || !empty($this->settings->get('key_json')) || isset($_POST['checked']) && count($_POST['checked']) > 1){
+        if(defined( 'WP_CLI' ) || $this->settings->get('key_json') || isset($_POST['checked']) && count($_POST['checked']) > 1){
           return;
         }
         
         if( 
-          empty($this->settings->get('key_json')) && 
+          !$this->settings->get('key_json') && 
           defined('WP_STATELESS_MEDIA_HIDE_SETUP_ASSISTANT') && WP_STATELESS_MEDIA_HIDE_SETUP_ASSISTANT == true && 
           defined('WP_STATELESS_MEDIA_HIDE_SETTINGS_PANEL') && WP_STATELESS_MEDIA_HIDE_SETTINGS_PANEL == true 
         ) {
           return;
         }
         
-        if( empty($this->settings->get('key_json')) && defined('WP_STATELESS_MEDIA_HIDE_SETUP_ASSISTANT') && WP_STATELESS_MEDIA_HIDE_SETUP_ASSISTANT == true ) {
+        if( !$this->settings->get('key_json') && defined('WP_STATELESS_MEDIA_HIDE_SETUP_ASSISTANT') && WP_STATELESS_MEDIA_HIDE_SETUP_ASSISTANT == true ) {
           $url = $this->get_settings_page_url('?page=stateless-settings');
           exit( wp_redirect($url));
         }
