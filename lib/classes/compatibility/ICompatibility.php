@@ -51,6 +51,10 @@ namespace wpCloud\StatelessMedia {
          */
         public function init(){
             $is_constant = false;
+            $is_network = false;
+            if(is_network_admin()){
+                $this->enabled = null;
+            }
 
             if (defined($this->constant) && $this->is_plugin_active()) {
                 $this->enabled = constant($this->constant);
@@ -61,9 +65,27 @@ namespace wpCloud\StatelessMedia {
                 if (empty($this->enabled)) {
                     $this->enabled = !empty($modules[$this->id]) && $modules[$this->id] == 'true' ? true : false;
                 }
+                if(is_multisite()){
+                    $modules = get_site_option( 'stateless-modules', array() );
+                    if(is_network_admin()){
+                        $this->enabled = $modules[$this->id];
+                    }
+                    elseif(!empty($modules[$this->id])){
+                        $this->enabled = $modules[$this->id];
+                        $is_network = true;
+                    }
+                }
             }
             
-            Module::register_module($this->id, $this->title, $this->description, $this->enabled, $is_constant);
+            Module::register_module(array(
+                'id'                => $this->id,
+                'title'             => $this->title,
+                'enabled'           => $this->enabled,
+                'description'       => $this->description,
+                'is_constant'       => $is_constant,
+                'is_network'        => $is_network,
+                'is_plugin_active'  => $this->is_plugin_active(),
+            ));
 
             if ($this->enabled) {
                 add_action('sm::module::init', array($this, 'module_init'));

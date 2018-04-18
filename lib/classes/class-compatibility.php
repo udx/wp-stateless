@@ -72,18 +72,19 @@ namespace wpCloud\StatelessMedia {
          * Register compatibility modules so that we can ues them in settings page.
          * Called from ICompatibility::init() method.
          */
-        public static function register_module($id, $title , $description, $enabled = 'false', $is_constant = false){
-            if (is_bool($enabled)) {
-                $enabled = $enabled ? 'true' : 'false';
+        public static function register_module($args){
+            if (is_bool($args['enabled'])) {
+                $args['enabled'] = $args['enabled'] ? 'true' : 'false';
             }
-            
-            self::$modules[] = array(
-                'id'            => $id,
-                'title'         => $title,
-                'enabled'       => $enabled,
-                'description'   => $description,
-                'is_constant'   => $is_constant,
-            );
+            self::$modules[] = wp_parse_args( $args, array(
+                'id'                => '',
+                'title'             => '',
+                'enabled'           => false,
+                'description'       => '',
+                'is_constant'       => false,
+                'is_network'        => false,
+                'is_plugin_active'  => false,
+            ));
         }
 
         /**
@@ -103,7 +104,12 @@ namespace wpCloud\StatelessMedia {
                 $modules = !empty($_POST['stateless-modules']) ? $_POST['stateless-modules'] : array();
                 $modules = apply_filters('stateless::modules::save', $modules);
                 
-                update_option('stateless-modules', $modules, true);
+                if(is_network_admin()){
+                    update_site_option('stateless-modules', $modules, true);
+                }
+                else{
+                    update_option('stateless-modules', $modules, true);
+                }
                 wp_redirect( $_POST['_wp_http_referer'] );
             }
         }

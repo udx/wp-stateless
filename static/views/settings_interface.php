@@ -7,8 +7,8 @@
         <a href="#stless_settings_tab" class="stless_setting_tab nav-tab  nav-tab-active"><?php _e( 'Settings', ud_get_stateless_media()->domain ); ?></a>  
         <?php if(!is_network_admin()): ?>
         <a href="#stless_sync_tab" class="stless_setting_tab nav-tab"><?php _e( 'Sync', ud_get_stateless_media()->domain ); ?></a>  
-        <a href="#stless_compatibility_tab" class="stless_setting_tab nav-tab"><?php _e( 'Compatibility', ud_get_stateless_media()->domain ); ?></a>  
         <?php endif; ?>
+        <a href="#stless_compatibility_tab" class="stless_setting_tab nav-tab"><?php _e( 'Compatibility', ud_get_stateless_media()->domain ); ?></a>  
         <a href="#stless_questions_tab" class="stless_setting_tab nav-tab"><?php _e( 'Feedback', ud_get_stateless_media()->domain ); ?></a>  
     </h2>  
 
@@ -225,6 +225,7 @@
         <div id="stless_sync_tab" class="stless_settings_content">
             <?php include 'regenerate_interface.php'; ?>
         </div>
+        <?php endif; ?>
         <div id="stless_compatibility_tab" class="stless_settings_content" ng-controller="wpStatelessCompatibility">
             <div class="container-fluid">
                 <h2><?php _e("Enable or disable compatibility with other plugins.");?></h2>
@@ -239,12 +240,17 @@
                                 <label for="{{module.id}}">{{module.title}}</label>
                             </th>
                             <td>
-                                <select name="stateless-modules[{{module.id}}]" id="{{module.id}}" ng-model="module.enabled" ng-disabled="module.is_constant">
+                                <select name="stateless-modules[{{module.id}}]" id="{{module.id}}" ng-model="module.enabled" ng-disabled="module.is_constant || module.is_network ||!module.is_plugin_active">
+                                    <?php if(is_network_admin()): ?>
+                                    <option value=""><?php _e("Don't override");?></option>
+                                    <?php endif; ?>
                                     <option value="false"><?php _e( 'Disable', ud_get_stateless_media()->domain ); ?></option>
                                     <option value="true"><?php _e( 'Enable', ud_get_stateless_media()->domain ); ?></option>
                                 </select>
                                 <p class="description">
                                     <strong ng-show="module.is_constant"><?php _e("Currently configured via a constant.");?></strong>
+                                    <strong ng-show="module.is_network"><?php _e("Currently configured via network settings.");?></strong>
+                                    <strong ng-show="!module.is_plugin_active"><?php _e("Please activate the plugin first.");?></strong>
                                     {{module.description}}
                                 </p>  
                             </td>
@@ -254,7 +260,6 @@
                 </form> 
             </div>
         </div>
-        <?php endif; ?>
         <div id="stless_questions_tab" class="stless_settings_content">
             <!--[if lte IE 8]>
             <script charset="utf-8" type="text/javascript" src="//js.hsforms.net/forms/v2-legacy.js"></script>
