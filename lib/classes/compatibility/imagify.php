@@ -17,7 +17,7 @@ namespace wpCloud\StatelessMedia {
             protected $title = 'Imagify Image Optimizer';
             protected $constant = 'WP_STATELESS_COMPATIBILITY_IMAGIFY';
             protected $description = 'Enables support for these Imagify Image Optimizer features: auto-optimize images on upload, bulk optimizer, resize larger images, optimization levels (normal, aggressive, ultra).';
-            protected $plugin_constant = 'IMAGIFY_VERSION';
+            protected $plugin_file = 'imagify/imagify.php';
 
             public function module_init($sm){
                 // We need to remove the regular handler for sync 

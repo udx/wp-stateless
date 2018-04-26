@@ -17,7 +17,7 @@ namespace wpCloud\StatelessMedia {
             protected $title = 'ShortPixel Image Optimizer';
             protected $constant = 'WP_STATELESS_COMPATIBILITY_SHORTPIXEL';
             protected $description = 'Ensures compatibility with ShortPixel Image Optimizer.';
-            protected $plugin_constant = 'SHORTPIXEL_IMAGE_OPTIMISER_VERSION';
+            protected $plugin_file = 'shortpixel-image-optimiser/wp-shortpixel.php';
 
             public function module_init($sm){
                 add_action( 'shortpixel_image_optimised', array($this, 'shortpixel_image_optimised') );

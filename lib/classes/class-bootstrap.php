@@ -48,7 +48,9 @@ namespace wpCloud\StatelessMedia {
         parent::__construct( $args );
         
         // Initialize compatibility modules.
-        new Module();
+        add_action( 'plugins_loaded', function(){
+          new Module();
+        });
       }
 
       /**

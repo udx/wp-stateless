@@ -17,7 +17,7 @@ namespace wpCloud\StatelessMedia {
             protected $title = 'Gravity Forms';
             protected $constant = 'WP_STATELESS_COMPATIBILITY_GF';
             protected $description = 'Enables support for these Gravity Forms features: file upload field, post image field, custom file upload field type.';
-            protected $plugin_class = 'GFForms';
+            protected $plugin_file = 'gravityforms/gravityforms.php';
 
             public function module_init($sm){
                 do_action('sm:sync::register_dir', '/gravity_forms/');
@@ -26,7 +26,6 @@ namespace wpCloud\StatelessMedia {
 
                 add_action( 'gform_file_path_pre_delete_file', array($this, 'gform_file_path_pre_delete_file'), 10, 2);
             }
-            
             
             /**
              * On gform save field value sync file to GCS and alter the file url to GCS link.

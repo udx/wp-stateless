@@ -240,17 +240,18 @@
                                 <label for="{{module.id}}">{{module.title}}</label>
                             </th>
                             <td>
-                                <select name="stateless-modules[{{module.id}}]" id="{{module.id}}" ng-model="module.enabled" ng-disabled="module.is_constant || module.is_network ||!module.is_plugin_active">
+                                <select name="stateless-modules[{{module.id}}]" id="{{module.id}}" ng-model="module.enabled" ng-disabled="module.is_constant || (module.is_network_override ||!module.is_plugin_active) && !module.is_network_admin">
                                     <?php if(is_network_admin()): ?>
                                     <option value=""><?php _e("Don't override");?></option>
                                     <?php endif; ?>
+                                    <option value="inactive" ng-show="module.enabled == 'inactive'"><?php _e( 'Not Available', ud_get_stateless_media()->domain ); ?></option>
                                     <option value="false"><?php _e( 'Disable', ud_get_stateless_media()->domain ); ?></option>
                                     <option value="true"><?php _e( 'Enable', ud_get_stateless_media()->domain ); ?></option>
                                 </select>
                                 <p class="description">
-                                    <strong ng-show="module.is_constant"><?php _e("Currently configured via a constant.");?></strong>
-                                    <strong ng-show="module.is_network"><?php _e("Currently configured via network settings.");?></strong>
                                     <strong ng-show="!module.is_plugin_active"><?php _e("Please activate the plugin first.");?></strong>
+                                    <strong ng-show="module.is_constant"><?php _e("Currently configured via a constant.");?></strong>
+                                    <strong ng-show="module.is_network_override"><?php _e("Currently configured via network settings.");?></strong>
                                     {{module.description}}
                                 </p>  
                             </td>

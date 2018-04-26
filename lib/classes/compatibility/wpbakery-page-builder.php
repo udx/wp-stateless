@@ -16,7 +16,7 @@ namespace wpCloud\StatelessMedia {
             protected $title = 'WPBakery Page Builder';
             protected $constant = 'WP_STATELESS_COMPATIBILITY_WPB';
             protected $description = 'Enables support for these WPBakery Page Builder features: single image element.';
-            protected $plugin_constant = 'WPB_VC_VERSION';
+            protected $plugin_file = 'js_composer/js_composer.php';
 
             public function __construct(){
                 parent::__construct();
