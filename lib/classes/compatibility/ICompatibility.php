@@ -25,16 +25,17 @@ namespace wpCloud\StatelessMedia {
         /**
          * Checking whether the plugin is active or not.
          * If the plugin_file is specified then check whether plugin is active or not.
-         * 
+         * We can't use is_plugin_active function because it's defined later in init.
          * By default return true.
          */
         public function is_plugin_active(){
             if(!empty($this->plugin_file)){
                 if(is_network_admin()){
-                    return is_plugin_active_for_network( $this->plugin_file );
+                    $plugins = get_site_option( 'active_sitewide_plugins');
+                    return isset($plugins[$this->plugin_file]);
                 }
                 else{
-                    return is_plugin_active($this->plugin_file);
+                    return in_array( $this->plugin_file, (array) get_option( 'active_plugins', array() ) );
                 }
             }
 
