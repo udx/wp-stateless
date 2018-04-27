@@ -66,6 +66,11 @@ namespace wpCloud\StatelessMedia {
              * Support for ShortPixel Image Optimizer
              */
             new ShortPixel();
+            
+            /**
+             * Support for WPForms
+             */
+            new WPForms();
         }
 
         /**
