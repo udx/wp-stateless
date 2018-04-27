@@ -143,7 +143,9 @@ namespace wpCloud\StatelessMedia {
         /**
          * Hashify file name if option is enabled
          */
-        if ( $this->get( 'sm.hashify_file_name' ) == 'true' ) {
+        if ( $this->get( 'sm.hashify_file_name' ) == 'true' && 
+          (empty($_GET['page']) || $_GET['page'] != 'wpforms-builder') // exclude wpforms page
+        ) {
           add_filter('sanitize_file_name', array( $this, 'randomize_filename' ), 10);
         }
 
