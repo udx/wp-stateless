@@ -71,6 +71,11 @@ namespace wpCloud\StatelessMedia {
              * Support for WPForms
              */
             new WPForms();
+            
+            /**
+             * Support for WPForms
+             */
+            new WPSmash();
         }
 
         /**

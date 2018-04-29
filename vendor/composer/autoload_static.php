@@ -71,6 +71,7 @@ class ComposerStaticInitc00cd3c666f8dfa818cb7edfd488ed20
         'wpCloud\\StatelessMedia\\Utility' => __DIR__ . '/../..' . '/lib/classes/class-utility.php',
         'wpCloud\\StatelessMedia\\WPBakeryPageBuilder' => __DIR__ . '/../..' . '/lib/classes/compatibility/wpbakery-page-builder.php',
         'wpCloud\\StatelessMedia\\WPForms' => __DIR__ . '/../..' . '/lib/classes/compatibility/wpforms.php',
+        'wpCloud\\StatelessMedia\\WPSmash' => __DIR__ . '/../..' . '/lib/classes/compatibility/wp-smash.php',
     );
 
     public static function getInitializer(ClassLoader $loader)
