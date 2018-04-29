@@ -1,7 +1,7 @@
 <?php
 /**
- * Plugin Name: Contact Form by WPSmash – Drag & Drop Form Builder for WordPress
- * Plugin URI: https://wordpress.org/plugins/wpSmash-lite/
+ * Plugin Name: Smush Image Compression and Optimization
+ * Plugin URI: https://wordpress.org/plugins/wp-smushit/
  *
  * Compatibility Description: Ensures compatibility with WPSmash.
  *
