@@ -43,7 +43,7 @@ namespace wpCloud\StatelessMedia {
             public function add_media_wrapper($metadata, $attachment_id){
                 $imagify = new \Imagify_Attachment($attachment_id);
                 if ( ! $imagify->is_extension_supported() ) {
-                    return ud_get_stateless_media()->add_media( $metadata, $id );
+                    return ud_get_stateless_media()->add_media( $metadata, $attachment_id );
                 }
                 return $metadata;
             }

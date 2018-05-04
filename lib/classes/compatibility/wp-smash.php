@@ -24,6 +24,33 @@ namespace wpCloud\StatelessMedia {
                 // Check if the file not exists for the given path then download
                 // Useful in Stateless mode
                 add_action( 'smush_file_exists', array( $this, 'maybe_download_file' ), 10, 3 );
+
+                // We need to remove the regular handler for sync 
+                // unless in stateless mode we would remove the attachment before it's get optimized.
+                remove_filter( 'wp_update_attachment_metadata', array( "wpCloud\StatelessMedia\Utility", 'add_media' ), 999 );
+                add_filter( 'wp_update_attachment_metadata', array( $this, 'add_media_wrapper' ), 999, 2 );
+            }
+
+            /**
+             * Replacement for default wp_update_attachment_metadata filter of bootstrap class.
+             * To avoid sync same image twice, once on upload and again after optimization.
+             * We also avoid downloading image before optimization on stateless mode.
+             */
+            public function add_media_wrapper($metadata, $attachment_id){
+                global $wpsmush_settings;
+                $auto_smush = $wpsmush_settings->settings['auto'];
+
+                if( !$auto_smush || !wp_attachment_is_image( $attachment_id ) ||
+                    !apply_filters( 'wp_smush_image', true, $attachment_id ) || 
+                    (
+                        (( ! empty( $_POST['action'] ) && 'upload-attachment' == $_POST['action'] ) || isset( $_POST['post_id'] )) &&
+                        // And, check if Async is enabled.
+                        defined( 'WP_SMUSH_ASYNC' ) && WP_SMUSH_ASYNC
+                    )
+                ){
+                    return ud_get_stateless_media()->add_media( $metadata, $attachment_id );
+                }
+                return $metadata;
             }
 
             /**
