@@ -199,9 +199,12 @@ namespace wpCloud\StatelessMedia {
                     // Removing file for GCS
                     $this->client->remove_media($file);
                     
-                    $key = array_search($file, $this->registered_files);
-                    unset($this->registered_files[$key]);
-                    update_option( 'sm_synced_files', $this->registered_files );
+                    if($key = array_search($file, $this->registered_files)){
+                        if(isset($this->registered_files[$key])){
+                            unset($this->registered_files[$key]);
+                            update_option( 'sm_synced_files', $this->registered_files );
+                        }
+                    }
                     return true;
                 }
                 catch(Exception $e){
