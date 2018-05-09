@@ -183,6 +183,8 @@ namespace wpCloud\StatelessMedia {
             /**
              * return subdir for that particular attached file - if it's media library then last 3 path items, otherwise substract the uploads path
              * Has trailing directory separator (/)
+             * 
+             * @copied from shortpixel-image-optimiser\class\db\shortpixel-meta-facade.php
              * @param type $file
              * @return string
              */

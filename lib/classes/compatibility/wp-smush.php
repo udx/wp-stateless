@@ -3,20 +3,20 @@
  * Plugin Name: Smush Image Compression and Optimization
  * Plugin URI: https://wordpress.org/plugins/wp-smushit/
  *
- * Compatibility Description: Ensures compatibility with WPSmash.
+ * Compatibility Description: Ensures compatibility with WPSmush.
  *
  * @todo Compatibility for backup feature
  */
 
 namespace wpCloud\StatelessMedia {
 
-    if(!class_exists('wpCloud\StatelessMedia\WPSmash')) {
+    if(!class_exists('wpCloud\StatelessMedia\WPSmush')) {
         
-        class WPSmash extends ICompatibility {
-            protected $id = 'wp-smash';
-            protected $title = 'WP Smash';
-            protected $constant = 'WP_STATELESS_COMPATIBILITY_WPSmash';
-            protected $description = 'Ensures compatibility with WP Smash.';
+        class WPSmush extends ICompatibility {
+            protected $id = 'wp-smush';
+            protected $title = 'WP Smush';
+            protected $constant = 'WP_STATELESS_COMPATIBILITY_WPSmush';
+            protected $description = 'Ensures compatibility with WP Smush.';
             protected $plugin_file = 'wp-smushit/wp-smush.php';
 
             public function module_init($sm){

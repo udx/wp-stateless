@@ -22,7 +22,8 @@ namespace wpCloud\StatelessMedia {
                 add_filter( 'set_url_scheme', array( $this, 'set_url_scheme' ), 20, 3 );
                 add_filter( 'pre_set_transient_sow:cleared', array( $this, 'clear_file_cache' ), 20, 3 );
                 add_filter( 'siteorigin_widgets_sanitize_instance', array($this, 'delete_file'), 10, 3);
-
+                // Manual sync from Sync tab.
+                do_action( 'sm:sync::register_dir', '/siteorigin-widgets/' );
             }
 
             /**
@@ -60,7 +61,7 @@ namespace wpCloud\StatelessMedia {
                 $hash = $so_widget->get_style_hash( $new_instance );
                 $name = $so_widget->id_base.'-'.$style.'-'.$hash;
 
-                $file = '/siteorigin-widgets/' . $name . '.css';
+                $file = 'siteorigin-widgets/' . $name . '.css';
                 do_action( 'sm:sync::deleteFile', $file );
                 return $new_instance;
             }
