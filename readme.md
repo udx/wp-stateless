@@ -93,12 +93,6 @@ To ensure new releases cause as little disruption as possible, we rely on a numb
 [Usability Dynamics](https://www.usabilitydynamics.com/) maintains this plugin by continuing development through it's own staff, reviewing pull requests, testing, and steering the overall release schedule. Usability Dynamics is located in Durham, North Carolina and provides WordPress engineering and hosting services to clients throughout the United States.
 
 
-## Upgrade Notice
-
-### 2.1.5
-* Bug fixed and loads of new compatibility added.
-
-
 ## Changelog
 
 ### 2.1.5
