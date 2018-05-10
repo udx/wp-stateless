@@ -44,17 +44,8 @@ Looking for a unique feature for your next project? [Hire us!](https://www.usabi
 3. Click "Google Login" and sign-in with your Google account.
 4. Set a Google Cloud Project, Google Cloud Storage Bucket, and Google Cloud Billing Account and click "Continue."
 5. Installation and setup is now complete. Visit *Media > Stateless Settings* for more options.
+
 For a more detailed installation and setup walkthrough, please see the [manual setup instructions on Github](https://github.com/wpCloud/wp-stateless/wiki/Manual-Setup).
-
-## Screenshots
-
-1. Settings Panel: Supports network setting and wp-config constant overrides.
-2. Setup Assistant 
-3. Setup Assistant: Google Login
-4. Setup Assistant: Approve Permissions
-5. Setup Assistant: Project & Bucket
-6. Setup Assistant: Complete
-7. Edit Media: Image stored on Google Cloud Storage.
 
 ## Frequently Asked Questions
 
@@ -87,20 +78,3 @@ To ensure new releases cause as little disruption as possible, we rely on a numb
 ### Who maintains this plugin?
 
 [Usability Dynamics](https://www.usabilitydynamics.com/) maintains this plugin by continuing development through it's own staff, reviewing pull requests, testing, and steering the overall release schedule. Usability Dynamics is located in Durham, North Carolina and provides WordPress engineering and hosting services to clients throughout the United States.
-
-
-## Changelog
-
-### 2.1.5
-* FIX - Fatal error with PHP 5.4.45 on activation.
-* FIX - E_WARNING: Illegal string offset ‘gs_bucket’.
-* FIX - Resolved ‘save_network_settings’ message when saving network settings.
-* COMPATIBILITY - Added support for WP Forms plugin
-* COMPATIBILITY - Added support for WP Smush plugin
-* COMPATIBILITY - Added support for ShortPixel Image Optimizer plugin.
-* COMPATIBILITY - Added support for Imagify Image Optimizer plugin.
-* COMPATIBILITY - Added support for SiteOrigin CSS plugin.
-* COMPATIBILITY - Added support for Gravity Forms plugin.
-* COMPATIBILITY - Added support for WPBakery Page Builder plugin.
-* COMPATIBILITY - Added wp-config constant support for compatibility options.
-
