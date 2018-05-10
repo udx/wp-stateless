@@ -1,4 +1,4 @@
-### WordPress Stateless Media Plugin
+# WordPress Stateless Media Plugin
 
 ***
 [![Scrutinizer Quality](http://img.shields.io/scrutinizer/g/wpCloud/wp-stateless.svg)](https://scrutinizer-ci.com/g/wpCloud/wp-stateless)
