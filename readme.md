@@ -1,6 +1,10 @@
 # WordPress Stateless Media Plugin
 
 ***
+[![Issues - Backlog](https://badge.waffle.io/wpCloud/wp-stateless.svg?columns=backlog&title=Backlog)](http://waffle.io/wpCloud/wp-stateless/)
+[![Issues - Active](https://badge.waffle.io/wpCloud/wp-stateless.svg?columns=underway&title=Underway)](http://waffle.io/wpCloud/wp-stateless/)
+[![Issues - Bug](https://badge.waffle.io/wpCloud/wp-stateless.svg?columns=review&title=Review)](http://waffle.io/wpCloud/wp-stateless)
+***
 [![Scrutinizer Quality](http://img.shields.io/scrutinizer/g/wpCloud/wp-stateless.svg)](https://scrutinizer-ci.com/g/wpCloud/wp-stateless)
 ***
 
