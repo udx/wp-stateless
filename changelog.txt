@@ -1,5 +1,18 @@
 == Changelog ==
 
+= 2.1.5 =
+* FIX - Fatal error with PHP 5.4.45 on activation.
+* FIX - E_WARNING: Illegal string offset ‘gs_bucket’.
+* FIX - Resolved ‘save_network_settings’ message when saving network settings.
+* COMPATIBILITY - Added support for WP Forms plugin
+* COMPATIBILITY - Added support for WP Smush plugin
+* COMPATIBILITY - Added support for ShortPixel Image Optimizer plugin.
+* COMPATIBILITY - Added support for Imagify Image Optimizer plugin.
+* COMPATIBILITY - Added support for SiteOrigin CSS plugin.
+* COMPATIBILITY - Added support for Gravity Forms plugin.
+* COMPATIBILITY - Added support for WPBakery Page Builder plugin.
+* COMPATIBILITY - Added wp-config constant support for compatibility options.
+
 = 2.1.4 =
 * ENHANCEMENT - Updated Google OAuth URL for Setup Assistant.
 

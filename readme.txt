@@ -119,3 +119,45 @@ To ensure new releases cause as little disruption as possible, we rely on a numb
 * COMPATIBILITY - Added support for Gravity Forms plugin.
 * COMPATIBILITY - Added support for WPBakery Page Builder plugin.
 * COMPATIBILITY - Added wp-config constant support for compatibility options.
+
+= 2.1.4 =
+* ENHANCEMENT - Updated Google OAuth URL for Setup Assistant.
+
+= 2.1.3 =
+* ENHANCEMENT - Updates to text explainers in Setup Assistant.
+* ENHANCEMENT - Refined redirection logic when activating plugin.
+* FIX - Removed extra space in converted URLs.
+
+= 2.1.2 =
+* ENHANCEMENT - Improved support for Easy Digital Downloads.
+* ENHANCEMENT - Added constant WP_STATELESS_CONSOLE_LOG check before logging to console.
+* ENHANCEMENT - Changed service account default permissions on creation.
+* COMPATIBILITY - Added support for SiteOrigin generated CSS files.
+* ENHANCEMENT - Moved Dynamic Image Support to Capability tab.
+* COMPATIBILITY - Added support for ACF Image Crop addon.
+* FIX - Fixed compatibility issue with wp-smush plugin.
+* FIX - Added required blog param for multi-sites.
+* FIX - Updated media library and mediaItem API endpoints.
+* COMPATIBILITY - Added support for EDD download method option.
+
+= 2.1.1 =
+* FIX - Fixed double slash when Organization is disabled.
+* FIX - Fatal error with GuzzleHttp.
+* FIX - Fixed content-type assignment.
+* ENHANCEMENT - Added support for https URLs in Domain field.
+* COMPATIBILITY - Advanced Custom Fields Image Crop Addon.
+
+= 2.1.0 =
+* FIX - Fixed read only for Service Account JSON if constant or environment variable is defined. 
+* FIX - Override default cache control.
+* FIX - Fixed custom domain bucket support with setup assistant.
+* FIX - Improved support for wp_calculate_image_srcset.
+* FIX - Synchronizing non-image files will now delete the local copy.
+* NEW - Support for GOOGLE_APPLICATION_CREDENTIALS environment variable.
+* NEW - Added bucket region option to setup assistant.
+* NEW - Added custom file type support for File URL Replacement setting.
+* NEW - Added failover to image url when not found on disk for sync tool.
+* ENHANCEMENT - updated service account role to Storage Object Admin.
+
+= Earlier versions =
+Please refer to the separate changelog.txt file.
