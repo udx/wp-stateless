@@ -85,8 +85,8 @@ namespace wpCloud\StatelessMedia {
 
                 if ( !empty( $meta_data['sizes'] ) && is_array( $meta_data['sizes'] ) ) {
                     foreach( $meta_data['sizes'] as $image ) {
-                        if ( !empty( $image['gs_name'] ) && !file_exists( $file = trailingslashit( $upload_dir[ 'basedir' ] ).$image['gs_name'] ) ) {
-                            ud_get_stateless_media()->get_client()->get_media( apply_filters( 'wp_stateless_file_name', $image['gs_name']), true, $file );
+                        if ( !empty( $image['gs_name'] ) && !file_exists( $_file = trailingslashit( $upload_dir[ 'basedir' ] ).$image['gs_name'] ) ) {
+                            ud_get_stateless_media()->get_client()->get_media( apply_filters( 'wp_stateless_file_name', $image['gs_name']), true, $_file );
                         }
                     }
                 }
