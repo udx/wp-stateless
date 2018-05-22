@@ -283,12 +283,14 @@ namespace wpCloud\StatelessMedia {
       public function get_gs_host($sm = array()) {
         $sm = $sm?$sm: $this->get( 'sm');
         $image_host = 'https://storage.googleapis.com/';
-        $is_ssl = strpos($sm['custom_domain'], 'https://');
-        $custom_domain = str_replace('https://', '', $sm['custom_domain']);
+        $custom_domain = $sm['custom_domain'];
+        $is_ssl = strpos($custom_domain, 'https://');
+        $custom_domain = str_replace('https://', '', $custom_domain);
+        $custom_domain = str_replace('http://', '', $custom_domain);
         if ( $sm['bucket'] && $custom_domain == $sm['bucket']) {
             $image_host = $is_ssl === 0 ? 'https://' : 'http://';  // bucketname will be host
         }
-        return apply_filters( 'get_gs_host', $image_host . $sm['bucket'], $image_host, $sm['bucket'], $is_ssl );
+        return apply_filters( 'get_gs_host', $image_host . $custom_domain, $image_host, $sm['bucket'], $is_ssl );
       }
 
       /**
