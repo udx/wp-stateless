@@ -328,7 +328,7 @@ var wpStatelessApp = angular.module('wpStatelessApp', [])
           }
         }
       } else {
-        $scope.status = 'Error appeared';
+        $scope.status = data.data || 'Error appeared';
         $scope.error = data.data || "Request failed";
       }
 
@@ -336,7 +336,7 @@ var wpStatelessApp = angular.module('wpStatelessApp', [])
 
     }, function(response) {
       $scope.error = response.data || "Request failed";
-      $scope.status = 'Error appeared';
+      $scope.status = response.data || 'Error appeared';
       $scope.isLoading = false;
     });
 
@@ -368,12 +368,12 @@ var wpStatelessApp = angular.module('wpStatelessApp', [])
             $scope.objectIDs = data.data;
             callback();
           } else {
-            $scope.status = 'Error appeared';
+            $scope.status = data.data || 'Error appeared';
             $scope.error = "IDs are malformed";
           }
         }
       } else {
-        $scope.status = 'Error appeared';
+        $scope.status = data.data || 'Error appeared';
         $scope.error = data.data || "Request failed";
       }
 
@@ -381,7 +381,7 @@ var wpStatelessApp = angular.module('wpStatelessApp', [])
 
     }, function(response) {
       $scope.error = response.data || "Request failed";
-      $scope.status = 'Error appeared';
+      $scope.status = response.data || 'Error appeared';
       $scope.isLoading = false;
     });
 
@@ -413,12 +413,12 @@ var wpStatelessApp = angular.module('wpStatelessApp', [])
             $scope.objectIDs = data.data;
             callback();
           } else {
-            $scope.status = 'Error appeared';
+            $scope.status = data.data || 'Error appeared';
             $scope.error = "IDs are malformed";
           }
         }
       } else {
-        $scope.status = 'Error appeared';
+        $scope.status = data.data || 'Error appeared';
         $scope.error = data.data || "Request failed";
       }
 
@@ -426,7 +426,7 @@ var wpStatelessApp = angular.module('wpStatelessApp', [])
 
     }, function(response) {
       $scope.error = response.data || "Request failed";
-      $scope.status = 'Error appeared';
+      $scope.status = response.data || 'Error appeared';
       $scope.isLoading = false;
     });
 
