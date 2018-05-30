@@ -1,3 +1,11 @@
+#### 2.1.4 ####
+* ENHANCEMENT - Updated Google OAuth URL for Setup Assistant.
+
+#### 2.1.3 ####
+* ENHANCEMENT - Updates to text explainers in Setup Assistant.
+* ENHANCEMENT - Refined redirection logic when activating plugin.
+* FIX - Removed extra space in converted URLs.
+
 #### 2.1.2
 * ENHANCEMENT - Improved support for Easy Digital Downloads.
 * ENHANCEMENT - Added constant WP_STATELESS_CONSOLE_LOG check before logging to console.
