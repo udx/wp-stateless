@@ -3,9 +3,10 @@ Contributors: usability_dynamics, andypotanin, ideric, maxim.peshkov, Anton Koro
 Donate link: https://www.usabilitydynamics.com
 Tags: google, google cloud, google cloud storage, cdn, uploads, media, stateless, backup
 License: GPLv2 or later
+Requires PHP: 5.5
 Requires at least: 4.0
 Tested up to: 4.9.4
-Stable tag: 2.1.4
+Stable tag: 2.1.5
 
 Upload and serve your WordPress media files from Google Cloud Storage.
 
@@ -53,6 +54,7 @@ Looking for a unique feature for your next project? [Hire us!](https://www.usabi
 3. Click "Google Login" and sign-in with your Google account.
 4. Set a Google Cloud Project, Google Cloud Storage Bucket, and Google Cloud Billing Account and click "Continue."
 5. Installation and setup is now complete. Visit *Media > Stateless Settings* for more options.
+For a more detailed installation and setup walkthrough, please see the [manual setup instructions on Github](https://github.com/wpCloud/wp-stateless/wiki/Manual-Setup).
 
 == Screenshots ==
 
@@ -65,6 +67,10 @@ Looking for a unique feature for your next project? [Hire us!](https://www.usabi
 7. Edit Media: Image stored on Google Cloud Storage.
 
 == Frequently Asked Questions ==
+
+= What are the minimum server requirements for this plugin? =
+
+Beyond the [official WordPress minimum requirements](https://codex.wordpress.org/Template:Server_requirements), WP-Stateless requires a minimum PHP version of 5.5 or higher and OpenSSL to be enabled.
 
 = What wp-config constants are supported? =
 
@@ -92,7 +98,27 @@ To ensure new releases cause as little disruption as possible, we rely on a numb
 
 [Usability Dynamics](https://www.usabilitydynamics.com/) maintains this plugin by continuing development through it's own staff, reviewing pull requests, testing, and steering the overall release schedule. Usability Dynamics is located in Durham, North Carolina and provides WordPress engineering and hosting services to clients throughout the United States.
 
+
+== Upgrade Notice ==
+
+= 2.1.5 =
+* Bug fixed and loads of new compatibility added.
+
+
 == Changelog ==
+
+= 2.1.5 =
+* FIX - Fatal error with PHP 5.4.45 on activation.
+* FIX - E_WARNING: Illegal string offset ‘gs_bucket’.
+* FIX - Resolved ‘save_network_settings’ message when saving network settings.
+* COMPATIBILITY - Added support for WP Forms plugin
+* COMPATIBILITY - Added support for WP Smush plugin
+* COMPATIBILITY - Added support for ShortPixel Image Optimizer plugin.
+* COMPATIBILITY - Added support for Imagify Image Optimizer plugin.
+* COMPATIBILITY - Added support for SiteOrigin CSS plugin.
+* COMPATIBILITY - Added support for Gravity Forms plugin.
+* COMPATIBILITY - Added support for WPBakery Page Builder plugin.
+* COMPATIBILITY - Added wp-config constant support for compatibility options.
 
 = 2.1.4 =
 * ENHANCEMENT - Updated Google OAuth URL for Setup Assistant.
@@ -133,47 +159,5 @@ To ensure new releases cause as little disruption as possible, we rely on a numb
 * NEW - Added failover to image url when not found on disk for sync tool.
 * ENHANCEMENT - updated service account role to Storage Object Admin.
 
-= 2.0.3 =
-* FIX - Fixed Fatal Error which was occurring on WordPress Multisite after upgrading plugin from 1.x to 2.x.
-* ENHANCEMENT - Improved support of PDF files.
-
-= 2.0.2 =
-* FIX - Fixed Fatal Error which were caused by using PHP 5.4 and less.
-* FIX - Fixed Fatal Error which was caused on Media page when WP Smush Pro plugin is activated.
-* FIX - Fixed detection of plugin files paths. The issue was occurring on installations with custom file structures ( e.g. Bedrock platform ).
-* FIX - Fixed redirection URL to Setup Wizard on plugin activation.
-* ENHANCEMENT - Updated the minimum requirements for PHP to 5.5 to prevent fatal errors and possible warnings.
-
-= 2.0.1 =
-* ENHANCEMENT - Added compatibility with Google SDK v1.x version to prevent conflicts with third-party plugins.
-* ENHANCEMENT - Added warning message if old Google SDK version is loaded by third-party plugin.
-
-= 2.0.0 =
-* NEW - Added stateless mode.
-* NEW - Dedicated settings panel.
-* NEW - Setup assistant for initial plugin activation.
-* NEW - Support for replacing default GCS domain with custom domain.
-* ENHANCEMENT - Expanded network setting overrides.
-* ENHANCEMENT - Expanded wp-config constants.
-* ENHANCEMENT - Relocated synchronization and regeneration tools to new settings panel.
-
-= 1.9.2 =
-* ENHANCEMENT - Added ability to modify default bucket link via 'wp_stateless_bucket_link' filter.
-* ENHANCEMENT - Added checking of connection to GCS once per four hours instead of doing it on every page load.
-* ENHANCEMENT - Google SDK was moved from vendor dir. So it's not loaded on every page load anymore, but only when it's required.
-* ENHANCEMENT - Updated Composer Autoload logic.
-* ENHANCEMENT - Reverted all changes included to 1.9.1 version because of conflicts.
-
-= 1.9.0 =
-* NEW - Added new ability to define cacheControl for remote objects.
-* NEW - Added new option that adds random hashes to file names.
-
-= 1.8.0 =
-* FIX - Fixed the issue on multisite setup (switch_to_blog now works as expected).
-* FIX - Performance fixes.
-* NEW - Added the ability to regenerate and synchronize separate Media file from the list.
-* NEW - Added the ability to regenerate and synchronize Media file from edit screen.
-* ENHANCEMENT - UI cleanup.
-
-= 1.7.3 =
-* Initial public release.
+= Earlier versions =
+Please refer to the separate changelog.txt file.

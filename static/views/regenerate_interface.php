@@ -6,7 +6,6 @@
 
 ?>
 
-<div id="message1" class="error fade" ng-show="error"><p>{{error}}</p></div>
 
 <div class="wrap" ng-controller="wpStatelessTools" ng-init="init()">
 
@@ -91,7 +90,7 @@
 
     </div>
 
-    <div class="status" ng-show="status"><?php _e( 'Status:', ud_get_stateless_media()->domain ); ?> {{status}}</div>
+    <div class="status {{error?'error':'success'}}" ng-show="status"><p><?php _e( 'Status:', ud_get_stateless_media()->domain ); ?> {{status}}</p></div>
 
     <div ng-show="isRunning" id="regenthumbs-bar" style="position:relative;height:25px;">
       <div id="regenthumbs-bar-percent" style="position:absolute;left:50%;top:50%;width:300px;margin-left:-150px;height:25px;margin-top:-9px;font-weight:bold;text-align:center;"></div>

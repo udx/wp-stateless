@@ -118,8 +118,8 @@ namespace wpCloud\StatelessMedia {
       /**
        * Wrapper for listObjects()
        */
-      public function list_objects( $bucket, $options = array() ) {
-
+      public function list_objects( $options = array() ) {
+        
         $options = wp_parse_args( $options, array(
             'delimiter'  => '',
             'maxResults' => 1000,
@@ -129,7 +129,7 @@ namespace wpCloud\StatelessMedia {
             'versions'   => false
         ) );
 
-        return $this->service->objects->listObjects( $bucket, $options );
+        return $this->service->objects->listObjects( $this->bucket, $options );
       }
 
       /**
@@ -138,7 +138,7 @@ namespace wpCloud\StatelessMedia {
        * @param array $options
        * @return mixed
        */
-      public function list_all_objects( $bucket, $options = array() ) {
+      public function list_all_objects( $options = array() ) {
 
         $options = wp_parse_args( $options, array(
           'delimiter'  => '',
@@ -149,13 +149,13 @@ namespace wpCloud\StatelessMedia {
           'versions'   => false
         ) );
 
-        $response = $this->service->objects->listObjects( $bucket, $options );
+        $response = $this->service->objects->listObjects( $this->bucket, $options );
 
         $this->temp_objects = array_merge( $this->temp_objects, $response->getItems() );
 
         if ( !empty( $response->nextPageToken ) ) {
           $options['pageToken'] = $response->nextPageToken;
-          return $this->list_all_objects( $bucket, $options );
+          return $this->list_all_objects( $this->bucket, $options );
         } else {
           return $this->temp_objects;
         }
@@ -194,7 +194,7 @@ namespace wpCloud\StatelessMedia {
           $name = apply_filters( 'wp_stateless_file_name', $name );
 
           // If media exists we just return it
-          if ( !$force && $media = $this->media_exists( $name ) ) {
+          if ( !$args['force'] && $media = $this->media_exists( $name ) ) {
             if($media->getCacheControl() != $args['cacheControl']){
               $media->setCacheControl($args['cacheControl']);
               $media = $this->service->objects->patch($this->bucket, $name, $media);

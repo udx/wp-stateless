@@ -1,9 +1,10 @@
 <?php
 /**
- * Plugin Name: Easy Digital Downloads
- * Plugin URI: https://wordpress.org/plugins/easy-digital-downloads/
+ * Plugin Name: Gravity Forms
+ * Plugin URI: https://www.gravityforms.com/
  *
- * Compatibility Description: 
+ * Compatibility Description: Enables support for these Gravity Forms features: 
+ * file upload field, post image field, custom file upload field type.
  *
  */
 
@@ -13,13 +14,12 @@ namespace wpCloud\StatelessMedia {
         
         class GravityForm extends ICompatibility {
             protected $id = 'gravity-form';
-            protected $title = 'Gravity Form File Upload';
+            protected $title = 'Gravity Forms';
             protected $constant = 'WP_STATELESS_COMPATIBILITY_GF';
-            protected $description = 'Ensures compatibility with Gravity Form File Upload field.';
-            protected $plugin_class = 'GFForms';
+            protected $description = 'Enables support for these Gravity Forms features: file upload field, post image field, custom file upload field type.';
+            protected $plugin_file = 'gravityforms/gravityforms.php';
 
             public function module_init($sm){
-                // add_filter( 'gform_upload_path', array($this, 'gform_upload_path'), 10, 2 );
                 do_action('sm:sync::register_dir', '/gravity_forms/');
                 add_filter( 'gform_save_field_value', array($this, 'gform_save_field_value'), 10, 5 );
                 add_action( 'sm::synced::nonMediaFiles', array($this, 'modify_db'), 10, 3);
@@ -27,9 +27,8 @@ namespace wpCloud\StatelessMedia {
                 add_action( 'gform_file_path_pre_delete_file', array($this, 'gform_file_path_pre_delete_file'), 10, 2);
             }
             
-            
             /**
-             * 
+             * On gform save field value sync file to GCS and alter the file url to GCS link.
              *
              * @param $value
              * @param $lead
@@ -46,6 +45,7 @@ namespace wpCloud\StatelessMedia {
                     if( $position !== false ){
                         $name = substr($value, $position);
                         $absolutePath = $dir['basedir'] . '/' .  $name;
+                        // doing sync
                         do_action( 'sm:sync::syncFile', $name, $absolutePath);
                         $value = ud_get_stateless_media()->get_gs_host() . '/' . $name;
                         // Todo add filter.
@@ -63,7 +63,7 @@ namespace wpCloud\StatelessMedia {
                         $position = strpos($value, 'gravity_forms/');
                         $_name = substr($value, $position); // gravity_forms/
                         $arr_name = explode('|:|', $_name);
-                        $name = rgar( $arr_name, 0 ); // Remoed |:| fron end of the url.
+                        $name = rgar( $arr_name, 0 ); // Removed |:| from end of the url.
                         
                         // doing sync
                         do_action( 'sm:sync::syncFile', $name, $dir['basedir'] . '/' .  $name);
@@ -77,8 +77,8 @@ namespace wpCloud\StatelessMedia {
             }
 
             /**
-             * Manual sync will lose title description from Post Image field if any set.
-             * To do fix missing metadata.
+             * Modify value in database after sync from Sync tab.
+             * 
              */
             public function modify_db( $file_path, $fullsizepath, $media ){
                 global $wpdb;
@@ -93,6 +93,7 @@ namespace wpCloud\StatelessMedia {
                     // Todo add filter.
 
                     // We need to get results from db because of post image field have extra data at the end of url.
+                    // Unless we would loss those data.
                     // xyz.jpg|:|tile|:|description|:|
                     $query = sprintf(
                         "
@@ -123,12 +124,16 @@ namespace wpCloud\StatelessMedia {
                 }
             }
 
+            /**
+             * Delete file from GCS 
+             */
             public function gform_file_path_pre_delete_file( $file_path, $url ){
                 $file_path = wp_normalize_path($file_path);
                 $gs_host = wp_normalize_path( ud_get_stateless_media()->get_gs_host() );
                 $dir = wp_upload_dir();
                 $is_stateless = strpos($file_path, $gs_host);
                 
+                // If the url is a GCS link then remove it from GCS.
                 if($is_stateless !== false){
                     $gs_name = substr($file_path, strpos($file_path, '/gravity_forms/'));
                     $file_path = $dir['basedir'] . $gs_name;

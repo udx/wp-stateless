@@ -181,6 +181,13 @@ namespace wpCloud\StatelessMedia {
             'file-hash' => md5( $metadata[ 'file' ] )
           );
 
+          if($attachment_id && !empty($metadata) && !$force){
+            $db_metadata = get_post_meta( $attachment_id, '_wp_attachment_metadata', true );
+            if($db_metadata != $metadata){
+              $force = true;
+            }
+          }
+
           /* Add default image */
           $media = $client->add_media( $_mediaOptions = array_filter( array(
             'force' => $force,

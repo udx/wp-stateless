@@ -15,6 +15,7 @@ jQuery(document).ready(function ($) {
   	var billingDropdown = comboBox.filter('.billing-account');
   	var noBillingButton = billingDropdown.parent().find('.create-billing-account.no-billing-account');
 	var gLoginUrl = $('#google-login').attr('href');
+	var updateJsonNonce = statelessWrapper.attr("data-nonce");
 
 	$("#google-login").attr("href", gLoginUrl + "&allowNotifications=true");
 	
@@ -524,6 +525,7 @@ jQuery(document).ready(function ($) {
 					},
 					data: {//JSON.stringify({
 						'action': 'stateless_wizard_update_settings',
+						'nonce': updateJsonNonce,
 						'bucket': bucketId,
 						'privateKeyData': results['createServiceAccountKey'].privateKeyData,
 						'enableAPI': results['enableAPI'].action,
