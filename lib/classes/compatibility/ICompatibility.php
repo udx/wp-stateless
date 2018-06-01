@@ -42,31 +42,37 @@ namespace wpCloud\StatelessMedia {
          * We can't use is_plugin_active function because it's defined later in init.
          * By default return true.
          * 
-         * @todo fix for network.
+         * @todo caching.
          */
         public function is_plugin_active(){
             if(!empty($this->plugin_file)){
-                
+                // Converting string to array for foreach
                 if(is_string($this->plugin_file)){
                     $this->plugin_file = array($this->plugin_file);
                 }
                 
-                if(is_network_admin()){
+                // If multisite then check if plugin is network active
+                if(is_multisite()){
                     $active_plugins = (array) get_site_option( 'active_sitewide_plugins');
                     foreach($this->plugin_file as $plugin_file){
                         if(isset($active_plugins[$plugin_file])){
                             return true;
                         }
                     }
-                }
-                else{
-                    $active_plugins = (array) get_option( 'active_plugins', array() );
-                    foreach($this->plugin_file as $plugin_file){
-                        if(in_array( $plugin_file,  $active_plugins)){
-                            return true;
-                        }
+                    
+                    // If we are in network admin then return, unless it will get data from main site.
+                    if(is_network_admin()){
+                        return false;
                     }
                 }
+                
+                $active_plugins = (array) get_option( 'active_plugins', array() );
+                foreach($this->plugin_file as $plugin_file){
+                    if(in_array( $plugin_file,  $active_plugins)){
+                        return true;
+                    }
+                }
+
                 return false;
             }
 
