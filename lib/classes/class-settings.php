@@ -31,7 +31,7 @@ namespace wpCloud\StatelessMedia {
           'delete_remote'          => array('WP_STATELESS_MEDIA_DELETE_REMOTE', 'true'), 
           'custom_domain'          => array('WP_STATELESS_MEDIA_CUSTOM_DOMAIN', ''), 
           'organize_media'         => array('', 'true'), 
-          'hashify_file_name'      => array('WP_STATELESS_MEDIA_HASH_FILENAME', 'true'), 
+          'hashify_file_name'      => array(['WP_STATELESS_MEDIA_HASH_FILENAME' => 'WP_STATELESS_MEDIA_CACHE_BUSTING'], 'true'), 
         );
 
       private $network_only_settings = array(
@@ -114,7 +114,22 @@ namespace wpCloud\StatelessMedia {
           }
 
           // If constant is set then override by constant
-          if(defined($constant)){
+          if(is_array($constant)){
+            foreach($constant as $old_const => $new_const){
+              if(defined($new_const)){
+                  $value = constant($new_const);
+                  $this->set( "sm.readonly.{$option}", "constant" );
+                break;
+              }
+              if(is_string($old_const) && defined($old_const)){
+                  $value = constant($old_const);
+                  trigger_error(__(sprintf("`%s` constant is deprecated, please use `%s` instead.", $old_const, $new_const)), E_USER_WARNING);
+                  $this->set( "sm.readonly.{$option}", "constant" );
+                  break;
+              }
+            }
+          }
+          elseif(defined($constant)){
             $value = constant($constant);
             $this->set( "sm.readonly.{$option}", "constant" );
           }
@@ -129,6 +144,11 @@ namespace wpCloud\StatelessMedia {
             }
 
           }
+          
+          // Converting to string true flase for angular.
+          if(is_bool($value)){
+            $value = $value === true ? "true" : "false";
+          }
 
           $this->set( "sm.$option", $value);
         }
@@ -140,12 +160,30 @@ namespace wpCloud\StatelessMedia {
           $default  = $array[1]; // Default value
 
           // If constant is set then override by constant
-          if(defined($constant)){
+          if(is_array($constant)){
+            foreach($constant as $old_const => $new_const){
+              if(defined($new_const)){
+                $value = constant($new_const);
+                break;
+              }
+              if(is_string($old_const) && defined($old_const)){
+                $value = constant($old_const);
+                trigger_error(__(sprintf("`%s` constant is deprecated, please use `%s` instead.", $old_const, $new_const)), E_USER_WARNING);
+                break;
+              }
+            }
+          }
+          elseif(defined($constant)){
             $value = constant($constant);
           }
           // Getting network settings
           elseif(is_multisite()){
             $value = get_site_option( $_option, $default );
+          }
+          
+          // Converting to string true flase for angular.
+          if(is_bool($value)){
+            $value = $value === true ? "true" : "false";
           }
 
           $this->set( "sm.$option", $value);
