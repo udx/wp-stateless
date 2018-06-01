@@ -13,6 +13,20 @@ namespace wpCloud\StatelessMedia {
     abstract class ICompatibility{
         protected $id = '';
         protected $title = '';
+        /**
+         * // Type String or Array. 
+         * 
+         * Single constant:
+         * example "WP_STATELESS_COMPATIBILITY_EDD"
+         * 
+         * Multiple constant:
+         * [Constant, Another_Constant, ....]
+         * ['WP_STATELESS_MEDIA_ON_FLY', 'WP_STATELESS_DYNAMIC_IMAGE_SUPPORT']
+         * 
+         * Deprecated constant:
+         * [Old Constant => New Constant, ...]
+         * ['WP_STATELESS_MEDIA_ON_FLY' => 'WP_STATELESS_DYNAMIC_IMAGE_SUPPORT']
+         */
         protected $constant = '';
         protected $enabled = false;
         protected $description = '';
@@ -56,7 +70,22 @@ namespace wpCloud\StatelessMedia {
                 $this->enabled = null;
             }
 
-            if (defined($this->constant)) {
+            if(is_array($this->constant)){
+                foreach($this->constant as $old_const => $new_const){
+                    if(defined($new_const)){
+                        $is_constant = true;
+                        $this->enabled = constant($new_const);
+                        break;
+                    }
+                    if(is_string($old_const) && defined($old_const)){
+                        $is_constant = true;
+                        $this->enabled = constant($old_const);
+                        trigger_error(__(sprintf("`%s` constant is deprecated, please use `%s` instead.", $old_const, $new_const)), E_USER_WARNING);
+                        break;
+                    }
+                }
+            }
+            elseif (defined($this->constant)) {
                 $this->enabled = constant($this->constant);
                 $is_constant = true;
             }
