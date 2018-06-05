@@ -112,6 +112,10 @@ namespace wpCloud\StatelessMedia {
           if ($option == 'body_rewrite_types' && empty($value) && !is_multisite()) {
             $value = $default;
           }
+          
+          if ($option == 'hashify_file_name' && $this->get("sm.mode") == 'stateless') {
+            $value = true;
+          }
 
           // If constant is set then override by constant
           if(is_array($constant)){
@@ -153,6 +157,7 @@ namespace wpCloud\StatelessMedia {
           $this->set( "sm.$option", $value);
         }
 
+        // Network only settings, to hide settings page
         foreach ($this->network_only_settings as $option => $array) {
           $value    = '';
           $_option  = 'sm_' . $option;
