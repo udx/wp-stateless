@@ -120,10 +120,10 @@ namespace wpCloud\StatelessMedia {
                 if(is_multisite()){
                     $modules = get_site_option( 'stateless-modules', array() );
                     if(is_network_admin()){
-                        $this->enabled = $modules[$this->id];
+                        $this->enabled = !empty($modules[$this->id]) && $modules[$this->id] == 'true' ? true : false;
                     }
                     elseif(!empty($modules[$this->id])){
-                        $this->enabled = $modules[$this->id];
+                        $this->enabled = !empty($modules[$this->id]) && $modules[$this->id] == 'true' ? true : false;
                         $is_network_override = true;
                     }
                 }
