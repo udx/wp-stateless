@@ -30,6 +30,7 @@ return array(
     'wpCloud\\StatelessMedia\\CompatibilityAcfImageCrop' => $baseDir . '/lib/classes/compatibility/acf-image-crop.php',
     'wpCloud\\StatelessMedia\\DynamicImageSupport' => $baseDir . '/lib/classes/compatibility/dynamic-image-support.php',
     'wpCloud\\StatelessMedia\\EDDDownloadMethod' => $baseDir . '/lib/classes/compatibility/easy-digital-downloads.php',
+    'wpCloud\\StatelessMedia\\Errors' => $baseDir . '/lib/classes/class-errors.php',
     'wpCloud\\StatelessMedia\\GS_Client' => $baseDir . '/lib/classes/class-gs-client.php',
     'wpCloud\\StatelessMedia\\GravityForm' => $baseDir . '/lib/classes/compatibility/gravity-forms.php',
     'wpCloud\\StatelessMedia\\ICompatibility' => $baseDir . '/lib/classes/compatibility/ICompatibility.php',

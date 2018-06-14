@@ -47,6 +47,11 @@ namespace wpCloud\StatelessMedia {
       protected function __construct( $args ) {
         parent::__construct( $args );
         
+        //** Define our Admin Notices handler object */
+        $this->errors = new Errors( array_merge( $args, array(
+          'type' => $this->type
+        ) ) );
+
         // Initialize compatibility modules.
         add_action( 'plugins_loaded', function(){
           new Module();
