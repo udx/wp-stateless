@@ -5,7 +5,7 @@
     background-repeat: no-repeat;
     background-size: 40px 40px;
     background-position: 5px center;
-    padding-left: 55px;
+    padding: 11px 15px 11px 55px;
     border-left-color: #FC5922 !important;
 
 }
@@ -14,6 +14,10 @@
     float: left;
     width: 30px;
     height: 30px;
+}
+
+.ud-admin-notice ul {
+    margin: 0.5em 0;
 }
 
 .ud-admin-notice .inner-contaner {

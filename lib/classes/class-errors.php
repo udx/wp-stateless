@@ -180,7 +180,7 @@ namespace wpCloud\StatelessMedia {
         $errors = apply_filters( 'ud:errors:admin_notices', $this->errors, $this->args );
         $notices = apply_filters( 'ud:messages:admin_notices', $this->notices, $this->args );
         
-        if( !empty( $errors ) || !empty( $messages ) || !empty( $warnings ) ) {
+        if( !empty( $errors ) || !empty( $notices ) ) {
           wp_enqueue_style("stateless-error-style", ud_get_stateless_media()->path('static/styles/error-notice.css'));
         }
 
