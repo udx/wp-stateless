@@ -31,6 +31,7 @@ namespace wpCloud\StatelessMedia {
         protected $enabled = false;
         protected $description = '';
         protected $plugin_file = null;
+        protected $first_party = false;
 
         public function __construct(){
             $this->init();
@@ -146,6 +147,14 @@ namespace wpCloud\StatelessMedia {
 
             if ($this->enabled && $this->is_plugin_active()) {
                 add_action('sm::module::init', array($this, 'module_init'));
+            }
+
+            if (!$this->enabled && !$this->first_party && $this->is_plugin_active()) {
+                ud_get_stateless_media()->errors->add( array(
+                    'title' => sprintf( __( "<b>%s:</b> Compatibility for <b>%s</b> isn't enabled.", ud_get_stateless_media()->domain ), ud_get_stateless_media()->name, $this->title ),
+                    'button' => __("Enable compatibility", ud_get_stateless_media()->domain ),
+                    'message' => __("Please enable the compatibility to ensure the fnctionality will work properly between <b>{$this->title}</b> and <b>WP-Stateless</b>.", ud_get_stateless_media()->domain ),
+                ), 'notice' );
             }
         }
     }

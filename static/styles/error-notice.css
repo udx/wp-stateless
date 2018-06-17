@@ -1,0 +1,38 @@
+.ud-admin-notice.error, .ud-admin-notice.notice {
+    position: relative;
+    display: block;
+    background-image: url('../images/stateless.svg');
+    background-repeat: no-repeat;
+    background-size: 40px 40px;
+    background-position: 5px center;
+    padding-left: 55px;
+    border-left-color: #FC5922 !important;
+
+}
+
+.ud-admin-notice .icon {
+    float: left;
+    width: 30px;
+    height: 30px;
+}
+
+.ud-admin-notice .inner-contaner {
+    float: left;
+}
+
+.ud-admin-notice a {
+    text-decoration: underline;
+}
+
+.ud-admin-notice a.notice-dismiss.dismiss {
+    top: 10px;
+    text-decoration: none;
+}
+
+
+.ud-admin-notice a.button-action {
+    top: 15px;
+    right: 40px;
+    position: absolute;
+    text-decoration: none;
+}

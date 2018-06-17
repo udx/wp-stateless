@@ -48,6 +48,16 @@ namespace wpCloud\StatelessMedia {
        * @type array
        */
       private $warnings = array();
+
+      /**
+       * Notices
+       *
+       * @used admin_notices
+       * @public
+       * @property $messages
+       * @type array
+       */
+      private $notices = array();
       
       /**
        * Action Links in Footer
@@ -57,7 +67,10 @@ namespace wpCloud\StatelessMedia {
        * @property $messages
        * @type array
        */
-      private $action_links = array();
+      private $action_links = array(
+        'errors' => null,
+        'notices' => null,
+      );
 
       /**
        * Dismiss action link is available or not.
@@ -88,10 +101,9 @@ namespace wpCloud\StatelessMedia {
             $this->errors[] = $message;
             break;
           case 'message':
-            $this->messages[] = $message;
-            break;
           case 'warning':
-            $this->warnings[] = $message;
+          case 'notice':
+            $this->notices[] = $message;
             break;
         }
       }
@@ -107,10 +119,9 @@ namespace wpCloud\StatelessMedia {
             $this->action_links[ 'errors' ][] = $link;
             break;
           case 'message':
-            $this->action_links[ 'messages' ][] = $link;
-            break;
-          case 'message':
-            $this->action_links[ 'warnings' ][] = $link;
+          case 'warning':
+          case 'notice':
+            $this->action_links[ 'notices' ][] = $link;
             break;
         }
       }
@@ -153,61 +164,60 @@ namespace wpCloud\StatelessMedia {
         if( \UsabilityDynamics\WP\TGM_Plugin_Activation::get_instance()->is_tgmpa_page() ) {
           return;
         }
-        
+
         $errors = apply_filters( 'ud:errors:admin_notices', $this->errors, $this->args );
-        $messages = apply_filters( 'ud:messages:admin_notices', $this->messages, $this->args );
-        $warnings = apply_filters( 'ud:warnings:admin_notices', $this->warnings, $this->args );
+        $notices = apply_filters( 'ud:messages:admin_notices', $this->notices, $this->args );
         
         if( !empty( $errors ) || !empty( $messages ) || !empty( $warnings ) ) {
-          echo "<style>.ud-admin-notice a { text-decoration: underline !important; } .ud-admin-notice { display: block !important; } .ud-admin-notice.update-nag { border-color: #ffba00 !important; }</style>";
+          wp_enqueue_style("stateless-error-style", ud_get_stateless_media()->path('static/styles/error-notice.css'));
         }
 
         //** Errors Block */
         if( !empty( $errors ) && is_array( $errors ) ) {
-          $message = '<ul style="list-style:disc inside;"><li>' . implode( '</li><li>', $errors ) . '</li></ul>';
-          $message = sprintf( __( '<p><b>%s</b> is not active due to following errors:</p> %s', $this->domain ), $this->name, $message );
-          if( !empty( $this->action_links[ 'errors' ] ) && is_array( $this->action_links[ 'errors' ] ) ) {
-            $message .= '<p>' . implode( ' | ', $this->action_links[ 'errors' ] ) . '</p>';
-          }
-          echo '<div class="ud-admin-notice error fade" style="padding:11px;">' . $message . '</div>';
+          $message = '<ul style="none;"><li>' . implode( '</li><li>', $errors ) . '</li></ul>';
+          $data = array(
+            'title' => sprintf( __( '<b>%s</b> is not active due to following errors:', $this->domain ), $this->name ),
+            'class' => 'error',
+            'message' => $message,
+            'action_links' => !empty($this->action_links[ 'errors' ])?$this->action_links[ 'errors' ]:null,
+          );
+          
+          include ud_get_stateless_media()->path( '/static/views/error-notice.php', 'dir' );
         }
 
+        $has_notice = false;
         //** Determine if warning has been dismissed */
-        $warning_dismissed = get_option( ( 'dismissed_warning_' . sanitize_key( $this->name ) ) );
-        $show_warnings = $this->check_dismiss_time( $warning_dismissed );
-        if ( $show_warnings && ! empty( $warnings ) && is_array( $warnings ) ) {
+        if ( ! empty( $notices ) && is_array( $notices ) ) {
           //** Warnings Block */
-          $message = '<ul style="list-style:disc inside;"><li>' . implode( '</li><li>', $warnings ) . '</li></ul>';
-          $message = sprintf( __( '<p><b>%s</b> has the following warnings:</p> %s', $this->domain ), $this->name, $message );
-          if( $this->dismiss ) {
-            $this->action_links[ 'warnings' ][] = '<a class="dismiss-warning dismiss" data-key="dismissed_warning_' . sanitize_key( $this->name ).'" href="#">' . __( 'Dismiss this warning', $this->domain ) . '</a>';
+          foreach($notices as $notice){
+            if(!is_array($notice)){
+              $notice = array( 
+                'title' => sprintf( __( '<b>%s</b> has the following notice:', $this->domain ), $this->name ),
+                'message' => $notice,
+                'button' => null,
+              );
+            }
+
+            $dismiss_key = md5( $notice['title'] );
+            $warning_dismissed = get_option( 'dismissed_notice_' . $dismiss_key );
+            if($warning_dismissed)
+              continue;
+            $data = array(
+              'title' => $notice['title'],
+              'class' => 'notice',
+              'message' => $notice['message'],
+              'button' => $notice['button'],
+              'dismis_key' => $dismiss_key,
+              'action_links' => $this->action_links[ 'notices' ],
+            );
+            
+            include ud_get_stateless_media()->path( '/static/views/error-notice.php', 'dir' );
+            
+            $has_notice = true;
           }
-          if( !empty( $this->action_links[ 'warnings' ] ) && is_array( $this->action_links[ 'warnings' ] ) ) {
-            $message .= '<p>' . implode( ' | ', $this->action_links[ 'warnings' ] ) . '</p>';
-          }
-          echo '<div class="ud-admin-notice updated update-nag fade" style="padding:11px;">' . $message . '</div>';
         }
 
-        //** Determine if message has been dismissed */
-        $message_dismissed = get_option( ( 'dismissed_notice_' . sanitize_key( $this->name ) ) );
-        if ( empty( $message_dismissed ) ) {
-          //** Notices Block */
-          if( !empty( $messages ) && is_array( $messages ) ) {
-            $message = '<ul style="list-style:disc inside;"><li>' . implode( '</li><li>', $messages ) . '</li></ul>';
-            if( !empty( $errors ) ) {
-              $message = sprintf( __( '<p><b>%s</b> has the following additional notices:</p> %s', $this->domain ), $this->name, $message );
-            } else {
-              $message = sprintf( __( '<p><b>%s</b> is active, but has the following notices:</p> %s', $this->domain ), $this->name, $message );
-            }
-            if( $this->dismiss ) {
-              $this->action_links[ 'messages' ][] = '<a class="dismiss-notice dismiss" data-key="dismissed_notice_' . sanitize_key( $this->name ).'" href="#">' . __( 'Dismiss this notice', $this->domain ) . '</a>';
-            }
-            $message .= '<p>' . implode( ' | ', $this->action_links[ 'messages' ] ) . '</p>';
-            echo '<div class="ud-admin-notice updated fade" style="padding:11px;">' . $message . '</div>';
-          }
-        }
-
-        if ( $show_warnings || empty( $message_dismissed ) ) {
+        if ( $has_notice) {
           //enqueue dismiss js for ajax requests
           $script_path = \UsabilityDynamics\WP\Utility::path( 'static/scripts/ud-dismiss.js', 'url' );
           wp_enqueue_script( "ud-dismiss", $script_path, array( 'jquery' ) );
