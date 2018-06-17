@@ -35,6 +35,7 @@ namespace wpCloud\StatelessMedia {
 
         public function __construct(){
             $this->init();
+            add_action('button_secondary_' . $this->id, array($this, 'enable_compatibility'));
         }
         
         /**
@@ -151,11 +152,31 @@ namespace wpCloud\StatelessMedia {
 
             if (!$this->enabled && !$this->first_party && $this->is_plugin_active()) {
                 ud_get_stateless_media()->errors->add( array(
+                    'key' => $this->id,
                     'title' => sprintf( __( "<b>%s:</b> Compatibility for <b>%s</b> isn't enabled.", ud_get_stateless_media()->domain ), ud_get_stateless_media()->name, $this->title ),
                     'button' => __("Enable compatibility", ud_get_stateless_media()->domain ),
                     'message' => __("Please enable the compatibility to ensure the fnctionality will work properly between <b>{$this->title}</b> and <b>WP-Stateless</b>.", ud_get_stateless_media()->domain ),
                 ), 'notice' );
             }
+        }
+
+        public function enable_compatibility(){
+            
+            if(is_network_admin()){
+                $modules = get_site_option( 'stateless-modules', array() );
+                if(empty($modules[$this->id]) || $modules[$this->id] != 'true'){
+                    $modules[$this->id] = 'true';
+                    update_site_option('stateless-modules', $modules, true);
+                }
+            }
+            else{
+                $modules = get_option('stateless-modules', array());
+                if(empty($modules[$this->id]) || $modules[$this->id] != 'true'){
+                    $modules[$this->id] = 'true';
+                    update_option('stateless-modules', $modules, true);
+                }
+            }
+            
         }
     }
 

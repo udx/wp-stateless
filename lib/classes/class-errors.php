@@ -86,6 +86,7 @@ namespace wpCloud\StatelessMedia {
         parent::__construct( $args );
         add_action( 'admin_notices', array( $this, 'admin_notices' ) );
         add_action( 'wp_ajax_ud_dismiss', array( $this, 'dismiss_notices' ) );
+        add_action( 'wp_ajax_button_action', array( $this, 'button_action' ) );
       }
       
       /**
@@ -103,6 +104,17 @@ namespace wpCloud\StatelessMedia {
           case 'message':
           case 'warning':
           case 'notice':
+            if(!is_array($message)){
+              $message = array( 
+                'title' => sprintf( __( '<b>%s</b> has the following notice:', $this->domain ), $this->name ),
+                'message' => $message,
+                'button' => null,
+              );
+            }
+
+            if(empty($message['key'])){
+              $message['key'] = md5( $message['title'] );
+            }
             $this->notices[] = $message;
             break;
         }
@@ -190,24 +202,16 @@ namespace wpCloud\StatelessMedia {
         if ( ! empty( $notices ) && is_array( $notices ) ) {
           //** Warnings Block */
           foreach($notices as $notice){
-            if(!is_array($notice)){
-              $notice = array( 
-                'title' => sprintf( __( '<b>%s</b> has the following notice:', $this->domain ), $this->name ),
-                'message' => $notice,
-                'button' => null,
-              );
+            if(get_option( 'dismissed_notice_' . $notice['key'] )){
+              continue;
             }
 
-            $dismiss_key = md5( $notice['title'] );
-            $warning_dismissed = get_option( 'dismissed_notice_' . $dismiss_key );
-            if($warning_dismissed)
-              continue;
             $data = array(
               'title' => $notice['title'],
               'class' => 'notice',
               'message' => $notice['message'],
               'button' => $notice['button'],
-              'dismis_key' => $dismiss_key,
+              'key' => $notice['key'],
               'action_links' => $this->action_links[ 'notices' ],
             );
             
@@ -220,6 +224,7 @@ namespace wpCloud\StatelessMedia {
         if ( $has_notice) {
           //enqueue dismiss js for ajax requests
           $script_path = \UsabilityDynamics\WP\Utility::path( 'static/scripts/ud-dismiss.js', 'url' );
+          wp_enqueue_script( "sateless-error-notice-js", ud_get_stateless_media()->path( 'static/scripts/error-notice.js', 'url' ), array( 'jquery' ) );
           wp_enqueue_script( "ud-dismiss", $script_path, array( 'jquery' ) );
           wp_localize_script( "ud-dismiss", "_ud_vars", array(
               "ajaxurl" => admin_url( 'admin-ajax.php' ),
@@ -246,7 +251,28 @@ namespace wpCloud\StatelessMedia {
 
         if ( ! $error && update_option( ( $_POST['key'] ), time() ) ) {
           $response['success'] = '1';
+          $response['error'] = null;
         }
+
+        wp_send_json( $response );
+      }
+
+      /**
+       * Action for the button_action ajax callback
+       * @throws \Exception
+       */
+      public function button_action(){
+        $response = array(
+          'success' => '1',
+        );
+        $error = false;
+
+        if( empty($_POST['key']) ) {
+          $response['success'] = '0';
+          $response['error'] = __( 'Invalid key', $this->domain );
+        }
+        
+        do_action($_POST['key']);
 
         wp_send_json( $response );
       }

@@ -8,10 +8,10 @@
         echo '<p>' . implode( ' | ', $data['action_links'] ) . '</p>';
     endif;
     ?>
-    <?php if(!empty($data['button']) && !empty($data['dismis_key'])):?>
-        <a class="button-action button button-primary" data-key="button_secondary_<?php echo $data['dismis_key'];?>" href="#"><?php echo $data['button'];?></a>
+    <?php if(!empty($data['button']) && !empty($data['key'])):?>
+        <a class="button-action button button-primary" data-key="button_secondary_<?php echo $data['key'];?>" href="#"><?php echo $data['button'];?></a>
     <?php endif;?>
-    <?php if(!empty($data['dismis_key'])):?>
-        <a class="dismiss-warning dismiss notice-dismiss" data-key="dismissed_notice_<?php echo $data['dismis_key'];?>" href="#"></a>
+    <?php if(!empty($data['key'])):?>
+        <a class="dismiss-warning dismiss notice-dismiss" data-key="dismissed_notice_<?php echo $data['key'];?>" href="#"></a>
     <?php endif;?>
 </div>
