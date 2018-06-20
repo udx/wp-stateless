@@ -72,16 +72,46 @@ var wpStatelessApp = angular.module('wpStatelessApp', [])
   $scope.log = [];
 
   /**
-   * Status text
-   * @type {boolean}
+   * Status message
+   * @type {String}
    */
-  $scope.status = false;
+  $scope.status = '';
+
+  /**
+   * Status message
+   * @type {String}
+   */
+  $scope.extraStatus = '';
 
   /**
    * Init
    */
   $scope.init = function() {
     jQuery("#regenthumbs-bar").progressbar();
+  }
+
+  /**
+   * Get error message
+   */
+  $scope.getError = function(response, message) {
+    if(response.data && typeof response.data.data !== 'undefined'){
+      return response.data.data;
+    }
+
+    if(response.data && typeof response.data == 'string'){
+      $scope.extraStatus = response.data;
+      return message;
+    }
+    
+    if(!response.data && response.statusText){
+      return response.statusText + " (Response code: " + response.status + ")";
+    }
+
+    if(!response.data && response.status == -1){
+      return "Unable to connect to the server";
+    }
+
+    return message;
   }
 
   /**
@@ -329,23 +359,23 @@ var wpStatelessApp = angular.module('wpStatelessApp', [])
           }
         }
       } else {
-        $scope.status = data.data || 'Unable to get Images Media ID';
+        $scope.status = $scope.getError(response, 'Unable to get Images Media ID');
         $scope.error = true;
       }
 
       $scope.isLoading = false;
 
       if(WP_DEBUG){
-        console.log("WP-Stateless get Images Media ID:", data);
+        console.log("WP-Stateless get Images Media ID:", response);
       }
 
     }, function(response) {
       $scope.error = true;
-      $scope.status = response.data || 'Get Images Media ID: Request failed';
+      $scope.status = $scope.getError(response, 'Get Images Media ID: Request failed');
       $scope.isLoading = false;
 
       if(WP_DEBUG){
-        console.log("WP-Stateless get Images Media ID: Request failed", response.data, response.headers());
+        console.log("WP-Stateless get Images Media ID: Request failed", response, response.headers());
       }
     });
 
@@ -377,26 +407,26 @@ var wpStatelessApp = angular.module('wpStatelessApp', [])
             $scope.objectIDs = data.data;
             callback();
           } else {
-            $scope.status = data.data || 'IDs are malformed';
+            $scope.status = $scope.getError(response, 'IDs are malformed');
             $scope.error = true;
           }
         }
       } else {
-        $scope.status = data.data || 'Unable to get non Images Media ID';
+        $scope.status = $scope.getError(response, 'Unable to get non Images Media ID');
         $scope.error = true;
       }
 
       $scope.isLoading = false;
 
       if(WP_DEBUG){
-        console.log("WP-Stateless get non Images Media ID:", response.data, response.headers());
+        console.log("WP-Stateless get non Images Media ID:", response, response.headers());
       }
     }, function(response) {
       $scope.error = true;
-      $scope.status = response.data || 'Get non Images Media ID: Request failed';
+      $scope.status = $scope.getError(response, 'Get non Images Media ID: Request failed');
       $scope.isLoading = false;
       if(WP_DEBUG){
-        console.log("WP-Stateless get non Images Media ID: Request failed", response.data, response.headers());
+        console.log("WP-Stateless get non Images Media ID: Request failed", response, response.headers());
       }
     });
 
@@ -428,27 +458,27 @@ var wpStatelessApp = angular.module('wpStatelessApp', [])
             $scope.objectIDs = data.data;
             callback();
           } else {
-            $scope.status = data.data || "IDs are malformed";
+            $scope.status = $scope.getError(response, "IDs are malformed");
             $scope.error = true;
           }
         }
       } else {
         $scope.error = true;
-        $scope.status = data.data || 'Unable to get non library files';
+        $scope.status = $scope.getError(response, 'Non libraries files are not found');
       }
 
       $scope.isLoading = false;
 
       if(WP_DEBUG){
-        console.log("WP-Stateless get non library files:", response.data, response.headers());
+        console.log("WP-Stateless get non library files:", response, response.headers());
       }
     }, function(response) {
       $scope.error = true;
-      $scope.status = response.data || 'Get non library files: Request failed';
+      $scope.status = $scope.getError(response, 'Get non library files: Request failed');
       $scope.isLoading = false;
 
       if(WP_DEBUG){
-        console.log("WP-Stateless get non library files: Request failed", response.data, response.headers());
+        console.log("WP-Stateless get non library files: Request failed", response, response.headers());
       }
     });
 
@@ -534,12 +564,17 @@ var wpStatelessApp = angular.module('wpStatelessApp', [])
     }).then(
       function(response) {
         var data = response.data || {};
-        $scope.log.push({message:data.data});
+        $scope.log.push({message:data.data || "Regenerate single image: Failed"});
 
         jQuery("#regenthumbs-bar").progressbar( "value", ( ++$scope.objectsCounter / $scope.objectsTotal ) * 100 );
         jQuery("#regenthumbs-bar-percent").html( Math.round( ( $scope.objectsCounter / $scope.objectsTotal ) * 1000 ) / 10 + "%" );
 
-        if ( 'undefined' !== typeof chunk_id ) {
+        if(typeof response.data.status == 'undefined' || response.data.status == false){
+          $scope.error = true;
+          $scope.status = $scope.getError(response, "Regenerate single image: Failed");
+          $scope.isRunning = false;
+        }
+        else if ( 'undefined' !== typeof chunk_id ) {
           if ( $scope.chunkIDs[ chunk_id ].length && $scope.continue ) {
             $scope.regenerateSingle( $scope.chunkIDs[ chunk_id ].shift(), chunk_id );
           } else {
@@ -553,15 +588,15 @@ var wpStatelessApp = angular.module('wpStatelessApp', [])
           }
         }
         if(WP_DEBUG){
-          console.log("WP-Stateless regenerate single image:", response.data, response.headers());
+          console.log("WP-Stateless regenerate single image:", response, response.headers());
         }
       },
       function(response) {
         $scope.error = true;
-        $scope.status = response.data || "Regenerate single image: Request failed";
+        $scope.status = $scope.getError(response, "Regenerate single image: Request failed");
         $scope.isRunning = false;
         if(WP_DEBUG){
-          console.log("WP-Stateless regenerate single image: Request failed", response.data, response.headers());
+          console.log("WP-Stateless regenerate single image: Request failed", response, response.headers());
         }
       }
     );
@@ -584,12 +619,17 @@ var wpStatelessApp = angular.module('wpStatelessApp', [])
     }).then(
       function(response) {
         var data = response.data || {};
-        $scope.log.push({message:data.data});
+        $scope.log.push({message:data.data || "Sync single file: Failed"});
 
         jQuery("#regenthumbs-bar").progressbar( "value", ( ++$scope.objectsCounter / $scope.objectsTotal ) * 100 );
         jQuery("#regenthumbs-bar-percent").html( Math.round( ( $scope.objectsCounter / $scope.objectsTotal ) * 1000 ) / 10 + "%" );
 
-        if ( 'undefined' !== typeof chunk_id ) {
+        if(typeof response.data.status == 'undefined' || response.data.status == false){
+          $scope.error = true;
+          $scope.status = $scope.getError(response, "Sync single file: Failed");
+          $scope.isRunning = false;
+        }
+        else if ( 'undefined' !== typeof chunk_id ) {
           if ( $scope.chunkIDs[ chunk_id ].length && $scope.continue ) {
             $scope.syncSingleFile( $scope.chunkIDs[ chunk_id ].shift(), chunk_id );
           } else {
@@ -604,16 +644,16 @@ var wpStatelessApp = angular.module('wpStatelessApp', [])
         }
 
         if(WP_DEBUG){
-          console.log("WP-Stateless sync single file:", response.data, response.headers());
+          console.log("WP-Stateless sync single file:", response, response.headers());
         }
       },
       function(response) {
         $scope.error = true;
-        $scope.status = response.data || "Sync single file: Request failed";
+        $scope.status = $scope.getError(response, "Sync single file: Request failed");
         $scope.isRunning = false;
 
         if(WP_DEBUG){
-          console.log("WP-Stateless sync single file: Request failed", response.data, response.headers());
+          console.log("WP-Stateless sync single file: Request failed", response, response.headers());
         }
       }
     );
@@ -636,12 +676,17 @@ var wpStatelessApp = angular.module('wpStatelessApp', [])
     }).then(
       function(response) {
         var data = response.data || {};
-        $scope.log.push({message:data.data});
+        $scope.log.push({message:data.data || "Sync non library file: Failed"});
 
         jQuery("#regenthumbs-bar").progressbar( "value", ( ++$scope.objectsCounter / $scope.objectsTotal ) * 100 );
         jQuery("#regenthumbs-bar-percent").html( Math.round( ( $scope.objectsCounter / $scope.objectsTotal ) * 1000 ) / 10 + "%" );
 
-        if ( 'undefined' !== typeof chunk_id ) {
+        if(typeof response.data.status == 'undefined' || response.data.status == false){
+          $scope.error = true;
+          $scope.status = $scope.getError(response, "Sync non library file: Failed");
+          $scope.isRunning = false;
+        }
+        else if ( 'undefined' !== typeof chunk_id ) {
           if ( $scope.chunkIDs[ chunk_id ].length && $scope.continue ) {
             $scope.syncSingleNonLibraryFile( $scope.chunkIDs[ chunk_id ].shift(), chunk_id );
           } else {
@@ -656,16 +701,16 @@ var wpStatelessApp = angular.module('wpStatelessApp', [])
         }
 
         if(WP_DEBUG){
-          console.log("WP-Stateless sync non library file:", response.data, response.headers());
+          console.log("WP-Stateless sync non library file:", response, response.headers());
         }
       },
       function(response) {
         $scope.error = true;
-        $scope.status = response.data || "Sync non library file: Request failed";
+        $scope.status = $scope.getError(response, "Sync non library file: Request failed");
         $scope.isRunning = false;
 
         if(WP_DEBUG){
-          console.log("WP-Stateless sync non library file: Request failed", response.data, response.headers());
+          console.log("WP-Stateless sync non library file: Request failed", response, response.headers());
         }
       }
     );
@@ -705,3 +750,9 @@ var wpStatelessApp = angular.module('wpStatelessApp', [])
 .controller('wpStatelessCompatibility', function($scope, $filter) {
   $scope.modules = wp_stateless_compatibility || {};
 });
+
+wpStatelessApp.filter("trust", ['$sce', function($sce) {
+  return function(htmlCode){
+    return $sce.trustAsHtml(htmlCode);
+  }
+}]);
