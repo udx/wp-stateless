@@ -90,10 +90,10 @@
 
     </div>
 
-    <div class="status {{error?'error':'success'}}" ng-show="status">
+    <div class="status ud-admin-notice {{error?'error':'notice'}}" ng-show="status">
       <p>
         <?php _e( 'Status:', ud_get_stateless_media()->domain ); ?> {{status}}
-        <span class="button button-secondary" ng-show="extraStatus" ng-click="showErrorDetails = !showErrorDetails">Details</span>
+        <span class="button button-secondary" ng-show="extraStatus" ng-click="showErrorDetails = !showErrorDetails"><?php _e( 'Details', ud_get_stateless_media()->domain ); ?></span>
       </p>
       <div id="sm-error-details" class="extra-info" ng-show="extraStatus && showErrorDetails" ng-bind-html="extraStatus | trust"></div>
     </div>

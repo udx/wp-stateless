@@ -207,6 +207,8 @@ var wpStatelessApp = angular.module('wpStatelessApp', [])
   $scope.processStart = function(e) {
 
     $scope.error = false;
+    $scope.status = '';
+    $scope.extraStatus = '';
     $scope.objectsCounter = 0;
     $scope.objectsTotal = 0;
     $scope.objectIDs = [];
