@@ -255,8 +255,14 @@ class Google_Service_Resource
    */
   public function createRequestUri($restPath, $params)
   {
+    // Override the default servicePath address if the $restPath use a /
+    if ('/' == substr($restPath, 0, 1)) {
+      $requestUrl = substr($restPath, 1);
+    } else {
+      $requestUrl = $this->servicePath . $restPath;
+    }
+
     // code for leading slash
-    $requestUrl = $this->servicePath . $restPath;
     if ($this->rootUrl) {
       if ('/' !== substr($this->rootUrl, -1) && '/' !== substr($requestUrl, 0, 1)) {
         $requestUrl = '/' . $requestUrl;
@@ -267,12 +273,12 @@ class Google_Service_Resource
     $queryVars = array();
     foreach ($params as $paramName => $paramSpec) {
       if ($paramSpec['type'] == 'boolean') {
-        $paramSpec['value'] = ($paramSpec['value']) ? 'true' : 'false';
+        $paramSpec['value'] = $paramSpec['value'] ? 'true' : 'false';
       }
       if ($paramSpec['location'] == 'path') {
         $uriTemplateVars[$paramName] = $paramSpec['value'];
       } else if ($paramSpec['location'] == 'query') {
-        if (isset($paramSpec['repeated']) && is_array($paramSpec['value'])) {
+        if (is_array($paramSpec['value'])) {
           foreach ($paramSpec['value'] as $value) {
             $queryVars[] = $paramName . '=' . rawurlencode(rawurldecode($value));
           }

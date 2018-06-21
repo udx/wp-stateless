@@ -44,8 +44,6 @@
 
 namespace phpseclib\Crypt;
 
-use phpseclib\Crypt\Base;
-
 /**
  * Pure-PHP implementation of RC4.
  *
@@ -109,7 +107,7 @@ class RC4 extends Base
      * @var string
      * @access private
      */
-    var $key = "\0";
+    var $key;
 
     /**
      * The Key Stream for decryption and encryption
@@ -146,8 +144,10 @@ class RC4 extends Base
      */
     function isValidEngine($engine)
     {
-        switch ($engine) {
-            case Base::ENGINE_OPENSSL:
+        if ($engine == Base::ENGINE_OPENSSL) {
+            if (version_compare(PHP_VERSION, '5.3.7') >= 0) {
+                $this->cipher_name_openssl = 'rc4-40';
+            } else {
                 switch (strlen($this->key)) {
                     case 5:
                         $this->cipher_name_openssl = 'rc4-40';
@@ -161,6 +161,7 @@ class RC4 extends Base
                     default:
                         return false;
                 }
+            }
         }
 
         return parent::isValidEngine($engine);
@@ -202,7 +203,7 @@ class RC4 extends Base
         if ($length < 8) {
             $this->key_length = 1;
         } elseif ($length > 2048) {
-            $this->key_length = 248;
+            $this->key_length = 256;
         } else {
             $this->key_length = $length >> 3;
         }
