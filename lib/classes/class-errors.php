@@ -188,7 +188,7 @@ namespace wpCloud\StatelessMedia {
         if( !empty( $errors ) && is_array( $errors ) ) {
           $message = '<ul style="none;"><li>' . implode( '</li><li>', $errors ) . '</li></ul>';
           $data = array(
-            'title' => sprintf( __( '<b>%s</b> is not active due to following errors:', $this->domain ), $this->name ),
+            'title' => sprintf( __( '%s is not active due to following errors:', $this->domain ), $this->name ),
             'class' => 'error',
             'message' => $message,
             'action_links' => !empty($this->action_links[ 'errors' ])?$this->action_links[ 'errors' ]:null,
