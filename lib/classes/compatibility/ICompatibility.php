@@ -114,8 +114,7 @@ namespace wpCloud\StatelessMedia {
                 $this->enabled = constant($this->constant);
                 $is_constant = true;
             }
-
-            if(!$is_constant) {
+            else {
                 $modules = get_option('stateless-modules', array());
                 if (empty($this->enabled)) {
                     $this->enabled = !empty($modules[$this->id]) && $modules[$this->id] == 'true' ? true : false;
