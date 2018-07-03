@@ -23,6 +23,8 @@
  *   $objects = $storageService->objects;
  *  </code>
  */
+namespace wpCloud\StatelessMedia\Google_Client;
+
 class Google_Service_Storage_Resource_Objects extends Google_Service_Resource
 {
   /**

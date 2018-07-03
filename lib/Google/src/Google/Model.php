@@ -21,6 +21,8 @@
  * http://tools.ietf.org/html/draft-zyp-json-schema-03#section-5
  *
  */
+namespace wpCloud\StatelessMedia\Google_Client;
+
 class Google_Model implements ArrayAccess
 {
   /**

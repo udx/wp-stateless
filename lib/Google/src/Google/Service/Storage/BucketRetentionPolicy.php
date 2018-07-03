@@ -14,6 +14,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+namespace wpCloud\StatelessMedia\Google_Client;
 
 class Google_Service_Storage_BucketRetentionPolicy extends Google_Model
 {

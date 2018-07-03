@@ -28,6 +28,8 @@
  *
  * @author Google, Inc.
  */
+namespace wpCloud\StatelessMedia\Google_Client;
+
 class Google_Service_Storage extends Google_Service
 {
   /** View and manage your data across Google Cloud Platform services. */

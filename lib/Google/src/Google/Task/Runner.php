@@ -20,6 +20,8 @@
  *
  * @see https://developers.google.com/drive/web/handle-errors#implementing_exponential_backoff
  */
+namespace wpCloud\StatelessMedia\Google_Client;
+
 class Google_Task_Runner
 {
   const TASK_RETRY_NEVER = 0;

@@ -23,6 +23,8 @@
  *   $projects = $storageService->projects;
  *  </code>
  */
+namespace wpCloud\StatelessMedia\Google_Client;
+
 class Google_Service_Storage_Resource_Projects extends Google_Service_Resource
 {
 }

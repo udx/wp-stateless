@@ -23,6 +23,8 @@
  *   $channels = $storageService->channels;
  *  </code>
  */
+namespace wpCloud\StatelessMedia\Google_Client;
+
 class Google_Service_Storage_Resource_Channels extends Google_Service_Resource
 {
   /**

@@ -23,6 +23,8 @@
  *   $notifications = $storageService->notifications;
  *  </code>
  */
+namespace wpCloud\StatelessMedia\Google_Client;
+
 class Google_Service_Storage_Resource_Notifications extends Google_Service_Resource
 {
   /**
