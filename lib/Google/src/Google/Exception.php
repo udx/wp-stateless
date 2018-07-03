@@ -16,6 +16,6 @@
  */
 namespace wpCloud\StatelessMedia\Google_Client;
 
-class Google_Exception extends Exception
+class Google_Exception extends \Exception
 {
 }

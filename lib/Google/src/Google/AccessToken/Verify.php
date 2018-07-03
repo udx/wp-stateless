@@ -124,7 +124,7 @@ class Google_AccessToken_Verify
         return false;
       } catch (SignatureInvalidException $e) {
         // continue
-      } catch (DomainException $e) {
+      } catch (\DomainException $e) {
         // continue
       }
     }

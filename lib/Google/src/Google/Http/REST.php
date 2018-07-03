@@ -125,7 +125,7 @@ class Google_Http_REST
 
     if ($expectedClass = self::determineExpectedClass($expectedClass, $request)) {
       $json = json_decode($body, true);
-
+      $expectedClass = "\\wpCloud\\StatelessMedia\\Google_Client\\" . $expectedClass;
       return new $expectedClass($json);
     }
 

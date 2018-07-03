@@ -37,7 +37,7 @@ class Google_AuthHandler_AuthHandlerFactory
       case '6':
         return new Google_AuthHandler_Guzzle6AuthHandler($cache, $cacheConfig);
       default:
-        throw new Exception('Version not supported');
+        throw new \Exception('Version not supported');
     }
   }
 }
