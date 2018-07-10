@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+namespace wpCloud\StatelessMedia\Google_Client;
 
 use Google\Auth\ApplicationDefaultCredentials;
 use Google\Auth\Cache\MemoryCacheItemPool;
@@ -179,7 +180,7 @@ class Google_Client
   public function fetchAccessTokenWithAuthCode($code)
   {
     if (strlen($code) == 0) {
-      throw new InvalidArgumentException("Invalid code");
+      throw new \InvalidArgumentException("Invalid code");
     }
 
     $auth = $this->getOAuth2Service();
@@ -216,7 +217,7 @@ class Google_Client
   public function fetchAccessTokenWithAssertion(ClientInterface $authHttp = null)
   {
     if (!$this->isUsingApplicationDefaultCredentials()) {
-      throw new DomainException(
+      throw new \DomainException(
           'set the JSON service account credentials using'
           . ' Google_Client::setAuthConfig or set the path to your JSON file'
           . ' with the "GOOGLE_APPLICATION_CREDENTIALS" environment variable'
@@ -263,7 +264,7 @@ class Google_Client
   {
     if (null === $refreshToken) {
       if (!isset($this->token['refresh_token'])) {
-        throw new LogicException(
+        throw new \LogicException(
             'refresh token must be passed in or set as part of setAccessToken'
         );
       }
@@ -412,7 +413,7 @@ class Google_Client
 
   /**
    * @param string|array $token
-   * @throws InvalidArgumentException
+   * @throws \InvalidArgumentException
    */
   public function setAccessToken($token)
   {
@@ -427,10 +428,10 @@ class Google_Client
       }
     }
     if ($token == null) {
-      throw new InvalidArgumentException('invalid json token');
+      throw new \InvalidArgumentException('invalid json token');
     }
     if (!isset($token['access_token'])) {
-      throw new InvalidArgumentException("Invalid token format");
+      throw new \InvalidArgumentException("Invalid token format");
     }
     $this->token = $token;
   }
@@ -489,7 +490,7 @@ class Google_Client
    */
   public function getAuth()
   {
-    throw new BadMethodCallException(
+    throw new \BadMethodCallException(
         'This function no longer exists. See UPGRADING.md for more information'
     );
   }
@@ -499,7 +500,7 @@ class Google_Client
    */
   public function setAuth($auth)
   {
-    throw new BadMethodCallException(
+    throw new \BadMethodCallException(
         'This function no longer exists. See UPGRADING.md for more information'
     );
   }
@@ -693,7 +694,7 @@ class Google_Client
    * Verify an id_token. This method will verify the current id_token, if one
    * isn't provided.
    *
-   * @throws LogicException
+   * @throws \LogicException
    * @param string|null $idToken The token (id_token) that should be verified.
    * @return array|false Returns the token payload as an array if the verification was
    * successful, false otherwise.
@@ -709,7 +710,7 @@ class Google_Client
     if (null === $idToken) {
       $token = $this->getAccessToken();
       if (!isset($token['id_token'])) {
-        throw new LogicException(
+        throw new \LogicException(
             'id_token must be passed in or set as part of setAccessToken'
         );
       }
@@ -856,13 +857,13 @@ class Google_Client
   {
     if (is_string($config)) {
       if (!file_exists($config)) {
-        throw new InvalidArgumentException('file does not exist');
+        throw new \InvalidArgumentException('file does not exist');
       }
 
       $json = file_get_contents($config);
 
       if (!$config = json_decode($json, true)) {
-        throw new LogicException('invalid json for auth config');
+        throw new \LogicException('invalid json for auth config');
       }
     }
 
@@ -1091,7 +1092,7 @@ class Google_Client
     // @see https://developers.google.com/identity/protocols/OAuth2ServiceAccount
     if ($sub) {
       if (!$credentials instanceof ServiceAccountCredentials) {
-        throw new DomainException('domain-wide authority requires service account credentials');
+        throw new \DomainException('domain-wide authority requires service account credentials');
       }
 
       $credentials->setSub($sub);

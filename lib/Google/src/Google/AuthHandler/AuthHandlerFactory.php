@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+namespace wpCloud\StatelessMedia\Google_Client;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\ClientInterface;
@@ -36,7 +37,7 @@ class Google_AuthHandler_AuthHandlerFactory
       case '6':
         return new Google_AuthHandler_Guzzle6AuthHandler($cache, $cacheConfig);
       default:
-        throw new Exception('Version not supported');
+        throw new \Exception('Version not supported');
     }
   }
 }

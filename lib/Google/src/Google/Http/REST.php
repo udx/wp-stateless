@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+namespace wpCloud\StatelessMedia\Google_Client;
 
 use Google\Auth\HttpHandler\HttpHandlerFactory;
 use GuzzleHttp\ClientInterface;
@@ -124,7 +125,7 @@ class Google_Http_REST
 
     if ($expectedClass = self::determineExpectedClass($expectedClass, $request)) {
       $json = json_decode($body, true);
-
+      $expectedClass = "\\wpCloud\\StatelessMedia\\Google_Client\\" . $expectedClass;
       return new $expectedClass($json);
     }
 

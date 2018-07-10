@@ -1,4 +1,5 @@
 <?php
+namespace wpCloud\StatelessMedia\Google_Client;
 
 use Google\Auth\CredentialsLoader;
 use Google\Auth\HttpHandler\HttpHandlerFactory;

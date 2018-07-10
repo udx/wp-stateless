@@ -23,6 +23,8 @@
  *   $defaultObjectAccessControls = $storageService->defaultObjectAccessControls;
  *  </code>
  */
+namespace wpCloud\StatelessMedia\Google_Client;
+
 class Google_Service_Storage_Resource_DefaultObjectAccessControls extends Google_Service_Resource
 {
   /**

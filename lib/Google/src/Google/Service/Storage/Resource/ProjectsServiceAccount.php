@@ -23,6 +23,8 @@
  *   $serviceAccount = $storageService->serviceAccount;
  *  </code>
  */
+namespace wpCloud\StatelessMedia\Google_Client;
+
 class Google_Service_Storage_Resource_ProjectsServiceAccount extends Google_Service_Resource
 {
   /**

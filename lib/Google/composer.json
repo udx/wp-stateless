@@ -25,11 +25,8 @@
         "cache/filesystem-adapter": "For caching certs and tokens (using Google_Client::setCache)"
     },
     "autoload": {
-        "psr-0": {
-            "Google_": "src/"
-        },
         "classmap": [
-            "src/Google/Service/"
+            "src/Google/"
         ]
     },
     "extra": {
