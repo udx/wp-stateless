@@ -571,7 +571,7 @@ var wpStatelessApp = angular.module('wpStatelessApp', [])
         jQuery("#regenthumbs-bar").progressbar( "value", ( ++$scope.objectsCounter / $scope.objectsTotal ) * 100 );
         jQuery("#regenthumbs-bar-percent").html( Math.round( ( $scope.objectsCounter / $scope.objectsTotal ) * 1000 ) / 10 + "%" );
 
-        if(typeof response.data.status == 'undefined' || response.data.status == false){
+        if(typeof response.data.success == 'undefined' || response.data.success == false){
           $scope.error = true;
           $scope.status = $scope.getError(response, "Regenerate single image: Failed");
           $scope.isRunning = false;
@@ -626,7 +626,7 @@ var wpStatelessApp = angular.module('wpStatelessApp', [])
         jQuery("#regenthumbs-bar").progressbar( "value", ( ++$scope.objectsCounter / $scope.objectsTotal ) * 100 );
         jQuery("#regenthumbs-bar-percent").html( Math.round( ( $scope.objectsCounter / $scope.objectsTotal ) * 1000 ) / 10 + "%" );
 
-        if(typeof response.data.status == 'undefined' || response.data.status == false){
+        if(typeof response.data.success == 'undefined' || response.data.success == false){
           $scope.error = true;
           $scope.status = $scope.getError(response, "Sync single file: Failed");
           $scope.isRunning = false;
@@ -683,7 +683,7 @@ var wpStatelessApp = angular.module('wpStatelessApp', [])
         jQuery("#regenthumbs-bar").progressbar( "value", ( ++$scope.objectsCounter / $scope.objectsTotal ) * 100 );
         jQuery("#regenthumbs-bar-percent").html( Math.round( ( $scope.objectsCounter / $scope.objectsTotal ) * 1000 ) / 10 + "%" );
 
-        if(typeof response.data.status == 'undefined' || response.data.status == false){
+        if(typeof response.data.success == 'undefined' || response.data.success == false){
           $scope.error = true;
           $scope.status = $scope.getError(response, "Sync non library file: Failed");
           $scope.isRunning = false;
