@@ -574,7 +574,7 @@ var wpStatelessApp = angular.module('wpStatelessApp', [])
         if(typeof response.data.success == 'undefined' || response.data.success == false){
           $scope.error = true;
           $scope.status = $scope.getError(response, "Regenerate single image: Failed");
-          $scope.isRunning = false;
+          // $scope.isRunning = false;
         }
         else if ( 'undefined' !== typeof chunk_id ) {
           if ( $scope.chunkIDs[ chunk_id ].length && $scope.continue ) {
@@ -629,7 +629,7 @@ var wpStatelessApp = angular.module('wpStatelessApp', [])
         if(typeof response.data.success == 'undefined' || response.data.success == false){
           $scope.error = true;
           $scope.status = $scope.getError(response, "Sync single file: Failed");
-          $scope.isRunning = false;
+          // $scope.isRunning = false;
         }
         else if ( 'undefined' !== typeof chunk_id ) {
           if ( $scope.chunkIDs[ chunk_id ].length && $scope.continue ) {
@@ -686,7 +686,7 @@ var wpStatelessApp = angular.module('wpStatelessApp', [])
         if(typeof response.data.success == 'undefined' || response.data.success == false){
           $scope.error = true;
           $scope.status = $scope.getError(response, "Sync non library file: Failed");
-          $scope.isRunning = false;
+          // $scope.isRunning = false;
         }
         else if ( 'undefined' !== typeof chunk_id ) {
           if ( $scope.chunkIDs[ chunk_id ].length && $scope.continue ) {
