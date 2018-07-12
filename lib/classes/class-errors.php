@@ -206,14 +206,14 @@ namespace wpCloud\StatelessMedia {
               continue;
             }
 
-            $data = array(
-              'title' => $notice['title'],
+            $data = wp_parse_args($notice, array(
+              'title' => '',
               'class' => 'notice',
-              'message' => $notice['message'],
-              'button' => $notice['button'],
-              'key' => $notice['key'],
+              'message' => '',
+              'button' => '',
+              'key' => '',
               'action_links' => $this->action_links[ 'notices' ],
-            );
+            ));
             
             include ud_get_stateless_media()->path( '/static/views/error-notice.php', 'dir' );
             
