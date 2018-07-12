@@ -130,7 +130,7 @@ namespace wpCloud\StatelessMedia {
                   ud_get_stateless_media()->errors->add( array(
                       'key' => $new_const,
                       'title' => sprintf( __( "%s: Deprecated Notice (%s)", ud_get_stateless_media()->domain ), ud_get_stateless_media()->name, $new_const ),
-                      'message' => sprintf(__("`%s` constant is deprecated, please use `%s` instead.", ud_get_stateless_media()->domain), $old_const, $new_const),
+                      'message' => sprintf(__("<i>%s</i> constant is deprecated, please use <i>%s</i> instead.", ud_get_stateless_media()->domain), $old_const, $new_const),
                   ), 'notice' );
                   $this->set( "sm.readonly.{$option}", "constant" );
                   break;
@@ -177,7 +177,7 @@ namespace wpCloud\StatelessMedia {
               }
               if(is_string($old_const) && defined($old_const)){
                 $value = constant($old_const);
-                trigger_error(__(sprintf("`%s` constant is deprecated, please use `%s` instead.", $old_const, $new_const)), E_USER_WARNING);
+                trigger_error(__(sprintf("<i>%s</i> constant is deprecated, please use <i>%s</i> instead.", $old_const, $new_const)), E_USER_WARNING);
                 break;
               }
             }
