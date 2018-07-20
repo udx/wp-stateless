@@ -238,7 +238,7 @@ namespace wpCloud\StatelessMedia {
           if( !empty( $metadata[ 'sizes' ] ) && is_array( $metadata[ 'sizes' ] ) ) {
 
             $path = wp_normalize_path( dirname( get_attached_file( $attachment_id ) ) );
-            $mediaPath = wp_normalize_path( trim( str_replace( basename( $metadata[ 'file' ] ), '', $metadata[ 'file' ] ), '\/\\' ) );
+            $mediaPath = wp_normalize_path( trim( dirname( $metadata[ 'file' ] ), '\/\\' ) );
 
             foreach( (array) $metadata[ 'sizes' ] as $image_size => $data ) {
 
