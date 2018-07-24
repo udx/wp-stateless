@@ -1,3 +1,20 @@
+#### 2.1.6 ####
+* FIX - Update Google Libraries. #176
+* FIX - Resolved Google SDK conflict. #261
+* FIX - New admin notice design. #219
+* FIX - Improved and clear error message. #244 
+* FIX - ICompatibility.php errors notice. #257 #259
+* FIX - Undefined index: gs_link in class-bootstrap.php. #170
+* FIX - Force `Cache-Busting` when using `Stateless` mode. #249 
+* FIX - Media files with accent characters would not upload correctly to the bucket. #272 
+* FIX - Renamed constant `WP_STATELESS_MEDIA_ON_FLY` to `WP_STATELESS_DYNAMIC_IMAGE_SUPPORT`. #251 
+* FIX - Renamed constant `WP_STATELESS_MEDIA_HASH_FILENAME` to `WP_STATELESS_MEDIA_CACHE_BUSTING`. #250
+* COMPATIBILITY - Renamed constant `WP_STATELESS_COMPATIBILITY_WPSmush` to `WP_STATELESS_COMPATIBILITY_WPSMUSH`. #252
+* COMPATIBILITY - Added support for `WooCommerce Extra Product Options`. #266
+* COMPATIBILITY - Added support for `WPForms Pro`. #253
+* COMPATIBILITY - Improved `ShortPixel` compatibility. #254
+* COMPATIBILITY - Fixed `ACF Image Crop` compatibility. #256
+
 #### 2.1.5 ####
 * FIX - Fatal error with PHP 5.4.45 on activation.
 * FIX - E_WARNING: Illegal string offset ‘gs_bucket’.
