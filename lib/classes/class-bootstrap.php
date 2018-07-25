@@ -898,7 +898,16 @@ namespace wpCloud\StatelessMedia {
 
         //** try for a new style intermediate size */
         if ( $intermediate = image_get_intermediate_size( $id, $size ) ) {
-          $img_url = !empty( $intermediate['gs_link'] ) ? $intermediate['gs_link'] : $intermediate['url'];
+          if(!empty( $intermediate['gs_link'] )){
+            $img_url = $intermediate['gs_link'];
+          }
+          else if(!empty( $intermediate['url'] )){
+            $img_url = $intermediate['url'];
+          }
+          else{
+            $img_url = dirname($img_url) . $intermediate['file'];
+          }
+          
           $width = $intermediate['width'];
           $height = $intermediate['height'];
           $is_intermediate = true;

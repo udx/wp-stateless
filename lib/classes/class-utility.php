@@ -151,6 +151,7 @@ namespace wpCloud\StatelessMedia {
        * @return bool|string
        */
       public static function add_media( $metadata, $attachment_id, $force = false ) {
+        $file = '';
         $upload_dir = wp_upload_dir();
 
         /* Get metadata in case if method is called directly. */
@@ -165,10 +166,17 @@ namespace wpCloud\StatelessMedia {
           $fullsizepath = wp_normalize_path( get_attached_file( $attachment_id ) );
           // Make non-images uploadable.
           if( empty( $metadata['file'] ) && $attachment_id ) {
-            $metadata = array( "file" => str_replace( trailingslashit( $upload_dir[ 'basedir' ] ), '', get_attached_file( $attachment_id ) ) );
+            $file = str_replace( wp_normalize_path(trailingslashit( $upload_dir[ 'basedir' ] )), '', $fullsizepath );
+            if(empty($metadata)){
+              $metadata = array();
+            }
+            $mime_type = get_post_mime_type( $attachment_id );
+            if($mime_type != "application/pdf"){
+              $metadata["file"] = $file;
+            }
           }
 
-          $file = wp_normalize_path( $metadata[ 'file' ] );
+          $file = wp_normalize_path( !empty($metadata[ 'file' ])?$metadata[ 'file' ]:$file );
 
           $image_host = ud_get_stateless_media()->get_gs_host();
           $bucketLink = apply_filters('wp_stateless_bucket_link', $image_host);
@@ -178,7 +186,7 @@ namespace wpCloud\StatelessMedia {
             "height" => isset( $metadata[ 'height' ] )  ? $metadata[ 'height' ] : null,
             'object-id' => $attachment_id,
             'source-id' => md5( $attachment_id.ud_get_stateless_media()->get( 'sm.bucket' ) ),
-            'file-hash' => md5( $metadata[ 'file' ] )
+            'file-hash' => md5( $file )
           );
 
           if($attachment_id && !empty($metadata) && !$force){
@@ -238,7 +246,7 @@ namespace wpCloud\StatelessMedia {
           if( !empty( $metadata[ 'sizes' ] ) && is_array( $metadata[ 'sizes' ] ) ) {
 
             $path = wp_normalize_path( dirname( get_attached_file( $attachment_id ) ) );
-            $mediaPath = wp_normalize_path( trim( dirname( $metadata[ 'file' ] ), '\/\\' ) );
+            $mediaPath = wp_normalize_path( trim( dirname( $file ), '\/\\' ) );
 
             foreach( (array) $metadata[ 'sizes' ] as $image_size => $data ) {
 
