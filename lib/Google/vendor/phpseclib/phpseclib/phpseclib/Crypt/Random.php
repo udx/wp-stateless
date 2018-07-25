@@ -24,14 +24,6 @@
 
 namespace phpseclib\Crypt;
 
-use phpseclib\Crypt\AES;
-use phpseclib\Crypt\Base;
-use phpseclib\Crypt\Blowfish;
-use phpseclib\Crypt\DES;
-use phpseclib\Crypt\RC4;
-use phpseclib\Crypt\TripleDES;
-use phpseclib\Crypt\Twofish;
-
 /**
  * Pure-PHP Random Number Generator
  *
@@ -53,6 +45,10 @@ class Random
      */
     static function string($length)
     {
+        if (!$length) {
+            return '';
+        }
+
         if (version_compare(PHP_VERSION, '7.0.0', '>=')) {
             try {
                 return \random_bytes($length);
@@ -70,7 +66,7 @@ class Random
             // method 1. prior to PHP 5.3 this would call rand() on windows hence the function_exists('class_alias') call.
             // ie. class_alias is a function that was introduced in PHP 5.3
             if (extension_loaded('mcrypt') && function_exists('class_alias')) {
-                return mcrypt_create_iv($length);
+                return @mcrypt_create_iv($length);
             }
             // method 2. openssl_random_pseudo_bytes was introduced in PHP 5.3.0 but prior to PHP 5.3.4 there was,
             // to quote <http://php.net/ChangeLog-5.php#5.3.4>, "possible blocking behavior". as of 5.3.4
@@ -109,7 +105,7 @@ class Random
             // not doing. regardless, this'll only be called if this PHP script couldn't open /dev/urandom due to open_basedir
             // restrictions or some such
             if (extension_loaded('mcrypt')) {
-                return mcrypt_create_iv($length, MCRYPT_DEV_URANDOM);
+                return @mcrypt_create_iv($length, MCRYPT_DEV_URANDOM);
             }
         }
         // at this point we have no choice but to use a pure-PHP CSPRNG
@@ -148,13 +144,13 @@ class Random
             session_start();
 
             $v = $seed = $_SESSION['seed'] = pack('H*', sha1(
-                serialize($_SERVER) .
-                serialize($_POST) .
-                serialize($_GET) .
-                serialize($_COOKIE) .
-                serialize($GLOBALS) .
-                serialize($_SESSION) .
-                serialize($_OLD_SESSION)
+                (isset($_SERVER) ? phpseclib_safe_serialize($_SERVER) : '') .
+                (isset($_POST) ? phpseclib_safe_serialize($_POST) : '') .
+                (isset($_GET) ? phpseclib_safe_serialize($_GET) : '') .
+                (isset($_COOKIE) ? phpseclib_safe_serialize($_COOKIE) : '') .
+                phpseclib_safe_serialize($GLOBALS) .
+                phpseclib_safe_serialize($_SESSION) .
+                phpseclib_safe_serialize($_OLD_SESSION)
             ));
             if (!isset($_SESSION['count'])) {
                 $_SESSION['count'] = 0;
@@ -239,5 +235,40 @@ class Random
             $result.= $r;
         }
         return substr($result, 0, $length);
+    }
+}
+
+if (!function_exists('phpseclib_safe_serialize')) {
+    /**
+     * Safely serialize variables
+     *
+     * If a class has a private __sleep() method it'll give a fatal error on PHP 5.2 and earlier.
+     * PHP 5.3 will emit a warning.
+     *
+     * @param mixed $arr
+     * @access public
+     */
+    function phpseclib_safe_serialize(&$arr)
+    {
+        if (is_object($arr)) {
+            return '';
+        }
+        if (!is_array($arr)) {
+            return serialize($arr);
+        }
+        // prevent circular array recursion
+        if (isset($arr['__phpseclib_marker'])) {
+            return '';
+        }
+        $safearr = array();
+        $arr['__phpseclib_marker'] = true;
+        foreach (array_keys($arr) as $key) {
+            // do not recurse on the '__phpseclib_marker' key itself, for smaller memory usage
+            if ($key !== '__phpseclib_marker') {
+                $safearr[$key] = phpseclib_safe_serialize($arr[$key]);
+            }
+        }
+        unset($arr['__phpseclib_marker']);
+        return serialize($safearr);
     }
 }

@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+namespace wpCloud\StatelessMedia\Google_Client;
 
 class Google_Service_Exception extends Google_Exception
 {
@@ -36,7 +37,7 @@ class Google_Service_Exception extends Google_Exception
   public function __construct(
       $message,
       $code = 0,
-      Exception $previous = null,
+      \Exception $previous = null,
       $errors = array()
   ) {
     if (version_compare(PHP_VERSION, '5.3.0') >= 0) {

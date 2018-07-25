@@ -154,6 +154,10 @@ namespace wpCloud\StatelessMedia {
        */
       public function action_stateless_process_image() {
 
+        if(ud_get_stateless_media()->is_connected_to_gs() !== true){
+          throw new \Exception( __( 'Not connected to GCS', ud_get_stateless_media()->domain) );
+        }
+
         @error_reporting( 0 );
 
         $id = (int) $_REQUEST['id'];
@@ -211,6 +215,10 @@ namespace wpCloud\StatelessMedia {
        */
       public function action_stateless_process_file() {
         @error_reporting( 0 );
+
+        if(ud_get_stateless_media()->is_connected_to_gs() !== true){
+          throw new \Exception( __( 'Not connected to GCS', ud_get_stateless_media()->domain) );
+        }
 
         $id = (int) $_REQUEST['id'];
         $file = get_post( $id );
@@ -284,9 +292,15 @@ namespace wpCloud\StatelessMedia {
       /**
        * @return string
        * @throws \Exception
+       * @todo Show error when file not exist on both local and gcs.
        */
       public function action_stateless_process_non_library_file() {
         @error_reporting( 0 );
+
+        if(ud_get_stateless_media()->is_connected_to_gs() !== true){
+          throw new \Exception( __( 'Not connected to GCS', ud_get_stateless_media()->domain) );
+        }
+        
         $upload_dir = wp_upload_dir();
         $client = ud_get_stateless_media()->get_client();
 
@@ -311,6 +325,10 @@ namespace wpCloud\StatelessMedia {
       public function action_get_images_media_ids() {
         global $wpdb;
 
+        if(ud_get_stateless_media()->is_connected_to_gs() !== true){
+          throw new \Exception( __( 'Not connected to GCS', ud_get_stateless_media()->domain) );
+        }
+
         if ( ! $images = $wpdb->get_results( "SELECT ID FROM $wpdb->posts WHERE post_type = 'attachment' AND post_mime_type LIKE 'image/%' ORDER BY ID DESC" ) ) {
           throw new \Exception( __('No images media objects found.', ud_get_stateless_media()->domain) );
         }
@@ -329,6 +347,10 @@ namespace wpCloud\StatelessMedia {
       public function action_get_other_media_ids() {
         global $wpdb;
 
+        if(ud_get_stateless_media()->is_connected_to_gs() !== true){
+          throw new \Exception( __( 'Not connected to GCS', ud_get_stateless_media()->domain) );
+        }
+
         if ( ! $files = $wpdb->get_results( "SELECT ID FROM $wpdb->posts WHERE post_type = 'attachment' AND post_mime_type NOT LIKE 'image/%' ORDER BY ID DESC" ) ) {
           throw new \Exception( __('No files found.', ud_get_stateless_media()->domain) );
         }
@@ -346,6 +368,10 @@ namespace wpCloud\StatelessMedia {
        * Return files to be manualy sync from sync tab.
        */
       public function action_get_non_library_files_id() {
+        if(ud_get_stateless_media()->is_connected_to_gs() !== true){
+          throw new \Exception( __( 'Not connected to GCS', ud_get_stateless_media()->domain) );
+        }
+
         $files = apply_filters( 'sm:sync::nonMediaFiles', array() );
         return $files;
       }
@@ -402,6 +428,10 @@ namespace wpCloud\StatelessMedia {
        * @return array
        */
       private function get_non_processed_media_ids( $mode, $files, $continue = false ) {
+        if(ud_get_stateless_media()->is_connected_to_gs() !== true){
+          throw new \Exception( __( 'Not connected to GCS', ud_get_stateless_media()->domain) );
+        }
+
         if ( $continue ) {
           $progress = $this->retrieve_current_progress( $mode );
           if ( false !== $progress ) {

@@ -31,7 +31,7 @@ namespace wpCloud\StatelessMedia {
           'delete_remote'          => array('WP_STATELESS_MEDIA_DELETE_REMOTE', 'true'), 
           'custom_domain'          => array('WP_STATELESS_MEDIA_CUSTOM_DOMAIN', ''), 
           'organize_media'         => array('', 'true'), 
-          'hashify_file_name'      => array('WP_STATELESS_MEDIA_HASH_FILENAME', 'true'), 
+          'hashify_file_name'      => array(['WP_STATELESS_MEDIA_HASH_FILENAME' => 'WP_STATELESS_MEDIA_CACHE_BUSTING'], 'true'), 
         );
 
       private $network_only_settings = array(
@@ -112,9 +112,32 @@ namespace wpCloud\StatelessMedia {
           if ($option == 'body_rewrite_types' && empty($value) && !is_multisite()) {
             $value = $default;
           }
+          
+          if ($option == 'hashify_file_name' && $this->get("sm.mode") == 'stateless') {
+            $value = true;
+          }
 
           // If constant is set then override by constant
-          if(defined($constant)){
+          if(is_array($constant)){
+            foreach($constant as $old_const => $new_const){
+              if(defined($new_const)){
+                  $value = constant($new_const);
+                  $this->set( "sm.readonly.{$option}", "constant" );
+                break;
+              }
+              if(is_string($old_const) && defined($old_const)){
+                  $value = constant($old_const);
+                  ud_get_stateless_media()->errors->add( array(
+                      'key' => $new_const,
+                      'title' => sprintf( __( "%s: Deprecated Notice (%s)", ud_get_stateless_media()->domain ), ud_get_stateless_media()->name, $new_const ),
+                      'message' => sprintf(__("<i>%s</i> constant is deprecated, please use <i>%s</i> instead.", ud_get_stateless_media()->domain), $old_const, $new_const),
+                  ), 'notice' );
+                  $this->set( "sm.readonly.{$option}", "constant" );
+                  break;
+              }
+            }
+          }
+          elseif(defined($constant)){
             $value = constant($constant);
             $this->set( "sm.readonly.{$option}", "constant" );
           }
@@ -129,10 +152,16 @@ namespace wpCloud\StatelessMedia {
             }
 
           }
+          
+          // Converting to string true flase for angular.
+          if(is_bool($value)){
+            $value = $value === true ? "true" : "false";
+          }
 
           $this->set( "sm.$option", $value);
         }
 
+        // Network only settings, to hide settings page
         foreach ($this->network_only_settings as $option => $array) {
           $value    = '';
           $_option  = 'sm_' . $option;
@@ -140,12 +169,30 @@ namespace wpCloud\StatelessMedia {
           $default  = $array[1]; // Default value
 
           // If constant is set then override by constant
-          if(defined($constant)){
+          if(is_array($constant)){
+            foreach($constant as $old_const => $new_const){
+              if(defined($new_const)){
+                $value = constant($new_const);
+                break;
+              }
+              if(is_string($old_const) && defined($old_const)){
+                $value = constant($old_const);
+                trigger_error(__(sprintf("<i>%s</i> constant is deprecated, please use <i>%s</i> instead.", $old_const, $new_const)), E_USER_WARNING);
+                break;
+              }
+            }
+          }
+          elseif(defined($constant)){
             $value = constant($constant);
           }
           // Getting network settings
           elseif(is_multisite()){
             $value = get_site_option( $_option, $default );
+          }
+          
+          // Converting to string true flase for angular.
+          if(is_bool($value)){
+            $value = $value === true ? "true" : "false";
           }
 
           $this->set( "sm.$option", $value);

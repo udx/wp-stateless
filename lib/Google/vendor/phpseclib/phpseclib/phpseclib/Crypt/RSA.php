@@ -51,13 +51,6 @@
 
 namespace phpseclib\Crypt;
 
-use phpseclib\Crypt\AES;
-use phpseclib\Crypt\Base;
-use phpseclib\Crypt\DES;
-use phpseclib\Crypt\Hash;
-use phpseclib\Crypt\Random;
-use phpseclib\Crypt\RSA;
-use phpseclib\Crypt\TripleDES;
 use phpseclib\Math\BigInteger;
 
 /**
@@ -252,7 +245,7 @@ class RSA
     /**
      * Precomputed Zero
      *
-     * @var array
+     * @var \phpseclib\Math\BigInteger
      * @access private
      */
     var $zero;
@@ -260,7 +253,7 @@ class RSA
     /**
      * Precomputed One
      *
-     * @var array
+     * @var \phpseclib\Math\BigInteger
      * @access private
      */
     var $one;
@@ -475,23 +468,27 @@ class RSA
                     break;
                 case extension_loaded('openssl') && file_exists($this->configFile):
                     // some versions of XAMPP have mismatched versions of OpenSSL which causes it not to work
-                    ob_start();
-                    @phpinfo();
-                    $content = ob_get_contents();
-                    ob_end_clean();
-
-                    preg_match_all('#OpenSSL (Header|Library) Version(.*)#im', $content, $matches);
-
                     $versions = array();
-                    if (!empty($matches[1])) {
-                        for ($i = 0; $i < count($matches[1]); $i++) {
-                            $fullVersion = trim(str_replace('=>', '', strip_tags($matches[2][$i])));
 
-                            // Remove letter part in OpenSSL version
-                            if (!preg_match('/(\d+\.\d+\.\d+)/i', $fullVersion, $m)) {
-                                $versions[$matches[1][$i]] = $fullVersion;
-                            } else {
-                                $versions[$matches[1][$i]] = $m[0];
+                    // avoid generating errors (even with suppression) when phpinfo() is disabled (common in production systems)
+                    if (strpos(ini_get('disable_functions'), 'phpinfo') === false) {
+                        ob_start();
+                        @phpinfo();
+                        $content = ob_get_contents();
+                        ob_end_clean();
+
+                        preg_match_all('#OpenSSL (Header|Library) Version(.*)#im', $content, $matches);
+
+                        if (!empty($matches[1])) {
+                            for ($i = 0; $i < count($matches[1]); $i++) {
+                                $fullVersion = trim(str_replace('=>', '', strip_tags($matches[2][$i])));
+
+                                // Remove letter part in OpenSSL version
+                                if (!preg_match('/(\d+\.\d+\.\d+)/i', $fullVersion, $m)) {
+                                    $versions[$matches[1][$i]] = $fullVersion;
+                                } else {
+                                    $versions[$matches[1][$i]] = $m[0];
+                                }
                             }
                         }
                     }
@@ -501,6 +498,7 @@ class RSA
                         case !isset($versions['Header']):
                         case !isset($versions['Library']):
                         case $versions['Header'] == $versions['Library']:
+                        case version_compare($versions['Header'], '1.0.0') >= 0 && version_compare($versions['Library'], '1.0.0') >= 0:
                             define('CRYPT_RSA_MODE', self::MODE_OPENSSL);
                             break;
                         default:
@@ -1578,6 +1576,15 @@ class RSA
         }
 
         if ($components === false) {
+            $this->comment = null;
+            $this->modulus = null;
+            $this->k = null;
+            $this->exponent = null;
+            $this->primes = null;
+            $this->exponents = null;
+            $this->coefficients = null;
+            $this->publicExponent = null;
+
             return false;
         }
 
@@ -1715,7 +1722,7 @@ class RSA
     function setPrivateKey($key = false, $type = false)
     {
         if ($key === false && !empty($this->publicExponent)) {
-            unset($this->publicExponent);
+            $this->publicExponent = false;
             return true;
         }
 
@@ -1723,7 +1730,7 @@ class RSA
         if (!$rsa->loadKey($key, $type)) {
             return false;
         }
-        unset($rsa->publicExponent);
+        $rsa->publicExponent = false;
 
         // don't overwrite the old key if the new key is invalid
         $this->loadKey($rsa);
@@ -1767,7 +1774,7 @@ class RSA
      * for invalid values.
      * @return mixed
      */
-    public function getPublicKeyFingerprint($algorithm = 'md5')
+    function getPublicKeyFingerprint($algorithm = 'md5')
     {
         if (empty($this->modulus) || empty($this->publicExponent)) {
             return false;
@@ -2092,8 +2099,14 @@ class RSA
      */
     function _exponentiate($x)
     {
-        if (empty($this->primes) || empty($this->coefficients) || empty($this->exponents)) {
-            return $x->modPow($this->exponent, $this->modulus);
+        switch (true) {
+            case empty($this->primes):
+            case $this->primes[1]->equals($this->zero):
+            case empty($this->coefficients):
+            case $this->coefficients[2]->equals($this->zero):
+            case empty($this->exponents):
+            case $this->exponents[1]->equals($this->zero):
+                return $x->modPow($this->exponent, $this->modulus);
         }
 
         $num_primes = count($this->primes);
@@ -2414,7 +2427,7 @@ class RSA
         $db = $maskedDB ^ $dbMask;
         $lHash2 = substr($db, 0, $this->hLen);
         $m = substr($db, $this->hLen);
-        if ($lHash != $lHash2) {
+        if (!$this->_equals($lHash, $lHash2)) {
             user_error('Decryption error');
             return false;
         }
@@ -2568,7 +2581,7 @@ class RSA
         // be output.
 
         $emLen = ($emBits + 1) >> 3; // ie. ceil($emBits / 8)
-        $sLen = $this->sLen ? $this->sLen : $this->hLen;
+        $sLen = $this->sLen !== null ? $this->sLen : $this->hLen;
 
         $mHash = $this->hash->hash($m);
         if ($emLen < $this->hLen + $sLen + 2) {
@@ -2606,7 +2619,7 @@ class RSA
         // be output.
 
         $emLen = ($emBits + 1) >> 3; // ie. ceil($emBits / 8);
-        $sLen = $this->sLen ? $this->sLen : $this->hLen;
+        $sLen = $this->sLen !== null ? $this->sLen : $this->hLen;
 
         $mHash = $this->hash->hash($m);
         if ($emLen < $this->hLen + $sLen + 2) {

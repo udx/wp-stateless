@@ -22,7 +22,8 @@ namespace wpCloud\StatelessMedia {
             public function module_init($sm){
                 add_action( 'shortpixel_image_optimised', array($this, 'shortpixel_image_optimised') );
                 add_filter( 'get_attached_file', array($this, 'fix_missing_file'), 10, 2 );
-                add_action( 'admin_action_shortpixel_restore_backup', array($this, 'handleRestoreBackup'), 999 );
+                add_action( 'shortpixel_before_restore_image', array($this, 'sync_backup_file') );
+                add_action( 'shortpixel_after_restore_image', array($this, 'handleRestoreBackup') );
                 add_action( 'admin_enqueue_scripts', array( $this, 'shortPixelJS') );
                 // Sync from sync tab
                 add_action( 'sm:synced::image', array( $this, 'sync_backup_file'), 10, 2 );
@@ -141,7 +142,7 @@ namespace wpCloud\StatelessMedia {
             /**
              * Sync backup image
              */
-            public function sync_backup_file($id, $metadata){
+            public function sync_backup_file($id, $metadata = null){
                 
                 /* Get metadata in case if method is called directly. */
                 if( empty($metadata) ) {
@@ -211,8 +212,7 @@ namespace wpCloud\StatelessMedia {
             /**
              * Sync images after shortpixel restore them from backup.
              */
-            public function handleRestoreBackup(){
-                $attachmentID = intval($_GET['attachment_ID']);
+            public function handleRestoreBackup($attachmentID){
                 $metadata = wp_get_attachment_metadata( $attachmentID );
                 $this->add_media( $metadata, $attachmentID );
             }
@@ -271,7 +271,7 @@ namespace wpCloud\StatelessMedia {
                     if( !empty( $metadata[ 'sizes' ] ) && is_array( $metadata[ 'sizes' ] ) ) {
 
                         $path = wp_normalize_path( dirname( get_attached_file( $attachment_id ) ) );
-                        $mediaPath = wp_normalize_path( trim( str_replace( basename( $metadata[ 'file' ] ), '', $metadata[ 'file' ] ), '\/\\' ) );
+                        $mediaPath = wp_normalize_path( trim( dirname( $metadata[ 'file' ] ), '\/\\' ) );
 
                         foreach( (array) $metadata[ 'sizes' ] as $image_size => $data ) {
 

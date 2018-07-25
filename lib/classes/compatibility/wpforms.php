@@ -16,7 +16,7 @@ namespace wpCloud\StatelessMedia {
             protected $title = 'WPForms';
             protected $constant = 'WP_STATELESS_COMPATIBILITY_WPFORMS';
             protected $description = 'Ensures compatibility with WPForms.';
-            protected $plugin_file = 'wpforms-lite/wpforms.php';
+            protected $plugin_file = ['wpforms-lite/wpforms.php', 'wpforms/wpforms.php'];
 
             public function module_init($sm){
                 // exclude randomize_filename from wpforms page
