@@ -641,12 +641,13 @@ var wpStatelessApp = angular.module('wpStatelessApp', [])
 
   $scope.sm.generatePreviewUrl = function() {
     var host = 'https://storage.googleapis.com/';
-    var is_ssl = $scope.sm.custom_domain.indexOf('https://');
+    var is_ssl = $scope.sm.force_ssl === "1";
     var custom_domain = $scope.sm.custom_domain;
     custom_domain = custom_domain.replace('https://', '');
     custom_domain = custom_domain.replace('http://', '');
+    $scope.sm.custom_domain = custom_domain;
     if ( $scope.sm.bucket && custom_domain == $scope.sm.bucket) {
-      host = is_ssl === 0 ? 'https://' : 'http://';  // bucketname will be host
+      host = is_ssl ? 'https://' : 'http://';  // bucketname will be host
     }
     host += $scope.sm.bucket ? $scope.sm.bucket : '{bucket-name}';
     var rootdir = $scope.sm.root_dir ? $scope.sm.root_dir + '/' : '';
