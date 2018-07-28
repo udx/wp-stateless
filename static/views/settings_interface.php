@@ -193,7 +193,7 @@
                                         </select>
                                     </p>
                                     <p class="description">
-                                    <?php printf(__( 'This will force SSL (HTTPS) to be used on your custom CDN domain, which is not supported by GCS by default. You will need to routed the custom CDN domain via other services like CloudFlare to <a href="%s" target="_blank">inject the required SSL encryption layer</a> (available in their free plan). <br/>Note: To enforce SSL on items uploaded previously, you might need to use the features in the Sync tab to perform a resync.', ud_get_stateless_media()->domain ), 'https://www.cloudflare.com/ssl/'); ?>
+                                    <?php printf(__( 'This will force SSL (HTTPS) to be used on your custom CDN domain, which is not supported by GCS by default. You will need to routed the custom CDN domain via other services like CloudFlare to <a href="%s" target="_blank">inject the required SSL encryption layer</a> (available in their free plan). <br/><br/>Note: To enforce SSL on items uploaded previously, you might need to use the features in the Sync tab to perform a resync.', ud_get_stateless_media()->domain ), 'https://www.cloudflare.com/ssl/'); ?>
                                     </p>
 
 
