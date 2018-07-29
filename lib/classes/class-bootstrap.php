@@ -284,11 +284,11 @@ namespace wpCloud\StatelessMedia {
         $sm = $sm?$sm: $this->get( 'sm');
         $image_host = 'https://storage.googleapis.com/';
         $custom_domain = $sm['custom_domain'];
-        $is_ssl = strpos($custom_domain, 'https://');
+        $is_ssl = $sm['force_ssl'] === "1";
         $custom_domain = str_replace('https://', '', $custom_domain);
         $custom_domain = str_replace('http://', '', $custom_domain);
         if ( $sm['bucket'] && $custom_domain == $sm['bucket']) {
-            $image_host = $is_ssl === 0 ? 'https://' : 'http://';  // bucketname will be host
+            $image_host = $is_ssl ? 'https://' : 'http://';  // bucketname will be host
         }
         return apply_filters( 'get_gs_host', $image_host . $sm['bucket'], $image_host, $sm['bucket'], $is_ssl );
       }
@@ -303,7 +303,8 @@ namespace wpCloud\StatelessMedia {
       public function wp_stateless_bucket_link($fileLink) {
         $bucketname = $this->get( 'sm.bucket' );
         if ( strpos($fileLink, $bucketname) > 8) {
-          $fileLink = 'http://' . substr($fileLink, strpos($fileLink, $bucketname));
+          $sm = $sm?$sm: $this->get( 'sm');
+          $fileLink = ($sm['force_ssl'] === '1' ? 'https://': 'http://') . substr($fileLink, strpos($fileLink, $bucketname));
         }
         return $fileLink;
       }
@@ -345,6 +346,7 @@ namespace wpCloud\StatelessMedia {
             'cache_control',
             'delete_remote',
             'custom_domain',
+            'force_ssl',
             'organize_media',
             'hashify_file_name'
         );
