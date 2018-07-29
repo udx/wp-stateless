@@ -179,8 +179,24 @@
                                     </p>
                                     <p class="description">
                                     <strong ng-bind="sm.showNotice('custom_domain')" ></strong> <br>
-                                    <?php printf(__( 'Replace the default GCS domain with your own custom domain. This will require you to <a href="%s" target="_blank">configure a CNAME</a>. Be advised that the bucket name and domain name must match exactly and HTTPS is not supported with a custom domain.', ud_get_stateless_media()->domain ), 'https://cloud.google.com/storage/docs/xml-api/reference-uris#cname'); ?>
+                                    <?php printf(__( 'Replace the default GCS domain with your own custom domain. This will require you to <a href="%s" target="_blank">configure a CNAME</a>. Be advised that the bucket name and domain name must match exactly and HTTPS is not supported with a custom domain unless it is routed via other CDN services like <a href="https://cloudflare.com" target="_blank">CloudFlare</a>.', ud_get_stateless_media()->domain ), 'https://cloud.google.com/storage/docs/xml-api/reference-uris#cname'); ?>
                                     </p>
+                                    
+                                    <h4><?php _e( 'Force SSL', ud_get_stateless_media()->domain ); ?></h4>
+                                    <p>
+                                        <select id="org_url_grp" name="sm[force_ssl]" ng-model="sm.force_ssl" ng-change="sm.generatePreviewUrl()" ng-disabled="sm.readonly.organize_media">
+                                            <?php if(is_network_admin()): ?>
+                                            <option value=""><?php _e( 'Don\'t override', ud_get_stateless_media()->domain ); ?></option>
+                                            <?php endif; ?>
+                                            <option value="1"><?php _e( 'Enable', ud_get_stateless_media()->domain ); ?></option>
+                                            <option value=""><?php _e( 'Disable', ud_get_stateless_media()->domain ); ?></option>
+                                        </select>
+                                    </p>
+                                    <p class="description">
+                                    <?php printf(__( 'This will force SSL (HTTPS) to be used on your custom CDN domain, which is not supported by GCS by default. You will need to routed the custom CDN domain via other services like CloudFlare to <a href="%s" target="_blank">inject the required SSL encryption layer</a> (available in their free plan). <br/><br/>Note: To enforce SSL on items uploaded previously, you might need to use the features in the Sync tab to perform a resync.', ud_get_stateless_media()->domain ), 'https://www.cloudflare.com/ssl/'); ?>
+                                    </p>
+
+
                                     <hr>
 
                                     <?php if(!is_network_admin()): ?>
