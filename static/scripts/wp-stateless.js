@@ -108,7 +108,7 @@ var wpStatelessApp = angular.module('wpStatelessApp', [])
     }
 
     if(!response.data && response.status == -1){
-      return "Unable to connect to the server";
+      return stateless_l10n.unable_to_connect_to_the_server;
     }
 
     return message;
@@ -138,15 +138,15 @@ var wpStatelessApp = angular.module('wpStatelessApp', [])
             callback();
           }
         } else {
-          console.error( 'Could not retrieve progress' );
+          console.error( stateless_l10n.could_not_retrieve_progress );
         }
       } else {
-        console.error( 'Could not retrieve progress' );
+        console.error( stateless_l10n.could_not_retrieve_progress );
       }
 
       $scope.isLoading = false;
     }, function(response) {
-      console.error( 'Could not retrieve progress' );
+      console.error( stateless_l10n.could_not_retrieve_progress );
 
       $scope.isLoading = false;
     });
@@ -183,15 +183,15 @@ var wpStatelessApp = angular.module('wpStatelessApp', [])
             callback();
           }
         } else {
-          console.error( 'Could not get fails' );
+          console.error( stateless_l10n.could_not_get_fails );
         }
       } else {
-        console.error( 'Could not get fails' );
+        console.error( stateless_l10n.could_not_get_fails );
       }
 
       $scope.isLoading = false;
     }, function(response) {
-      console.error( 'Could not get fails' );
+      console.error( stateless_l10n.could_not_get_fails );
 
       $scope.isLoading = false;
     });
@@ -260,7 +260,7 @@ var wpStatelessApp = angular.module('wpStatelessApp', [])
    * Stop process
    */
   $scope.processStop = function() {
-    $scope.status = 'Stopping...';
+    $scope.status = stateless_l10n.stopping;
     $scope.continue = false;
   };
 
@@ -298,10 +298,10 @@ var wpStatelessApp = angular.module('wpStatelessApp', [])
       }).then(function(response){
         $scope.progresses[ mode ] = false;
 
-        $scope.status = 'Finished';
+        $scope.status = stateless_l10n.finished;
         $scope.isRunning = false;
       }, function(response) {
-        console.error( 'Could not reset progress' );
+        console.error( stateless_l10n.could_not_reset_progress );
       });
     } else if ( 'undefined' !== typeof chunk_id ) {
       // process cancelled, but this is only a chunk finishing request
@@ -316,7 +316,7 @@ var wpStatelessApp = angular.module('wpStatelessApp', [])
       }
       if ( all_done ) {
         $scope.getCurrentProgresses( function() {
-          $scope.status = 'Cancelled';
+          $scope.status = stateless_l10n.cancelled;
           $scope.isRunning = false;
         });
       }
@@ -324,7 +324,7 @@ var wpStatelessApp = angular.module('wpStatelessApp', [])
       // process cancelled
 
       $scope.getCurrentProgresses( function() {
-        $scope.status = 'Cancelled';
+        $scope.status = stateless_l10n.cancelled;
         $scope.isRunning = false;
       });
     }
@@ -338,7 +338,7 @@ var wpStatelessApp = angular.module('wpStatelessApp', [])
 
     $scope.continue = true;
     $scope.isLoading = true;
-    $scope.status = 'Loading Images Media Objects...';
+    $scope.status = stateless_l10n.loading_images_media_objects;
 
     $http({
       method: 'GET',
@@ -356,28 +356,28 @@ var wpStatelessApp = angular.module('wpStatelessApp', [])
             $scope.objectIDs = data.data;
             callback();
           } else {
-            $scope.status = 'IDs are malformed';
+            $scope.status = stateless_l10n.ids_are_malformed;
             $scope.error = true;
           }
         }
       } else {
-        $scope.status = $scope.getError(response, 'Unable to get Images Media ID');
+        $scope.status = $scope.getError(response, stateless_l10n.unable_to_get_images_media_id);
         $scope.error = true;
       }
 
       $scope.isLoading = false;
 
       if(WP_DEBUG){
-        console.log("WP-Stateless get Images Media ID:", response);
+        console.log(stateless_l10n.wp_stateless_get_images_media_id, response);
       }
 
     }, function(response) {
       $scope.error = true;
-      $scope.status = $scope.getError(response, 'Get Images Media ID: Request failed');
+      $scope.status = $scope.getError(response, get_images_media_id + ": " + stateless_l10n.request_failed);
       $scope.isLoading = false;
 
       if(WP_DEBUG){
-        console.log("WP-Stateless get Images Media ID: Request failed", response, response.headers());
+        console.log(stateless_l10n.wp_stateless_get_images_media_id + ": " + stateless_l10n.request_failed, response, response.headers());
       }
     });
 
@@ -391,7 +391,7 @@ var wpStatelessApp = angular.module('wpStatelessApp', [])
 
     $scope.continue = true;
     $scope.isLoading = true;
-    $scope.status = 'Loading non-image Media Objects...';
+    $scope.status = stateless_l10n.loading_non_image_media_objects;
 
     $http({
       method: 'GET',
@@ -409,7 +409,7 @@ var wpStatelessApp = angular.module('wpStatelessApp', [])
             $scope.objectIDs = data.data;
             callback();
           } else {
-            $scope.status = $scope.getError(response, 'IDs are malformed');
+            $scope.status = $scope.getError(response, stateless_l10n.ids_are_malformed);
             $scope.error = true;
           }
         }
