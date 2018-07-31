@@ -202,7 +202,7 @@
                                     <hr>
                                     <h4><?php _e( 'Cache-Busting', ud_get_stateless_media()->domain ); ?></h4>
                                     <p>
-                                        <select id="cache_busting" name="sm[hashify_file_name]" ng-model="sm.hashify_file_name" ng-change="sm.generatePreviewUrl()" ng-disabled="sm.readonly.hashify_file_name">
+                                        <select id="cache_busting" name="sm[hashify_file_name]" ng-model="sm.hashify_file_name" ng-change="sm.generatePreviewUrl()" ng-disabled="sm.readonly.hashify_file_name || sm.mode == 'stateless'">
                                             <?php if(is_network_admin()): ?>
                                             <option value=""><?php _e( 'Don\'t override', ud_get_stateless_media()->domain ); ?></option>
                                             <?php endif; ?>
@@ -210,7 +210,12 @@
                                             <option value="false"><?php _e( 'Disable', ud_get_stateless_media()->domain ); ?></option>
                                         </select>
                                     </p>
-                                    <p class="description"><strong ng-bind="sm.showNotice('hashify_file_name')" ></strong> <?php _e( 'Prepends a random set of numbers and letters to the filename. This is useful for preventing caching issues when uploading files that have the same filename.', ud_get_stateless_media()->domain ); ?></p>
+                                    <p class="description"><strong ng-bind="sm.showNotice('hashify_file_name')" ></strong> 
+                                    <span ng-show="sm.mode == 'stateless'">
+                                    <?php _e(sprintf( "<b>Required by Stateless Mode. Override with the <a href='%s' target='_blank'>WP_STATELESS_MEDIA_CACHE_CONTROL</a> constant.</b>","https://github.com/wpCloud/wp-stateless/wiki/Constants#wp_stateless_media_cache_control"), ud_get_stateless_media()->domain);?>
+                                    </span>
+
+                                    <?php _e( 'Prepends a random set of numbers and letters to the filename. This is useful for preventing caching issues when uploading files that have the same filename.', ud_get_stateless_media()->domain ); ?></p>
                                 </fieldset>
                             </td>
                         </tr> 
