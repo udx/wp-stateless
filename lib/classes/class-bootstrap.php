@@ -724,6 +724,7 @@ namespace wpCloud\StatelessMedia {
        * Register scripts and styles
        */
       public function admin_init() {
+        $this->show_notice_stateless_cache_busting();
         wp_register_style( 'wp-stateless', $this->path( 'static/styles/wp-stateless.css', 'url'  ), array(), self::$version );
 
         /* Attachment or upload page */
@@ -1068,6 +1069,28 @@ namespace wpCloud\StatelessMedia {
        */
       public function activate() {
         add_action( 'activated_plugin', array($this, 'redirect_to_splash') );
+        add_action( 'activated_plugin', array($this, 'is_new_install'), 1 );
+      }
+
+      public function is_new_install($plugin =''){
+        if( $plugin == plugin_basename( $this->boot_file ) ) {
+          $sm_mode = get_option('sm_mode', null);
+          if(empty($sm_mode)){
+            update_option('dismissed_notice_stateless_cache_busting', true);
+          }
+        }
+      }
+      
+      public function show_notice_stateless_cache_busting(){
+        $this->errors->add( array(
+          'key' => 'stateless_cache_busting',
+          'button' => 'View Settings',
+          'button_link' => admin_url('upload.php?page=stateless-settings'),
+          'title' => sprintf( __( "Stateless mode now requires the Cache-Busting option.", ud_get_stateless_media()->domain ) ),
+          'message' => sprintf( __("WordPress looks at local files to prevent files with the same filenames. 
+                                Since Stateless mode bypasses this check, there is a potential for files to be stored with the same file name. We enforce the Cache-Busting option to prevent this. 
+                                Override with the <a href='%s' target='_blank'>%s</a> constant.", ud_get_stateless_media()->domain),"https://github.com/wpCloud/wp-stateless/wiki/Constants#wp_stateless_media_cache_busting", "WP_STATELESS_MEDIA_CACHE_BUSTING" ),
+        ), 'notice' );
       }
 
       public function redirect_to_splash($plugin =''){

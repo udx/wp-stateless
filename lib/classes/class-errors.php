@@ -211,6 +211,7 @@ namespace wpCloud\StatelessMedia {
               'class' => 'notice',
               'message' => '',
               'button' => '',
+              'button_link' => '#',
               'key' => '',
               'action_links' => $this->action_links[ 'notices' ],
             ));

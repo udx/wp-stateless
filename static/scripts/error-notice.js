@@ -4,10 +4,14 @@
 jQuery( document ).ready( function () {
   
     jQuery( '.ud-admin-notice' ).on( 'click', '.button-action', function(e){
+      if(_this.attr('href') != '#'){
+        return;
+      }
+      
       e.preventDefault();
   
       var _this = jQuery( this );
-  
+
       var data = {
         action: 'button_action',
         key: _this.data('key'),
@@ -20,7 +24,7 @@ jQuery( document ).ready( function () {
             alert(result_data.error);
           }
       }, "json" );
-  
+      return false;
     });
   
   } );
