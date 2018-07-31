@@ -1,3 +1,9 @@
+
+#### 2.1.7 ####
+* ENHANCEMENT - Display notice when selecting stateless option.
+* ENHANCEMENT - Added required message on Cache-Busting setting.
+* ENHANCEMENT - Display dashboard-wide notice for existing users.
+
 #### 2.1.6 ####
 * FIX - Resolved Google SDK conflict.
 * FIX - ICompatibility.php errors notice.

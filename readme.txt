@@ -6,7 +6,7 @@ License: GPLv2 or later
 Requires PHP: 5.5
 Requires at least: 4.0
 Tested up to: 4.9.7
-Stable tag: 2.1.6
+Stable tag: 2.1.7
 
 Upload and serve your WordPress media files from Google Cloud Storage.
 
@@ -101,11 +101,21 @@ To ensure new releases cause as little disruption as possible, we rely on a numb
 
 == Upgrade Notice ==
 
+= 2.1.7 =
+* ENHANCEMENT - Display notice when selecting stateless option.
+* ENHANCEMENT - Added required message on Cache-Busting setting.
+* ENHANCEMENT - Display dashboard-wide notice for existing users.
+
 = 2.1.5 =
 * Bug fixed and loads of new compatibility added.
 
 
 == Changelog ==
+
+= 2.1.7 =
+* ENHANCEMENT - Display notice when selecting stateless option.
+* ENHANCEMENT - Added required message on Cache-Busting setting.
+* ENHANCEMENT - Display dashboard-wide notice for existing users.
 
 = 2.1.6 =
 * FIX - Resolved Google SDK conflict.
