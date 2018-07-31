@@ -35,8 +35,6 @@
 
 namespace phpseclib\Crypt;
 
-use phpseclib\Crypt\Base;
-
 /**
  * Pure-PHP implementation of RC2.
  *
@@ -288,7 +286,7 @@ class RC2 extends Base
     /**
      * Sets the key length.
      *
-     * Valid key lengths are 1 to 1024.
+     * Valid key lengths are 8 to 1024.
      * Calling this function after setting the key has no effect until the next
      *  \phpseclib\Crypt\RC2::setKey() call.
      *
@@ -297,9 +295,16 @@ class RC2 extends Base
      */
     function setKeyLength($length)
     {
-        if ($length >= 1 && $length <= 1024) {
+        if ($length < 8) {
+            $this->default_key_length = 1;
+        } elseif ($length > 1024) {
+            $this->default_key_length = 128;
+        } else {
             $this->default_key_length = $length;
         }
+        $this->current_key_length = $this->default_key_length;
+
+        parent::setKeyLength($length);
     }
 
     /**
@@ -316,7 +321,7 @@ class RC2 extends Base
     /**
      * Sets the key.
      *
-     * Keys can be of any length. RC2, itself, uses 1 to 1024 bit keys (eg.
+     * Keys can be of any length. RC2, itself, uses 8 to 1024 bit keys (eg.
      * strlen($key) <= 128), however, we only use the first 128 bytes if $key
      * has more then 128 bytes in it, and set $key to a single null byte if
      * it is empty.
@@ -415,7 +420,7 @@ class RC2 extends Base
             return $result;
         }
 
-        return parent::encrypt($ciphertext);
+        return parent::decrypt($ciphertext);
     }
 
     /**
@@ -560,7 +565,7 @@ class RC2 extends Base
         // (Currently, for Crypt_RC2, one generated $lambda_function cost on php5.5@32bit ~60kb unfreeable mem and ~100kb on php5.5@64bit)
         $gen_hi_opt_code = (bool)(count($lambda_functions) < 10);
 
-        // Generation of a uniqe hash for our generated code
+        // Generation of a unique hash for our generated code
         $code_hash = "Crypt_RC2, {$this->mode}";
         if ($gen_hi_opt_code) {
             $code_hash = str_pad($code_hash, 32) . $this->_hashInlineCryptFunction($this->key);

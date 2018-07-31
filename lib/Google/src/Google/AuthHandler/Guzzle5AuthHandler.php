@@ -1,13 +1,15 @@
 <?php
+namespace wpCloud\StatelessMedia\Google_Client;
 
-use Google\Auth\CacheInterface;
 use Google\Auth\CredentialsLoader;
 use Google\Auth\HttpHandler\HttpHandlerFactory;
+use Google\Auth\FetchAuthTokenCache;
 use Google\Auth\Subscriber\AuthTokenSubscriber;
 use Google\Auth\Subscriber\ScopedAccessTokenSubscriber;
 use Google\Auth\Subscriber\SimpleSubscriber;
 use GuzzleHttp\Client;
 use GuzzleHttp\ClientInterface;
+use Psr\Cache\CacheItemPoolInterface;
 
 /**
 *
@@ -15,14 +17,27 @@ use GuzzleHttp\ClientInterface;
 class Google_AuthHandler_Guzzle5AuthHandler
 {
   protected $cache;
+  protected $cacheConfig;
 
-  public function __construct(CacheInterface $cache = null)
+  public function __construct(CacheItemPoolInterface $cache = null, array $cacheConfig = [])
   {
     $this->cache = $cache;
+    $this->cacheConfig = $cacheConfig;
   }
 
-  public function attachCredentials(ClientInterface $http, CredentialsLoader $credentials)
-  {
+  public function attachCredentials(
+      ClientInterface $http,
+      CredentialsLoader $credentials,
+      callable $tokenCallback = null
+  ) {
+    // use the provided cache
+    if ($this->cache) {
+      $credentials = new FetchAuthTokenCache(
+          $credentials,
+          $this->cacheConfig,
+          $this->cache
+      );
+    }
     // if we end up needing to make an HTTP request to retrieve credentials, we
     // can use our existing one, but we need to throw exceptions so the error
     // bubbles up.
@@ -30,9 +45,8 @@ class Google_AuthHandler_Guzzle5AuthHandler
     $authHttpHandler = HttpHandlerFactory::build($authHttp);
     $subscriber = new AuthTokenSubscriber(
         $credentials,
-        [],
-        $this->cache,
-        $authHttpHandler
+        $authHttpHandler,
+        $tokenCallback
     );
 
     $http->setDefaultOption('auth', 'google_auth');
@@ -50,7 +64,7 @@ class Google_AuthHandler_Guzzle5AuthHandler
     $subscriber = new ScopedAccessTokenSubscriber(
         $tokenFunc,
         $scopes,
-        [],
+        $this->cacheConfig,
         $this->cache
     );
 

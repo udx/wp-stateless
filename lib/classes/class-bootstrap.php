@@ -47,6 +47,11 @@ namespace wpCloud\StatelessMedia {
       protected function __construct( $args ) {
         parent::__construct( $args );
         
+        //** Define our Admin Notices handler object */
+        $this->errors = new Errors( array_merge( $args, array(
+          'type' => $this->type
+        ) ) );
+
         // Initialize compatibility modules.
         add_action( 'plugins_loaded', function(){
           new Module();
@@ -756,8 +761,11 @@ namespace wpCloud\StatelessMedia {
           wp_register_script( 'jquery-ui-progressbar', ud_get_stateless_media()->path( 'static/scripts/jquery-ui/jquery.ui.progressbar.min.1.7.2.js', 'url' ), array( 'jquery-ui-core' ), '1.7.2' );
         }
         wp_register_script( 'wp-stateless-angular', ud_get_stateless_media()->path( 'static/scripts/angular.min.js', 'url' ), array(), '1.5.0', true );
-        wp_register_script( 'wp-stateless', ud_get_stateless_media()->path( 'static/scripts/wp-stateless.js', 'url'  ), array( 'jquery-ui-core' ), ud_get_stateless_media()->version, true );
-
+        wp_register_script( 'wp-stateless', ud_get_stateless_media()->path( 'static/scripts/wp-stateless.js', 'url'  ), array( 'jquery-ui-core', 'wp-stateless-settings' ), ud_get_stateless_media()->version, true );
+        
+        wp_localize_script('wp-stateless', 'wp_stateless_configs', array(
+          'WP_DEBUG' => defined('WP_DEBUG') ? WP_DEBUG : false,
+        ));
         wp_localize_script('wp-stateless', 'wp_stateless_settings', ud_get_stateless_media()->get('sm'));
         wp_localize_script('wp-stateless', 'wp_stateless_compatibility', Module::get_modules());
         wp_register_style( 'jquery-ui-regenthumbs', ud_get_stateless_media()->path( 'static/scripts/jquery-ui/redmond/jquery-ui-1.7.2.custom.css', 'url' ), array(), '1.7.2' );

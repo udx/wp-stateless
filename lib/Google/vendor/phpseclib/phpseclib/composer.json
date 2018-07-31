@@ -55,7 +55,7 @@
     },
     "require-dev": {
         "phing/phing": "~2.7",
-        "phpunit/phpunit": "~4.0",
+        "phpunit/phpunit": "^4.8.35|^5.7|^6.0",
         "sami/sami": "~2.0",
         "squizlabs/php_codesniffer": "~2.0"
     },
@@ -66,6 +66,9 @@
         "ext-gmp": "Install the GMP (GNU Multiple Precision) extension in order to speed up arbitrary precision integer arithmetic operations."
     },
     "autoload": {
+        "files": [
+            "phpseclib/bootstrap.php"
+        ],
         "psr-4": {
             "phpseclib\\": "phpseclib/"
         }

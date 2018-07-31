@@ -15,7 +15,7 @@ namespace wpCloud\StatelessMedia {
         class WPSmush extends ICompatibility {
             protected $id = 'wp-smush';
             protected $title = 'WP Smush';
-            protected $constant = 'WP_STATELESS_COMPATIBILITY_WPSmush';
+            protected $constant = 'WP_STATELESS_COMPATIBILITY_WPSMUSH';
             protected $description = 'Ensures compatibility with WP Smush.';
             protected $plugin_file = 'wp-smushit/wp-smush.php';
 
