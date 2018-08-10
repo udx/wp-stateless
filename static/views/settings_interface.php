@@ -60,20 +60,20 @@
                                     <p class="description"><strong ng-bind="sm.showNotice('mode')" ></strong></p>
                                     <?php if(is_network_admin()): ?>
                                     <p class="sm-mode">
-                                        <label for="sm_mode_disabled"><input id="sm_mode_not_override" type="radio" name="sm[mode]" value="" ng-checked="sm.mode == ''" ng-disabled="sm.readonly.mode"><?php _e( 'Don\'t override', ud_get_stateless_media()->domain ); ?><small class="description"><?php _e( 'Don\'t override.', ud_get_stateless_media()->domain ); ?></small></label>
+                                        <label for="sm_mode_disabled"><input ng-model="sm.mode" id="sm_mode_not_override" type="radio" name="sm[mode]" value="" ng-checked="sm.mode == ''" ng-disabled="sm.readonly.mode"><?php _e( 'Don\'t override', ud_get_stateless_media()->domain ); ?><small class="description"><?php _e( 'Don\'t override.', ud_get_stateless_media()->domain ); ?></small></label>
                                     </p>
                                     <?php endif; ?>
                                     <p class="sm-mode">
-                                        <label for="sm_mode_disabled"><input id="sm_mode_disabled" type="radio" name="sm[mode]" value="disabled" ng-checked="sm.mode == 'disabled'" ng-disabled="sm.readonly.mode"><?php _e( 'Disabled', ud_get_stateless_media()->domain ); ?><small class="description"><?php _e( 'Disable Stateless Media.', ud_get_stateless_media()->domain ); ?></small></label>
+                                        <label for="sm_mode_disabled"><input ng-model="sm.mode" id="sm_mode_disabled" type="radio" name="sm[mode]" value="disabled" ng-checked="sm.mode == 'disabled'" ng-disabled="sm.readonly.mode"><?php _e( 'Disabled', ud_get_stateless_media()->domain ); ?><small class="description"><?php _e( 'Disable Stateless Media.', ud_get_stateless_media()->domain ); ?></small></label>
                                     </p>
                                     <p class="sm-mode">
-                                        <label for="sm_mode_backup"><input id="sm_mode_backup" type="radio" name="sm[mode]" value="backup" ng-checked="sm.mode == 'backup'" ng-disabled="sm.readonly.mode"><?php _e( 'Backup', ud_get_stateless_media()->domain ); ?><small class="description"><?php _e( 'Upload media files to Google Storage and serve local file urls.', ud_get_stateless_media()->domain ); ?></small></label>
+                                        <label for="sm_mode_backup"><input ng-model="sm.mode" id="sm_mode_backup" type="radio" name="sm[mode]" value="backup" ng-checked="sm.mode == 'backup'" ng-disabled="sm.readonly.mode"><?php _e( 'Backup', ud_get_stateless_media()->domain ); ?><small class="description"><?php _e( 'Upload media files to Google Storage and serve local file urls.', ud_get_stateless_media()->domain ); ?></small></label>
                                     </p>
                                     <p class="sm-mode">
-                                        <label for="sm_mode_cdn"><input id="sm_mode_cdn" type="radio" name="sm[mode]" value="cdn" ng-checked="sm.mode == 'cdn'"  ng-disabled="sm.readonly.mode"><?php _e( 'CDN', ud_get_stateless_media()->domain ); ?><small class="description"><?php _e( 'Copy media files to Google Storage and serve them directly from there.', ud_get_stateless_media()->domain ); ?></small></label>
+                                        <label for="sm_mode_cdn"><input ng-model="sm.mode" id="sm_mode_cdn" type="radio" name="sm[mode]" value="cdn" ng-checked="sm.mode == 'cdn'"  ng-disabled="sm.readonly.mode"><?php _e( 'CDN', ud_get_stateless_media()->domain ); ?><small class="description"><?php _e( 'Copy media files to Google Storage and serve them directly from there.', ud_get_stateless_media()->domain ); ?></small></label>
                                     </p>
                                     <p class="sm-mode">
-                                        <label for="sm_mode_stateless"><input id="sm_mode_stateless" type="radio" name="sm[mode]" value="stateless" ng-checked="sm.mode == 'stateless'" ng-disabled="sm.readonly.mode"><?php _e( 'Stateless', ud_get_stateless_media()->domain ); ?><small class="description"><?php _e( 'Store and serve media files with Google Cloud Storage only. Media files are not stored locally.', ud_get_stateless_media()->domain ); ?></small></label>
+                                        <label for="sm_mode_stateless"><input ng-model="sm.mode" id="sm_mode_stateless" type="radio" name="sm[mode]" value="stateless" ng-checked="sm.mode == 'stateless'" ng-disabled="sm.readonly.mode"><?php _e( 'Stateless', ud_get_stateless_media()->domain ); ?><small class="description"><?php _e( 'Store and serve media files with Google Cloud Storage only. Media files are not stored locally.', ud_get_stateless_media()->domain ); ?></small></label>
                                     </p>
                                     <hr>
 
