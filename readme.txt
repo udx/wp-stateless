@@ -102,20 +102,16 @@ To ensure new releases cause as little disruption as possible, we rely on a numb
 == Upgrade Notice ==
 
 = 2.1.7 =
-* ENHANCEMENT - Display notice when selecting stateless option.
-* ENHANCEMENT - Added required message on Cache-Busting setting.
-* ENHANCEMENT - Display dashboard-wide notice for existing users.
-
-= 2.1.5 =
-* Bug fixed and loads of new compatibility added.
-
+* ENHANCEMENT - Display dashboard-wide notice for existing users explaining stateless mode now enables cache-busting option.
+* ENHANCEMENT - Display notice when selecting stateless mode explaining stateless mode now enables cache-busting option.
+* ENHANCEMENT - Display required message on cache-busting setting description when stateless mode is enabled.
 
 == Changelog ==
 
 = 2.1.7 =
-* ENHANCEMENT - Display notice when selecting stateless option.
-* ENHANCEMENT - Added required message on Cache-Busting setting.
-* ENHANCEMENT - Display dashboard-wide notice for existing users.
+* ENHANCEMENT - Display dashboard-wide notice for existing users explaining stateless mode now enables cache-busting option.
+* ENHANCEMENT - Display notice when selecting stateless mode explaining stateless mode now enables cache-busting option.
+* ENHANCEMENT - Display required message on cache-busting setting description when stateless mode is enabled.
 
 = 2.1.6 =
 * FIX - Resolved Google SDK conflict.
