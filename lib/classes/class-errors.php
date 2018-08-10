@@ -155,6 +155,16 @@ namespace wpCloud\StatelessMedia {
       public function admin_notices() {
         global $wp_version;
 
+        wp_enqueue_style("stateless-error-style", ud_get_stateless_media()->path('static/styles/error-notice.css'));
+        //enqueue dismiss js for ajax requests
+        $script_path = \UsabilityDynamics\WP\Utility::path( 'static/scripts/ud-dismiss.js', 'url' );
+        wp_enqueue_script( "sateless-error-notice-js", ud_get_stateless_media()->path( 'static/scripts/error-notice.js', 'url' ), array( 'jquery' ) );
+        wp_enqueue_script( "ud-dismiss", $script_path, array( 'jquery' ) );
+        wp_localize_script( "ud-dismiss", "_ud_vars", array(
+            "ajaxurl" => admin_url( 'admin-ajax.php' ),
+        ) );
+
+
         //** Don't show the message if the user has no enough permissions. */
         if ( ! function_exists( 'wp_get_current_user' ) ) {
           require_once( ABSPATH . 'wp-includes/pluggable.php' );
@@ -179,10 +189,6 @@ namespace wpCloud\StatelessMedia {
 
         $errors = apply_filters( 'ud:errors:admin_notices', $this->errors, $this->args );
         $notices = apply_filters( 'stateless:notices:admin_notices', $this->notices, $this->args );
-        
-        if( !empty( $errors ) || !empty( $notices ) ) {
-          wp_enqueue_style("stateless-error-style", ud_get_stateless_media()->path('static/styles/error-notice.css'));
-        }
 
         //** Errors Block */
         if( !empty( $errors ) && is_array( $errors ) ) {
@@ -211,6 +217,7 @@ namespace wpCloud\StatelessMedia {
               'class' => 'notice',
               'message' => '',
               'button' => '',
+              'button_link' => '#',
               'key' => '',
               'action_links' => $this->action_links[ 'notices' ],
             ));
@@ -221,16 +228,6 @@ namespace wpCloud\StatelessMedia {
           }
         }
 
-        if ( $has_notice) {
-          //enqueue dismiss js for ajax requests
-          $script_path = \UsabilityDynamics\WP\Utility::path( 'static/scripts/ud-dismiss.js', 'url' );
-          wp_enqueue_script( "sateless-error-notice-js", ud_get_stateless_media()->path( 'static/scripts/error-notice.js', 'url' ), array( 'jquery' ) );
-          wp_enqueue_script( "ud-dismiss", $script_path, array( 'jquery' ) );
-          wp_localize_script( "ud-dismiss", "_ud_vars", array(
-              "ajaxurl" => admin_url( 'admin-ajax.php' ),
-          ) );
-        }
-        
       }
 
       /**

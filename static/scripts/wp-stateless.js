@@ -721,7 +721,22 @@ var wpStatelessApp = angular.module('wpStatelessApp', [])
 
 }])
 .controller('wpStatelessSettings', function($scope, $filter) {
+  $scope.backup = {};
   $scope.sm = wp_stateless_settings || {};
+  
+  $scope.$watch('sm.mode', function(value) {
+    if(value == 'stateless'){
+      $scope.backup.hashify_file_name = $scope.sm.hashify_file_name;
+      $scope.sm.hashify_file_name = 'true';
+      $scope.apply();
+    }
+    else{
+      if($scope.backup.hashify_file_name){
+        $scope.sm.hashify_file_name = $scope.backup.hashify_file_name;
+        $scope.apply();
+      }
+    }
+  });
 
   $scope.sm.showNotice = function(option){
     if($scope.sm.readonly && $scope.sm.readonly[option]){
