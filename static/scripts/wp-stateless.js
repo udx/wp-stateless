@@ -94,6 +94,11 @@ var wpStatelessApp = angular.module('wpStatelessApp', [])
    * Get error message
    */
   $scope.getError = function(response, message) {
+    if(response.data && typeof response.data.data !== 'undefined' && typeof response.data.success !== 'undefined' && response.data.success == false){
+      $scope.extraStatus = response.data.data;
+      return message;
+    }
+
     if(response.data && typeof response.data.data !== 'undefined'){
       return response.data.data;
     }
@@ -621,7 +626,7 @@ var wpStatelessApp = angular.module('wpStatelessApp', [])
     }).then(
       function(response) {
         var data = response.data || {};
-        $scope.log.push({message:data.data || "Sync single file: Failed"});
+        $scope.log.push({message: $scope.getError(response, "Sync single file: Failed")});
 
         jQuery("#regenthumbs-bar").progressbar( "value", ( ++$scope.objectsCounter / $scope.objectsTotal ) * 100 );
         jQuery("#regenthumbs-bar-percent").html( Math.round( ( $scope.objectsCounter / $scope.objectsTotal ) * 1000 ) / 10 + "%" );
@@ -678,7 +683,7 @@ var wpStatelessApp = angular.module('wpStatelessApp', [])
     }).then(
       function(response) {
         var data = response.data || {};
-        $scope.log.push({message:data.data || "Sync non library file: Failed"});
+        $scope.log.push({message: $scope.getError(response, "Faild to sync " + id)});
 
         jQuery("#regenthumbs-bar").progressbar( "value", ( ++$scope.objectsCounter / $scope.objectsTotal ) * 100 );
         jQuery("#regenthumbs-bar-percent").html( Math.round( ( $scope.objectsCounter / $scope.objectsTotal ) * 1000 ) / 10 + "%" );
@@ -712,7 +717,7 @@ var wpStatelessApp = angular.module('wpStatelessApp', [])
         $scope.isRunning = false;
 
         if(WP_DEBUG){
-          console.log("WP-Stateless sync non library file: Request failed", response, response.headers());
+          console.log("WP-Stateless sync non library file: Request failed", response, typeof response.headers === 'function'?response.headers():{});
         }
       }
     );
