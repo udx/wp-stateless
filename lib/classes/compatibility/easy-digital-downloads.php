@@ -2,6 +2,8 @@
 /**
  * Plugin Name: Easy Digital Downloads
  * Plugin URI: https://wordpress.org/plugins/easy-digital-downloads/
+ * 
+ * Addons: EDD Front-end Submission
  *
  * Compatibility Description: Ensures compatibility with the forced download method and WP-Stateless.
  *
@@ -20,6 +22,8 @@ namespace wpCloud\StatelessMedia {
 
             public function module_init($sm){
                 add_action('edd_process_download_headers', array( $this, 'edd_download_method_support' ), 10, 4);
+                // the main filter to replace url with GCS url have 20 as priority in Bootstrap class.
+                add_filter('wp_get_attachment_url', array( $this, 'wp_get_attachment_url' ), 30, 2);
             }
 
             /**
@@ -42,6 +46,38 @@ namespace wpCloud\StatelessMedia {
                     readfile($requested_file);
                     exit;
                 }
+            }
+
+            /**
+             * EDD Front-end Submission Author Avatar
+             */
+            public function wp_get_attachment_url($url, $ID){
+                global $wp_current_filter;
+
+                // Verifing that the wp_get_attachment_url is called from EDD Front-end Submission.
+                // The flow of function call 
+                // save_form_frontend() > save_field_values() > save_field() > 
+                // save_field_frontend() > fes_update_avatar() > wp_get_image_editor()
+                if(in_array('wp_ajax_fes_submit_profile_form', $wp_current_filter)){
+                    $uploads    = wp_get_upload_dir();
+                    $meta_data  = wp_get_attachment_metadata($ID);
+
+                    if ( !empty($meta_data['file']) && false === $uploads['error'] ) {
+                        $absolutePath = $uploads['basedir'] . "/" . $meta_data['file'];
+
+                        if(!file_exists($absolutePath)){
+                            $this->client = ud_get_stateless_media()->get_client();
+                            if( $this->client && !is_wp_error( $this->client ) ) {
+                                $this->client->get_media( $meta_data['file'], true, $absolutePath );
+                            }
+                        }
+                        
+                        if(file_exists($absolutePath)){
+                            $url = $uploads['baseurl'] . "/" . $meta_data['file'];
+                        }
+                    }
+                }
+                return $url;
             }
         }
 
