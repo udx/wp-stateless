@@ -4,13 +4,13 @@
 jQuery( document ).ready( function () {
   
     jQuery( '.ud-admin-notice' ).on( 'click', '.button-action', function(e){
+      var _this = jQuery( this );
       if(_this.attr('href') != '#'){
         return;
       }
       
       e.preventDefault();
   
-      var _this = jQuery( this );
 
       var data = {
         action: 'button_action',
