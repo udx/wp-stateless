@@ -24,6 +24,7 @@ namespace wpCloud\StatelessMedia {
                 add_action('edd_process_download_headers', array( $this, 'edd_download_method_support' ), 10, 4);
                 // the main filter to replace url with GCS url have 20 as priority in Bootstrap class.
                 add_filter('wp_get_attachment_url', array( $this, 'wp_get_attachment_url' ), 30, 2);
+                add_filter('upload_dir', array( $this, 'upload_dir' ));
             }
 
             /**
@@ -39,12 +40,23 @@ namespace wpCloud\StatelessMedia {
                     return;
                 if (edd_get_file_download_method() != 'direct') 
                     return;
-                if (!edd_is_local_file($requested_file) && strstr($requested_file, 'storage.googleapis.com')) {
-                    header('Content-Type: application/octet-stream');
-                    header("Content-Transfer-Encoding: Binary");
-                    header("Content-disposition: attachment; filename=\"" . apply_filters('edd_requested_file_name', basename($requested_file)) . "\"");
-                    readfile($requested_file);
-                    exit;
+                if (!edd_is_local_file($requested_file) && strstr($requested_file, ud_get_stateless_media()->get_gs_host())) {
+                    try{
+                        $file_extension = edd_get_file_extension( $requested_file );
+                        $ctype          = edd_get_file_ctype( $file_extension );
+    
+                        header("Content-Type: $ctype");
+                        header("Content-Transfer-Encoding: Binary");
+                        header("Content-Description: File Transfer");
+                        header("Content-disposition: attachment; filename=\"" . apply_filters('edd_requested_file_name', basename($requested_file)) . "\"");
+                        readfile($requested_file);
+                        exit;
+                    }
+                    catch(Exception $e){
+                        if ( wp_redirect( $requested_file ) ) {
+                            exit;
+                        }
+                    }
                 }
             }
 
@@ -78,6 +90,46 @@ namespace wpCloud\StatelessMedia {
                     }
                 }
                 return $url;
+            }
+
+            /**
+             * Change Upload BaseURL when called from fes_get_attachment_id_from_url function.
+             *
+             * @param $data
+             * @return mixed
+             */
+            public function upload_dir( $data ) {
+                if($this->hook_from_fes()){
+                    $data[ 'basedir' ] = ud_get_stateless_media()->get_gs_host();
+                    $data[ 'baseurl' ] = ud_get_stateless_media()->get_gs_host();
+                    $data[ 'url' ] = $data[ 'baseurl' ] . $data[ 'subdir' ];
+                }
+                return $data;
+
+            }
+
+            /**
+             * Determine where we hook from
+             * We need to do this only for fes_get_attachment_id_from_url() function
+             *
+             * @return bool
+             */
+            private function hook_from_fes() {
+                $call_stack = debug_backtrace();
+                if( !empty($call_stack[5]['function']) && $call_stack[5]['function'] == 'fes_get_attachment_id_from_url'){
+                    return true;
+                }
+
+                // Extra layer of condition to be sure
+                if ( !empty( $call_stack ) && is_array( $call_stack ) ) {
+                    foreach( $call_stack as $step ) {
+                        if ( $step['function'] == 'getURLsAndPATHs' && strpos( $step['file'], 'wp-short-pixel' ) ) {
+                            return true;
+                        }
+                    }
+                }
+
+                return false;
             }
         }
 
