@@ -592,6 +592,8 @@ namespace wpCloud\StatelessMedia {
       }
 
       /**
+       * Copied from https://developer.wordpress.org/reference/functions/get_metadata/
+       * 
        * @param $value null unless other filter hooked in this function.
        * @param $object_id post id
        * @param $meta_key 
@@ -601,9 +603,9 @@ namespace wpCloud\StatelessMedia {
       public function post_metadata_filter($value, $object_id, $meta_key, $single){
         if(empty($value)){
           $meta_type = 'post';
-          $transient_key = "{$meta_type}_meta_{$object_id}";
+          $transient_key = "stateless_{$meta_type}_meta";
           
-          $meta_cache = get_transient($transient_key);
+          $meta_cache = wp_cache_get($object_id, $transient_key);
           if(empty($meta_cache)){
             $meta_cache = wp_cache_get($object_id, $meta_type . '_meta');
 
@@ -612,8 +614,12 @@ namespace wpCloud\StatelessMedia {
               $meta_cache = $meta_cache[$object_id];
             }
             
+            foreach($meta_cache as $key => $meta){
+              $meta_cache[$key] = array_map('maybe_unserialize', $meta_cache[$key]);
+            }
+
             $meta_cache = $this->convert_to_gs_link($meta_cache);
-            set_transient($transient_key, $meta_cache, DAY_IN_SECONDS);
+            wp_cache_set($object_id, $meta_cache, $transient_key);
           }
           
           if ( ! $meta_key ) {
@@ -621,13 +627,15 @@ namespace wpCloud\StatelessMedia {
           }
           
           if ( isset($meta_cache[$meta_key]) ) {
-              return $meta_cache[$meta_key];
+              if ( $single )
+                  return $meta_cache[$meta_key][0];
+              else
+                  return $meta_cache[$meta_key];
           }
-       
-          if ($single)
-              return '';
-          else
-              return array();
+          
+          // in case no metadata is found return what was passed in $value. 
+          // $value most of the time is null.
+          return $value;
         }
 
         return $this->convert_to_gs_link($value);
