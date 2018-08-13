@@ -64,7 +64,7 @@ namespace wpCloud\StatelessMedia {
         $this->key_json = json_decode($args['key_json'], 1);
 
         // May be Loading Google SDK....
-        if( !class_exists( 'Google_Client' ) ) {
+        if( !class_exists( '\wpCloud\StatelessMedia\Google_Client\Google_Client' ) ) {
           include_once( ud_get_stateless_media()->path('lib/Google/vendor/autoload.php', 'dir') );
         }
 
