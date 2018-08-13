@@ -603,7 +603,7 @@ namespace wpCloud\StatelessMedia {
           $meta_type = 'post';
           $transient_key = "{$meta_type}_meta_{$object_id}";
           
-          // $meta_cache = get_transient($transient_key);
+          $meta_cache = get_transient($transient_key);
           if(empty($meta_cache)){
             $meta_cache = wp_cache_get($object_id, $meta_type . '_meta');
 
