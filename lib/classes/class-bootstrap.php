@@ -601,19 +601,27 @@ namespace wpCloud\StatelessMedia {
       public function post_metadata_filter($value, $object_id, $meta_key, $single){
         if(empty($value)){
           $meta_type = 'post';
-          $meta_cache = wp_cache_get($object_id, $meta_type . '_meta');
+          $transient_key = "{$meta_type}_meta_{$object_id}";
+          
+          // $meta_cache = get_transient($transient_key);
+          if(empty($meta_cache)){
+            $meta_cache = wp_cache_get($object_id, $meta_type . '_meta');
 
-          if ( !$meta_cache ) {
+            if ( !$meta_cache ) {
               $meta_cache = update_meta_cache( $meta_type, array( $object_id ) );
               $meta_cache = $meta_cache[$object_id];
+            }
+            
+            $meta_cache = $this->convert_to_gs_link($meta_cache);
+            set_transient($transient_key, $meta_cache, DAY_IN_SECONDS);
           }
-       
+          
           if ( ! $meta_key ) {
-              return $this->convert_to_gs_link($meta_cache);
+              return $meta_cache;
           }
           
           if ( isset($meta_cache[$meta_key]) ) {
-              return $this->convert_to_gs_link(array_map('maybe_unserialize', $meta_cache[$meta_key]));
+              return $meta_cache[$meta_key];
           }
        
           if ($single)
@@ -667,7 +675,7 @@ namespace wpCloud\StatelessMedia {
           }
           return $meta;
         } elseif(is_string($meta)){
-          return preg_replace( '/(https?:\/\/'.str_replace('/', '\/', $baseurl).')\/(.+?)(\.jpg|\.png|\.gif|\.jpeg|\.pdf)/i', $image_host.'$2$3', $meta);
+          return preg_replace( '/(https?:\/\/'.str_replace('/', '\/', $baseurl).')\/(.+?)(' . $file_ext . ')/i', $image_host.'$2$3', $meta);
         }
 
         return $meta;
