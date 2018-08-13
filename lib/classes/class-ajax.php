@@ -190,13 +190,16 @@ namespace wpCloud\StatelessMedia {
 
         $metadata = wp_generate_attachment_metadata( $image->ID, $fullsizepath );
 
-        if ( is_wp_error( $metadata ) ) {
-          $this->store_failed_attachment( $image->ID, 'images' );
-          throw new \Exception($metadata->get_error_message());
-        }
-        if ( empty( $metadata ) ) {
-          $this->store_failed_attachment( $image->ID, 'images' );
-          throw new \Exception(__('Unknown failure reason.', ud_get_stateless_media()->domain));
+        if(get_post_mime_type($image->ID) !== 'image/svg+xml'){
+          if ( is_wp_error( $metadata ) ) {
+            $this->store_failed_attachment( $image->ID, 'images' );
+            throw new \Exception($metadata->get_error_message());
+          }
+          
+          if ( empty( $metadata ) ) {
+            $this->store_failed_attachment( $image->ID, 'images' );
+            throw new \Exception(sprintf( __('No metadata generated for %1$s (ID %2$s).', ud_get_stateless_media()->domain), esc_html( get_the_title( $image->ID ) ), $image->ID));
+          }
         }
 
         // If this fails, then it just means that nothing was changed (old value == new value)
