@@ -47,6 +47,11 @@ namespace wpCloud\StatelessMedia {
       protected function __construct( $args ) {
         parent::__construct( $args );
         
+        //** Define our Admin Notices handler object */
+        $this->errors = new Errors( array_merge( $args, array(
+          'type' => $this->type
+        ) ) );
+
         // Initialize compatibility modules.
         add_action( 'plugins_loaded', function(){
           new Module();
@@ -721,6 +726,7 @@ namespace wpCloud\StatelessMedia {
        * Register scripts and styles
        */
       public function admin_init() {
+        $this->show_notice_stateless_cache_busting();
         wp_register_style( 'wp-stateless', $this->path( 'static/styles/wp-stateless.css', 'url'  ), array(), self::$version );
 
         /* Attachment or upload page */
@@ -756,8 +762,11 @@ namespace wpCloud\StatelessMedia {
           wp_register_script( 'jquery-ui-progressbar', ud_get_stateless_media()->path( 'static/scripts/jquery-ui/jquery.ui.progressbar.min.1.7.2.js', 'url' ), array( 'jquery-ui-core' ), '1.7.2' );
         }
         wp_register_script( 'wp-stateless-angular', ud_get_stateless_media()->path( 'static/scripts/angular.min.js', 'url' ), array(), '1.5.0', true );
-        wp_register_script( 'wp-stateless', ud_get_stateless_media()->path( 'static/scripts/wp-stateless.js', 'url'  ), array( 'jquery-ui-core' ), ud_get_stateless_media()->version, true );
-
+        wp_register_script( 'wp-stateless', ud_get_stateless_media()->path( 'static/scripts/wp-stateless.js', 'url'  ), array( 'jquery-ui-core', 'wp-stateless-settings' ), ud_get_stateless_media()->version, true );
+        
+        wp_localize_script('wp-stateless', 'wp_stateless_configs', array(
+          'WP_DEBUG' => defined('WP_DEBUG') ? WP_DEBUG : false,
+        ));
         wp_localize_script('wp-stateless', 'wp_stateless_settings', ud_get_stateless_media()->get('sm'));
         wp_localize_script('wp-stateless', 'wp_stateless_compatibility', Module::get_modules());
         wp_register_style( 'jquery-ui-regenthumbs', ud_get_stateless_media()->path( 'static/scripts/jquery-ui/redmond/jquery-ui-1.7.2.custom.css', 'url' ), array(), '1.7.2' );
@@ -824,6 +833,18 @@ namespace wpCloud\StatelessMedia {
             wp_enqueue_script( 'wp-stateless-angular' );
             wp_enqueue_script( 'wp-stateless' );
             wp_enqueue_style( 'jquery-ui-regenthumbs' );
+
+            $data = array(
+                    'key' => 'stateless-cache-busting',
+                    'class' => 'notice',
+                    'title' => sprintf( __( "Stateless mode enables and requires the Cache-Busting option.", ud_get_stateless_media()->domain ) ),
+                    'message' => sprintf( __("WordPress looks at local files to prevent files with the same filenames. 
+                                          Since Stateless mode bypasses this check, there is a potential for files to be stored with the same file name. We enforce the Cache-Busting option to prevent this. 
+                                          Override with the <a href='%s' target='_blank'>%s</a> constant.", ud_get_stateless_media()->domain),"https://github.com/wpCloud/wp-stateless/wiki/Constants#wp_stateless_media_cache_busting", "WP_STATELESS_MEDIA_CACHE_BUSTING" ),
+                  );
+            echo "<script id='template-stateless-cache-busting' type='text/html'>";
+            include ud_get_stateless_media()->path( '/static/views/error-notice.php', 'dir' );
+            echo "</script>";
           default: break;
         }
 
@@ -1062,6 +1083,32 @@ namespace wpCloud\StatelessMedia {
        */
       public function activate() {
         add_action( 'activated_plugin', array($this, 'redirect_to_splash') );
+        add_action( 'activated_plugin', array($this, 'is_new_install'), 1 );
+      }
+
+      public function is_new_install($plugin =''){
+        if( $plugin == plugin_basename( $this->boot_file ) ) {
+          $sm_mode = get_option('sm_mode', null);
+          $hashify_file_name = get_option('sm_hashify_file_name', null);
+          if($sm_mode == 'stateless' &&  $hashify_file_name == 'false'){
+            delete_option('dismissed_notice_stateless_cache_busting');
+          }
+          else{
+            update_option('dismissed_notice_stateless_cache_busting', true);
+          }
+        }
+      }
+      
+      public function show_notice_stateless_cache_busting(){
+        $this->errors->add( array(
+          'key' => 'stateless-cache-busting',
+          'button' => 'View Settings',
+          'button_link' => admin_url('upload.php?page=stateless-settings'),
+          'title' => sprintf( __( "Stateless mode now requires the Cache-Busting option.", ud_get_stateless_media()->domain ) ),
+          'message' => sprintf( __("WordPress looks at local files to prevent files with the same filenames. 
+                                Since Stateless mode bypasses this check, there is a potential for files to be stored with the same file name. We enforce the Cache-Busting option to prevent this. 
+                                Override with the <a href='%s' target='_blank'>%s</a> constant.", ud_get_stateless_media()->domain),"https://github.com/wpCloud/wp-stateless/wiki/Constants#wp_stateless_media_cache_busting", "WP_STATELESS_MEDIA_CACHE_BUSTING" ),
+        ), 'notice' );
       }
 
       public function redirect_to_splash($plugin =''){

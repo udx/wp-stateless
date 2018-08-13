@@ -5,8 +5,8 @@ Tags: google, google cloud, google cloud storage, cdn, uploads, media, stateless
 License: GPLv2 or later
 Requires PHP: 5.5
 Requires at least: 4.0
-Tested up to: 4.9.6
-Stable tag: 2.1.5
+Tested up to: 4.9.7
+Stable tag: 2.1.7
 
 Upload and serve your WordPress media files from Google Cloud Storage.
 
@@ -101,11 +101,34 @@ To ensure new releases cause as little disruption as possible, we rely on a numb
 
 == Upgrade Notice ==
 
-= 2.1.5 =
-* Bug fixed and loads of new compatibility added.
-
+= 2.1.7 =
+* ENHANCEMENT - Display dashboard-wide notice for existing users explaining stateless mode now enables cache-busting option.
+* ENHANCEMENT - Display notice when selecting stateless mode explaining stateless mode now enables cache-busting option.
+* ENHANCEMENT - Display required message on cache-busting setting description when stateless mode is enabled.
 
 == Changelog ==
+
+= 2.1.7 =
+* ENHANCEMENT - Display dashboard-wide notice for existing users explaining stateless mode now enables cache-busting option.
+* ENHANCEMENT - Display notice when selecting stateless mode explaining stateless mode now enables cache-busting option.
+* ENHANCEMENT - Display required message on cache-busting setting description when stateless mode is enabled.
+
+= 2.1.6 =
+* FIX - Resolved Google SDK conflict.
+* FIX - ICompatibility.php errors notice.
+* FIX - Undefined index: gs_link in class-bootstrap.php.
+* FIX - Media files with accent characters would not upload correctly to the bucket. 
+* ENHANCEMENT - Force Cache-Busting when using Stateless mode. 
+* ENHANCEMENT - New admin notice design.
+* ENHANCEMENT - Improved and clear error message. 
+* ENHANCEMENT - Renamed constant WP_STATELESS_MEDIA_ON_FLY to WP_STATELESS_DYNAMIC_IMAGE_SUPPORT. 
+* ENHANCEMENT - Update Google Libraries.
+* ENHANCEMENT - Renamed constant WP_STATELESS_MEDIA_HASH_FILENAME to WP_STATELESS_MEDIA_CACHE_BUSTING.
+* COMPATIBILITY - Renamed constant WP_STATELESS_COMPATIBILITY_WPSmush to WP_STATELESS_COMPATIBILITY_WPSMUSH.
+* COMPATIBILITY - Added support for WooCommerce Extra Product Options.
+* COMPATIBILITY - Added support for WPForms Pro.
+* COMPATIBILITY - Improved ShortPixel compatibility.
+* COMPATIBILITY - Fixed ACF Image Crop compatibility.
 
 = 2.1.5 =
 * FIX - Fatal error with PHP 5.4.45 on activation.

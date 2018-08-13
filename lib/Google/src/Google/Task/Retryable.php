@@ -19,6 +19,8 @@
  * Interface for checking how many times a given task can be retried following
  * a failure.
  */
+namespace wpCloud\StatelessMedia\Google_Client;
+
 interface Google_Task_Retryable
 {
 }

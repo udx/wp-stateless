@@ -69,7 +69,7 @@ namespace wpCloud\StatelessMedia {
         }
 
         /* Initialize our client */
-        $this->client = new Google_Client();
+        $this->client = new \wpCloud\StatelessMedia\Google_Client\Google_Client();
 
         // We're supporting Google SDK 1.X version since
         // The plugins which also are using Google SDK may have its old version
@@ -111,7 +111,7 @@ namespace wpCloud\StatelessMedia {
         }
 
         /* Now, Initialize our Google Storage Service */
-        $this->service = new Google_Service_Storage( $this->client );
+        $this->service = new \wpCloud\StatelessMedia\Google_Client\Google_Service_Storage( $this->client );
 
       }
 
@@ -202,7 +202,7 @@ namespace wpCloud\StatelessMedia {
             return get_object_vars( $media );
           }
 
-          $media = new \Google_Service_Storage_StorageObject();
+          $media = new \wpCloud\StatelessMedia\Google_Client\Google_Service_Storage_StorageObject();
           $media->setName($name);
           $media->setMetadata($args['metadata']);
 
@@ -228,7 +228,7 @@ namespace wpCloud\StatelessMedia {
 
           /* Make Media Public READ for all on success */
           if (is_object($media)) {
-            $acl = new Google_Service_Storage_ObjectAccessControl();
+            $acl = new \wpCloud\StatelessMedia\Google_Client\Google_Service_Storage_ObjectAccessControl();
             $acl->setEntity('allUsers');
             $acl->setRole('READER');
 
@@ -387,7 +387,7 @@ namespace wpCloud\StatelessMedia {
           'WP-Stateless',
           "<b>v2.0</b>",
           $pluginName,
-          "<b>v" . Google_Client::LIBVER . "</b>"
+          "<b>v" . \wpCloud\StatelessMedia\Google_Client\Google_Client::LIBVER . "</b>"
         );
 
         set_transient( "wp_stateless_google_sdk_conflict", $error );
