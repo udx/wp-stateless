@@ -23,7 +23,9 @@ namespace wpCloud\StatelessMedia {
             public function module_init($sm){
                 add_action('edd_process_download_headers', array( $this, 'edd_download_method_support' ), 10, 4);
                 // the main filter to replace url with GCS url have 20 as priority in Bootstrap class.
+                // FES Author Avatar need local file to work.
                 add_filter('wp_get_attachment_url', array( $this, 'wp_get_attachment_url' ), 30, 2);
+                // Need to overwrite base_url unless fes_get_attachment_id_from_url won't work.
                 add_filter('upload_dir', array( $this, 'upload_dir' ));
             }
 
@@ -94,18 +96,15 @@ namespace wpCloud\StatelessMedia {
 
             /**
              * Change Upload BaseURL when called from fes_get_attachment_id_from_url function.
-             *
+             * Unless fes_get_attachment_id_from_url function won't be able to return attachement id.
              * @param $data
              * @return mixed
              */
             public function upload_dir( $data ) {
                 if($this->hook_from_fes()){
-                    $data[ 'basedir' ] = ud_get_stateless_media()->get_gs_host();
-                    $data[ 'baseurl' ] = ud_get_stateless_media()->get_gs_host();
-                    $data[ 'url' ] = $data[ 'baseurl' ] . $data[ 'subdir' ];
+                    $data[ 'baseurl' ] = ud_get_stateless_media()->get_gs_host() . '/' . ud_get_stateless_media()->get( 'sm.root_dir' );
                 }
                 return $data;
-
             }
 
             /**
