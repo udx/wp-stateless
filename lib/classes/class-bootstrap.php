@@ -1200,9 +1200,51 @@ namespace wpCloud\StatelessMedia {
         global $wpdb;
 
         if ( ! $post_id ) {
-          $query = "SELECT post_id FROM $wpdb->postmeta WHERE meta_key = 'sm_cloud' AND meta_value LIKE '%s'";
+          $post_id = get_transient("stateless_url_to_postid_" . md5($url));
 
-          $post_id = $wpdb->get_var( $wpdb->prepare( $query, '%' . $url . '%' ) );
+          if(defined('WP_STATELESS_LAGECY_URL_TO_POSTID')){
+            // User can use this constant if they change the Bucket Folder (root_dir) after uploading image.
+            // This can be little slow at first run.
+            if(empty($post_id)){
+              $query = "SELECT post_id FROM $wpdb->postmeta WHERE meta_key = 'sm_cloud' AND meta_value LIKE '%s'";
+              $post_id = $wpdb->get_var( $wpdb->prepare( $query, '%' . $url . '%' ) );            
+
+              if($post_id){
+                set_transient("stateless_url_to_postid_" . md5($url), $post_id);
+              }
+            }
+            return $post_id;
+          }
+
+          if(empty($post_id)){
+            $gs_base_url =  $this->get_gs_host();
+            $gs_url =  $this->get_gs_host() . '/' . $this->get( 'sm.root_dir' );
+            $site_url = parse_url($gs_url);
+            $image_path = parse_url( $url );
+
+            //force the protocols to match if needed
+            if( isset( $image_path['scheme'] ) && ( $image_path['scheme'] !== $site_url['scheme'] ) ) {
+              $url = str_replace( $image_path['scheme'], $site_url['scheme'], $url );
+            }
+
+            if( 0 === strpos( $url, $gs_url . '/' ) ) {
+              $url = substr( $url, strlen( $gs_url . '/' ) );
+            }
+            else if( 0 === strpos( $url, $gs_base_url . '/' ) ) {
+              // In case user added Bucket Folder (root_dir) after uploading image.
+              $url = substr( $url, strlen( $gs_base_url . '/' ) );
+            }
+
+            $sql = $wpdb->prepare(
+              "SELECT post_id FROM $wpdb->postmeta WHERE meta_key = '_wp_attached_file' AND meta_value = %s",
+              $url
+            );
+            $post_id = $wpdb->get_var( $sql );
+
+            if($post_id){
+              set_transient("stateless_url_to_postid_" . md5($url), $post_id);
+            }
+          }
         }
 
         return $post_id;
