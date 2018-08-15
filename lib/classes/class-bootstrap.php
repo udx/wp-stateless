@@ -200,9 +200,7 @@ namespace wpCloud\StatelessMedia {
                 add_filter( 'get_post_metadata', array( $this, 'post_metadata_filter' ), 2, 4 );
               }
 
-              if ( $this->get( 'sm.custom_domain' ) == $this->get( 'sm.bucket' ) ) {
-                add_filter( 'wp_stateless_bucket_link', array( $this, 'wp_stateless_bucket_link' ) );
-              }
+              add_filter( 'wp_stateless_bucket_link', array( $this, 'wp_stateless_bucket_link' ) );
             }
 
             if ( $root_dir = $this->get( 'sm.root_dir' ) ) {
@@ -290,8 +288,7 @@ namespace wpCloud\StatelessMedia {
         $image_host = 'https://storage.googleapis.com/';
         $custom_domain = $sm['custom_domain'];
         $is_ssl = strpos($custom_domain, 'https://');
-        $custom_domain = str_replace('https://', '', $custom_domain);
-        $custom_domain = str_replace('http://', '', $custom_domain);
+        $custom_domain = str_replace(array('http://', 'https://'), '', $custom_domain);
         if ( $sm['bucket'] && $custom_domain == $sm['bucket']) {
             $image_host = $is_ssl === 0 ? 'https://' : 'http://';  // bucketname will be host
         }
@@ -307,8 +304,12 @@ namespace wpCloud\StatelessMedia {
        */
       public function wp_stateless_bucket_link($fileLink) {
         $bucketname = $this->get( 'sm.bucket' );
-        if ( strpos($fileLink, $bucketname) > 8) {
-          $fileLink = 'http://' . substr($fileLink, strpos($fileLink, $bucketname));
+        $custom_domain = $this->get( 'sm.custom_domain' );
+        $is_ssl = strpos($custom_domain, 'https://');
+        $custom_domain = str_replace(array('http://', 'https://'), '', $custom_domain);
+        
+        if ( $custom_domain == $bucketname && strpos($fileLink, $bucketname) > 8 ) {
+          $fileLink = ($is_ssl === 0 ? 'https://' : 'http://') . substr($fileLink, strpos($fileLink, $bucketname));
         }
         return $fileLink;
       }

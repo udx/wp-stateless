@@ -753,7 +753,7 @@ var wpStatelessApp = angular.module('wpStatelessApp', [])
   $scope.sm.generatePreviewUrl = function() {
     var host = 'https://storage.googleapis.com/';
     var is_ssl = $scope.sm.custom_domain.indexOf('https://');
-    var custom_domain = $scope.sm.custom_domain;
+    var custom_domain = $scope.sm.custom_domain.toString();
     custom_domain = custom_domain.replace('https://', '');
     custom_domain = custom_domain.replace('http://', '');
     if ( $scope.sm.bucket && custom_domain == $scope.sm.bucket) {
