@@ -1208,7 +1208,7 @@ namespace wpCloud\StatelessMedia {
         if ( ! $post_id ) {
           $post_id = get_transient("stateless_url_to_postid_" . md5($url));
 
-          if(defined('WP_STATELESS_LAGECY_URL_TO_POSTID')){
+          if(defined('WP_STATELESS_LEGACY_URL_TO_POSTID')){
             // User can use this constant if they change the Bucket Folder (root_dir) after uploading image.
             // This can be little slow at first run.
             if(empty($post_id)){
