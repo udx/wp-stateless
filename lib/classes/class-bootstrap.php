@@ -306,10 +306,17 @@ namespace wpCloud\StatelessMedia {
         $bucketname = $this->get( 'sm.bucket' );
         $custom_domain = $this->get( 'sm.custom_domain' );
         $is_ssl = strpos($custom_domain, 'https://');
+        $fileLink_is_ssl = strpos($fileLink, 'https://');
         $custom_domain = str_replace(array('http://', 'https://'), '', $custom_domain);
         
         if ( $custom_domain == $bucketname && strpos($fileLink, $bucketname) > 8 ) {
           $fileLink = ($is_ssl === 0 ? 'https://' : 'http://') . substr($fileLink, strpos($fileLink, $bucketname));
+        }
+        elseif( $custom_domain == $bucketname && $fileLink_is_ssl !== $is_ssl){
+          if($is_ssl)
+            $fileLink = str_replace(array('http://', 'https://'), 'https://', $fileLink);
+          else
+            $fileLink = str_replace(array('http://', 'https://'), 'http://', $fileLink);
         }
         return $fileLink;
       }
