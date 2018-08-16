@@ -305,12 +305,12 @@ namespace wpCloud\StatelessMedia {
       public function wp_stateless_bucket_link($fileLink) {
         $bucketname = $this->get( 'sm.bucket' );
         $custom_domain = $this->get( 'sm.custom_domain' );
-        $is_ssl = strpos($custom_domain, 'https://');
-        $fileLink_is_ssl = strpos($fileLink, 'https://');
+        $is_ssl = strpos($custom_domain, 'https://') === 0;
+        $fileLink_is_ssl = strpos($fileLink, 'https://') === 0;
         $custom_domain = str_replace(array('http://', 'https://'), '', $custom_domain);
         
         if ( $custom_domain == $bucketname && strpos($fileLink, $bucketname) > 8 ) {
-          $fileLink = ($is_ssl === 0 ? 'https://' : 'http://') . substr($fileLink, strpos($fileLink, $bucketname));
+          $fileLink = ($is_ssl ? 'https://' : 'http://') . substr($fileLink, strpos($fileLink, $bucketname));
         }
         elseif( $custom_domain == $bucketname && $fileLink_is_ssl !== $is_ssl){
           if($is_ssl)
