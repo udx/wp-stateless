@@ -298,7 +298,7 @@ namespace wpCloud\StatelessMedia {
           }
 
           // Stateless mode: we don't need the local version.
-          if(ud_get_stateless_media()->get( 'sm.mode' ) === 'stateless'){
+          if(ud_get_stateless_media()->get( 'sm.mode' ) === 'stateless' && $args['no_thumb'] != true){
             unlink($fullsizepath);
           }
 

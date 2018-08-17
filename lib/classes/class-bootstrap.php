@@ -1264,7 +1264,7 @@ namespace wpCloud\StatelessMedia {
       public function before_intermediate_image_sizes($sizes, $metadata){
         try{
           $attachment_id = attachment_url_to_postid($metadata['file']);
-          $metadata = $this->add_media(null, $attachment_id, false, array('no_thumb' => true));
+          $this->add_media(null, $attachment_id, false, array('no_thumb' => true));
         }
         catch(Exception $e){
 
