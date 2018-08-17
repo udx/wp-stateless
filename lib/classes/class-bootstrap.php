@@ -227,6 +227,7 @@ namespace wpCloud\StatelessMedia {
              * We can't use this. That's prevent removing this filter.
              */
             add_filter( 'wp_update_attachment_metadata', array( 'wpCloud\StatelessMedia\Utility', 'add_media' ), 999, 2 );
+            add_filter( 'intermediate_image_sizes_advanced', array( $this, 'before_intermediate_image_sizes' ), 10, 2 );
 
             /**
              * Add Media
@@ -1254,6 +1255,22 @@ namespace wpCloud\StatelessMedia {
         }
 
         return $post_id;
+      }
+
+      /**
+       * Upload the full size image first.
+       * 
+       */
+      public function before_intermediate_image_sizes($sizes, $metadata){
+        try{
+          $attachment_id = attachment_url_to_postid($metadata['file']);
+          $metadata = $this->add_media(null, $attachment_id, false, array('no_thumb' => true));
+        }
+        catch(Exception $e){
+
+        }
+
+        return $sizes;
       }
 
       /**

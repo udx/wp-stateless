@@ -150,9 +150,13 @@ namespace wpCloud\StatelessMedia {
        * @param $force Whether to force the upload incase of it's already exists.
        * @return bool|string
        */
-      public static function add_media( $metadata, $attachment_id, $force = false ) {
+      public static function add_media( $metadata, $attachment_id, $force = false, $args = array() ) {
+        global $stateless_synced_full_size;
         $file = '';
         $upload_dir = wp_upload_dir();
+        $args = wp_parse_args($args, array(
+          'no_thumb' => false,
+        ));
 
         /* Get metadata in case if method is called directly. */
         if( current_filter() !== 'wp_generate_attachment_metadata' && current_filter() !== 'wp_update_attachment_metadata' ) {
@@ -198,7 +202,7 @@ namespace wpCloud\StatelessMedia {
 
           /* Add default image */
           $media = $client->add_media( $_mediaOptions = array_filter( array(
-            'force' => $force,
+            'force' => $force && $stateless_synced_full_size != $attachment_id,
             'name' => $file,
             'absolutePath' => wp_normalize_path( get_attached_file( $attachment_id ) ),
             'cacheControl' => $_cacheControl = self::getCacheControl( $attachment_id, $metadata, null ),
@@ -243,7 +247,7 @@ namespace wpCloud\StatelessMedia {
           }
 
           /* Now we go through all available image sizes and upload them to Google Storage */
-          if( !empty( $metadata[ 'sizes' ] ) && is_array( $metadata[ 'sizes' ] ) ) {
+          if( !empty( $metadata[ 'sizes' ] ) && is_array( $metadata[ 'sizes' ] ) && $args['no_thumb'] != true ) {
 
             $path = wp_normalize_path( dirname( get_attached_file( $attachment_id ) ) );
             $mediaPath = wp_normalize_path( trim( dirname( $file ), '\/\\' ) );
@@ -300,6 +304,9 @@ namespace wpCloud\StatelessMedia {
 
           update_post_meta( $attachment_id, 'sm_cloud', $cloud_meta );
 
+          if($args['no_thumb'] == true){
+            $stateless_synced_full_size = $attachment_id;
+          }
         }
 
         return $metadata;
