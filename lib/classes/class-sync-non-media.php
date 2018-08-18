@@ -17,6 +17,7 @@ namespace wpCloud\StatelessMedia {
             
             public function __construct(){
                 $this->registered_files = get_option('sm_synced_files', array());
+                // print_r($this->registered_files);
                 // Manual sync using sync tab. 
                 // called from ajax action_get_non_library_files_id
                 // Return files to be manualy sync from sync tab.
@@ -60,7 +61,10 @@ namespace wpCloud\StatelessMedia {
              * @param:
              *  $name: Reletive path to upload dir.
              *  $absolutePath: Full path of the file
-             *  $forced: Whether to force to move the file to GCS even it's already exists.
+             *  $forced: Type: bool/2; Whether to force to move the file to GCS even it's already exists.
+             *           true: Check whether it's already synced or not in database.
+             *           2 (int): Force to overwrite on GCS
+             * 
              * @return:
              *  $media: Media object returned from client->add_media() method.
              * @throws: Exception File not found
@@ -198,6 +202,7 @@ namespace wpCloud\StatelessMedia {
                     }
                     // Removing file for GCS
                     $this->client->remove_media($file);
+                    print_r($this->registered_files);
                     
                     if($key = array_search($file, $this->registered_files)){
                         if(isset($this->registered_files[$key])){

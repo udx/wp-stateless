@@ -4,6 +4,8 @@
  * Plugin URI: https://wordpress.org/plugins/elementor/
  *
  * Compatibility Description: Ensures compatibility with Elementor.
+ * 
+ * @Todo add manual sync to sync all elementor css file to GCS.
  *
  */
 
@@ -19,15 +21,20 @@ namespace wpCloud\StatelessMedia {
             protected $plugin_file = 'elementor/elementor.php';
 
             public function module_init($sm){
-                add_filter('set_url_scheme', array($this, 'sync_rewrite_url'), 10, 3);
+                add_filter( 'set_url_scheme', array($this, 'sync_rewrite_url'), 10, 3 );
+                add_action( 'elementor/core/files/clear_cache', array($this, 'delete_elementor_files') );
+                add_action( 'save_post', array($this, 'delete_css_files'), 10, 3 );
+                add_action( 'deleted_post', array($this, 'delete_css_files') );
             }
 
+            /**
+             * Sync local elementor files to GCS.
+             */
             public function sync_rewrite_url($url, $scheme, $orig_scheme){
                 try{
                     if(strpos($url, 'elementor/') !== false){
                         $wp_uploads_dir = wp_get_upload_dir();
                         $name = str_replace($wp_uploads_dir['baseurl'] . '/', '', $url);
-                        
                         if($name != $url){
                             $name = apply_filters( 'wp_stateless_file_name', $name);
                             do_action('sm:sync::syncFile', $name, $wp_uploads_dir['basedir'] . '/' . $name);
@@ -41,6 +48,46 @@ namespace wpCloud\StatelessMedia {
                 }
                 return $url;
             }
+
+            /**
+             * To regenerate/delete files click Regenerate Files in
+             * Elementor >> Tools >> General >> Regenerate CSS
+             * All files will be deleted from GCS.
+             * And will be copied to GCS again on next page view.
+             */
+            public function delete_elementor_files(){
+                do_action('sm:sync::deleteFiles', 'elementor/');
+            }
+
+            /**
+             * Delete GCS file on update/delete post.
+             */
+            public function delete_css_files( $post_ID, $post = null, $update = null ){
+
+                if($update || current_action() === 'deleted_post'){
+                    $wp_uploads_dir = wp_get_upload_dir();
+
+                    $post_css = new \Elementor\Core\Files\CSS\Post( $post_ID );
+
+                    //      elementor/               css/                           'post-' . $post_id . '.css' 
+                    $name = $post_css::UPLOADS_DIR . $post_css::DEFAULT_FILES_DIR . $post_css->get_file_name();
+                    $name = apply_filters( 'wp_stateless_file_name', $name);
+                    // Removing status so that file will be generated next time.
+                    do_action('sm:sync::deleteFile', $name);
+
+                    // $meta = $post_css->update();
+
+                    // sync_file($name, $absolutePath, $forced = false);
+                    // here $forced = 2 mean Force to overwrite on GCS
+                    // do_action('sm:sync::syncFile', $name, $wp_uploads_dir['basedir'] . '/' . $name, 2);
+
+                    // $meta = $post_css->get_meta();
+                    // $meta['status'] = '';
+                    // update_post_meta($post_ID, $post_css::META_KEY, $meta);
+
+                }
+            }
+
 
         }
 
