@@ -56,6 +56,7 @@ class ComposerStaticInitc00cd3c666f8dfa818cb7edfd488ed20
         'wpCloud\\StatelessMedia\\CompatibilityWooExtraPorductOptions' => __DIR__ . '/../..' . '/lib/classes/compatibility/woo-extra-product-options.php',
         'wpCloud\\StatelessMedia\\DynamicImageSupport' => __DIR__ . '/../..' . '/lib/classes/compatibility/dynamic-image-support.php',
         'wpCloud\\StatelessMedia\\EDDDownloadMethod' => __DIR__ . '/../..' . '/lib/classes/compatibility/easy-digital-downloads.php',
+        'wpCloud\\StatelessMedia\\Elementor' => __DIR__ . '/../..' . '/lib/classes/compatibility/elementor.php',
         'wpCloud\\StatelessMedia\\Errors' => __DIR__ . '/../..' . '/lib/classes/class-errors.php',
         'wpCloud\\StatelessMedia\\GS_Client' => __DIR__ . '/../..' . '/lib/classes/class-gs-client.php',
         'wpCloud\\StatelessMedia\\GravityForm' => __DIR__ . '/../..' . '/lib/classes/compatibility/gravity-forms.php',

@@ -81,6 +81,11 @@ namespace wpCloud\StatelessMedia {
              * Support for WPForms
              */
             new CompatibilityWooExtraPorductOptions();
+            
+            /**
+             * Support for Elementor
+             */
+            new Elementor();
         }
 
         /**
