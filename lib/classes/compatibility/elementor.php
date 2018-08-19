@@ -25,6 +25,7 @@ namespace wpCloud\StatelessMedia {
                 add_action( 'elementor/core/files/clear_cache', array($this, 'delete_elementor_files') );
                 add_action( 'save_post', array($this, 'delete_css_files'), 10, 3 );
                 add_action( 'deleted_post', array($this, 'delete_css_files') );
+                add_filter( "elementor/settings/general/success_response_data", array($this, 'delete_global_css'), 10, 3 );
             }
 
             /**
@@ -44,8 +45,9 @@ namespace wpCloud\StatelessMedia {
 
                 }
                 catch(Exception $e){
-
+                    // @todo maybe log the exception.
                 }
+                // We are in filter so need to return the passed value.
                 return $url;
             }
 
@@ -72,7 +74,6 @@ namespace wpCloud\StatelessMedia {
                     //      elementor/               css/                           'post-' . $post_id . '.css' 
                     $name = $post_css::UPLOADS_DIR . $post_css::DEFAULT_FILES_DIR . $post_css->get_file_name();
                     $name = apply_filters( 'wp_stateless_file_name', $name);
-                    // Removing status so that file will be generated next time.
                     do_action('sm:sync::deleteFile', $name);
 
                     // $meta = $post_css->update();
@@ -81,11 +82,31 @@ namespace wpCloud\StatelessMedia {
                     // here $forced = 2 mean Force to overwrite on GCS
                     // do_action('sm:sync::syncFile', $name, $wp_uploads_dir['basedir'] . '/' . $name, 2);
 
+                    // Removing status so that file will be generated next time.
                     // $meta = $post_css->get_meta();
                     // $meta['status'] = '';
                     // update_post_meta($post_ID, $post_css::META_KEY, $meta);
 
                 }
+            }
+
+            /**
+             * Delete elementor global css file when global style is updated on Elementor Editor.
+             * 
+             */
+            public function delete_global_css($success_response_data, $id, $data){
+                try{
+                    $post_css = new \Elementor\Core\Files\CSS\Global_CSS( 'global.css' );
+                    //      elementor/               css/                           'global.css' 
+                    $name = $post_css::UPLOADS_DIR . $post_css::DEFAULT_FILES_DIR . $post_css->get_file_name();
+                    $name = apply_filters( 'wp_stateless_file_name', $name);
+                    do_action('sm:sync::deleteFile', $name);
+                }
+                catch(Exception $e){
+                    // @todo maybe log the exception.
+                }
+                // We are in filter so need to return the passed value.
+                return $success_response_data;
             }
 
 
