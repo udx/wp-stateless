@@ -254,7 +254,8 @@
                                     <option value="true"><?php _e( 'Enable', ud_get_stateless_media()->domain ); ?></option>
                                 </select>
                                 <p class="description">
-                                    <strong ng-show="!module.is_plugin_active"><?php _e("Please activate the plugin first.");?></strong>
+                                    <strong ng-show="!module.is_plugin_active && module.is_plugin"><?php _e("Please activate the plugin first.");?></strong>
+                                    <strong ng-show="!module.is_plugin_active && module.is_theme"><?php _e("Please activate the theme first.");?></strong>
                                     <strong ng-show="module.is_constant"><?php _e("Currently configured via a constant.");?></strong>
                                     <strong ng-show="module.is_network_override"><?php _e("Currently configured via network settings.");?></strong>
                                     {{module.description}}

@@ -29,6 +29,7 @@ return array(
     'wpCloud\\StatelessMedia\\Bootstrap' => $baseDir . '/lib/classes/class-bootstrap.php',
     'wpCloud\\StatelessMedia\\CompatibilityAcfImageCrop' => $baseDir . '/lib/classes/compatibility/acf-image-crop.php',
     'wpCloud\\StatelessMedia\\CompatibilityWooExtraPorductOptions' => $baseDir . '/lib/classes/compatibility/woo-extra-product-options.php',
+    'wpCloud\\StatelessMedia\\Divi' => $baseDir . '/lib/classes/compatibility/divi.php',
     'wpCloud\\StatelessMedia\\DynamicImageSupport' => $baseDir . '/lib/classes/compatibility/dynamic-image-support.php',
     'wpCloud\\StatelessMedia\\EDDDownloadMethod' => $baseDir . '/lib/classes/compatibility/easy-digital-downloads.php',
     'wpCloud\\StatelessMedia\\Elementor' => $baseDir . '/lib/classes/compatibility/elementor.php',

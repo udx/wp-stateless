@@ -31,6 +31,7 @@ namespace wpCloud\StatelessMedia {
         protected $enabled = false;
         protected $description = '';
         protected $plugin_file = null;
+        protected $theme_name = null;
         protected $first_party = false;
 
         public function __construct(){
@@ -47,6 +48,13 @@ namespace wpCloud\StatelessMedia {
          * @todo caching.
          */
         public function is_plugin_active(){
+            if(!empty($this->theme_name)){
+                $theme = wp_get_theme();
+                if($theme->Name == $this->theme_name){
+                    return true;
+                }
+                return false;
+            }
             if(!empty($this->plugin_file)){
                 // Converting string to array for foreach
                 if(is_string($this->plugin_file)){
@@ -149,6 +157,8 @@ namespace wpCloud\StatelessMedia {
                 'is_network_override'   => $is_network_override,
                 'is_plugin_active'      => $this->is_plugin_active(),
                 'is_network_admin'      => is_network_admin(),
+                'is_plugin'             => !empty($this->plugin_file),
+                'is_theme'              => !empty($this->theme_name),
             ));
 
             if ($this->enabled && $this->is_plugin_active()) {

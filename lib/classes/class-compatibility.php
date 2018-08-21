@@ -86,6 +86,11 @@ namespace wpCloud\StatelessMedia {
              * Support for Elementor
              */
             new Elementor();
+            
+            /**
+             * Support for Divi
+             */
+            new Divi();
         }
 
         /**
