@@ -72,6 +72,10 @@ namespace wpCloud\StatelessMedia {
        * @return string
        */
       public static function randomize_filename( $filename ) {
+        $return = apply_filters('stateless_skip_cache_busting', null, $filename);
+        if($return){
+          return $return;
+        }
         $info = pathinfo($filename);
         $ext = empty($info['extension']) ? '' : '' . $info['extension'];
         $_parts = array();

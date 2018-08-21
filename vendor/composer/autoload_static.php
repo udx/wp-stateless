@@ -63,6 +63,7 @@ class ComposerStaticInitc00cd3c666f8dfa818cb7edfd488ed20
         'wpCloud\\StatelessMedia\\GravityForm' => __DIR__ . '/../..' . '/lib/classes/compatibility/gravity-forms.php',
         'wpCloud\\StatelessMedia\\ICompatibility' => __DIR__ . '/../..' . '/lib/classes/compatibility/ICompatibility.php',
         'wpCloud\\StatelessMedia\\Imagify' => __DIR__ . '/../..' . '/lib/classes/compatibility/imagify.php',
+        'wpCloud\\StatelessMedia\\LearnDash' => __DIR__ . '/../..' . '/lib/classes/compatibility/LearnDash.php',
         'wpCloud\\StatelessMedia\\Logger' => __DIR__ . '/../..' . '/lib/classes/class-logger.php',
         'wpCloud\\StatelessMedia\\Module' => __DIR__ . '/../..' . '/lib/classes/class-compatibility.php',
         'wpCloud\\StatelessMedia\\SOCSS' => __DIR__ . '/../..' . '/lib/classes/compatibility/siteorigin-css.php',

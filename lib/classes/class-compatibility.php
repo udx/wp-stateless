@@ -91,6 +91,11 @@ namespace wpCloud\StatelessMedia {
              * Support for Divi
              */
             new Divi();
+            
+            /**
+             * Support for LearnDash
+             */
+            new LearnDash();
         }
 
         /**
