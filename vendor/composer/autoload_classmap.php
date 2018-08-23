@@ -27,6 +27,7 @@ return array(
     'wpCloud\\StatelessMedia\\API' => $baseDir . '/lib/classes/class-api.php',
     'wpCloud\\StatelessMedia\\Ajax' => $baseDir . '/lib/classes/class-ajax.php',
     'wpCloud\\StatelessMedia\\Bootstrap' => $baseDir . '/lib/classes/class-bootstrap.php',
+    'wpCloud\\StatelessMedia\\BuddyPress' => $baseDir . '/lib/classes/compatibility/buddypress.php',
     'wpCloud\\StatelessMedia\\CompatibilityAcfImageCrop' => $baseDir . '/lib/classes/compatibility/acf-image-crop.php',
     'wpCloud\\StatelessMedia\\CompatibilityWooExtraPorductOptions' => $baseDir . '/lib/classes/compatibility/woo-extra-product-options.php',
     'wpCloud\\StatelessMedia\\Divi' => $baseDir . '/lib/classes/compatibility/divi.php',

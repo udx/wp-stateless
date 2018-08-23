@@ -96,6 +96,11 @@ namespace wpCloud\StatelessMedia {
              * Support for LearnDash
              */
             new LearnDash();
+            
+            /**
+             * Support for BuddyPress
+             */
+            new BuddyPress();
         }
 
         /**

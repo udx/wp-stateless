@@ -27,7 +27,7 @@ namespace wpCloud\StatelessMedia {
                 add_action( 'sm:sync::register_dir', array($this, 'register_dir') );
                 add_action( 'sm:sync::addFile', array($this, 'add_file') );
                 // Sync a file.
-                add_action( 'sm:sync::syncFile', array($this, 'sync_file'), 10, 3 );
+                add_action( 'sm:sync::syncFile', array($this, 'sync_file'), 10, 4 );
                 add_action( 'sm:sync::deleteFile', array($this, 'delete_file') );
                 add_action( 'sm:sync::deleteFiles', array($this, 'delete_files') );
             }
@@ -69,7 +69,11 @@ namespace wpCloud\StatelessMedia {
              *  $media: Media object returned from client->add_media() method.
              * @throws: Exception File not found
              */
-            public function sync_file($name, $absolutePath, $forced = false){
+            public function sync_file($name, $absolutePath, $forced = false, $args = array()){
+                $args = wp_parse_args($args, array(
+                    'stateless' => true, // whether to delete local file in stateless mode.
+                ));
+                
                 if(in_array($name, $this->registered_files) && !$forced){
                     return false;
                 }
@@ -119,7 +123,7 @@ namespace wpCloud\StatelessMedia {
                     do_action( 'sm::synced::nonMediaFiles', $name, $absolutePath, $media); // , $media
 
                     // Stateless mode: we don't need the local version.
-                    if(ud_get_stateless_media()->get( 'sm.mode' ) === 'stateless'){
+                    if($args['stateless'] == true && ud_get_stateless_media()->get( 'sm.mode' ) === 'stateless'){
                         unlink($absolutePath);
                     }
                     return $media;
@@ -202,7 +206,6 @@ namespace wpCloud\StatelessMedia {
                     }
                     // Removing file for GCS
                     $this->client->remove_media($file);
-                    print_r($this->registered_files);
                     
                     if($key = array_search($file, $this->registered_files)){
                         if(isset($this->registered_files[$key])){
