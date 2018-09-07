@@ -26,6 +26,10 @@ namespace wpCloud\StatelessMedia {
                 add_action( 'save_post', array($this, 'delete_css_files'), 10, 3 );
                 add_action( 'deleted_post', array($this, 'delete_css_files') );
                 add_filter( "elementor/settings/general/success_response_data", array($this, 'delete_global_css'), 10, 3 );
+                // return file names
+                add_filter( 'sm:sync::nonMediaFiles', array($this, 'sync_non_media_files') );
+                add_action( 'sm::pre::sync::nonMediaFiles', array($this, 'filter_css_file'), 10, 2 );
+                
             }
 
             /**
@@ -107,6 +111,67 @@ namespace wpCloud\StatelessMedia {
                 }
                 // We are in filter so need to return the passed value.
                 return $success_response_data;
+            }
+
+            /**
+             * 
+             */
+            public function sync_non_media_files($files){
+                $wp_uploads_dir = wp_get_upload_dir();
+                $base_dir = wp_normalize_path($wp_uploads_dir['basedir'] . '/');
+                $dir =  $base_dir . \Elementor\Core\Files\CSS\Post::UPLOADS_DIR . \Elementor\Core\Files\CSS\Post::DEFAULT_FILES_DIR;
+                $file_list = list_files($dir);
+                
+                foreach($file_list as $file){
+                    $files[] = str_replace($base_dir, '', wp_normalize_path($file));
+                }
+                return $files;
+            }
+
+            /**
+             * @param $content
+             * @return mixed
+             */
+            public function filter_css_file( $name, $absolutePath ) {
+
+                if ( $upload_data = wp_upload_dir() && file_exists($absolutePath)) {
+                    try{
+                        $content = file_get_contents($absolutePath);
+
+                        if ( !empty( $upload_data['baseurl'] ) && !empty( $content ) ) {
+                            $baseurl = preg_replace('/https?:\/\//','',$upload_data['baseurl']);
+                            $root_dir = trim( ud_get_stateless_media()->get( 'sm.root_dir' ), '/ ' ); // Remove any forward slash and empty space.
+                            $root_dir = !empty( $root_dir ) ? $root_dir . '/' : '';
+                            $image_host = ud_get_stateless_media()->get_gs_host() . $root_dir;
+                            $file_ext = ud_get_stateless_media()->replaceable_file_types();
+
+                            preg_match_all( '/(https?:\/\/'.str_replace('/', '\/', $baseurl).')\/(.+?)('.$file_ext.')/i', $content, $matches);
+                            if(!empty($matches)){
+                                foreach($matches[0] as $key => $match){
+                                    $id = attachment_url_to_postid($match);
+                                    if(!empty($id)){
+                                        Utility::add_media(null, $id, true);
+                                    }
+                                }
+                            }
+
+                            $content = preg_replace( '/(https?:\/\/'.str_replace('/', '\/', $baseurl).')\/(.+?)('.$file_ext.')/i', $image_host.'/$2$3', $content);
+                            file_put_contents($absolutePath, $content);
+                            preg_match('/post-(\d+).css/', $name, $match);
+
+                            if(!empty($match[1])){
+                                $_elementor_css = get_post_meta($match[1], '_elementor_css', true);
+                                if(!empty($_elementor_css)){
+                                    $_elementor_css['time'] = time();
+                                }
+                            }
+                        }
+                    }
+                    catch(Exception $e){
+
+                    }
+
+                }
             }
 
 

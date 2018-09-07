@@ -93,6 +93,8 @@ namespace wpCloud\StatelessMedia {
                 $file_copied_from_gcs = false;
                 $local_file_exists = file_exists( $absolutePath );
 
+                do_action( 'sm::pre::sync::nonMediaFiles', $name, $absolutePath); // , $media
+
                 if ( !$local_file_exists && ud_get_stateless_media()->get( 'sm.mode' ) !== 'stateless') {
 
                     // Try get it and save

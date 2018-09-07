@@ -376,7 +376,7 @@ namespace wpCloud\StatelessMedia {
         }
 
         $files = apply_filters( 'sm:sync::nonMediaFiles', array() );
-        return $files;
+        return array_unique($files);
       }
 
       /**
