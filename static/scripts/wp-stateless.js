@@ -737,12 +737,12 @@ var wpStatelessApp = angular.module('wpStatelessApp', [])
     if(value == 'stateless'){
       $scope.backup.hashify_file_name = $scope.sm.hashify_file_name;
       $scope.sm.hashify_file_name = 'true';
-      $scope.apply();
+      // $scope.apply();
     }
     else{
       if($scope.backup.hashify_file_name){
         $scope.sm.hashify_file_name = $scope.backup.hashify_file_name;
-        $scope.apply();
+        // $scope.apply();
       }
     }
   });
