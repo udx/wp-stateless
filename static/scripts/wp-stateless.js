@@ -755,18 +755,24 @@ var wpStatelessApp = angular.module('wpStatelessApp', [])
   }
 
   $scope.sm.generatePreviewUrl = function() {
+    $scope.sm.is_custom_domain = false;
     var host = 'https://storage.googleapis.com/';
-    var is_ssl = $scope.sm.custom_domain.indexOf('https://');
-    var custom_domain = $scope.sm.custom_domain.toString();
-    custom_domain = custom_domain.replace('https://', '');
-    custom_domain = custom_domain.replace('http://', '');
-    if ( $scope.sm.bucket && custom_domain == $scope.sm.bucket) {
-      host = is_ssl === 0 ? 'https://' : 'http://';  // bucketname will be host
-    }
-    host += $scope.sm.bucket ? $scope.sm.bucket : '{bucket-name}';
     var rootdir = $scope.sm.root_dir ? $scope.sm.root_dir + '/' : '';
     var subdir = $scope.sm.organize_media == '1' ? $filter('date')(Date.now(), 'yyyy/MM') + '/' : '';
     var hash = $scope.sm.hashify_file_name == 'true' ? Date.now().toString(36) + '-' : '';
+    var is_ssl = $scope.sm.custom_domain.indexOf('https://');
+    var custom_domain = $scope.sm.custom_domain.toString();
+    
+    custom_domain = custom_domain.replace(/\/+$/, ''); // removing trailing slashes
+    custom_domain = custom_domain.replace(/https?:\/\//, ''); // removing http:// or https:// from the beginning.
+    host += $scope.sm.bucket ? $scope.sm.bucket : '{bucket-name}';
+
+    if ( $scope.sm.bucket && custom_domain && ( is_ssl === 0 || custom_domain != $scope.sm.bucket ) ) {
+      $scope.sm.is_custom_domain = true;
+      host = is_ssl === 0 ? 'https://' : 'http://';  // bucketname will be host
+      host += custom_domain;
+    }
+
     $scope.sm.preview_url = host + "/" + rootdir + subdir + hash + "your-image-name.jpeg";
   }
 
