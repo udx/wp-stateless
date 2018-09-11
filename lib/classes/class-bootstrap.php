@@ -127,11 +127,6 @@ namespace wpCloud\StatelessMedia {
         new Ajax();
 
         /**
-         * Maybe Upgrade current Version
-         */
-        Upgrader::call( $this->args[ 'version' ] );
-
-        /**
          * Load WP-CLI Commands
          */
         if( defined( 'WP_CLI' ) && WP_CLI ) {
@@ -1121,25 +1116,17 @@ namespace wpCloud\StatelessMedia {
        */
       public function activate() {
         add_action( 'activated_plugin', array($this, 'redirect_to_splash') );
-        add_action( 'activated_plugin', array($this, 'is_new_install'), 1 );
+        
+        /**
+         * Maybe Upgrade current Version
+         */
+        Upgrader::call( $this->args[ 'version' ] );
       }
 
-      public function is_new_install($plugin =''){
-        if( $plugin == plugin_basename( $this->boot_file ) ) {
-          $sm_mode = get_option('sm_mode', null);
-          $hashify_file_name = get_option('sm_hashify_file_name', null);
-          if($sm_mode == 'stateless' &&  $hashify_file_name == 'false'){
-            delete_option('dismissed_notice_stateless_cache_busting');
-          }
-          else{
-            update_option('dismissed_notice_stateless_cache_busting', true);
-          }
-        }
-      }
       
       public function show_notice_stateless_cache_busting(){
         $this->errors->add( array(
-          'key' => 'stateless-cache-busting',
+          'key' => 'stateless_cache_busting',
           'button' => 'View Settings',
           'button_link' => admin_url('upload.php?page=stateless-settings'),
           'title' => sprintf( __( "Stateless mode now requires the Cache-Busting option.", ud_get_stateless_media()->domain ) ),

@@ -85,7 +85,7 @@ namespace wpCloud\StatelessMedia {
       public function __construct( $args ) {
         parent::__construct( $args );
         add_action( 'admin_notices', array( $this, 'admin_notices' ) );
-        add_action( 'wp_ajax_ud_dismiss', array( $this, 'dismiss_notices' ) );
+        add_action( 'wp_ajax_stateless_notice_dismiss', array( $this, 'dismiss_notices' ) );
         add_action( 'wp_ajax_stateless_notice_button_action', array( $this, 'stateless_notice_button_action' ) );
       }
       

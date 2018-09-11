@@ -34,7 +34,7 @@ jQuery( document ).ready( function () {
       var _this = jQuery( this );
 
       var data = {
-        action: 'ud_dismiss',
+        action: 'stateless_notice_dismiss',
         key: _this.data('key'),
       }
 
