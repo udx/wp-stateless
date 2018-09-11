@@ -883,7 +883,7 @@ namespace wpCloud\StatelessMedia {
        * @param $size
        * @return mixed
        */
-      public function wp_get_attachment_image_attributes( $attr, $attachment, $size ) {
+      public function wp_get_attachment_image_attributes( $attr, $attachment, $size = null ) {
 
         $sm_cloud = get_post_meta( $attachment->ID, 'sm_cloud', true );
         if( is_array( $sm_cloud ) && !empty( $sm_cloud[ 'name' ] ) ) {
