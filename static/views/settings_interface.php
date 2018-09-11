@@ -9,7 +9,7 @@
         <a href="#stless_sync_tab" class="stless_setting_tab nav-tab"><?php _e( 'Sync', ud_get_stateless_media()->domain ); ?></a>  
         <?php endif; ?>
         <a href="#stless_compatibility_tab" class="stless_setting_tab nav-tab"><?php _e( 'Compatibility', ud_get_stateless_media()->domain ); ?></a>  
-        <a href="#stless_questions_tab" class="stless_setting_tab nav-tab"><?php _e( 'Feedback', ud_get_stateless_media()->domain ); ?></a>  
+        <a href="#stless_questions_tab" class="stless_setting_tab nav-tab"><?php _e( 'Support', ud_get_stateless_media()->domain ); ?></a>
     </h2>  
 
     <div class="stless_settings">
