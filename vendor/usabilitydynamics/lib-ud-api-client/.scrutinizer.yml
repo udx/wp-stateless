@@ -1,0 +1,8 @@
+filter:
+    excluded_paths: [static/*, test/*, vendor/*, node_modules/*]
+
+tools:
+    php_analyzer: true
+    php_sim: true
+    php_pdepend: true
+    external_code_coverage: true

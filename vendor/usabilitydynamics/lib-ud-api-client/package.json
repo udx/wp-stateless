@@ -1,0 +1,27 @@
+{
+  "name": "lib-ud-api-client",
+  "version": "0.1.0",
+  "description": "UD Client for WooCommerce API Manager",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/UsabilityDynamics/lib-ud-api-client"
+  },
+  "engines": {
+    "node": ">= 0.10.0"
+  },
+  "dependencies": {
+    "load-grunt-tasks": "^0.6.0"
+  },
+  "devDependencies": {
+    "grunt": "^0.4.5",
+    "grunt-contrib-clean": "~0.5.0",
+    "grunt-contrib-concat": "~0.3.0",
+    "grunt-contrib-less": "~0.8.3",
+    "grunt-contrib-uglify": "~0.2.4",
+    "grunt-contrib-watch": "~0.5.3",
+    "grunt-contrib-yuidoc": "~0.5.0",
+    "grunt-markdown": "~0.4.0",
+    "grunt-shell": "~0.6.0",
+    "grunt-phpunit": "~0.3.3"
+  }
+}
