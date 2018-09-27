@@ -74,10 +74,7 @@
             "menu_title": "Stateless License"
           }
         },
-        "product" : {
-          "referrer": "wpcloud/wp-stateless",
-          "product_id": "wpcloud/wp-stateless"
-        }
+        "product" : false
       }
     }
   }
