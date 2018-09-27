@@ -79,15 +79,26 @@ namespace wpCloud\StatelessMedia {
         $info = pathinfo($filename);
         $ext = empty($info['extension']) ? '' : '' . $info['extension'];
         $_parts = array();
+        $rand = substr(md5(time()), 0, 8);
+
+        $body_rewrite_types = ud_get_stateless_media()->get( 'sm.body_rewrite_types' );
+        if(empty($info['extension']) || strpos($body_rewrite_types, $info['extension']) === false){
+          return $filename;
+        }
+
+        if(strpos($filename, $rand) !== false){
+          return $filename;
+        }
+
         if (strpos($info['filename'], '@')) {
           $_cleanName = explode('@', $info['filename'])[0];
           $_retna = explode('@', $info['filename'])[1];
-          $_parts[] = substr(md5(time()), 0, 8);
+          $_parts[] = $rand;
           $_parts[] = '-';
           $_parts[] = strtolower($_cleanName);
           $_parts[] = '@' . strtolower($_retna);
         } else {
-          $_parts[] = substr(md5(time()), 0, 8);
+          $_parts[] = $rand;
           $_parts[] = '-';
           $_parts[] = strtolower($info['filename']);
         }

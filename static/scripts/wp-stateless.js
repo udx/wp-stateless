@@ -383,7 +383,7 @@ var wpStatelessApp = angular.module('wpStatelessApp', [])
       $scope.isLoading = false;
 
       if(WP_DEBUG){
-        console.log(stateless_l10n.wp_stateless_get_images_media_id + ": " + stateless_l10n.request_failed, response, typeof response.headers === 'function'?response.headers());
+        console.log(stateless_l10n.wp_stateless_get_images_media_id + ": " + stateless_l10n.request_failed, response, typeof response.headers === 'function'?response.headers() : '');
       }
     });
 
@@ -427,14 +427,14 @@ var wpStatelessApp = angular.module('wpStatelessApp', [])
       $scope.isLoading = false;
 
       if(WP_DEBUG){
-        console.log("WP-Stateless get non Images Media ID:", response, typeof response.headers === 'function'?response.headers());
+        console.log("WP-Stateless get non Images Media ID:", response, typeof response.headers === 'function'?response.headers(): "");
       }
     }, function(response) {
       $scope.error = true;
       $scope.status = $scope.getError(response, stateless_l10n.get_non_images_media_id_request_failed);
       $scope.isLoading = false;
       if(WP_DEBUG){
-        console.log("WP-Stateless get non Images Media ID: Request failed", response, typeof response.headers === 'function'?response.headers());
+        console.log("WP-Stateless get non Images Media ID: Request failed", response, typeof response.headers === 'function'?response.headers(): "");
       }
     });
 
@@ -478,7 +478,7 @@ var wpStatelessApp = angular.module('wpStatelessApp', [])
       $scope.isLoading = false;
 
       if(WP_DEBUG){
-        console.log("WP-Stateless get non library files:", response, typeof response.headers === 'function'?response.headers());
+        console.log("WP-Stateless get non library files:", response, typeof response.headers === 'function'?response.headers(): "");
       }
     }, function(response) {
       $scope.error = true;
@@ -486,7 +486,7 @@ var wpStatelessApp = angular.module('wpStatelessApp', [])
       $scope.isLoading = false;
 
       if(WP_DEBUG){
-        console.log("WP-Stateless get non library files: Request failed", response, typeof response.headers === 'function'?response.headers());
+        console.log("WP-Stateless get non library files: Request failed", response, typeof response.headers === 'function'?response.headers(): "");
       }
     });
 
@@ -597,7 +597,7 @@ var wpStatelessApp = angular.module('wpStatelessApp', [])
           }
         }
         if(WP_DEBUG){
-          console.log("WP-Stateless regenerate single image:", response, typeof response.headers === 'function'?response.headers());
+          console.log("WP-Stateless regenerate single image:", response, typeof response.headers === 'function'?response.headers(): "");
         }
       },
       function(response) {
@@ -605,7 +605,7 @@ var wpStatelessApp = angular.module('wpStatelessApp', [])
         $scope.status = $scope.getError(response, stateless_l10n.regenerate_single_image_request_failed);
         $scope.isRunning = false;
         if(WP_DEBUG){
-          console.log("WP-Stateless regenerate single image: Request failed", response, typeof response.headers === 'function'?response.headers());
+          console.log("WP-Stateless regenerate single image: Request failed", response, typeof response.headers === 'function'?response.headers(): "");
         }
       }
     );
@@ -654,7 +654,7 @@ var wpStatelessApp = angular.module('wpStatelessApp', [])
         }
 
         if(WP_DEBUG){
-          console.log("WP-Stateless sync single file:", response, typeof response.headers === 'function'?response.headers());
+          console.log("WP-Stateless sync single file:", response, typeof response.headers === 'function'?response.headers(): "");
         }
       },
       function(response) {
@@ -663,7 +663,7 @@ var wpStatelessApp = angular.module('wpStatelessApp', [])
         $scope.isRunning = false;
 
         if(WP_DEBUG){
-          console.log("WP-Stateless sync single file: Request failed", response, typeof response.headers === 'function'?response.headers());
+          console.log("WP-Stateless sync single file: Request failed", response, typeof response.headers === 'function'?response.headers(): "");
         }
       }
     );
@@ -712,7 +712,7 @@ var wpStatelessApp = angular.module('wpStatelessApp', [])
         }
 
         if(WP_DEBUG){
-          console.log("WP-Stateless sync non library file:", response, typeof response.headers === 'function'?response.headers());
+          console.log("WP-Stateless sync non library file:", response, typeof response.headers === 'function'?response.headers(): "");
         }
       },
       function(response) {
