@@ -48,7 +48,7 @@ return array(
     'wpCloud\\StatelessMedia\\GravityForm' => $baseDir . '/lib/classes/compatibility/gravity-forms.php',
     'wpCloud\\StatelessMedia\\ICompatibility' => $baseDir . '/lib/classes/compatibility/ICompatibility.php',
     'wpCloud\\StatelessMedia\\Imagify' => $baseDir . '/lib/classes/compatibility/imagify.php',
-    'wpCloud\\StatelessMedia\\LearnDash' => $baseDir . '/lib/classes/compatibility/LearnDash.php',
+    'wpCloud\\StatelessMedia\\LearnDash' => $baseDir . '/lib/classes/compatibility/learn-dash.php',
     'wpCloud\\StatelessMedia\\Logger' => $baseDir . '/lib/classes/class-logger.php',
     'wpCloud\\StatelessMedia\\Module' => $baseDir . '/lib/classes/class-compatibility.php',
     'wpCloud\\StatelessMedia\\SOCSS' => $baseDir . '/lib/classes/compatibility/siteorigin-css.php',
