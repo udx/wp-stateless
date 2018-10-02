@@ -69,9 +69,7 @@
         "client" : {
           "slug": "wpcloud/wp-stateless",
           "screen": {
-            "parent": "upload.php",
-            "page_title": "Stateless License",
-            "menu_title": "Stateless License"
+            "hide_menu": true
           }
         },
         "product" : false

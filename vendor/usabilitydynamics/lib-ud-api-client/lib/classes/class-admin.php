@@ -144,6 +144,7 @@ namespace UsabilityDynamics\UD_API {
        */
       public function register_licenses_screen () {
         $args = $this->args;
+        if($args['screen']['hide_menu'] == true) return;
         $screen = !empty( $args[ 'screen' ] ) ? $args[ 'screen' ] : false;
         $this->screen_type = !empty( $screen[ 'parent' ] ) ? 'submenu' : 'menu';
         $this->icon_url = !empty( $screen[ 'icon_url' ] ) ? $screen[ 'icon_url' ] : '';
@@ -641,7 +642,12 @@ namespace UsabilityDynamics\UD_API {
                 }
               }
               //** Sort the list */
-              usort( $more_products, create_function( '$a,$b', 'if ($a[\'order\'] == $b[\'order\']) { return 0; } return ($a[\'order\'] < $b[\'order\']) ? -1 : 1;' ) );
+              usort($more_products, function( $a,$b ) {
+                if ( $a['order'] == $b['order'] ) {
+                  return 0;
+                }
+                return ( $a['order'] < $b['order'] ) ? -1 : 1;
+              });
               //** Set transient for one day */
               set_transient( $this->token . "-more", $more_products, (60 * 60 * 24) );
             }
@@ -737,7 +743,7 @@ namespace UsabilityDynamics\UD_API {
                 $message = sprintf( __( '%s License is not active.', $this->domain ), $v['product_name'] );
               }
               if( !empty( $v[ 'errors_callback' ] ) && is_callable( $v[ 'errors_callback' ] ) ) {
-                call_user_func_array( $v[ 'errors_callback' ], array( $message, 'warning' ) );
+                // call_user_func_array( $v[ 'errors_callback' ], array( $message, 'warning' ) );
               } else {
                 $messages[] = $message;
               }
@@ -773,7 +779,8 @@ namespace UsabilityDynamics\UD_API {
        * Admin notices
        */
       public function admin_notices() {
-        
+        // @todo();
+        return;
         //** Step 1. Look for default messages */
         $messages = $this->messages;
         if( !empty( $messages ) && is_array( $messages ) ) {
