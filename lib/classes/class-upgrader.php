@@ -69,14 +69,12 @@ namespace wpCloud\StatelessMedia {
 
         }
         
-        if ( !$version || version_compare( $version, '2.1.8', '<' ) ){
+        update_option('dismissed_notice_stateless_cache_busting', true);
+        if ( !$version || version_compare( $version, '2.1.7', '<' ) ){
           $sm_mode = get_option('sm_mode', null);
           $hashify_file_name = get_option('sm_hashify_file_name', null);
-          if($version){
+          if($version && $sm_mode == 'stateless' && $hashify_file_name == 'true'){
             delete_option('dismissed_notice_stateless_cache_busting');
-          }
-          else{
-            update_option('dismissed_notice_stateless_cache_busting', true);
           }
         }
 
