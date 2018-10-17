@@ -376,6 +376,9 @@ namespace wpCloud\StatelessMedia {
         }
 
         $files = apply_filters( 'sm:sync::nonMediaFiles', array() );
+        if(empty($files)){
+          throw new \Exception( __('Nothing to sync. Please enable appropriate compatibility from the Compatibility Tab.', ud_get_stateless_media()->domain) );
+        }
         return array_unique($files);
       }
 
