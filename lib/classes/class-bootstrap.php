@@ -1085,10 +1085,17 @@ namespace wpCloud\StatelessMedia {
               $trnst[ 'success' ] = 'false';
               $trnst[ 'error' ] = sprintf( __( 'Could not connect to Google Storage bucket. Please, be sure that bucket with name <b>%s</b> exists.', $this->domain ), $this->get( 'sm.bucket' ) );
 
+              if( is_callable(array($connected, 'getHandlerContext')) && $handlerContext = $connected->getHandlerContext() ){
+                if(!empty($handlerContext['error'])){
+                  $handlerContext['error'];
+                  $trnst[ 'error' ] = "Could not connect to Google Storage bucket. " . make_clickable($handlerContext['error']);
+                }
+              }
+
               if( is_callable(array($connected, 'getErrors')) && $error = $connected->getErrors() ){
                 $error = reset($error);
                 if($error['reason'] == 'accessNotConfigured')
-                  $trnst[ 'error' ] .= "<br>" . make_clickable($error['message']);
+                  $trnst[ 'error' ] = "Could not connect to Google Storage bucket. " . make_clickable($error['message']);
               }
             }
           }
