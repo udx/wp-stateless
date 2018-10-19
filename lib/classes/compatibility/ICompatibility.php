@@ -33,6 +33,7 @@ namespace wpCloud\StatelessMedia {
         protected $plugin_file = null;
         protected $theme_name = null;
         protected $first_party = false;
+        protected $non_library_sync = false;
 
         public function __construct(){
             $this->init();
@@ -146,6 +147,14 @@ namespace wpCloud\StatelessMedia {
 
             if(!is_network_admin() && !$this->is_plugin_active()){
                 $this->enabled = 'inactive';
+            }
+
+            /**
+             * Checking whethere to show manual sync option.
+             */
+            if($this->is_plugin_active() && $this->non_library_sync == true){
+                global $show_non_library_sync;
+                $show_non_library_sync = true;
             }
             
             Module::register_module(array(

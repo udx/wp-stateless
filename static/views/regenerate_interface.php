@@ -29,12 +29,14 @@
         </label>
       </div>
 
+      <?php if(!empty($GLOBALS['show_non_library_sync'])):?>
       <div class="option">
         <label>
           <input ng-disabled="isRunning || isLoading" type="radio" name="action" value="sync_non_library_files" ng-model="action" />
           <?php _e( 'Synchronize non media library files between Google Storage and local server', ud_get_stateless_media()->domain ); ?>
         </label>
       </div>
+      <?php endif;?>
 
     </div>
 
