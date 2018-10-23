@@ -20,9 +20,9 @@
   "require": {
     "php": ">=5.5",
     "composer/installers": "~1.0",
-    "usabilitydynamics/lib-settings": "0.2.3",
-    "usabilitydynamics/lib-wp-bootstrap": "1.2.3",
-    "usabilitydynamics/lib-ud-api-client": "1.1.5.2",
+    "usabilitydynamics/lib-settings": "~0.2.3",
+    "usabilitydynamics/lib-wp-bootstrap": "~1.2.3",
+    "usabilitydynamics/lib-ud-api-client": "~1.1.5.3",
     "ccampbell/chromephp": "^4.1"
   },
   "require-dev": {

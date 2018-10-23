@@ -26,6 +26,7 @@ namespace UsabilityDynamics\UD_API {
       public $name;
       public $domain;
       public $page;
+      public $error;
       public $per_page = 100;
       
       /**
@@ -67,7 +68,11 @@ namespace UsabilityDynamics\UD_API {
       
       public function no_items() {
         if ( isset( $this->error ) ) {
-          $message = $this->error->get_error_message() . '<p class="hide-if-no-js"><a href="#" class="button" onclick="document.location.reload(); return false;">' . __( 'Try again' ) . '</a></p>';
+          $message = $this->error->get_error_message();
+          if($this->error->get_error_message() == 'User has blocked requests through HTTP.'){
+            $message .=  '<p>For more information please check <a href="https://wp-property.github.io/docs/set-accessible-host" class="link" target="_blank">' . __( 'this documentation.' ) . '</a></p>';
+          }
+          $message .= '<p class="hide-if-no-js"><a href="#" class="button" onclick="document.location.reload(); return false;">' . __( 'Try again' ) . '</a></p>';
         } else {
           $message = sprintf( __( 'No More Available Products for %s', $this->domain ), $this->name );
         }

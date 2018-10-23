@@ -8,6 +8,11 @@
         'domain' => $this->domain,
         'page' => $this->menu_slug,
       ) );
+
+      if(is_wp_error($this->error)){
+        $this->list_table->error = $this->error;
+      }
+      
       $this->list_table->data = $this->more_products;
       $this->list_table->prepare_items();
       $this->list_table->display();
