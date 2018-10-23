@@ -68,7 +68,7 @@ $l10n = array(
   'loading_non_image_media_objects'       => __( "Loading non-image Media Objects...", ud_get_stateless_media()->domain ),
 
   'unable_to_get_non_images_media_id'     => __('Unable to get non Images Media ID', ud_get_stateless_media()->domain ),
-  'non_libraries_files_are_not_found'     => __('Non libraries files are not found', ud_get_stateless_media()->domain ),
+  'non_libraries_files_are_not_found'     => __('There are no files to process.', ud_get_stateless_media()->domain ),
   'get_non_library_files_request_failed'  => __('Get non library files: Request failed', ud_get_stateless_media()->domain ),
   'regenerate_single_image_failed'        => __('Regenerate single image: Failed', ud_get_stateless_media()->domain ),
   'sync_single_file_failed'               => __('Sync single file: Failed', ud_get_stateless_media()->domain ),
