@@ -5,8 +5,8 @@ Tags: google, google cloud, google cloud storage, cdn, uploads, media, stateless
 License: GPLv2 or later
 Requires PHP: 5.5
 Requires at least: 4.0
-Tested up to: 4.9.7
-Stable tag: 2.1.7
+Tested up to: 4.9.8
+Stable tag: 2.1.8
 
 Upload and serve your WordPress media files from Google Cloud Storage.
 
@@ -101,12 +101,32 @@ To ensure new releases cause as little disruption as possible, we rely on a numb
 
 == Upgrade Notice ==
 
-= 2.1.7 =
-* ENHANCEMENT - Display dashboard-wide notice for existing users explaining stateless mode now enables cache-busting option.
-* ENHANCEMENT - Display notice when selecting stateless mode explaining stateless mode now enables cache-busting option.
-* ENHANCEMENT - Display required message on cache-busting setting description when stateless mode is enabled.
+= 2.1.8 =
+* FIX - WooCommerce product export.
+* FIX - PDF previews in media library now supported.
+* ENHANCEMENT - Improved error message when there is nothing to sync.
+* ENHANCEMENT - Renamed constant WP_STATELESS_MEDIA_CACHE_CONTROL to WP_STATELESS_MEDIA_CACHE_BUSTING.
+* ENHANCEMENT - Domain field functionality now allows webmaster to control http or https
+* ENHANCEMENT - Notice about Stateless mode requiring the Cache-Busting option is displayed to those using Stateless mode.
+* ENHANCEMENT - Upload full size image before generating thumbnails.
+* COMPATIBILITY - Added compatibility support for Learndash plugin.
+* COMPATIBILITY - Added compatibility support for BuddyPress plugin.
+* COMPATIBILITY - Added compatibility support for Divi Builder export.
+* COMPATIBILITY - Added compatibility support for Elementor plugin.
 
 == Changelog ==
+= 2.1.8 =
+* FIX - WooCommerce product export.
+* FIX - PDF previews in media library now supported.
+* ENHANCEMENT - Improved error message when there is nothing to sync.
+* ENHANCEMENT - Renamed constant WP_STATELESS_MEDIA_CACHE_CONTROL to WP_STATELESS_MEDIA_CACHE_BUSTING.
+* ENHANCEMENT - Domain field functionality now allows webmaster to control http or https
+* ENHANCEMENT - Notice about Stateless mode requiring the Cache-Busting option is displayed to those using Stateless mode.
+* ENHANCEMENT - Upload full size image before generating thumbnails.
+* COMPATIBILITY - Added compatibility support for Learndash plugin.
+* COMPATIBILITY - Added compatibility support for BuddyPress plugin.
+* COMPATIBILITY - Added compatibility support for Divi Builder export.
+* COMPATIBILITY - Added compatibility support for Elementor plugin.
 
 = 2.1.7 =
 * ENHANCEMENT - Display dashboard-wide notice for existing users explaining stateless mode now enables cache-busting option.

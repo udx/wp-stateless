@@ -51,7 +51,39 @@ $l10n = array(
   'service_account_key_save_failed'       => __( "Failed to  Save Service Account Key", ud_get_stateless_media()->domain ),
 
   'service_account_role_granted'          => __( "Service Account Role Granted", ud_get_stateless_media()->domain ),
-  'service_account_role_grant_failed'     => __( "Service Account Role Grant Failed", ud_get_stateless_media()->domain )
+  'service_account_role_grant_failed'     => __( "Service Account Role Grant Failed", ud_get_stateless_media()->domain ),
+  'unable_to_connect_to_the_server'       => __( "Unable to connect to the server", ud_get_stateless_media()->domain ),
+  'could_not_retrieve_progress'           => __( "Could not retrieve progress", ud_get_stateless_media()->domain ),
+  'could_not_get_fails'                   => __( "Could not get fails", ud_get_stateless_media()->domain ),
+  'could_not_reset_progress'              => __( "Could not reset progress", ud_get_stateless_media()->domain ),
+  'loading_images_media_objects'          => __( "Loading Images Media Objects...", ud_get_stateless_media()->domain ),
+  'stopping'                              => __( "Stopping...", ud_get_stateless_media()->domain ),
+  'finished'                              => __( "Finished", ud_get_stateless_media()->domain ),
+  'cancelled'                             => __( "Cancelled", ud_get_stateless_media()->domain ),
+  'ids_are_malformed'                     => __( "IDs are malformed", ud_get_stateless_media()->domain ),
+  'unable_to_get_images_media_id'         => __( "Unable to get Images Media ID", ud_get_stateless_media()->domain ),
+  'wp_stateless_get_images_media_id'      => __( "WP-Stateless get Images Media ID", ud_get_stateless_media()->domain ),
+  'request_failed'                        => __( "Request failed", ud_get_stateless_media()->domain ),
+  'get_images_media_id'                   => __( "Get Images Media ID", ud_get_stateless_media()->domain ),
+  'loading_non_image_media_objects'       => __( "Loading non-image Media Objects...", ud_get_stateless_media()->domain ),
 
+  'unable_to_get_non_images_media_id'     => __('Unable to get non Images Media ID', ud_get_stateless_media()->domain ),
+  'non_libraries_files_are_not_found'     => __('There are no files to process.', ud_get_stateless_media()->domain ),
+  'get_non_library_files_request_failed'  => __('Get non library files: Request failed', ud_get_stateless_media()->domain ),
+  'regenerate_single_image_failed'        => __('Regenerate single image: Failed', ud_get_stateless_media()->domain ),
+  'sync_single_file_failed'               => __('Sync single file: Failed', ud_get_stateless_media()->domain ),
+  'sync_single_file_request_failed'       => __('Sync single file: Request failed', ud_get_stateless_media()->domain ),
+  'failed_to_sync'                        => __('Failed to sync ', ud_get_stateless_media()->domain ),
+  'sync_non_library_file_failed'          => __('Sync non library file: Failed', ud_get_stateless_media()->domain ),
+  'sync_non_library_file_request_failed'  => __('Sync non library file: Request failed', ud_get_stateless_media()->domain ),
+  'response_code'                         => __('Response code: ', ud_get_stateless_media()->domain ),
+  'loading_non_library_objects'           => __('Loading non library Objects...', ud_get_stateless_media()->domain ),
+  'processing_files'                      => __('Processing files (', ud_get_stateless_media()->domain ),
+  '_total___'                             => __(' total)...', ud_get_stateless_media()->domain ),
+  'processing_images'                     => __('Processing images (', ud_get_stateless_media()->domain ),
+  
+  'get_non_images_media_id_request_failed'  => __('Get non Images Media ID: Request failed', ud_get_stateless_media()->domain ),
+  'regenerate_single_image_request_failed'  => __('Regenerate single image: Request failed', ud_get_stateless_media()->domain ),
+  
 );
 

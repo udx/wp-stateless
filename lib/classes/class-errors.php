@@ -85,8 +85,8 @@ namespace wpCloud\StatelessMedia {
       public function __construct( $args ) {
         parent::__construct( $args );
         add_action( 'admin_notices', array( $this, 'admin_notices' ) );
-        add_action( 'wp_ajax_ud_dismiss', array( $this, 'dismiss_notices' ) );
-        add_action( 'wp_ajax_button_action', array( $this, 'button_action' ) );
+        add_action( 'wp_ajax_stateless_notice_dismiss', array( $this, 'dismiss_notices' ) );
+        add_action( 'wp_ajax_stateless_notice_button_action', array( $this, 'stateless_notice_button_action' ) );
       }
       
       /**
@@ -255,10 +255,10 @@ namespace wpCloud\StatelessMedia {
       }
 
       /**
-       * Action for the button_action ajax callback
+       * Action for the stateless_notice_button_action ajax callback
        * @throws \Exception
        */
-      public function button_action(){
+      public function stateless_notice_button_action(){
         $response = array(
           'success' => '1',
         );
