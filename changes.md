@@ -1,3 +1,15 @@
+#### 2.1.8 ####
+* FIX - WooCommerce product export.
+* FIX - PDF previews in media library now supported.
+* ENHANCEMENT - Improved error message when there is nothing to sync.
+* ENHANCEMENT - Renamed constant WP_STATELESS_MEDIA_CACHE_CONTROL to WP_STATELESS_MEDIA_CACHE_BUSTING.
+* ENHANCEMENT - Domain field functionality now allows webmaster to control http or https
+* ENHANCEMENT - Notice about Stateless mode requiring the Cache-Busting option is displayed to those using Stateless mode.
+* ENHANCEMENT - Upload full size image before generating thumbnails.
+* COMPATIBILITY - Added compatibility support for Learndash plugin.
+* COMPATIBILITY - Added compatibility support for BuddyPress plugin.
+* COMPATIBILITY - Added compatibility support for Divi Builder export.
+* COMPATIBILITY - Added compatibility support for Elementor plugin.
 
 #### 2.1.7 ####
 * ENHANCEMENT - Display dashboard-wide notice for existing users explaining stateless mode now enables cache-busting option.
