@@ -268,10 +268,10 @@ namespace wpCloud\StatelessMedia {
               $this->store_failed_attachment( $file->ID, 'other' );
               throw new \Exception($metadata->get_error_message());
             }
-            if ( empty( $metadata ) ) {
-              $this->store_failed_attachment( $file->ID, 'other' );
-              throw new \Exception(__('Unknown failure reason.', ud_get_stateless_media()->domain));
-            }
+            // if ( empty( $metadata ) ) {
+            //   $this->store_failed_attachment( $file->ID, 'other' );
+            // throw new \Exception(sprintf( __('No metadata generated for %1$s (ID %2$s).', ud_get_stateless_media()->domain), esc_html( get_the_title( $image->ID ) ), $image->ID));
+            // }
 
             wp_update_attachment_metadata( $file->ID, $metadata );
             do_action( 'sm:synced::nonImage', $id, $metadata);
