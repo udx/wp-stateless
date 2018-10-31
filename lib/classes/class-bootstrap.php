@@ -1260,7 +1260,11 @@ namespace wpCloud\StatelessMedia {
        * Upload the full size image first.
        * 
        */
-      public function before_intermediate_image_sizes($sizes, $metadata){
+      public function before_intermediate_image_sizes($sizes, $metadata = array()){
+        if(empty($metadata)){
+          return $sizes;
+        }
+
         try{
           $attachment_id = attachment_url_to_postid($metadata['file']);
           $this->add_media(null, $attachment_id, false, array('no_thumb' => true));
