@@ -174,7 +174,7 @@
                                     <h4><?php _e( 'Domain', ud_get_stateless_media()->domain ); ?></h4>
                                     <p>
                                         <label for="bucket_folder_name">
-                                            <input name="sm[custom_domain]" ng-model="sm.custom_domain" type="text" id="bucket_folder_name" class="regular-text ltr" placeholder="https://storage.googleapis.com" ng-change="sm.generatePreviewUrl()" ng-disabled="sm.readonly.custom_domain">
+                                            <input name="sm[custom_domain]" ng-model="sm.custom_domain" type="text" id="bucket_folder_name" class="regular-text ltr" placeholder="" ng-change="sm.generatePreviewUrl()" ng-disabled="sm.readonly.custom_domain">
                                         </label>
                                     </p>
                                     <p class="description">
