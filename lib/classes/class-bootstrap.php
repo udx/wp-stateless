@@ -811,18 +811,19 @@ namespace wpCloud\StatelessMedia {
        */
       public function admin_enqueue_scripts( $hook ) {
 
-        wp_enqueue_style( 'wp-stateless');
 
         switch( $hook ) {
 
           case 'options-media.php':
             //wp_enqueue_script( 'wp-api' );
 
+            wp_enqueue_style( 'wp-stateless');
             wp_enqueue_script( 'wp-stateless-setup' );
           break;
 
           case 'upload.php':
 
+            wp_enqueue_style( 'wp-stateless');
             wp_enqueue_script( 'wp-stateless-uploads-js' );
 
             break;
@@ -832,12 +833,14 @@ namespace wpCloud\StatelessMedia {
             global $post;
 
             if ( $post->post_type == 'attachment' ) {
+              wp_enqueue_style( 'wp-stateless');
               wp_enqueue_script( 'wp-stateless-uploads-js' );
             }
 
             break;
 
-          case $this->settings->setup_wizard_ui:
+          case 'media_page_stateless-setup':
+            wp_enqueue_style( 'wp-stateless');
             wp_enqueue_style( 'wp-stateless-bootstrap' );
             wp_enqueue_style( 'wp-stateless-setup-wizard' );
 
@@ -849,7 +852,8 @@ namespace wpCloud\StatelessMedia {
             wp_enqueue_script( 'wp-stateless-setup' );
             wp_enqueue_script( 'wp-stateless-setup-wizard-js' );
             break;
-          case $this->settings->stateless_settings:
+          case 'media_page_stateless-settings':
+            wp_enqueue_style( 'wp-stateless');
             wp_enqueue_script( 'wp-stateless-settings' );
             wp_enqueue_style( 'bootstrap-grid-v4' );
             wp_enqueue_style( 'wp-stateless-settings' );
