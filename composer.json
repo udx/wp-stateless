@@ -69,6 +69,7 @@
         "client" : {
           "slug": "wpcloud/wp-stateless",
           "screen": {
+            "parent": "upload.php?page=stateless-settings",
             "hide_menu": true
           }
         },
