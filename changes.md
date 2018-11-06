@@ -1,3 +1,8 @@
+#### 2.1.9 ####
+* FIX - Resolved fatal error with OneCodeShop RML Amazon S3 plugin. GitHub Issue #317.
+* FIX - Resolved missing bucket in file URL when “storage.googleapis.com” was supplied in Domain field. GitHub Issue #318.
+* ENHANCEMENT - Support synchronization of files without metadata, such as .doc and .docx files. GitHub Issue #316.
+
 #### 2.1.8 ####
 * FIX - WooCommerce product export.
 * FIX - PDF previews in media library now supported.
