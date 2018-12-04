@@ -1,4 +1,4 @@
-<div id="stateless-notice-<?php echo $data['key'];?>" class="ud-admin-notice <?php echo $data['class'];?> update-nag fade">
+<div id="stateless-notice-<?php if(!empty($data['key'])) echo $data['key'];?>" class="stateless-admin-notice ud-admin-notice <?php echo $data['class'];?> update-nag fade">
     <div>
         <div class="title"><?php echo $data['title'];?></div>
         <div class="description"><?php echo $data['message'];?></div>

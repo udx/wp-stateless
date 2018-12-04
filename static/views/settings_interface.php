@@ -9,7 +9,7 @@
         <a href="#stless_sync_tab" class="stless_setting_tab nav-tab"><?php _e( 'Sync', ud_get_stateless_media()->domain ); ?></a>  
         <?php endif; ?>
         <a href="#stless_compatibility_tab" class="stless_setting_tab nav-tab"><?php _e( 'Compatibility', ud_get_stateless_media()->domain ); ?></a>  
-        <a href="#stless_questions_tab" class="stless_setting_tab nav-tab"><?php _e( 'Feedback', ud_get_stateless_media()->domain ); ?></a>  
+        <a href="#stless_questions_tab" class="stless_setting_tab nav-tab"><?php _e( 'Support', ud_get_stateless_media()->domain ); ?></a>
     </h2>  
 
     <div class="stless_settings">
@@ -174,29 +174,14 @@
                                     <h4><?php _e( 'Domain', ud_get_stateless_media()->domain ); ?></h4>
                                     <p>
                                         <label for="bucket_folder_name">
-                                            <input name="sm[custom_domain]" ng-model="sm.custom_domain" type="text" id="bucket_folder_name" class="regular-text ltr" placeholder="storage.googleapis.com" ng-change="sm.generatePreviewUrl()" ng-disabled="sm.readonly.custom_domain">
+                                            <input name="sm[custom_domain]" ng-model="sm.custom_domain" type="text" id="bucket_folder_name" class="regular-text ltr" placeholder="" ng-change="sm.generatePreviewUrl()" ng-disabled="sm.readonly.custom_domain">
                                         </label>
                                     </p>
                                     <p class="description">
                                     <strong ng-bind="sm.showNotice('custom_domain')" ></strong> <br>
-                                    <?php printf(__( 'Replace the default GCS domain with your own custom domain. This will require you to <a href="%s" target="_blank">configure a CNAME</a>. Be advised that the bucket name and domain name must match exactly and HTTPS is not supported with a custom domain unless it is routed via other CDN services like <a href="https://cloudflare.com" target="_blank">CloudFlare</a>.', ud_get_stateless_media()->domain ), 'https://cloud.google.com/storage/docs/xml-api/reference-uris#cname'); ?>
+                                    <strong class="notice" ng-show="sm.is_custom_domain"><?php printf(__( 'This will require proxy/load balancer.', ud_get_stateless_media()->domain )); ?></strong>
+                                    <?php printf(__( 'Replace the default GCS domain with your own custom domain. This will require you to <a href="%s" target="_blank">configure a CNAME</a>. Be advised that the bucket name and domain name must match exactly, and HTTPS is not supported with a custom domain out of the box.', ud_get_stateless_media()->domain ), 'https://cloud.google.com/storage/docs/xml-api/reference-uris#cname'); ?>
                                     </p>
-                                    
-                                    <h4><?php _e( 'Force SSL', ud_get_stateless_media()->domain ); ?></h4>
-                                    <p>
-                                        <select id="org_url_grp" name="sm[force_ssl]" ng-model="sm.force_ssl" ng-change="sm.generatePreviewUrl()" ng-disabled="sm.readonly.organize_media">
-                                            <?php if(is_network_admin()): ?>
-                                            <option value=""><?php _e( 'Don\'t override', ud_get_stateless_media()->domain ); ?></option>
-                                            <?php endif; ?>
-                                            <option value="1"><?php _e( 'Enable', ud_get_stateless_media()->domain ); ?></option>
-                                            <option value=""><?php _e( 'Disable', ud_get_stateless_media()->domain ); ?></option>
-                                        </select>
-                                    </p>
-                                    <p class="description">
-                                    <?php printf(__( 'This will force SSL (HTTPS) to be used on your custom CDN domain, which is not supported by GCS by default. You will need to routed the custom CDN domain via other services like CloudFlare to <a href="%s" target="_blank">inject the required SSL encryption layer</a> (available in their free plan). <br/><br/>Note: To enforce SSL on items uploaded previously, you might need to use the features in the Sync tab to perform a resync.', ud_get_stateless_media()->domain ), 'https://www.cloudflare.com/ssl/'); ?>
-                                    </p>
-
-
                                     <hr>
 
                                     <?php if(!is_network_admin()): ?>
@@ -228,7 +213,7 @@
                                     </p>
                                     <p class="description"><strong ng-bind="sm.showNotice('hashify_file_name')" ></strong> 
                                     <span ng-show="sm.mode == 'stateless'">
-                                    <?php _e(sprintf( "<b>Required by Stateless Mode. Override with the <a href='%s' target='_blank'>WP_STATELESS_MEDIA_CACHE_CONTROL</a> constant.</b>","https://github.com/wpCloud/wp-stateless/wiki/Constants#wp_stateless_media_cache_control"), ud_get_stateless_media()->domain);?>
+                                    <?php _e(sprintf( "<b>Required by Stateless Mode. Override with the <a href='%s' target='_blank'>WP_STATELESS_MEDIA_CACHE_BUSTING</a> constant.</b>","https://github.com/wpCloud/wp-stateless/wiki/Constants#wp_stateless_media_cache_busting"), ud_get_stateless_media()->domain);?>
                                     </span>
 
                                     <?php _e( 'Prepends a random set of numbers and letters to the filename. This is useful for preventing caching issues when uploading files that have the same filename.', ud_get_stateless_media()->domain ); ?></p>
@@ -270,7 +255,8 @@
                                     <option value="true"><?php _e( 'Enable', ud_get_stateless_media()->domain ); ?></option>
                                 </select>
                                 <p class="description">
-                                    <strong ng-show="!module.is_plugin_active"><?php _e("Please activate the plugin first.");?></strong>
+                                    <strong ng-show="!module.is_plugin_active && module.is_plugin"><?php _e("Please activate the plugin first.");?></strong>
+                                    <strong ng-show="!module.is_plugin_active && module.is_theme"><?php _e("Please activate the theme first.");?></strong>
                                     <strong ng-show="module.is_constant"><?php _e("Currently configured via a constant.");?></strong>
                                     <strong ng-show="module.is_network_override"><?php _e("Currently configured via network settings.");?></strong>
                                     {{module.description}}

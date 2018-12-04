@@ -1,4 +1,4 @@
-.ud-admin-notice.error, .ud-admin-notice.notice {
+.stateless-admin-notice.error, .stateless-admin-notice.notice {
     position: relative;
     display: block;
     background-image: url('../images/stateless.svg');
@@ -10,43 +10,43 @@
 
 }
 
-.ud-admin-notice .icon {
+.stateless-admin-notice .icon {
     float: left;
     width: 30px;
     height: 30px;
 }
 
-.ud-admin-notice .description {
+.stateless-admin-notice .description {
     margin-top: 7px;
 }
 
-.ud-admin-notice .description ul{
+.stateless-admin-notice .description ul{
     margin: 0px;
 }
 
-.ud-admin-notice ul {
+.stateless-admin-notice ul {
     margin: 0.5em 0;
 }
 
-.ud-admin-notice .inner-contaner {
+.stateless-admin-notice .inner-contaner {
     float: left;
 }
 
-.ud-admin-notice .title {
+.stateless-admin-notice .title {
     font-weight: bold;
 }
 
-.ud-admin-notice a {
+.stateless-admin-notice a {
     text-decoration: underline;
 }
 
 
-.ud-admin-notice a.notice-dismiss.dismiss,
-.ud-admin-notice a.button-action {
+.stateless-admin-notice a.notice-dismiss.dismiss,
+.stateless-admin-notice a.button-action {
     text-decoration: none !important;
 }
 
-.ud-admin-notice a.button-action {
+.stateless-admin-notice a.button-action {
     right: 40px;
 }
 
@@ -72,36 +72,36 @@
 
 /* Large devices (laptops/desktops, 992px and up) */
 @media only screen and (max-width: 992px) {
-    .ud-admin-notice .description {
+    .stateless-admin-notice .description {
         margin-top: 15px;
     }
     
-    .ud-admin-notice a.notice-dismiss.dismiss,
-    .ud-admin-notice a.button-action {
+    .stateless-admin-notice a.notice-dismiss.dismiss,
+    .stateless-admin-notice a.button-action {
         margin-top: 12px;
     }
 } 
 
 /* Large devices (laptops/desktops, 992px and up) */
 @media only screen and (min-width: 992px) {
-    .ud-admin-notice.error, .ud-admin-notice.notice {
+    .stateless-admin-notice.error, .stateless-admin-notice.notice {
         background-position: 10px center;
         padding: 15px 193px 15px 60px;
     }
 
-    .ud-admin-notice a.notice-dismiss.dismiss,
-    .ud-admin-notice a.button-action {
+    .stateless-admin-notice a.notice-dismiss.dismiss,
+    .stateless-admin-notice a.button-action {
         position: absolute;
         top: 50%;
         transform: translateY(-50%);
     }
 
-    .ud-admin-notice a.notice-dismiss.dismiss:focus{
+    .stateless-admin-notice a.notice-dismiss.dismiss:focus{
         box-shadow: none;
     }
 
-    .ud-admin-notice a.notice-dismiss.dismiss:active,
-    .ud-admin-notice a.button-action:active {
+    .stateless-admin-notice a.notice-dismiss.dismiss:active,
+    .stateless-admin-notice a.button-action:active {
         transform: translateY(-48%) !important;
     }
 } 

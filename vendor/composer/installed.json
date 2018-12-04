@@ -1,65 +1,169 @@
 [
     {
-        "name": "usabilitydynamics/lib-utility",
-        "version": "0.3.7",
-        "version_normalized": "0.3.7.0",
+        "name": "ccampbell/chromephp",
+        "version": "4.1.0",
+        "version_normalized": "4.1.0.0",
         "source": {
             "type": "git",
-            "url": "git@github.com:UsabilityDynamics/lib-utility",
-            "reference": "0.3.7"
+            "url": "https://github.com/ccampbell/chromephp.git",
+            "reference": "c3c297615d48ae5b2a86a82311152d1ed095fcef"
         },
         "dist": {
             "type": "zip",
-            "url": "https://github.com/UsabilityDynamics/lib-utility/archive/0.3.7.zip",
-            "reference": "0.3.7",
-            "shasum": null
+            "url": "https://api.github.com/repos/ccampbell/chromephp/zipball/c3c297615d48ae5b2a86a82311152d1ed095fcef",
+            "reference": "c3c297615d48ae5b2a86a82311152d1ed095fcef",
+            "shasum": ""
+        },
+        "require": {
+            "php": ">=5.0.0"
+        },
+        "time": "2013-06-26T03:44:33+00:00",
+        "type": "library",
+        "installation-source": "dist",
+        "autoload": {
+            "psr-0": {
+                "ChromePhp": ""
+            }
+        },
+        "notification-url": "https://packagist.org/downloads/",
+        "license": [
+            "Apache-2.0"
+        ],
+        "authors": [
+            {
+                "name": "Craig Campbell",
+                "email": "iamcraigcampbell@gmail.com",
+                "homepage": "http://craig.is",
+                "role": "Developer"
+            }
+        ],
+        "description": "Log variables to the Chrome console (via Chrome Logger Google Chrome extension).",
+        "homepage": "http://github.com/ccampbell/chromephp",
+        "keywords": [
+            "log",
+            "logging"
+        ]
+    },
+    {
+        "name": "composer/installers",
+        "version": "v1.6.0",
+        "version_normalized": "1.6.0.0",
+        "source": {
+            "type": "git",
+            "url": "https://github.com/composer/installers.git",
+            "reference": "cfcca6b1b60bc4974324efb5783c13dca6932b5b"
+        },
+        "dist": {
+            "type": "zip",
+            "url": "https://api.github.com/repos/composer/installers/zipball/cfcca6b1b60bc4974324efb5783c13dca6932b5b",
+            "reference": "cfcca6b1b60bc4974324efb5783c13dca6932b5b",
+            "shasum": ""
+        },
+        "require": {
+            "composer-plugin-api": "^1.0"
+        },
+        "replace": {
+            "roundcube/plugin-installer": "*",
+            "shama/baton": "*"
         },
         "require-dev": {
-            "phpunit/phpunit": "4.1.*"
+            "composer/composer": "1.0.*@dev",
+            "phpunit/phpunit": "^4.8.36"
         },
-        "type": "library",
+        "time": "2018-08-27T06:10:37+00:00",
+        "type": "composer-plugin",
         "extra": {
-            "installer-name": "lib-utility",
-            "component": {
-                "name": "utility",
-                "scripts": [
-                    "scripts/*.js"
-                ]
+            "class": "Composer\\Installers\\Plugin",
+            "branch-alias": {
+                "dev-master": "1.0-dev"
             }
         },
         "installation-source": "dist",
         "autoload": {
-            "classmap": [
-                "lib"
-            ]
+            "psr-4": {
+                "Composer\\Installers\\": "src/Composer/Installers"
+            }
         },
+        "notification-url": "https://packagist.org/downloads/",
         "license": [
             "MIT"
         ],
         "authors": [
             {
-                "name": "Andy Potanin",
-                "email": "andy.potanin@usabilitydynamics.com",
-                "homepage": "http://usabilitydynamics.com",
-                "role": "Developer"
-            },
-            {
-                "name": "Maxim Peshkov",
-                "email": "maxim.peshkov@usabilitydynamics.com",
-                "homepage": "http://usabilitydynamics.com",
-                "role": "Developer"
-            },
-            {
-                "name": "Anton Korotkov",
-                "email": "anton.korotkov@usabilitydynamics.com",
-                "homepage": "http://usabilitydynamics.com",
-                "role": "Developer"
+                "name": "Kyle Robinson Young",
+                "email": "kyle@dontkry.com",
+                "homepage": "https://github.com/shama"
             }
         ],
+        "description": "A multi-framework Composer library installer",
+        "homepage": "https://composer.github.io/installers/",
         "keywords": [
-            "job",
-            "process",
-            "utility"
+            "Craft",
+            "Dolibarr",
+            "Eliasis",
+            "Hurad",
+            "ImageCMS",
+            "Kanboard",
+            "Lan Management System",
+            "MODX Evo",
+            "Mautic",
+            "Maya",
+            "OXID",
+            "Plentymarkets",
+            "Porto",
+            "RadPHP",
+            "SMF",
+            "Thelia",
+            "WolfCMS",
+            "agl",
+            "aimeos",
+            "annotatecms",
+            "attogram",
+            "bitrix",
+            "cakephp",
+            "chef",
+            "cockpit",
+            "codeigniter",
+            "concrete5",
+            "croogo",
+            "dokuwiki",
+            "drupal",
+            "eZ Platform",
+            "elgg",
+            "expressionengine",
+            "fuelphp",
+            "grav",
+            "installer",
+            "itop",
+            "joomla",
+            "kohana",
+            "laravel",
+            "lavalite",
+            "lithium",
+            "magento",
+            "majima",
+            "mako",
+            "mediawiki",
+            "modulework",
+            "modx",
+            "moodle",
+            "osclass",
+            "phpbb",
+            "piwik",
+            "ppi",
+            "puppet",
+            "pxcms",
+            "reindex",
+            "roundcube",
+            "shopware",
+            "silverstripe",
+            "sydes",
+            "symfony",
+            "typo3",
+            "wordpress",
+            "yawik",
+            "zend",
+            "zikula"
         ]
     },
     {
@@ -133,182 +237,122 @@
         ]
     },
     {
-        "name": "ccampbell/chromephp",
-        "version": "4.1.0",
-        "version_normalized": "4.1.0.0",
+        "name": "usabilitydynamics/lib-ud-api-client",
+        "version": "1.1.5.3",
+        "version_normalized": "1.1.5.3",
         "source": {
             "type": "git",
-            "url": "https://github.com/ccampbell/chromephp.git",
-            "reference": "c3c297615d48ae5b2a86a82311152d1ed095fcef"
+            "url": "git@github.com:UsabilityDynamics/lib-ud-api-client",
+            "reference": "1.1.5.3"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/ccampbell/chromephp/zipball/c3c297615d48ae5b2a86a82311152d1ed095fcef",
-            "reference": "c3c297615d48ae5b2a86a82311152d1ed095fcef",
-            "shasum": ""
+            "url": "https://github.com/UsabilityDynamics/lib-ud-api-client/archive/1.1.5.3.zip",
+            "reference": "1.1.5.3",
+            "shasum": null
         },
         "require": {
-            "php": ">=5.0.0"
+            "php": ">=5.3"
         },
-        "time": "2013-06-26T03:44:33+00:00",
         "type": "library",
+        "extra": {
+            "installer-name": "lib-ud-api-client"
+        },
         "installation-source": "dist",
         "autoload": {
-            "psr-0": {
-                "ChromePhp": ""
-            }
+            "classmap": [
+                "lib/classes"
+            ]
         },
-        "notification-url": "https://packagist.org/downloads/",
         "license": [
-            "Apache-2.0"
+            "GPLv2"
         ],
-        "authors": [
-            {
-                "name": "Craig Campbell",
-                "email": "iamcraigcampbell@gmail.com",
-                "homepage": "http://craig.is",
-                "role": "Developer"
-            }
-        ],
-        "description": "Log variables to the Chrome console (via Chrome Logger Google Chrome extension).",
-        "homepage": "http://github.com/ccampbell/chromephp",
+        "description": "UD API Client for WooCommerce API Manager",
+        "homepage": "https://github.com/UsabilityDynamics/lib-ud-api-client",
         "keywords": [
-            "log",
-            "logging"
+            "api",
+            "client",
+            "licenses",
+            "plugins",
+            "wordpress"
         ]
     },
     {
-        "name": "composer/installers",
-        "version": "v1.4.0",
-        "version_normalized": "1.4.0.0",
+        "name": "usabilitydynamics/lib-utility",
+        "version": "0.3.7",
+        "version_normalized": "0.3.7.0",
         "source": {
             "type": "git",
-            "url": "https://github.com/composer/installers.git",
-            "reference": "9ce17fb70e9a38dd8acff0636a29f5cf4d575c1b"
+            "url": "git@github.com:UsabilityDynamics/lib-utility",
+            "reference": "0.3.7"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/composer/installers/zipball/9ce17fb70e9a38dd8acff0636a29f5cf4d575c1b",
-            "reference": "9ce17fb70e9a38dd8acff0636a29f5cf4d575c1b",
-            "shasum": ""
-        },
-        "require": {
-            "composer-plugin-api": "^1.0"
-        },
-        "replace": {
-            "roundcube/plugin-installer": "*",
-            "shama/baton": "*"
+            "url": "https://github.com/UsabilityDynamics/lib-utility/archive/0.3.7.zip",
+            "reference": "0.3.7",
+            "shasum": null
         },
         "require-dev": {
-            "composer/composer": "1.0.*@dev",
             "phpunit/phpunit": "4.1.*"
         },
-        "time": "2017-08-09T07:53:48+00:00",
-        "type": "composer-plugin",
+        "type": "library",
         "extra": {
-            "class": "Composer\\Installers\\Plugin",
-            "branch-alias": {
-                "dev-master": "1.0-dev"
+            "installer-name": "lib-utility",
+            "component": {
+                "name": "utility",
+                "scripts": [
+                    "scripts/*.js"
+                ]
             }
         },
         "installation-source": "dist",
         "autoload": {
-            "psr-4": {
-                "Composer\\Installers\\": "src/Composer/Installers"
-            }
+            "classmap": [
+                "lib"
+            ]
         },
-        "notification-url": "https://packagist.org/downloads/",
         "license": [
             "MIT"
         ],
         "authors": [
             {
-                "name": "Kyle Robinson Young",
-                "email": "kyle@dontkry.com",
-                "homepage": "https://github.com/shama"
+                "name": "Andy Potanin",
+                "email": "andy.potanin@usabilitydynamics.com",
+                "homepage": "http://usabilitydynamics.com",
+                "role": "Developer"
+            },
+            {
+                "name": "Maxim Peshkov",
+                "email": "maxim.peshkov@usabilitydynamics.com",
+                "homepage": "http://usabilitydynamics.com",
+                "role": "Developer"
+            },
+            {
+                "name": "Anton Korotkov",
+                "email": "anton.korotkov@usabilitydynamics.com",
+                "homepage": "http://usabilitydynamics.com",
+                "role": "Developer"
             }
         ],
-        "description": "A multi-framework Composer library installer",
-        "homepage": "https://composer.github.io/installers/",
         "keywords": [
-            "Craft",
-            "Dolibarr",
-            "Eliasis",
-            "Hurad",
-            "ImageCMS",
-            "Kanboard",
-            "Lan Management System",
-            "MODX Evo",
-            "Mautic",
-            "Maya",
-            "OXID",
-            "Plentymarkets",
-            "Porto",
-            "RadPHP",
-            "SMF",
-            "Thelia",
-            "WolfCMS",
-            "agl",
-            "aimeos",
-            "annotatecms",
-            "attogram",
-            "bitrix",
-            "cakephp",
-            "chef",
-            "cockpit",
-            "codeigniter",
-            "concrete5",
-            "croogo",
-            "dokuwiki",
-            "drupal",
-            "eZ Platform",
-            "elgg",
-            "expressionengine",
-            "fuelphp",
-            "grav",
-            "installer",
-            "itop",
-            "joomla",
-            "kohana",
-            "laravel",
-            "lavalite",
-            "lithium",
-            "magento",
-            "mako",
-            "mediawiki",
-            "modulework",
-            "moodle",
-            "osclass",
-            "phpbb",
-            "piwik",
-            "ppi",
-            "puppet",
-            "reindex",
-            "roundcube",
-            "shopware",
-            "silverstripe",
-            "sydes",
-            "symfony",
-            "typo3",
-            "wordpress",
-            "yawik",
-            "zend",
-            "zikula"
+            "job",
+            "process",
+            "utility"
         ]
     },
     {
         "name": "usabilitydynamics/lib-wp-bootstrap",
-        "version": "1.2.3",
-        "version_normalized": "1.2.3.0",
+        "version": "1.2.4",
+        "version_normalized": "1.2.4.0",
         "source": {
             "type": "git",
             "url": "git@github.com:UsabilityDynamics/lib-wp-bootstrap",
-            "reference": "1.2.3"
+            "reference": "1.2.4"
         },
         "dist": {
             "type": "zip",
-            "url": "https://github.com/UsabilityDynamics/lib-wp-bootstrap/archive/1.2.3.zip",
-            "reference": "1.2.3",
+            "url": "https://github.com/UsabilityDynamics/lib-wp-bootstrap/archive/1.2.4.zip",
+            "reference": "1.2.4",
             "shasum": null
         },
         "require": {

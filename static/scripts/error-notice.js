@@ -3,17 +3,17 @@
  */
 jQuery( document ).ready( function () {
   
-    jQuery( '.ud-admin-notice' ).on( 'click', '.button-action', function(e){
+    jQuery( document ).on( 'click', '.stateless-admin-notice.ud-admin-notice .button-action', function(e){
+      var _this = jQuery( this );
       if(_this.attr('href') != '#'){
         return;
       }
       
       e.preventDefault();
   
-      var _this = jQuery( this );
 
       var data = {
-        action: 'button_action',
+        action: 'stateless_notice_button_action',
         key: _this.data('key'),
       }
   
@@ -21,10 +21,31 @@ jQuery( document ).ready( function () {
           if( result_data.success == '1' ) {
             _this.closest('.ud-admin-notice').remove();
           } else if ( result_data.success == '0' ) {
-            alert(result_data.error);
+            // alert(result_data.error);
           }
       }, "json" );
       return false;
+    });
+
+      
+    jQuery( document ).on( 'click', '.stateless-admin-notice.ud-admin-notice .dismiss-warning', function(e){
+      e.preventDefault();
+
+      var _this = jQuery( this );
+
+      var data = {
+        action: 'stateless_notice_dismiss',
+        key: _this.data('key'),
+      }
+
+      jQuery.post( ajaxurl, data, function ( result_data ) {
+          if( result_data.success == '1' ) {
+            _this.closest('.ud-admin-notice').remove();
+          } else if ( result_data.success == '0' ) {
+            // alert(result_data.error);
+          }
+      }, "json" );
+
     });
 
     jQuery('#stless_settings_tab .sm-mode input[type=radio]').on('change', function(){

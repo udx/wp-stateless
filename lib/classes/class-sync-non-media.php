@@ -17,6 +17,7 @@ namespace wpCloud\StatelessMedia {
             
             public function __construct(){
                 $this->registered_files = get_option('sm_synced_files', array());
+                // print_r($this->registered_files);
                 // Manual sync using sync tab. 
                 // called from ajax action_get_non_library_files_id
                 // Return files to be manualy sync from sync tab.
@@ -26,7 +27,7 @@ namespace wpCloud\StatelessMedia {
                 add_action( 'sm:sync::register_dir', array($this, 'register_dir') );
                 add_action( 'sm:sync::addFile', array($this, 'add_file') );
                 // Sync a file.
-                add_action( 'sm:sync::syncFile', array($this, 'sync_file'), 10, 3 );
+                add_action( 'sm:sync::syncFile', array($this, 'sync_file'), 10, 4 );
                 add_action( 'sm:sync::deleteFile', array($this, 'delete_file') );
                 add_action( 'sm:sync::deleteFiles', array($this, 'delete_files') );
             }
@@ -60,12 +61,19 @@ namespace wpCloud\StatelessMedia {
              * @param:
              *  $name: Reletive path to upload dir.
              *  $absolutePath: Full path of the file
-             *  $forced: Whether to force to move the file to GCS even it's already exists.
+             *  $forced: Type: bool/2; Whether to force to move the file to GCS even it's already exists.
+             *           true: Check whether it's already synced or not in database.
+             *           2 (int): Force to overwrite on GCS
+             * 
              * @return:
              *  $media: Media object returned from client->add_media() method.
              * @throws: Exception File not found
              */
-            public function sync_file($name, $absolutePath, $forced = false){
+            public function sync_file($name, $absolutePath, $forced = false, $args = array()){
+                $args = wp_parse_args($args, array(
+                    'stateless' => true, // whether to delete local file in stateless mode.
+                ));
+                
                 if(in_array($name, $this->registered_files) && !$forced){
                     return false;
                 }
@@ -84,6 +92,8 @@ namespace wpCloud\StatelessMedia {
                 
                 $file_copied_from_gcs = false;
                 $local_file_exists = file_exists( $absolutePath );
+
+                do_action( 'sm::pre::sync::nonMediaFiles', $name, $absolutePath); // , $media
 
                 if ( !$local_file_exists && ud_get_stateless_media()->get( 'sm.mode' ) !== 'stateless') {
 
@@ -115,7 +125,7 @@ namespace wpCloud\StatelessMedia {
                     do_action( 'sm::synced::nonMediaFiles', $name, $absolutePath, $media); // , $media
 
                     // Stateless mode: we don't need the local version.
-                    if(ud_get_stateless_media()->get( 'sm.mode' ) === 'stateless'){
+                    if($args['stateless'] == true && ud_get_stateless_media()->get( 'sm.mode' ) === 'stateless'){
                         unlink($absolutePath);
                     }
                     return $media;
