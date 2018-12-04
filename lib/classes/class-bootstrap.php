@@ -222,7 +222,7 @@ namespace wpCloud\StatelessMedia {
              * We can't use this. That's prevent removing this filter.
              */
             add_filter( 'wp_update_attachment_metadata', array( 'wpCloud\StatelessMedia\Utility', 'add_media' ), 999, 2 );
-            add_filter( 'intermediate_image_sizes_advanced', array( $this, 'before_intermediate_image_sizes' ), 10, 2 );
+            // add_filter( 'intermediate_image_sizes_advanced', array( $this, 'before_intermediate_image_sizes' ), 10, 2 );
 
             /**
              * Add Media
