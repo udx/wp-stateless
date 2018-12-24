@@ -22,9 +22,9 @@ namespace wpCloud\StatelessMedia {
             public function module_init($sm){
                 // We need to remove the regular handler for sync 
                 // unless in stateless mode we would remove the attachment before it's get optimized.
-                // remove_filter( 'wp_update_attachment_metadata', array( "wpCloud\StatelessMedia\Utility", 'add_media' ), 999 );
-                // we are not using this for now untill we have queue system. Because if we use this add media button return local url.
-                // add_filter( 'wp_update_attachment_metadata', array( $this, 'add_media_wrapper' ), 999, 2 );
+                remove_filter( 'wp_update_attachment_metadata', array( "wpCloud\StatelessMedia\Utility", 'add_media' ), 999 );
+                // @todo add media button returns local url.
+                add_filter( 'wp_update_attachment_metadata', array( $this, 'add_media_wrapper' ), 999, 2 );
 
                 add_filter( 'before_imagify_optimize_attachment', array($this, 'fix_missing_file'), 10);
                 add_action( 'after_imagify_optimize_attachment', array($this, 'after_imagify_optimize_attachment'), 10 );
@@ -37,7 +37,7 @@ namespace wpCloud\StatelessMedia {
             }
 
             /**
-             * Not using for now.
+             * @todo
              * Replacement for default wp_update_attachment_metadata filter of bootstrap class.
              * To avoid sync same image twice, once on upload and again after optimization.
              * We also avoid downloading image before optimization on stateless mode.
