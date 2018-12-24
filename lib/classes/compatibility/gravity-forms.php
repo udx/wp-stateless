@@ -3,7 +3,7 @@
  * Plugin Name: Gravity Forms
  * Plugin URI: https://www.gravityforms.com/
  *
- * Compatibility Description: Enables support for these Gravity Forms features: 
+ * Compatibility Description: Enables support for these Gravity Forms features:
  * file upload field, post image field, custom file upload field type.
  *
  */
@@ -11,24 +11,27 @@
 namespace wpCloud\StatelessMedia {
 
     if(!class_exists('wpCloud\StatelessMedia\GravityForm')) {
-        
+
         class GravityForm extends ICompatibility {
             protected $id = 'gravity-form';
             protected $title = 'Gravity Forms';
             protected $constant = 'WP_STATELESS_COMPATIBILITY_GF';
             protected $description = 'Enables support for these Gravity Forms features: file upload field, post image field, custom file upload field type.';
             protected $plugin_file = 'gravityforms/gravityforms.php';
+            protected $plugin_version;
             protected $non_library_sync = true;
 
             public function module_init($sm){
-                $this->plugin_version = \GFForms::$version;
+            	if ( class_exists('GFForms') ) {
+            		$this->plugin_version = \GFForms::$version;
+            	}
                 do_action('sm:sync::register_dir', '/gravity_forms/');
                 add_filter( 'gform_save_field_value', array($this, 'gform_save_field_value'), 10, 5 );
                 add_action( 'sm::synced::nonMediaFiles', array($this, 'modify_db'), 10, 3);
 
                 add_action( 'gform_file_path_pre_delete_file', array($this, 'gform_file_path_pre_delete_file'), 10, 2);
             }
-            
+
             /**
              * On gform save field value sync file to GCS and alter the file url to GCS link.
              *
@@ -43,7 +46,7 @@ namespace wpCloud\StatelessMedia {
                 $type = \GFFormsModel::get_input_type($field);
                 if($type == 'fileupload'){
                     $dir = wp_upload_dir();
-                    
+
 					if ( $field->multipleFiles ) {
 						$value = json_decode( $value );
                     }
@@ -54,7 +57,7 @@ namespace wpCloud\StatelessMedia {
                     foreach($value as $k => $v){
                         if(empty($v)) continue;
                         $position = strpos($v, 'gravity_forms/');
-    
+
                         if( $position !== false ){
                             $name = substr($v, $position);
                             $absolutePath = $dir['basedir'] . '/' .  $name;
@@ -85,7 +88,7 @@ namespace wpCloud\StatelessMedia {
                         $_name = substr($value, $position); // gravity_forms/
                         $arr_name = explode('|:|', $_name);
                         $name = rgar( $arr_name, 0 ); // Removed |:| from end of the url.
-                        
+
                         // doing sync
                         do_action( 'sm:sync::syncFile', $name, $dir['basedir'] . '/' .  $name);
 
@@ -104,7 +107,7 @@ namespace wpCloud\StatelessMedia {
 
             /**
              * Modify value in database after sync from Sync tab.
-             * 
+             *
              */
             public function modify_db( $file_path, $fullsizepath, $media ){
                 global $wpdb;
@@ -145,7 +148,7 @@ namespace wpCloud\StatelessMedia {
                         $position = false;
 						//EDIT: Check if value is json encoded, if so, cycle through array and replace URLs.
                         $value = json_decode($result->value);
-                        
+
 						if (json_last_error() === 0) {
 							foreach( $value  as $k => $v ){
 								 $position = strpos($v, $dir['baseurl']);
@@ -180,7 +183,7 @@ namespace wpCloud\StatelessMedia {
 
             /**
              * Throw db error from last db query.
-             * We need to throw db error instead of just printing, 
+             * We need to throw db error instead of just printing,
              * so that we can catch them in ajax request.
              */
             function throw_db_error(){
@@ -196,23 +199,23 @@ namespace wpCloud\StatelessMedia {
                         throw new \Exception( $error );
                     }
                 endif;
-            
+
             }
 
             /**
-             * Delete file from GCS 
+             * Delete file from GCS
              */
             public function gform_file_path_pre_delete_file( $file_path, $url ){
                 $file_path = wp_normalize_path($file_path);
                 $gs_host = wp_normalize_path( ud_get_stateless_media()->get_gs_host() );
                 $dir = wp_upload_dir();
                 $is_stateless = strpos($file_path, $gs_host);
-                
+
                 // If the url is a GCS link then remove it from GCS.
                 if($is_stateless !== false){
                     $gs_name = substr($file_path, strpos($file_path, '/gravity_forms/'));
                     $file_path = $dir['basedir'] . $gs_name;
-                    
+
                     $client = ud_get_stateless_media()->get_client();
                     if( !is_wp_error( $client ) ) {
                         $client->remove_media( trim($gs_name, '/') );
