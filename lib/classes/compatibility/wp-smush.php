@@ -17,7 +17,7 @@ namespace wpCloud\StatelessMedia {
             protected $title = 'WP Smush';
             protected $constant = 'WP_STATELESS_COMPATIBILITY_WPSMUSH';
             protected $description = 'Ensures compatibility with WP Smush.';
-            protected $plugin_file = ['wp-smushit/wp-smush.php', 'wp-smush-pro/wp-smush.php'];
+            protected $plugin_file = ['wp-smushit/wp-smush.php', 'wp-smush-pro/wp-smush.php', 'wp-smushit-pro/wp-smush-pro.php'];
 
             public function module_init($sm){
                 add_action('wp_smush_image_optimised', array($this, 'image_optimized'), 10, 2);
