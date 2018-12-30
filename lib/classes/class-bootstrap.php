@@ -247,28 +247,36 @@ namespace wpCloud\StatelessMedia {
       
       /**
        * Rebuild srcset from gs_link.
-       * 
+       * Using calculations returned from WordPress wp_calculate_image_srcset()
        * 
        */
       public function wp_calculate_image_srcset($sources, $size_array, $image_src, $image_meta, $attachment_id){
-
-        if ( empty( $image_meta['gs_link'] ) ) {
+        if (empty($image_meta['gs_link'])) {
           $image_meta = wp_get_attachment_metadata($attachment_id);
         }
-
+  
         foreach ($sources as $width => &$image) {
-          if($width == $image_meta['width'] && isset( $image_meta['gs_link'] ) && $image_meta['gs_link'] ){
-            $image['url'] = $image_meta['gs_link'];
+          if (!isset($image_meta['gs_name']) || empty($image_meta['gs_name'])) {
+            continue;
           }
-          elseif(isset($image_meta['sizes']) && is_array($image_meta['sizes'])){
+    
+          // If srcset includes original image src, replace it
+          if (substr_compare($image['url'], $image_meta['gs_name'], -strlen($image_meta['gs_name'])) === 0) {
+            $image['url'] = $image_meta['gs_link'];
+          // Replace all sizes
+          } elseif (isset($image_meta['sizes']) && is_array($image_meta['sizes'])) {
             foreach ($image_meta['sizes'] as $key => $meta) {
-              if($width == $meta['width'] && isset($meta['gs_link']) && $meta['gs_link']){
+              if (!isset($meta['gs_name']) || empty($meta['gs_name'])) {
+                continue;
+              }
+        
+              if (substr_compare($image['url'], $meta['gs_name'], -strlen($meta['gs_name'])) === 0) {
                 $image['url'] = $meta['gs_link'];
               }
             }
           }
         }
-
+  
         return $sources;
       }
 
