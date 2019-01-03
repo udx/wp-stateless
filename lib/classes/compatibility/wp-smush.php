@@ -116,12 +116,12 @@ namespace wpCloud\StatelessMedia {
                 $upload_dir = wp_get_upload_dir();
                 $metadata = wp_get_attachment_metadata( $attachment_id );
                 $backup_paths = get_post_meta( $attachment_id, '_wp_attachment_backup_sizes', true );
-                // Getting local dir path for backup image
-                $base_dir = $upload_dir['basedir'] . '/' . dirname( $metadata['file'] );
-                // Getting GCS dir name from meta data. In case Bucket Folder used.
-                $gs_dir = dirname($metadata['gs_name']);
 
                 if(!empty($metadata['gs_name']) && !empty($backup_paths) && is_array($backup_paths)){
+                    // Getting local dir path for backup image
+                    $base_dir = $upload_dir['basedir'] . '/' . dirname( $metadata['file'] );
+                    // Getting GCS dir name from meta data. In case Bucket Folder used.
+                    $gs_dir = dirname($metadata['gs_name']);
                     foreach ($backup_paths as $key => $data) {
                         $gs_name = $gs_dir . '/' . basename($data['file']);
                         // Path of backup image
