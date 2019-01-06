@@ -2,7 +2,7 @@
 
  - Utility: General utility methods.
  - Job: Job and processing handling.
- - Loader: PSR class loader.
+ - Loader: PSR class loader. 
 
 ## Utility Methods
 
@@ -31,6 +31,7 @@ $settings = UsabilityDynamics\Utility::defaults( $configurationObject, $defaults
 $composer = UsabilityDynamics\Utility::findUp( 'composer.json', __DIR__ );
 echo "Versio is {$composer->version}."
 ```
+
 
 ## License
 

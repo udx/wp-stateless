@@ -436,7 +436,6 @@ namespace UsabilityDynamics\WP {
           'home_link' => !empty( $this->schema[ 'homepage' ] ) ? $this->schema[ 'homepage' ] : false,
         ) );
         extract( $vars );
-        require( dirname( dirname( __DIR__ ) ) . '/static/views/install_notice.php' );
         $content = ob_get_clean();
         echo apply_filters( 'ud::bootstrap::upgrade_notice::template', $content, $this->slug, $vars );
       }
