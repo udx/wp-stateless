@@ -178,7 +178,7 @@ namespace wpCloud\StatelessMedia {
           }
 
           /** Temporary fix to WP 4.4 srcset feature **/
-          //add_filter( 'max_srcset_image_width', create_function( '', 'return 1;' ) );
+          //add_filter( 'max_srcset_image_width', function(){return 1;} );
 
           /**
            * Carry on only if we do not have errors.
@@ -222,7 +222,14 @@ namespace wpCloud\StatelessMedia {
              * We can't use this. That's prevent removing this filter.
              */
             add_filter( 'wp_update_attachment_metadata', array( 'wpCloud\StatelessMedia\Utility', 'add_media' ), 999, 2 );
-            add_filter( 'intermediate_image_sizes_advanced', array( $this, 'before_intermediate_image_sizes' ), 10, 2 );
+            
+            /**
+             * Upload the full size image first.
+             * 
+             */
+            if(!defined('WP_STATELESS_MEDIA_DISABLE_FULL_IMAGE_FIRST') || WP_STATELESS_MEDIA_DISABLE_FULL_IMAGE_FIRST != true){
+              add_filter( 'intermediate_image_sizes_advanced', array( $this, 'before_intermediate_image_sizes' ), 10, 2 );
+            }
 
             /**
              * Add Media
