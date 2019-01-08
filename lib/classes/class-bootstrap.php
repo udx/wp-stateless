@@ -1150,25 +1150,39 @@ namespace wpCloud\StatelessMedia {
        *
        */
       public function activate() {
-        add_action( 'activated_plugin', array($this, 'redirect_to_splash') );
-        
+        add_action( 'activated_plugin', array($this, 'redirect_to_splash'), 99 );
+        add_action( 'activated_plugin', array($this, 'create_db') );
         /**
          * Maybe Upgrade current Version
          */
+        $this->create_db();
         Upgrader::call( $this->args[ 'version' ] );
       }
 
+      public function create_db() {
+        global $wpdb;
+        $sm_sync_db_version = get_option( 'sm_sync_db_version' );
+        
+        if( $sm_sync_db_version ) {
+          return;
+        }
       
-      public function show_notice_stateless_cache_busting(){
-        $this->errors->add( array(
-          'key' => 'stateless_cache_busting',
-          'button' => 'View Settings',
-          'button_link' => admin_url('upload.php?page=stateless-settings'),
-          'title' => sprintf( __( "Stateless mode now requires the Cache-Busting option.", ud_get_stateless_media()->domain ) ),
-          'message' => sprintf( __("WordPress looks at local files to prevent files with the same filenames. 
-                                Since Stateless mode bypasses this check, there is a potential for files to be stored with the same file name. We enforce the Cache-Busting option to prevent this. 
-                                Override with the <a href='%s' target='_blank'>%s</a> constant.", ud_get_stateless_media()->domain),"https://github.com/wpCloud/wp-stateless/wiki/Constants#wp_stateless_media_cache_busting", "WP_STATELESS_MEDIA_CACHE_BUSTING" ),
-        ), 'notice' );
+        $table_name = $wpdb->prefix . 'sm_sync';
+        
+        $charset_collate = $wpdb->get_charset_collate();
+        
+        $sql = "CREATE TABLE $table_name (
+          `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT ,
+          `file` varchar(255) NOT NULL ,
+          `status` varchar(10) NOT NULL ,
+          `expire` timestamp NOT NULL ,
+          PRIMARY KEY  (`id`)
+        ) $charset_collate;";
+      
+        require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
+        dbDelta( $sql );
+
+        add_option( 'sm_sync_db_version', $this->args[ 'version' ] );
       }
 
       public function redirect_to_splash($plugin =''){
@@ -1205,6 +1219,18 @@ namespace wpCloud\StatelessMedia {
        *
        */
       public function deactivate() {}
+
+      public function show_notice_stateless_cache_busting(){
+        $this->errors->add( array(
+          'key' => 'stateless_cache_busting',
+          'button' => 'View Settings',
+          'button_link' => admin_url('upload.php?page=stateless-settings'),
+          'title' => sprintf( __( "Stateless mode now requires the Cache-Busting option.", ud_get_stateless_media()->domain ) ),
+          'message' => sprintf( __("WordPress looks at local files to prevent files with the same filenames. 
+                                Since Stateless mode bypasses this check, there is a potential for files to be stored with the same file name. We enforce the Cache-Busting option to prevent this. 
+                                Override with the <a href='%s' target='_blank'>%s</a> constant.", ud_get_stateless_media()->domain),"https://github.com/wpCloud/wp-stateless/wiki/Constants#wp_stateless_media_cache_busting", "WP_STATELESS_MEDIA_CACHE_BUSTING" ),
+        ), 'notice' );
+      }
 
       /**
        * Filter for wp_get_attachment_url();
