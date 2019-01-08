@@ -24,9 +24,6 @@ namespace UsabilityDynamics\WP {
         } elseif ( defined( 'WP_PLUGIN_DIR' ) &&  strpos( wp_normalize_path( dirname(__FILE__) ), wp_normalize_path( WP_PLUGIN_DIR ) ) !== false
         ){
           $instance = 'plugin';
-        } elseif ( defined( 'PLUGINDIR' ) &&  strpos( wp_normalize_path( dirname(__FILE__) ), wp_normalize_path( PLUGINDIR ) ) !== false
-        ){
-          $instance = 'plugin';
         } elseif ( strpos( wp_normalize_path( get_template_directory() ), wp_normalize_path( dirname(__FILE__) ) ) !== false ){
           $instance = 'template';
         } else {

@@ -76,6 +76,31 @@ namespace wpCloud\StatelessMedia {
              * Support for WPForms
              */
             new WPSmush();
+            
+            /**
+             * Support for WPForms
+             */
+            new CompatibilityWooExtraPorductOptions();
+            
+            /**
+             * Support for Elementor
+             */
+            new Elementor();
+            
+            /**
+             * Support for Divi
+             */
+            new Divi();
+            
+            /**
+             * Support for LearnDash
+             */
+            new LearnDash();
+            
+            /**
+             * Support for BuddyPress
+             */
+            new BuddyPress();
         }
 
         /**

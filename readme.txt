@@ -5,8 +5,8 @@ Tags: google, google cloud, google cloud storage, cdn, uploads, media, stateless
 License: GPLv2 or later
 Requires PHP: 5.5
 Requires at least: 4.0
-Tested up to: 4.9.4
-Stable tag: 2.1.5
+Tested up to: 5.0
+Stable tag: 2.1.9
 
 Upload and serve your WordPress media files from Google Cloud Storage.
 
@@ -100,12 +100,51 @@ To ensure new releases cause as little disruption as possible, we rely on a numb
 
 
 == Upgrade Notice ==
-
-= 2.1.5 =
-* Bug fixed and loads of new compatibility added.
-
+= 2.1.9 =
+* FIX - Resolved fatal error with OneCodeShop RML Amazon S3 plugin. GitHub Issue [#317](https://github.com/wpCloud/wp-stateless/issues/317).
+* FIX - Resolved missing bucket in file URL when “storage.googleapis.com” was supplied in Domain field. GitHub Issue [318](https://github.com/wpCloud/wp-stateless/issues/318).
+* ENHANCEMENT - Support synchronization of files without metadata, such as .doc and .docx files. GitHub Issue [316](https://github.com/wpCloud/wp-stateless/issues/316).
 
 == Changelog ==
+= 2.1.9 =
+* FIX - Resolved fatal error with OneCodeShop RML Amazon S3 plugin. GitHub Issue [#317](https://github.com/wpCloud/wp-stateless/issues/317).
+* FIX - Resolved missing bucket in file URL when “storage.googleapis.com” was supplied in Domain field. GitHub Issue [318](https://github.com/wpCloud/wp-stateless/issues/318).
+* ENHANCEMENT - Support synchronization of files without metadata, such as .doc and .docx files. GitHub Issue [316](https://github.com/wpCloud/wp-stateless/issues/316).
+
+= 2.1.8 =
+* FIX - WooCommerce product export.
+* FIX - PDF previews in media library now supported.
+* ENHANCEMENT - Improved error message when there is nothing to sync.
+* ENHANCEMENT - Renamed constant WP_STATELESS_MEDIA_CACHE_CONTROL to WP_STATELESS_MEDIA_CACHE_BUSTING.
+* ENHANCEMENT - Domain field functionality now allows webmaster to control http or https
+* ENHANCEMENT - Notice about Stateless mode requiring the Cache-Busting option is displayed to those using Stateless mode.
+* ENHANCEMENT - Upload full size image before generating thumbnails.
+* COMPATIBILITY - Added compatibility support for Learndash plugin.
+* COMPATIBILITY - Added compatibility support for BuddyPress plugin.
+* COMPATIBILITY - Added compatibility support for Divi Builder export.
+* COMPATIBILITY - Added compatibility support for Elementor plugin.
+
+= 2.1.7 =
+* ENHANCEMENT - Display dashboard-wide notice for existing users explaining stateless mode now enables cache-busting option.
+* ENHANCEMENT - Display notice when selecting stateless mode explaining stateless mode now enables cache-busting option.
+* ENHANCEMENT - Display required message on cache-busting setting description when stateless mode is enabled.
+
+= 2.1.6 =
+* FIX - Resolved Google SDK conflict.
+* FIX - ICompatibility.php errors notice.
+* FIX - Undefined index: gs_link in class-bootstrap.php.
+* FIX - Media files with accent characters would not upload correctly to the bucket. 
+* ENHANCEMENT - Force Cache-Busting when using Stateless mode. 
+* ENHANCEMENT - New admin notice design.
+* ENHANCEMENT - Improved and clear error message. 
+* ENHANCEMENT - Renamed constant WP_STATELESS_MEDIA_ON_FLY to WP_STATELESS_DYNAMIC_IMAGE_SUPPORT. 
+* ENHANCEMENT - Update Google Libraries.
+* ENHANCEMENT - Renamed constant WP_STATELESS_MEDIA_HASH_FILENAME to WP_STATELESS_MEDIA_CACHE_BUSTING.
+* COMPATIBILITY - Renamed constant WP_STATELESS_COMPATIBILITY_WPSmush to WP_STATELESS_COMPATIBILITY_WPSMUSH.
+* COMPATIBILITY - Added support for WooCommerce Extra Product Options.
+* COMPATIBILITY - Added support for WPForms Pro.
+* COMPATIBILITY - Improved ShortPixel compatibility.
+* COMPATIBILITY - Fixed ACF Image Crop compatibility.
 
 = 2.1.5 =
 * FIX - Fatal error with PHP 5.4.45 on activation.
@@ -122,42 +161,6 @@ To ensure new releases cause as little disruption as possible, we rely on a numb
 
 = 2.1.4 =
 * ENHANCEMENT - Updated Google OAuth URL for Setup Assistant.
-
-= 2.1.3 =
-* ENHANCEMENT - Updates to text explainers in Setup Assistant.
-* ENHANCEMENT - Refined redirection logic when activating plugin.
-* FIX - Removed extra space in converted URLs.
-
-= 2.1.2 =
-* ENHANCEMENT - Improved support for Easy Digital Downloads.
-* ENHANCEMENT - Added constant WP_STATELESS_CONSOLE_LOG check before logging to console.
-* ENHANCEMENT - Changed service account default permissions on creation.
-* COMPATIBILITY - Added support for SiteOrigin generated CSS files.
-* ENHANCEMENT - Moved Dynamic Image Support to Capability tab.
-* COMPATIBILITY - Added support for ACF Image Crop addon.
-* FIX - Fixed compatibility issue with wp-smush plugin.
-* FIX - Added required blog param for multi-sites.
-* FIX - Updated media library and mediaItem API endpoints.
-* COMPATIBILITY - Added support for EDD download method option.
-
-= 2.1.1 =
-* FIX - Fixed double slash when Organization is disabled.
-* FIX - Fatal error with GuzzleHttp.
-* FIX - Fixed content-type assignment.
-* ENHANCEMENT - Added support for https URLs in Domain field.
-* COMPATIBILITY - Advanced Custom Fields Image Crop Addon.
-
-= 2.1.0 =
-* FIX - Fixed read only for Service Account JSON if constant or environment variable is defined. 
-* FIX - Override default cache control.
-* FIX - Fixed custom domain bucket support with setup assistant.
-* FIX - Improved support for wp_calculate_image_srcset.
-* FIX - Synchronizing non-image files will now delete the local copy.
-* NEW - Support for GOOGLE_APPLICATION_CREDENTIALS environment variable.
-* NEW - Added bucket region option to setup assistant.
-* NEW - Added custom file type support for File URL Replacement setting.
-* NEW - Added failover to image url when not found on disk for sync tool.
-* ENHANCEMENT - updated service account role to Storage Object Admin.
 
 = Earlier versions =
 Please refer to the separate changelog.txt file.

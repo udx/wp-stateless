@@ -9,7 +9,7 @@
         <a href="#stless_sync_tab" class="stless_setting_tab nav-tab"><?php _e( 'Sync', ud_get_stateless_media()->domain ); ?></a>  
         <?php endif; ?>
         <a href="#stless_compatibility_tab" class="stless_setting_tab nav-tab"><?php _e( 'Compatibility', ud_get_stateless_media()->domain ); ?></a>  
-        <a href="#stless_questions_tab" class="stless_setting_tab nav-tab"><?php _e( 'Feedback', ud_get_stateless_media()->domain ); ?></a>  
+        <a href="#stless_questions_tab" class="stless_setting_tab nav-tab"><?php _e( 'Support', ud_get_stateless_media()->domain ); ?></a>
     </h2>  
 
     <div class="stless_settings">
@@ -60,20 +60,20 @@
                                     <p class="description"><strong ng-bind="sm.showNotice('mode')" ></strong></p>
                                     <?php if(is_network_admin()): ?>
                                     <p class="sm-mode">
-                                        <label for="sm_mode_disabled"><input id="sm_mode_not_override" type="radio" name="sm[mode]" value="" ng-checked="sm.mode == ''" ng-disabled="sm.readonly.mode"><?php _e( 'Don\'t override', ud_get_stateless_media()->domain ); ?><small class="description"><?php _e( 'Don\'t override.', ud_get_stateless_media()->domain ); ?></small></label>
+                                        <label for="sm_mode_disabled"><input ng-model="sm.mode" id="sm_mode_not_override" type="radio" name="sm[mode]" value="" ng-checked="sm.mode == ''" ng-disabled="sm.readonly.mode"><?php _e( 'Don\'t override', ud_get_stateless_media()->domain ); ?><small class="description"><?php _e( 'Don\'t override.', ud_get_stateless_media()->domain ); ?></small></label>
                                     </p>
                                     <?php endif; ?>
                                     <p class="sm-mode">
-                                        <label for="sm_mode_disabled"><input id="sm_mode_disabled" type="radio" name="sm[mode]" value="disabled" ng-checked="sm.mode == 'disabled'" ng-disabled="sm.readonly.mode"><?php _e( 'Disabled', ud_get_stateless_media()->domain ); ?><small class="description"><?php _e( 'Disable Stateless Media.', ud_get_stateless_media()->domain ); ?></small></label>
+                                        <label for="sm_mode_disabled"><input ng-model="sm.mode" id="sm_mode_disabled" type="radio" name="sm[mode]" value="disabled" ng-checked="sm.mode == 'disabled'" ng-disabled="sm.readonly.mode"><?php _e( 'Disabled', ud_get_stateless_media()->domain ); ?><small class="description"><?php _e( 'Disable Stateless Media.', ud_get_stateless_media()->domain ); ?></small></label>
                                     </p>
                                     <p class="sm-mode">
-                                        <label for="sm_mode_backup"><input id="sm_mode_backup" type="radio" name="sm[mode]" value="backup" ng-checked="sm.mode == 'backup'" ng-disabled="sm.readonly.mode"><?php _e( 'Backup', ud_get_stateless_media()->domain ); ?><small class="description"><?php _e( 'Upload media files to Google Storage and serve local file urls.', ud_get_stateless_media()->domain ); ?></small></label>
+                                        <label for="sm_mode_backup"><input ng-model="sm.mode" id="sm_mode_backup" type="radio" name="sm[mode]" value="backup" ng-checked="sm.mode == 'backup'" ng-disabled="sm.readonly.mode"><?php _e( 'Backup', ud_get_stateless_media()->domain ); ?><small class="description"><?php _e( 'Upload media files to Google Storage and serve local file urls.', ud_get_stateless_media()->domain ); ?></small></label>
                                     </p>
                                     <p class="sm-mode">
-                                        <label for="sm_mode_cdn"><input id="sm_mode_cdn" type="radio" name="sm[mode]" value="cdn" ng-checked="sm.mode == 'cdn'"  ng-disabled="sm.readonly.mode"><?php _e( 'CDN', ud_get_stateless_media()->domain ); ?><small class="description"><?php _e( 'Copy media files to Google Storage and serve them directly from there.', ud_get_stateless_media()->domain ); ?></small></label>
+                                        <label for="sm_mode_cdn"><input ng-model="sm.mode" id="sm_mode_cdn" type="radio" name="sm[mode]" value="cdn" ng-checked="sm.mode == 'cdn'"  ng-disabled="sm.readonly.mode"><?php _e( 'CDN', ud_get_stateless_media()->domain ); ?><small class="description"><?php _e( 'Copy media files to Google Storage and serve them directly from there.', ud_get_stateless_media()->domain ); ?></small></label>
                                     </p>
                                     <p class="sm-mode">
-                                        <label for="sm_mode_stateless"><input id="sm_mode_stateless" type="radio" name="sm[mode]" value="stateless" ng-checked="sm.mode == 'stateless'" ng-disabled="sm.readonly.mode"><?php _e( 'Stateless', ud_get_stateless_media()->domain ); ?><small class="description"><?php _e( 'Store and serve media files with Google Cloud Storage only. Media files are not stored locally.', ud_get_stateless_media()->domain ); ?></small></label>
+                                        <label for="sm_mode_stateless"><input ng-model="sm.mode" id="sm_mode_stateless" type="radio" name="sm[mode]" value="stateless" ng-checked="sm.mode == 'stateless'" ng-disabled="sm.readonly.mode"><?php _e( 'Stateless', ud_get_stateless_media()->domain ); ?><small class="description"><?php _e( 'Store and serve media files with Google Cloud Storage only. Media files are not stored locally.', ud_get_stateless_media()->domain ); ?></small></label>
                                     </p>
                                     <hr>
 
@@ -174,12 +174,13 @@
                                     <h4><?php _e( 'Domain', ud_get_stateless_media()->domain ); ?></h4>
                                     <p>
                                         <label for="bucket_folder_name">
-                                            <input name="sm[custom_domain]" ng-model="sm.custom_domain" type="text" id="bucket_folder_name" class="regular-text ltr" placeholder="storage.googleapis.com" ng-change="sm.generatePreviewUrl()" ng-disabled="sm.readonly.custom_domain">
+                                            <input name="sm[custom_domain]" ng-model="sm.custom_domain" type="text" id="bucket_folder_name" class="regular-text ltr" placeholder="" ng-change="sm.generatePreviewUrl()" ng-disabled="sm.readonly.custom_domain">
                                         </label>
                                     </p>
                                     <p class="description">
                                     <strong ng-bind="sm.showNotice('custom_domain')" ></strong> <br>
-                                    <?php printf(__( 'Replace the default GCS domain with your own custom domain. This will require you to <a href="%s" target="_blank">configure a CNAME</a>. Be advised that the bucket name and domain name must match exactly and HTTPS is not supported with a custom domain.', ud_get_stateless_media()->domain ), 'https://cloud.google.com/storage/docs/xml-api/reference-uris#cname'); ?>
+                                    <strong class="notice" ng-show="sm.is_custom_domain"><?php printf(__( 'This will require proxy/load balancer.', ud_get_stateless_media()->domain )); ?></strong>
+                                    <?php printf(__( 'Replace the default GCS domain with your own custom domain. This will require you to <a href="%s" target="_blank">configure a CNAME</a>. Be advised that the bucket name and domain name must match exactly, and HTTPS is not supported with a custom domain out of the box.', ud_get_stateless_media()->domain ), 'https://cloud.google.com/storage/docs/xml-api/reference-uris#cname'); ?>
                                     </p>
                                     <hr>
 
@@ -202,7 +203,7 @@
                                     <hr>
                                     <h4><?php _e( 'Cache-Busting', ud_get_stateless_media()->domain ); ?></h4>
                                     <p>
-                                        <select id="cache_busting" name="sm[hashify_file_name]" ng-model="sm.hashify_file_name" ng-change="sm.generatePreviewUrl()" ng-disabled="sm.readonly.hashify_file_name">
+                                        <select id="cache_busting" name="sm[hashify_file_name]" ng-model="sm.hashify_file_name" ng-change="sm.generatePreviewUrl()" ng-disabled="sm.readonly.hashify_file_name || sm.mode == 'stateless'">
                                             <?php if(is_network_admin()): ?>
                                             <option value=""><?php _e( 'Don\'t override', ud_get_stateless_media()->domain ); ?></option>
                                             <?php endif; ?>
@@ -210,7 +211,12 @@
                                             <option value="false"><?php _e( 'Disable', ud_get_stateless_media()->domain ); ?></option>
                                         </select>
                                     </p>
-                                    <p class="description"><strong ng-bind="sm.showNotice('hashify_file_name')" ></strong> <?php _e( 'Prepends a random set of numbers and letters to the filename. This is useful for preventing caching issues when uploading files that have the same filename.', ud_get_stateless_media()->domain ); ?></p>
+                                    <p class="description"><strong ng-bind="sm.showNotice('hashify_file_name')" ></strong> 
+                                    <span ng-show="sm.mode == 'stateless'">
+                                    <?php _e(sprintf( "<b>Required by Stateless Mode. Override with the <a href='%s' target='_blank'>WP_STATELESS_MEDIA_CACHE_BUSTING</a> constant.</b>","https://github.com/wpCloud/wp-stateless/wiki/Constants#wp_stateless_media_cache_busting"), ud_get_stateless_media()->domain);?>
+                                    </span>
+
+                                    <?php _e( 'Prepends a random set of numbers and letters to the filename. This is useful for preventing caching issues when uploading files that have the same filename.', ud_get_stateless_media()->domain ); ?></p>
                                 </fieldset>
                             </td>
                         </tr> 
@@ -249,7 +255,8 @@
                                     <option value="true"><?php _e( 'Enable', ud_get_stateless_media()->domain ); ?></option>
                                 </select>
                                 <p class="description">
-                                    <strong ng-show="!module.is_plugin_active"><?php _e("Please activate the plugin first.");?></strong>
+                                    <strong ng-show="!module.is_plugin_active && module.is_plugin"><?php _e("Please activate the plugin first.");?></strong>
+                                    <strong ng-show="!module.is_plugin_active && module.is_theme"><?php _e("Please activate the theme first.");?></strong>
                                     <strong ng-show="module.is_constant"><?php _e("Currently configured via a constant.");?></strong>
                                     <strong ng-show="module.is_network_override"><?php _e("Currently configured via network settings.");?></strong>
                                     {{module.description}}

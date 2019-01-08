@@ -18,35 +18,51 @@
 namespace Google\Auth\Tests;
 
 use Google\Auth\HttpHandler\Guzzle6HttpHandler;
-use GuzzleHttp\Client;
+use GuzzleHttp\Promise\Promise;
 use GuzzleHttp\Psr7\Response;
-
 
 class Guzzle6HttpHandlerTest extends BaseTest
 {
-  public function setUp()
-  {
-    $this->onlyGuzzle6();
+    public function setUp()
+    {
+        $this->onlyGuzzle6();
 
-    $this->mockRequest =
-      $this
-      ->getMockBuilder('Psr\Http\Message\RequestInterface')
-      ->getMock();
-    $this->mockClient =
-      $this
-      ->getMockBuilder('GuzzleHttp\Client')
-      ->getMock();
-  }
+        $this->mockRequest =
+            $this
+                ->getMockBuilder('Psr\Http\Message\RequestInterface')
+                ->getMock();
+        $this->mockClient =
+            $this
+                ->getMockBuilder('GuzzleHttp\Client')
+                ->getMock();
+    }
 
-  public function testSuccessfullySendsRequest()
-  {
-    $this->mockClient
-      ->expects($this->any())
-      ->method('send')
-      ->will($this->returnValue(new Response(200)));
+    public function testSuccessfullySendsRequest()
+    {
+        $this->mockClient
+            ->expects($this->any())
+            ->method('send')
+            ->will($this->returnValue(new Response(200)));
 
-    $handler = new Guzzle6HttpHandler($this->mockClient);
-    $response = $handler($this->mockRequest);
-    $this->assertInstanceOf('Psr\Http\Message\ResponseInterface', $response);
-  }
+        $handler = new Guzzle6HttpHandler($this->mockClient);
+        $response = $handler($this->mockRequest);
+        $this->assertInstanceOf('Psr\Http\Message\ResponseInterface', $response);
+    }
+
+    public function testSuccessfullySendsRequestAsync()
+    {
+        $this->mockClient
+            ->expects($this->any())
+            ->method('sendAsync')
+            ->will($this->returnValue(new Promise(function () use (&$promise) {
+                return $promise->resolve(new Response(200, [], 'Body Text'));
+            })));
+
+        $handler = new Guzzle6HttpHandler($this->mockClient);
+        $promise = $handler->async($this->mockRequest);
+        $response = $promise->wait();
+        $this->assertInstanceOf('Psr\Http\Message\ResponseInterface', $response);
+        $this->assertEquals(200, $response->getStatusCode());
+        $this->assertEquals('Body Text', (string) $response->getBody());
+    }
 }

@@ -1,4 +1,44 @@
 == Changelog ==
+= 2.1.9 =
+* FIX - Resolved fatal error with OneCodeShop RML Amazon S3 plugin. GitHub Issue [#317](https://github.com/wpCloud/wp-stateless/issues/317).
+* FIX - Resolved missing bucket in file URL when “storage.googleapis.com” was supplied in Domain field. GitHub Issue [318](https://github.com/wpCloud/wp-stateless/issues/318).
+* ENHANCEMENT - Support synchronization of files without metadata, such as .doc and .docx files. GitHub Issue [316](https://github.com/wpCloud/wp-stateless/issues/316).
+
+= 2.1.8 =
+* FIX - Woocommerce product export.
+* FIX - Allow webmaster to control http or https.
+* FIX - PDF preview sync.
+* ENHANCEMENT - Improved error message when there is nothing to sync.
+* ENHANCEMENT - Renamed constant WP_STATELESS_MEDIA_CACHE_CONTROL to WP_STATELESS_MEDIA_CACHE_BUSTING.
+* ENHANCEMENT - Domain field functionality now allows webmaster to control http or https
+* ENHANCEMENT - Message about Stateless mode now requires the Cache-Busting option now see only those who using Stateless mode.
+* ENHANCEMENT - Upload full size image before generating thumbnails.
+* COMPATIBILITY - Added support for Learndash plugin.
+* COMPATIBILITY - Added support for BuddyPress plugin.
+* COMPATIBILITY - Added support for Divi builder export.
+* COMPATIBILITY - Added support for Elementor plugin.
+
+= 2.1.7 =
+* ENHANCEMENT - Display dashboard-wide notice for existing users explaining stateless mode now enables cache-busting option.
+* ENHANCEMENT - Display notice when selecting stateless mode explaining stateless mode now enables cache-busting option.
+* ENHANCEMENT - Display required message on cache-busting setting description when stateless mode is enabled.
+
+= 2.1.6 =
+* FIX - Resolved Google SDK conflict.
+* FIX - ICompatibility.php errors notice.
+* FIX - Undefined index: gs_link in class-bootstrap.php.
+* FIX - Media files with accent characters would not upload correctly to the bucket. 
+* ENHANCEMENT - Force `Cache-Busting` when using `Stateless` mode. 
+* ENHANCEMENT - New admin notice design.
+* ENHANCEMENT - Improved and clear error message. 
+* ENHANCEMENT - Renamed constant `WP_STATELESS_MEDIA_ON_FLY` to `WP_STATELESS_DYNAMIC_IMAGE_SUPPORT`. 
+* ENHANCEMENT - Update Google Libraries.
+* ENHANCEMENT - Renamed constant `WP_STATELESS_MEDIA_HASH_FILENAME` to `WP_STATELESS_MEDIA_CACHE_BUSTING`.
+* COMPATIBILITY - Renamed constant `WP_STATELESS_COMPATIBILITY_WPSmush` to `WP_STATELESS_COMPATIBILITY_WPSMUSH`.
+* COMPATIBILITY - Added support for `WooCommerce Extra Product Options`.
+* COMPATIBILITY - Added support for `WPForms Pro`.
+* COMPATIBILITY - Improved `ShortPixel` compatibility.
+* COMPATIBILITY - Fixed `ACF Image Crop` compatibility.
 
 = 2.1.5 =
 * FIX - Fatal error with PHP 5.4.45 on activation.

@@ -15,9 +15,9 @@ namespace wpCloud\StatelessMedia {
         class WPSmush extends ICompatibility {
             protected $id = 'wp-smush';
             protected $title = 'WP Smush';
-            protected $constant = 'WP_STATELESS_COMPATIBILITY_WPSmush';
+            protected $constant = 'WP_STATELESS_COMPATIBILITY_WPSMUSH';
             protected $description = 'Ensures compatibility with WP Smush.';
-            protected $plugin_file = 'wp-smushit/wp-smush.php';
+            protected $plugin_file = ['wp-smushit/wp-smush.php', 'wp-smush-pro/wp-smush.php'];
 
             public function module_init($sm){
                 add_action('wp_smush_image_optimised', array($this, 'image_optimized'), 10, 2);
@@ -33,7 +33,6 @@ namespace wpCloud\StatelessMedia {
                 add_filter('delete_attachment', array($this, 'remove_backup'));
                 add_filter( 'smush_backup_exists', array( $this, 'backup_exists_on_gcs' ), 10, 3 );
                 add_action( 'sm:synced::image', array( $this, 'sync_backup'), 10, 2 );
-                
             }
 
             /**
@@ -42,8 +41,12 @@ namespace wpCloud\StatelessMedia {
              * We also avoid downloading image before optimization on stateless mode.
              */
             public function add_media_wrapper($metadata, $attachment_id){
-                global $wpsmush_settings;
-                $auto_smush = $wpsmush_settings->settings['auto'];
+            	if ( class_exists( 'WP_Smush_Modules' ) ) {
+		            $auto_smush = \WP_Smush::get_instance()->core()->mod->settings->get( 'auto' );
+	            } else {
+		            global $wpsmush_settings;
+		            $auto_smush = $wpsmush_settings->settings['auto'];
+	            }
 
                 if( !$auto_smush || !wp_attachment_is_image( $attachment_id ) ||
                     !apply_filters( 'wp_smush_image', true, $attachment_id ) || 
@@ -67,7 +70,6 @@ namespace wpCloud\StatelessMedia {
              * @return null
              */
             public function image_optimized($attachment_id, $stats){
-                global $WpSmush;
                 // Sync the attachment to GCS
                 ud_get_stateless_media()->add_media( array(), $attachment_id, true );
                 
@@ -195,10 +197,13 @@ namespace wpCloud\StatelessMedia {
              */
             private function hook_from_restore_image() {
                 $call_stack = debug_backtrace();
+				$class_name = class_exists( 'WpSmushBackup' ) ? 'WpSmushBackup' : 'WP_Smush_Backup';
 
                 if ( !empty( $call_stack ) && is_array( $call_stack ) ) {
                     foreach( $call_stack as $step ) {
-                        if ( $step['function'] == 'restore_image' && $step['class'] == 'WpSmushBackup' ) {
+
+
+                        if ( $step['function'] == 'restore_image' && $step['class'] == $class_name ) {
                             return true;
                         }
                     }

@@ -29,12 +29,14 @@
         </label>
       </div>
 
+      <?php if(!empty($GLOBALS['show_non_library_sync'])):?>
       <div class="option">
         <label>
           <input ng-disabled="isRunning || isLoading" type="radio" name="action" value="sync_non_library_files" ng-model="action" />
           <?php _e( 'Synchronize non media library files between Google Storage and local server', ud_get_stateless_media()->domain ); ?>
         </label>
       </div>
+      <?php endif;?>
 
     </div>
 
@@ -90,7 +92,13 @@
 
     </div>
 
-    <div class="status {{error?'error':'success'}}" ng-show="status"><p><?php _e( 'Status:', ud_get_stateless_media()->domain ); ?> {{status}}</p></div>
+    <div class="status ud-admin-notice {{error?'error':'notice'}}" ng-show="status">
+      <p>
+        <?php _e( 'Status:', ud_get_stateless_media()->domain ); ?> {{status}}
+        <span class="button button-secondary" ng-show="extraStatus" ng-click="showErrorDetails = !showErrorDetails"><?php _e( 'Details', ud_get_stateless_media()->domain ); ?></span>
+      </p>
+      <div id="sm-error-details" class="extra-info" ng-show="extraStatus && showErrorDetails" ng-bind-html="extraStatus | trust"></div>
+    </div>
 
     <div ng-show="isRunning" id="regenthumbs-bar" style="position:relative;height:25px;">
       <div id="regenthumbs-bar-percent" style="position:absolute;left:50%;top:50%;width:300px;margin-left:-150px;height:25px;margin-top:-9px;font-weight:bold;text-align:center;"></div>
