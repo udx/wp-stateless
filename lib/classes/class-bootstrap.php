@@ -1152,33 +1152,37 @@ namespace wpCloud\StatelessMedia {
       public function activate() {
         add_action( 'activated_plugin', array($this, 'redirect_to_splash'), 99 );
         add_action( 'activated_plugin', array($this, 'create_db') );
+        
+        $this->create_db();
         /**
          * Maybe Upgrade current Version
          */
-        $this->create_db();
         Upgrader::call( $this->args[ 'version' ] );
       }
 
-      public function create_db() {
+      /**
+       * Create database on plugin activation.
+       * @param $force whether to create db even if option exists. For debug purpose only.
+       */
+      public function create_db($force = false) {
         global $wpdb;
         $sm_sync_db_version = get_option( 'sm_sync_db_version' );
-        
-        if( $sm_sync_db_version ) {
+
+        if( $sm_sync_db_version && $force == false ) {
           return;
         }
-      
+
         $table_name = $wpdb->prefix . 'sm_sync';
-        
         $charset_collate = $wpdb->get_charset_collate();
-        
+
+        // `expire` timestamp NULL DEFAULT NULL,
         $sql = "CREATE TABLE $table_name (
           `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT ,
           `file` varchar(255) NOT NULL ,
           `status` varchar(10) NOT NULL ,
-          `expire` timestamp NOT NULL ,
           PRIMARY KEY  (`id`)
         ) $charset_collate;";
-      
+
         require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
         dbDelta( $sql );
 

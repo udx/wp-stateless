@@ -379,7 +379,7 @@ namespace wpCloud\StatelessMedia {
         if(empty($files)){
           throw new \Exception( __('', ud_get_stateless_media()->domain) );
         }
-        return array_unique($files);
+        return array_values(array_unique($files));
       }
 
       /**
