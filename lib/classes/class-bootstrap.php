@@ -816,7 +816,7 @@ namespace wpCloud\StatelessMedia {
         
         $settings = ud_get_stateless_media()->get('sm');
         if(defined('WP_STATELESS_MEDIA_JSON_KEY') && WP_STATELESS_MEDIA_JSON_KEY){
-          $settings['key_json'] = "Currently configured via constant.";
+          $settings['key_json'] = "Currently configured via a constant.";
         }
         wp_localize_script('wp-stateless', 'wp_stateless_settings', $settings);
         wp_localize_script('wp-stateless', 'wp_stateless_compatibility', Module::get_modules());
