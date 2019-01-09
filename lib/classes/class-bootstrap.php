@@ -190,8 +190,11 @@ namespace wpCloud\StatelessMedia {
               add_filter( 'wp_get_attachment_url', array( $this, 'wp_get_attachment_url' ), 20, 2 );
               add_filter( 'attachment_url_to_postid', array( $this, 'attachment_url_to_postid' ), 20, 2 );
 
-              if ( $this->get( 'sm.body_rewrite' ) == 'true' ) {
+              if ( $this->get( 'sm.body_rewrite' ) == 'true' ||  $this->get( 'sm.body_rewrite' ) == 'enable_editor' ) {
                 add_filter( 'the_content', array( $this, 'the_content_filter' ), 99 );
+              }
+
+              if ( $this->get( 'sm.body_rewrite' ) == 'true' ||  $this->get( 'sm.body_rewrite' ) == 'enable_meta' ) {
                 add_filter( 'get_post_metadata', array( $this, 'post_metadata_filter' ), 2, 4 );
               }
 

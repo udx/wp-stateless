@@ -83,11 +83,15 @@
                                             <?php if(is_network_admin()): ?>
                                             <option value=""><?php _e("Don't override");?></option>
                                             <?php endif; ?>
-                                            <option value="true"><?php _e( 'Enable', ud_get_stateless_media()->domain ); ?></option>
                                             <option value="false"><?php _e( 'Disable', ud_get_stateless_media()->domain ); ?></option>
+                                            <optgroup label="Enable">
+                                                <option value="enable_editor"><?php _e( 'Editor', ud_get_stateless_media()->domain ); ?></option>
+                                                <option value="enable_meta"><?php _e( 'Meta', ud_get_stateless_media()->domain ); ?></option>
+                                                <option value="true"><?php _e( 'Editor & Meta', ud_get_stateless_media()->domain ); ?></option>
+                                            </optgroup>
                                         </select>
                                     </p>
-                                    <p class="description"><strong ng-bind="sm.showNotice('body_rewrite')" ></strong> <?php _e( 'Scans post content and meta during presentation and replaces local media file urls with GCS urls. This setting does not modify your database.', ud_get_stateless_media()->domain ); ?></p>
+                                    <p class="description"><strong ng-bind="sm.showNotice('body_rewrite')" ></strong> <?php _e( 'Scans post content and meta during presentation and replaces local media file urls with GCS urls. Depending on the amount of meta, this could be significantly impact performance negatively. This setting does not modify your database.', ud_get_stateless_media()->domain ); ?></p>
 
                                     <h4 ng-show="sm.body_rewrite == 'true'"><?php _e( 'Supported File Types', ud_get_stateless_media()->domain ); ?></h4>
                                     <div ng-show="sm.body_rewrite == 'true'" class="body_rewrite_types">
