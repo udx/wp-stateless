@@ -35,8 +35,8 @@ namespace wpCloud\StatelessMedia {
         );
 
       private $network_only_settings = array(
-          'hide_settings_panel'   => array('WP_STATELESS_MEDIA_HIDE_SETTINGS_PANEL', 'false'), 
-          'hide_setup_assistant'  => array('WP_STATELESS_MEDIA_HIDE_SETUP_ASSISTANT', 'false'), 
+          'hide_settings_panel'   => array('WP_STATELESS_MEDIA_HIDE_SETTINGS_PANEL', false), 
+          'hide_setup_assistant'  => array('WP_STATELESS_MEDIA_HIDE_SETUP_ASSISTANT', false), 
         );
 
       private $strings = array(

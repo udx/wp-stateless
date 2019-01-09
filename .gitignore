@@ -24,3 +24,4 @@ wp-test-config.php
 *.out
 *.pid
 *.gz
+wp-stateless.wiki

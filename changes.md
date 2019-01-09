@@ -7,7 +7,7 @@
 * FIX - WooCommerce product export.
 * FIX - PDF previews in media library now supported.
 * ENHANCEMENT - Improved error message when there is nothing to sync.
-* ENHANCEMENT - Renamed constant WP_STATELESS_MEDIA_CACHE_CONTROL to WP_STATELESS_MEDIA_CACHE_BUSTING.
+* ENHANCEMENT - Renamed constant WP_STATELESS_MEDIA_HASH_FILENAME to WP_STATELESS_MEDIA_CACHE_BUSTING.
 * ENHANCEMENT - Domain field functionality now allows webmaster to control http or https
 * ENHANCEMENT - Notice about Stateless mode requiring the Cache-Busting option is displayed to those using Stateless mode.
 * ENHANCEMENT - Upload full size image before generating thumbnails.
