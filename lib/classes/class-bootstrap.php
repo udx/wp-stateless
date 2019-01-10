@@ -1164,6 +1164,32 @@ namespace wpCloud\StatelessMedia {
       }
 
       /**
+       * Run Install Process.
+       *
+       * @param string $old_version Old version.
+       * @author peshkov@UD
+       */
+      public function run_install_process()
+      {
+        $this->run_upgrade_process();
+      }
+
+      /**
+       * Run Upgrade Process:
+       * - do WP-Property settings backup.
+       *
+       * @author peshkov@UD
+       */
+      public function run_upgrade_process()
+      {
+        $this->create_db();
+        /**
+         * Maybe Upgrade current Version
+         */
+        Upgrader::call( $this->args[ 'version' ] );
+      }
+
+      /**
        * Create database on plugin activation.
        * @param $force whether to create db even if option exists. For debug purpose only.
        */
