@@ -63,7 +63,7 @@ class ComposerStaticInitc00cd3c666f8dfa818cb7edfd488ed20
         'wpCloud\\StatelessMedia\\Bootstrap' => __DIR__ . '/../..' . '/lib/classes/class-bootstrap.php',
         'wpCloud\\StatelessMedia\\BuddyPress' => __DIR__ . '/../..' . '/lib/classes/compatibility/buddypress.php',
         'wpCloud\\StatelessMedia\\CompatibilityAcfImageCrop' => __DIR__ . '/../..' . '/lib/classes/compatibility/acf-image-crop.php',
-        'wpCloud\\StatelessMedia\\CompatibilityWooExtraPorductOptions' => __DIR__ . '/../..' . '/lib/classes/compatibility/woo-extra-product-options.php',
+        'wpCloud\\StatelessMedia\\CompatibilityWooExtraProductOptions' => __DIR__ . '/../..' . '/lib/classes/compatibility/woo-extra-product-options.php',
         'wpCloud\\StatelessMedia\\Divi' => __DIR__ . '/../..' . '/lib/classes/compatibility/divi.php',
         'wpCloud\\StatelessMedia\\DynamicImageSupport' => __DIR__ . '/../..' . '/lib/classes/compatibility/dynamic-image-support.php',
         'wpCloud\\StatelessMedia\\EDDDownloadMethod' => __DIR__ . '/../..' . '/lib/classes/compatibility/easy-digital-downloads.php',
