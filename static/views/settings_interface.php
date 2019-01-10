@@ -91,7 +91,7 @@
                                             </optgroup>
                                         </select>
                                     </p>
-                                    <p class="description"><strong ng-bind="sm.showNotice('body_rewrite')" ></strong> <?php _e( 'Scans post content and meta during presentation and replaces local media file urls with GCS urls. Depending on the amount of meta, this could be significantly impact performance negatively. This setting does not modify your database.', ud_get_stateless_media()->domain ); ?></p>
+                                    <p class="description"><strong ng-bind="sm.showNotice('body_rewrite')" ></strong> <?php _e( 'Scans post content and meta during presentation and replaces local media file urls with GCS urls. When selecting meta or true depending on the amount of meta, this could be significantly impact performance negatively. This setting does not modify your database.', ud_get_stateless_media()->domain ); ?></p>
 
                                     <h4 ng-show="sm.body_rewrite == 'true'"><?php _e( 'Supported File Types', ud_get_stateless_media()->domain ); ?></h4>
                                     <div ng-show="sm.body_rewrite == 'true'" class="body_rewrite_types">
