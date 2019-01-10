@@ -1,7 +1,5 @@
 <?php
 /**
- * To do: Create seperate table to keep track of files.
- * To do: check if client is connected to google before doing any action.
  * Need to improve workflow.
  * Maybe add a transient of few days to keep track of synced files.
  */
@@ -21,7 +19,7 @@ namespace wpCloud\StatelessMedia {
                 $this->table_name = $wpdb->prefix . self::table;
                 // Manual sync using sync tab. 
                 // called from ajax action_get_non_library_files_id
-                // Return files to be manualy sync from sync tab.
+                // Return files to be manually sync from sync tab.
                 add_filter( 'sm:sync::nonMediaFiles', array($this, 'sync_non_media_files') );
 
                 // register a dir to sync from sync tab
@@ -57,7 +55,7 @@ namespace wpCloud\StatelessMedia {
             /**
              * Sync the file to GCS.
              * @param:
-             *  $name: Reletive path to upload dir.
+             *  $name: Relative path to upload dir.
              *  $absolutePath: Full path of the file
              *  $forced: Type: bool/2; Whether to force to move the file to GCS even it's already exists.
              *           true: Check whether it's already synced or not in database.

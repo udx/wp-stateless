@@ -9,9 +9,9 @@
 
 namespace wpCloud\StatelessMedia {
 
-    if(!class_exists('wpCloud\StatelessMedia\CompatibilityWooExtraPorductOptions')) {
+    if(!class_exists('wpCloud\StatelessMedia\CompatibilityWooExtraProductOptions')) {
         
-        class CompatibilityWooExtraPorductOptions extends ICompatibility {
+        class CompatibilityWooExtraProductOptions extends ICompatibility {
             protected $id = 'woo-extra-product-options';
             protected $title = 'WooCommerce Extra Product Options';
             protected $constant = 'WP_STATELESS_COMPATIBILITY_WOO_EXTRA_PRODUCT_OPTION';
@@ -31,7 +31,7 @@ namespace wpCloud\StatelessMedia {
             }
 
             /**
-             * upload image to GCS and retunr GCS link.
+             * upload image to GCS and return GCS link.
              */
             public function wp_handle_upload( $upload ) {
                 $file = $upload['file'];

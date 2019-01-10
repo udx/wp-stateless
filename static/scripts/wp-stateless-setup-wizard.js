@@ -6,7 +6,7 @@ jQuery(document).ready(function ($) {
 	var setupSteps = setupStepContainer.find('.wpStateLess-s-step');
 	var stepSetupProject = setupSteps.find('.step-setup-project');
 	var userInfo = setupSteps.find('.wpStateLess-userinfo');
-	var userDetails = userInfo.find('.wpStateLess-user-detais');
+	var userDetails = userInfo.find('.wpStateLess-user-details');
 	var setupForm = setupSteps.find('.wpStateLess-step-setup-form form');
 	var comboBox = setupForm.find('.wpStateLess-combo-box');
 	var projectDropdown = comboBox.filter('.project');

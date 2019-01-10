@@ -368,7 +368,7 @@ namespace wpCloud\StatelessMedia {
 
       /**
        * Returns IDs of non media library files
-       * Return files to be manualy sync from sync tab.
+       * Return files to be manually sync from sync tab.
        */
       public function action_get_non_library_files_id() {
         if(ud_get_stateless_media()->is_connected_to_gs() !== true){

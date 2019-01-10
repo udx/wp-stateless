@@ -80,7 +80,7 @@ namespace wpCloud\StatelessMedia {
             /**
              * Support for WPForms
              */
-            new CompatibilityWooExtraPorductOptions();
+            new CompatibilityWooExtraProductOptions();
             
             /**
              * Support for Elementor

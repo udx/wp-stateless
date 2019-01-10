@@ -46,7 +46,7 @@ namespace wpCloud\StatelessMedia {
         );
 
       /**
-       * Overriden construct
+       * Overridden construct
        */
       public function __construct() {
 
@@ -153,7 +153,7 @@ namespace wpCloud\StatelessMedia {
 
           }
           
-          // Converting to string true flase for angular.
+          // Converting to string true false for angular.
           if(is_bool($value)){
             $value = $value === true ? "true" : "false";
           }
