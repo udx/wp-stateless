@@ -1154,8 +1154,6 @@ namespace wpCloud\StatelessMedia {
        */
       public function activate() {
         add_action( 'activated_plugin', array($this, 'redirect_to_splash'), 99 );
-        add_action( 'activated_plugin', array($this, 'create_db') );
-        
         $this->run_upgrade_process();
       }
 

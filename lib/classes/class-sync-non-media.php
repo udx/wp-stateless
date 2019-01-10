@@ -228,8 +228,8 @@ namespace wpCloud\StatelessMedia {
                     return;
                 }
 
-                // @todo optimize queue_get_all by query with $dir
-                foreach ($this->queue_get_all() as $key => $file) {
+                // Removing the files one by one.
+                foreach ($this->queue_get_all($dir) as $key => $file) {
                     if(strpos($file, $dir) !== false){
                         $this->client->remove_media($file);
                         $this->queue_remove_file($file);
@@ -243,9 +243,14 @@ namespace wpCloud\StatelessMedia {
              * Return all the files from the database.
              * @return array of files.
              */
-            public function queue_get_all(){
+            public function queue_get_all($prefix = ''){
                 global $wpdb;
-                $files = $wpdb->get_col( "SELECT file FROM $this->table_name" );
+                if($prefix){
+                    $files = $wpdb->get_col( $wpdb->prepare("SELECT file FROM $this->table_name WHERE file like '%s'", $wpdb->esc_like($prefix) . '%' ) );
+                }
+                else{
+                    $files = $wpdb->get_col( "SELECT file FROM $this->table_name" );
+                }
                 if(!empty($files) && is_array($files))
                     return $files;
                 return array();
