@@ -1195,26 +1195,26 @@ namespace wpCloud\StatelessMedia {
       public function redirect_to_splash($plugin =''){
         $this->settings = new Settings();
 
-        if(defined( 'WP_CLI' ) || $this->settings->get('key_json') || isset($_POST['checked']) && count($_POST['checked']) > 1){
+        if(defined( 'WP_CLI' ) || $this->settings->get('sm.key_json') || isset($_POST['checked']) && count($_POST['checked']) > 1){
           return;
         }
         
         if( 
-          !$this->settings->get('key_json') && 
+          !$this->settings->get('sm.key_json') && 
           defined('WP_STATELESS_MEDIA_HIDE_SETUP_ASSISTANT') && WP_STATELESS_MEDIA_HIDE_SETUP_ASSISTANT == true && 
           defined('WP_STATELESS_MEDIA_HIDE_SETTINGS_PANEL') && WP_STATELESS_MEDIA_HIDE_SETTINGS_PANEL == true 
         ) {
           return;
         }
         
-        if( !$this->settings->get('key_json') && defined('WP_STATELESS_MEDIA_HIDE_SETUP_ASSISTANT') && WP_STATELESS_MEDIA_HIDE_SETUP_ASSISTANT == true ) {
+        if( !$this->settings->get('sm.key_json') && defined('WP_STATELESS_MEDIA_HIDE_SETUP_ASSISTANT') && WP_STATELESS_MEDIA_HIDE_SETUP_ASSISTANT == true ) {
           $url = $this->get_settings_page_url('?page=stateless-settings');
           exit( wp_redirect($url));
         }
         
         if( $plugin == plugin_basename( $this->boot_file ) ) {
           $url = $this->get_settings_page_url('?page=stateless-setup&step=splash-screen');
-          if(json_decode(get_site_option('sm_key_json'))){
+          if(json_decode($this->settings->get('sm.key_json'))){
             $url = $this->get_settings_page_url('?page=stateless-settings');
           }
           exit( wp_redirect($url));
