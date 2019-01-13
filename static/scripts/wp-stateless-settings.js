@@ -20,5 +20,12 @@ jQuery(document).ready(function($){
     
     return false;
   });
+  console.log(jQuery(".stateless-admin-notice [data-key^='button_secondary_']"));
+  jQuery(".stateless-admin-notice [data-key^='button_secondary_']").on('click', function(){
+    var key = $(this).attr('data-key');
+    key = key.replace('button_secondary_', '');
+    $("#" + key + " option[value=" + key +"]").attr('selected', 'selected');
+    $("#" + key).val('true');
+  });
 
 });
