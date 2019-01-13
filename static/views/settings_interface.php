@@ -84,11 +84,9 @@
                                             <option value=""><?php _e("Don't override");?></option>
                                             <?php endif; ?>
                                             <option value="false"><?php _e( 'Disable', ud_get_stateless_media()->domain ); ?></option>
-                                            <optgroup label="Enable">
-                                                <option value="enable_editor"><?php _e( 'Editor', ud_get_stateless_media()->domain ); ?></option>
-                                                <option value="enable_meta"><?php _e( 'Meta', ud_get_stateless_media()->domain ); ?></option>
-                                                <option value="true"><?php _e( 'Editor & Meta', ud_get_stateless_media()->domain ); ?></option>
-                                            </optgroup>
+                                            <option value="enable_editor"><?php _e( 'Enable Editor', ud_get_stateless_media()->domain ); ?></option>
+                                            <option value="enable_meta"><?php _e( 'Enable Meta', ud_get_stateless_media()->domain ); ?></option>
+                                            <option value="true"><?php _e( 'Enable Editor & Meta', ud_get_stateless_media()->domain ); ?></option>
                                         </select>
                                     </p>
                                     <p class="description"><strong ng-bind="sm.showNotice('body_rewrite')" ></strong> <?php _e( 'Scans post content and meta during presentation and replaces local media file urls with GCS urls. When selecting meta or true depending on the amount of meta, this could be significantly impact performance negatively. This setting does not modify your database.', ud_get_stateless_media()->domain ); ?></p>
