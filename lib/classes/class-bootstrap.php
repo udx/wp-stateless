@@ -1159,23 +1159,28 @@ namespace wpCloud\StatelessMedia {
 
       /**
        * Run Install Process.
+       * Triggered on plugins_loaded instead of register_activation_hook action.
+       * Works on even manual plugin update.
        *
        * @param string $old_version Old version.
-       * @author peshkov@UD
+       * @author alim@UD
        */
       public function run_install_process()
       {
+        // calling the upgrade function because it's same as this point for fresh install or updates.
         $this->run_upgrade_process();
       }
 
       /**
        * Run Upgrade Process:
-       * - do WP-Property settings backup.
+       * Triggered on plugins_loaded instead of register_activation_hook action.
+       * Works on even manual plugin update.
        *
-       * @author peshkov@UD
+       * @author alim@UD
        */
       public function run_upgrade_process()
       {
+        // Creating database on new installation.
         $this->create_db();
         /**
          * Maybe Upgrade current Version
