@@ -43,7 +43,7 @@ namespace wpCloud\StatelessMedia {
              */
             public function add_media_wrapper($metadata, $attachment_id){
                 global $wpsmush_settings;
-                $auto_smush = $wpsmush_settings->settings['auto'];
+                $auto_smush = $wpsmush_settings->get('auto');
 
                 if( !$auto_smush || !wp_attachment_is_image( $attachment_id ) ||
                     !apply_filters( 'wp_smush_image', true, $attachment_id ) || 
