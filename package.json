@@ -2,7 +2,7 @@
   "name": "wp-stateless",
   "title": "WP-Stateless",
   "description": "wpCloud Stateless Media for GCE",
-  "version": "2.1.9",
+  "version": "2.2.0",
   "homepage": "https://usabilitydynamics.com",
   "author": {
     "name": "UsabilityDynamics, Inc.",

@@ -6,7 +6,7 @@ License: GPLv2 or later
 Requires PHP: 5.5
 Requires at least: 4.0
 Tested up to: 5.0
-Stable tag: 2.1.9
+Stable tag: 2.2.0
 
 Upload and serve your WordPress media files from Google Cloud Storage.
 
@@ -100,16 +100,35 @@ To ensure new releases cause as little disruption as possible, we rely on a numb
 
 
 == Upgrade Notice ==
-= 2.1.9 =
-* FIX - Resolved fatal error with OneCodeShop RML Amazon S3 plugin. GitHub Issue [#317](https://github.com/wpCloud/wp-stateless/issues/317).
-* FIX - Resolved missing bucket in file URL when “storage.googleapis.com” was supplied in Domain field. GitHub Issue [318](https://github.com/wpCloud/wp-stateless/issues/318).
-* ENHANCEMENT - Support synchronization of files without metadata, such as .doc and .docx files. GitHub Issue [316](https://github.com/wpCloud/wp-stateless/issues/316).
+= 2.2.0 =
+FIX - Slow page generation when File URL Replacement is enabled. [#265](https://github.com/wpCloud/wp-stateless/issues/265).
+FIX - Fatal error when WP Smush Pro compatibility is enabled. [#325](https://github.com/wpCloud/wp-stateless/issues/325).
+FIX - Issue with Imagify. [#326](https://github.com/wpCloud/wp-stateless/issues/326).
+FIX - Return correct srcset images. [#328](https://github.com/wpCloud/wp-stateless/issues/328).
+FIX - Fatal error with GFForms. [#330](https://github.com/wpCloud/wp-stateless/issues/330).
+FIX - Typo in admin notices. [#337](https://github.com/wpCloud/wp-stateless/issues/337).
+ENHANCEMENT - Extended “File URL Replacement” options. [#336](https://github.com/wpCloud/wp-stateless/issues/336).
+ENHANCEMENT - Service Account JSON is now hidden if set via constant. [#320](https://github.com/wpCloud/wp-stateless/issues/320).
+ENHANCEMENT - New database table for tracking files not tracked in media library. [#307](https://github.com/wpCloud/wp-stateless/issues/307).
+ENHANCEMENT - Updated depreciated function flagged by security software. [#300](https://github.com/wpCloud/wp-stateless/issues/300).
 
 == Changelog ==
+= 2.2.0 =
+FIX - Slow page generation when File URL Replacement is enabled. [#265](https://github.com/wpCloud/wp-stateless/issues/265).
+FIX - Fatal error when WP Smush Pro compatibility is enabled. [#325](https://github.com/wpCloud/wp-stateless/issues/325).
+FIX - Issue with Imagify. [#326](https://github.com/wpCloud/wp-stateless/issues/326).
+FIX - Return correct srcset images. [#328](https://github.com/wpCloud/wp-stateless/issues/328).
+FIX - Fatal error with GFForms. [#330](https://github.com/wpCloud/wp-stateless/issues/330).
+FIX - Typo in admin notices. [#337](https://github.com/wpCloud/wp-stateless/issues/337).
+ENHANCEMENT - Extended “File URL Replacement” options. [#336](https://github.com/wpCloud/wp-stateless/issues/336).
+ENHANCEMENT - Service Account JSON is now hidden if set via constant. [#320](https://github.com/wpCloud/wp-stateless/issues/320).
+ENHANCEMENT - New database table for tracking files not tracked in media library. [#307](https://github.com/wpCloud/wp-stateless/issues/307).
+ENHANCEMENT - Updated depreciated function flagged by security software. [#300](https://github.com/wpCloud/wp-stateless/issues/300).
+
 = 2.1.9 =
 * FIX - Resolved fatal error with OneCodeShop RML Amazon S3 plugin. GitHub Issue [#317](https://github.com/wpCloud/wp-stateless/issues/317).
-* FIX - Resolved missing bucket in file URL when “storage.googleapis.com” was supplied in Domain field. GitHub Issue [318](https://github.com/wpCloud/wp-stateless/issues/318).
-* ENHANCEMENT - Support synchronization of files without metadata, such as .doc and .docx files. GitHub Issue [316](https://github.com/wpCloud/wp-stateless/issues/316).
+* FIX - Resolved missing bucket in file URL when “storage.googleapis.com” was supplied in Domain field. GitHub Issue [#318](https://github.com/wpCloud/wp-stateless/issues/318).
+* ENHANCEMENT - Support synchronization of files without metadata, such as .doc and .docx files. GitHub Issue [#316](https://github.com/wpCloud/wp-stateless/issues/316).
 
 = 2.1.8 =
 * FIX - WooCommerce product export.
@@ -128,39 +147,6 @@ To ensure new releases cause as little disruption as possible, we rely on a numb
 * ENHANCEMENT - Display dashboard-wide notice for existing users explaining stateless mode now enables cache-busting option.
 * ENHANCEMENT - Display notice when selecting stateless mode explaining stateless mode now enables cache-busting option.
 * ENHANCEMENT - Display required message on cache-busting setting description when stateless mode is enabled.
-
-= 2.1.6 =
-* FIX - Resolved Google SDK conflict.
-* FIX - ICompatibility.php errors notice.
-* FIX - Undefined index: gs_link in class-bootstrap.php.
-* FIX - Media files with accent characters would not upload correctly to the bucket. 
-* ENHANCEMENT - Force Cache-Busting when using Stateless mode. 
-* ENHANCEMENT - New admin notice design.
-* ENHANCEMENT - Improved and clear error message. 
-* ENHANCEMENT - Renamed constant WP_STATELESS_MEDIA_ON_FLY to WP_STATELESS_DYNAMIC_IMAGE_SUPPORT. 
-* ENHANCEMENT - Update Google Libraries.
-* ENHANCEMENT - Renamed constant WP_STATELESS_MEDIA_HASH_FILENAME to WP_STATELESS_MEDIA_CACHE_BUSTING.
-* COMPATIBILITY - Renamed constant WP_STATELESS_COMPATIBILITY_WPSmush to WP_STATELESS_COMPATIBILITY_WPSMUSH.
-* COMPATIBILITY - Added support for WooCommerce Extra Product Options.
-* COMPATIBILITY - Added support for WPForms Pro.
-* COMPATIBILITY - Improved ShortPixel compatibility.
-* COMPATIBILITY - Fixed ACF Image Crop compatibility.
-
-= 2.1.5 =
-* FIX - Fatal error with PHP 5.4.45 on activation.
-* FIX - E_WARNING: Illegal string offset ‘gs_bucket’.
-* FIX - Resolved ‘save_network_settings’ message when saving network settings.
-* COMPATIBILITY - Added support for WP Forms plugin
-* COMPATIBILITY - Added support for WP Smush plugin
-* COMPATIBILITY - Added support for ShortPixel Image Optimizer plugin.
-* COMPATIBILITY - Added support for Imagify Image Optimizer plugin.
-* COMPATIBILITY - Added support for SiteOrigin CSS plugin.
-* COMPATIBILITY - Added support for Gravity Forms plugin.
-* COMPATIBILITY - Added support for WPBakery Page Builder plugin.
-* COMPATIBILITY - Added wp-config constant support for compatibility options.
-
-= 2.1.4 =
-* ENHANCEMENT - Updated Google OAuth URL for Setup Assistant.
 
 = Earlier versions =
 Please refer to the separate changelog.txt file.

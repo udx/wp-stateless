@@ -1,7 +1,19 @@
+#### 2.2.0 ####
+FIX - Slow page generation when File URL Replacement is enabled. https://github.com/wpCloud/wp-stateless/issues/265.
+FIX - Fatal error when WP Smush Pro compatibility is enabled. https://github.com/wpCloud/wp-stateless/issues/325
+FIX - Issue with Imagify. https://github.com/wpCloud/wp-stateless/issues/326.
+FIX - Return correct srcset images. https://github.com/wpCloud/wp-stateless/issues/328.
+FIX - Fatal error with GFForms. https://github.com/wpCloud/wp-stateless/issues/330.
+FIX - Typo in admin notices. https://github.com/wpCloud/wp-stateless/issues/337.
+ENHANCEMENT - Extended “File URL Replacement” options. https://github.com/wpCloud/wp-stateless/issues/336.
+ENHANCEMENT - Service Account JSON is now hidden if set via constant. https://github.com/wpCloud/wp-stateless/issues/320.
+ENHANCEMENT - New database table for tracking files not tracked in media library. https://github.com/wpCloud/wp-stateless/issues/307.
+ENHANCEMENT - Updated depreciated function flagged by security software. https://github.com/wpCloud/wp-stateless/issues/300.
+
 #### 2.1.9 ####
-* FIX - Resolved fatal error with OneCodeShop RML Amazon S3 plugin. GitHub Issue #317.
-* FIX - Resolved missing bucket in file URL when “storage.googleapis.com” was supplied in Domain field. GitHub Issue #318.
-* ENHANCEMENT - Support synchronization of files without metadata, such as .doc and .docx files. GitHub Issue #316.
+* FIX - Resolved fatal error with OneCodeShop RML Amazon S3 plugin. GitHub Issue https://github.com/wpCloud/wp-stateless/issues/317.
+* FIX - Resolved missing bucket in file URL when “storage.googleapis.com” was supplied in Domain field. GitHub Issue https://github.com/wpCloud/wp-stateless/issues/318.
+* ENHANCEMENT - Support synchronization of files without metadata, such as .doc and .docx files. GitHub Issue https://github.com/wpCloud/wp-stateless/issues/316.
 
 #### 2.1.8 ####
 * FIX - WooCommerce product export.
