@@ -101,11 +101,11 @@ To ensure new releases cause as little disruption as possible, we rely on a numb
 
 == Upgrade Notice ==
 = 2.2.1 =
-* Security patch for Authenticated Remote Code Execution (RCE) vulnerability.
+* Fix - Security patch for Authenticated Remote Code Execution (RCE) vulnerability.
 
 == Changelog ==
-= 2.2.0 =
-* Security patch for Authenticated Remote Code Execution (RCE) vulnerability.
+= 2.2.1 =
+* Fix - Security patch for Authenticated Remote Code Execution (RCE) vulnerability.
 
 = 2.2.0 =
 * FIX - Slow page generation when File URL Replacement is enabled. GitHub Issue [#265](https://github.com/wpCloud/wp-stateless/issues/265).

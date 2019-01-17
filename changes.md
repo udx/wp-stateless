@@ -1,5 +1,5 @@
 #### 2.2.1 ####
-* Security patch for Authenticated Remote Code Execution (RCE) vulnerability.
+* Fix - Security patch for Authenticated Remote Code Execution (RCE) vulnerability.
 
 #### 2.2.0 ####
 * FIX - Slow page generation when File URL Replacement is enabled [#265](https://github.com/wpCloud/wp-stateless/issues/265). 
