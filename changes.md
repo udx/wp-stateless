@@ -1,3 +1,6 @@
+#### 2.2.1 ####
+* Fix - Security patch for Authenticated Remote Code Execution (RCE) vulnerability.
+
 #### 2.2.0 ####
 * FIX - Slow page generation when File URL Replacement is enabled [#265](https://github.com/wpCloud/wp-stateless/issues/265). 
 * FIX - Fatal error when WP Smush Pro compatibility is enabled [#325](https://github.com/wpCloud/wp-stateless/issues/325). 

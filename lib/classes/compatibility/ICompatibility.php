@@ -37,7 +37,6 @@ namespace wpCloud\StatelessMedia {
 
         public function __construct(){
             $this->init();
-            add_action('button_secondary_' . $this->id, array($this, 'enable_compatibility'));
         }
         
         /**
@@ -159,6 +158,7 @@ namespace wpCloud\StatelessMedia {
             
             Module::register_module(array(
                 'id'                    => $this->id,
+                'self'                  => $this,
                 'title'                 => $this->title,
                 'enabled'               => $this->enabled,
                 'description'           => $this->description,
@@ -201,6 +201,7 @@ namespace wpCloud\StatelessMedia {
                 }
             }
             
+            return true;
         }
     }
 

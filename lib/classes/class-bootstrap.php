@@ -266,13 +266,21 @@ namespace wpCloud\StatelessMedia {
         }
 
         if(is_array($sources) && !empty( $image_meta['gs_link'] )){
+          $gs_name = $image_meta['gs_name'];
+          // getting position of root_dir in gs_name.
+          $root_dir_pos = strpos($gs_name, $image_meta['file']);
+          // removing rood_dir from gs_name so we can compare to replace url with gs_link. 
+          if($root_dir_pos !== false){
+            $gs_name = substr($gs_name, $root_dir_pos);
+          }
+
           foreach ($sources as $width => &$image) {
             if (!isset($image_meta['gs_name']) || empty($image_meta['gs_name'])) {
               continue;
             }
 
             // If srcset includes original image src, replace it
-            if (substr_compare($image['url'], $image_meta['gs_name'], -strlen($image_meta['gs_name'])) === 0) {
+            if (substr_compare($image['url'], $gs_name, -strlen($gs_name)) === 0) {
               $image['url'] = $image_meta['gs_link'];
             // Replace all sizes
             } elseif (isset($image_meta['sizes']) && is_array($image_meta['sizes'])) {
@@ -281,8 +289,15 @@ namespace wpCloud\StatelessMedia {
                   continue;
                 }
 
-                if (substr_compare($image['url'], $meta['gs_name'], -strlen($meta['gs_name'])) === 0) {
+                $thumb_gs_name = $meta['gs_name'];
+                // removing rood_dir from gs_name because 
+                if($root_dir_pos !== false){
+                  $thumb_gs_name = substr($thumb_gs_name, $root_dir_pos);
+                }
+
+                if (substr_compare($image['url'], $thumb_gs_name, -strlen($thumb_gs_name)) === 0) {
                   $image['url'] = $meta['gs_link'];
+                  break;
                 }
               }
             }
