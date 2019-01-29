@@ -50,9 +50,9 @@ class SM_CLI_Scaffold {
     $args = $this->assoc_args;
     if( !isset( $args['memory-usage'] ) ) return null;
     static $last_usage = 0;
-    $differents = $last_usage ? number_format( ( memory_get_usage() / 1024 / 1024 ) - $last_usage, 3 ) . 'Mb' : 'none';
+    $differences = $last_usage ? number_format( ( memory_get_usage() / 1024 / 1024 ) - $last_usage, 3 ) . 'Mb' : 'none';
     $current_usage = number_format( $last_usage = memory_get_usage() / 1024 / 1024, 3 ) . 'Mb';
-    return sprintf( "Memory Usage: %s. Diff: %s.", $current_usage, $differents );
+    return sprintf( "Memory Usage: %s. Diff: %s.", $current_usage, $differences );
   }
   
   /**

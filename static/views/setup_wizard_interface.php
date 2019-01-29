@@ -63,7 +63,7 @@ else{
                                         <div class="photo-wrapper">
                                             <img class="user-photo img-circle" src="<?php echo ud_get_stateless_media()->path( 'static/images/author-image.png'); ?>" alt="">
                                         </div>
-                                        <div class="wpStateLess-user-detais">
+                                        <div class="wpStateLess-user-details">
                                             <h4><span class="user-name"></span> <a class="logout" href="#google-logout"><?php _e( 'Logout', ud_get_stateless_media()->domain ); ?></a></h4>
                                             <p class="user-email"></p>
                                         </div>

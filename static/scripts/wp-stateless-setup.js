@@ -515,7 +515,7 @@ wp.stateless = {
     if(!wp.stateless.getAccessToken() || !options)
       return false;
 
-    var lagecyAccess = function(){
+    var legacyAccess = function(){
       jQuery.ajax({
         url: 'https://www.googleapis.com/storage/v1/b/' + options.bucket + '/acl',
         method: "POST",
@@ -556,10 +556,10 @@ wp.stateless = {
       }).done(function(response){
         promis.resolve(response);
       }).fail(function(error) {
-        lagecyAccess();
+        legacyAccess();
       });
     }).fail(function(error) {
-      lagecyAccess();
+      legacyAccess();
     });
     return promis;
   },

@@ -37,7 +37,6 @@ namespace wpCloud\StatelessMedia {
 
         public function __construct(){
             $this->init();
-            add_action('button_secondary_' . $this->id, array($this, 'enable_compatibility'));
         }
         
         /**
@@ -150,7 +149,7 @@ namespace wpCloud\StatelessMedia {
             }
 
             /**
-             * Checking whethere to show manual sync option.
+             * Checking whether to show manual sync option.
              */
             if($this->is_plugin_active() && $this->non_library_sync == true){
                 global $show_non_library_sync;
@@ -159,6 +158,7 @@ namespace wpCloud\StatelessMedia {
             
             Module::register_module(array(
                 'id'                    => $this->id,
+                'self'                  => $this,
                 'title'                 => $this->title,
                 'enabled'               => $this->enabled,
                 'description'           => $this->description,
@@ -178,8 +178,8 @@ namespace wpCloud\StatelessMedia {
                 ud_get_stateless_media()->errors->add( array(
                     'key' => $this->id,
                     'title' => sprintf( __( "%s: Compatibility for %s isn't enabled.", ud_get_stateless_media()->domain ), ud_get_stateless_media()->name, $this->title ),
-                    'button' => __("Enable compatibility", ud_get_stateless_media()->domain ),
-                    'message' => __("Please enable the compatibility to ensure the fnctionality will work properly between <b>{$this->title}</b> and <b>WP-Stateless</b>.", ud_get_stateless_media()->domain ),
+                    'button' => __("Enable Compatibility", ud_get_stateless_media()->domain ),
+                    'message' => __("Please enable the compatibility to ensure the functionality will work properly between <b>{$this->title}</b> and <b>WP-Stateless</b>.", ud_get_stateless_media()->domain ),
                 ), 'notice' );
             }
         }
@@ -201,6 +201,7 @@ namespace wpCloud\StatelessMedia {
                 }
             }
             
+            return true;
         }
     }
 

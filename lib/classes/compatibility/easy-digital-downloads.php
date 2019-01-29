@@ -68,7 +68,7 @@ namespace wpCloud\StatelessMedia {
             public function wp_get_attachment_url($url, $ID){
                 global $wp_current_filter;
 
-                // Verifing that the wp_get_attachment_url is called from EDD Front-end Submission.
+                // Verifying that the wp_get_attachment_url is called from EDD Front-end Submission.
                 // The flow of function call 
                 // save_form_frontend() > save_field_values() > save_field() > 
                 // save_field_frontend() > fes_update_avatar() > wp_get_image_editor()
@@ -96,7 +96,7 @@ namespace wpCloud\StatelessMedia {
 
             /**
              * Change Upload BaseURL when called from fes_get_attachment_id_from_url function.
-             * Unless fes_get_attachment_id_from_url function won't be able to return attachement id.
+             * Unless fes_get_attachment_id_from_url function won't be able to return attachment id.
              * @param $data
              * @return mixed
              */

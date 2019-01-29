@@ -338,7 +338,7 @@ namespace wpCloud\StatelessMedia {
        * @param $post_id
        */
       public static function remove_media( $post_id ) {
-        /* Get attahcment's metadata */
+        /* Get attachments metadata */
         $metadata = wp_get_attachment_metadata( $post_id );
 
         /* Be sure we have the same bucket in settings and have GS object's name before proceed. */

@@ -59,7 +59,7 @@ namespace wpCloud\StatelessMedia {
       }
 
       /**
-       * Instantaite class.
+       * Instantiate class.
        */
       public function init() {
 
@@ -67,7 +67,7 @@ namespace wpCloud\StatelessMedia {
          * Copied from wp-property
          * Duplicates UsabilityDynamics\WP\Bootstrap_Plugin::load_textdomain();
          *
-         * There is a bug with localisation in lib-wp-bootstrap 1.1.3 and lower.
+         * There is a bug with localization in lib-wp-bootstrap 1.1.3 and lower.
          * So we load textdomain here again, in case old version lib-wp-bootstrap is being loaded
          * by another plugin.
          *
@@ -178,7 +178,7 @@ namespace wpCloud\StatelessMedia {
           }
 
           /** Temporary fix to WP 4.4 srcset feature **/
-          //add_filter( 'max_srcset_image_width', create_function( '', 'return 1;' ) );
+          //add_filter( 'max_srcset_image_width', function(){return 1;} );
 
           /**
            * Carry on only if we do not have errors.
@@ -190,8 +190,11 @@ namespace wpCloud\StatelessMedia {
               add_filter( 'wp_get_attachment_url', array( $this, 'wp_get_attachment_url' ), 20, 2 );
               add_filter( 'attachment_url_to_postid', array( $this, 'attachment_url_to_postid' ), 20, 2 );
 
-              if ( $this->get( 'sm.body_rewrite' ) == 'true' ) {
+              if ( $this->get( 'sm.body_rewrite' ) == 'true' ||  $this->get( 'sm.body_rewrite' ) == 'enable_editor' ) {
                 add_filter( 'the_content', array( $this, 'the_content_filter' ), 99 );
+              }
+
+              if ( $this->get( 'sm.body_rewrite' ) == 'true' ||  $this->get( 'sm.body_rewrite' ) == 'enable_meta' ) {
                 add_filter( 'get_post_metadata', array( $this, 'post_metadata_filter' ), 2, 4 );
               }
 
@@ -222,7 +225,14 @@ namespace wpCloud\StatelessMedia {
              * We can't use this. That's prevent removing this filter.
              */
             add_filter( 'wp_update_attachment_metadata', array( 'wpCloud\StatelessMedia\Utility', 'add_media' ), 999, 2 );
-            add_filter( 'intermediate_image_sizes_advanced', array( $this, 'before_intermediate_image_sizes' ), 10, 2 );
+            
+            /**
+             * Upload the full size image first.
+             * 
+             */
+            if(!defined('WP_STATELESS_MEDIA_DISABLE_FULL_IMAGE_FIRST') || WP_STATELESS_MEDIA_DISABLE_FULL_IMAGE_FIRST != true){
+              add_filter( 'intermediate_image_sizes_advanced', array( $this, 'before_intermediate_image_sizes' ), 10, 2 );
+            }
 
             /**
              * Add Media
@@ -254,29 +264,46 @@ namespace wpCloud\StatelessMedia {
         if (empty($image_meta['gs_link'])) {
           $image_meta = wp_get_attachment_metadata($attachment_id);
         }
-  
-        foreach ($sources as $width => &$image) {
-          if (!isset($image_meta['gs_name']) || empty($image_meta['gs_name'])) {
-            continue;
+
+        if(is_array($sources) && !empty( $image_meta['gs_link'] )){
+          $gs_name = $image_meta['gs_name'];
+          // getting position of root_dir in gs_name.
+          $root_dir_pos = strpos($gs_name, $image_meta['file']);
+          // removing rood_dir from gs_name so we can compare to replace url with gs_link. 
+          if($root_dir_pos !== false){
+            $gs_name = substr($gs_name, $root_dir_pos);
           }
-    
-          // If srcset includes original image src, replace it
-          if (substr_compare($image['url'], $image_meta['gs_name'], -strlen($image_meta['gs_name'])) === 0) {
-            $image['url'] = $image_meta['gs_link'];
-          // Replace all sizes
-          } elseif (isset($image_meta['sizes']) && is_array($image_meta['sizes'])) {
-            foreach ($image_meta['sizes'] as $key => $meta) {
-              if (!isset($meta['gs_name']) || empty($meta['gs_name'])) {
-                continue;
-              }
-        
-              if (substr_compare($image['url'], $meta['gs_name'], -strlen($meta['gs_name'])) === 0) {
-                $image['url'] = $meta['gs_link'];
+
+          foreach ($sources as $width => &$image) {
+            if (!isset($image_meta['gs_name']) || empty($image_meta['gs_name'])) {
+              continue;
+            }
+
+            // If srcset includes original image src, replace it
+            if (substr_compare($image['url'], $gs_name, -strlen($gs_name)) === 0) {
+              $image['url'] = $image_meta['gs_link'];
+            // Replace all sizes
+            } elseif (isset($image_meta['sizes']) && is_array($image_meta['sizes'])) {
+              foreach ($image_meta['sizes'] as $key => $meta) {
+                if (!isset($meta['gs_name']) || empty($meta['gs_name'])) {
+                  continue;
+                }
+
+                $thumb_gs_name = $meta['gs_name'];
+                // removing rood_dir from gs_name because 
+                if($root_dir_pos !== false){
+                  $thumb_gs_name = substr($thumb_gs_name, $root_dir_pos);
+                }
+
+                if (substr_compare($image['url'], $thumb_gs_name, -strlen($thumb_gs_name)) === 0) {
+                  $image['url'] = $meta['gs_link'];
+                  break;
+                }
               }
             }
           }
         }
-  
+
         return $sources;
       }
 
@@ -801,7 +828,12 @@ namespace wpCloud\StatelessMedia {
         wp_localize_script('wp-stateless', 'wp_stateless_configs', array(
           'WP_DEBUG' => defined('WP_DEBUG') ? WP_DEBUG : false,
         ));
-        wp_localize_script('wp-stateless', 'wp_stateless_settings', ud_get_stateless_media()->get('sm'));
+        
+        $settings = ud_get_stateless_media()->get('sm');
+        if(defined('WP_STATELESS_MEDIA_JSON_KEY') && WP_STATELESS_MEDIA_JSON_KEY){
+          $settings['key_json'] = "Currently configured via a constant.";
+        }
+        wp_localize_script('wp-stateless', 'wp_stateless_settings', $settings);
         wp_localize_script('wp-stateless', 'wp_stateless_compatibility', Module::get_modules());
         wp_register_style( 'jquery-ui-regenthumbs', ud_get_stateless_media()->path( 'static/scripts/jquery-ui/redmond/jquery-ui-1.7.2.custom.css', 'url' ), array(), '1.7.2' );
 
@@ -1136,50 +1168,93 @@ namespace wpCloud\StatelessMedia {
        *
        */
       public function activate() {
-        add_action( 'activated_plugin', array($this, 'redirect_to_splash') );
-        
+        add_action( 'activated_plugin', array($this, 'redirect_to_splash'), 99 );
+        $this->run_upgrade_process();
+      }
+
+      /**
+       * Run Install Process.
+       * Triggered on plugins_loaded instead of register_activation_hook action.
+       * Works on even manual plugin update.
+       *
+       * @param string $old_version Old version.
+       * @author alim@UD
+       */
+      public function run_install_process()
+      {
+        // calling the upgrade function because it's same as this point for fresh install or updates.
+        $this->run_upgrade_process();
+      }
+
+      /**
+       * Run Upgrade Process:
+       * Triggered on plugins_loaded instead of register_activation_hook action.
+       * Works on even manual plugin update.
+       *
+       * @author alim@UD
+       */
+      public function run_upgrade_process()
+      {
+        // Creating database on new installation.
+        $this->create_db();
         /**
          * Maybe Upgrade current Version
          */
         Upgrader::call( $this->args[ 'version' ] );
       }
 
-      
-      public function show_notice_stateless_cache_busting(){
-        $this->errors->add( array(
-          'key' => 'stateless_cache_busting',
-          'button' => 'View Settings',
-          'button_link' => admin_url('upload.php?page=stateless-settings'),
-          'title' => sprintf( __( "Stateless mode now requires the Cache-Busting option.", ud_get_stateless_media()->domain ) ),
-          'message' => sprintf( __("WordPress looks at local files to prevent files with the same filenames. 
-                                Since Stateless mode bypasses this check, there is a potential for files to be stored with the same file name. We enforce the Cache-Busting option to prevent this. 
-                                Override with the <a href='%s' target='_blank'>%s</a> constant.", ud_get_stateless_media()->domain),"https://github.com/wpCloud/wp-stateless/wiki/Constants#wp_stateless_media_cache_busting", "WP_STATELESS_MEDIA_CACHE_BUSTING" ),
-        ), 'notice' );
+      /**
+       * Create database on plugin activation.
+       * @param $force whether to create db even if option exists. For debug purpose only.
+       */
+      public function create_db($force = false) {
+        global $wpdb;
+        $sm_sync_db_version = get_option( 'sm_sync_db_version' );
+
+        if( $sm_sync_db_version && $force == false ) {
+          return;
+        }
+
+        $table_name = $wpdb->prefix . 'sm_sync';
+        $charset_collate = $wpdb->get_charset_collate();
+
+        // `expire` timestamp NULL DEFAULT NULL,
+        $sql = "CREATE TABLE $table_name (
+          `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT ,
+          `file` varchar(255) NOT NULL ,
+          `status` varchar(10) NOT NULL ,
+          PRIMARY KEY  (`id`)
+        ) $charset_collate;";
+
+        require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
+        dbDelta( $sql );
+
+        add_option( 'sm_sync_db_version', $this->args[ 'version' ] );
       }
 
       public function redirect_to_splash($plugin =''){
         $this->settings = new Settings();
 
-        if(defined( 'WP_CLI' ) || $this->settings->get('key_json') || isset($_POST['checked']) && count($_POST['checked']) > 1){
+        if(defined( 'WP_CLI' ) || $this->settings->get('sm.key_json') || isset($_POST['checked']) && count($_POST['checked']) > 1){
           return;
         }
         
         if( 
-          !$this->settings->get('key_json') && 
+          !$this->settings->get('sm.key_json') && 
           defined('WP_STATELESS_MEDIA_HIDE_SETUP_ASSISTANT') && WP_STATELESS_MEDIA_HIDE_SETUP_ASSISTANT == true && 
           defined('WP_STATELESS_MEDIA_HIDE_SETTINGS_PANEL') && WP_STATELESS_MEDIA_HIDE_SETTINGS_PANEL == true 
         ) {
           return;
         }
         
-        if( !$this->settings->get('key_json') && defined('WP_STATELESS_MEDIA_HIDE_SETUP_ASSISTANT') && WP_STATELESS_MEDIA_HIDE_SETUP_ASSISTANT == true ) {
+        if( !$this->settings->get('sm.key_json') && defined('WP_STATELESS_MEDIA_HIDE_SETUP_ASSISTANT') && WP_STATELESS_MEDIA_HIDE_SETUP_ASSISTANT == true ) {
           $url = $this->get_settings_page_url('?page=stateless-settings');
           exit( wp_redirect($url));
         }
         
         if( $plugin == plugin_basename( $this->boot_file ) ) {
           $url = $this->get_settings_page_url('?page=stateless-setup&step=splash-screen');
-          if(json_decode(get_site_option('sm_key_json'))){
+          if(json_decode($this->settings->get('sm.key_json'))){
             $url = $this->get_settings_page_url('?page=stateless-settings');
           }
           exit( wp_redirect($url));
@@ -1191,6 +1266,18 @@ namespace wpCloud\StatelessMedia {
        *
        */
       public function deactivate() {}
+
+      public function show_notice_stateless_cache_busting(){
+        $this->errors->add( array(
+          'key' => 'stateless_cache_busting',
+          'button' => 'View Settings',
+          'button_link' => admin_url('upload.php?page=stateless-settings'),
+          'title' => sprintf( __( "Stateless mode now requires the Cache-Busting option.", ud_get_stateless_media()->domain ) ),
+          'message' => sprintf( __("WordPress looks at local files to prevent files with the same filenames. 
+                                Since Stateless mode bypasses this check, there is a potential for files to be stored with the same file name. We enforce the Cache-Busting option to prevent this. 
+                                Override with the <a href='%s' target='_blank'>%s</a> constant.", ud_get_stateless_media()->domain),"https://github.com/wpCloud/wp-stateless/wiki/Constants#wp_stateless_media_cache_busting", "WP_STATELESS_MEDIA_CACHE_BUSTING" ),
+        ), 'notice' );
+      }
 
       /**
        * Filter for wp_get_attachment_url();

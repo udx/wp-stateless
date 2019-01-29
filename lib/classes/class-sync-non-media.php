@@ -1,7 +1,5 @@
 <?php
 /**
- * To do: Create seperate table to keep track of files.
- * To do: check if client is connected to google before doing any action.
  * Need to improve workflow.
  * Maybe add a transient of few days to keep track of synced files.
  */
@@ -12,15 +10,16 @@ namespace wpCloud\StatelessMedia {
 
         class SyncNonMedia {
             
-            public $registered_dir = array();
-            public $registered_files = array();
+            private $registered_dir = array();
+            const table = 'sm_sync';
+            public $table_name;
             
             public function __construct(){
-                $this->registered_files = get_option('sm_synced_files', array());
-                // print_r($this->registered_files);
+                global $wpdb;
+                $this->table_name = $wpdb->prefix . self::table;
                 // Manual sync using sync tab. 
                 // called from ajax action_get_non_library_files_id
-                // Return files to be manualy sync from sync tab.
+                // Return files to be manually sync from sync tab.
                 add_filter( 'sm:sync::nonMediaFiles', array($this, 'sync_non_media_files') );
 
                 // register a dir to sync from sync tab
@@ -50,16 +49,13 @@ namespace wpCloud\StatelessMedia {
              * $file: The file to register.
              */
             public function add_file($file){
-                if(!in_array($file, $this->registered_files)){
-                    $this->registered_files[] = $file;
-                    update_option( 'sm_synced_files', $this->registered_files );
-                }
+                $this->queue_add_file($file);
             }
 
             /**
              * Sync the file to GCS.
              * @param:
-             *  $name: Reletive path to upload dir.
+             *  $name: Relative path to upload dir.
              *  $absolutePath: Full path of the file
              *  $forced: Type: bool/2; Whether to force to move the file to GCS even it's already exists.
              *           true: Check whether it's already synced or not in database.
@@ -74,13 +70,12 @@ namespace wpCloud\StatelessMedia {
                     'stateless' => true, // whether to delete local file in stateless mode.
                 ));
                 
-                if(in_array($name, $this->registered_files) && !$forced){
+                if($this->queue_is_exists($name, 'synced') && !$forced){
                     return false;
                 }
 
                 // add file_path to the file list.
-                $this->add_file($name);
-
+                $this->queue_add_file($name, 'synced');
                 $file_type = wp_check_filetype($absolutePath);
                 if(empty($this->client)){
                     $this->client = ud_get_stateless_media()->get_client();
@@ -140,13 +135,15 @@ namespace wpCloud\StatelessMedia {
              * @return:
              *  $files: A list of registered files, dir and passed file.
              */
-            public function sync_non_media_files($files){
+            public function sync_non_media_files($files = array()){
                 $upload_dir = wp_upload_dir();
-                $files = array_merge($files, $this->registered_files);
+                $files = array_merge($files, $this->queue_get_all());
                 foreach ($this->registered_dir as $key => $dir) {
                     $dir = $upload_dir['basedir'] . "/" . trim($dir, '/') . "/";
                     if(is_dir($dir)){
+                        // Getting all the files from dir recursively.
                         $_files = $this->get_files( $dir );
+                        // validating and adding to the $files array.
                         foreach ($_files as $id => $file) {
                             if(!file_exists($file)){
                                 continue;
@@ -160,7 +157,7 @@ namespace wpCloud\StatelessMedia {
                     }
                 }
 
-                $files = array_values(array_unique($files));
+                // $files = array_values(array_unique($files));
                 return $files;
             }
             
@@ -208,13 +205,7 @@ namespace wpCloud\StatelessMedia {
                     }
                     // Removing file for GCS
                     $this->client->remove_media($file);
-                    
-                    if($key = array_search($file, $this->registered_files)){
-                        if(isset($this->registered_files[$key])){
-                            unset($this->registered_files[$key]);
-                            update_option( 'sm_synced_files', $this->registered_files );
-                        }
-                    }
+                    $this->queue_remove_file($file);
                     return true;
                 }
                 catch(Exception $e){
@@ -237,16 +228,78 @@ namespace wpCloud\StatelessMedia {
                     return;
                 }
 
-                foreach ($this->registered_files as $key => $file) {
+                // Removing the files one by one.
+                foreach ($this->queue_get_all($dir) as $key => $file) {
                     if(strpos($file, $dir) !== false){
                         $this->client->remove_media($file);
-                        unset($this->registered_files[$key]);
+                        $this->queue_remove_file($file);
                     }
                 }
                 
-                update_option( 'sm_synced_files', $this->registered_files );
-                
                 return true;
+            }
+
+            /***
+             * Return all the files from the database.
+             * @return array of files.
+             */
+            public function queue_get_all($prefix = ''){
+                global $wpdb;
+                if($prefix){
+                    $files = $wpdb->get_col( $wpdb->prepare("SELECT file FROM $this->table_name WHERE file like '%s'", $wpdb->esc_like($prefix) . '%' ) );
+                }
+                else{
+                    $files = $wpdb->get_col( "SELECT file FROM $this->table_name" );
+                }
+                if(!empty($files) && is_array($files))
+                    return $files;
+                return array();
+            }
+
+            /***
+             * Checks whether a file is exist in database.
+             * @params 
+             *      $file: Path of file relative to upload dir.
+             *      $status: optional. queued|synced
+             * @return non boolean true. number of item found in db.
+             */
+            public function queue_is_exists($file, $status = ''){
+                global $wpdb;
+                if(empty($status)){
+                    return $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM {$this->table_name} WHERE file = '%s';", $file));
+                }
+                else{
+                    return $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM {$this->table_name} WHERE file = '%s' AND status = '%s';", $file, $status));
+                }
+            }
+
+            /***
+             * Add file to the database.
+             * @params 
+             *      $file: Path of file relative to upload dir.
+             *      $status: optional. queued|synced
+             * @return boolean
+             */
+            public function queue_add_file($file, $status = 'queued'){
+                global $wpdb;
+                if($this->queue_is_exists($file)){
+                    return $wpdb->update( $this->table_name, array( 'file' => $file, 'status' => $status ), array('file' => $file), array( '%s', '%s' ), array( '%s' ) ); 
+                }
+                else{
+                    return $wpdb->insert( $this->table_name, array( 'file' => $file, 'status' => $status ), array( '%s', '%s' ) ); 
+                }
+                return false;
+            }
+
+            /***
+             * Deletes a entry from database.
+             * @params 
+             *      $file: Path of file relative to upload dir.
+             * @return boolean
+             */
+            public function queue_remove_file($file){
+                global $wpdb;
+                return $wpdb->delete( $this->table_name, array( 'file' => $file), array( '%s' ) ); 
             }
         }
     }

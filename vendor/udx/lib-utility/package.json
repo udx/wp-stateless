@@ -1,11 +1,11 @@
 {
   "name": "lib-utility",
-  "version": "0.3.7",
+  "version": "0.4.0",
   "description": "Utility Library.",
   "private": true,
   "repository": {
     "type": "git",
-    "url": "https://github.com/UsabilityDynamics/lib-utility"
+    "url": "https://github.com/udx/lib-utility"
   },
   "main": "scripts/udx.utility.js",
   "engines": {

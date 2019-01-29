@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "c4bc248114f07201f5dd14e8e6ce21b3",
+    "content-hash": "d39ca4a0f09bafedb2c7ddf5940920e5",
     "packages": [
         {
             "name": "ccampbell/chromephp",
@@ -170,21 +170,21 @@
             "time": "2018-08-27T06:10:37+00:00"
         },
         {
-            "name": "usabilitydynamics/lib-settings",
-            "version": "0.2.3",
+            "name": "udx/lib-settings",
+            "version": "0.3.0",
             "source": {
                 "type": "git",
-                "url": "git@github.com:UsabilityDynamics/lib-settings",
-                "reference": "0.2.3"
+                "url": "git@github.com:udx/lib-settings",
+                "reference": "0.3.0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://github.com/UsabilityDynamics/lib-settings/archive/0.2.3.zip",
-                "reference": "0.2.3",
+                "url": "https://github.com/udx/lib-settings/archive/0.3.0.zip",
+                "reference": "0.3.0",
                 "shasum": null
             },
             "require": {
-                "usabilitydynamics/lib-utility": "~0.3"
+                "udx/lib-utility": "~0.3"
             },
             "require-dev": {
                 "justinrainbow/json-schema": "1.1.*"
@@ -216,39 +216,39 @@
                 {
                     "name": "Andy Potanin",
                     "email": "andy.potanin@usabilitydynamics.com",
-                    "homepage": "http://usabilitydynamics.com",
+                    "homepage": "https://www.usabilitydynamics.com",
                     "role": "Developer"
                 },
                 {
                     "name": "Maxim Peshkov",
                     "email": "maxim.peshkov@usabilitydynamics.com",
-                    "homepage": "http://usabilitydynamics.com",
+                    "homepage": "https://www.usabilitydynamics.com",
                     "role": "Developer"
                 },
                 {
                     "name": "Anton Korotkov",
                     "email": "anton.korotkov@usabilitydynamics.com",
-                    "homepage": "http://usabilitydynamics.com",
+                    "homepage": "https://www.usabilitydynamics.com",
                     "role": "Developer"
                 }
             ],
-            "homepage": "http://github.com/usabilitydynamics/lib-settings",
+            "homepage": "https://github.com/udx/lib-settings",
             "keywords": [
                 "settings"
             ]
         },
         {
-            "name": "usabilitydynamics/lib-ud-api-client",
-            "version": "1.1.5.3",
+            "name": "udx/lib-ud-api-client",
+            "version": "1.2.0",
             "source": {
                 "type": "git",
-                "url": "git@github.com:UsabilityDynamics/lib-ud-api-client",
-                "reference": "1.1.5.3"
+                "url": "git@github.com:udx/lib-ud-api-client",
+                "reference": "1.2.0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://github.com/UsabilityDynamics/lib-ud-api-client/archive/1.1.5.3.zip",
-                "reference": "1.1.5.3",
+                "url": "https://github.com/udx/lib-ud-api-client/archive/1.2.0.zip",
+                "reference": "1.2.0",
                 "shasum": null
             },
             "require": {
@@ -267,7 +267,7 @@
                 "GPLv2"
             ],
             "description": "UD API Client for WooCommerce API Manager",
-            "homepage": "https://github.com/UsabilityDynamics/lib-ud-api-client",
+            "homepage": "https://github.com/udx/lib-ud-api-client",
             "keywords": [
                 "api",
                 "client",
@@ -277,17 +277,17 @@
             ]
         },
         {
-            "name": "usabilitydynamics/lib-utility",
-            "version": "0.3.7",
+            "name": "udx/lib-utility",
+            "version": "0.4.0",
             "source": {
                 "type": "git",
-                "url": "git@github.com:UsabilityDynamics/lib-utility",
-                "reference": "0.3.7"
+                "url": "git@github.com:udx/lib-utility",
+                "reference": "0.4.0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://github.com/UsabilityDynamics/lib-utility/archive/0.3.7.zip",
-                "reference": "0.3.7",
+                "url": "https://github.com/udx/lib-utility/archive/0.4.0.zip",
+                "reference": "0.4.0",
                 "shasum": null
             },
             "require-dev": {
@@ -315,19 +315,19 @@
                 {
                     "name": "Andy Potanin",
                     "email": "andy.potanin@usabilitydynamics.com",
-                    "homepage": "http://usabilitydynamics.com",
+                    "homepage": "https://www.usabilitydynamics.com",
                     "role": "Developer"
                 },
                 {
                     "name": "Maxim Peshkov",
                     "email": "maxim.peshkov@usabilitydynamics.com",
-                    "homepage": "http://usabilitydynamics.com",
+                    "homepage": "https://www.usabilitydynamics.com",
                     "role": "Developer"
                 },
                 {
                     "name": "Anton Korotkov",
                     "email": "anton.korotkov@usabilitydynamics.com",
-                    "homepage": "http://usabilitydynamics.com",
+                    "homepage": "https://www.usabilitydynamics.com",
                     "role": "Developer"
                 }
             ],
@@ -338,22 +338,22 @@
             ]
         },
         {
-            "name": "usabilitydynamics/lib-wp-bootstrap",
-            "version": "1.2.4",
+            "name": "udx/lib-wp-bootstrap",
+            "version": "1.3.0",
             "source": {
                 "type": "git",
-                "url": "git@github.com:UsabilityDynamics/lib-wp-bootstrap",
-                "reference": "1.2.4"
+                "url": "git@github.com:udx/lib-wp-bootstrap",
+                "reference": "1.3.0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://github.com/UsabilityDynamics/lib-wp-bootstrap/archive/1.2.4.zip",
-                "reference": "1.2.4",
+                "url": "https://github.com/udx/lib-wp-bootstrap/archive/1.3.0.zip",
+                "reference": "1.3.0",
                 "shasum": null
             },
             "require": {
                 "php": ">=5.3",
-                "usabilitydynamics/lib-utility": "~0.3"
+                "udx/lib-utility": "~0.3"
             },
             "type": "library",
             "extra": {
@@ -368,7 +368,7 @@
                 "MIT"
             ],
             "description": "Wordpress bootstrap library created by UsabilityDynamics",
-            "homepage": "https://github.com/UsabilityDynamics/lib-wp-bootstrap",
+            "homepage": "https://github.com/udx/lib-wp-bootstrap",
             "keywords": [
                 "wordpress"
             ]
@@ -440,12 +440,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/composer/ca-bundle.git",
-                "reference": "8afa52cd417f4ec417b4bfe86b68106538a87660"
+                "reference": "45501c64f5d1b6a9c53c9a9def19e141bcbf2260"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/composer/ca-bundle/zipball/8afa52cd417f4ec417b4bfe86b68106538a87660",
-                "reference": "8afa52cd417f4ec417b4bfe86b68106538a87660",
+                "url": "https://api.github.com/repos/composer/ca-bundle/zipball/45501c64f5d1b6a9c53c9a9def19e141bcbf2260",
+                "reference": "45501c64f5d1b6a9c53c9a9def19e141bcbf2260",
                 "shasum": ""
             },
             "require": {
@@ -488,7 +488,7 @@
                 "ssl",
                 "tls"
             ],
-            "time": "2018-10-18T06:09:13+00:00"
+            "time": "2018-10-31T14:14:03+00:00"
         },
         {
             "name": "guzzle/guzzle",
@@ -713,12 +713,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/php-fig/log.git",
-                "reference": "3490ba5925e6dcbe6de950c5c6b8dce9f6e96eda"
+                "reference": "c4421fcac1edd5a324fda73e589a5cf96e52ffd0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/php-fig/log/zipball/3490ba5925e6dcbe6de950c5c6b8dce9f6e96eda",
-                "reference": "3490ba5925e6dcbe6de950c5c6b8dce9f6e96eda",
+                "url": "https://api.github.com/repos/php-fig/log/zipball/c4421fcac1edd5a324fda73e589a5cf96e52ffd0",
+                "reference": "c4421fcac1edd5a324fda73e589a5cf96e52ffd0",
                 "shasum": ""
             },
             "require": {
@@ -727,7 +727,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "1.0.x-dev"
+                    "dev-master": "1.1.x-dev"
                 }
             },
             "autoload": {
@@ -752,7 +752,7 @@
                 "psr",
                 "psr-3"
             ],
-            "time": "2018-04-03T15:59:15+00:00"
+            "time": "2018-11-21T13:42:00+00:00"
         },
         {
             "name": "satooshi/php-coveralls",
@@ -822,12 +822,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/config.git",
-                "reference": "2a62c1aa4504ab183b194a6c317b5b816474cf8c"
+                "reference": "67bf83b27ec0afc7a4b16eb0cc85f44ddf3f1674"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/config/zipball/2a62c1aa4504ab183b194a6c317b5b816474cf8c",
-                "reference": "2a62c1aa4504ab183b194a6c317b5b816474cf8c",
+                "url": "https://api.github.com/repos/symfony/config/zipball/67bf83b27ec0afc7a4b16eb0cc85f44ddf3f1674",
+                "reference": "67bf83b27ec0afc7a4b16eb0cc85f44ddf3f1674",
                 "shasum": ""
             },
             "require": {
@@ -850,7 +850,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "4.2-dev"
+                    "dev-master": "4.3-dev"
                 }
             },
             "autoload": {
@@ -877,7 +877,7 @@
             ],
             "description": "Symfony Config Component",
             "homepage": "https://symfony.com",
-            "time": "2018-10-23T07:19:36+00:00"
+            "time": "2019-01-03T09:16:58+00:00"
         },
         {
             "name": "symfony/console",
@@ -885,12 +885,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/console.git",
-                "reference": "3cb827c808ccec1c6cff4e217f36415f9428fe5e"
+                "reference": "a700b874d3692bc8342199adfb6d3b99f62cc61a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/console/zipball/3cb827c808ccec1c6cff4e217f36415f9428fe5e",
-                "reference": "3cb827c808ccec1c6cff4e217f36415f9428fe5e",
+                "url": "https://api.github.com/repos/symfony/console/zipball/a700b874d3692bc8342199adfb6d3b99f62cc61a",
+                "reference": "a700b874d3692bc8342199adfb6d3b99f62cc61a",
                 "shasum": ""
             },
             "require": {
@@ -946,7 +946,7 @@
             ],
             "description": "Symfony Console Component",
             "homepage": "https://symfony.com",
-            "time": "2018-10-14T19:00:59+00:00"
+            "time": "2019-01-04T04:42:43+00:00"
         },
         {
             "name": "symfony/contracts",
@@ -954,12 +954,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/contracts.git",
-                "reference": "df30ce9a7726feff039b5eaacffe5d48920d1f9f"
+                "reference": "1aa7ab2429c3d594dd70689604b5cf7421254cdf"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/contracts/zipball/df30ce9a7726feff039b5eaacffe5d48920d1f9f",
-                "reference": "df30ce9a7726feff039b5eaacffe5d48920d1f9f",
+                "url": "https://api.github.com/repos/symfony/contracts/zipball/1aa7ab2429c3d594dd70689604b5cf7421254cdf",
+                "reference": "1aa7ab2429c3d594dd70689604b5cf7421254cdf",
                 "shasum": ""
             },
             "require": {
@@ -1014,7 +1014,7 @@
                 "interoperability",
                 "standards"
             ],
-            "time": "2018-10-10T09:20:36+00:00"
+            "time": "2018-12-05T08:06:11+00:00"
         },
         {
             "name": "symfony/debug",
@@ -1022,12 +1022,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/debug.git",
-                "reference": "e72d01486af310919a99388b60e8c8ae717c9008"
+                "reference": "b04503aa3b54be19a8e80cd75b9b9be64b62eeb9"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/debug/zipball/e72d01486af310919a99388b60e8c8ae717c9008",
-                "reference": "e72d01486af310919a99388b60e8c8ae717c9008",
+                "url": "https://api.github.com/repos/symfony/debug/zipball/b04503aa3b54be19a8e80cd75b9b9be64b62eeb9",
+                "reference": "b04503aa3b54be19a8e80cd75b9b9be64b62eeb9",
                 "shasum": ""
             },
             "require": {
@@ -1043,7 +1043,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "4.2-dev"
+                    "dev-master": "4.3-dev"
                 }
             },
             "autoload": {
@@ -1070,7 +1070,7 @@
             ],
             "description": "Symfony Debug Component",
             "homepage": "https://symfony.com",
-            "time": "2018-10-02T16:38:08+00:00"
+            "time": "2019-01-05T08:11:12+00:00"
         },
         {
             "name": "symfony/event-dispatcher",
@@ -1078,12 +1078,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/event-dispatcher.git",
-                "reference": "b7ac80168a5ff214fb03880019f10d12e8aab507"
+                "reference": "a77e974a5fecb4398833b0709210e3d5e334ffb0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/event-dispatcher/zipball/b7ac80168a5ff214fb03880019f10d12e8aab507",
-                "reference": "b7ac80168a5ff214fb03880019f10d12e8aab507",
+                "url": "https://api.github.com/repos/symfony/event-dispatcher/zipball/a77e974a5fecb4398833b0709210e3d5e334ffb0",
+                "reference": "a77e974a5fecb4398833b0709210e3d5e334ffb0",
                 "shasum": ""
             },
             "require": {
@@ -1130,7 +1130,7 @@
             ],
             "description": "Symfony EventDispatcher Component",
             "homepage": "https://symfony.com",
-            "time": "2018-10-11T11:32:54+00:00"
+            "time": "2018-11-21T14:20:20+00:00"
         },
         {
             "name": "symfony/filesystem",
@@ -1138,12 +1138,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/filesystem.git",
-                "reference": "0fee23ff76141ad511356e6232566c40ef7d778e"
+                "reference": "b12244c29ced470fba69e20da3db97e53a6a918a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/filesystem/zipball/0fee23ff76141ad511356e6232566c40ef7d778e",
-                "reference": "0fee23ff76141ad511356e6232566c40ef7d778e",
+                "url": "https://api.github.com/repos/symfony/filesystem/zipball/b12244c29ced470fba69e20da3db97e53a6a918a",
+                "reference": "b12244c29ced470fba69e20da3db97e53a6a918a",
                 "shasum": ""
             },
             "require": {
@@ -1153,7 +1153,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "4.2-dev"
+                    "dev-master": "4.3-dev"
                 }
             },
             "autoload": {
@@ -1180,11 +1180,11 @@
             ],
             "description": "Symfony Filesystem Component",
             "homepage": "https://symfony.com",
-            "time": "2018-10-10T11:36:40+00:00"
+            "time": "2019-01-03T09:16:58+00:00"
         },
         {
             "name": "symfony/polyfill-ctype",
-            "version": "dev-master",
+            "version": "v1.10.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/polyfill-ctype.git",
@@ -1242,7 +1242,7 @@
         },
         {
             "name": "symfony/polyfill-mbstring",
-            "version": "dev-master",
+            "version": "v1.10.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/polyfill-mbstring.git",
@@ -1305,12 +1305,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/stopwatch.git",
-                "reference": "187946b203e26517babe4dcbc2c045dec8579376"
+                "reference": "950e4c71f7f11ac52639abb86f560ab03e4b06c1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/stopwatch/zipball/187946b203e26517babe4dcbc2c045dec8579376",
-                "reference": "187946b203e26517babe4dcbc2c045dec8579376",
+                "url": "https://api.github.com/repos/symfony/stopwatch/zipball/950e4c71f7f11ac52639abb86f560ab03e4b06c1",
+                "reference": "950e4c71f7f11ac52639abb86f560ab03e4b06c1",
                 "shasum": ""
             },
             "require": {
@@ -1320,7 +1320,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "4.2-dev"
+                    "dev-master": "4.3-dev"
                 }
             },
             "autoload": {
@@ -1347,7 +1347,7 @@
             ],
             "description": "Symfony Stopwatch Component",
             "homepage": "https://symfony.com",
-            "time": "2018-10-02T12:43:31+00:00"
+            "time": "2019-01-03T09:16:58+00:00"
         },
         {
             "name": "symfony/yaml",
@@ -1355,12 +1355,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/yaml.git",
-                "reference": "7228a3e2163ab5623231f126cf8d7701072f9d16"
+                "reference": "6e8c0d1188d5ba60752b8b523db1f1bdbac203da"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/yaml/zipball/7228a3e2163ab5623231f126cf8d7701072f9d16",
-                "reference": "7228a3e2163ab5623231f126cf8d7701072f9d16",
+                "url": "https://api.github.com/repos/symfony/yaml/zipball/6e8c0d1188d5ba60752b8b523db1f1bdbac203da",
+                "reference": "6e8c0d1188d5ba60752b8b523db1f1bdbac203da",
                 "shasum": ""
             },
             "require": {
@@ -1379,7 +1379,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "4.2-dev"
+                    "dev-master": "4.3-dev"
                 }
             },
             "autoload": {
@@ -1406,7 +1406,7 @@
             ],
             "description": "Symfony Yaml Component",
             "homepage": "https://symfony.com",
-            "time": "2018-10-02T16:38:08+00:00"
+            "time": "2019-01-03T09:16:58+00:00"
         }
     ],
     "aliases": [],

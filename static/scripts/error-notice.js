@@ -1,7 +1,7 @@
 /**
  * EVENTS
  */
-jQuery( document ).ready( function () {
+jQuery( document ).ready( function ($) {
   
     jQuery( document ).on( 'click', '.stateless-admin-notice.ud-admin-notice .button-action', function(e){
       var _this = jQuery( this );
@@ -13,13 +13,18 @@ jQuery( document ).ready( function () {
   
 
       var data = {
-        action: 'stateless_notice_button_action',
+        action: 'stateless_enable_notice_button_action',
         key: _this.data('key'),
       }
   
       jQuery.post( ajaxurl, data, function ( result_data ) {
           if( result_data.success == '1' ) {
             _this.closest('.ud-admin-notice').remove();
+            
+            var key = _this.attr('data-key');
+            key = key.replace('button_secondary_', '');
+            $("#" + key + " option[value=" + key +"]").attr('selected', 'selected');
+            $("#" + key).val('true');
           } else if ( result_data.success == '0' ) {
             // alert(result_data.error);
           }
@@ -27,7 +32,7 @@ jQuery( document ).ready( function () {
       return false;
     });
 
-      
+    jQuery( '.ud-admin-notice' ).off( 'click', '.dismiss');
     jQuery( document ).on( 'click', '.stateless-admin-notice.ud-admin-notice .dismiss-warning', function(e){
       e.preventDefault();
 
@@ -45,7 +50,7 @@ jQuery( document ).ready( function () {
             // alert(result_data.error);
           }
       }, "json" );
-
+      return false;
     });
 
     jQuery('#stless_settings_tab .sm-mode input[type=radio]').on('change', function(){

@@ -1,13 +1,28 @@
+#### 2.2.1 ####
+* Fix - Security patch for Authenticated Remote Code Execution (RCE) vulnerability.
+
+#### 2.2.0 ####
+* FIX - Slow page generation when File URL Replacement is enabled [#265](https://github.com/wpCloud/wp-stateless/issues/265). 
+* FIX - Fatal error when WP Smush Pro compatibility is enabled [#325](https://github.com/wpCloud/wp-stateless/issues/325). 
+* FIX - Issue with Imagify [#326](https://github.com/wpCloud/wp-stateless/issues/326). 
+* FIX - Return correct srcset images [#328](https://github.com/wpCloud/wp-stateless/issues/328). 
+* FIX - Fatal error with GFForms [#330](https://github.com/wpCloud/wp-stateless/issues/330). 
+* FIX - Typo in admin notices [#337](https://github.com/wpCloud/wp-stateless/issues/337). 
+* ENHANCEMENT - Extended “File URL Replacement” options [#336](https://github.com/wpCloud/wp-stateless/issues/336). 
+* ENHANCEMENT - Service Account JSON is now hidden if set via constant [#320](https://github.com/wpCloud/wp-stateless/issues/320). 
+* ENHANCEMENT - New database table for tracking files not tracked in media library [#307](https://github.com/wpCloud/wp-stateless/issues/307). 
+* ENHANCEMENT - Updated depreciated function flagged by security software [#300](https://github.com/wpCloud/wp-stateless/issues/300). 
+
 #### 2.1.9 ####
-* FIX - Resolved fatal error with OneCodeShop RML Amazon S3 plugin. GitHub Issue #317.
-* FIX - Resolved missing bucket in file URL when “storage.googleapis.com” was supplied in Domain field. GitHub Issue #318.
-* ENHANCEMENT - Support synchronization of files without metadata, such as .doc and .docx files. GitHub Issue #316.
+* FIX - Resolved fatal error with OneCodeShop RML Amazon S3 plugin. GitHub Issue [#317](https://github.com/wpCloud/wp-stateless/issues/317).
+* FIX - Resolved missing bucket in file URL when “storage.googleapis.com” was supplied in Domain field. GitHub Issue [#318](https://github.com/wpCloud/wp-stateless/issues/318).
+* ENHANCEMENT - Support synchronization of files without metadata, such as .doc and .docx files. GitHub Issue [#316](https://github.com/wpCloud/wp-stateless/issues/316).
 
 #### 2.1.8 ####
 * FIX - WooCommerce product export.
 * FIX - PDF previews in media library now supported.
 * ENHANCEMENT - Improved error message when there is nothing to sync.
-* ENHANCEMENT - Renamed constant WP_STATELESS_MEDIA_CACHE_CONTROL to WP_STATELESS_MEDIA_CACHE_BUSTING.
+* ENHANCEMENT - Renamed constant WP_STATELESS_MEDIA_HASH_FILENAME to WP_STATELESS_MEDIA_CACHE_BUSTING.
 * ENHANCEMENT - Domain field functionality now allows webmaster to control http or https
 * ENHANCEMENT - Notice about Stateless mode requiring the Cache-Busting option is displayed to those using Stateless mode.
 * ENHANCEMENT - Upload full size image before generating thumbnails.
