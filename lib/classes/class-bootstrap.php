@@ -284,27 +284,43 @@ namespace wpCloud\StatelessMedia {
               $image['url'] = $image_meta['gs_link'];
             // Replace all sizes
             } elseif (isset($image_meta['sizes']) && is_array($image_meta['sizes'])) {
+              $found = false;
               foreach ($image_meta['sizes'] as $key => $meta) {
                 if (!isset($meta['gs_name']) || empty($meta['gs_name'])) {
+                  // if mode is stateless and nothing to show for srcset item - unset that item
+                  if ( $this->get( 'sm.mode' ) === 'stateless' ) {
+                    $image = null;
+                  }
                   continue;
                 }
 
                 $thumb_gs_name = $meta['gs_name'];
-                // removing rood_dir from gs_name because 
+                // removing rood_dir from gs_name
                 if($root_dir_pos !== false){
                   $thumb_gs_name = substr($thumb_gs_name, $root_dir_pos);
                 }
 
                 if (substr_compare($image['url'], $thumb_gs_name, -strlen($thumb_gs_name)) === 0) {
                   $image['url'] = $meta['gs_link'];
+                  $found = true;
                   break;
                 }
+              }
+
+              // if no size found and mode is stateless and nothing to show for srcset item - unset that item
+              if (!$found && $this->get( 'sm.mode' ) === 'stateless') {
+                $image = null;
+              }
+            } else {
+              // if mode is stateless and nothing to show for srcset item - unset that item
+              if ( $this->get( 'sm.mode' ) === 'stateless' ) {
+                $image = null;
               }
             }
           }
         }
 
-        return $sources;
+        return array_filter( $sources );
       }
 
       /**
