@@ -6,7 +6,7 @@ License: GPLv2 or later
 Requires PHP: 5.5
 Requires at least: 4.0
 Tested up to: 5.0
-Stable tag: 2.2.1
+Stable tag: 2.2.2
 
 Upload and serve your WordPress media files from Google Cloud Storage.
 
@@ -104,8 +104,11 @@ To ensure new releases cause as little disruption as possible, we rely on a numb
 * Fix - Security patch for Authenticated Remote Code Execution (RCE) vulnerability.
 
 == Changelog ==
+= 2.2.2 =
+
+
 = 2.2.1 =
-* Fix - Security patch for Authenticated Remote Code Execution (RCE) vulnerability.
+* FIX - Security patch for Authenticated Remote Code Execution (RCE) vulnerability.
 
 = 2.2.0 =
 * FIX - Slow page generation when File URL Replacement is enabled. GitHub Issue [#265](https://github.com/wpCloud/wp-stateless/issues/265).
