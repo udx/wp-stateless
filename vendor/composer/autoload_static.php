@@ -80,7 +80,6 @@ class ComposerStaticInitc00cd3c666f8dfa818cb7edfd488ed20
         'wpCloud\\StatelessMedia\\SOWidgetCSS' => __DIR__ . '/../..' . '/lib/classes/compatibility/siteorigin-widget-bundle.php',
         'wpCloud\\StatelessMedia\\Settings' => __DIR__ . '/../..' . '/lib/classes/class-settings.php',
         'wpCloud\\StatelessMedia\\ShortPixel' => __DIR__ . '/../..' . '/lib/classes/compatibility/shortpixel.php',
-        'wpCloud\\StatelessMedia\\Sync' => __DIR__ . '/../..' . '/lib/classes/class-sync.php',
         'wpCloud\\StatelessMedia\\SyncNonMedia' => __DIR__ . '/../..' . '/lib/classes/class-sync-non-media.php',
         'wpCloud\\StatelessMedia\\Upgrader' => __DIR__ . '/../..' . '/lib/classes/class-upgrader.php',
         'wpCloud\\StatelessMedia\\Utility' => __DIR__ . '/../..' . '/lib/classes/class-utility.php',

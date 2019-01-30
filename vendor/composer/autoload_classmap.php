@@ -55,7 +55,6 @@ return array(
     'wpCloud\\StatelessMedia\\SOWidgetCSS' => $baseDir . '/lib/classes/compatibility/siteorigin-widget-bundle.php',
     'wpCloud\\StatelessMedia\\Settings' => $baseDir . '/lib/classes/class-settings.php',
     'wpCloud\\StatelessMedia\\ShortPixel' => $baseDir . '/lib/classes/compatibility/shortpixel.php',
-    'wpCloud\\StatelessMedia\\Sync' => $baseDir . '/lib/classes/class-sync.php',
     'wpCloud\\StatelessMedia\\SyncNonMedia' => $baseDir . '/lib/classes/class-sync-non-media.php',
     'wpCloud\\StatelessMedia\\Upgrader' => $baseDir . '/lib/classes/class-upgrader.php',
     'wpCloud\\StatelessMedia\\Utility' => $baseDir . '/lib/classes/class-utility.php',

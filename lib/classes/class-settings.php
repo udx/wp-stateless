@@ -365,13 +365,7 @@ namespace wpCloud\StatelessMedia {
        * @return \UsabilityDynamics\Settings
        */
       public function set( $key = '', $value = false, $bypass_validation = false ) {
-
-        //if (  $value !== false ) {
-        //  update_option( str_replace( '.', '_', $key ), $value );
-        //}
-
         return parent::set( $key, $value, $bypass_validation );
-
       }
 
     }

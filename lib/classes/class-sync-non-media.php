@@ -130,10 +130,8 @@ namespace wpCloud\StatelessMedia {
 
             /**
              * Generate list for manual sync using sync tab. Sync all register files, dir and passed files.
-             * @param:
-             *  $files: Additional files to sync.
-             * @return:
-             *  $files: A list of registered files, dir and passed file.
+             * @param array $files - Additional files to sync.
+             * @return array
              */
             public function sync_non_media_files($files = array()){
                 $upload_dir = wp_upload_dir();
@@ -160,12 +158,11 @@ namespace wpCloud\StatelessMedia {
                 // $files = array_values(array_unique($files));
                 return $files;
             }
-            
+
             /**
              * Return list of files in a dir.
-             * @param:
-             *  $dir: Directory path
-             * @return: Lists of files in the directory and subdirectory.
+             * @param string $dir: Directory path
+             * @return array - Lists of files in the directory and subdirectory.
              */
             function get_files($dir) {
                 $return = array();
@@ -188,10 +185,10 @@ namespace wpCloud\StatelessMedia {
 
             /**
              * Delete a file from GCS.
-             * @param:
-             *  $file: File path relative to upload dir.
-             * @return: Whether file removed from GCS or not.
-             * @todo: Improve workflow. Currently file removing dependent on Registered files list.
+             *
+             * @param $file
+             * @param bool $force
+             * @return bool
              */
             public function delete_file($file, $force = true){
                 try{
@@ -201,23 +198,23 @@ namespace wpCloud\StatelessMedia {
                     }
 
                     if( is_wp_error( $this->client ) ) {
-                        return;
+                        return false;
                     }
                     // Removing file for GCS
                     $this->client->remove_media($file);
                     $this->queue_remove_file($file);
                     return true;
                 }
-                catch(Exception $e){
+                catch(\Exception $e){
                     return false;
                 }
             }
 
             /**
              * Remove registered files of specified dir from GCS.
-             * @param:
-             *  $dir: Directory path for file to be removed
-             * @todo: Improve workflow. Currently file removing dependent on Registered files list.
+             *
+             * @param $dir
+             * @return bool|void
              */
             public function delete_files($dir){
                 if(empty($this->client)){
