@@ -155,7 +155,7 @@ namespace wpCloud\StatelessMedia {
                 $modules = apply_filters('stateless::modules::save', $modules);
                 
                 if(is_network_admin()){
-                    update_site_option('stateless-modules', $modules, true);
+                    update_site_option('stateless-modules', $modules);
                 }
                 else{
                     update_option('stateless-modules', $modules, true);
