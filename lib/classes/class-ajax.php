@@ -120,14 +120,13 @@ namespace wpCloud\StatelessMedia {
        * Fail over to image URL if not found on disk
        * In case image not available on both local and bucket
        * try to pull image from image URL in case it is accessible by some sort of proxy.
-       * 
+       *
        * @param:
        * $url (int/string): URL of the image.
        * $save_to (string): Path where to save the image.
-       * 
-       * @return:
-       * boolean (true/false)
-       * 
+       *
+       * @return bool|int
+       * @throws \Exception
        */
       public function get_attachment_if_exist($url, $save_to){
         if(is_int($url))
@@ -141,7 +140,7 @@ namespace wpCloud\StatelessMedia {
                 return file_put_contents($save_to, $response['body']);
               }
             }
-            catch(Exception $e){
+            catch(\Exception $e){
               throw $e;
             }
           }
@@ -268,10 +267,6 @@ namespace wpCloud\StatelessMedia {
               $this->store_failed_attachment( $file->ID, 'other' );
               throw new \Exception($metadata->get_error_message());
             }
-            // if ( empty( $metadata ) ) {
-            //   $this->store_failed_attachment( $file->ID, 'other' );
-            // throw new \Exception(sprintf( __('No metadata generated for %1$s (ID %2$s).', ud_get_stateless_media()->domain), esc_html( get_the_title( $image->ID ) ), $image->ID));
-            // }
 
             wp_update_attachment_metadata( $file->ID, $metadata );
             do_action( 'sm:synced::nonImage', $id, $metadata);
@@ -403,7 +398,10 @@ namespace wpCloud\StatelessMedia {
       }
 
       /**
+       * Get_fails
+       *
        * @param $mode
+       * @return mixed|void
        */
       private function get_fails( $mode ) {
         if ( $mode !== 'other' ) {
@@ -428,10 +426,13 @@ namespace wpCloud\StatelessMedia {
       }
 
       /**
+       * Get_non_processed_media_ids
+       *
        * @param $mode
        * @param $files
        * @param bool $continue
        * @return array
+       * @throws \Exception
        */
       private function get_non_processed_media_ids( $mode, $files, $continue = false ) {
         if(ud_get_stateless_media()->is_connected_to_gs() !== true){

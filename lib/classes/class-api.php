@@ -146,8 +146,6 @@ namespace wpCloud\StatelessMedia {
        */
       static public function authRequest( $request = false ) {
 
-        //die( '<pre>' . print_r($request->get_param('key'),true) . '</pre>' );
-
         if( !$request ) {
           return false;
         }
