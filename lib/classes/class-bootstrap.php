@@ -327,8 +327,9 @@ namespace wpCloud\StatelessMedia {
        * Return gs host.
        * If custom domain is set it's return bucket name as host,
        * else return storage.googleapis.com as host and append bucket name at the end.
-       * @param none
-       * @return Host name to use
+       *
+       * @param array $sm
+       * @return mixed|void
        */
       public function get_gs_host($sm = array()) {
         $sm = $sm?$sm: $this->get( 'sm');
@@ -352,8 +353,9 @@ namespace wpCloud\StatelessMedia {
        * Filter for wp_stateless_bucket_link if custom domain is set.
        * It's get attachment url and remove "storage.googleapis.com" from url.
        * So that custom url can be used.
-       * @param $new_blog
-       * @param $prev_blog_id
+       *
+       * @param $fileLink
+       * @return mixed|string
        */
       public function wp_stateless_bucket_link($fileLink) {
         $bucketname = $this->get( 'sm.bucket' );
@@ -377,7 +379,9 @@ namespace wpCloud\StatelessMedia {
 
       /**
        * Return settings page url.
-       * @param $path
+       *
+       * @param string $path
+       * @return string
        */
       public function get_settings_page_url( $path = '' ) {
         $url = get_admin_url( get_current_blog_id(), ( is_network_admin() ? 'network/settings.php' : 'upload.php' ) );
@@ -703,7 +707,8 @@ namespace wpCloud\StatelessMedia {
       }
 
       /**
-       * Rplace all image link with gs link and return only if meta modified.
+       * Replace all image link with gs link and return only if meta modified.
+       *
        * @param $meta
        * @return mixed or null when not changed.
        */
@@ -727,7 +732,8 @@ namespace wpCloud\StatelessMedia {
       }
 
       /**
-       * Rplace all image link with gs link
+       * Replace all image link with gs link
+       *
        * @param $meta
        * @return mixed
        */
@@ -855,18 +861,23 @@ namespace wpCloud\StatelessMedia {
 
       }
 
+      /**
+       * Get_l10n_data
+       *
+       * @param string $value
+       * @return mixed
+       */
       public function get_l10n_data($value=''){
         include ud_get_stateless_media()->path( 'l10n.php', 'dir');
         return $l10n;
       }
 
       /**
+       * Admin Scripts
        *
-       * @todo: it should not be loaded everywhere. peshkov@UD
        * @param $hook
        */
       public function admin_enqueue_scripts( $hook ) {
-
 
         switch( $hook ) {
 
@@ -1013,7 +1024,6 @@ namespace wpCloud\StatelessMedia {
           $height = $intermediate['height'];
           $is_intermediate = true;
         }
-        //die( '<pre>' . print_r( $intermediate, true ) . '</pre>' );
 
         /**
          * maybe try to get images info from sm_cloud
@@ -1064,10 +1074,9 @@ namespace wpCloud\StatelessMedia {
        * Extends metadata by adding GS information.
        * Note: must not be called directly. It's used only on hook
        *
-       * @action wp_get_attachment_metadata
        * @param $metadata
        * @param $attachment_id
-       * @return $metadata
+       * @return array|mixed
        */
       public function wp_get_attachment_metadata( $metadata, $attachment_id  ) {
         /* Determine if the media file has GS data at all. */
@@ -1193,7 +1202,6 @@ namespace wpCloud\StatelessMedia {
        * Triggered on plugins_loaded instead of register_activation_hook action.
        * Works on even manual plugin update.
        *
-       * @param string $old_version Old version.
        * @author alim@UD
        */
       public function run_install_process()
@@ -1221,7 +1229,7 @@ namespace wpCloud\StatelessMedia {
 
       /**
        * Create database on plugin activation.
-       * @param $force whether to create db even if option exists. For debug purpose only.
+       * @param boolean $force - whether to create db even if option exists. For debug purpose only.
        */
       public function create_db($force = false) {
         global $wpdb;
@@ -1248,6 +1256,11 @@ namespace wpCloud\StatelessMedia {
         add_option( 'sm_sync_db_version', $this->args[ 'version' ] );
       }
 
+      /**
+       * Redirect_to_splash
+       *
+       * @param string $plugin
+       */
       public function redirect_to_splash($plugin =''){
         $this->settings = new Settings();
 
@@ -1283,6 +1296,10 @@ namespace wpCloud\StatelessMedia {
        */
       public function deactivate() {}
 
+      /**
+       * Show_notice_stateless_cache_busting
+       *
+       */
       public function show_notice_stateless_cache_busting(){
         $this->errors->add( array(
           'key' => 'stateless_cache_busting',
@@ -1448,9 +1465,7 @@ namespace wpCloud\StatelessMedia {
           // echo 'Caught exception: ', $e->getMessage(), "\n";
         }
 
-
         return isset( $_parsed ) ? $_parsed : null;
-
 
       }
 
@@ -1470,9 +1485,6 @@ namespace wpCloud\StatelessMedia {
           return NULL;
         }
       }
-
     }
-
   }
-
 }

@@ -197,7 +197,7 @@ namespace wpCloud\StatelessMedia {
              */
             private function hook_from_restore_image() {
                 $call_stack = debug_backtrace();
-				$class_name = class_exists( 'WpSmushBackup' ) ? 'WpSmushBackup' : 'WP_Smush_Backup';
+                $class_name = class_exists( 'WpSmushBackup' ) ? 'WpSmushBackup' : 'WP_Smush_Backup';
 
                 if ( !empty( $call_stack ) && is_array( $call_stack ) ) {
                     foreach( $call_stack as $step ) {
