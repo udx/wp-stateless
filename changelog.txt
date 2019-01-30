@@ -1,5 +1,7 @@
 == Changelog ==
 = 2.2.2 =
+* FIX - Proper 'srcset' attribute handling. GitHub Issue [#342](https://github.com/wpCloud/wp-stateless/issues/342).
+* ENHANCEMENT - Minor fixes code quality.
 
 = 2.2.1 =
 * Fix - Security patch for Authenticated Remote Code Execution (RCE) vulnerability.

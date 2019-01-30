@@ -100,12 +100,13 @@ To ensure new releases cause as little disruption as possible, we rely on a numb
 
 
 == Upgrade Notice ==
-= 2.2.1 =
-* Fix - Security patch for Authenticated Remote Code Execution (RCE) vulnerability.
+= 2.2.2 =
+* FIX - Proper 'srcset' attribute handling. GitHub Issue [#342](https://github.com/wpCloud/wp-stateless/issues/342).
 
 == Changelog ==
 = 2.2.2 =
-
+* FIX - Proper 'srcset' attribute handling. GitHub Issue [#342](https://github.com/wpCloud/wp-stateless/issues/342).
+* ENHANCEMENT - Minor fixes code quality.
 
 = 2.2.1 =
 * FIX - Security patch for Authenticated Remote Code Execution (RCE) vulnerability.
