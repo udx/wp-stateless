@@ -267,6 +267,11 @@ namespace wpCloud\StatelessMedia {
             $path = wp_normalize_path( dirname( get_attached_file( $attachment_id ) ) );
             $mediaPath = wp_normalize_path( trim( dirname( $file ), '\/\\' ) );
 
+            /**
+             * @see https://github.com/wpCloud/wp-stateless/issues/343
+             **/
+            $mediaPath = $mediaPath === '.' ? '' : $mediaPath;
+
             foreach( (array) $metadata[ 'sizes' ] as $image_size => $data ) {
 
               $absolutePath = wp_normalize_path( $path . '/' . $data[ 'file' ] );
