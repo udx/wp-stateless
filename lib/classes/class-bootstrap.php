@@ -274,10 +274,11 @@ namespace wpCloud\StatelessMedia {
             $gs_name = substr($gs_name, $root_dir_pos);
           }
 
+          if ( !isset($gs_name) || empty($gs_name) ) {
+            return [];
+          }
+
           foreach ($sources as $width => &$image) {
-            if (!isset($image_meta['gs_name']) || empty($image_meta['gs_name'])) {
-              continue;
-            }
 
             // If srcset includes original image src, replace it
             if (substr_compare($image['url'], $gs_name, -strlen($gs_name)) === 0) {
@@ -287,10 +288,6 @@ namespace wpCloud\StatelessMedia {
               $found = false;
               foreach ($image_meta['sizes'] as $key => $meta) {
                 if (!isset($meta['gs_name']) || empty($meta['gs_name'])) {
-                  // if mode is stateless and nothing to show for srcset item - unset that item
-                  if ( $this->get( 'sm.mode' ) === 'stateless' ) {
-                    $image = null;
-                  }
                   continue;
                 }
 
