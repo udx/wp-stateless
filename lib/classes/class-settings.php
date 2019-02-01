@@ -345,6 +345,9 @@ namespace wpCloud\StatelessMedia {
               $option = 'uploads_use_yearmonth_folders';
             }
 
+            // Be sure to cleanup values before saving
+            $value = trim($value);
+
             if(is_network_admin()){
               update_site_option( $option, $value );
             }
