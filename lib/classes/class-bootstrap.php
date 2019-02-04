@@ -684,14 +684,11 @@ namespace wpCloud\StatelessMedia {
           }
           
           if ( ! $meta_key ) {
-              return $meta_cache;
+            return $meta_cache;
           }
           
           if ( isset($meta_cache[$meta_key]) ) {
-              if ( $single )
-                  return $meta_cache[$meta_key][0];
-              else
-                  return $meta_cache[$meta_key];
+            return $meta_cache[$meta_key];
           }
           
           // in case no metadata is found return what was passed in $value. 
