@@ -32,7 +32,7 @@ jQuery( document ).ready( function ($) {
       return false;
     });
 
-    jQuery( '.ud-admin-notice' ).off( 'click', '.dismiss');
+    jQuery( '.stateless-admin-notice.ud-admin-notice' ).off( 'click', '.dismiss');
     jQuery( document ).on( 'click', '.stateless-admin-notice.ud-admin-notice .dismiss-warning', function(e){
       e.preventDefault();
 
