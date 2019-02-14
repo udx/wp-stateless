@@ -1,4 +1,11 @@
 == Changelog ==
+= 2.2.3 =
+* FIX - get_post_metadata does not break multi-dimensional arrays anymore. GitHub Issue [#352](https://github.com/wpCloud/wp-stateless/issues/352).
+* FIX - PHP Warning: substr_compare() fixed. GitHub Issue [#350](https://github.com/wpCloud/wp-stateless/issues/350).
+* FIX - Filtering Domain setting before saving in order to get rid of possible empty spaces. GitHub Issue [#348](https://github.com/wpCloud/wp-stateless/issues/348).
+* FIX - Incorrect remote file path generated when disabled Organization setting. GitHub Issue [#343](https://github.com/wpCloud/wp-stateless/issues/343).
+* FIX - Hiding admin notices correctly. GitHub Pull Request [#355](https://github.com/wpCloud/wp-stateless/pull/355).
+
 = 2.2.2 =
 * FIX - Proper 'srcset' attribute handling. GitHub Issue [#342](https://github.com/wpCloud/wp-stateless/issues/342).
 * ENHANCEMENT - Minor fixes code quality.

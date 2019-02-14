@@ -6,7 +6,7 @@ License: GPLv2 or later
 Requires PHP: 5.5
 Requires at least: 4.0
 Tested up to: 5.0
-Stable tag: 2.2.2
+Stable tag: 2.2.3
 
 Upload and serve your WordPress media files from Google Cloud Storage.
 
@@ -104,6 +104,13 @@ To ensure new releases cause as little disruption as possible, we rely on a numb
 * FIX - Proper 'srcset' attribute handling. GitHub Issue [#342](https://github.com/wpCloud/wp-stateless/issues/342).
 
 == Changelog ==
+= 2.2.3 =
+* FIX - get_post_metadata does not break multi-dimensional arrays anymore. GitHub Issue [#352](https://github.com/wpCloud/wp-stateless/issues/352).
+* FIX - PHP Warning: substr_compare() fixed. GitHub Issue [#350](https://github.com/wpCloud/wp-stateless/issues/350).
+* FIX - Filtering Domain setting before saving in order to get rid of possible empty spaces. GitHub Issue [#348](https://github.com/wpCloud/wp-stateless/issues/348).
+* FIX - Incorrect remote file path generated when disabled Organization setting. GitHub Issue [#343](https://github.com/wpCloud/wp-stateless/issues/343).
+* FIX - Hiding admin notices correctly. GitHub Pull Request [#355](https://github.com/wpCloud/wp-stateless/pull/355).
+
 = 2.2.2 =
 * FIX - Proper 'srcset' attribute handling. GitHub Issue [#342](https://github.com/wpCloud/wp-stateless/issues/342).
 * ENHANCEMENT - Minor fixes code quality.
