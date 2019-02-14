@@ -53,8 +53,15 @@ namespace wpCloud\StatelessMedia {
                 if($theme->Name == $this->theme_name){
                     return true;
                 }
+
+                $parent_theme = $theme->parent();
+                if(is_a($parent_theme, 'WP_Theme') && $parent_theme->Name == $this->theme_name){
+                    return true;
+                }
+
                 return false;
             }
+
             if(!empty($this->plugin_file)){
                 // Converting string to array for foreach
                 if(is_string($this->plugin_file)){
