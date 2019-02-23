@@ -767,8 +767,9 @@ var wpStatelessApp = angular.module('wpStatelessApp', [])
     custom_domain = custom_domain.replace(/https?:\/\//, ''); // removing http:// or https:// from the beginning.
     host += $scope.sm.bucket ? $scope.sm.bucket : '{bucket-name}';
 
-    if ( custom_domain !== 'storage.googleapis.com' && $scope.sm.bucket && custom_domain && ( is_ssl === 0 || custom_domain != $scope.sm.bucket ) ) {
+    if ( custom_domain !== 'storage.googleapis.com' && $scope.sm.bucket && custom_domain && ( is_ssl === 0 || custom_domain == $scope.sm.bucket ) ) {
       $scope.sm.is_custom_domain = true;
+      $scope.sm.is_ssl = is_ssl === 0 ? true : false;
       host = is_ssl === 0 ? 'https://' : 'http://';  // bucketname will be host
       host += custom_domain;
     }

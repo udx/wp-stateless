@@ -338,7 +338,7 @@ namespace wpCloud\StatelessMedia {
         $custom_domain = str_replace(array('http://', 'https://'), '', $custom_domain);
         $custom_domain = trim($custom_domain, '/');
 
-        if ( !empty($sm['bucket']) && !empty($custom_domain) && $custom_domain !== 'storage.googleapis.com' && ( $is_ssl === 0 || $custom_domain != $sm['bucket'] ) ) {
+        if ( !empty($sm['bucket']) && !empty($custom_domain) && $custom_domain !== 'storage.googleapis.com' && ( $is_ssl === 0 || $custom_domain == $sm['bucket'] ) ) {
           $image_host = $is_ssl === 0 ? 'https://' : 'http://';  // bucketname will be host
           $image_host .=  $custom_domain;
         }
