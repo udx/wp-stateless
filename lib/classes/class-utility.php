@@ -157,12 +157,16 @@ namespace wpCloud\StatelessMedia {
       /**
        * Add/Update Media to Bucket
        * Fired for every action with image add or update
+       * 
+       * $force and $args params will no be passed on media library uploads.
+       * This two will be passed on by compatibility.
        *
        * @action wp_generate_attachment_metadata
        * @author peshkov@UD
        * @param $metadata
        * @param $attachment_id
        * @param $force Whether to force the upload incase of it's already exists.
+       * @param $args Whether to only sync the full size image.
        * @return bool|string
        */
       public static function add_media( $metadata, $attachment_id, $force = false, $args = array() ) {
@@ -177,10 +181,29 @@ namespace wpCloud\StatelessMedia {
         if( current_filter() !== 'wp_generate_attachment_metadata' && current_filter() !== 'wp_update_attachment_metadata' ) {
           $metadata = wp_get_attachment_metadata( $attachment_id );
         }
+        
+        /**
+         * To skip the sync process.
+         *
+         * Returning a non-null value
+         * will effectively short-circuit the function.
+         *
+         * $force and $args params will no be passed on media library uploads.
+         * This two will be passed on by compatibility.
+         * 
+         * @since 2.2.4
+         *
+         * @param bool              $value          This should return true if want to skip the sync.
+         * @param int               $metadata       Metadata for the attachment.
+         * @param string            $attachment_id  Attachment ID.
+         * @param bool              $force          Whether to force the sync even the file already exist in GCS.
+         * @param bool              $args           Whether to only sync the full size image.
+         */
+        $check = apply_filters('wp_stateless_skip_add_media', null, $metadata, $attachment_id, $force, $args);
 
         $client = ud_get_stateless_media()->get_client();
 
-        if( !is_wp_error( $client ) ) {
+        if( !is_wp_error( $client ) && !$check ) {
 
           $fullsizepath = wp_normalize_path( get_attached_file( $attachment_id ) );
           // Make non-images uploadable.
