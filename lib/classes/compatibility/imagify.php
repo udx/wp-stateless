@@ -6,6 +6,7 @@
  * Compatibility Description: Enables support for these Imagify Image Optimizer features: 
  * auto-optimize images on upload, bulk optimizer, resize larger images, optimization levels (normal, aggressive, ultra).
  *
+ * https://github.com/wpCloud/wp-stateless/issues/206
  */
 
 namespace wpCloud\StatelessMedia {
@@ -51,7 +52,7 @@ namespace wpCloud\StatelessMedia {
             public function skip_add_media($return, $metadata, $attachment_id, $force = false, $args = array()) {
                 $imagify = new \Imagify_Attachment($attachment_id);
 
-                if($force) return false;
+                if($force || !get_imagify_option( 'auto_optimize' )) return false;
 
                 if ( is_callable( array( $imagify, 'is_extension_supported' ) ) ) {
                     if ( ! $imagify->is_extension_supported() ) {
