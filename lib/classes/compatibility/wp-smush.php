@@ -25,10 +25,8 @@ namespace wpCloud\StatelessMedia {
                 // Useful in Stateless mode
                 add_action( 'smush_file_exists', array( $this, 'maybe_download_file' ), 10, 3 );
 
-                // We need to remove the regular handler for sync 
-                // unless in stateless mode we would remove the attachment before it's get optimized.
-                remove_filter( 'wp_update_attachment_metadata', array( 'wpCloud\StatelessMedia\Utility', 'add_media' ), 999 );
-                add_filter( 'wp_update_attachment_metadata', array( $this, 'add_media_wrapper' ), 999, 2 );
+                // Skip sync when attachment is image, sync will be handled after image is optimized.
+                add_filter( 'wp_stateless_skip_add_media', array( $this, 'skip_add_media' ), 10, 4 );
 
                 add_filter('delete_attachment', array($this, 'remove_backup'));
                 add_filter( 'smush_backup_exists', array( $this, 'backup_exists_on_gcs' ), 10, 3 );
@@ -36,11 +34,24 @@ namespace wpCloud\StatelessMedia {
             }
 
             /**
-             * Replacement for default wp_update_attachment_metadata filter of bootstrap class.
-             * To avoid sync same image twice, once on upload and again after optimization.
-             * We also avoid downloading image before optimization on stateless mode.
+             * Whether to skip the sync on image upload before the image is optimized.
+             * The sync is skipped if the image is compatible with Smush.
+             * 
+             * The image will be synced after it's get optimized using the 'wp_smush_image_optimised' action.
+             * 
+             *
+             * @param bool   $return         This should return true if want to skip the sync.
+             * @param int    $metadata       Metadata for the attachment.
+             * @param string $attachment_id  Attachment ID.
+             * @param bool   $force          Whether to force the sync even the file already exist in GCS.
+             * @param bool   $args           Whether to only sync the full size image.
+             * 
+             * @return bool  $return         True to skip the sync and false to do the sync.
+             * 
              */
-            public function add_media_wrapper($metadata, $attachment_id) {
+            public function skip_add_media($return, $metadata, $attachment_id, $force = false, $args = array()) {
+                if($force) return false;
+
                 if (class_exists('WP_Smush_Modules')) {
                     $auto_smush = \WP_Smush::get_instance()->core()->mod->settings->get('auto');
                 } else {
@@ -56,9 +67,9 @@ namespace wpCloud\StatelessMedia {
                         defined('WP_SMUSH_ASYNC') && WP_SMUSH_ASYNC
                     )
                 ) {
-                    return ud_get_stateless_media()->add_media($metadata, $attachment_id);
+                    return false;
                 }
-                return $metadata;
+                return true;
             }
 
             /**
