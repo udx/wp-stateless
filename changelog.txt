@@ -1,4 +1,10 @@
 == Changelog ==
+= 2.2.4 =
+* NEW - Added new filter `wp_stateless_skip_add_media`. Allows skipping synchronization of the media object with GCS depending on custom condition. GitHub Issue [#344](https://github.com/wpCloud/wp-stateless/issues/344).
+* FIX - Compatibility Manager is considering Child Themes now. GitHub Issue [#351](https://github.com/wpCloud/wp-stateless/issues/351).
+* FIX - Custom domains handling has been fixed. GitHub Issue [#358](https://github.com/wpCloud/wp-stateless/issues/358).
+* ENHANCEMENT - Imagify Image Optimizer and WP Smush compatibilities improved. GitHub Issue [#359](https://github.com/wpCloud/wp-stateless/issues/359).
+
 = 2.2.3 =
 * FIX - get_post_metadata does not break multi-dimensional arrays anymore. GitHub Issue [#352](https://github.com/wpCloud/wp-stateless/issues/352).
 * FIX - PHP Warning: substr_compare() fixed. GitHub Issue [#350](https://github.com/wpCloud/wp-stateless/issues/350).

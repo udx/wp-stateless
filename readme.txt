@@ -5,8 +5,8 @@ Tags: google, google cloud, google cloud storage, cdn, uploads, media, stateless
 License: GPLv2 or later
 Requires PHP: 5.5
 Requires at least: 4.0
-Tested up to: 5.0
-Stable tag: 2.2.3
+Tested up to: 5.1
+Stable tag: 2.2.4
 
 Upload and serve your WordPress media files from Google Cloud Storage.
 
@@ -104,6 +104,12 @@ To ensure new releases cause as little disruption as possible, we rely on a numb
 * FIX - Proper 'srcset' attribute handling. GitHub Issue [#342](https://github.com/wpCloud/wp-stateless/issues/342).
 
 == Changelog ==
+= 2.2.4 =
+* NEW - Added new filter `wp_stateless_skip_add_media`. Allows skipping synchronization of the media object with GCS depending on custom condition. GitHub Issue [#344](https://github.com/wpCloud/wp-stateless/issues/344).
+* FIX - Compatibility Manager is considering Child Themes now. GitHub Issue [#351](https://github.com/wpCloud/wp-stateless/issues/351).
+* FIX - Custom domains handling has been fixed. GitHub Issue [#358](https://github.com/wpCloud/wp-stateless/issues/358).
+* ENHANCEMENT - Imagify Image Optimizer and WP Smush compatibilities improved. GitHub Issue [#359](https://github.com/wpCloud/wp-stateless/issues/359).
+
 = 2.2.3 =
 * FIX - get_post_metadata does not break multi-dimensional arrays anymore. GitHub Issue [#352](https://github.com/wpCloud/wp-stateless/issues/352).
 * FIX - PHP Warning: substr_compare() fixed. GitHub Issue [#350](https://github.com/wpCloud/wp-stateless/issues/350).
