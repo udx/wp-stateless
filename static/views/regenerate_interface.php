@@ -59,6 +59,11 @@
           <input ng-disabled="isRunning || isLoading" type="radio" name="method" value="continue" ng-model="$parent.method" />
           <?php _e( 'Continue the last process', ud_get_stateless_media()->domain ); ?>
         </label>
+        <input ng-disabled="isRunning || isLoading" type="number" name="startFrom" ng-model="$parent.startFrom" />
+        
+        <span class="notice notice-warning" style="margin-left:20px;">
+            <?php _e( 'Enter attachment ID from which you want to restart the sync process, will also include attachments added after you started the first sync. The sync process start from new attachment to old attachments.', ud_get_stateless_media()->domain ); ?>
+          </span>
       </div>
 
     </div>

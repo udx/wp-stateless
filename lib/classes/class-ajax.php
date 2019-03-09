@@ -332,11 +332,13 @@ namespace wpCloud\StatelessMedia {
         }
 
         $continue = false;
+        $start_from = 0;
         if ( isset( $_REQUEST['continue'] ) ) {
           $continue = (bool) $_REQUEST['continue'];
+          $start_from = isset( $_REQUEST['start_from'] ) ? (int) $_REQUEST['start_from'] : 0;
         }
 
-        return $this->get_non_processed_media_ids( 'images', $images, $continue );
+        return $this->get_non_processed_media_ids( 'images', $images, $continue, $start_from );
       }
 
       /**
@@ -354,11 +356,13 @@ namespace wpCloud\StatelessMedia {
         }
 
         $continue = false;
+        $start_from = 0;
         if ( isset( $_REQUEST['continue'] ) ) {
           $continue = (bool) $_REQUEST['continue'];
+          $start_from = isset( $_REQUEST['start_from'] ) ? (int) $_REQUEST['start_from'] : 0;
         }
 
-        return $this->get_non_processed_media_ids( 'other', $files, $continue );
+        return $this->get_non_processed_media_ids( 'other', $files, $continue, $start_from );
       }
 
       /**
@@ -434,14 +438,19 @@ namespace wpCloud\StatelessMedia {
        * @return array
        * @throws \Exception
        */
-      private function get_non_processed_media_ids( $mode, $files, $continue = false ) {
+      private function get_non_processed_media_ids( $mode, $files, $continue = false, $start_from = 0 ) {
         if(ud_get_stateless_media()->is_connected_to_gs() !== true){
           throw new \Exception( __( 'Not connected to GCS', ud_get_stateless_media()->domain) );
         }
 
         if ( $continue ) {
           $progress = $this->retrieve_current_progress( $mode );
+
           if ( false !== $progress ) {
+            if($start_from && $start_from != 0){
+              // adding 1 because we subtracted 1 in js code for presentation.
+              $progress[1] = $start_from + 1;
+            }
             $ids = array();
             foreach ( $files as $file ) {
               $id = (int) $file->ID;

@@ -139,6 +139,16 @@ var wpStatelessApp = angular.module('wpStatelessApp', [])
         if ( typeof data.data !== 'undefined' ) {
           $scope.progresses.images = data.data.images;
           $scope.progresses.other = data.data.other;
+          $scope.startFrom = null;
+          if($scope.action == 'regenerate_images' && typeof $scope.progresses.images[1]  == "number"){
+            // Subtracting 1 so user get where from the sync will start instead of where it ended. We will add 1 in class-ajax.php.
+            $scope.startFrom = $scope.progresses.images[1] - 1;
+          }
+          else if($scope.action == 'sync_non_images' && typeof $scope.progresses.other[1]  == "number"){
+            // Subtracting 1 so user get where from the sync will start instead of where it ended. We will add 1 in class-ajax.php.
+            $scope.startFrom = $scope.progresses.other[1] - 1;
+          }
+
           if ( 'function' === typeof callback ) {
             callback();
           }
@@ -351,6 +361,7 @@ var wpStatelessApp = angular.module('wpStatelessApp', [])
       url: ajaxurl,
       params: {
         action: 'get_images_media_ids',
+        start_from: $scope.startFrom,
         continue: cont
       }
     }).then(function(response){
@@ -404,6 +415,7 @@ var wpStatelessApp = angular.module('wpStatelessApp', [])
       url: ajaxurl,
       params: {
         action: 'get_other_media_ids',
+        start_from: $scope.startFrom,
         continue: cont
       }
     }).then(function(response){
