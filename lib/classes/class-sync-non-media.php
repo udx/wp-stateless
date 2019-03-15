@@ -74,8 +74,6 @@ namespace wpCloud\StatelessMedia {
                     return false;
                 }
 
-                // add file_path to the file list.
-                $this->queue_add_file($name, 'synced');
                 $file_type = wp_check_filetype($absolutePath);
                 if(empty($this->client)){
                     $this->client = ud_get_stateless_media()->get_client();
@@ -123,6 +121,8 @@ namespace wpCloud\StatelessMedia {
                     if($args['stateless'] == true && ud_get_stateless_media()->get( 'sm.mode' ) === 'stateless'){
                         unlink($absolutePath);
                     }
+                    // add file_path to the file list.
+                    $this->queue_add_file($name, 'synced');
                     return $media;
                 }
 

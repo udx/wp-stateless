@@ -101,6 +101,11 @@ namespace wpCloud\StatelessMedia {
              * Support for BuddyPress
              */
             new BuddyPress();
+            
+            /**
+             * LiteSpeed Cache
+             */
+            new LSCacheWP();
         }
 
         /**
