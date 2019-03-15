@@ -180,7 +180,7 @@
                                         </label>
                                     </p>
                                     <p class="description">
-                                    <strong ng-bind="sm.showNotice('custom_domain')" ></strong> <br>
+                                    <strong ng-bind="sm.showNotice('custom_domain')" ></strong>
                                     <strong class="notice" ng-show="sm.is_ssl"><?php printf(__( 'This will require proxy/load balancer.', ud_get_stateless_media()->domain )); ?></strong>
                                     <?php printf(__( 'Replace the default GCS domain with your own custom domain. This will require you to <a href="%s" target="_blank">configure a CNAME</a>. Be advised that the bucket name and domain name must match exactly, and HTTPS is not supported with a custom domain out of the box.', ud_get_stateless_media()->domain ), 'https://cloud.google.com/storage/docs/xml-api/reference-uris#cname'); ?>
                                     </p>
