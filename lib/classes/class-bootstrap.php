@@ -611,7 +611,8 @@ namespace wpCloud\StatelessMedia {
         $root_dir = $this->get( 'sm.root_dir' );
         $root_dir = trim( $root_dir, '/ ' ); // Remove any forward slash and empty space.
 
-        if ( !empty( $root_dir ) ) {
+        // skip adding root dir if it's already added.
+        if ( !empty( $root_dir ) && strpos($current_path, $root_dir) !== 0 ) {
           return $root_dir . '/' . $current_path;
         }
 

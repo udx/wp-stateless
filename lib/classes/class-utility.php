@@ -188,7 +188,7 @@ namespace wpCloud\StatelessMedia {
          * Returning a non-null value
          * will effectively short-circuit the function.
          *
-         * $force and $args params will no be passed on media library uploads.
+         * $force and $args params will no be passed on non media library uploads.
          * This two will be passed on by compatibility.
          * 
          * @since 2.2.4
@@ -196,8 +196,8 @@ namespace wpCloud\StatelessMedia {
          * @param bool              $value          This should return true if want to skip the sync.
          * @param int               $metadata       Metadata for the attachment.
          * @param string            $attachment_id  Attachment ID.
-         * @param bool              $force          Whether to force the sync even the file already exist in GCS.
-         * @param bool              $args           Whether to only sync the full size image.
+         * @param bool              $force          (optional) Whether to force the sync even the file already exist in GCS.
+         * @param bool              $args           (optional) Whether to only sync the full size image.
          */
         $check = apply_filters('wp_stateless_skip_add_media', null, $metadata, $attachment_id, $force, $args);
 
@@ -350,6 +350,21 @@ namespace wpCloud\StatelessMedia {
           if($args['no_thumb'] == true){
             $stateless_synced_full_size = $attachment_id;
           }
+
+          /**
+          * Triggers when the media and it's childs are synced.
+          *
+          * $force and $args params will no be passed on non media library uploads.
+          * This two will be passed on by compatibility.
+          * 
+          * @since 2.2.5
+          *
+          * @param int               $metadata       Metadata for the attachment.
+          * @param string            $attachment_id  Attachment ID.
+          * @param bool              $force          (optional) Whether to force the sync even the file already exist in GCS.
+          * @param bool              $args           (optional) Whether to only sync the full size image.
+          */
+          do_action( 'wp_stateless_media_synced', $metadata, $attachment_id, $force, $args);
         }
 
         return $metadata;

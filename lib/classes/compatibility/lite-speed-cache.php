@@ -27,6 +27,7 @@ namespace wpCloud\StatelessMedia {
                 // Sync image.
                 add_action( 'litespeed_img_pull_ori', array($this, 'sync_image'), 10, 2 );
                 add_action( 'litespeed_img_pull_webp', array($this, 'sync_image'), 10, 2 );
+                add_action( 'wp_stateless_media_synced', array($this, 'sync_attachment'), 10, 4 );
 
                 // override is_internal_file check.
                 add_filter( 'litespeed_media_check_ori', array($this, 'litespeed_media_check_img'), 10, 2 );
@@ -39,7 +40,46 @@ namespace wpCloud\StatelessMedia {
              * 
              */
             public function sync_image($row_img, $local_file){
+                add_filter( 'upload_mimes', array($this, 'add_webp_mime'), 10, 2 );
                 do_action( 'sm:sync::syncFile', $row_img->src . '.webp', $local_file, true);
+
+            }
+            
+            /**
+             * Sync the image when Lite Speed plugin pull the optimized image.
+             * We need to overwrite the existing image.
+             * 
+             */
+            public function sync_attachment($metadata, $attachment_id, $force = false, $args = array()){
+                add_filter( 'upload_mimes', array($this, 'add_webp_mime'), 10, 2 );
+                $args = wp_parse_args($args, array(
+                    'no_thumb' => false,
+                ));
+
+                $upload_dir = wp_upload_dir();
+                $fullsizepath = wp_normalize_path( get_attached_file( $attachment_id ) );
+                $gs_name = str_replace( wp_normalize_path(trailingslashit( $upload_dir[ 'basedir' ] )), '', wp_normalize_path($fullsizepath) );
+                do_action( 'sm:sync::syncFile', $gs_name . '.webp', $fullsizepath . '.webp', true);
+
+                
+                $mediaPath = trim( dirname( $gs_name ), '\/\\' );
+
+                /**
+                 * @see https://github.com/wpCloud/wp-stateless/issues/343
+                 **/
+                $mediaPath = $mediaPath === '.' ? '' : $mediaPath;
+                
+                /* Now we go through all available image sizes and upload them to Google Storage */
+                if( !empty( $metadata[ 'sizes' ] ) && is_array( $metadata[ 'sizes' ] ) && $args['no_thumb'] != true ) {
+                    $path = wp_normalize_path( dirname( get_attached_file( $attachment_id ) ) );
+
+                    foreach( (array) $metadata[ 'sizes' ] as $image_size => $data ) {
+                        $fullsizepath = wp_normalize_path( $path . '/' . $data[ 'file' ] );
+                        $gs_name = trim($mediaPath . '/' . $data[ 'file' ], '/');
+                        do_action( 'sm:sync::syncFile', $gs_name . '.webp', $fullsizepath . '.webp', true);
+                    }
+                }
+
 
             }
 
@@ -56,6 +96,15 @@ namespace wpCloud\StatelessMedia {
                     return true;
                 }
                 return $return;
+            }
+
+            /**
+             * add_webp_mime
+             * 
+             */
+            public function add_webp_mime($t, $user){
+                $t['webp'] = 'image/webp';
+                return $t;
             }
 
         }
