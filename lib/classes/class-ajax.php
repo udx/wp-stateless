@@ -58,6 +58,7 @@ namespace wpCloud\StatelessMedia {
        * @author peshkov@UD
        */
       public function request() {
+        global $doing_manual_sync;
 
         $response = array(
           'message' => '',
@@ -65,6 +66,7 @@ namespace wpCloud\StatelessMedia {
         );
 
         try{
+          $doing_manual_sync = true;
 
           $action = $_REQUEST[ 'action' ];
 

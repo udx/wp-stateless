@@ -22,7 +22,7 @@ namespace wpCloud\StatelessMedia {
 
             public function module_init($sm){
                 // Skip sync on upload when attachment is image, sync will be handled after image is optimized.
-                add_filter( 'wp_stateless_skip_add_media', array( $this, 'skip_add_media' ), 10, 4 );
+                add_filter( 'wp_stateless_skip_add_media', array( $this, 'skip_add_media' ), 10, 5 );
                 add_filter( 'before_imagify_optimize_attachment', array($this, 'fix_missing_file'), 10);
                 add_action( 'after_imagify_optimize_attachment', array($this, 'after_imagify_optimize_attachment'), 10 );
 
@@ -50,10 +50,14 @@ namespace wpCloud\StatelessMedia {
              * 
              */
             public function skip_add_media($return, $metadata, $attachment_id, $force = false, $args = array()) {
+                global $doing_manual_sync;
+                $args = wp_parse_args($args, array(
+                    'no_thumb' => false,
+                  ));
+
+                if($force || $doing_manual_sync || !get_imagify_option( 'auto_optimize' ) || $args['no_thumb'] == true ) return false;
+
                 $imagify = new \Imagify_Attachment($attachment_id);
-
-                if($force || !get_imagify_option( 'auto_optimize' )) return false;
-
                 if ( is_callable( array( $imagify, 'is_extension_supported' ) ) ) {
                     if ( ! $imagify->is_extension_supported() ) {
                         return false;
