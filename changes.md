@@ -1,3 +1,8 @@
+#### 2.2.5 ####
+* NEW - Added ability to start sync process from specific Attachment ID. GitHub Issue [#360](https://github.com/wpCloud/wp-stateless/issues/360).
+* COMPATIBILITY - Added compatibility support for LiteSpeed Cache plugin. Especially to support optimized .webp images. GitHub Issue [#357](https://github.com/wpCloud/wp-stateless/issues/357).
+* FIX - Other minor fixes.
+
 #### 2.2.4 ####
 * NEW - Added new filter `wp_stateless_skip_add_media`. Allows skipping synchronization of the media object with GCS depending on custom condition. GitHub Issue [#344](https://github.com/wpCloud/wp-stateless/issues/344).
 * FIX - Compatibility Manager is considering Child Themes now. GitHub Issue [#351](https://github.com/wpCloud/wp-stateless/issues/351).

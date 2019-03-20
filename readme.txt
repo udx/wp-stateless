@@ -6,7 +6,7 @@ License: GPLv2 or later
 Requires PHP: 5.5
 Requires at least: 4.0
 Tested up to: 5.1
-Stable tag: 2.2.4
+Stable tag: 2.2.5
 
 Upload and serve your WordPress media files from Google Cloud Storage.
 
@@ -104,6 +104,11 @@ To ensure new releases cause as little disruption as possible, we rely on a numb
 * FIX - Proper 'srcset' attribute handling. GitHub Issue [#342](https://github.com/wpCloud/wp-stateless/issues/342).
 
 == Changelog ==
+= 2.2.5 =
+* NEW - Added ability to start sync process from specific Attachment ID. GitHub Issue [#360](https://github.com/wpCloud/wp-stateless/issues/360).
+* COMPATIBILITY - Added compatibility support for LiteSpeed Cache plugin. Especially to support optimized .webp images. GitHub Issue [#357](https://github.com/wpCloud/wp-stateless/issues/357).
+* FIX - Other minor fixes.
+
 = 2.2.4 =
 * NEW - Added new filter `wp_stateless_skip_add_media`. Allows skipping synchronization of the media object with GCS depending on custom condition. GitHub Issue [#344](https://github.com/wpCloud/wp-stateless/issues/344).
 * FIX - Compatibility Manager is considering Child Themes now. GitHub Issue [#351](https://github.com/wpCloud/wp-stateless/issues/351).
