@@ -26,7 +26,7 @@ namespace UsabilityDynamics\WP {
        * @property $errors
        * @type array
        */
-      private $errors = array();
+      protected $errors = array();
       
       /**
        * Messages
@@ -36,7 +36,7 @@ namespace UsabilityDynamics\WP {
        * @property $messages
        * @type array
        */
-      private $messages = array();
+      protected $messages = array();
 
       /**
        * Warnings
@@ -46,7 +46,7 @@ namespace UsabilityDynamics\WP {
        * @property $messages
        * @type array
        */
-      private $warnings = array();
+      protected $warnings = array();
       
       /**
        * Action Links in Footer
@@ -56,14 +56,14 @@ namespace UsabilityDynamics\WP {
        * @property $messages
        * @type array
        */
-      private $action_links = array();
+      protected $action_links = array();
 
       /**
        * Dismiss action link is available or not.
        *
        * @var bool
        */
-      private $dismiss = true;
+      protected $dismiss = true;
       
       /**
        *

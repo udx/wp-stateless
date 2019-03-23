@@ -23,7 +23,7 @@ namespace wpCloud\StatelessMedia {
                 $modules = get_option('stateless-modules', array());
 
                 if (empty($modules[$this->id])) {
-                    // Lagecy settings
+                    // Legacy settings
                     $this->enabled = get_option('sm_on_fly', false);
                 }
 

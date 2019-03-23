@@ -80,7 +80,7 @@ namespace wpCloud\StatelessMedia {
             /**
              * Support for WPForms
              */
-            new CompatibilityWooExtraPorductOptions();
+            new CompatibilityWooExtraProductOptions();
             
             /**
              * Support for Elementor
@@ -101,6 +101,11 @@ namespace wpCloud\StatelessMedia {
              * Support for BuddyPress
              */
             new BuddyPress();
+            
+            /**
+             * LiteSpeed Cache
+             */
+            new LSCacheWP();
         }
 
         /**
@@ -108,11 +113,15 @@ namespace wpCloud\StatelessMedia {
          * Called from ICompatibility::init() method.
          */
         public static function register_module($args){
+            if(empty($args['id'])){
+                return;
+            }
             if (is_bool($args['enabled'])) {
                 $args['enabled'] = $args['enabled'] ? 'true' : 'false';
             }
-            self::$modules[] = wp_parse_args( $args, array(
+            self::$modules[$args['id']] = wp_parse_args( $args, array(
                 'id'                => '',
+                'self'              => '',
                 'title'             => '',
                 'enabled'           => false,
                 'description'       => '',
@@ -131,6 +140,17 @@ namespace wpCloud\StatelessMedia {
         }
 
         /**
+         * Return all the registered modules.
+         * Used in admin_init in bootstrap class as localize_script.
+         */
+        public static function get_module($id){
+            if(!empty(self::$modules[$id])){
+                return self::$modules[$id];
+            }
+            return false;
+        }
+
+        /**
          * Handles saving module data.
          * Enable or disable modules from Compatibility tab.
          */
@@ -140,7 +160,7 @@ namespace wpCloud\StatelessMedia {
                 $modules = apply_filters('stateless::modules::save', $modules);
                 
                 if(is_network_admin()){
-                    update_site_option('stateless-modules', $modules, true);
+                    update_site_option('stateless-modules', $modules);
                 }
                 else{
                     update_option('stateless-modules', $modules, true);

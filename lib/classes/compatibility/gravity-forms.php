@@ -43,6 +43,11 @@ namespace wpCloud\StatelessMedia {
              */
             public function gform_save_field_value( $value, $lead, $field, $form, $input_id ) {
                 if(empty($value)) return $value;
+
+            	if ( empty($this->plugin_version) && class_exists('GFForms') ) {
+            		$this->plugin_version = \GFForms::$version;
+                }
+                
                 $type = \GFFormsModel::get_input_type($field);
                 if($type == 'fileupload'){
                     $dir = wp_upload_dir();
@@ -115,6 +120,10 @@ namespace wpCloud\StatelessMedia {
                 $position = strpos($file_path, 'gravity_forms/');
                 $is_index = strpos($file_path, 'index.html');
                 $is_htaccess = strpos($file_path, '.htaccess');
+                
+            	if ( empty($this->plugin_version) && class_exists('GFForms') ) {
+            		$this->plugin_version = \GFForms::$version;
+                }
 
                 $gf_val_column = 'meta_value';
                 $gf_table = \GFFormsModel::get_entry_meta_table_name();

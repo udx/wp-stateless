@@ -256,17 +256,17 @@
     width: 60px;
     height:60px;
 }
-.wpStateLess-userinfo .wpStateLess-user-detais {
+.wpStateLess-userinfo .wpStateLess-user-details {
     padding-left: 20px;
 }
-.wpStateLess-user-detais p.user-email {
+.wpStateLess-user-details p.user-email {
     color: #a9a9a9;
     font-family: "Helvetica Neue";
     font-size: 14px;
     font-weight: 400;
 }
 
-.wpStateLess-userinfo .wpStateLess-user-detais a.logout {
+.wpStateLess-userinfo .wpStateLess-user-details a.logout {
     display: inline-block;
     margin-left: 10px;
     border-radius: 30px;
@@ -278,7 +278,7 @@
     font-style: italic;
     line-height: 1.1;
 }
-.wpStateLess-userinfo .wpStateLess-user-detais > * {
+.wpStateLess-userinfo .wpStateLess-user-details > * {
     margin-bottom: 0px;
     margin-top: 0px;
 }
@@ -619,14 +619,14 @@
     .wpStateLess-userinfo img {
         float: none;
     }
-    .wpStateLess-userinfo .wpStateLess-user-detais {
+    .wpStateLess-userinfo .wpStateLess-user-details {
         padding-left: 0px;
     }
-    .wpStateLess-userinfo .wpStateLess-user-detais .user-name{
+    .wpStateLess-userinfo .wpStateLess-user-details .user-name{
         display: block;
         padding-bottom: 7px;
     }
-    .wpStateLess-userinfo .wpStateLess-user-detais a.logout {
+    .wpStateLess-userinfo .wpStateLess-user-details a.logout {
         margin-left: 0px;
     }
 

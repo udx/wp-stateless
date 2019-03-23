@@ -25,10 +25,8 @@ namespace wpCloud\StatelessMedia {
                 // Useful in Stateless mode
                 add_action( 'smush_file_exists', array( $this, 'maybe_download_file' ), 10, 3 );
 
-                // We need to remove the regular handler for sync 
-                // unless in stateless mode we would remove the attachment before it's get optimized.
-                remove_filter( 'wp_update_attachment_metadata', array( "wpCloud\StatelessMedia\Utility", 'add_media' ), 999 );
-                add_filter( 'wp_update_attachment_metadata', array( $this, 'add_media_wrapper' ), 999, 2 );
+                // Skip sync when attachment is image, sync will be handled after image is optimized.
+                add_filter( 'wp_stateless_skip_add_media', array( $this, 'skip_add_media' ), 10, 5 );
 
                 add_filter('delete_attachment', array($this, 'remove_backup'));
                 add_filter( 'smush_backup_exists', array( $this, 'backup_exists_on_gcs' ), 10, 3 );
@@ -36,29 +34,46 @@ namespace wpCloud\StatelessMedia {
             }
 
             /**
-             * Replacement for default wp_update_attachment_metadata filter of bootstrap class.
-             * To avoid sync same image twice, once on upload and again after optimization.
-             * We also avoid downloading image before optimization on stateless mode.
+             * Whether to skip the sync on image upload before the image is optimized.
+             * The sync is skipped if the image is compatible with Smush.
+             * 
+             * The image will be synced after it's get optimized using the 'wp_smush_image_optimised' action.
+             * 
+             *
+             * @param bool   $return         This should return true if want to skip the sync.
+             * @param int    $metadata       Metadata for the attachment.
+             * @param string $attachment_id  Attachment ID.
+             * @param bool   $force          Whether to force the sync even the file already exist in GCS.
+             * @param bool   $args           Whether to only sync the full size image.
+             * 
+             * @return bool  $return         True to skip the sync and false to do the sync.
+             * 
              */
-            public function add_media_wrapper($metadata, $attachment_id){
-            	if ( class_exists( 'WP_Smush_Modules' ) ) {
-		            $auto_smush = \WP_Smush::get_instance()->core()->mod->settings->get( 'auto' );
-	            } else {
-		            global $wpsmush_settings;
-		            $auto_smush = $wpsmush_settings->settings['auto'];
-	            }
+            public function skip_add_media($return, $metadata, $attachment_id, $force = false, $args = array()) {
+                $args = wp_parse_args($args, array(
+                    'no_thumb' => false,
+                  ));
 
-                if( !$auto_smush || !wp_attachment_is_image( $attachment_id ) ||
-                    !apply_filters( 'wp_smush_image', true, $attachment_id ) || 
-                    !(
-                        (( ! empty( $_POST['action'] ) && 'upload-attachment' == $_POST['action'] ) || isset( $_POST['post_id'] )) &&
-                        // And, check if Async is enabled.
-                        defined( 'WP_SMUSH_ASYNC' ) && WP_SMUSH_ASYNC
-                    )
-                ){
-                    return ud_get_stateless_media()->add_media( $metadata, $attachment_id );
+                if($force || $doing_manual_sync || $args['no_thumb'] == true) return false;
+
+                if (class_exists('WP_Smush_Modules')) {
+                    $auto_smush = \WP_Smush::get_instance()->core()->mod->settings->get('auto');
+                } else {
+                    global $wpsmush_settings;
+                    $auto_smush = $wpsmush_settings->settings['auto'];
                 }
-                return $metadata;
+
+                if (!$auto_smush || !wp_attachment_is_image($attachment_id) ||
+                    !apply_filters('wp_smush_image', true, $attachment_id) ||
+                    !(
+                        ((!empty($_POST['action']) && 'upload-attachment' == $_POST['action']) || isset($_POST['post_id'])) &&
+                        // And, check if Async is enabled.
+                        defined('WP_SMUSH_ASYNC') && WP_SMUSH_ASYNC
+                    )
+                ) {
+                    return false;
+                }
+                return true;
             }
 
             /**
@@ -116,12 +131,12 @@ namespace wpCloud\StatelessMedia {
                 $upload_dir = wp_get_upload_dir();
                 $metadata = wp_get_attachment_metadata( $attachment_id );
                 $backup_paths = get_post_meta( $attachment_id, '_wp_attachment_backup_sizes', true );
-                // Getting local dir path for backup image
-                $base_dir = $upload_dir['basedir'] . '/' . dirname( $metadata['file'] );
-                // Getting GCS dir name from meta data. In case Bucket Folder used.
-                $gs_dir = dirname($metadata['gs_name']);
 
                 if(!empty($metadata['gs_name']) && !empty($backup_paths) && is_array($backup_paths)){
+                    // Getting local dir path for backup image
+                    $base_dir = $upload_dir['basedir'] . '/' . dirname( $metadata['file'] );
+                    // Getting GCS dir name from meta data. In case Bucket Folder used.
+                    $gs_dir = dirname($metadata['gs_name']);
                     foreach ($backup_paths as $key => $data) {
                         $gs_name = $gs_dir . '/' . basename($data['file']);
                         // Path of backup image
@@ -197,7 +212,7 @@ namespace wpCloud\StatelessMedia {
              */
             private function hook_from_restore_image() {
                 $call_stack = debug_backtrace();
-				$class_name = class_exists( 'WpSmushBackup' ) ? 'WpSmushBackup' : 'WP_Smush_Backup';
+                $class_name = class_exists( 'WpSmushBackup' ) ? 'WpSmushBackup' : 'WP_Smush_Backup';
 
                 if ( !empty( $call_stack ) && is_array( $call_stack ) ) {
                     foreach( $call_stack as $step ) {

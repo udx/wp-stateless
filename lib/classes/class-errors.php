@@ -86,7 +86,7 @@ namespace wpCloud\StatelessMedia {
         parent::__construct( $args );
         add_action( 'admin_notices', array( $this, 'admin_notices' ) );
         add_action( 'wp_ajax_stateless_notice_dismiss', array( $this, 'dismiss_notices' ) );
-        add_action( 'wp_ajax_stateless_notice_button_action', array( $this, 'stateless_notice_button_action' ) );
+        add_action( 'wp_ajax_stateless_enable_notice_button_action', array( $this, 'stateless_enable_notice_button_action' ) );
       }
       
       /**
@@ -241,12 +241,13 @@ namespace wpCloud\StatelessMedia {
         );
         $error = false;
 
-        if( empty($_POST['key']) ) {
+        if( empty($_POST['key']) && strpos($_POST['key'], 'dismissed_notice_') !== false ) {
           $response['error'] = __( 'Invalid key', $this->domain );
           $error = true;
         }
-
-        if ( ! $error && update_option( ( $_POST['key'] ), time() ) ) {
+        else {
+          $option_key = sanitize_key($_POST['key']);
+          update_option( $option_key, time() );
           $response['success'] = '1';
           $response['error'] = null;
         }
@@ -255,10 +256,10 @@ namespace wpCloud\StatelessMedia {
       }
 
       /**
-       * Action for the stateless_notice_button_action ajax callback
+       * Action for the stateless_enable_notice_button_action ajax callback
        * @throws \Exception
        */
-      public function stateless_notice_button_action(){
+      public function stateless_enable_notice_button_action(){
         $response = array(
           'success' => '1',
         );
@@ -268,9 +269,13 @@ namespace wpCloud\StatelessMedia {
           $response['success'] = '0';
           $response['error'] = __( 'Invalid key', $this->domain );
         }
+        else{
+          $compatibility = Module::get_module($_POST['key']);
+          if(!empty($compatibility['self']) && is_callable(array($compatibility['self'], 'enable_compatibility'))){
+            $response['success'] = $compatibility['self']->enable_compatibility();
+          }
+        }
         
-        do_action($_POST['key']);
-
         wp_send_json( $response );
       }
 

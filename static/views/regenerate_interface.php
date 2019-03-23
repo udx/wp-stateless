@@ -61,6 +61,19 @@
         </label>
       </div>
 
+      <div class="start-form" ng-if="method == 'continue'">
+        <h3>
+          <?php _e( 'Start sync from', ud_get_stateless_media()->domain ); ?>
+        </h3>
+        <div>
+          <input ng-disabled="isRunning || isLoading" type="number" name="startFrom" ng-model="$parent.startFrom" />
+          <br />
+          <p class="description" style="margin-top: 11px;">
+              <?php _e( 'Enter attachment ID from which you want to restart the sync process, will also include attachments added after you started the first sync. The sync process start from new attachment to old attachments.', ud_get_stateless_media()->domain ); ?>
+          </p>
+        </div>
+      </div>
+
     </div>
 
     <div ng-if="(action == 'regenerate_images' && fails.images) || (action == 'sync_non_images' && fails.other)">

@@ -22,7 +22,7 @@ namespace wpCloud\StatelessMedia {
 
       private $settings = array(
           'mode'                   => array('WP_STATELESS_MEDIA_MODE', 'cdn'), 
-          'body_rewrite'           => array('WP_STATELESS_MEDIA_BODY_REWRITE', 'true'),
+          'body_rewrite'           => array('WP_STATELESS_MEDIA_BODY_REWRITE', 'false'),
           'body_rewrite_types'     => array('WP_STATELESS_MEDIA_BODY_REWRITE_TYPES', 'jpg jpeg png gif pdf'), 
           'bucket'                 => array('WP_STATELESS_MEDIA_BUCKET', ''), 
           'root_dir'               => array('WP_STATELESS_MEDIA_ROOT_DIR', ''), 
@@ -35,8 +35,8 @@ namespace wpCloud\StatelessMedia {
         );
 
       private $network_only_settings = array(
-          'hide_settings_panel'   => array('WP_STATELESS_MEDIA_HIDE_SETTINGS_PANEL', 'false'), 
-          'hide_setup_assistant'  => array('WP_STATELESS_MEDIA_HIDE_SETUP_ASSISTANT', 'false'), 
+          'hide_settings_panel'   => array('WP_STATELESS_MEDIA_HIDE_SETTINGS_PANEL', false), 
+          'hide_setup_assistant'  => array('WP_STATELESS_MEDIA_HIDE_SETUP_ASSISTANT', false), 
         );
 
       private $strings = array(
@@ -46,7 +46,7 @@ namespace wpCloud\StatelessMedia {
         );
 
       /**
-       * Overriden construct
+       * Overridden construct
        */
       public function __construct() {
 
@@ -153,7 +153,7 @@ namespace wpCloud\StatelessMedia {
 
           }
           
-          // Converting to string true flase for angular.
+          // Converting to string true false for angular.
           if(is_bool($value)){
             $value = $value === true ? "true" : "false";
           }
@@ -345,6 +345,9 @@ namespace wpCloud\StatelessMedia {
               $option = 'uploads_use_yearmonth_folders';
             }
 
+            // Be sure to cleanup values before saving
+            $value = trim($value);
+
             if(is_network_admin()){
               update_site_option( $option, $value );
             }
@@ -365,13 +368,7 @@ namespace wpCloud\StatelessMedia {
        * @return \UsabilityDynamics\Settings
        */
       public function set( $key = '', $value = false, $bypass_validation = false ) {
-
-        //if (  $value !== false ) {
-        //  update_option( str_replace( '.', '_', $key ), $value );
-        //}
-
         return parent::set( $key, $value, $bypass_validation );
-
       }
 
     }

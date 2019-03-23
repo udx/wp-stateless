@@ -83,14 +83,16 @@
                                             <?php if(is_network_admin()): ?>
                                             <option value=""><?php _e("Don't override");?></option>
                                             <?php endif; ?>
-                                            <option value="true"><?php _e( 'Enable', ud_get_stateless_media()->domain ); ?></option>
                                             <option value="false"><?php _e( 'Disable', ud_get_stateless_media()->domain ); ?></option>
+                                            <option value="enable_editor"><?php _e( 'Enable Editor', ud_get_stateless_media()->domain ); ?></option>
+                                            <option value="enable_meta"><?php _e( 'Enable Meta', ud_get_stateless_media()->domain ); ?></option>
+                                            <option value="true"><?php _e( 'Enable Editor & Meta', ud_get_stateless_media()->domain ); ?></option>
                                         </select>
                                     </p>
-                                    <p class="description"><strong ng-bind="sm.showNotice('body_rewrite')" ></strong> <?php _e( 'Scans post content and meta during presentation and replaces local media file urls with GCS urls. This setting does not modify your database.', ud_get_stateless_media()->domain ); ?></p>
+                                    <p class="description"><strong ng-bind="sm.showNotice('body_rewrite')" ></strong> <?php _e( 'Scans post content and meta during presentation and replaces local media file urls with GCS urls. When selecting meta or true depending on the amount of meta, this could be significantly impact performance negatively. This setting does not modify your database.', ud_get_stateless_media()->domain ); ?></p>
 
-                                    <h4 ng-show="sm.body_rewrite == 'true'"><?php _e( 'Supported File Types', ud_get_stateless_media()->domain ); ?></h4>
-                                    <div ng-show="sm.body_rewrite == 'true'" class="body_rewrite_types">
+                                    <h4 ng-show="sm.body_rewrite == 'true' || sm.body_rewrite == 'enable_editor' || sm.body_rewrite == 'enable_meta'"><?php _e( 'Supported File Types', ud_get_stateless_media()->domain ); ?></h4>
+                                    <div ng-show="sm.body_rewrite == 'true' || sm.body_rewrite == 'enable_editor' || sm.body_rewrite == 'enable_meta'" class="body_rewrite_types">
                                         <p>
                                             <label for="body_rewrite_types">
                                                 <input name="sm[body_rewrite_types]" type="text" id="body_rewrite_types" class="regular-text ltr" ng-model="sm.body_rewrite_types" ng-disabled="sm.readonly.body_rewrite_types">
@@ -178,8 +180,8 @@
                                         </label>
                                     </p>
                                     <p class="description">
-                                    <strong ng-bind="sm.showNotice('custom_domain')" ></strong> <br>
-                                    <strong class="notice" ng-show="sm.is_custom_domain"><?php printf(__( 'This will require proxy/load balancer.', ud_get_stateless_media()->domain )); ?></strong>
+                                    <strong ng-bind="sm.showNotice('custom_domain')" ></strong>
+                                    <strong class="notice" ng-show="sm.is_ssl"><?php printf(__( 'This will require proxy/load balancer.', ud_get_stateless_media()->domain )); ?></strong>
                                     <?php printf(__( 'Replace the default GCS domain with your own custom domain. This will require you to <a href="%s" target="_blank">configure a CNAME</a>. Be advised that the bucket name and domain name must match exactly, and HTTPS is not supported with a custom domain out of the box.', ud_get_stateless_media()->domain ), 'https://cloud.google.com/storage/docs/xml-api/reference-uris#cname'); ?>
                                     </p>
                                     <hr>

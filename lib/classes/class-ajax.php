@@ -58,6 +58,7 @@ namespace wpCloud\StatelessMedia {
        * @author peshkov@UD
        */
       public function request() {
+        global $doing_manual_sync;
 
         $response = array(
           'message' => '',
@@ -65,6 +66,7 @@ namespace wpCloud\StatelessMedia {
         );
 
         try{
+          $doing_manual_sync = true;
 
           $action = $_REQUEST[ 'action' ];
 
@@ -120,14 +122,13 @@ namespace wpCloud\StatelessMedia {
        * Fail over to image URL if not found on disk
        * In case image not available on both local and bucket
        * try to pull image from image URL in case it is accessible by some sort of proxy.
-       * 
+       *
        * @param:
        * $url (int/string): URL of the image.
        * $save_to (string): Path where to save the image.
-       * 
-       * @return:
-       * boolean (true/false)
-       * 
+       *
+       * @return bool|int
+       * @throws \Exception
        */
       public function get_attachment_if_exist($url, $save_to){
         if(is_int($url))
@@ -141,7 +142,7 @@ namespace wpCloud\StatelessMedia {
                 return file_put_contents($save_to, $response['body']);
               }
             }
-            catch(Exception $e){
+            catch(\Exception $e){
               throw $e;
             }
           }
@@ -268,10 +269,6 @@ namespace wpCloud\StatelessMedia {
               $this->store_failed_attachment( $file->ID, 'other' );
               throw new \Exception($metadata->get_error_message());
             }
-            // if ( empty( $metadata ) ) {
-            //   $this->store_failed_attachment( $file->ID, 'other' );
-            // throw new \Exception(sprintf( __('No metadata generated for %1$s (ID %2$s).', ud_get_stateless_media()->domain), esc_html( get_the_title( $image->ID ) ), $image->ID));
-            // }
 
             wp_update_attachment_metadata( $file->ID, $metadata );
             do_action( 'sm:synced::nonImage', $id, $metadata);
@@ -337,11 +334,13 @@ namespace wpCloud\StatelessMedia {
         }
 
         $continue = false;
+        $start_from = 0;
         if ( isset( $_REQUEST['continue'] ) ) {
           $continue = (bool) $_REQUEST['continue'];
+          $start_from = isset( $_REQUEST['start_from'] ) ? (int) $_REQUEST['start_from'] : 0;
         }
 
-        return $this->get_non_processed_media_ids( 'images', $images, $continue );
+        return $this->get_non_processed_media_ids( 'images', $images, $continue, $start_from );
       }
 
       /**
@@ -359,16 +358,18 @@ namespace wpCloud\StatelessMedia {
         }
 
         $continue = false;
+        $start_from = 0;
         if ( isset( $_REQUEST['continue'] ) ) {
           $continue = (bool) $_REQUEST['continue'];
+          $start_from = isset( $_REQUEST['start_from'] ) ? (int) $_REQUEST['start_from'] : 0;
         }
 
-        return $this->get_non_processed_media_ids( 'other', $files, $continue );
+        return $this->get_non_processed_media_ids( 'other', $files, $continue, $start_from );
       }
 
       /**
        * Returns IDs of non media library files
-       * Return files to be manualy sync from sync tab.
+       * Return files to be manually sync from sync tab.
        */
       public function action_get_non_library_files_id() {
         if(ud_get_stateless_media()->is_connected_to_gs() !== true){
@@ -379,7 +380,7 @@ namespace wpCloud\StatelessMedia {
         if(empty($files)){
           throw new \Exception( __('', ud_get_stateless_media()->domain) );
         }
-        return array_unique($files);
+        return array_values(array_unique($files));
       }
 
       /**
@@ -403,7 +404,10 @@ namespace wpCloud\StatelessMedia {
       }
 
       /**
+       * Get_fails
+       *
        * @param $mode
+       * @return mixed|void
        */
       private function get_fails( $mode ) {
         if ( $mode !== 'other' ) {
@@ -428,19 +432,27 @@ namespace wpCloud\StatelessMedia {
       }
 
       /**
+       * Get_non_processed_media_ids
+       *
        * @param $mode
        * @param $files
        * @param bool $continue
        * @return array
+       * @throws \Exception
        */
-      private function get_non_processed_media_ids( $mode, $files, $continue = false ) {
+      private function get_non_processed_media_ids( $mode, $files, $continue = false, $start_from = 0 ) {
         if(ud_get_stateless_media()->is_connected_to_gs() !== true){
           throw new \Exception( __( 'Not connected to GCS', ud_get_stateless_media()->domain) );
         }
 
         if ( $continue ) {
           $progress = $this->retrieve_current_progress( $mode );
+
           if ( false !== $progress ) {
+            if($start_from && $start_from != 0){
+              // adding 1 because we subtracted 1 in js code for presentation.
+              $progress[1] = $start_from + 1;
+            }
             $ids = array();
             foreach ( $files as $file ) {
               $id = (int) $file->ID;

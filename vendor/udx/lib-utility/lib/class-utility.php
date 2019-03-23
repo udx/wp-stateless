@@ -28,7 +28,7 @@ namespace UsabilityDynamics {
        * @property $version
        * @type string
        */
-      public static $version = '0.3.7';
+      public static $version = '0.4.0';
 
       /**
        * Textdomain String
@@ -293,11 +293,12 @@ namespace UsabilityDynamics {
       /**
        * Parses Query.
        * HACK. The current logic solves the issue of max_input_vars in the case if query is huge.
-       * 
+       *
        * @see parse_str() Default PHP function
-       * @param mixed $request
        * @version 1.1
        * @author peshkov@UD
+       * @param $request
+       * @return array|mixed
        */
       static public function parse_str( $request ) {
         $data = array();
@@ -306,7 +307,9 @@ namespace UsabilityDynamics {
           $token = str_replace( '%2B', md5( '%2B' ), $token );
           $arr = array();
           parse_str( $token, $arr );
-          array_walk_recursive( $arr, create_function( '&$value,$key', '$value = str_replace( md5( "%2B" ), "+", $value );' ) );
+          array_walk_recursive( $arr, function( &$value,$key ) {
+            $value = str_replace( md5( "%2B" ), "+", $value );
+          });
           $data = self::extend( $data, $arr );
         }
         return $data;
@@ -1882,7 +1885,6 @@ namespace UsabilityDynamics {
        */
       static public function extend() {
 
-        //$arrays = array_reverse( func_get_args() );
         $arrays = func_get_args();
         $base   = array_shift( $arrays );
         if( !is_array( $base ) ) $base = empty( $base ) ? array() : array( $base );
@@ -1893,8 +1895,15 @@ namespace UsabilityDynamics {
               $base[ $key ] = $append[ $key ];
               continue;
             }
-            if( @is_array( $value ) or @is_array( $base[ $key ] ) ) {
-              $base[ $key ] = self::extend( $base[ $key ], $append[ $key ] );
+            if( ( isset( $value ) && @is_array( $value ) ) || ( isset( $base[ $key ] ) && @is_array( $base[ $key ] ) ) ) {
+              
+              // extend if exists, otherwise create.
+              if( isset( $base[ $key ] ) ) {
+                $base[ $key ] = self::extend( $base[ $key ], $append[ $key ] );
+              } else {
+                $base[ $key ] = $append[ $key ];
+              }            
+              
             } else if( is_numeric( $key ) ) {
               if( !in_array( $value, $base ) ) $base[ ] = $value;
             } else {
@@ -2009,7 +2018,9 @@ namespace UsabilityDynamics {
 
           return false;
         }
-        add_action( 'admin_menu', create_function( '', "add_menu_page( __( 'Log' ,UD_API_Transdomain ), __( 'Log',UD_API_Transdomain ), current_user_can( 'manage_options' ), 'ud_log', array( 'UD_API', 'show_log_page' ) );" ) );
+        add_action( 'admin_menu', function() {
+          add_menu_page( __( 'Log', UD_API_Transdomain ), __( 'Log', UD_API_Transdomain ), current_user_can( 'manage_options' ), 'ud_log', array( 'UD_API', 'show_log_page' ) );
+        });
       }
 
       /**
@@ -2078,7 +2089,9 @@ namespace UsabilityDynamics {
       static public function replace_data( $str = '', $values = array(), $brackets = array( 'left' => '[', 'right' => ']' ) ) {
         $values       = (array) $values;
         $replacements = array_keys( $values );
-        array_walk( $replacements, create_function( '&$val', '$val = "' . $brackets[ 'left' ] . '".$val."' . $brackets[ 'right' ] . '";' ) );
+        array_walk( $replacements, function(&$val) use ($brackets){
+          $val = $brackets[ 'left' ] . $val . $brackets[ 'right' ];
+        } );
 
         return str_replace( $replacements, array_values( $values ), $str );
       }
@@ -2383,7 +2396,9 @@ namespace UsabilityDynamics {
        * @author odokienko@UD
        */
       static public function cleanup_extra_whitespace( $content ) {
-        $content = preg_replace_callback( '~<(?:table|ul|ol )[^>]*>.*?<\/( ?:table|ul|ol )>~ims', create_function( '$matches', 'return preg_replace(\'~>[\s]+<((?:t[rdh]|li|\/tr|/table|/ul ))~ims\',\'><$1\',$matches[0]);' ), $content );
+        $content = preg_replace_callback( '~<(?:table|ul|ol )[^>]*>.*?<\/( ?:table|ul|ol )>~ims', function($matches){
+          return preg_replace('~>[\s]+<((?:t[rdh]|li|\/tr|/table|/ul ))~ims', '><$1', $matches[0]);
+        }, $content );
 
         return $content;
       }
@@ -2477,7 +2492,9 @@ namespace UsabilityDynamics {
        *
        * Usage:
        *
-       * add_filter( 'ud::schema::localization', create_function( '$locals', 'return array_merge( array( 'value_for_translating' => __( 'Blah Blah' ) ), $locals )') );
+       * add_filter( 'ud::schema::localization', function($locals){
+       *    return array_merge( array( 'value_for_translating' => __( 'Blah Blah' ) ), $locals );
+       * });
        *
        * $result = self::l10n_localize (array(
        *  'key' => 'l10n.value_for_translating'
@@ -2507,7 +2524,7 @@ namespace UsabilityDynamics {
               preg_match_all( '/l10n\.([^\s]*)/', $v, $matches );
               if ( !empty( $matches[ 1 ] ) ) {
                 foreach ( $matches[ 1 ] as $i => $m ) {
-                  if ( key_exists( $m, $l10n ) ) {
+                  if ( array_key_exists( $m, $l10n ) ) {
                     $data[ $k ] = str_replace( $matches[ 0 ][ $i ], $l10n[ $m ], $data[ $k ] );
                   }
                 }
@@ -2529,7 +2546,10 @@ namespace UsabilityDynamics {
        */
       static public function json_encode( $arr ) {
         // convmap since 0x80 char codes so it takes all multibyte codes (above ASCII 127). So such characters are being "hidden" from normal json_encoding
-        array_walk_recursive( $arr, create_function( '&$item, $key', 'if (is_string($item)) $item = mb_encode_numericentity($item, array (0x80, 0xffff, 0, 0xffff), "UTF-8");' ) );
+        array_walk_recursive( $arr,  function(&$item, $key){
+          if (is_string($item)) 
+            $item = mb_encode_numericentity($item, array (0x80, 0xffff, 0, 0xffff), "UTF-8");
+        });
         return mb_decode_numericentity( json_encode( $arr ), array( 0x80, 0xffff, 0, 0xffff ), 'UTF-8' );
       }
       

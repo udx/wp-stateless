@@ -6,6 +6,7 @@
  * Compatibility Description: Enables support for these Imagify Image Optimizer features: 
  * auto-optimize images on upload, bulk optimizer, resize larger images, optimization levels (normal, aggressive, ultra).
  *
+ * https://github.com/wpCloud/wp-stateless/issues/206
  */
 
 namespace wpCloud\StatelessMedia {
@@ -20,12 +21,8 @@ namespace wpCloud\StatelessMedia {
             protected $plugin_file = 'imagify/imagify.php';
 
             public function module_init($sm){
-                // We need to remove the regular handler for sync 
-                // unless in stateless mode we would remove the attachment before it's get optimized.
-                remove_filter( 'wp_update_attachment_metadata', array( "wpCloud\StatelessMedia\Utility", 'add_media' ), 999 );
-                // @todo add media button returns local url.
-                add_filter( 'wp_update_attachment_metadata', array( $this, 'add_media_wrapper' ), 999, 2 );
-
+                // Skip sync on upload when attachment is image, sync will be handled after image is optimized.
+                add_filter( 'wp_stateless_skip_add_media', array( $this, 'skip_add_media' ), 10, 5 );
                 add_filter( 'before_imagify_optimize_attachment', array($this, 'fix_missing_file'), 10);
                 add_action( 'after_imagify_optimize_attachment', array($this, 'after_imagify_optimize_attachment'), 10 );
 
@@ -37,28 +34,44 @@ namespace wpCloud\StatelessMedia {
             }
 
             /**
-             * @todo
-             * Replacement for default wp_update_attachment_metadata filter of bootstrap class.
-             * To avoid sync same image twice, once on upload and again after optimization.
-             * We also avoid downloading image before optimization on stateless mode.
+             * Whether to skip the sync on image upload before the image is optimized.
+             * The sync is skipped if the image is compatible with Smush.
+             * 
+             * The image will be synced after it's get optimized using the 'wp_smush_image_optimised' action.
+             * 
+             *
+             * @param bool   $return         This should return true if want to skip the sync.
+             * @param int    $metadata       Metadata for the attachment.
+             * @param string $attachment_id  Attachment ID.
+             * @param bool   $force          Whether to force the sync even the file already exist in GCS.
+             * @param bool   $args           Whether to only sync the full size image.
+             * 
+             * @return bool  $return         True to skip the sync and false to do the sync.
+             * 
              */
-            public function add_media_wrapper($metadata, $attachment_id){
-                $imagify = new \Imagify_Attachment($attachment_id);
+            public function skip_add_media($return, $metadata, $attachment_id, $force = false, $args = array()) {
+                global $doing_manual_sync;
+                $args = wp_parse_args($args, array(
+                    'no_thumb' => false,
+                  ));
 
+                if($force || $doing_manual_sync || !get_imagify_option( 'auto_optimize' ) || $args['no_thumb'] == true ) return false;
+
+                $imagify = new \Imagify_Attachment($attachment_id);
                 if ( is_callable( array( $imagify, 'is_extension_supported' ) ) ) {
                     if ( ! $imagify->is_extension_supported() ) {
-                        return ud_get_stateless_media()->add_media( $metadata, $attachment_id );
+                        return false;
                     }
                 } elseif ( function_exists( 'imagify_is_attachment_mime_type_supported' ) ) {
                     // Use `imagify_is_attachment_mime_type_supported( $attachment_id )`.
                     if ( ! imagify_is_attachment_mime_type_supported( $attachment_id ) ) {
-                        return ud_get_stateless_media()->add_media( $metadata, $attachment_id );
+                        return false;
                     }
                 } elseif(!wp_attachment_is_image($attachment_id)){
-                    return ud_get_stateless_media()->add_media( $metadata, $attachment_id );
+                    return false;
                 }
 
-                return $metadata;
+                return true;
             }
 
             /**

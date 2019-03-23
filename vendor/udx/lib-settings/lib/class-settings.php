@@ -23,7 +23,7 @@ namespace UsabilityDynamics {
        * @property $version
        * @type {Object}
        */
-      static public $version = '0.2.2';
+      static public $version = '0.3.0';
 
       /**
        * Prefix for option keys to unique
