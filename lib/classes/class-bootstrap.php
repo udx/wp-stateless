@@ -905,6 +905,7 @@ namespace wpCloud\StatelessMedia {
             break;
 
           case 'media_page_stateless-setup':
+          case 'settings_page_stateless-setup':
             wp_enqueue_style( 'wp-stateless');
             wp_enqueue_style( 'wp-stateless-bootstrap' );
             wp_enqueue_style( 'wp-stateless-setup-wizard' );
@@ -918,6 +919,7 @@ namespace wpCloud\StatelessMedia {
             wp_enqueue_script( 'wp-stateless-setup-wizard-js' );
             break;
           case 'media_page_stateless-settings':
+          case 'settings_page_stateless-settings':
             wp_enqueue_style( 'wp-stateless');
             wp_enqueue_script( 'wp-stateless-settings' );
             wp_enqueue_style( 'bootstrap-grid-v4' );
@@ -940,6 +942,7 @@ namespace wpCloud\StatelessMedia {
             echo "<script id='template-stateless-cache-busting' type='text/html'>";
             include ud_get_stateless_media()->path( '/static/views/error-notice.php', 'dir' );
             echo "</script>";
+            break;
           default: break;
         }
 
