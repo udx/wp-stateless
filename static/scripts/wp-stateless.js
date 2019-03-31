@@ -794,6 +794,9 @@ var wpStatelessApp = angular.module('wpStatelessApp', [])
 })
 .controller('wpStatelessCompatibility', function($scope, $filter) {
   $scope.modules = wp_stateless_compatibility || {};
+})
+.controller('noJSWarning', function($scope, $filter) {
+  $scope.jsLoaded = true;
 });
 
 wpStatelessApp.filter("trust", ['$sce', function($sce) {

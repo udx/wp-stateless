@@ -2,6 +2,7 @@
     <div id="stateless-settings-page-title">
         <h1><?php _e( 'WP-Stateless', ud_get_stateless_media()->domain ); ?></h1>
         <div class="description"><?php _e( 'Upload and serve your WordPress media files from Google Cloud Storage.', ud_get_stateless_media()->domain ); ?></div>
+        <div class="no-js-error" ng-hide="jsLoaded" ng-controller="noJSWarning">You have a problem with JS.</div>
     </div>
     <h2 class="nav-tab-wrapper">  
         <a href="#stless_settings_tab" class="stless_setting_tab nav-tab  nav-tab-active"><?php _e( 'Settings', ud_get_stateless_media()->domain ); ?></a>  
@@ -200,9 +201,9 @@
                                     <p class="description">
                                     <?php printf(__( 'Organize uploads into year and month based folders. This will update the <a href="%s">related WordPress media setting</a>.', ud_get_stateless_media()->domain ), admin_url("options-media.php")); ?>
                                     </p>
+                                    <hr>
                                     <?php endif; ?>    
 
-                                    <hr>
                                     <h4><?php _e( 'Cache-Busting', ud_get_stateless_media()->domain ); ?></h4>
                                     <p>
                                         <select id="cache_busting" name="sm[hashify_file_name]" ng-model="sm.hashify_file_name" ng-change="sm.generatePreviewUrl()" ng-disabled="sm.readonly.hashify_file_name || sm.mode == 'stateless'">
