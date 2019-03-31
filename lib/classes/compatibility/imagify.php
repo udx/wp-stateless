@@ -57,6 +57,16 @@ namespace wpCloud\StatelessMedia {
 
                 if($force || $doing_manual_sync || !get_imagify_option( 'auto_optimize' ) || $args['no_thumb'] == true ) return false;
 
+                if(defined('WP_STATELESS_MEDIA_DISABLE_SKIP_ADD_MEDIA')){
+                    // broken into two condition so that if the constant is defined false the else if condition don't get evaluated.
+                    if(WP_STATELESS_MEDIA_DISABLE_SKIP_ADD_MEDIA == true){
+                        return false;
+                    }
+                }
+                else if(strpos($_SERVER['HTTP_REFERER'], 'wp-admin/post.php') !== false || strpos($_SERVER['HTTP_REFERER'], 'wp-admin/post-new.php') !== false){
+                    return false;
+                }
+
                 $imagify = new \Imagify_Attachment($attachment_id);
                 if ( is_callable( array( $imagify, 'is_extension_supported' ) ) ) {
                     if ( ! $imagify->is_extension_supported() ) {
