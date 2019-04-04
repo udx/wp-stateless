@@ -294,6 +294,7 @@ namespace wpCloud\StatelessMedia {
        */
       public function remove_media( $name ) {
         try {
+          $name = apply_filters( 'wp_stateless_file_name', $name );
           $this->service->objects->delete( $this->bucket, $name );
         } catch( Exception $e ) {
           return new WP_Error( 'sm_error', $e->getMessage() );

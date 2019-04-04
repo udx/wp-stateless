@@ -33,11 +33,14 @@ namespace wpCloud\StatelessMedia {
             public function action_admin_menu() {
                 if ( current_user_can('edit_theme_options') && isset( $_POST['siteorigin_custom_css_save'] ) ) {
                     try{
-                        $object_list = ud_get_stateless_media()->get_client()->list_objects("prefix=so-css");
-                        $files_array = $object_list->getItems();
-                        foreach ($files_array as $file) {
-                            do_action( 'sm:sync::deleteFile', $file->name );
-                        }
+                        $prefix = apply_filters('wp_stateless_file_name', 'so-css');
+                        do_action( 'sm:sync::deleteFiles', $prefix );
+                        // die();
+                        // $object_list = ud_get_stateless_media()->get_client()->list_objects("prefix=$prefix");
+                        // $files_array = $object_list->getItems();
+                        // foreach ($files_array as $file) {
+                        //     do_action( 'sm:sync::deleteFile', $file->name );
+                        // }
                     }
                     catch(Exception $e){}
                 }
@@ -54,8 +57,11 @@ namespace wpCloud\StatelessMedia {
                 if( $position !== false ){
                     $upload_data = wp_upload_dir();
                     $name = substr($url, $position);
+                    // We need to get the absolute path before adding the bucket dir to name.
                     $absolutePath = $upload_data['basedir'] . '/' .  $name;
+                    $name = apply_filters('wp_stateless_file_name', $name);
                     do_action( 'sm:sync::syncFile', $name, $absolutePath);
+                    // echo "do_action( 'sm:sync::syncFile', $name, $absolutePath);\n";
                     $url = ud_get_stateless_media()->get_gs_host() . '/' . $name;
                 }
                 return $url;
