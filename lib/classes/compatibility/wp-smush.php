@@ -56,16 +56,6 @@ namespace wpCloud\StatelessMedia {
 
                 if($force || $doing_manual_sync || $args['no_thumb'] == true) return false;
 
-                if(defined('WP_STATELESS_MEDIA_DISABLE_SKIP_ADD_MEDIA')){
-                    // broken into two condition so that if the constant is defined false the else if condition don't get evaluated.
-                    if(WP_STATELESS_MEDIA_DISABLE_SKIP_ADD_MEDIA == true){
-                        return false;
-                    }
-                }
-                else if(strpos($_SERVER['HTTP_REFERER'], 'wp-admin/post.php') !== false || strpos($_SERVER['HTTP_REFERER'], 'wp-admin/post-new.php') !== false){
-                    return false;
-                }
-
                 if (class_exists('WP_Smush_Modules')) {
                     $auto_smush = \WP_Smush::get_instance()->core()->mod->settings->get('auto');
                 } else {
