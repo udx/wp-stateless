@@ -88,8 +88,10 @@ namespace wpCloud\StatelessMedia {
              * @return mixed
              */
             public function upload_dir( $data ) {
-                $data[ 'basedir' ] = ud_get_stateless_media()->get_gs_host();
-                $data[ 'baseurl' ] = ud_get_stateless_media()->get_gs_host();
+                $root_dir = ud_get_stateless_media()->get( 'sm.root_dir' );
+                $root_dir = trim( $root_dir, '/ ' ); // Remove any forward slash and empty space.
+                $data[ 'basedir' ] = ud_get_stateless_media()->get_gs_host() . '/' . $root_dir;
+                $data[ 'baseurl' ] = ud_get_stateless_media()->get_gs_host() . '/' . $root_dir;
                 $data[ 'url' ] = $data[ 'baseurl' ] . $data[ 'subdir' ];
                 return $data;
             }

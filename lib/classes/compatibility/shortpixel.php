@@ -249,6 +249,7 @@ namespace wpCloud\StatelessMedia {
                     );
 
                     if(file_exists($fullsizepath)){
+                        $file = apply_filters( 'wp_stateless_file_name', $file);
 
                         /* Add default image */
                         $media = $client->add_media( $_mediaOptions = array_filter( array(
@@ -271,7 +272,7 @@ namespace wpCloud\StatelessMedia {
                     if( !empty( $metadata[ 'sizes' ] ) && is_array( $metadata[ 'sizes' ] ) ) {
 
                         $path = wp_normalize_path( dirname( get_attached_file( $attachment_id ) ) );
-                        $mediaPath = wp_normalize_path( trim( dirname( $metadata[ 'file' ] ), '\/\\' ) );
+                        $mediaPath = apply_filters( 'wp_stateless_file_name', trim( dirname( $metadata[ 'file' ] ), '\/\\' ) );
 
                         foreach( (array) $metadata[ 'sizes' ] as $image_size => $data ) {
 

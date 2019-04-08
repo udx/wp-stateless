@@ -59,6 +59,7 @@ namespace wpCloud\StatelessMedia {
                 $upload_dir = wp_upload_dir();
                 $fullsizepath = wp_normalize_path( get_attached_file( $attachment_id ) );
                 $gs_name = str_replace( wp_normalize_path(trailingslashit( $upload_dir[ 'basedir' ] )), '', wp_normalize_path($fullsizepath) );
+                $gs_name = apply_filters( 'wp_stateless_file_name', $gs_name);
                 do_action( 'sm:sync::syncFile', $gs_name . '.webp', $fullsizepath . '.webp', true);
 
                 

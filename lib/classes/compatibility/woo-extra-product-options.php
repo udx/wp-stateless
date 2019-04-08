@@ -42,6 +42,7 @@ namespace wpCloud\StatelessMedia {
                 $upload_dir = wp_upload_dir();
 
                 $file_path = str_replace(trailingslashit($upload_dir[ 'basedir' ]), '', $file);
+                $file_path = apply_filters('wp_stateless_file_name', $file_path);
                 $file_info = @getimagesize($file);
 
                 if ($file_info) {

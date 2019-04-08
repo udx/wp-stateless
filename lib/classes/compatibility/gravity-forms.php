@@ -66,6 +66,7 @@ namespace wpCloud\StatelessMedia {
                         if( $position !== false ){
                             $name = substr($v, $position);
                             $absolutePath = $dir['basedir'] . '/' .  $name;
+                            $name = apply_filters( 'wp_stateless_file_name', $name);
                             // doing sync
                             do_action( 'sm:sync::syncFile', $name, $absolutePath);
                             $value[$k] = ud_get_stateless_media()->get_gs_host() . '/' . $name;
@@ -95,7 +96,9 @@ namespace wpCloud\StatelessMedia {
                         $name = rgar( $arr_name, 0 ); // Removed |:| from end of the url.
 
                         // doing sync
-                        do_action( 'sm:sync::syncFile', $name, $dir['basedir'] . '/' .  $name);
+                        $absolutePath = $dir['basedir'] . '/' .  $name;
+                        $name = apply_filters( 'wp_stateless_file_name', $name);
+                        do_action( 'sm:sync::syncFile', $name, $absolutePath);
 
                         $value = ud_get_stateless_media()->get_gs_host() . '/' . $_name;
                         // Todo add filter.
@@ -120,6 +123,7 @@ namespace wpCloud\StatelessMedia {
                 $position = strpos($file_path, 'gravity_forms/');
                 $is_index = strpos($file_path, 'index.html');
                 $is_htaccess = strpos($file_path, '.htaccess');
+                $root_dir = ud_get_stateless_media()->get( 'sm.root_dir' );
                 
             	if ( empty($this->plugin_version) && class_exists('GFForms') ) {
             		$this->plugin_version = \GFForms::$version;
@@ -162,7 +166,7 @@ namespace wpCloud\StatelessMedia {
 							foreach( $value  as $k => $v ){
 								 $position = strpos($v, $dir['baseurl']);
 								 if($position !== false){
-								  	$value[$k] = str_replace($dir['baseurl'], ud_get_stateless_media()->get_gs_host(), $v );
+								  	$value[$k] = str_replace($dir['baseurl'], ud_get_stateless_media()->get_gs_host() . '/' . $root_dir, $v );
 								 }
 							}
 
@@ -170,7 +174,7 @@ namespace wpCloud\StatelessMedia {
                         }
                         else{
 							$position = strpos($result->value, $dir['baseurl']);
-							$result->value = str_replace($dir['baseurl'], ud_get_stateless_media()->get_gs_host(), $result->value);
+							$result->value = str_replace($dir['baseurl'], ud_get_stateless_media()->get_gs_host() . '/' . $root_dir, $result->value);
 						}
 
                         if($position !== false){
@@ -224,6 +228,7 @@ namespace wpCloud\StatelessMedia {
                 if($is_stateless !== false){
                     $gs_name = substr($file_path, strpos($file_path, '/gravity_forms/'));
                     $file_path = $dir['basedir'] . $gs_name;
+                    $gs_name = apply_filters( 'wp_stateless_file_name', $gs_name);
 
                     $client = ud_get_stateless_media()->get_client();
                     if( !is_wp_error( $client ) ) {
