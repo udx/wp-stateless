@@ -1,4 +1,9 @@
 == Changelog ==
+= 2.2.6 =
+* FIX - Multisite Network Settings page fixed. GitHub Issue [#369](https://github.com/wpCloud/wp-stateless/issues/369).
+* FIX - Fixed incorrect Compatibilities behavior when Bucket Folder is set. GitHub Issue [#368](https://github.com/wpCloud/wp-stateless/issues/368).
+* FIX - Other minor fixes.
+
 = 2.2.5 =
 * NEW - Added ability to start sync process from specific Attachment ID. GitHub Issue [#360](https://github.com/wpCloud/wp-stateless/issues/360).
 * COMPATIBILITY - Added compatibility support for LiteSpeed Cache plugin. Especially to support optimized .webp images. GitHub Issue [#357](https://github.com/wpCloud/wp-stateless/issues/357).
