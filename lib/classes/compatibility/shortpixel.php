@@ -5,6 +5,8 @@
  *
  * Compatibility Description: Ensures compatibility with ShortPixel Image Optimizer.
  *
+ * @todo Use backup version of image on Regenerate and Sync with GCS.
+ * @todo Test for CDN mode also, currently optimized for Stateless Mode.
  */
 
 namespace wpCloud\StatelessMedia {
@@ -21,8 +23,15 @@ namespace wpCloud\StatelessMedia {
 
             public function module_init($sm){
                 add_action( 'shortpixel_image_optimised', array($this, 'shortpixel_image_optimised') );
-                add_filter( 'get_attached_file', array($this, 'fix_missing_file'), 10, 2 );
-                add_action( 'shortpixel_before_restore_image', array($this, 'sync_backup_file') );
+                add_filter( 'shortpixel_image_exists', array($this, 'shortpixel_image_exists'), 10, 4 );
+                add_filter( 'shortpixel_skip_backup', array($this, 'shortpixel_skip_backup'), 10, 3 );
+                add_filter( 'wp_update_attachment_metadata', array( $this, 'wp_update_attachment_metadata' ), 10, 2 );
+                add_filter( 'shortpixel_skip_delete_backups_and_webps', array( $this, 'shortpixel_skip_delete_backups_and_webps' ), 10, 2 );
+                add_filter( 'shortpixel_backup_folder', array( $this, 'getBackupFolderAny' ), 10, 3 );
+
+                // add_filter( 'get_attached_file', array($this, 'fix_missing_file'), 10, 2 );
+                // add_action( 'shortpixel_start_image_optimisation', array($this, 'fix_missing_file') );
+                add_action( 'shortpixel_before_restore_image', array($this, 'shortpixel_before_restore_image') );
                 add_action( 'shortpixel_after_restore_image', array($this, 'handleRestoreBackup') );
                 add_action( 'admin_enqueue_scripts', array( $this, 'shortPixelJS') );
                 // Sync from sync tab
@@ -49,6 +58,82 @@ namespace wpCloud\StatelessMedia {
 
             }
 
+            public function getBackupFolderAny( $ret, $file, $thumbs ) {
+                if($ret == false){
+                    $fullSubDir = $this->returnSubDir($file);
+                    $ret = SHORTPIXEL_BACKUP_FOLDER . '/' . $fullSubDir;
+                    
+                }
+                return $ret;
+            }
+
+
+            public function shortpixel_image_exists( $return, $path, $id = null ) {
+
+                if($return == false && !empty($id)){
+                    $metadata = wp_get_attachment_metadata($id);
+                    $basename = basename($path);
+                    if(!empty($metadata['gs_name'])){
+                        $gs_basename = basename($metadata['gs_name']);
+                        if($gs_basename == $basename){
+                            return true;
+                        }
+
+                        if(is_array($metadata['sizes'])){
+                            foreach ($metadata['sizes'] as $key => &$data) {
+                                if(empty($metadata['gs_name'])) continue;
+                                $gs_basename = basename($data['gs_name']);
+                                if($gs_basename == $basename){
+                                    return true;
+                                }
+                            }
+                        }
+                    }
+                }
+                else if($return == false && empty($id)){
+                    $wp_uploads_dir = wp_get_upload_dir();
+                    $gs_name = str_replace(trailingslashit($wp_uploads_dir['basedir']), '', $path);
+                    $gs_name = str_replace(trailingslashit($wp_uploads_dir['baseurl']), '', $gs_name);
+                    $gs_name = apply_filters( 'wp_stateless_file_name', $gs_name);
+                    if ( $media = ud_get_stateless_media()->get_client()->media_exists( $gs_name ) ) {
+                        return true;
+                    }
+                    
+                }
+
+                return $return;
+            }
+
+            public function shortpixel_skip_delete_backups_and_webps($return, $paths){
+                if(empty($paths) || !is_array($paths)) return $return;
+
+                $sp__uploads = wp_upload_dir();
+                $fullSubDir = $this->returnSubDir($paths[0]);
+                $backup_path = SHORTPIXEL_BACKUP_FOLDER . '/' . $fullSubDir;
+
+                foreach ($paths as $key => $path) {
+                    $name = str_replace($sp__uploads['basedir'], '', $path);
+                    $name = apply_filters( 'wp_stateless_file_name',  SHORTPIXEL_BACKUP . '/' . $fullSubDir . basename($path));
+                    do_action( 'sm:sync::deleteFile', $name);
+
+                }
+                
+                return true;
+            }
+
+            public function shortpixel_skip_backup( $return, $mainPath, $PATHs ){
+                return true;
+            }
+            /**
+             * 
+             */
+            public function wp_update_attachment_metadata( $metadata, $attachment_id ){
+                $backup_images = \WPShortPixelSettings::getOpt('wp-short-backup_images');
+                if($backup_images){
+                    $this->sync_backup_file($attachment_id, $metadata, true);
+                }
+                return $metadata;
+            }
 
             /**
              * Try to restore images before compression
@@ -57,12 +142,7 @@ namespace wpCloud\StatelessMedia {
              * @param $attachment_id
              * @return mixed
              */
-            public function fix_missing_file( $file, $attachment_id ) {
-
-                /**
-                 * If hook is triggered by ShortPixel
-                 */
-                if ( !$this->hook_from_shortpixel() ) return $file;
+            public function fix_missing_file( $attachment_id ) {
 
                 /**
                  * If mode is stateless then we change it to cdn in order images not being deleted before optimization
@@ -75,18 +155,22 @@ namespace wpCloud\StatelessMedia {
                 }
 
                 $upload_dir = wp_upload_dir();
+                $file = get_attached_file($attachment_id);
                 $meta_data = wp_get_attachment_metadata( $attachment_id );
 
                 /**
                  * Try to get all missing files from GCS
                  */
                 if ( !file_exists( $file ) ) {
-                    ud_get_stateless_media()->get_client()->get_media( apply_filters( 'wp_stateless_file_name', str_replace( trailingslashit( $upload_dir[ 'basedir' ] ), '', $file )), true, $file );
+                    $gs_name = str_replace( trailingslashit( $upload_dir[ 'basedir' ] ), '', $file );
+                    $gs_name = apply_filters( 'wp_stateless_file_name', $gs_name);
+                    ud_get_stateless_media()->get_client()->get_media( $gs_name, true, $file );
                 }
 
                 if ( !empty( $meta_data['sizes'] ) && is_array( $meta_data['sizes'] ) ) {
                     foreach( $meta_data['sizes'] as $image ) {
-                        if ( !empty( $image['gs_name'] ) && !file_exists( $_file = trailingslashit( $upload_dir[ 'basedir' ] ).$image['gs_name'] ) ) {
+                        $_file = trailingslashit( $upload_dir[ 'basedir' ] ) . trailingslashit(dirname($meta_data['file'])) . $image['file'];
+                        if ( !empty( $image['gs_name'] ) && !file_exists( $_file ) ) {
                             ud_get_stateless_media()->get_client()->get_media( apply_filters( 'wp_stateless_file_name', $image['gs_name']), true, $_file );
                         }
                     }
@@ -135,14 +219,19 @@ namespace wpCloud\StatelessMedia {
 
                 $metadata = wp_get_attachment_metadata( $id );
                 ud_get_stateless_media()->add_media( $metadata, $id, true );
+            }
 
-                $this->sync_backup_file($id, $metadata);
+            /**
+             * 
+             */
+            public function shortpixel_before_restore_image($id, $metadata = null){
+                $this->sync_backup_file($id, $metadata, false, true);
             }
 
             /**
              * Sync backup image
              */
-            public function sync_backup_file($id, $metadata = null){
+            public function sync_backup_file($id, $metadata = null, $before_optimization = false, $force = false){
                 
                 /* Get metadata in case if method is called directly. */
                 if( empty($metadata) ) {
@@ -155,6 +244,10 @@ namespace wpCloud\StatelessMedia {
                     $file_path = get_attached_file( $id );
                     $fullSubDir = $this->returnSubDir($file_path);
                     $backup_path = SHORTPIXEL_BACKUP_FOLDER . '/' . $fullSubDir;
+                    if($before_optimization){
+                        $upload_dir = wp_upload_dir();
+                        $backup_path = $upload_dir['basedir'] . '/' . dirname($metadata[ 'file' ]);
+                    }
 
                     /**
                      * If mode is stateless then we change it to cdn in order images not being deleted before optimization
@@ -166,17 +259,21 @@ namespace wpCloud\StatelessMedia {
                         ud_get_stateless_media()->set( 'sm.mode', 'cdn' );
                         $wp_stateless_shortpixel_mode = 'stateless';
                     }
+
+                    $absolutePath = trailingslashit($backup_path) . basename($metadata[ 'file' ]);
+                    $name = apply_filters( 'wp_stateless_file_name',  SHORTPIXEL_BACKUP . '/' . $fullSubDir . basename($metadata[ 'file' ]));
+                    do_action( 'sm:sync::syncFile', $name, $absolutePath, $force);
+
                     foreach( (array) $metadata[ 'sizes' ] as $image_size => $data ) {
-                        $absolutePath = $backup_path . $data[ 'file' ];
-                        $name = apply_filters( 'wp_stateless_file_name',  basename(SHORTPIXEL_BACKUP_FOLDER) . '/' . $fullSubDir . $data[ 'file' ]);
+                        $absolutePath = trailingslashit($backup_path) . $data[ 'file' ];
+                        $name = apply_filters( 'wp_stateless_file_name',  SHORTPIXEL_BACKUP . '/' . $fullSubDir . $data[ 'file' ]);
                         
-                        do_action( 'sm:sync::syncFile', $name, $absolutePath, true);
+                        do_action( 'sm:sync::syncFile', $name, $absolutePath, $force);
                     }
 
                     if ( $wp_stateless_shortpixel_mode == 'stateless' ) {
                         ud_get_stateless_media()->set( 'sm.mode', 'stateless' );
                     }
-
 
                 }
             }

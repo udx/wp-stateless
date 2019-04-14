@@ -244,8 +244,9 @@ namespace wpCloud\StatelessMedia {
             if ( $this->get( 'sm.delete_remote' ) == 'true' ) {
               /**
                * On physical file deletion we remove any from GS
+               * We need priority grater than default (10) for ShortPixel plugin to work properly.
                */
-              add_filter('delete_attachment', array($this, 'remove_media'));
+              add_filter('delete_attachment', array($this, 'remove_media'), 11);
             }
 
             // Trigger module initialization and registration.
