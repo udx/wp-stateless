@@ -746,7 +746,7 @@ var wpStatelessApp = angular.module('wpStatelessApp', [])
   $scope.sm = wp_stateless_settings || {};
   
   $scope.$watch('sm.mode', function(value) {
-    if(value == 'stateless'){
+    if(value == 'stateless' && $scope.sm.readonly.hashify_file_name != 'constant'){
       $scope.backup.hashify_file_name = $scope.sm.hashify_file_name;
       $scope.sm.hashify_file_name = 'true';
       // $scope.apply();

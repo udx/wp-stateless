@@ -215,7 +215,7 @@
                                         </select>
                                     </p>
                                     <p class="description"><strong ng-bind="sm.showNotice('hashify_file_name')" ></strong> 
-                                    <span ng-show="sm.mode == 'stateless'">
+                                    <span ng-show="sm.mode == 'stateless' && sm.readonly.hashify_file_name != 'constant'">
                                     <?php _e(sprintf( "<b>Required by Stateless Mode. Override with the <a href='%s' target='_blank'>WP_STATELESS_MEDIA_CACHE_BUSTING</a> constant.</b>","https://github.com/wpCloud/wp-stateless/wiki/Constants#wp_stateless_media_cache_busting"), ud_get_stateless_media()->domain);?>
                                     </span>
 
