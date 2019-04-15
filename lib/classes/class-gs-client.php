@@ -268,6 +268,26 @@ namespace wpCloud\StatelessMedia {
       }
 
       /**
+       * get or save media file
+       * @param $path
+       * @param bool $save
+       * @param bool $save_path
+       * @return bool|\Google_Service_Storage_StorageObject|int
+       */
+      public function copy( $path, $new_path ) {
+        try {
+          $media = $this->service->objects->get($this->bucket, $path);
+          $media = $this->service->objects->copy($this->bucket, $path, $this->bucket, $new_path, $media);
+        } catch ( \Exception $e ) {
+          return false;
+        }
+
+        if ( empty( $media->id ) ) return false;
+
+        return $media;
+      }
+
+      /**
        * Check if media exists
        * @param $path
        * @return bool

@@ -68,6 +68,7 @@ namespace wpCloud\StatelessMedia {
             public function sync_file($name, $absolutePath, $forced = false, $args = array()){
                 $args = wp_parse_args($args, array(
                     'stateless' => true, // whether to delete local file in stateless mode.
+                    'download' => false, // whether to only download.
                 ));
                 
                 if($this->queue_is_exists($name, 'synced') && !$forced){
@@ -88,7 +89,7 @@ namespace wpCloud\StatelessMedia {
 
                 do_action( 'sm::pre::sync::nonMediaFiles', $name, $absolutePath); // , $media
 
-                if ( !$local_file_exists && ud_get_stateless_media()->get( 'sm.mode' ) !== 'stateless') {
+                if ( !$local_file_exists && ( ud_get_stateless_media()->get( 'sm.mode' ) !== 'stateless') || $args['download'] ) {
 
                     // Try get it and save
                     $result_code = $this->client->get_media( $name, true, $absolutePath );
@@ -99,7 +100,7 @@ namespace wpCloud\StatelessMedia {
                     }
                 }
 
-                if($local_file_exists && !$file_copied_from_gcs){
+                if($local_file_exists && !$file_copied_from_gcs && !$args['download']){
 
                     $media = $this->client->add_media( array(
                         'name' => $name,

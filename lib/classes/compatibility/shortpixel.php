@@ -8,7 +8,9 @@
  * We don't need to download image to server from GCS to optimize image. As it can directly use GCS URL.
  * 
  * @todo Use backup version of image on Regenerate and Sync with GCS.
- * @todo Test for CDN mode also, currently optimized for Stateless Mode.
+ * @todo Restore image now download from backup dir then upload to regular GCS path again. We need to fix that. 
+ *          https://cloud.google.com/storage/docs/renaming-copying-moving-objects#copy
+ * @todo implement a customized version of ShortPixelMetaFacade::getURLsAndPATHs() function.
  */
 
 namespace wpCloud\StatelessMedia {
@@ -30,12 +32,14 @@ namespace wpCloud\StatelessMedia {
                 add_filter( 'wp_update_attachment_metadata', array( $this, 'wp_update_attachment_metadata' ), 10, 2 );
                 add_filter( 'shortpixel_skip_delete_backups_and_webps', array( $this, 'shortpixel_skip_delete_backups_and_webps' ), 10, 2 );
                 add_filter( 'shortpixel_backup_folder', array( $this, 'getBackupFolderAny' ), 10, 3 );
+                // add_filter( 'shortpixel_skip_restore_image', array( $this, 'shortpixel_skip_restore_image' ), 10, 2 );
 
                 add_action( 'shortpixel_before_restore_image', array($this, 'shortpixel_before_restore_image') );
                 add_action( 'shortpixel_after_restore_image', array($this, 'handleRestoreBackup') );
                 add_action( 'admin_enqueue_scripts', array( $this, 'shortPixelJS') );
                 // Sync from sync tab
                 add_action( 'sm:synced::image', array( $this, 'sync_backup_file'), 10, 2 );
+
             }
 
             public function shortPixelJS(){
@@ -157,7 +161,7 @@ namespace wpCloud\StatelessMedia {
                 if ( ud_get_stateless_media()->get( 'sm.mode' ) == 'stateless' ) {
                     $backup_images = \WPShortPixelSettings::getOpt('wp-short-backup_images');
                     if($backup_images){
-                        $this->sync_backup_file($attachment_id, $metadata, true);
+                        $this->sync_backup_file($attachment_id, $metadata, false, array('before_optimization' => true));
                     }
                 }
                 return $metadata;
@@ -168,20 +172,12 @@ namespace wpCloud\StatelessMedia {
              * 
              */
             public function shortpixel_image_optimised($id){
-
-                /**
-                 * Restore stateless mode if needed
-                 */
-                global $wp_stateless_shortpixel_mode;
-                if ( $wp_stateless_shortpixel_mode == 'stateless' ) {
-                    ud_get_stateless_media()->set( 'sm.mode', 'stateless' );
-                }
-
                 $metadata = wp_get_attachment_metadata( $id );
                 ud_get_stateless_media()->add_media( $metadata, $id, true );
 
-                if ( ud_get_stateless_media()->get( 'sm.mode' ) == 'stateless' ) {
-                    $this->sync_backup_file($attachment_id, $metadata, true);
+                // Don't needed in stateless mode. In stateless mode the back will be sync once on wp_update_attachment_metadata filter.
+                if ( ud_get_stateless_media()->get( 'sm.mode' ) !== 'stateless' ) {
+                    $this->sync_backup_file($id, $metadata, true);
                 }
             }
 
@@ -189,7 +185,19 @@ namespace wpCloud\StatelessMedia {
              * Before shortpixel tries to restore from backup we need to make files available on server.
              */
             public function shortpixel_before_restore_image($id, $metadata = null){
-                $this->sync_backup_file($id, $metadata, false, true);
+                $this->sync_backup_file($id, $metadata, true, array('download' => true));
+            }
+
+            /**
+             * Disable default shortpixel restore and directly update image on GCS from backup copy in GCS.
+             */
+            public function shortpixel_skip_restore_image($return, $id = null){
+                if(ud_get_stateless_media()->get( 'sm.mode' ) === 'stateless'){
+                    $this->client = ud_get_stateless_media()->get_client();
+                    $this->client->copy('localhost/ShortpixelBackups/wp-content/uploads/2019/04/htpps.png', 'localhost/2019/04/htpps.png');
+                    return true;
+                }
+                return $return;
             }
 
             /**
@@ -197,7 +205,11 @@ namespace wpCloud\StatelessMedia {
              * 
              * @param $before_optimization: pass true if you want to sync directly from original path instead of backup path.
              */
-            public function sync_backup_file($id, $metadata = null, $before_optimization = false, $force = false){
+            public function sync_backup_file($id, $metadata = null, $force = false, $args = array()){
+                $args = wp_parse_args($args, array(
+                    'download'              => false, // whether to only download.
+                    'before_optimization'   => false, // whether to delete local file in stateless mode.
+                ));
                 
                 /* Get metadata in case if method is called directly. */
                 if( empty($metadata) ) {
@@ -210,35 +222,21 @@ namespace wpCloud\StatelessMedia {
                     $file_path = get_attached_file( $id );
                     $fullSubDir = $this->returnSubDir($file_path);
                     $backup_path = SHORTPIXEL_BACKUP_FOLDER . '/' . $fullSubDir;
-                    if($before_optimization){
+                    if($args['before_optimization']){
                         $upload_dir = wp_upload_dir();
                         $backup_path = $upload_dir['basedir'] . '/' . dirname($metadata[ 'file' ]);
+                        $args = array( 'stateless' => false );
                     }
-
-                    /**
-                     * If mode is stateless then we change it to cdn in order images not being deleted before optimization
-                     * Remember that we changed mode via global var
-                     */
-                    $wp_stateless_shortpixel_mode;
                     
-                    if ( ud_get_stateless_media()->get( 'sm.mode' ) == 'stateless' ) {
-                        ud_get_stateless_media()->set( 'sm.mode', 'cdn' );
-                        $wp_stateless_shortpixel_mode = 'stateless';
-                    }
-
                     $absolutePath = trailingslashit($backup_path) . basename($metadata[ 'file' ]);
                     $name = apply_filters( 'wp_stateless_file_name',  SHORTPIXEL_BACKUP . '/' . $fullSubDir . basename($metadata[ 'file' ]));
-                    do_action( 'sm:sync::syncFile', $name, $absolutePath, $force);
+                    do_action( 'sm:sync::syncFile', $name, $absolutePath, $force, $args);
 
                     foreach( (array) $metadata[ 'sizes' ] as $image_size => $data ) {
                         $absolutePath = trailingslashit($backup_path) . $data[ 'file' ];
                         $name = apply_filters( 'wp_stateless_file_name',  SHORTPIXEL_BACKUP . '/' . $fullSubDir . $data[ 'file' ]);
                         
-                        do_action( 'sm:sync::syncFile', $name, $absolutePath, $force);
-                    }
-
-                    if ( $wp_stateless_shortpixel_mode == 'stateless' ) {
-                        ud_get_stateless_media()->set( 'sm.mode', 'stateless' );
+                        do_action( 'sm:sync::syncFile', $name, $absolutePath, $force, $args);
                     }
 
                 }
