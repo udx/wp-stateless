@@ -11,6 +11,7 @@
  * @todo Restore image now download from backup dir then upload to regular GCS path again. We need to fix that. 
  *          https://cloud.google.com/storage/docs/renaming-copying-moving-objects#copy
  * @todo implement a customized version of ShortPixelMetaFacade::getURLsAndPATHs() function.
+ * @todo convert GCS URL from http://storage.googleapis.com/udx-ci-develop-alim/ to http://udx-ci-develop-alim.storage.googleapis.com
  */
 
 namespace wpCloud\StatelessMedia {
@@ -27,11 +28,14 @@ namespace wpCloud\StatelessMedia {
 
             public function module_init($sm){
                 add_action( 'shortpixel_image_optimised', array($this, 'shortpixel_image_optimised') );
-                add_filter( 'shortpixel_image_exists', array($this, 'shortpixel_image_exists'), 10, 4 );
+                add_filter( 'shortpixel_image_exists', array($this, 'shortpixel_image_exists'), 10, 3 );
                 add_filter( 'shortpixel_skip_backup', array($this, 'shortpixel_skip_backup'), 10, 3 );
                 add_filter( 'wp_update_attachment_metadata', array( $this, 'wp_update_attachment_metadata' ), 10, 2 );
+                // Remove backup and webp version of image.
                 add_filter( 'shortpixel_skip_delete_backups_and_webps', array( $this, 'shortpixel_skip_delete_backups_and_webps' ), 10, 2 );
                 add_filter( 'shortpixel_backup_folder', array( $this, 'getBackupFolderAny' ), 10, 3 );
+                add_filter( 'wp_stateless_add_media_args', array($this, 'wp_stateless_add_media_args') );
+                add_filter( 'shortpixel_webp_image_base', array($this, 'shortpixel_webp_image_base'), 10, 2 );
                 // add_filter( 'shortpixel_skip_restore_image', array( $this, 'shortpixel_skip_restore_image' ), 10, 2 );
 
                 add_action( 'shortpixel_before_restore_image', array($this, 'shortpixel_before_restore_image') );
@@ -39,6 +43,7 @@ namespace wpCloud\StatelessMedia {
                 add_action( 'admin_enqueue_scripts', array( $this, 'shortPixelJS') );
                 // Sync from sync tab
                 add_action( 'sm:synced::image', array( $this, 'sync_backup_file'), 10, 2 );
+                add_action( 'sm:synced::image', array( $this, 'sync_webp_file'), 10, 2 );
 
             }
 
@@ -108,6 +113,7 @@ namespace wpCloud\StatelessMedia {
                     $wp_uploads_dir = wp_get_upload_dir();
                     $gs_name = str_replace(trailingslashit($wp_uploads_dir['basedir']), '', $path);
                     $gs_name = str_replace(trailingslashit($wp_uploads_dir['baseurl']), '', $gs_name);
+                    $gs_name = str_replace(trailingslashit(ud_get_stateless_media()->get_gs_host()), '', $gs_name);
                     $gs_name = apply_filters( 'wp_stateless_file_name', $gs_name);
                     if ( $media = ud_get_stateless_media()->get_client()->media_exists( $gs_name ) ) {
                         return true;
@@ -131,11 +137,19 @@ namespace wpCloud\StatelessMedia {
                 $backup_path = SHORTPIXEL_BACKUP_FOLDER . '/' . $fullSubDir;
 
                 foreach ($paths as $key => $path) {
-                    $name = str_replace($sp__uploads['basedir'], '', $path);
+                    // Removing backup
                     $name = apply_filters( 'wp_stateless_file_name',  SHORTPIXEL_BACKUP . '/' . $fullSubDir . basename($path));
                     do_action( 'sm:sync::deleteFile', $name);
 
+                    // Removing WebP
+                    $backup_images = \WPShortPixelSettings::getOpt('wp-short-create-webp');
+                    if($backup_images){
+                        $name = str_replace($sp__uploads['basedir'], '', $path);
+                        $name = apply_filters( 'wp_stateless_file_name',  $name . '.webp');
+                        do_action( 'sm:sync::deleteFile', $name);
+                    }
                 }
+
                 if ( ud_get_stateless_media()->get( 'sm.mode' ) == 'stateless' ) {
                     return true;
                 }
@@ -174,7 +188,8 @@ namespace wpCloud\StatelessMedia {
             public function shortpixel_image_optimised($id){
                 $metadata = wp_get_attachment_metadata( $id );
                 ud_get_stateless_media()->add_media( $metadata, $id, true );
-
+                // Sync the webp to GCS
+                ud_get_stateless_media()->add_media( $metadata, $id, true, array('is_webp' => '.webp') );
                 // Don't needed in stateless mode. In stateless mode the back will be sync once on wp_update_attachment_metadata filter.
                 if ( ud_get_stateless_media()->get( 'sm.mode' ) !== 'stateless' ) {
                     $this->sync_backup_file($id, $metadata, true);
@@ -240,6 +255,19 @@ namespace wpCloud\StatelessMedia {
                     }
 
                 }
+            }
+
+            /**
+             * Sync from sync tab
+             * 
+             */
+            public function sync_webp_file($id, $metadata = null){
+                /* Get metadata in case if method is called directly. */
+                if( empty($metadata) ) {
+                    $metadata = wp_get_attachment_metadata( $id );
+                }
+                // Sync the webp to GCS
+                ud_get_stateless_media()->add_media( $metadata, $id, true, array('is_webp' => '.webp') );
             }
 
             /**
@@ -374,6 +402,40 @@ namespace wpCloud\StatelessMedia {
                 }
             }
             // End add_media
+
+            /**
+             * modifying gs_name and absolutePath so that we can upload webp image using the same Utility::add_media function.
+             */
+            public function wp_stateless_add_media_args($args){
+                if(!empty($args['is_webp']) && $args['is_webp']){
+                    if(\file_exists($args['absolutePath'] . '.webp')){
+                        $args['name'] = $args['name'] . '.webp';
+                        $args['absolutePath'] = $args['absolutePath'] . '.webp';
+                    }
+                    else{
+                        $pathinfo = pathinfo($args['absolutePath']);
+                        $absolutePath = trailingslashit($pathinfo['dirname']) . $pathinfo['filename'] . '.webp';
+                        if(file_exists($absolutePath)){
+                            $args['name'] = $args['name'] . '.webp';
+                            $args['absolutePath'] = $absolutePath;
+                        }
+                    }
+                    $args['mimeType'] = 'image/webp';
+                }
+                return $args;
+            }
+            
+            /**
+             * Bypass server url check and return base url for GCS image.
+             */
+            public function shortpixel_webp_image_base($imageBase, $src){
+                $gs_link = \ud_get_stateless_media()->convert_to_gs_link($src, true);
+                if($gs_link){
+                    $imageBase = trailingslashit(dirname($gs_link));
+                }
+                return $imageBase;
+            }
+
         }
 
     }

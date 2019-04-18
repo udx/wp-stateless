@@ -173,13 +173,16 @@ namespace wpCloud\StatelessMedia {
 
           @set_time_limit( -1 );
 
-          extract( $args = wp_parse_args( $args, array(
+          $args = wp_parse_args( $args, array(
             'force' => false,
             'name' => false,
             'absolutePath' => false,
             'mimeType' => 'image/jpeg',
             'metadata' => array(),
-          ) ) );
+            'is_webp' => '',
+          ) );
+          $args = apply_filters('wp_stateless_add_media_args', $args);
+          $name = $args['name'];
 
           /* Be sure file exists. */
           if( !file_exists( $args['absolutePath'] ) ) {

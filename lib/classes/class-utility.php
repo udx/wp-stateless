@@ -175,6 +175,7 @@ namespace wpCloud\StatelessMedia {
         $upload_dir = wp_upload_dir();
         $args = wp_parse_args($args, array(
           'no_thumb' => false,
+          'is_webp' => '', // expected value ".webp";
         ));
 
         /* Get metadata in case if method is called directly. */
@@ -246,6 +247,7 @@ namespace wpCloud\StatelessMedia {
             'cacheControl' => $_cacheControl = self::getCacheControl( $attachment_id, $metadata, null ),
             'contentDisposition' => $_contentDisposition = self::getContentDisposition( $attachment_id, $metadata, null ),
             'mimeType' => get_post_mime_type( $attachment_id ),
+            'is_webp' => $args['is_webp'],
             'metadata' => $_metadata
           ) ));
 
@@ -307,6 +309,7 @@ namespace wpCloud\StatelessMedia {
                 'cacheControl' => $_cacheControl,
                 'contentDisposition' => $_contentDisposition,
                 'mimeType' => $data[ 'mime-type' ],
+                'is_webp' => $args['is_webp'],
                 'metadata' => array_merge( $_metadata, array(
                   'width' => $data['width'],
                   'height' => $data['height'],
@@ -345,7 +348,15 @@ namespace wpCloud\StatelessMedia {
             unlink($fullsizepath);
           }
 
-          update_post_meta( $attachment_id, 'sm_cloud', $cloud_meta );
+          if(!$args['is_webp']){
+            update_post_meta( $attachment_id, 'sm_cloud', $cloud_meta );
+          }
+          else{
+            // There is no use case for is_webp meta.
+            // $cloud_meta = get_post_meta( $attachment_id, 'sm_cloud', true);
+            // $cloud_meta['is_webp'] = true;
+            // update_post_meta( $attachment_id, 'sm_cloud', $cloud_meta );
+          }
 
           if($args['no_thumb'] == true){
             $stateless_synced_full_size = $attachment_id;

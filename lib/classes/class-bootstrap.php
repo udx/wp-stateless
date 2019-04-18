@@ -614,7 +614,7 @@ namespace wpCloud\StatelessMedia {
 
         // skip adding root dir if it's already added.
         if ( !empty( $root_dir ) && strpos($current_path, $root_dir) !== 0 ) {
-          return $root_dir . '/' . $current_path;
+          return $root_dir . '/' . trim( $current_path, '/ ' );
         }
 
         return $current_path;
@@ -711,7 +711,7 @@ namespace wpCloud\StatelessMedia {
        * @param $meta
        * @return mixed or null when not changed.
        */
-      public function convert_to_gs_link($meta){
+      public function convert_to_gs_link($meta, $return = false){
         $updated = $meta;
         if ( $meta && $upload_data = wp_upload_dir() ) {
           if ( !empty( $upload_data['baseurl'] ) && !empty( $meta ) ) {
@@ -724,7 +724,7 @@ namespace wpCloud\StatelessMedia {
           }
         }
 
-        if($updated == $meta){
+        if($updated == $meta && !$return){
           return null; // Not changed.
         }
         return $updated;
