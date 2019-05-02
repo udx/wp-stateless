@@ -17,6 +17,8 @@ namespace wpCloud\StatelessMedia {
             public function __construct(){
                 global $wpdb;
                 $this->table_name = $wpdb->prefix . self::table;
+                ud_get_stateless_media()->create_db();
+
                 // Manual sync using sync tab. 
                 // called from ajax action_get_non_library_files_id
                 // Return files to be manually sync from sync tab.
