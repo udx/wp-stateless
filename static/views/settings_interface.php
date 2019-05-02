@@ -216,7 +216,7 @@
                                     </p>
                                     <p class="description"><strong ng-bind="sm.showNotice('hashify_file_name')" ></strong> 
                                     <span ng-show="sm.mode == 'stateless'">
-                                    <?php _e(sprintf( "<b>Required by Stateless Mode. Override with the <a href='%s' target='_blank'>WP_STATELESS_MEDIA_CACHE_BUSTING</a> constant.</b>","https://github.com/wpCloud/wp-stateless/wiki/Constants#wp_stateless_media_cache_busting"), ud_get_stateless_media()->domain);?>
+                                    <?php _e(sprintf( "<b>Required by Stateless Mode. Override with the <a href='%s' target='_blank'>WP_STATELESS_MEDIA_CACHE_BUSTING</a> constant.</b>","https://wp-stateless.github.io/docs/constants/#wp_stateless_media_cache_busting"), ud_get_stateless_media()->domain);?>
                                     </span>
 
                                     <?php _e( 'Prepends a random set of numbers and letters to the filename. This is useful for preventing caching issues when uploading files that have the same filename.', ud_get_stateless_media()->domain ); ?></p>
