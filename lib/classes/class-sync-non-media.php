@@ -21,6 +21,7 @@ namespace wpCloud\StatelessMedia {
                 // called from ajax action_get_non_library_files_id
                 // Return files to be manually sync from sync tab.
                 add_filter( 'sm:sync::nonMediaFiles', array($this, 'sync_non_media_files') );
+                add_filter( 'sm:sync::queue_is_exists', array($this, 'queue_is_exists'), 10, 2 );
 
                 // register a dir to sync from sync tab
                 add_action( 'sm:sync::register_dir', array($this, 'register_dir') );
