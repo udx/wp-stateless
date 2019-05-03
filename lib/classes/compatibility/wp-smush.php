@@ -26,7 +26,7 @@ namespace wpCloud\StatelessMedia {
                 add_action( 'smush_file_exists', array( $this, 'maybe_download_file' ), 10, 3 );
 
                 // Skip sync when attachment is image, sync will be handled after image is optimized.
-                add_filter( 'wp_stateless_skip_add_media', array( $this, 'skip_add_media' ), 10, 5 );
+                // add_filter( 'wp_stateless_skip_add_media', array( $this, 'skip_add_media' ), 10, 5 );
 
                 add_filter('delete_attachment', array($this, 'remove_backup'));
                 add_filter( 'smush_backup_exists', array( $this, 'backup_exists_on_gcs' ), 10, 3 );
@@ -50,6 +50,7 @@ namespace wpCloud\StatelessMedia {
              * 
              */
             public function skip_add_media($return, $metadata, $attachment_id, $force = false, $args = array()) {
+                global $doing_manual_sync;
                 $args = wp_parse_args($args, array(
                     'no_thumb' => false,
                   ));
