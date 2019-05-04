@@ -106,6 +106,11 @@ namespace wpCloud\StatelessMedia {
              * LiteSpeed Cache
              */
             new LSCacheWP();
+            
+            /**
+             * EWWW Image Optimizer
+             */
+            new EWWW();
         }
 
         /**
