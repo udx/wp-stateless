@@ -147,6 +147,11 @@ namespace wpCloud\StatelessMedia {
           add_filter('sanitize_file_name', array( 'wpCloud\StatelessMedia\Utility', 'randomize_filename' ), 10);
         }
 
+        /**
+         * Delete table when blog is deleted.
+         */
+        add_action( 'wp_delete_site', array($this, 'wp_delete_site'));
+
         /* Initialize plugin only if Mode is not 'disabled'. */
         if ( $this->get( 'sm.mode' ) !== 'disabled' ) {
 
@@ -1256,6 +1261,21 @@ namespace wpCloud\StatelessMedia {
         dbDelta( $sql );
 
         add_option( 'sm_sync_db_version', $this->args[ 'version' ] );
+      }
+
+      /**
+       * 
+       * Delete table when blog is deleted.
+       */
+      public function wp_delete_site($old_site){
+        global $wpdb;
+        
+        switch_to_blog( $old_site->id );
+        $table_name = $wpdb->prefix . 'sm_sync';
+        
+        $sql = "DROP TABLE IF EXISTS $table_name";
+        $wpdb->query($sql);
+        restore_current_blog();
       }
 
       /**
