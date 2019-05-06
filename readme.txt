@@ -6,7 +6,7 @@ License: GPLv2 or later
 Requires PHP: 5.5
 Requires at least: 4.0
 Tested up to: 5.1
-Stable tag: 2.2.6
+Stable tag: 2.2.7
 
 Upload and serve your WordPress media files from Google Cloud Storage.
 
@@ -104,6 +104,13 @@ To ensure new releases cause as little disruption as possible, we rely on a numb
 * FIX - Multisite Network Settings page fixed. GitHub Issue [#369](https://github.com/wpCloud/wp-stateless/issues/369).
 
 == Changelog ==
+
+= 2.2.7 =
+* FIX - WP-Smush compatibility enhanced. GitHub Issue [#366](https://github.com/wpCloud/wp-stateless/issues/366).
+* FIX - Fixed multisite installation support. GitHub Issue [#370](https://github.com/wpCloud/wp-stateless/issues/370).
+* FIX - Fixed settings UI problems related to Cache-Busting option. GitHub Issue [#373](https://github.com/wpCloud/wp-stateless/issues/373).
+* FIX - Other minor fixes.
+
 = 2.2.6 =
 * FIX - Multisite Network Settings page fixed. GitHub Issue [#369](https://github.com/wpCloud/wp-stateless/issues/369).
 * FIX - Fixed incorrect Compatibilities behavior when Bucket Folder is set. GitHub Issue [#368](https://github.com/wpCloud/wp-stateless/issues/368).
