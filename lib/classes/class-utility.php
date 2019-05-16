@@ -178,10 +178,15 @@ namespace wpCloud\StatelessMedia {
         ));
 
         /* Get metadata in case if method is called directly. */
-        if( current_filter() !== 'wp_generate_attachment_metadata' && current_filter() !== 'wp_update_attachment_metadata' ) {
+        if( current_filter() !== 'wp_generate_attachment_metadata' && current_filter() !== 'wp_update_attachment_metadata' && current_filter() !== 'intermediate_image_sizes_advanced' ) {
           $metadata = wp_get_attachment_metadata( $attachment_id );
         }
-        
+
+        // making sure meta data isn't null.
+        if(empty($metadata)){
+          $metadata = array();
+        }
+
         /**
          * To skip the sync process.
          *
@@ -205,32 +210,14 @@ namespace wpCloud\StatelessMedia {
 
         if( !is_wp_error( $client ) && !$check ) {
 
-          $fullsizepath = wp_normalize_path( get_attached_file( $attachment_id ) );
-          // Make non-images uploadable.
-          if( empty( $metadata['file'] ) && $attachment_id ) {
-            $file = str_replace( wp_normalize_path(trailingslashit( $upload_dir[ 'basedir' ] )), '', $fullsizepath );
-            if(empty($metadata)){
-              $metadata = array();
-            }
-            $mime_type = get_post_mime_type( $attachment_id );
-            if($mime_type != "application/pdf"){
-              $metadata["file"] = $file;
-            }
-          }
-
-          $file = wp_normalize_path( !empty($metadata[ 'file' ])?$metadata[ 'file' ]:$file );
-
-          $image_host = ud_get_stateless_media()->get_gs_host();
-          $bucketLink = apply_filters('wp_stateless_bucket_link', $image_host);
-
-          $_metadata = array(
-            "width" => isset( $metadata[ 'width' ] ) ? $metadata[ 'width' ] : null,
-            "height" => isset( $metadata[ 'height' ] )  ? $metadata[ 'height' ] : null,
-            'object-id' => $attachment_id,
-            'source-id' => md5( $attachment_id.ud_get_stateless_media()->get( 'sm.bucket' ) ),
-            'file-hash' => md5( $file )
-          );
-
+          $image_host          = ud_get_stateless_media()->get_gs_host();
+          $bucketLink          = apply_filters('wp_stateless_bucket_link', $image_host);
+          $fullsizepath        = wp_normalize_path( get_attached_file( $attachment_id ) );
+          $_cacheControl       = self::getCacheControl( $attachment_id, $metadata, null );
+          $_contentDisposition = self::getContentDisposition( $attachment_id, $metadata, null );
+          
+          // Ensure image upload to GCS when attachment is updated,
+          // by checking if the attachment metadata is changed.
           if($attachment_id && !empty($metadata) && !$force){
             $db_metadata = get_post_meta( $attachment_id, '_wp_attachment_metadata', true );
             if($db_metadata != $metadata){
@@ -238,112 +225,91 @@ namespace wpCloud\StatelessMedia {
             }
           }
 
-          /* Add default image */
-          $media = $client->add_media( $_mediaOptions = array_filter( array(
-            'force' => $force && $stateless_synced_full_size != $attachment_id,
-            'name' => $file,
-            'absolutePath' => wp_normalize_path( get_attached_file( $attachment_id ) ),
-            'cacheControl' => $_cacheControl = self::getCacheControl( $attachment_id, $metadata, null ),
-            'contentDisposition' => $_contentDisposition = self::getContentDisposition( $attachment_id, $metadata, null ),
-            'mimeType' => get_post_mime_type( $attachment_id ),
-            'metadata' => $_metadata
-          ) ));
+          // Make non-images uploadable.
+          // empty $metadata['file'] can cause problem, so we need to generate it.
+          if( empty( $metadata['file'] ) && $attachment_id ) {
+            $mime_type = get_post_mime_type( $attachment_id );
+            $file = str_replace( wp_normalize_path(trailingslashit( $upload_dir[ 'basedir' ] )), '', $fullsizepath );
 
-          // Break if we have errors.
-          // @note Errors could be due to key being invalid or now having sufficient permissions in which case should notify user.
-          if( is_wp_error( $media ) ) {
-            return $metadata;
+            // We shouldn't create $metadata["file"] if it's PDF file.
+            if($mime_type != "application/pdf"){
+              $metadata["file"] = $file;
+            }
           }
 
-          /* Add Google Storage metadata to our attachment */
-          $fileLink = $bucketLink . '/' . ( !empty($media['name']) ? $media['name'] : $file );
+          $cloud_meta = get_post_meta( $attachment_id, 'sm_cloud', true );
 
-          $cloud_meta = array(
-            'id' => $media[ 'id' ],
-            'name' => !empty($media['name']) ? $media['name'] : $file,
-            'fileLink' => $fileLink,
-            'storageClass' => $media[ 'storageClass' ],
-            'mediaLink' => $media[ 'mediaLink' ],
-            'selfLink' => $media[ 'selfLink' ],
-            'bucket' => ud_get_stateless_media()->get( 'sm.bucket' ),
-            'object' => $media,
-            'sizes' => array(),
-          );
+          $cloud_meta = wp_parse_args($cloud_meta, array(
+            'id'                 => '',
+            'name'               => '',
+            'bucket'             => ud_get_stateless_media()->get( 'sm.bucket' ),
+            'storageClass'       => '',
+            'fileLink'           => '',
+            'mediaLink'          => '',
+            'selfLink'           => '',
+            'cacheControl'       => $_cacheControl,
+            'contentDisposition' => $_contentDisposition,
+            'object'             => '',
+            'sizes'              => array(),
+          ));
 
-          if( isset( $_cacheControl ) && $_cacheControl ) {
-            //update_post_meta( $attachment_id, 'sm_cloud:cacheControl', $_cacheControl );
-            $cloud_meta[ 'cacheControl' ] = $_cacheControl;
-          }
-
-          if( isset( $_contentDisposition ) && $_contentDisposition ) {
-            //update_post_meta( $attachment_id, 'sm_cloud:contentDisposition', $_contentDisposition );
-            $cloud_meta[ 'contentDisposition' ] = $_contentDisposition;
-          }
-
-          if( empty( $metadata[ 'sizes' ] ) ) {
-            // @note This could happen if WordPress does not have any wp_get_image_editor(), e.g. Imagemagic not installed.
-          }
-
-          /* Now we go through all available image sizes and upload them to Google Storage */
-          if( !empty( $metadata[ 'sizes' ] ) && is_array( $metadata[ 'sizes' ] ) && $args['no_thumb'] != true ) {
-
-            $path = wp_normalize_path( dirname( get_attached_file( $attachment_id ) ) );
-            $mediaPath = wp_normalize_path( trim( dirname( $file ), '\/\\' ) );
-
-            /**
-             * @see https://github.com/wpCloud/wp-stateless/issues/343
-             **/
-            $mediaPath = $mediaPath === '.' ? '' : $mediaPath;
-
-            foreach( (array) $metadata[ 'sizes' ] as $image_size => $data ) {
-
-              $absolutePath = wp_normalize_path( $path . '/' . $data[ 'file' ] );
-
-              /* Add 'image size' image */
-              $media = $client->add_media( array(
-                'force' => $force,
-                'name' => $file_path = trim($mediaPath . '/' . $data[ 'file' ], '/'),
-                'absolutePath' => $absolutePath,
-                'cacheControl' => $_cacheControl,
-                'contentDisposition' => $_contentDisposition,
-                'mimeType' => $data[ 'mime-type' ],
-                'metadata' => array_merge( $_metadata, array(
-                  'width' => $data['width'],
-                  'height' => $data['height'],
-                  'child-of' => $attachment_id,
-                  'file-hash' => md5( $data[ 'file' ] )
-                ))
-              ));
-
-              /* Break if we have errors. */
-              if( !is_wp_error( $media ) ) {
-
-                $fileLink = $bucketLink . '/' . (!empty($media['name']) ? $media['name'] : $file_path);
-
-                // @note We don't add storageClass because it's same as parent...
-                $cloud_meta[ 'sizes' ][ $image_size ] = array(
-                  'id' => $mediaPath . '/' . $media[ 'id' ],
-                  'name' => !empty($media['name']) ? $media['name'] : $file_path,
-                  'fileLink' => $fileLink,
-                  'mediaLink' => $media[ 'mediaLink' ],
-                  'selfLink' => $media[ 'selfLink' ]
-                );
-                
-                // Stateless mode: we don't need the local version.
-                if(ud_get_stateless_media()->get( 'sm.mode' ) === 'stateless'){
-                  unlink($absolutePath);
-                }
-              }
-
-
+          /**
+           * 
+           */
+          $image_sizes = self::get_path_and_url($metadata, $attachment_id);
+          foreach($image_sizes as $size => $img){
+            // skips thumbs when it's called from Upload the full size image first, through intermediate_image_sizes_advanced filter.
+            if($args['no_thumb'] && $img['is_thumb']){
+              continue;
             }
 
-          }
+            // also skips full size image if already uploaded using that feature.
+            // and delete it in stateless mode as it already bin uploaded through intermediate_image_sizes_advanced filter.
+            if( !$img['is_thumb'] && $stateless_synced_full_size == $attachment_id ){
+              if(ud_get_stateless_media()->get( 'sm.mode' ) === 'stateless' && $args['no_thumb'] != true){
+                unlink($img['path']);
+              }
+              continue;
+            }
 
-          // Stateless mode: we don't need the local version.
-          if(ud_get_stateless_media()->get( 'sm.mode' ) === 'stateless' && $args['no_thumb'] != true){
-            unlink($fullsizepath);
+            // GCS metadata
+            $_metadata = array(
+              "width"     => $img[ 'width' ],
+              "height"    => $img[ 'height' ],
+              'child-of'  => $attachment_id,
+              'file-hash' => md5( $file ),
+            );
+
+            // adding extra GCS meta for full size image.
+            if(!$img['is_thumb']){
+              unset($_metadata['child-of']); // no need in full size image.
+              $_metadata['object-id'] = $attachment_id;
+              $_metadata['source-id'] = md5( $attachment_id.ud_get_stateless_media()->get( 'sm.bucket' ) );
+            }
+
+            /* Add default image */
+            $media = $client->add_media( array_filter( array(
+              'force'              => $img['is_thumb'] ? $force : $force && $stateless_synced_full_size != $attachment_id,
+              'name'               => $img['gs_name'],
+              'mimeType'           => $img['mime_type'],
+              'metadata'           => $_metadata,
+              'absolutePath'       => $img['path'],
+              'cacheControl'       => $_cacheControl,
+              'contentDisposition' => $_contentDisposition,
+            ) ));
+
+            /* Break if we have errors. */
+            if( !is_wp_error( $media ) ) {
+              // @note We don't add storageClass because it's same as parent...
+              $cloud_meta = self::generate_cloud_meta($cloud_meta, $media, $size, $img, $bucketLink);
+              
+              // Stateless mode: we don't need the local version.
+              if(ud_get_stateless_media()->get( 'sm.mode' ) === 'stateless' && $args['no_thumb'] != true){
+                unlink($img['path']);
+              }
+            }
           }
+          // End of image sync loop
 
           update_post_meta( $attachment_id, 'sm_cloud', $cloud_meta );
 
@@ -410,6 +376,92 @@ namespace wpCloud\StatelessMedia {
 
         }
 
+      }
+
+      /**
+       * Return URL and path for all image sizes of a attachment.
+       */
+      public static function get_path_and_url( $metadata, $attachment_id ){
+        /* Get metadata in case if method is called directly. */
+        if( empty($metadata) && current_filter() !== 'wp_generate_attachment_metadata' && current_filter() !== 'wp_update_attachment_metadata' ) {
+          $metadata = wp_get_attachment_metadata( $attachment_id );
+        }
+
+        $gs_name_path   = array();
+        $full_size_path = get_attached_file( $attachment_id );
+        $base_dir       = dirname( $full_size_path );
+        $gs_name        = apply_filters('wp_stateless_file_name', $full_size_path);
+
+        if( !isset($metadata['width']) && file_exists($full_size_path) ){
+          try{
+            $_image_size = getimagesize($full_size_path);
+            $metadata['width']  = $_image_size[0];
+            $metadata['height'] = $_image_size[1];
+          }
+          catch(Exception $e){
+            // lets do nothing.
+          }
+        }
+        
+        
+        $gs_name_path['__full'] = array(
+          'gs_name'   => $gs_name,
+          'path'      => $full_size_path,
+          'is_thumb'  => false,
+          'mime_type' => get_post_mime_type( $attachment_id ),
+          'width'     => isset($metadata['width']) ? $metadata['width'] : null,
+          'height'    => isset($metadata['height']) ? $metadata['height'] : null,
+        );
+        
+        
+        /* Now we go through all available image sizes and upload them to Google Storage */
+        if( !empty( $metadata[ 'sizes' ] ) && is_array( $metadata[ 'sizes' ] ) ) {
+          foreach( $metadata[ 'sizes' ] as $image_size => $data ) {
+
+            $absolutePath = wp_normalize_path( $base_dir . '/' . $data[ 'file' ] );
+            $gs_name = apply_filters('wp_stateless_file_name', $absolutePath);
+
+            $gs_name_path[$image_size] = array(
+              'gs_name'   => $gs_name,
+              'path'      => $absolutePath,
+              'is_thumb'  => true,
+              'mime_type' => $data['mime-type'],
+              'width'     => $data['width'],
+              'height'    => $data['height'],
+            );
+          }
+        }
+
+        return $gs_name_path;
+      }
+
+      /**
+       * Return URL and path for all image sizes of a attachment.
+       */
+      public static function generate_cloud_meta( $cloud_meta, $media, $image_size, $img, $bucketLink ){
+        $gs_name = !empty($media['name']) ? $media['name'] : $img['gs_name'];
+        $fileLink = trailingslashit($bucketLink) . $gs_name;
+
+        if($img['is_thumb']){
+          // Cloud meta for thumbs.
+          $cloud_meta[ 'sizes' ][ $image_size ]['id']           = $media[ 'id' ];
+          $cloud_meta[ 'sizes' ][ $image_size ]['name']         = $gs_name;
+          $cloud_meta[ 'sizes' ][ $image_size ]['fileLink']     = $fileLink;
+          $cloud_meta[ 'sizes' ][ $image_size ]['mediaLink']    = $media[ 'mediaLink' ];
+          $cloud_meta[ 'sizes' ][ $image_size ]['selfLink']     = $media[ 'selfLink' ];
+        }
+        else{
+          // cloud meta for full size image.
+          $cloud_meta['id']           = $media[ 'id' ];
+          $cloud_meta['name']         = $gs_name;
+          $cloud_meta['fileLink']     = $fileLink;
+          $cloud_meta['storageClass'] = $media[ 'storageClass' ];
+          $cloud_meta['mediaLink']    = $media[ 'mediaLink' ];
+          $cloud_meta['selfLink']     = $media[ 'selfLink' ];
+          $cloud_meta['bucket']       = ud_get_stateless_media()->get( 'sm.bucket' );
+          $cloud_meta['object']       = $media;
+        }
+        return $cloud_meta;
       }
 
     }
