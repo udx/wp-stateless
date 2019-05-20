@@ -318,7 +318,7 @@ namespace wpCloud\StatelessMedia {
           }
 
           /**
-          * Triggers when the media and it's childs are synced.
+          * Triggers when the media and it's thumbs are synced.
           *
           * $force and $args params will no be passed on non media library uploads.
           * This two will be passed on by compatibility.
@@ -362,12 +362,15 @@ namespace wpCloud\StatelessMedia {
 
             /* Remove default image */
             $client->remove_media( $metadata[ 'gs_name' ] );
+            // Remove webp
+            $client->remove_media( $metadata[ 'gs_name' ] . '.webp' );
 
             /* Now, go through all sizes and remove 'image sizes' images from Bucket too. */
             if( !empty( $metadata[ 'sizes' ] ) && is_array( $metadata[ 'sizes' ] ) ) {
               foreach( $metadata[ 'sizes' ] as $k => $v ) {
                 if( !empty( $v[ 'gs_name' ] ) ) {
                   $client->remove_media( $v[ 'gs_name' ] );
+                  $client->remove_media( $v[ 'gs_name' ] . '.webp' );
                 }
               }
             }
