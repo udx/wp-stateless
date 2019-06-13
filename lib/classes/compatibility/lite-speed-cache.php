@@ -9,6 +9,7 @@
  * Reference: https://www.litespeedtech.com/support/wiki/doku.php/litespeed_wiki:cache:lscwp:image-optimization#image_optimization_in_litespeed_cache_for_wordpress
  *
  * @todo configure as image optimization plugin.
+ * @todo delete webp
  */
 
 namespace wpCloud\StatelessMedia {
@@ -26,7 +27,7 @@ namespace wpCloud\StatelessMedia {
             public function module_init($sm){
                 // Sync image.
                 add_action( 'litespeed_img_pull_ori', array($this, 'sync_image'), 10, 2 );
-                add_action( 'litespeed_img_pull_webp', array($this, 'sync_image'), 10, 2 );
+                add_action( 'litespeed_img_pull_webp', array($this, 'sync_webp'), 10, 2 );
                 add_action( 'wp_stateless_media_synced', array($this, 'sync_attachment'), 10, 4 );
 
                 // override is_internal_file check.
@@ -40,9 +41,17 @@ namespace wpCloud\StatelessMedia {
              * 
              */
             public function sync_image($row_img, $local_file){
-                add_filter( 'upload_mimes', array($this, 'add_webp_mime'), 10, 2 );
-                do_action( 'sm:sync::syncFile', $row_img->src . '.webp', $local_file, true);
+                do_action( 'sm:sync::syncFile', $row_img->src, $local_file, 2);
+            }
 
+            /**
+             * Sync the image when Lite Speed plugin pull the optimized image.
+             * We need to overwrite the existing image.
+             * 
+             */
+            public function sync_webp($row_img, $local_file){
+                add_filter( 'upload_mimes', array($this, 'add_webp_mime'), 10, 2 );
+                do_action( 'sm:sync::syncFile', $row_img->src . '.webp', $local_file, 2);
             }
             
             /**

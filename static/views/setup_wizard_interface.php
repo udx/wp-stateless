@@ -46,7 +46,7 @@ else{
                                     <img src="<?php echo ud_get_stateless_media()->path( 'static/images/authenticate-login.png'); ?>" alt=""/>
                                     <div class="wpStateLess-step-title">
                                         <h3><?php _e( 'Google Login', ud_get_stateless_media()->domain ); ?></h3>
-                                        <p class="description"><?php _e( sprintf('Login with the Google Account you want to be associated with this website and consent to the permissions request. If you\'re unsure about granting access to your Google account, check over our documentation on the <a target="_blank" href="%1$s">permissions request</a> and <a target="_blank" href="%2$s">manual setup alternative.</a>', "https://github.com/wpCloud/wp-stateless/wiki/Google-Permission-Request", "https://github.com/wpCloud/wp-stateless/wiki/Manual-Setup"), ud_get_stateless_media()->domain ); ?></p>
+                                        <p class="description"><?php _e( sprintf('Login with the Google Account you want to be associated with this website and consent to the permissions request. If you\'re unsure about granting access to your Google account, check over our documentation on the <a target="_blank" href="%1$s">permissions request</a> and <a target="_blank" href="%2$s">manual setup alternative.</a>', "https://wp-stateless.github.io/docs/google-permission-request/", "https://wp-stateless.github.io/docs/manual-setup/"), ud_get_stateless_media()->domain ); ?></p>
                                     </div>
                                     <p>
                                         <input id="allow-notifications" type="checkbox" checked="checked" />

@@ -8,7 +8,7 @@
                             <h1><?php _e( 'WP-Stateless', ud_get_stateless_media()->domain ); ?></h1>
                             <p><?php _e( 'Upload and serve your WordPress media files from Google Cloud Storage.', ud_get_stateless_media()->domain ); ?></p>
                             <a class="btn btn-rounded btn-green" href="<?php echo ud_get_stateless_media()->get_settings_page_url('?page=stateless-setup&step=google-login');?>"><?php _e( 'Begin Setup Assistant', ud_get_stateless_media()->domain ); ?></a>
-                            <p class="manual-instruction"> <?php _e( sprintf('or read <a target="_blank" href="%s">manual setup instructions.</a>', 'https://github.com/wpCloud/wp-stateless/wiki/Manual-Setup'))?></p>
+                            <p class="manual-instruction"> <?php _e( sprintf('or read <a target="_blank" href="%s">manual setup instructions.</a>', 'https://wp-stateless.github.io/docs/manual-setup/'))?></p>
                         </div>
                     </div>
                 </div>

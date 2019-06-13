@@ -943,7 +943,7 @@ namespace wpCloud\StatelessMedia {
                     'title' => sprintf( __( "Stateless mode enables and requires the Cache-Busting option.", ud_get_stateless_media()->domain ) ),
                     'message' => sprintf( __("WordPress looks at local files to prevent files with the same filenames. 
                                           Since Stateless mode bypasses this check, there is a potential for files to be stored with the same file name. We enforce the Cache-Busting option to prevent this. 
-                                          Override with the <a href='%s' target='_blank'>%s</a> constant.", ud_get_stateless_media()->domain),"https://github.com/wpCloud/wp-stateless/wiki/Constants#wp_stateless_media_cache_busting", "WP_STATELESS_MEDIA_CACHE_BUSTING" ),
+                                          Override with the <a href='%s' target='_blank'>%s</a> constant.", ud_get_stateless_media()->domain),"https://wp-stateless.github.io/docs/constants/#wp_stateless_media_cache_busting", "WP_STATELESS_MEDIA_CACHE_BUSTING" ),
                   );
             echo "<script id='template-stateless-cache-busting' type='text/html'>";
             include ud_get_stateless_media()->path( '/static/views/error-notice.php', 'dir' );
@@ -1121,9 +1121,9 @@ namespace wpCloud\StatelessMedia {
 
         if( null === $this->client ) {
 
-          $key_json = get_site_option( 'sm_key_json' );
+          $key_json = $this->get( 'sm.key_json' );
           if ( empty($key_json) ) {
-            $key_json = $this->get( 'sm.key_json' );
+            $key_json = get_site_option( 'sm_key_json' );
           }
 
           /* Try to initialize GS Client */
@@ -1330,7 +1330,7 @@ namespace wpCloud\StatelessMedia {
           'title' => sprintf( __( "Stateless mode now requires the Cache-Busting option.", ud_get_stateless_media()->domain ) ),
           'message' => sprintf( __("WordPress looks at local files to prevent files with the same filenames. 
                                 Since Stateless mode bypasses this check, there is a potential for files to be stored with the same file name. We enforce the Cache-Busting option to prevent this. 
-                                Override with the <a href='%s' target='_blank'>%s</a> constant.", ud_get_stateless_media()->domain),"https://github.com/wpCloud/wp-stateless/wiki/Constants#wp_stateless_media_cache_busting", "WP_STATELESS_MEDIA_CACHE_BUSTING" ),
+                                Override with the <a href='%s' target='_blank'>%s</a> constant.", ud_get_stateless_media()->domain),"https://wp-stateless.github.io/docs/constants/#wp_stateless_media_cache_busting", "WP_STATELESS_MEDIA_CACHE_BUSTING" ),
         ), 'notice' );
       }
 
