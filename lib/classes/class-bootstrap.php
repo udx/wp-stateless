@@ -1120,9 +1120,9 @@ namespace wpCloud\StatelessMedia {
 
         if( null === $this->client ) {
 
-          $key_json = get_site_option( 'sm_key_json' );
+          $key_json = $this->get( 'sm.key_json' );
           if ( empty($key_json) ) {
-            $key_json = $this->get( 'sm.key_json' );
+            $key_json = get_site_option( 'sm_key_json' );
           }
 
           /* Try to initialize GS Client */
