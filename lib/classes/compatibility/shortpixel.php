@@ -29,6 +29,7 @@ namespace wpCloud\StatelessMedia {
             public function module_init($sm){
                 add_action( 'shortpixel_image_optimised', array($this, 'shortpixel_image_optimised') );
                 add_filter( 'shortpixel_image_exists', array($this, 'shortpixel_image_exists'), 10, 3 );
+                add_filter( 'shortpixel_image_urls', array($this, 'shortpixel_image_urls'), 10, 2 );
                 add_filter( 'shortpixel_skip_backup', array($this, 'shortpixel_skip_backup'), 10, 3 );
                 add_filter( 'wp_update_attachment_metadata', array( $this, 'wp_update_attachment_metadata' ), 10, 2 );
                 // Remove backup and webp version of image.
@@ -99,7 +100,7 @@ namespace wpCloud\StatelessMedia {
 
                         if(is_array($metadata['sizes'])){
                             foreach ($metadata['sizes'] as $key => &$data) {
-                                if(empty($metadata['gs_name'])) continue;
+                                if(empty($data['gs_name'])) continue;
                                 $gs_basename = basename($data['gs_name']);
                                 if($gs_basename == $basename){
                                     return true;
@@ -434,6 +435,21 @@ namespace wpCloud\StatelessMedia {
                     $imageBase = trailingslashit(dirname($gs_link));
                 }
                 return $imageBase;
+            }
+
+            public function shortpixel_image_urls($URLs, $id){
+                foreach ($URLs as $key => $url) {
+                    $url_parts = wp_parse_url( $url );
+                    if($url_parts['host'] == 'storage.googleapis.com'){
+                        if(preg_match("@(^/?.*?/)(.*)@", $url_parts['path'], $matches)){
+                            $bucket = trim($matches[1], '/');
+                            $url_parts['path'] = $matches[2];
+                            $url_parts['host'] = $bucket . '.' . $url_parts['host'];
+                            $URLs[$key] = Utility::join_url($url_parts);
+                        }
+                    }
+                }
+                return $URLs;
             }
 
         }
