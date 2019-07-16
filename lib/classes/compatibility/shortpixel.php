@@ -50,13 +50,8 @@ namespace wpCloud\StatelessMedia {
 
             public function shortPixelJS(){
                 $upload_dir = wp_upload_dir();
-                $jsSuffix = '.min.js';
 
-                if (defined('SHORTPIXEL_DEBUG') && SHORTPIXEL_DEBUG === true) {
-                    $jsSuffix = '.js'; //use unminified versions for easier debugging
-                }
-                $dep = 'short-pixel' . $jsSuffix;
-                wp_enqueue_script('stateless-short-pixel', ud_get_stateless_media()->path( 'lib/classes/compatibility/js/shortpixel.js', 'url'), array($dep), '', true);
+                wp_enqueue_script('stateless-short-pixel', ud_get_stateless_media()->path( 'lib/classes/compatibility/js/shortpixel.js', 'url'), array(), '', true);
                 
                 $image_host = ud_get_stateless_media()->get_gs_host();
                 $bucketLink = apply_filters('wp_stateless_bucket_link', $image_host);
