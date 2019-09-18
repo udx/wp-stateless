@@ -1092,6 +1092,10 @@ namespace wpCloud\StatelessMedia {
           $metadata = get_post_meta( $attachment_id, '_wp_attachment_metadata', true );
         }
 
+        if(empty($metadata)){
+          $metadata = [];
+        }
+
         if( is_array( $metadata ) && is_array( $sm_cloud ) && !empty( $sm_cloud[ 'fileLink' ] ) ) {
           $metadata[ 'gs_link' ] = apply_filters('wp_stateless_bucket_link', $sm_cloud[ 'fileLink' ]);
           $metadata[ 'gs_name' ] = isset( $sm_cloud[ 'name' ] ) ? $sm_cloud[ 'name' ] : false;
