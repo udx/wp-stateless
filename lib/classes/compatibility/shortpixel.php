@@ -15,6 +15,7 @@
  */
 
 namespace wpCloud\StatelessMedia {
+    use ShortPixel\ShortPixelLogger\ShortPixelLogger as Log;
 
     if(!class_exists('wpCloud\StatelessMedia\ShortPixel')) {
         
@@ -25,6 +26,7 @@ namespace wpCloud\StatelessMedia {
             protected $constant = 'WP_STATELESS_COMPATIBILITY_SHORTPIXEL';
             protected $description = 'Ensures compatibility with ShortPixel Image Optimizer.';
             protected $plugin_file = 'shortpixel-image-optimiser/wp-shortpixel.php';
+            private   $jsSuffix = '.min.js';
 
             public function module_init($sm){
                 add_action( 'shortpixel_image_optimised', array($this, 'shortpixel_image_optimised') );
@@ -46,12 +48,17 @@ namespace wpCloud\StatelessMedia {
                 add_action( 'sm:synced::image', array( $this, 'sync_backup_file'), 10, 2 );
                 add_action( 'sm:synced::image', array( $this, 'sync_webp_file'), 10, 2 );
 
+                
+                if (Log::debugIsActive()) {
+                    $this->jsSuffix = '.js'; //use unminified versions for easier debugging
+                }
+
             }
 
             public function shortPixelJS(){
                 $upload_dir = wp_upload_dir();
 
-                wp_enqueue_script('stateless-short-pixel', ud_get_stateless_media()->path( 'lib/classes/compatibility/js/shortpixel.js', 'url'), array(), '', true);
+                wp_enqueue_script('stateless-short-pixel', ud_get_stateless_media()->path( 'lib/classes/compatibility/js/shortpixel.js', 'url'), array('shortpixel' . $this->jsSuffix), '', true);
                 
                 $image_host = ud_get_stateless_media()->get_gs_host();
                 $bucketLink = apply_filters('wp_stateless_bucket_link', $image_host);
