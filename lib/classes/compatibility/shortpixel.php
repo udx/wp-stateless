@@ -31,7 +31,12 @@ namespace wpCloud\StatelessMedia {
             public function module_init($sm){
                 add_action( 'shortpixel_image_optimised', array($this, 'shortpixel_image_optimised') );
                 add_filter( 'shortpixel_image_exists', array($this, 'shortpixel_image_exists'), 10, 3 );
-                add_filter( 'shortpixel_image_urls', array($this, 'shortpixel_image_urls'), 10, 2 );
+                // A way to disable the URL conversion to subdomain format.
+                if(!defined( 'WP_STATELESS_MEDIA_SHORTPIXEL_DISABLE_SUBDOMAIN_LINK' ) ||  !WP_STATELESS_MEDIA_SHORTPIXEL_DISABLE_SUBDOMAIN_LINK){
+                    // URL conversion to subdomain format {bucket}.storage.googleapis.com instead of storage.googleapis.com/{bucket}
+                    // So that ShortPixel don't count all Stateless request as one domain.
+                    add_filter( 'shortpixel_image_urls', array($this, 'shortpixel_image_urls'), 10, 2 );
+                }
                 add_filter( 'shortpixel_skip_backup', array($this, 'shortpixel_skip_backup'), 10, 3 );
                 add_filter( 'wp_update_attachment_metadata', array( $this, 'wp_update_attachment_metadata' ), 10, 2 );
                 // Remove backup and webp version of image.
