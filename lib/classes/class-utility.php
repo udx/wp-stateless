@@ -292,6 +292,7 @@ namespace wpCloud\StatelessMedia {
             $media = $client->add_media( array_filter( array(
               'force'              => $img['is_thumb'] ? $force : $force && $stateless_synced_full_size != $attachment_id,
               'name'               => $img['gs_name'],
+              'is_webp'            => $args['is_webp'],
               'mimeType'           => $img['mime_type'],
               'metadata'           => $_metadata,
               'absolutePath'       => $img['path'],

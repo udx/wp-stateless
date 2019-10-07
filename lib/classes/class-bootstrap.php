@@ -206,7 +206,7 @@ namespace wpCloud\StatelessMedia {
               add_filter( 'wp_stateless_bucket_link', array( $this, 'wp_stateless_bucket_link' ) );
             }
 
-            add_filter( 'wp_stateless_file_name', array( $this, 'handle_root_dir' ) );
+            add_filter( 'wp_stateless_file_name', array( $this, 'handle_root_dir' ), 10, 2 );
 
             /**
              * Rewrite Image URLS
@@ -609,7 +609,7 @@ namespace wpCloud\StatelessMedia {
        * @param $current_path
        * @return string
        */
-      public function handle_root_dir( $current_path ) {
+      public function handle_root_dir( $current_path, $use_root = true ) {
         $root_dir = $this->get( 'sm.root_dir' );
         $root_dir = trim( $root_dir, '/ ' ); // Remove any forward slash and empty space.
 
@@ -618,7 +618,7 @@ namespace wpCloud\StatelessMedia {
         $current_path = str_replace( wp_normalize_path( trailingslashit( $upload_dir[ 'baseurl' ] ) ), '', wp_normalize_path( $current_path ) );
 
         // skip adding root dir if it's already added.
-        if ( !empty( $root_dir ) && strpos($current_path, $root_dir) !== 0 ) {
+        if ( $use_root && !empty( $root_dir ) && strpos($current_path, $root_dir) !== 0 ) {
           return $root_dir . '/' . trim( $current_path, '/ ' );
         }
 

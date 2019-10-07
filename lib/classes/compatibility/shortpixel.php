@@ -82,41 +82,46 @@ namespace wpCloud\StatelessMedia {
              * Only when image is not available on server.
              */
             public function shortpixel_image_exists( $return, $path, $id = null ) {
+                if($return) return $return;
 
-                // Checking by matching file name in gs_name and $path.
-                if($return == false && !empty($id)){
-                    $metadata = wp_get_attachment_metadata($id);
-                    $basename = basename($path);
-                    if(!empty($metadata['gs_name'])){
-                        $gs_basename = basename($metadata['gs_name']);
-                        if($gs_basename == $basename){
-                            return true;
-                        }
+                $key = "stateless_url_to_postid_" . md5($path);
+                $return = get_transient( $key );
+                // echo "\npath: $path \nKey: $key\nReturn: $return\nID: $id\n  ";
+                if(!$return){
+                    // Checking by matching file name in gs_name and $path.
+                    if(!empty($id)){
+                        $metadata = wp_get_attachment_metadata($id);
+                        $basename = basename($path);
+                        if(!empty($metadata['gs_name'])){
+                            $gs_basename = basename($metadata['gs_name']);
+                            if($gs_basename == $basename){
+                                $return = true;
+                            }
 
-                        if(is_array($metadata['sizes'])){
-                            foreach ($metadata['sizes'] as $key => &$data) {
-                                if(empty($data['gs_name'])) continue;
-                                $gs_basename = basename($data['gs_name']);
-                                if($gs_basename == $basename){
-                                    return true;
+                            if(is_array($metadata['sizes'])){
+                                foreach ($metadata['sizes'] as $key => &$data) {
+                                    if(empty($data['gs_name'])) continue;
+                                    $gs_basename = basename($data['gs_name']);
+                                    if($gs_basename == $basename){
+                                        $return = true;
+                                    }
                                 }
                             }
                         }
                     }
-                }
-                // Directly check on GCS if image exist.
-                else if($return == false && empty($id)){
-                    $wp_uploads_dir = wp_get_upload_dir();
-                    $gs_name = str_replace(trailingslashit($wp_uploads_dir['basedir']), '', $path);
-                    $gs_name = str_replace(trailingslashit($wp_uploads_dir['baseurl']), '', $gs_name);
-                    $gs_name = str_replace(trailingslashit(ud_get_stateless_media()->get_gs_host()), '', $gs_name);
-                    $gs_name = apply_filters( 'wp_stateless_file_name', $gs_name);
-                    if ( $media = ud_get_stateless_media()->get_client()->media_exists( $gs_name ) ) {
-                        return true;
+                    // Directly check on GCS if image exist.
+                    else if(empty($id)){
+                        $wp_uploads_dir = wp_get_upload_dir();
+                        $gs_name = str_replace(trailingslashit($wp_uploads_dir['basedir']), '', $path);
+                        $gs_name = str_replace(trailingslashit($wp_uploads_dir['baseurl']), '', $gs_name);
+                        $gs_name = str_replace(trailingslashit(ud_get_stateless_media()->get_gs_host()), '', $gs_name);
+                        $gs_name = apply_filters( 'wp_stateless_file_name', $gs_name);
+                        if ( $media = ud_get_stateless_media()->get_client()->media_exists( $gs_name ) ) {
+                            $return = true;
+                        }
                     }
-                    
+                    set_transient( $key, $return, 10 * MINUTE_IN_SECONDS );
                 }
-
                 return $return;
             }
 
@@ -185,7 +190,10 @@ namespace wpCloud\StatelessMedia {
                 $metadata = wp_get_attachment_metadata( $id );
                 ud_get_stateless_media()->add_media( $metadata, $id, true );
                 // Sync the webp to GCS
-                ud_get_stateless_media()->add_media( $metadata, $id, true, array('is_webp' => '.webp') );
+                $create_webp = \WPShortPixelSettings::getOpt('wp-short-create-webp');
+                if($create_webp){
+                    ud_get_stateless_media()->add_media( $metadata, $id, true, array('is_webp' => '.webp') );
+                }
                 // Don't needed in stateless mode. In stateless mode the back will be sync once on wp_update_attachment_metadata filter.
                 if ( ud_get_stateless_media()->get( 'sm.mode' ) !== 'stateless' ) {
                     $this->sync_backup_file($id, $metadata, true);
