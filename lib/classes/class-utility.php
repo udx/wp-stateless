@@ -302,6 +302,7 @@ namespace wpCloud\StatelessMedia {
               $cloud_meta = self::generate_cloud_meta($cloud_meta, $media, $size, $img, $bucketLink);
               
               // Stateless mode: we don't need the local version.
+              // Except when uploading the full size image first.
               if(ud_get_stateless_media()->get( 'sm.mode' ) === 'stateless' && $args['no_thumb'] != true){
                 unlink($img['path']);
               }
@@ -416,6 +417,7 @@ namespace wpCloud\StatelessMedia {
         $gs_name_path['__full'] = array(
           'gs_name'   => $gs_name,
           'path'      => $full_size_path,
+          'sm_meta'   => true,
           'is_thumb'  => false,
           'mime_type' => get_post_mime_type( $attachment_id ),
           'width'     => isset($metadata['width']) ? $metadata['width'] : null,
@@ -426,13 +428,14 @@ namespace wpCloud\StatelessMedia {
         /* Now we go through all available image sizes and upload them to Google Storage */
         if( !empty( $metadata[ 'sizes' ] ) && is_array( $metadata[ 'sizes' ] ) ) {
           foreach( $metadata[ 'sizes' ] as $image_size => $data ) {
-
+            if(empty($data[ 'file' ])) continue;
             $absolutePath = wp_normalize_path( $base_dir . '/' . $data[ 'file' ] );
             $gs_name = apply_filters('wp_stateless_file_name', $absolutePath);
 
             $gs_name_path[$image_size] = array(
               'gs_name'   => $gs_name,
               'path'      => $absolutePath,
+              'sm_meta'   => true,
               'is_thumb'  => true,
               'mime_type' => $data['mime-type'],
               'width'     => $data['width'],
@@ -441,7 +444,7 @@ namespace wpCloud\StatelessMedia {
           }
         }
 
-        return $gs_name_path;
+        return apply_filters( 'wp_stateless_get_path_and_url', $gs_name_path, $metadata, $attachment_id );
       }
 
       /**
