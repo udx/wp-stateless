@@ -464,16 +464,16 @@ namespace wpCloud\StatelessMedia {
         }
         else{
           // cloud meta for full size image.
-          $cloud_meta['id']           = $media[ 'id' ];
-          $cloud_meta['name']         = $gs_name;
-          $cloud_meta['fileLink']     = $fileLink;
-          $cloud_meta['storageClass'] = $media[ 'storageClass' ];
-          $cloud_meta['mediaLink']    = $media[ 'mediaLink' ];
-          $cloud_meta['selfLink']     = $media[ 'selfLink' ];
-          $cloud_meta['bucket']       = ud_get_stateless_media()->get( 'sm.bucket' );
-          $cloud_meta['object']       = $media;
+          $cloud_meta['id']                     = $media[ 'id' ];
+          $cloud_meta['name']                   = $gs_name;
+          $cloud_meta['fileLink']               = $fileLink;
+          $cloud_meta['storageClass']           = $media[ 'storageClass' ];
+          $cloud_meta['mediaLink']              = $media[ 'mediaLink' ];
+          $cloud_meta['selfLink']               = $media[ 'selfLink' ];
+          $cloud_meta['bucket']                 = ud_get_stateless_media()->get( 'sm.bucket' );
+          $cloud_meta['object']                 = $media;
         }
-        return $cloud_meta;
+        return apply_filters( 'wp_stateless_generate_cloud_meta', $cloud_meta, $media, $image_size, $img, $bucketLink );
       }
 
       /**
@@ -528,6 +528,15 @@ namespace wpCloud\StatelessMedia {
         if ( isset( $parts['fragment'] ) )
             $url .= '#' . $parts['fragment'];
         return $url;
+      }
+
+      /**
+       * add_webp_mime
+       * 
+       */
+      public function add_webp_mime($t, $user){
+          $t['webp'] = 'image/webp';
+          return $t;
       }
 
 
