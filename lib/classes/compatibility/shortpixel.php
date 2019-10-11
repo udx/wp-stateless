@@ -204,6 +204,7 @@ namespace wpCloud\StatelessMedia {
                 // Sync the webp to GCS
                 $create_webp = \WPShortPixelSettings::getOpt('wp-short-create-webp');
                 if($create_webp){
+                    add_filter( 'upload_mimes', array($this, 'add_webp_mime'), 10, 2 );
                     ud_get_stateless_media()->add_media( $metadata, $id, true, array('is_webp' => '.webp') );
                 }
                 // Don't needed in stateless mode. In stateless mode the back will be sync once on wp_update_attachment_metadata filter.
@@ -225,7 +226,7 @@ namespace wpCloud\StatelessMedia {
             public function shortpixel_skip_restore_image($return, $id = null){
                 if(ud_get_stateless_media()->get( 'sm.mode' ) === 'stateless'){
                     $this->client = ud_get_stateless_media()->get_client();
-                    $this->client->copy('localhost/ShortpixelBackups/wp-content/uploads/2019/04/htpps.png', 'localhost/2019/04/htpps.png');
+                    $this->client->copy_media('localhost/ShortpixelBackups/wp-content/uploads/2019/04/htpps.png', 'localhost/2019/04/htpps.png');
                     return true;
                 }
                 return $return;
@@ -282,6 +283,7 @@ namespace wpCloud\StatelessMedia {
                 if( empty($metadata) ) {
                     $metadata = wp_get_attachment_metadata( $id );
                 }
+                add_filter( 'upload_mimes', array($this, 'add_webp_mime'), 10, 2 );
                 // Sync the webp to GCS
                 ud_get_stateless_media()->add_media( $metadata, $id, true, array('is_webp' => '.webp') );
             }
@@ -465,6 +467,15 @@ namespace wpCloud\StatelessMedia {
                     }
                 }
                 return $URLs;
+            }
+
+            /**
+             * add_webp_mime
+             * 
+             */
+            public function add_webp_mime($t, $user){
+                $t['webp'] = 'image/webp';
+                return $t;
             }
 
         }
