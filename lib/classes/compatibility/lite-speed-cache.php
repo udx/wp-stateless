@@ -82,9 +82,9 @@ namespace wpCloud\StatelessMedia {
             public function sync_image($row_img, $local_file){
                 // error_log(print_r(func_get_args(), true));
                 $rm_ori_bkup = \LiteSpeed_Cache::config( \LiteSpeed_Cache_Config::OPT_MEDIA_RM_ORI_BKUP ) ;
+                $gs_name = apply_filters( 'wp_stateless_file_name', $row_img->src );
         
                 if ( ! $rm_ori_bkup ){
-                    $gs_name = apply_filters( 'wp_stateless_file_name', $row_img->src );
 
                     $extension = pathinfo( $gs_name, PATHINFO_EXTENSION ) ;
                     $bk_file = substr( $gs_name, 0, -strlen( $extension ) ) . 'bk.' . $extension ;
@@ -109,8 +109,14 @@ namespace wpCloud\StatelessMedia {
             public function sync_webp($row_img, $local_file){
                 $optm_webp = \LiteSpeed_Cache::config( \LiteSpeed_Cache_Config::OPT_MEDIA_OPTM_WEBP ) ;
                 if($optm_webp){
+                    $gs_name = apply_filters( 'wp_stateless_file_name', $row_img->src . '.webp' );
+
+                    $cloud_meta = get_post_meta( $row_img->post_id, 'sm_cloud', true );
+                    $cloud_meta['fileMd5'][($gs_name)] = md5_file($local_file);
+                    update_post_meta( $row_img->post_id, 'sm_cloud', $cloud_meta );
+
                     add_filter( 'upload_mimes', array($this, 'add_webp_mime'), 10, 2 );
-                    do_action( 'sm:sync::syncFile', $row_img->src . '.webp', $local_file, 2);
+                    do_action( 'sm:sync::syncFile', $gs_name . '.webp', $local_file, 2);
                 }
             }
 
