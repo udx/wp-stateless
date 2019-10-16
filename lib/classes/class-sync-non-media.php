@@ -62,7 +62,7 @@ namespace wpCloud\StatelessMedia {
              * @param:
              *  $name: Relative path to upload dir.
              *  $absolutePath: Full path of the file
-             *  $forced: Type: bool/2; Whether to force to move the file to GCS even it's already exists.
+             *  $forced: Type: bool/int; Whether to force to move the file to GCS even it's already exists.
              *           true: Check whether it's already synced or not in database.
              *           2 (int): Force to overwrite on GCS
              * 

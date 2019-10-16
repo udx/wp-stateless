@@ -189,6 +189,8 @@ namespace wpCloud\StatelessMedia {
 
         @set_time_limit( -1 );
 
+        // 
+        do_action( 'sm:pre::synced::image', $id);
         $metadata = wp_generate_attachment_metadata( $image->ID, $fullsizepath );
 
         if(get_post_mime_type($image->ID) !== 'image/svg+xml'){
