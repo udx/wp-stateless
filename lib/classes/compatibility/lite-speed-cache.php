@@ -301,6 +301,7 @@ namespace wpCloud\StatelessMedia {
              * On manual sync/regenerate wp regenerate all image sizes.
              * So to keep the file md5 accurate we need to update it after image is regenerated.
              * 
+             * Manual sync if it's the first time syncing and image optimized before enabling Stateless
              */
             public function update_md5_and_manual_sync($attachment_id){
                 $cloud_meta     = get_post_meta( $attachment_id, 'sm_cloud', true );
