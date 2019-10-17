@@ -19,7 +19,7 @@ namespace wpCloud\StatelessMedia {
             protected $id = 'lscache_wp';
             protected $title = 'LiteSpeed Cache';
             protected $constant = 'WP_STATELESS_COMPATIBILITY_LITESPEED_CACHE';
-            protected $description = 'Ensures compatibility with LiteSpeed Cache plugins "Image WebP Replacement" functions.';
+            protected $description = 'Ensures compatibility with LiteSpeed Cache plugins.';
             protected $plugin_file = 'litespeed-cache/litespeed-cache.php';
 
             public function module_init($sm){
