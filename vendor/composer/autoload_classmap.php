@@ -62,5 +62,6 @@ return array(
     'wpCloud\\StatelessMedia\\Utility' => $baseDir . '/lib/classes/class-utility.php',
     'wpCloud\\StatelessMedia\\WPBakeryPageBuilder' => $baseDir . '/lib/classes/compatibility/wpbakery-page-builder.php',
     'wpCloud\\StatelessMedia\\WPForms' => $baseDir . '/lib/classes/compatibility/wpforms.php',
+    'wpCloud\\StatelessMedia\\WPRetina2x' => $baseDir . '/lib/classes/compatibility/wp-retina-2x.php',
     'wpCloud\\StatelessMedia\\WPSmush' => $baseDir . '/lib/classes/compatibility/wp-smush.php',
 );

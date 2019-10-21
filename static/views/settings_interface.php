@@ -261,7 +261,7 @@
                                     <strong ng-show="!module.is_plugin_active && module.is_theme"><?php _e("Please activate the theme first.");?></strong>
                                     <strong ng-show="module.is_constant"><?php _e("Currently configured via a constant.");?></strong>
                                     <strong ng-show="module.is_network_override"><?php _e("Currently configured via network settings.");?></strong>
-                                    {{module.description}}
+                                    <span ng-bind-html="module.description"></span>
                                 </p>  
                             </td>
                         </tr>

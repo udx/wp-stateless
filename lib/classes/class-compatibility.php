@@ -111,6 +111,11 @@ namespace wpCloud\StatelessMedia {
              * EWWW Image Optimizer
              */
             new EWWW();
+            
+            /**
+             * WP Retina 2x
+             */
+            new WPRetina2x();
         }
 
         /**
