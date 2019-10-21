@@ -44,7 +44,7 @@ namespace wpCloud\StatelessMedia {
 
                 // Manual sync
                 add_action( 'sm:synced::image', array( $this, 'manual_sync_backup_file'), 10, 2 );
-                add_action( 'sm:pre::synced::image', array( $this, 'update_md5_and_manual_sync'), 10, 2 );
+                add_action( 'sm:pre::synced::image', array( $this, 'update_md5_and_manual_sync'), 10, 1 );
 
             }
 
