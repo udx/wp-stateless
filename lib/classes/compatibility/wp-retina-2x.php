@@ -17,7 +17,7 @@ namespace wpCloud\StatelessMedia {
             protected $id = 'wp-retina-2x-pro';
             protected $title = 'WP Retina 2x Pro';
             protected $constant = 'WP_STATELESS_COMPATIBILITY_WP_RETINA_2X';
-            protected $description = 'Ensures compatibility with WP Retina 2x Pro plugins. Make sure <b class="wp-ui-notification">"Over HTTP Check"</b> setting is <b>enabled</b>.';
+            protected $description = 'Ensures compatibility with WP Retina 2x Pro plugins. Make sure <b>"Over HTTP Check"</b> setting is <b>enabled</b>.';
             protected $plugin_file = 'wp-retina-2x-pro/wp-retina-2x-pro.php';
 
             public function module_init($sm){
@@ -32,6 +32,15 @@ namespace wpCloud\StatelessMedia {
                 // Manual Sync retina images.
                 add_action( 'sm:synced::image', array( $this, 'manual_sync_retina'), 10, 2 );
 
+                $over_http = get_option( 'wr2x_over_http_check', false );
+                if(!$over_http){
+                    $url = admin_url('admin.php?page=wr2x_settings-menu');
+                    ud_get_stateless_media()->errors->add( array(
+                        'key' => "wp-retina-2x-pro-over-http-check",
+                        'title' => sprintf( __( "WP Stateless Compatibility: WP Retina 2x Pro", ud_get_stateless_media()->domain ) ),
+                        'message' => sprintf(__('Please enable the <b>"Over HTTP Check"</b> settings in <b>Meow Apps</b> > <a href="%s">Retina</a>.', ud_get_stateless_media()->domain), $url),
+                    ), 'notice' );
+                }
             }
 
             /**
