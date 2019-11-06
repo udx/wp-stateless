@@ -25,10 +25,11 @@ namespace wpCloud\StatelessMedia {
             	if ( class_exists('GFForms') ) {
             		$this->plugin_version = \GFForms::$version;
             	}
-                do_action('sm:sync::register_dir', '/gravity_forms/');
                 add_filter( 'gform_save_field_value', array($this, 'gform_save_field_value'), 10, 5 );
+                add_filter( 'stateless_skip_cache_busting', array($this, 'skip_cache_busting'), 10, 2 );
+                
+                do_action('sm:sync::register_dir', '/gravity_forms/');
                 add_action( 'sm::synced::nonMediaFiles', array($this, 'modify_db'), 10, 3);
-
                 add_action( 'gform_file_path_pre_delete_file', array($this, 'gform_file_path_pre_delete_file'), 10, 2);
             }
 
@@ -237,6 +238,18 @@ namespace wpCloud\StatelessMedia {
                 }
 
 		        return $file_path;
+            }
+
+            /**
+             * 
+             */
+            public function skip_cache_busting($return, $filename){
+                $backtrace = debug_backtrace();
+                if(!empty($backtrace[7]['class']) && $backtrace[7]['class'] == 'GFExport' && $backtrace[7]['function'] == 'write_file'){
+                    return true;
+                }
+
+                return $return;
             }
         }
 
