@@ -244,11 +244,17 @@ namespace wpCloud\StatelessMedia {
              * 
              */
             public function skip_cache_busting($return, $filename){
-                $backtrace = debug_backtrace();
-                if(!empty($backtrace[7]['class']) && $backtrace[7]['class'] == 'GFExport' && $backtrace[7]['function'] == 'write_file'){
-                    return true;
+                $backtrace = debug_backtrace(false, 8);
+                if(
+                    !empty($backtrace[7]['class']) && 
+                    $backtrace[7]['class'] == 'GFExport' && 
+                    (
+                        $backtrace[7]['function'] == 'write_file' ||
+                        $backtrace[7]['function'] == 'ajax_download_export'
+                    )
+                ){
+                    return $filename;
                 }
-
                 return $return;
             }
         }
