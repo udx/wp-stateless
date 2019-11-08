@@ -206,6 +206,14 @@ namespace wpCloud\StatelessMedia {
               add_filter( 'wp_stateless_bucket_link', array( $this, 'wp_stateless_bucket_link' ) );
             }
 
+            if($this->get( 'sm.mode' ) === 'stateless'){
+              // Store attachment id in a static variable on 'intermediate_image_sizes_advanced' filter.
+              // Utility::store_can_delete_attachment();
+              if(is_wp_version_compatible('5.3-RC4-46673')){
+                add_filter( 'intermediate_image_sizes_advanced', array($this, 'store_can_delete_attachment'), 10, 3 );
+              }
+            }
+
             add_filter( 'wp_stateless_file_name', array( $this, 'handle_root_dir' ), 10, 2 );
 
             /**

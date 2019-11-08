@@ -16,6 +16,8 @@ namespace wpCloud\StatelessMedia {
 
     class Utility {
 
+      static $can_delete_attachment = [];
+
       /**
        * ChromeLogger
        *
@@ -263,7 +265,7 @@ namespace wpCloud\StatelessMedia {
             // also skips full size image if already uploaded using that feature.
             // and delete it in stateless mode as it already bin uploaded through intermediate_image_sizes_advanced filter.
             if( !$img['is_thumb'] && $stateless_synced_full_size == $attachment_id ){
-              if(ud_get_stateless_media()->get( 'sm.mode' ) === 'stateless' && $args['no_thumb'] != true){
+              if(ud_get_stateless_media()->get( 'sm.mode' ) === 'stateless' && $args['no_thumb'] != true && \file_exists($img['path'])){
                 unlink($img['path']);
               }
               continue;
@@ -303,7 +305,7 @@ namespace wpCloud\StatelessMedia {
               
               // Stateless mode: we don't need the local version.
               // Except when uploading the full size image first.
-              if(ud_get_stateless_media()->get( 'sm.mode' ) === 'stateless' && $args['no_thumb'] != true){
+              if(self::can_delete_attachment($attachment_id, $args)){
                 unlink($img['path']);
               }
             }
@@ -539,6 +541,42 @@ namespace wpCloud\StatelessMedia {
           return $t;
       }
 
+      /**
+       * Store attachment id in a static variable on 'intermediate_image_sizes_advanced' filter.
+       * To indicate that we can now delete attachment from server now.
+       *
+       * @param array $new_sizes
+       * @param array $image_meta
+       * @param int $attachment_id
+       * @return array $new_sizes
+       */
+      public static function store_can_delete_attachment( $new_sizes, $image_meta, $attachment_id ){
+        if( !in_array($attachment_id, self::$can_delete_attachment)){
+          self::$can_delete_attachment[] = $attachment_id;
+        }
+        return $new_sizes;
+      }
+
+      /**
+       * Check whether to delete attachment from server or not.
+       *
+       * @param int $attachment_id
+       * @return boolean
+       */
+      public static function can_delete_attachment($attachment_id, $args){
+        if(
+          ud_get_stateless_media()->get( 'sm.mode' ) === 'stateless' && 
+          $args['no_thumb'] != true
+        ){
+          // checks whether it's WP 5.3 and 'intermediate_image_sizes_advanced' is passed.
+          // To be sure that we don't delete full size image before thumbnails are generated.
+          if(is_wp_version_compatible('5.3-RC4-46673') && !in_array($attachment_id, self::$can_delete_attachment)){
+            return false;
+          }
+          return true;
+        }
+        return false;
+      }
 
     }
 
