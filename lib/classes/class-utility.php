@@ -17,6 +17,7 @@ namespace wpCloud\StatelessMedia {
     class Utility {
 
       static $can_delete_attachment = [];
+      static $synced_sizes = [];
 
       /**
        * ChromeLogger
@@ -258,7 +259,7 @@ namespace wpCloud\StatelessMedia {
           $image_sizes = self::get_path_and_url($metadata, $attachment_id);
           foreach($image_sizes as $size => $img){
             // skips thumbs when it's called from Upload the full size image first, through intermediate_image_sizes_advanced filter.
-            if($args['no_thumb'] && $img['is_thumb']){
+            if($args['no_thumb'] && $img['is_thumb'] || !empty(self::$synced_sizes[$attachment_id][$size])){
               continue;
             }
 
@@ -307,6 +308,11 @@ namespace wpCloud\StatelessMedia {
               // Except when uploading the full size image first.
               if(self::can_delete_attachment($attachment_id, $args)){
                 unlink($img['path']);
+              }
+
+              // Setting
+              if(empty(self::$synced_sizes[$attachment_id][$size])){
+                self::$synced_sizes[$attachment_id][$size] = true;
               }
             }
           }
