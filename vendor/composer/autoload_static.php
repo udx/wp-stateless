@@ -87,6 +87,7 @@ class ComposerStaticInitc00cd3c666f8dfa818cb7edfd488ed20
         'wpCloud\\StatelessMedia\\Utility' => __DIR__ . '/../..' . '/lib/classes/class-utility.php',
         'wpCloud\\StatelessMedia\\WPBakeryPageBuilder' => __DIR__ . '/../..' . '/lib/classes/compatibility/wpbakery-page-builder.php',
         'wpCloud\\StatelessMedia\\WPForms' => __DIR__ . '/../..' . '/lib/classes/compatibility/wpforms.php',
+        'wpCloud\\StatelessMedia\\WPRetina2x' => __DIR__ . '/../..' . '/lib/classes/compatibility/wp-retina-2x.php',
         'wpCloud\\StatelessMedia\\WPSmush' => __DIR__ . '/../..' . '/lib/classes/compatibility/wp-smush.php',
     );
 

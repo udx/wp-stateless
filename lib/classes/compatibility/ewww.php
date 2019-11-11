@@ -20,7 +20,7 @@ namespace wpCloud\StatelessMedia {
             protected $plugin_file = ['ewww-image-optimizer/ewww-image-optimizer.php'];
 
             public function module_init($sm){
-                add_filter( 'ewww_image_optimizer_pre_optimization', array($this, 'pre_optimization'), 10, 3 );
+                // add_filter( 'ewww_image_optimizer_pre_optimization', array($this, 'pre_optimization'), 10, 3 );
                 add_action( 'ewww_image_optimizer_post_optimization', array($this, 'post_optimization'), 10, 3 );
             }
 
@@ -42,6 +42,12 @@ namespace wpCloud\StatelessMedia {
                 // wp_stateless_file_name filter will remove the basedir from the path and prepend with root dir.
                 $name = apply_filters( 'wp_stateless_file_name', $file);
                 do_action( 'sm:sync::syncFile', $name, $file, true);
+
+                // if($fullsize && file_exists($file . '.bak'))
+                //     do_action( 'sm:sync::syncFile', $name . '.bak', $file . '.bak', true);
+
+                if(file_exists($file . '.webp'))
+                    do_action( 'sm:sync::syncFile', $name . '.webp', $file . '.webp', true);
             }
             
         }

@@ -173,13 +173,16 @@ namespace wpCloud\StatelessMedia {
 
           @set_time_limit( -1 );
 
-          extract( $args = wp_parse_args( $args, array(
+          $args = wp_parse_args( $args, array(
             'force' => false,
             'name' => false,
             'absolutePath' => false,
             'mimeType' => 'image/jpeg',
             'metadata' => array(),
-          ) ) );
+            'is_webp' => '',
+          ) );
+          $args = apply_filters('wp_stateless_add_media_args', $args);
+          $name = $args['name'];
 
           /* Be sure file exists. */
           if( !file_exists( $args['absolutePath'] ) ) {
@@ -226,19 +229,27 @@ namespace wpCloud\StatelessMedia {
               'predefinedAcl' => 'bucketOwnerFullControl',
           )));
 
-          /* Make Media Public READ for all on success */
-          if (is_object($media)) {
-            $acl = new \wpCloud\StatelessMedia\Google_Client\Google_Service_Storage_ObjectAccessControl();
-            $acl->setEntity('allUsers');
-            $acl->setRole('READER');
-
-            $this->service->objectAccessControls->insert($this->bucket, $name, $acl);
-          }
+          $this->mediaInsertACL($media);
 
         } catch( Exception $e ) {
           return new WP_Error( 'sm_error', $e->getMessage() );
         }
         return get_object_vars( $media );
+      }
+
+      /**
+       * 
+       * 
+       */
+      public function mediaInsertACL($media){
+          /* Make Media Public READ for all on success */
+          if (!empty($media->name)) {
+            $acl = new \wpCloud\StatelessMedia\Google_Client\Google_Service_Storage_ObjectAccessControl();
+            $acl->setEntity('allUsers');
+            $acl->setRole('READER');
+
+            $this->service->objectAccessControls->insert($this->bucket, $media->name, $acl);
+          }
       }
 
       /**
@@ -263,6 +274,47 @@ namespace wpCloud\StatelessMedia {
           }
           return $this->client->getHttpClient()->get($media->getMediaLink(), ['save_to' => $save_path] )->getStatusCode();
         }
+
+        return $media;
+      }
+
+      /**
+       * get or save media file
+       * @param $path
+       * @param bool $save
+       * @param bool $save_path
+       * @return bool|\Google_Service_Storage_StorageObject|int
+       */
+      public function copy_media( $path, $new_path ) {
+        try {
+          $media = $this->service->objects->get($this->bucket, $path);
+          $media = $this->service->objects->copy($this->bucket, $path, $this->bucket, $new_path, $media);
+          $this->mediaInsertACL($media);
+        } catch ( \Exception $e ) {
+          return false;
+        }
+
+        if ( empty( $media->id ) ) return false;
+
+        return $media;
+      }
+
+      /**
+       * get or save media file
+       * @param $path
+       * @param bool $save
+       * @param bool $save_path
+       * @return bool|\Google_Service_Storage_StorageObject|int
+       */
+      public function move_media( $path, $new_path ) {
+        try {
+          $media = $this->copy_media($path, $new_path);
+          $this->remove_media($path);
+        } catch ( \Exception $e ) {
+          return false;
+        }
+
+        if ( empty( $media->id ) ) return false;
 
         return $media;
       }

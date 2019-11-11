@@ -30,6 +30,8 @@ namespace wpCloud\StatelessMedia {
                 add_action( 'sm:sync::addFile', array($this, 'add_file') );
                 // Sync a file.
                 add_action( 'sm:sync::syncFile', array($this, 'sync_file'), 10, 4 );
+                add_action( 'sm:sync::copyFile', array($this, 'copy_file'), 10, 2 );
+                add_action( 'sm:sync::moveFile', array($this, 'move_file'), 10, 2 );
                 add_action( 'sm:sync::deleteFile', array($this, 'delete_file') );
                 add_action( 'sm:sync::deleteFiles', array($this, 'delete_files') );
             }
@@ -60,7 +62,7 @@ namespace wpCloud\StatelessMedia {
              * @param:
              *  $name: Relative path to upload dir.
              *  $absolutePath: Full path of the file
-             *  $forced: Type: bool/2; Whether to force to move the file to GCS even it's already exists.
+             *  $forced: Type: bool/int; Whether to force to move the file to GCS even it's already exists.
              *           true: Check whether it's already synced or not in database.
              *           2 (int): Force to overwrite on GCS
              * 
@@ -93,7 +95,6 @@ namespace wpCloud\StatelessMedia {
                 do_action( 'sm::pre::sync::nonMediaFiles', $name, $absolutePath); // , $media
 
                 if ( !$local_file_exists && ( $args['download'] || ud_get_stateless_media()->get( 'sm.mode' ) !== 'stateless' ) ) {
-
                     // Try get it and save
                     $result_code = $this->client->get_media( $name, true, $absolutePath );
 
@@ -103,7 +104,7 @@ namespace wpCloud\StatelessMedia {
                     }
                 }
 
-                if($local_file_exists && !$file_copied_from_gcs){
+                if($local_file_exists && !$file_copied_from_gcs && !$args['download']){
 
                     $media = $this->client->add_media( array(
                         'name' => $name,
@@ -194,7 +195,7 @@ namespace wpCloud\StatelessMedia {
              * @param bool $force
              * @return bool
              */
-            public function delete_file($file, $force = true){
+            public function delete_file($file){
                 try{
                     $file = trim($file, '/');
                     if(empty($this->client)){
@@ -301,6 +302,68 @@ namespace wpCloud\StatelessMedia {
             public function queue_remove_file($file){
                 global $wpdb;
                 return $wpdb->delete( $this->table_name, array( 'file' => $file), array( '%s' ) ); 
+            }
+
+            /**
+             * Delete a file from GCS.
+             *
+             * @param $file
+             * @param bool $force
+             * @return bool
+             */
+            public function copy_file($old_file, $new_file, $force = false, $status = 'copied'){
+                try{
+                    if(!$force && $this->queue_is_exists($new_file, $status)){
+                        return false;
+                    }
+
+                    $client = $this->get_gs_client();
+
+                    // Removing file for GCS
+                    $client->copy_media($old_file, $new_file);
+
+                    $this->queue_add_file($new_file, $status);
+                    return true;
+                }
+                catch(\Exception $e){
+                    return false;
+                }
+            }
+
+            /**
+             * Delete a file from GCS.
+             *
+             * @param $file
+             * @param bool $force
+             * @return bool
+             */
+            public function move_file($old_file, $new_file){
+                try{
+                    
+                    $this->copy_file($old_file, $new_file, true, 'moved');
+                    $this->delete_file($old_file);
+
+                    $this->queue_remove_file($old_file);
+                    return true;
+                }
+                catch(\Exception $e){
+                    return false;
+                }
+            }
+
+            /**
+             * Delete a file from GCS.
+             *
+             * @param $file
+             * @param bool $force
+             * @return bool
+             */
+            public function get_gs_client(){
+                if(empty($this->client)){
+                    $this->client = ud_get_stateless_media()->get_client();
+                }
+
+                return $this->client;
             }
         }
     }

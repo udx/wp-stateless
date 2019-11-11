@@ -4,7 +4,7 @@
  */
 
 // Application
-var wpStatelessApp = angular.module('wpStatelessApp', [])
+var wpStatelessApp = angular.module('wpStatelessApp', ['ngSanitize'])
 
 // Controller
 .controller('wpStatelessTools', ['$scope', '$http', function ($scope, $http) {
