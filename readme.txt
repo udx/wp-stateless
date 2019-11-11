@@ -5,8 +5,8 @@ Tags: google, google cloud, google cloud storage, cdn, uploads, media, stateless
 License: GPLv2 or later
 Requires PHP: 5.5
 Requires at least: 4.0
-Tested up to: 5.1
-Stable tag: 2.2.7
+Tested up to: 5.3
+Stable tag: 2.3.0
 
 Upload and serve your WordPress media files from Google Cloud Storage.
 
@@ -100,10 +100,24 @@ To ensure new releases cause as little disruption as possible, we rely on a numb
 
 
 == Upgrade Notice ==
-= 2.2.6 =
-* FIX - Multisite Network Settings page fixed. GitHub Issue [#369](https://github.com/wpCloud/wp-stateless/issues/369).
+= 2.3.0 =
+* FIX - Fixed problem with WordPress 5.3. GitHub issue [#406](https://github.com/wpCloud/wp-stateless/issues/406).
+* FIX - Fixed problem with the Cache Busting feature. GitHub issue [#377](https://github.com/wpCloud/wp-stateless/issues/377).
+* COMPATIBILITY - Added compatibility support for WP Retina 2x pro. GitHub issue [#380](https://github.com/wpCloud/wp-stateless/issues/380).
+* COMPATIBILITY - Enhanced compatibility support for LiteSpeed Cache. GitHub issue [#365](https://github.com/wpCloud/wp-stateless/issues/365).
+* COMPATIBILITY - Enhanced compatibility support for ShortPixel Image Optimizer. GitHub issue [#364](https://github.com/wpCloud/wp-stateless/issues/364), [#398](https://github.com/wpCloud/wp-stateless/issues/398).
+* COMPATIBILITY - Fixed Gravity Form export. GitHub issue [#408](https://github.com/wpCloud/wp-stateless/issues/408).
+* ENHANCEMENT - Improved upon add_media function for better compatibility support. GitHub issue [#382](https://github.com/wpCloud/wp-stateless/issues/382).
 
 == Changelog ==
+= 2.3.0 =
+* FIX - Fixed problem with WordPress 5.3. GitHub issue [#406](https://github.com/wpCloud/wp-stateless/issues/406).
+* FIX - Fixed problem with the Cache Busting feature. GitHub issue [#377](https://github.com/wpCloud/wp-stateless/issues/377).
+* COMPATIBILITY - Added compatibility support for WP Retina 2x pro. GitHub issue [#380](https://github.com/wpCloud/wp-stateless/issues/380).
+* COMPATIBILITY - Enhanced compatibility support for LiteSpeed Cache. GitHub issue [#365](https://github.com/wpCloud/wp-stateless/issues/365).
+* COMPATIBILITY - Enhanced compatibility support for ShortPixel Image Optimizer. GitHub issue [#364](https://github.com/wpCloud/wp-stateless/issues/364), [#398](https://github.com/wpCloud/wp-stateless/issues/398).
+* COMPATIBILITY - Fixed Gravity Form export. GitHub issue [#408](https://github.com/wpCloud/wp-stateless/issues/408).
+* ENHANCEMENT - Improved upon add_media function for better compatibility support. GitHub issue [#382](https://github.com/wpCloud/wp-stateless/issues/382).
 
 = 2.2.7 =
 * FIX - WP-Smush compatibility enhanced. GitHub Issue [#366](https://github.com/wpCloud/wp-stateless/issues/366).
@@ -120,61 +134,6 @@ To ensure new releases cause as little disruption as possible, we rely on a numb
 * NEW - Added ability to start sync process from specific Attachment ID. GitHub Issue [#360](https://github.com/wpCloud/wp-stateless/issues/360).
 * COMPATIBILITY - Added compatibility support for LiteSpeed Cache plugin. Especially to support optimized .webp images. GitHub Issue [#357](https://github.com/wpCloud/wp-stateless/issues/357).
 * FIX - Other minor fixes.
-
-= 2.2.4 =
-* NEW - Added new filter `wp_stateless_skip_add_media`. Allows skipping synchronization of the media object with GCS depending on custom condition. GitHub Issue [#344](https://github.com/wpCloud/wp-stateless/issues/344).
-* FIX - Compatibility Manager is considering Child Themes now. GitHub Issue [#351](https://github.com/wpCloud/wp-stateless/issues/351).
-* FIX - Custom domains handling has been fixed. GitHub Issue [#358](https://github.com/wpCloud/wp-stateless/issues/358).
-* ENHANCEMENT - Imagify Image Optimizer and WP Smush compatibilities improved. GitHub Issue [#359](https://github.com/wpCloud/wp-stateless/issues/359).
-
-= 2.2.3 =
-* FIX - get_post_metadata does not break multi-dimensional arrays anymore. GitHub Issue [#352](https://github.com/wpCloud/wp-stateless/issues/352).
-* FIX - PHP Warning: substr_compare() fixed. GitHub Issue [#350](https://github.com/wpCloud/wp-stateless/issues/350).
-* FIX - Filtering Domain setting before saving in order to get rid of possible empty spaces. GitHub Issue [#348](https://github.com/wpCloud/wp-stateless/issues/348).
-* FIX - Incorrect remote file path generated when disabled Organization setting. GitHub Issue [#343](https://github.com/wpCloud/wp-stateless/issues/343).
-* FIX - Hiding admin notices correctly. GitHub Pull Request [#355](https://github.com/wpCloud/wp-stateless/pull/355).
-
-= 2.2.2 =
-* FIX - Proper 'srcset' attribute handling. GitHub Issue [#342](https://github.com/wpCloud/wp-stateless/issues/342).
-* ENHANCEMENT - Minor fixes code quality.
-
-= 2.2.1 =
-* FIX - Security patch for Authenticated Remote Code Execution (RCE) vulnerability.
-
-= 2.2.0 =
-* FIX - Slow page generation when File URL Replacement is enabled. GitHub Issue [#265](https://github.com/wpCloud/wp-stateless/issues/265).
-* FIX - Fatal error when WP Smush Pro compatibility is enabled. GitHub Issue [#325](https://github.com/wpCloud/wp-stateless/issues/325).
-* FIX - Issue with Imagify. GitHub Issue [#326](https://github.com/wpCloud/wp-stateless/issues/326).
-* FIX - Return correct srcset images. GitHub Issue [#328](https://github.com/wpCloud/wp-stateless/issues/328).
-* FIX - Fatal error with GFForms. GitHub Issue [#330](https://github.com/wpCloud/wp-stateless/issues/330).
-* FIX - Typo in admin notices. GitHub Issue [#337](https://github.com/wpCloud/wp-stateless/issues/337).
-* ENHANCEMENT - Extended “File URL Replacement” options. GitHub Issue [#336](https://github.com/wpCloud/wp-stateless/issues/336).
-* ENHANCEMENT - Service Account JSON is now hidden if set via constant. GitHub Issue [#320](https://github.com/wpCloud/wp-stateless/issues/320).
-* ENHANCEMENT - New database table for tracking files not tracked in media library. GitHub Issue [#307](https://github.com/wpCloud/wp-stateless/issues/307).
-* ENHANCEMENT - Updated depreciated function flagged by security software. GitHub Issue [#300](https://github.com/wpCloud/wp-stateless/issues/300).
-
-= 2.1.9 =
-* FIX - Resolved fatal error with OneCodeShop RML Amazon S3 plugin. GitHub Issue [#317](https://github.com/wpCloud/wp-stateless/issues/317).
-* FIX - Resolved missing bucket in file URL when “storage.googleapis.com” was supplied in Domain field. GitHub Issue [#318](https://github.com/wpCloud/wp-stateless/issues/318).
-* ENHANCEMENT - Support synchronization of files without metadata, such as .doc and .docx files. GitHub Issue [#316](https://github.com/wpCloud/wp-stateless/issues/316).
-
-= 2.1.8 =
-* FIX - WooCommerce product export.
-* FIX - PDF previews in media library now supported.
-* ENHANCEMENT - Improved error message when there is nothing to sync.
-* ENHANCEMENT - Renamed constant WP_STATELESS_MEDIA_HASH_FILENAME to WP_STATELESS_MEDIA_CACHE_BUSTING.
-* ENHANCEMENT - Domain field functionality now allows webmaster to control http or https
-* ENHANCEMENT - Notice about Stateless mode requiring the Cache-Busting option is displayed to those using Stateless mode.
-* ENHANCEMENT - Upload full size image before generating thumbnails.
-* COMPATIBILITY - Added compatibility support for Learndash plugin.
-* COMPATIBILITY - Added compatibility support for BuddyPress plugin.
-* COMPATIBILITY - Added compatibility support for Divi Builder export.
-* COMPATIBILITY - Added compatibility support for Elementor plugin.
-
-= 2.1.7 =
-* ENHANCEMENT - Display dashboard-wide notice for existing users explaining stateless mode now enables cache-busting option.
-* ENHANCEMENT - Display notice when selecting stateless mode explaining stateless mode now enables cache-busting option.
-* ENHANCEMENT - Display required message on cache-busting setting description when stateless mode is enabled.
 
 = Earlier versions =
 Please refer to the separate changelog.txt file.
