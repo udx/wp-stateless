@@ -81,7 +81,6 @@ namespace wpCloud\StatelessMedia {
              * 
              */
             public function sync_image($row_img, $local_file){
-                // error_log(print_r(func_get_args(), true));
                 $rm_ori_bkup = \LiteSpeed_Cache::config( \LiteSpeed_Cache_Config::OPT_MEDIA_RM_ORI_BKUP ) ;
                 $gs_name = apply_filters( 'wp_stateless_file_name', $row_img->src );
                 $cloud_meta = get_post_meta( $row_img->post_id, 'sm_cloud', true );
@@ -138,9 +137,6 @@ namespace wpCloud\StatelessMedia {
              */
             public function litespeed_media_info($info, $short_file_path, $post_id){
                 if(!$post_id) return $info;
-                // echo('\n\nlitespeed_media_info start:');
-                // echo(print_r(func_get_args(), true));
-                // echo('\nlitespeed_media_info end:\n\n');
 
                 try {
                     $metadata = wp_get_attachment_metadata( $post_id );
@@ -150,10 +146,6 @@ namespace wpCloud\StatelessMedia {
                         $short_file_path = apply_filters( 'wp_stateless_file_name', $short_file_path );
                         $url = ud_get_stateless_media()->get_gs_host() . '/' . $short_file_path;
                         $md5 = !empty($cloud_meta['fileMd5'][$short_file_path]) ? $cloud_meta['fileMd5'][$short_file_path] : null;
-                        // print_r($cloud_meta['fileMd5']);
-
-                        // echo "\n $short_file_path: $md5\n";
-                        // print_r($cloud_meta['fileMd5']);
     
                         if($metadata['file'] == $short_file_path){
                             $url = $metadata['gs_link'];
@@ -176,9 +168,8 @@ namespace wpCloud\StatelessMedia {
                         }
                     }
                 } catch (\Throwable $th) {
-                    error_log(print_r($th));
+                    error_log(print_r($th, true));
                 }
-                // print_r($info);
 
                 return $info;
             }

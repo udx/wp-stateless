@@ -258,17 +258,17 @@ namespace wpCloud\StatelessMedia {
            */
           $image_sizes = self::get_path_and_url($metadata, $attachment_id);
           foreach($image_sizes as $size => $img){
-            // skips thumbs when it's called from Upload the full size image first, through intermediate_image_sizes_advanced filter.
-            if($args['no_thumb'] && $img['is_thumb'] || !empty(self::$synced_sizes[$attachment_id][$size])){
-              continue;
-            }
-
             // also skips full size image if already uploaded using that feature.
             // and delete it in stateless mode as it already bin uploaded through intermediate_image_sizes_advanced filter.
             if( !$img['is_thumb'] && $stateless_synced_full_size == $attachment_id ){
               if(ud_get_stateless_media()->get( 'sm.mode' ) === 'stateless' && $args['no_thumb'] != true && \file_exists($img['path'])){
                 unlink($img['path']);
               }
+              continue;
+            }
+
+            // skips thumbs when it's called from Upload the full size image first, through intermediate_image_sizes_advanced filter.
+            if($args['no_thumb'] && $img['is_thumb'] || !empty(self::$synced_sizes[$attachment_id][$size])){
               continue;
             }
 
