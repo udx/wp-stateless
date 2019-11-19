@@ -6,7 +6,7 @@ License: GPLv2 or later
 Requires PHP: 5.5
 Requires at least: 4.0
 Tested up to: 5.3
-Stable tag: 2.3.0
+Stable tag: 2.3.1
 
 Upload and serve your WordPress media files from Google Cloud Storage.
 
@@ -100,16 +100,12 @@ To ensure new releases cause as little disruption as possible, we rely on a numb
 
 
 == Upgrade Notice ==
-= 2.3.0 =
-* FIX - Fixed problem with WordPress 5.3. GitHub issue [#406](https://github.com/wpCloud/wp-stateless/issues/406).
-* FIX - Fixed problem with the Cache Busting feature. GitHub issue [#377](https://github.com/wpCloud/wp-stateless/issues/377).
-* COMPATIBILITY - Added compatibility support for WP Retina 2x pro. GitHub issue [#380](https://github.com/wpCloud/wp-stateless/issues/380).
-* COMPATIBILITY - Enhanced compatibility support for LiteSpeed Cache. GitHub issue [#365](https://github.com/wpCloud/wp-stateless/issues/365).
-* COMPATIBILITY - Enhanced compatibility support for ShortPixel Image Optimizer. GitHub issue [#364](https://github.com/wpCloud/wp-stateless/issues/364), [#398](https://github.com/wpCloud/wp-stateless/issues/398).
-* COMPATIBILITY - Fixed Gravity Form export. GitHub issue [#408](https://github.com/wpCloud/wp-stateless/issues/408).
-* ENHANCEMENT - Improved upon add_media function for better compatibility support. GitHub issue [#382](https://github.com/wpCloud/wp-stateless/issues/382).
+Fixed fatal error, undefined function `is_wp_version_compatible`.
 
 == Changelog ==
+= 2.3.1 =
+* Fix - Fixed fatal error, undefined function `is_wp_version_compatible`. GitHub issue [#414](https://github.com/wpCloud/wp-stateless/issues/414).
+
 = 2.3.0 =
 * FIX - Fixed problem with WordPress 5.3. GitHub issue [#406](https://github.com/wpCloud/wp-stateless/issues/406).
 * FIX - Fixed problem with the Cache Busting feature. GitHub issue [#377](https://github.com/wpCloud/wp-stateless/issues/377).
