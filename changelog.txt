@@ -1,4 +1,7 @@
 == Changelog ==
+= 2.3.1 =
+* Fix - Fixed fatal error, undefined function `is_wp_version_compatible`. GitHub issue [#414](https://github.com/wpCloud/wp-stateless/issues/414).
+
 = 2.3.0 =
 * FIX - Fixed problem with WordPress 5.3. GitHub issue [#406](https://github.com/wpCloud/wp-stateless/issues/406).
 * FIX - Fixed problem with the Cache Busting feature. GitHub issue [#377](https://github.com/wpCloud/wp-stateless/issues/377).
