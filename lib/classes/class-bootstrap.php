@@ -209,7 +209,7 @@ namespace wpCloud\StatelessMedia {
             if($this->get( 'sm.mode' ) === 'stateless'){
               // Store attachment id in a static variable on 'intermediate_image_sizes_advanced' filter.
               // Utility::store_can_delete_attachment();
-              if(is_wp_version_compatible('5.3-RC4-46673')){
+              if(function_exists('is_wp_version_compatible') && is_wp_version_compatible('5.3-RC4-46673')){
                 add_filter( 'intermediate_image_sizes_advanced', array($this, 'store_can_delete_attachment'), 10, 3 );
               }
             }
