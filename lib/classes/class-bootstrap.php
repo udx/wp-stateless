@@ -141,27 +141,12 @@ namespace wpCloud\StatelessMedia {
         add_action( 'admin_enqueue_scripts', array( $this, 'admin_enqueue_scripts' ) );
 
         /**
-         * Hashify file name if option is enabled
-         */
-        if ( $this->get( 'sm.hashify_file_name' ) == 'true' ) {
-          add_filter('sanitize_file_name', array( 'wpCloud\StatelessMedia\Utility', 'randomize_filename' ), 10);
-        }
-
-        /**
          * Delete table when blog is deleted.
          */
         add_action( 'wp_delete_site', array($this, 'wp_delete_site'));
 
         /* Initialize plugin only if Mode is not 'disabled'. */
         if ( $this->get( 'sm.mode' ) !== 'disabled' ) {
-
-          /**
-           * Override Cache Control is option is enabled
-           */
-          $cacheControl = trim($this->get( 'sm.cache_control' ));
-          if ( !empty($cacheControl) ) {
-            add_filter( 'sm:item:cacheControl', array( $this, 'override_cache_control' ) );
-          }
 
           /**
            * Determine if we have issues with connection to Google Storage Bucket
@@ -189,6 +174,21 @@ namespace wpCloud\StatelessMedia {
            * Carry on only if we do not have errors.
            */
           if( !$this->has_errors() ) {
+
+            /**
+             * Hashify file name if option is enabled
+             */
+            if ( $this->get( 'sm.hashify_file_name' ) == 'true' ) {
+              add_filter('sanitize_file_name', array( 'wpCloud\StatelessMedia\Utility', 'randomize_filename' ), 10);
+            }
+
+            /**
+             * Override Cache Control is option is enabled
+             */
+            $cacheControl = trim($this->get( 'sm.cache_control' ));
+            if ( !empty($cacheControl) ) {
+              add_filter( 'sm:item:cacheControl', array( $this, 'override_cache_control' ) );
+            }
 
             if( $this->get( 'sm.mode' ) === 'cdn' || $this->get( 'sm.mode' ) === 'stateless' ) {
               add_filter( 'wp_get_attachment_image_attributes', array( $this, 'wp_get_attachment_image_attributes' ), 20, 3 );
