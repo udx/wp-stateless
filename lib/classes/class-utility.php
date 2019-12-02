@@ -576,7 +576,12 @@ namespace wpCloud\StatelessMedia {
         ){
           // checks whether it's WP 5.3 and 'intermediate_image_sizes_advanced' is passed.
           // To be sure that we don't delete full size image before thumbnails are generated.
-          if(is_wp_version_compatible('5.3-RC4-46673') && !in_array($attachment_id, self::$can_delete_attachment)){
+          if(
+            wp_attachment_is_image($attachment_id) &&
+            function_exists('is_wp_version_compatible') && 
+            is_wp_version_compatible('5.3-RC4-46673') && 
+            !in_array($attachment_id, self::$can_delete_attachment)
+          ){
             return false;
           }
           return true;

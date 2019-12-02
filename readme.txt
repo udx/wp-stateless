@@ -4,7 +4,7 @@ Donate link: https://www.usabilitydynamics.com
 Tags: google, google cloud, google cloud storage, cdn, uploads, media, stateless, backup
 License: GPLv2 or later
 Requires PHP: 5.5
-Requires at least: 4.0
+Requires at least: 4.7.0
 Tested up to: 5.3
 Stable tag: 2.3.1
 
