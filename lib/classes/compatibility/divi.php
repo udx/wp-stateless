@@ -20,8 +20,13 @@ namespace wpCloud\StatelessMedia {
             protected $theme_name = 'Divi';
 
             public function module_init($sm){
-                // exclude randomize_filename from wpforms page
-                if(wp_doing_ajax() && !empty($_POST['et_core_portability_export']) && $_POST['et_core_portability_export'] == 'et_core_portability_export') {
+                // exclude randomize_filename from export
+                if(
+                    !empty($_GET['et_core_portability']) ||
+                    wp_doing_ajax() && 
+                    (!empty($_POST['action']) && $_POST['action'] == 'et_core_portability_export') ||
+                    (!empty($_POST['et_core_portability_export']) && $_POST['et_core_portability_export'] == 'et_core_portability_export')
+                ) {
                     remove_filter( 'sanitize_file_name', array( "wpCloud\StatelessMedia\Utility", 'randomize_filename' ), 10 );
                 }
                 
