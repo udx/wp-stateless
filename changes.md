@@ -1,3 +1,11 @@
+#### 2.3.2 ####
+* FIX - Fixed video file doesn't get deleted from the server in `Stateless` mode. GitHub issue [#418](https://github.com/wpCloud/wp-stateless/issues/418).
+* FIX - Fixed file size doesn't show under attachment details in `Stateless` mode. GitHub issue [#413](https://github.com/wpCloud/wp-stateless/issues/413).
+* FIX - Fixed Cache-Busting feature works even if the Mode is `Disabled`. GitHub issue [#405](https://github.com/wpCloud/wp-stateless/issues/405).
+* COMPATIBILITY - Fixed Gravity Form Post Image didn't include `Bucket Folder`. GitHub issue [#421](https://github.com/wpCloud/wp-stateless/issues/421).
+* COMPATIBILITY - Fixed Divi Builder Export. GitHub issue [#420](https://github.com/wpCloud/wp-stateless/issues/420).
+* COMPATIBILITY - Fixed BuddyBoss pages breaking after updating to 2.3.0. GitHub issue [#417](https://github.com/wpCloud/wp-stateless/issues/417).
+
 #### 2.3.1 ####
 * Fix - Fixed fatal error, undefined function `is_wp_version_compatible`. GitHub issue [#414](https://github.com/wpCloud/wp-stateless/issues/414).
 
