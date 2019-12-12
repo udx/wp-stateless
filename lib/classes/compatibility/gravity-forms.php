@@ -101,7 +101,7 @@ namespace wpCloud\StatelessMedia {
                         $name = apply_filters( 'wp_stateless_file_name', $name);
                         do_action( 'sm:sync::syncFile', $name, $absolutePath);
 
-                        $value = ud_get_stateless_media()->get_gs_host() . '/' . $_name;
+                        $value = ud_get_stateless_media()->get_gs_host() . '/' . $name;
                         // Todo add filter.
                         if(version_compare($this->plugin_version, '2.3', '<')){ // older version
                             $result = $wpdb->update( $lead_detail_table, array( 'value' => $value ), array( 'lead_id' => $lead_detail_id, 'form_id' => $form['id'], 'field_number' => $field['id'], ), array( '%s' ), array( '%d' ) );

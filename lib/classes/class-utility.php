@@ -254,6 +254,19 @@ namespace wpCloud\StatelessMedia {
           ));
 
           /**
+           * Storing file size to sm_cloud first,
+           * Because assigning directly to $metadata['filesize'] don't work.
+           * Maybe filesize gets removed in first run (when file exists).
+           */
+          if ( file_exists( $fullsizepath ) ) {
+            $cloud_meta['filesize'] = filesize( $fullsizepath );
+          }
+          // Getting file size from sm_cloud.
+          if(!empty($cloud_meta['filesize'])){
+            $metadata['filesize'] = $cloud_meta['filesize'];
+          }
+          
+          /**
            * 
            */
           $image_sizes = self::get_path_and_url($metadata, $attachment_id);
@@ -576,7 +589,12 @@ namespace wpCloud\StatelessMedia {
         ){
           // checks whether it's WP 5.3 and 'intermediate_image_sizes_advanced' is passed.
           // To be sure that we don't delete full size image before thumbnails are generated.
-          if(is_wp_version_compatible('5.3-RC4-46673') && !in_array($attachment_id, self::$can_delete_attachment)){
+          if(
+            wp_attachment_is_image($attachment_id) &&
+            function_exists('is_wp_version_compatible') && 
+            is_wp_version_compatible('5.3-RC4-46673') && 
+            !in_array($attachment_id, self::$can_delete_attachment)
+          ){
             return false;
           }
           return true;
