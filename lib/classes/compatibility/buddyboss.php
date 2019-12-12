@@ -1,6 +1,6 @@
 <?php
 /**
- * Plugin Name: BuddyPress
+ * Plugin Name: BuddyBoss
  * Plugin URI: https://www.buddyboss.com/platform/
  *
  * Compatibility Description: Ensures compatibility with BuddyBoss.
@@ -14,7 +14,7 @@ namespace wpCloud\StatelessMedia {
         class BuddyBoss extends ICompatibility {
             protected $id = 'buddyboss';
             protected $title = 'BuddyBoss';
-            protected $constant = 'WP_STATELESS_COMPATIBILITY_BUDDYPRESS';
+            protected $constant = 'WP_STATELESS_COMPATIBILITY_BUDDYBOSS';
             protected $description = 'Ensures compatibility with BuddyBoss.';
             protected $plugin_file = ['buddyboss-platform/bp-loader.php'];
 
