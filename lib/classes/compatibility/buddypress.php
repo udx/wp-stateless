@@ -83,10 +83,16 @@ namespace wpCloud\StatelessMedia {
             public function bp_core_fetch_avatar_url($url){
                 $wp_uploads_dir = wp_get_upload_dir();
                 $name = apply_filters( 'wp_stateless_file_name', $url);
-                $full_avatar_path = $wp_uploads_dir['basedir'] . '/' . $name;
-                do_action( 'sm:sync::syncFile', $full_avatar, $full_avatar_path, true, array('stateless' => false));
 
-                $url = ud_get_stateless_media()->get_gs_host() . '/' . $name;
+                
+                $root_dir = ud_get_stateless_media()->get( 'sm.root_dir' );
+                $root_dir = trim( $root_dir, '/ ' ); // Remove any forward slash and empty space.
+                // Making sure that we only modify url for uploads dir.
+                if(strpos($name, "$root_dir/http") !== 0){
+                    $full_avatar_path = $wp_uploads_dir['basedir'] . '/' . $name;
+                    do_action( 'sm:sync::syncFile', $full_avatar, $full_avatar_path, true, array('stateless' => false));
+                    $url = ud_get_stateless_media()->get_gs_host() . '/' . $name;
+                }
                 return $url;
             }
 
