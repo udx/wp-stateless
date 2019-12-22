@@ -29,6 +29,9 @@ namespace wpCloud\StatelessMedia {
 
             }
 
+            /**
+             * Sync avatar.
+             */
             public function avatar_uploaded($item_id, $type, $r){
                 $full_avatar = bp_core_fetch_avatar( array(
                     'object'  => $r['object'],
@@ -75,7 +78,7 @@ namespace wpCloud\StatelessMedia {
             }
 
             /**
-             * 
+             * Sync then return GCS url.
              *
              * @param [type] $url image url.
              * @return void
@@ -96,6 +99,9 @@ namespace wpCloud\StatelessMedia {
                 return $url;
             }
 
+            /**
+             * Deleting avatar from GCS.
+             */
             public function delete_existing_avatar($return, $args){
                 if(empty($args['object']) && empty($args['item_id'])){
                     return $return;
@@ -134,6 +140,7 @@ namespace wpCloud\StatelessMedia {
              * @return void
              */
             public function bp_attachments_pre_get_attachment($return, $r){
+                // Return if this is a recursive call.
                 if(!empty($r['recursive'])){
                     return $return;
                 }
@@ -141,6 +148,7 @@ namespace wpCloud\StatelessMedia {
                 try {
                     $debug_backtrace = \debug_backtrace(false);
 
+                    // Making sure we only return GCS link if the type is url.
                     if(!empty($debug_backtrace[3]['args'][0]) && $debug_backtrace[3]['args'][0] == 'url'){
                         $r['recursive'] = true;
 
