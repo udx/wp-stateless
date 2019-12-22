@@ -69,8 +69,10 @@ namespace wpCloud\StatelessMedia {
             public function bp_core_fetch_avatar($image_html){
                 try {
                     preg_match("/src=(?:'|\")(.*)(?:'|\")/", $image_html, $image_url);
-                    $gs_image_url = $this->bp_core_fetch_avatar_url($image_url[1]);
-                    $image_html = str_replace($image_url[1], $gs_image_url, $image_html);
+                    if(!empty($image_url[1])){
+                        $gs_image_url = $this->bp_core_fetch_avatar_url($image_url[1]);
+                        $image_html = str_replace($image_url[1], $gs_image_url, $image_html);
+                    }
                 } catch (\Throwable $th) {
                     //throw $th;
                 }
@@ -91,7 +93,7 @@ namespace wpCloud\StatelessMedia {
                 $root_dir = ud_get_stateless_media()->get( 'sm.root_dir' );
                 $root_dir = trim( $root_dir, '/ ' ); // Remove any forward slash and empty space.
                 // Making sure that we only modify url for uploads dir.
-                if(strpos($name, "$root_dir/http") !== 0){
+                if(strpos($name, "$root_dir/http") !== 0 && $root_dir !== $name){
                     $full_avatar_path = $wp_uploads_dir['basedir'] . '/' . $name;
                     do_action( 'sm:sync::syncFile', $full_avatar, $full_avatar_path, true, array('stateless' => false));
                     $url = ud_get_stateless_media()->get_gs_host() . '/' . $name;
@@ -154,11 +156,16 @@ namespace wpCloud\StatelessMedia {
 
                         $url = bp_attachments_get_attachment('url', $r);
                         $name = apply_filters( 'wp_stateless_file_name', $url);
+                        
+                        $root_dir = ud_get_stateless_media()->get( 'sm.root_dir' );
+                        $root_dir = trim( $root_dir, '/ ' ); // Remove any forward slash and empty space.
 
-                        $full_path = bp_attachments_get_attachment(false, $r);
-                        do_action( 'sm:sync::syncFile', $name, $full_path, true, array('stateless' => false));
+                        if($root_dir . "/" != $name){
+                            $full_path = bp_attachments_get_attachment(false, $r);
+                            do_action( 'sm:sync::syncFile', $name, $full_path, true, array('stateless' => false));
+                            $return = ud_get_stateless_media()->get_gs_host() . '/' . $name;
+                        }
 
-                        $return = ud_get_stateless_media()->get_gs_host() . '/' . $name;
                     }
                 } catch (\Throwable $th) {
                     //throw $th;
