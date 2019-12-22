@@ -21,8 +21,8 @@ namespace wpCloud\StatelessMedia {
             public function module_init($sm){
                 add_action('xprofile_avatar_uploaded', array($this, 'avatar_uploaded'), 10, 3);
                 add_action('groups_avatar_uploaded', array($this, 'avatar_uploaded'), 10, 3);
-                add_action('bp_core_fetch_avatar', array($this, 'bp_core_fetch_avatar'), 10, 3);
-
+                
+                add_filter('bp_core_fetch_avatar', array($this, 'bp_core_fetch_avatar'), 10, 3);
                 add_filter('bp_core_fetch_avatar_url', array($this, 'bp_core_fetch_avatar_url'), 10, 3);
                 add_filter('bp_core_pre_delete_existing_avatar', array($this, 'delete_existing_avatar'), 10, 2);
                 add_filter('bp_attachments_pre_get_attachment', array($this, 'bp_attachments_pre_get_attachment'), 10, 2);
@@ -64,7 +64,13 @@ namespace wpCloud\StatelessMedia {
              * @return void
              */
             public function bp_core_fetch_avatar($image_html){
-                $image_html = ud_get_stateless_media()->the_content_filter($image_html);
+                try {
+                    preg_match("/src=(?:'|\")(.*)(?:'|\")/", $image_html, $image_url);
+                    $gs_image_url = $this->bp_core_fetch_avatar_url($image_url[1]);
+                    $image_html = str_replace($image_url[1], $gs_image_url, $image_html);
+                } catch (\Throwable $th) {
+                    //throw $th;
+                }
                 return $image_html;
             }
 
@@ -75,7 +81,11 @@ namespace wpCloud\StatelessMedia {
              * @return void
              */
             public function bp_core_fetch_avatar_url($url){
+                $wp_uploads_dir = wp_get_upload_dir();
                 $name = apply_filters( 'wp_stateless_file_name', $url);
+                $full_avatar_path = $wp_uploads_dir['basedir'] . '/' . $name;
+                do_action( 'sm:sync::syncFile', $full_avatar, $full_avatar_path, true, array('stateless' => false));
+
                 $url = ud_get_stateless_media()->get_gs_host() . '/' . $name;
                 return $url;
             }
@@ -110,6 +120,8 @@ namespace wpCloud\StatelessMedia {
 
             /**
              * Sync and return GCS url for group images.
+             * 
+             * Used as CSS background-image.
              *
              * @param [type] $return
              * @param [type] $r
