@@ -68,7 +68,7 @@ namespace wpCloud\StatelessMedia {
              */
             public function bp_core_fetch_avatar($image_html){
                 try {
-                    preg_match("/src=(?:'|\")(.*)(?:'|\")/", $image_html, $image_url);
+                    preg_match("/src=(?:'|\")(.*?)(?:'|\")/", $image_html, $image_url);
                     if(!empty($image_url[1])){
                         $gs_image_url = $this->bp_core_fetch_avatar_url($image_url[1]);
                         $image_html = str_replace($image_url[1], $gs_image_url, $image_html);
@@ -88,14 +88,23 @@ namespace wpCloud\StatelessMedia {
             public function bp_core_fetch_avatar_url($url){
                 $wp_uploads_dir = wp_get_upload_dir();
                 $name = apply_filters( 'wp_stateless_file_name', $url);
+                $full_avatar_path = $wp_uploads_dir['basedir'] . '/' . $name;
 
                 
                 $root_dir = ud_get_stateless_media()->get( 'sm.root_dir' );
                 $root_dir = trim( $root_dir, '/ ' ); // Remove any forward slash and empty space.
                 // Making sure that we only modify url for uploads dir.
-                if(strpos($name, "$root_dir/http") !== 0 && $root_dir !== $name){
-                    $full_avatar_path = $wp_uploads_dir['basedir'] . '/' . $name;
-                    do_action( 'sm:sync::syncFile', $full_avatar, $full_avatar_path, true, array('stateless' => false));
+                // @todo support photo in plugins directory.
+
+
+                if(strpos($name, plugins_url()) === 0){
+                    $name = str_replace(plugins_url() . '/', '', $name);
+                    $name = apply_filters( 'wp_stateless_file_name', $name);
+                    $full_avatar_path = WP_PLUGIN_DIR . '/' . $name;
+                }
+                
+                if(strpos($name, "$root_dir/http") !== 0 && strpos($name, "http") !== 0 && $root_dir !== $name){
+                    do_action( 'sm:sync::syncFile', $name, $full_avatar_path, false, array('stateless' => false));
                     $url = ud_get_stateless_media()->get_gs_host() . '/' . $name;
                 }
                 return $url;
@@ -156,13 +165,13 @@ namespace wpCloud\StatelessMedia {
 
                         $url = bp_attachments_get_attachment('url', $r);
                         $name = apply_filters( 'wp_stateless_file_name', $url);
-                        
+
                         $root_dir = ud_get_stateless_media()->get( 'sm.root_dir' );
                         $root_dir = trim( $root_dir, '/ ' ); // Remove any forward slash and empty space.
 
-                        if($root_dir . "/" != $name){
+                        if(!empty($name) && $root_dir . "/" != $name){
                             $full_path = bp_attachments_get_attachment(false, $r);
-                            do_action( 'sm:sync::syncFile', $name, $full_path, true, array('stateless' => false));
+                            do_action( 'sm:sync::syncFile', $name, $full_path, false, array('stateless' => false));
                             $return = ud_get_stateless_media()->get_gs_host() . '/' . $name;
                         }
 

@@ -626,7 +626,9 @@ namespace wpCloud\StatelessMedia {
         $current_path = str_replace( wp_normalize_path( trailingslashit( $upload_dir[ 'baseurl' ] ) ), '', wp_normalize_path( $current_path ) );
         $current_path = str_replace( trailingslashit( $this->get_gs_host() ), '', $current_path );
 
-        $current_path = str_replace( trailingslashit( $root_dir ), '', $current_path );
+        if($root_dir){
+          $current_path = str_replace( trailingslashit( $root_dir ), '', $current_path );
+        }
 
         // skip adding root dir if it's already added.
         if ( $use_root && !empty( $root_dir ) && strpos($current_path, $root_dir) !== 0 ) {
