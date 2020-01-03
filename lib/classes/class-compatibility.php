@@ -121,6 +121,11 @@ namespace wpCloud\StatelessMedia {
              * WP Retina 2x
              */
             new WPRetina2x();
+            
+            /**
+             * VidoRev
+             */
+            new VidoRev();
         }
 
         /**
