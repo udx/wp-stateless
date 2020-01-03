@@ -1,5 +1,5 @@
 #### 2.3.3 ####
-* COMPATIBILITY - Fixed VidoRev video file uploaded from the frontend not syncing.
+* COMPATIBILITY - Fixed VidoRev video file uploaded from the frontend not syncing. GitHub issue [#418](https://github.com/wpCloud/wp-stateless/issues/418).
 
 #### 2.3.2 ####
 * FIX - Fixed video file doesn't get deleted from the server in `Stateless` mode. GitHub issue [#418](https://github.com/wpCloud/wp-stateless/issues/418).
