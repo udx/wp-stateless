@@ -6,7 +6,7 @@ License: GPLv2 or later
 Requires PHP: 5.5
 Requires at least: 4.7.0
 Tested up to: 5.3
-Stable tag: 2.3.2
+Stable tag: 2.3.3
 
 Upload and serve your WordPress media files from Google Cloud Storage.
 
@@ -100,9 +100,12 @@ To ensure new releases cause as little disruption as possible, we rely on a numb
 
 
 == Upgrade Notice ==
-Fixed fatal error, undefined function `is_wp_version_compatible`.
+COMPATIBILITY - Fixed VidoRev video file uploaded from the frontend not syncing.
 
 == Changelog ==
+= 2.3.3 =
+* COMPATIBILITY - Fixed VidoRev video file uploaded from the frontend not syncing. GitHub issue [#418](https://github.com/wpCloud/wp-stateless/issues/418).
+
 = 2.3.2 =
 * FIX - Fixed video file doesn't get deleted from the server in `Stateless` mode. GitHub issue [#418](https://github.com/wpCloud/wp-stateless/issues/418).
 * FIX - Fixed file size doesn't show under attachment details in `Stateless` mode. GitHub issue [#413](https://github.com/wpCloud/wp-stateless/issues/413).
