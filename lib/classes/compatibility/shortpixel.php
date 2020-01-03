@@ -15,7 +15,6 @@
  */
 
 namespace wpCloud\StatelessMedia {
-    use ShortPixel\ShortPixelLogger\ShortPixelLogger as Log;
 
     if(!class_exists('wpCloud\StatelessMedia\ShortPixel')) {
         
@@ -53,8 +52,7 @@ namespace wpCloud\StatelessMedia {
                 add_action( 'sm:synced::image', array( $this, 'sync_backup_file'), 10, 2 );
                 add_action( 'sm:synced::image', array( $this, 'sync_webp_file'), 10, 2 );
 
-                
-                if (Log::debugIsActive()) {
+                if (method_exists('ShortPixel\ShortPixelLogger\ShortPixelLogger', 'debugIsActive') && \ShortPixel\ShortPixelLogger\ShortPixelLogger::debugIsActive()) {
                     $this->jsSuffix = '.js'; //use unminified versions for easier debugging
                 }
 
