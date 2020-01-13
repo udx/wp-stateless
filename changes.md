@@ -1,5 +1,6 @@
 #### 2.3.3 ####
 * COMPATIBILITY - Fixed VidoRev video file uploaded from the frontend not syncing. GitHub issue [#418](https://github.com/wpCloud/wp-stateless/issues/418).
+* COMPATIBILITY - Fixed fatal error with ShortPixel version 4.14.2. GitHub issue [#433](https://github.com/wpCloud/wp-stateless/issues/433).
 
 #### 2.3.2 ####
 * FIX - Fixed video file doesn't get deleted from the server in `Stateless` mode. GitHub issue [#418](https://github.com/wpCloud/wp-stateless/issues/418).
