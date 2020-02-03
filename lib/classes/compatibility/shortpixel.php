@@ -204,6 +204,7 @@ namespace wpCloud\StatelessMedia {
                 if($create_webp){
                     add_filter( 'upload_mimes', array($this, 'add_webp_mime'), 10, 2 );
                     ud_get_stateless_media()->add_media( $metadata, $id, true, array('is_webp' => '.webp') );
+                    remove_filter( 'upload_mimes', array($this, 'add_webp_mime'), 10 );
                 }
                 // Don't needed in stateless mode. In stateless mode the back will be sync once on wp_update_attachment_metadata filter.
                 if ( ud_get_stateless_media()->get( 'sm.mode' ) !== 'stateless' ) {
@@ -284,6 +285,7 @@ namespace wpCloud\StatelessMedia {
                 add_filter( 'upload_mimes', array($this, 'add_webp_mime'), 10, 2 );
                 // Sync the webp to GCS
                 ud_get_stateless_media()->add_media( $metadata, $id, true, array('is_webp' => '.webp') );
+                remove_filter( 'upload_mimes', array($this, 'add_webp_mime'), 10 );
             }
 
             /**
@@ -465,15 +467,6 @@ namespace wpCloud\StatelessMedia {
                     }
                 }
                 return $URLs;
-            }
-
-            /**
-             * add_webp_mime
-             * 
-             */
-            public function add_webp_mime($t, $user){
-                $t['webp'] = 'image/webp';
-                return $t;
             }
 
         }

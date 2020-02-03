@@ -46,8 +46,11 @@ namespace wpCloud\StatelessMedia {
                 // if($fullsize && file_exists($file . '.bak'))
                 //     do_action( 'sm:sync::syncFile', $name . '.bak', $file . '.bak', true);
 
-                if(file_exists($file . '.webp'))
+                if(file_exists($file . '.webp')){
+                    add_filter( 'upload_mimes', array($this, 'add_webp_mime'), 10, 2 );
                     do_action( 'sm:sync::syncFile', $name . '.webp', $file . '.webp', true);
+                    remove_filter( 'upload_mimes', array($this, 'add_webp_mime'), 10 );
+                }
             }
             
         }
