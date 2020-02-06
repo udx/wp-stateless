@@ -54,6 +54,7 @@ return array(
     'wpCloud\\StatelessMedia\\LearnDash' => $baseDir . '/lib/classes/compatibility/learn-dash.php',
     'wpCloud\\StatelessMedia\\Logger' => $baseDir . '/lib/classes/class-logger.php',
     'wpCloud\\StatelessMedia\\Module' => $baseDir . '/lib/classes/class-compatibility.php',
+    'wpCloud\\StatelessMedia\\Polylang' => $baseDir . '/lib/classes/compatibility/polylang-pro.php',
     'wpCloud\\StatelessMedia\\SOCSS' => $baseDir . '/lib/classes/compatibility/siteorigin-css.php',
     'wpCloud\\StatelessMedia\\SOWidgetCSS' => $baseDir . '/lib/classes/compatibility/siteorigin-widget-bundle.php',
     'wpCloud\\StatelessMedia\\Settings' => $baseDir . '/lib/classes/class-settings.php',
