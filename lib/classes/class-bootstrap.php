@@ -113,11 +113,6 @@ namespace wpCloud\StatelessMedia {
         add_action( 'admin_init', array( $this, 'admin_init' ) );
 
         /**
-         * Add custom actions to media rows
-         */
-        add_filter( 'media_row_actions', array( $this, 'add_custom_row_actions' ), 10, 3 );
-
-        /**
          * Handle switch blog properly.
          */
         add_action( 'switch_blog', array( $this, 'on_switch_blog' ), 10, 2 );
@@ -180,6 +175,11 @@ namespace wpCloud\StatelessMedia {
            * Carry on only if we do not have errors.
            */
           if( !$this->has_errors() ) {
+
+            /**
+             * Add custom actions to media rows
+             */
+            add_filter( 'media_row_actions', array( $this, 'add_custom_row_actions' ), 10, 3 );
 
             /**
              * Hashify file name if option is enabled
