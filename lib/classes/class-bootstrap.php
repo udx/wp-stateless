@@ -1480,12 +1480,12 @@ namespace wpCloud\StatelessMedia {
 
         $site_url = parse_url( site_url() );
         $wildcards = apply_filters('wp_stateless_root_dir_wildcard', array(
-          '%%date_year%%'       => date('Y'),
-          '%%date_month%%'      => date('m'),
-          '%%site_id%%'         => get_current_blog_id(),
-          '%%site_url%%'        => trim( $site_url['host'] . $site_url['path'], '/ ' ),
-          '%%site_url_host%%'   => trim( $site_url['host'], '/ ' ),
-          '%%site_url_path%%'   => trim( $site_url['path'], '/ ' ),
+          '%date_year%'       => date('Y'),
+          '%date_month%'      => date('m'),
+          '%site_id%'         => get_current_blog_id(),
+          '%site_url%'        => trim( $site_url['host'] . $site_url['path'], '/ ' ),
+          '%site_url_host%'   => trim( $site_url['host'], '/ ' ),
+          '%site_url_path%'   => trim( $site_url['path'], '/ ' ),
         ));
 
 
