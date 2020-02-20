@@ -16,6 +16,11 @@ namespace wpCloud\StatelessMedia {
       public $setup_wizard_ui = null;
 
       /**
+       * @var Array
+       */
+      public $wildcards = array();
+
+      /**
        * @var false|null|string
        */
       public $stateless_settings = null;
@@ -52,7 +57,6 @@ namespace wpCloud\StatelessMedia {
 
         add_action('admin_menu', array( $this, 'admin_menu' ));
 
-        
         $this->save_media_settings();
         
 
@@ -82,6 +86,41 @@ namespace wpCloud\StatelessMedia {
 
         /** Register options */
         add_action( 'init', array( $this, 'init' ), 3 );
+
+        
+        $site_url = parse_url( site_url() );
+        $this->wildcards = array(
+          '%year%'            => [
+                                    date('Y'),
+                                    "year",
+                                    "The year of the post, four digits, for example 2004.",
+                                 ],
+          '%month%'           => [
+                                    date('m'),
+                                    "monthnum",
+                                    "Month of the year, for example 05.",
+                                 ],
+          '%site_id%'         => [
+                                    get_current_blog_id(),
+                                    "site id",
+                                    "Site ID, for example 1.",
+                                 ],
+          '%site_url%'        => [
+                                    trim( $site_url['host'] . $site_url['path'], '/ ' ),
+                                    "site url",
+                                    "Site URL, for example example.com/site-1.",
+                                 ],
+          '%site_url_host%'   => [
+                                    trim( $site_url['host'], '/ ' ),
+                                    "host name",
+                                    "Host name, for example example.com.",
+                                 ],
+          '%site_url_path%'   => [
+                                    trim( $site_url['path'], '/ ' ),
+                                    "site path",
+                                    "Site path, for example site-1.",
+                                 ],
+        );
       }
 
       public function init(){
@@ -301,6 +340,7 @@ namespace wpCloud\StatelessMedia {
        * Draw interface
        */
       public function settings_interface() {
+        $wildcards = apply_filters('wp_stateless_root_dir_wildcard', $this->wildcards);
         include ud_get_stateless_media()->path( '/static/views/settings_interface.php', 'dir' );
       }
 

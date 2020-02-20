@@ -119,13 +119,46 @@
                                     <p class="description"><strong ng-bind="sm.showNotice('bucket')" ></strong> <?php _e( 'The name of the GCS bucket.', ud_get_stateless_media()->domain ); ?></p>
                                     <hr>       
 
+                                    <div class="form-table permalink-structure">
                                     <h4><?php _e( 'Bucket Folder', ud_get_stateless_media()->domain ); ?></h4>
                                     <p>
                                         <label for="bucket_folder_name">
-                                            <input name="sm[root_dir]" type="text" id="bucket_folder_name" class="regular-text ltr" ng-model="sm.root_dir" ng-disabled="sm.readonly.root_dir" ng-change="sm.generatePreviewUrl()">
+                                            <select name="sm[bucket_folder_type]" id="sm_file_url" ng-model="sm.bucket_folder_type" ng-disabled="sm.readonly.bucket_folder_type">
+                                                <?php if(is_network_admin()): ?>
+                                                <option value=""><?php _e("Don't override");?></option>
+                                                <?php endif; ?>
+                                                <option value="single-site"><?php _e( 'Single Site', ud_get_stateless_media()->domain ); ?></option>
+                                                <option value="multi-site"><?php _e( 'Multisite', ud_get_stateless_media()->domain ); ?></option>
+                                                <option value="custom"><?php _e( 'Custom', ud_get_stateless_media()->domain ); ?></option>
+                                            </select>
                                         </label>
                                     </p>
+                                    <p>
+                                        <label for="bucket_folder_name">
+                                            <input name="sm[root_dir]" type="text" id="permalink_structure" class="regular-text ltr" ng-model="sm.root_dir" ng-disabled="sm.readonly.root_dir" ng-change="sm.generatePreviewUrl()">
+                                        </label>
+                                    </p>
+                                    <div class="available-structure-tags hide-if-no-js">
+                                        <div id="custom_selection_updated" aria-live="assertive" class="screen-reader-text"></div>
+                                        <p>Available tags:</p>
+                                        <ul role="list" class="clearfix">
+                                        <?php foreach($wildcards as $wildcard => $replace): ?>
+                                            <li>
+                                                <button type="button"
+                                                        ng-click="tagClicked()"
+                                                        class="button button-secondary"
+                                                        aria-label="<?php echo $replace[1];?> (<?php echo $replace[1];?>)"
+                                                        data-added="<?php echo $replace[1];?> added to permalink structure"
+                                                        data-used="<?php echo $replace[1];?> (already used in permalink structure)">
+                                                    <?php echo $wildcard;?>
+                                                </button>
+                                            </li>
+                                        <?php endforeach;?>
+                                        </ul>
+                                    </div>
                                     <p class="description"><strong ng-bind="sm.showNotice('root_dir')" ></strong> <?php _e( 'If you would like files to be uploaded into a particular folder within the bucket, define that path here.', ud_get_stateless_media()->domain ); ?></p>
+                                    </div>
+
                                     <hr>
 
                                     <h4><?php _e( 'Service Account JSON', ud_get_stateless_media()->domain ); ?></h4>

@@ -758,6 +758,40 @@ var wpStatelessApp = angular.module('wpStatelessApp', ['ngSanitize'])
       }
     }
   });
+  
+  $scope.$watch('sm.bucket_folder_type', function(value) {
+    if(value == 'single-site'){
+      $scope.sm.root_dir = '/%year%/%month%/';
+    }
+    else if(value == 'multi-site'){
+      $scope.sm.root_dir = '/sites/%site_id%/%year%/%month%/';
+    }
+    setTimeout(function(){
+      jQuery( '#permalink_structure' ).trigger('change');
+    }, 1);
+  });
+  
+  $scope.$watch('sm.root_dir', function(value) {
+    if(value == '/%year%/%month%/'){
+      $scope.sm.bucket_folder_type = 'single-site';
+    }
+    else if(value == '/sites/%site_id%/%year%/%month%/'){
+      $scope.sm.bucket_folder_type = 'multi-site';
+    }
+    else{
+      $scope.sm.bucket_folder_type = 'custom';
+    }
+    setTimeout(function(){
+      jQuery( '#permalink_structure' ).trigger('change');
+    }, 1);
+  });
+
+  $scope.tagClicked = function(){
+    $scope.sm.bucket_folder_type = 'custom';
+    setTimeout(function(){
+      jQuery( '#permalink_structure' ).trigger('change');
+    }, 1);
+  }
 
   $scope.sm.showNotice = function(option){
     if($scope.sm.readonly && $scope.sm.readonly[option]){
