@@ -602,8 +602,55 @@ namespace wpCloud\StatelessMedia {
         return false;
       }
 
+      /**
+       * Useful when there is a need to do things depending on a call stack.
+       * Returns true if any of the conditions met. Returns false otherwise.
+       *
+       * @param $callstack array Result of debug_backtrace function.
+       * @param $conditions array CallStack fingerprint with `stack_level` integer.
+       *
+       * Example:
+       * array(
+       *  array(
+       *    'stack_level' => 4,
+       *    'function' => '__construct',
+       *    'class' => 'ET_Core_PageResource'
+       *  ),
+       *  array(
+       *    'stack_level' => 4,
+       *    'function' => 'get_cache_filename',
+       *    'class' => 'ET_Builder_Element'
+       *  )
+       * )
+       *
+       * @return bool
+       */
+      public static function isCallStackMatches( $callstack, $conditions ) {
+        if ( !is_array( $conditions ) ) {
+          $conditions = array( $conditions );
+        }
+
+        foreach( $conditions as $condition ) {
+          $condition['stack_level'] = $condition['stack_level'] ? $condition['stack_level'] : 0;
+
+          $levelData = $callstack[$condition['stack_level']];
+
+          unset( $condition['stack_level'] );
+
+          $levelMatches = false;
+          foreach( $condition as $key => $value ) {
+            if ( $levelData[ $key ] === $value ) {
+              $levelMatches = true;
+            } else {
+              $levelMatches = false;
+            }
+          }
+
+          if ( $levelMatches ) return true;
+        }
+
+        return false;
+      }
     }
-
   }
-
 }
