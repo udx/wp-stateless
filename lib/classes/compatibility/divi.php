@@ -27,12 +27,12 @@ namespace wpCloud\StatelessMedia {
              */
             private $cache_busting_disable_conditions = array(
                 array(
-                    'stack_level' => 4,
+                    'stack_level' => 7,
                     'function' => '__construct',
                     'class' => 'ET_Core_PageResource'
                 ),
                 array(
-                    'stack_level' => 4,
+                    'stack_level' => 7,
                     'function' => 'get_cache_filename',
                     'class' => 'ET_Builder_Element'
                 )
@@ -53,24 +53,23 @@ namespace wpCloud\StatelessMedia {
                     remove_filter( 'sanitize_file_name', array( "wpCloud\StatelessMedia\Utility", 'randomize_filename' ), 10 );
                 }
 
-                // maybe disable the filter
-                add_filter('sanitize_file_name', array( $this, 'sanitize_file_name' ), 1);
+                // maybe skip cache busting
+                add_filter( 'stateless_skip_cache_busting', array( $this, 'maybe_skip_cache_busting' ), 10, 2 );
             }
 
             /**
-             * Check if `sanitize_file_name` filter was called in a place where we don't need our custom filter.
-             * Remove our 10-priority filter if condition met.
+             * Maybe skip cache busting
+             * @param $null
              * @param $filename
-             * @return mixed
+             * @return bool | string
              */
-            public function sanitize_file_name( $filename ) {
-                $callstack = debug_backtrace( DEBUG_BACKTRACE_PROVIDE_OBJECT, 5 );
+            public function maybe_skip_cache_busting( $null, $filename ) {
+              $callstack = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 8 );
 
-                if ( Utility::isCallStackMatches( $callstack, $this->cache_busting_disable_conditions ) ) {
-                    remove_filter( 'sanitize_file_name', array( "wpCloud\StatelessMedia\Utility", 'randomize_filename' ), 10 );
-                }
-
+              if ( Utility::isCallStackMatches( $callstack, $this->cache_busting_disable_conditions ) )
                 return $filename;
+
+              return $null;
             }
 
         }
