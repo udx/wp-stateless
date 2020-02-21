@@ -803,7 +803,7 @@ var wpStatelessApp = angular.module('wpStatelessApp', ['ngSanitize'])
   $scope.sm.generatePreviewUrl = function() {
     $scope.sm.is_custom_domain = false;
     var host = 'https://storage.googleapis.com/';
-    var rootdir = $scope.sm.root_dir ? $scope.sm.root_dir + '/' : '';
+    var rootdir = $scope.sm._root_dir ? $scope.sm._root_dir + '/' : '';
     var subdir = $scope.sm.organize_media == '1' ? $filter('date')(Date.now(), 'yyyy/MM') + '/' : '';
     var hash = $scope.sm.hashify_file_name == 'true' ? Date.now().toString(36) + '-' : '';
     var is_ssl = $scope.sm.custom_domain.indexOf('https://');

@@ -881,6 +881,7 @@ namespace wpCloud\StatelessMedia {
         ));
         
         $settings = ud_get_stateless_media()->get('sm');
+        $settings['_root_dir'] = apply_filters("wp_stateless_handle_root_dir", $settings['root_dir']);
         if(defined('WP_STATELESS_MEDIA_JSON_KEY') && WP_STATELESS_MEDIA_JSON_KEY){
           $settings['key_json'] = "Currently configured via a constant.";
         }
@@ -888,6 +889,29 @@ namespace wpCloud\StatelessMedia {
         wp_localize_script('wp-stateless', 'wp_stateless_compatibility', Module::get_modules());
         wp_register_style( 'jquery-ui-regenthumbs', ud_get_stateless_media()->path( 'static/scripts/jquery-ui/redmond/jquery-ui-1.7.2.custom.css', 'url' ), array(), '1.7.2' );
 
+
+        add_action( 'admin_footer', array($this, 'admin_footer'));
+
+      }
+
+      /**
+       * Get_l10n_data
+       *
+       * @param string $value
+       * @return mixed
+       */
+      public function admin_footer($value=''){
+        $current_screen = get_current_screen();
+        if($current_screen->base == 'options-media'){
+          ?>
+          <script>
+            jQuery(document).ready(function(){
+              jQuery('#uploads_use_yearmonth_folders').attr('disabled',true)
+              .parent().after("<p><?php _e("This settings will be managed by WP-Stateless in <b>Bucket Folder</b>.", ud_get_stateless_media()->domain);?></p>");
+            });
+          </script>
+          <?php
+        }
       }
 
       /**
