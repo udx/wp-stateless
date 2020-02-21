@@ -639,7 +639,7 @@ namespace wpCloud\StatelessMedia {
 
           $levelMatches = false;
           foreach( $condition as $key => $value ) {
-            if ( $levelData[ $key ] === $value ) {
+            if ( isset($levelData[ $key ]) && $levelData[ $key ] === $value ) {
               $levelMatches = true;
             } else {
               $levelMatches = false;
