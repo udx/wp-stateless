@@ -182,6 +182,11 @@ namespace wpCloud\StatelessMedia {
             add_filter( 'media_row_actions', array( $this, 'add_custom_row_actions' ), 10, 3 );
 
             /**
+             * Allow bucket folder wildcard to organize file on server also.
+             */
+            add_filter( 'upload_dir', array( $this, 'upload_dir' ) );
+
+            /**
              * Hashify file name if option is enabled
              */
             if ( $this->get( 'sm.hashify_file_name' ) == 'true' ) {
@@ -1463,13 +1468,14 @@ namespace wpCloud\StatelessMedia {
        * @param $data
        * @return mixed
        */
-      public function upload_dir( $data ) {
-        $data[ 'basedir' ] = $this->get_gs_host();
-        $data[ 'baseurl' ] = $this->get_gs_host();
-        $data[ 'url' ] = $data[ 'baseurl' ] . $data[ 'subdir' ];
+      public function upload_dir( $upload_data ) {
+        $root_dir = $this->get( 'sm.root_dir' );
+        $root_dir = apply_filters("wp_stateless_handle_root_dir", $root_dir);
+        $upload_data[ 'path' ]   = $upload_data[ 'path' ]   . '/' . $root_dir;
+        $upload_data[ 'url' ]    = $upload_data[ 'url' ]    . '/' . $root_dir;
+        $upload_data[ 'subdir' ] = $upload_data[ 'subdir' ] . '/' . $root_dir;
 
-        return $data;
-
+        return $upload_data;
       }
 
       /**

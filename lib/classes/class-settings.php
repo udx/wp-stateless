@@ -90,12 +90,12 @@ namespace wpCloud\StatelessMedia {
         
         $site_url = parse_url( site_url() );
         $this->wildcards = array(
-          '%year%'            => [
+          '%date_year%'            => [
                                     date('Y'),
                                     "year",
                                     "The year of the post, four digits, for example 2004.",
                                  ],
-          '%month%'           => [
+          '%date_month%'           => [
                                     date('m'),
                                     "monthnum",
                                     "Month of the year, for example 05.",
