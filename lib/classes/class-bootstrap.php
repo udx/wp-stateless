@@ -155,7 +155,7 @@ namespace wpCloud\StatelessMedia {
           $is_connected = $this->is_connected_to_gs();
 
           if ( is_wp_error( $is_connected ) ) {
-            $this->errors->add( $is_connected->get_error_message() );
+            $this->errors->add( $is_connected->get_error_message(), 'warning' );
           }
 
           if ( $googleSDKVersionConflictError = get_transient( "wp_stateless_google_sdk_conflict" ) ) {
