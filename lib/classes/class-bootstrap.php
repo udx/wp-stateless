@@ -240,13 +240,6 @@ namespace wpCloud\StatelessMedia {
               add_filter( 'intermediate_image_sizes_advanced', array( $this, 'before_intermediate_image_sizes' ), 10, 2 );
             }
 
-            /**
-             * Add Media
-             *
-             * Once added we can get into Attachment ID then get all image sizes and sync them with GS
-             */
-            // add_filter( 'wp_generate_attachment_metadata', array( $this, 'add_media' ), 100, 2 );
-
             if ( $this->get( 'sm.delete_remote' ) == 'true' ) {
               /**
                * On physical file deletion we remove any from GS
