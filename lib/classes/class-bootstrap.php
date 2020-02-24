@@ -167,9 +167,6 @@ namespace wpCloud\StatelessMedia {
             $this->errors->add( sprintf( __( 'The plugin requires PHP %s or higher. You current PHP version %s is too old.', ud_get_stateless_media()->domain ), '<b>5.5</b>', '<b>' . PHP_VERSION . '</b>' ) );
           }
 
-          /** Temporary fix to WP 4.4 srcset feature **/
-          //add_filter( 'max_srcset_image_width', function(){return 1;} );
-
           /**
            * Carry on only if we do not have errors.
            */
