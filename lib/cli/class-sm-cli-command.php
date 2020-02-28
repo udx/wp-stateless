@@ -81,22 +81,22 @@ if( defined( 'WP_CLI' ) && WP_CLI ) {
      *
      * ## EXAMPLES
      *
-     * wp sm upgrade meta --url=example.com --b
-     * : Run process looping 10 batches. Every batch is external command 'wp sm upgrade meta --url=example.com --batch=<number> --batches=10'
+     * wp stateless upgrade meta --url=example.com --b
+     * : Run process looping 10 batches. Every batch is external command 'wp stateless upgrade meta --url=example.com --batch=<number> --batches=10'
      *
-     * wp sm upgrade meta --url=example.com --b --batches=100
+     * wp stateless upgrade meta --url=example.com --b --batches=100
      * : Run process looping 100 batches.
      *
-     * wp sm upgrade meta --url=example.com --b --batches=10 --batch=2
+     * wp stateless upgrade meta --url=example.com --b --batches=10 --batch=2
      * : Run second batch from 10 batches manually.
      *
-     * wp sm upgrade meta --url=example.com --log
+     * wp stateless upgrade meta --url=example.com --log
      * : Run default process showing additional information in command line.
      *
-     * wp sm upgrade meta --url=example.com --end=3000 --limit=50
+     * wp stateless upgrade meta --url=example.com --end=3000 --limit=50
      * : Run process from 1 to 3000 row. Splits process by limiting queries to 50 rows. So, the current example does 60 queries ( 3000 / 50 = 60 )
      *
-     * wp sm upgrade meta --url=example.com --start=777 --end=3000 --o
+     * wp stateless upgrade meta --url=example.com --start=777 --end=3000 --o
      * : Run process from 777 to 3000 row. Also does database optimization and removes transient in the end.
      *
      * @synopsis [<type>] [--start=<val>] [--limit=<val>] [--end=<val>] [--batch=<val>] [--batches=<val>] [--b] [--log] [--o]
@@ -154,9 +154,9 @@ if( defined( 'WP_CLI' ) && WP_CLI ) {
       for( $i=1; $i<=$batches; $i++ ) {
 
         if( !empty( $this->url ) ) {
-          $command = "wp sm {$method} {$type} --batch={$i} --batches={$batches} --limit={$limit} --url={$this->url}";
+          $command = "wp stateless {$method} {$type} --batch={$i} --batches={$batches} --limit={$limit} --url={$this->url}";
         } else {
-          $command = "wp sm {$method} {$type} --batch={$i} --batches={$batches} --limit={$limit}";
+          $command = "wp stateless {$method} {$type} --batch={$i} --batches={$batches} --limit={$limit}";
         }
 
         WP_CLI::line( '...' );
@@ -226,6 +226,6 @@ if( defined( 'WP_CLI' ) && WP_CLI ) {
   }
 
   /** Add the commands from above */
-  WP_CLI::add_command( 'sm', 'SM_CLI_Command' );
+  WP_CLI::add_command( 'stateless', 'SM_CLI_Command' );
 
 }
