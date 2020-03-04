@@ -664,7 +664,7 @@ namespace wpCloud\StatelessMedia {
        * @return bool|int
        * @throws \Exception
        */
-      public function sync_get_attachment_if_exist($url, $save_to){
+      public static function sync_get_attachment_if_exist($url, $save_to){
         if(is_int($url))
           $url = wp_get_attachment_url($url);
 
@@ -689,7 +689,7 @@ namespace wpCloud\StatelessMedia {
        * @param $attachment_id
        * @param $mode
        */
-      public function sync_store_failed_attachment( $attachment_id, $mode ) {
+      public static function sync_store_failed_attachment( $attachment_id, $mode ) {
         if ( ! in_array( $mode, [ 'other', 'cli_images', 'cli_other' ] ) ) {
           $mode = 'images';
         }
@@ -711,7 +711,7 @@ namespace wpCloud\StatelessMedia {
        * @param $mode
        * @param $attachment_id
        */
-      public function sync_maybe_fix_failed_attachment( $mode, $attachment_id ) {
+      public static function sync_maybe_fix_failed_attachment( $mode, $attachment_id ) {
         $fails = get_option( 'wp_stateless_failed_' . $mode );
 
         if ( !empty( $fails ) && is_array( $fails ) ) {
@@ -731,7 +731,7 @@ namespace wpCloud\StatelessMedia {
        * @param $id
        * @param $cli
        */
-      public function sync_store_current_progress( $mode, $id, $cli = false ) {
+      public static function sync_store_current_progress( $mode, $id, $cli = false ) {
         if ( ! in_array( $mode, [ 'other', 'cli_images', 'cli_other' ] ) ) {
           $mode = 'images';
         }
@@ -751,7 +751,7 @@ namespace wpCloud\StatelessMedia {
        * @param $mode
        * @return array|bool
        */
-      public function sync_retrieve_current_progress( $mode ) {
+      public static function sync_retrieve_current_progress( $mode ) {
         if ( ! in_array( $mode, [ 'other', 'cli_images', 'cli_other' ] ) ) {
           $mode = 'images';
         }
@@ -770,7 +770,7 @@ namespace wpCloud\StatelessMedia {
        * Reset synchronization progress
        * @param $mode
        */
-      public function sync_reset_current_progress( $mode ) {
+      public static function sync_reset_current_progress( $mode ) {
         if ( ! in_array( $mode, [ 'other', 'cli_images', 'cli_other' ] ) ) {
           $mode = 'images';
         }
@@ -785,7 +785,7 @@ namespace wpCloud\StatelessMedia {
        * @param $mode
        * @return mixed|void
        */
-      public function sync_get_fails( $mode ) {
+      public static function sync_get_fails( $mode ) {
         if ( ! in_array( $mode, [ 'other', 'cli_images', 'cli_other' ] ) ) {
           $mode = 'images';
         }
@@ -803,13 +803,13 @@ namespace wpCloud\StatelessMedia {
        * @return array
        * @throws \Exception
        */
-      public function sync_get_non_processed_media_ids( $mode, $files, $continue = false, $start_from = 0 ) {
+      public static function sync_get_non_processed_media_ids( $mode, $files, $continue = false, $start_from = 0 ) {
         if(ud_get_stateless_media()->is_connected_to_gs() !== true){
           throw new \Exception( __( 'Not connected to GCS', ud_get_stateless_media()->domain) );
         }
 
         if ( $continue ) {
-          $progress = $this->sync_retrieve_current_progress( $mode );
+          $progress = self::sync_retrieve_current_progress( $mode );
 
           if ( false !== $progress ) {
             if($start_from && $start_from != 0){
@@ -828,7 +828,7 @@ namespace wpCloud\StatelessMedia {
           }
         }
 
-        $this->sync_reset_current_progress( $mode );
+        self::sync_reset_current_progress( $mode );
 
         $ids = array();
         foreach ( $files as $file )

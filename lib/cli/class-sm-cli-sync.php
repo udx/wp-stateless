@@ -1,8 +1,9 @@
 <?php
 /**
  *
- * @author peshkov@UD
+ * @author palant@UD
  */
+use wpCloud\StatelessMedia\Utility;
 
 if( !class_exists( 'SM_CLI_Scaffold' ) ) {
   require_once( dirname( __FILE__ ) . '/class-sm-cli-scaffold.php' );
@@ -71,8 +72,6 @@ class SM_CLI_Sync extends SM_CLI_Scaffold {
    */
   public function images() {
     global $wpdb;
-    $utility = new \wpCloud\StatelessMedia\Utility();
-
 
     /** Prepare arguments */
     $this->_prepare();
@@ -82,7 +81,7 @@ class SM_CLI_Sync extends SM_CLI_Scaffold {
     $where = '';
 
     if ( $this->fix ) {
-      $failed_attachments = $utility->sync_get_fails( 'cli_images' );
+      $failed_attachments = Utility::sync_get_fails( 'cli_images' );
 
       if ( !empty($failed_attachments) ) {
         $where .= " AND ID IN (" . implode(',', $failed_attachments) . ") ";
@@ -93,7 +92,7 @@ class SM_CLI_Sync extends SM_CLI_Scaffold {
     }
 
     if ( $this->continue ) {
-      $current_progress  = $utility->sync_retrieve_current_progress( 'cli_images' );
+      $current_progress  = Utility::sync_retrieve_current_progress( 'cli_images' );
 
       if ( isset($current_progress[1]) && !empty( $current_progress[1] )) {
         $where .= " AND ID " . ( $this->order === 'DESC' ? ' < ' : ' > ' ) . $current_progress[1];
@@ -190,8 +189,6 @@ class SM_CLI_Sync extends SM_CLI_Scaffold {
    */
   public function files() {
     global $wpdb;
-    $utility = new \wpCloud\StatelessMedia\Utility();
-
 
     /** Prepare arguments */
     $this->_prepare();
@@ -201,7 +198,7 @@ class SM_CLI_Sync extends SM_CLI_Scaffold {
     $where = '';
 
     if ( $this->fix ) {
-      $failed_attachments = $utility->sync_get_fails( 'cli_images' );
+      $failed_attachments = Utility::sync_get_fails( 'cli_images' );
 
       if ( !empty( $failed_attachments ) ) {
         $where .= " AND ID IN (" . implode(',', $failed_attachments) . ") ";
@@ -212,7 +209,7 @@ class SM_CLI_Sync extends SM_CLI_Scaffold {
     }
 
     if ( $this->continue ) {
-      $current_progress  = $utility->sync_retrieve_current_progress( 'cli_other' );
+      $current_progress  = Utility::sync_retrieve_current_progress( 'cli_other' );
 
       if ( isset( $current_progress[1] ) && !empty( $current_progress[1] )) {
         $where .= " AND ID " . ( $this->order === 'DESC' ? ' < ' : ' > ' ) . $current_progress[1];
@@ -311,8 +308,6 @@ class SM_CLI_Sync extends SM_CLI_Scaffold {
    */
   public function stateless_process_image( $id ) {
 
-    $utility = new \wpCloud\StatelessMedia\Utility();
-
     if(ud_get_stateless_media()->is_connected_to_gs() !== true){
       //WP_CLI::line( 'Starting extract attachments.' );
       throw new \Exception( __( 'Not connected to GCS', ud_get_stateless_media()->domain) );
@@ -336,8 +331,8 @@ class SM_CLI_Sync extends SM_CLI_Scaffold {
       $result_code = ud_get_stateless_media()->get_client()->get_media( apply_filters( 'wp_stateless_file_name', str_replace( trailingslashit( $upload_dir[ 'basedir' ] ), '', $fullsizepath )), true, $fullsizepath );
 
       if ( $result_code !== 200 ) {
-        if(!$utility->sync_get_attachment_if_exist($image->ID, $fullsizepath)){ // Save file to local from proxy.
-          $utility->sync_store_failed_attachment( $image->ID, 'cli_images' );
+        if(!Utility::sync_get_attachment_if_exist($image->ID, $fullsizepath)){ // Save file to local from proxy.
+          Utility::sync_store_failed_attachment( $image->ID, 'cli_images' );
           throw new \Exception(sprintf(__('Both local and remote files are missing. Unable to resize. (%s)', ud_get_stateless_media()->domain), $image->guid));
         }
       }
@@ -351,20 +346,20 @@ class SM_CLI_Sync extends SM_CLI_Scaffold {
 
     if(get_post_mime_type($image->ID) !== 'image/svg+xml'){
       if ( is_wp_error( $metadata ) ) {
-        $utility->sync_store_failed_attachment( $image->ID, 'cli_images' );
+        Utility::sync_store_failed_attachment( $image->ID, 'cli_images' );
         throw new \Exception($metadata->get_error_message());
       }
 
       if ( empty( $metadata ) ) {
-        $utility->sync_store_failed_attachment( $image->ID, 'cli_images' );
+        Utility::sync_store_failed_attachment( $image->ID, 'cli_images' );
         throw new \Exception(sprintf( __('No metadata generated for %1$s (ID %2$s).', ud_get_stateless_media()->domain), esc_html( get_the_title( $image->ID ) ), $image->ID));
       }
     }
 
     // If this fails, then it just means that nothing was changed (old value == new value)
     wp_update_attachment_metadata( $image->ID, $metadata );
-    $utility->sync_store_current_progress( 'cli_images', $image->ID, true );
-    $utility->sync_maybe_fix_failed_attachment( 'cli_images', $image->ID );
+    Utility::sync_store_current_progress( 'cli_images', $image->ID, true );
+    Utility::sync_maybe_fix_failed_attachment( 'cli_images', $image->ID );
     do_action( 'sm:synced::image', $image->ID, $metadata);
 
     return sprintf( __( '%1$s (ID %2$s) was successfully resized in %3$s seconds.', ud_get_stateless_media()->domain ), esc_html( get_the_title( $image->ID ) ), $image->ID, timer_stop() );
@@ -376,8 +371,6 @@ class SM_CLI_Sync extends SM_CLI_Scaffold {
    * @throws \Exception
    */
   public function stateless_process_file( $id ) {
-
-    $utility = new \wpCloud\StatelessMedia\Utility();
 
     @error_reporting( 0 );
     timer_start();
@@ -401,8 +394,8 @@ class SM_CLI_Sync extends SM_CLI_Scaffold {
       $result_code = ud_get_stateless_media()->get_client()->get_media( str_replace( trailingslashit( $upload_dir[ 'basedir' ] ), '', $fullsizepath ), true, $fullsizepath );
 
       if ( $result_code !== 200 ) {
-        if(!$utility->sync_get_attachment_if_exist($file->ID, $fullsizepath)){ // Save file to local from proxy.
-          $utility->sync_store_failed_attachment( $file->ID, 'cli_other' );
+        if(!Utility::sync_get_attachment_if_exist($file->ID, $fullsizepath)){ // Save file to local from proxy.
+          Utility::sync_store_failed_attachment( $file->ID, 'cli_other' );
           throw new \Exception(sprintf(__('File not found (%s)', ud_get_stateless_media()->domain), $file->guid));
         }
         else{
@@ -424,7 +417,7 @@ class SM_CLI_Sync extends SM_CLI_Scaffold {
         $metadata = wp_generate_attachment_metadata( $file->ID, $fullsizepath );
 
         if ( is_wp_error( $metadata ) ) {
-          $utility->sync_store_failed_attachment( $file->ID, 'cli_other' );
+          Utility::sync_store_failed_attachment( $file->ID, 'cli_other' );
           throw new \Exception($metadata->get_error_message());
         }
 
@@ -441,8 +434,8 @@ class SM_CLI_Sync extends SM_CLI_Scaffold {
 
     }
 
-    $utility->sync_store_current_progress( 'cli_other', $file->ID, true );
-    $utility->sync_maybe_fix_failed_attachment( 'cli_other', $file->ID );
+    Utility::sync_store_current_progress( 'cli_other', $file->ID, true );
+    Utility::sync_maybe_fix_failed_attachment( 'cli_other', $file->ID );
 
     return sprintf( __( '%1$s (ID %2$s) was successfully synchronised in %3$s seconds.', ud_get_stateless_media()->domain ), esc_html( get_the_title( $file->ID ) ), $file->ID, timer_stop() );
   }
