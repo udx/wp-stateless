@@ -92,33 +92,33 @@ namespace wpCloud\StatelessMedia {
         $this->wildcards = array(
           '%date_year%'            => [
                                     date('Y'),
-                                    "year",
-                                    "The year of the post, four digits, for example 2004.",
+                                    __("year", ud_get_stateless_media()->domain),
+                                    __("The year of the post, four digits, for example 2004.", ud_get_stateless_media()->domain),
                                  ],
           '%date_month%'           => [
                                     date('m'),
-                                    "monthnum",
-                                    "Month of the year, for example 05.",
+                                    __("monthnum", ud_get_stateless_media()->domain),
+                                    __("Month of the year, for example 05.", ud_get_stateless_media()->domain),
                                  ],
           '%site_id%'         => [
                                     get_current_blog_id(),
-                                    "site id",
-                                    "Site ID, for example 1.",
+                                    __("site id", ud_get_stateless_media()->domain),
+                                    __("Site ID, for example 1.", ud_get_stateless_media()->domain),
                                  ],
           '%site_url%'        => [
                                     trim( $site_url['host'] . $site_url['path'], '/ ' ),
-                                    "site url",
-                                    "Site URL, for example example.com/site-1.",
+                                    __("site url", ud_get_stateless_media()->domain),
+                                    __("Site URL, for example example.com/site-1.", ud_get_stateless_media()->domain),
                                  ],
           '%site_url_host%'   => [
                                     trim( $site_url['host'], '/ ' ),
-                                    "host name",
-                                    "Host name, for example example.com.",
+                                    __("host name", ud_get_stateless_media()->domain),
+                                    __("Host name, for example example.com.", ud_get_stateless_media()->domain),
                                  ],
           '%site_url_path%'   => [
                                     trim( $site_url['path'], '/ ' ),
-                                    "site path",
-                                    "Site path, for example site-1.",
+                                    __("site path", ud_get_stateless_media()->domain),
+                                    __("Site path, for example site-1.", ud_get_stateless_media()->domain),
                                  ],
         );
       }

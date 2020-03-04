@@ -803,11 +803,18 @@ var wpStatelessApp = angular.module('wpStatelessApp', ['ngSanitize'])
   $scope.sm.generatePreviewUrl = function() {
     $scope.sm.is_custom_domain = false;
     var host = 'https://storage.googleapis.com/';
-    var rootdir = $scope.sm._root_dir ? $scope.sm._root_dir + '/' : '';
-    var subdir = $scope.sm.organize_media == '1' ? $filter('date')(Date.now(), 'yyyy/MM') + '/' : '';
     var hash = $scope.sm.hashify_file_name == 'true' ? Date.now().toString(36) + '-' : '';
     var is_ssl = $scope.sm.custom_domain.indexOf('https://');
     var custom_domain = $scope.sm.custom_domain.toString();
+    var root_dir = $scope.sm.root_dir ? $scope.sm.root_dir : '';
+
+    jQuery.each($scope.sm.wildcards, function(index, item){
+      var reg = new RegExp(index, 'g');
+      root_dir = root_dir.replace(reg, item[0]);
+    });
+    root_dir = root_dir.replace(/(\/+)/g, '/');
+    root_dir = root_dir.replace(/^\//, '');
+    root_dir = root_dir.replace(/\/$/, '');
     
     custom_domain = custom_domain.replace(/\/+$/, ''); // removing trailing slashes
     custom_domain = custom_domain.replace(/https?:\/\//, ''); // removing http:// or https:// from the beginning.
@@ -820,7 +827,7 @@ var wpStatelessApp = angular.module('wpStatelessApp', ['ngSanitize'])
       host += custom_domain;
     }
 
-    $scope.sm.preview_url = host + "/" + rootdir + subdir + hash + "your-image-name.jpeg";
+    $scope.sm.preview_url = host + "/" + root_dir + hash + "your-image-name.jpeg";
   }
 
   $scope.sm.generatePreviewUrl();
