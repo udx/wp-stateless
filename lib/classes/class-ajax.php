@@ -118,37 +118,6 @@ namespace wpCloud\StatelessMedia {
         wp_send_json(array('success' => true));
       }
 
-      /**
-       * Fail over to image URL if not found on disk
-       * In case image not available on both local and bucket
-       * try to pull image from image URL in case it is accessible by some sort of proxy.
-       *
-       * @param:
-       * $url (int/string): URL of the image.
-       * $save_to (string): Path where to save the image.
-       *
-       * @return bool|int
-       * @throws \Exception
-       */
-      public function get_attachment_if_exist($url, $save_to){
-        if(is_int($url))
-          $url = wp_get_attachment_url($url);
-
-        $response = wp_remote_get( $url );
-        if ( !is_wp_error($response) && is_array( $response ) ) {
-          if(!empty($response['response']['code']) && $response['response']['code'] == 200){
-            try{
-              if(wp_mkdir_p(dirname($save_to))){
-                return file_put_contents($save_to, $response['body']);
-              }
-            }
-            catch(\Exception $e){
-              throw $e;
-            }
-          }
-        }
-        return false;
-      }
 
       /**
        * Regenerate image sizes.
@@ -180,8 +149,8 @@ namespace wpCloud\StatelessMedia {
           $result_code = ud_get_stateless_media()->get_client()->get_media( apply_filters( 'wp_stateless_file_name', str_replace( trailingslashit( $upload_dir[ 'basedir' ] ), '', $fullsizepath )), true, $fullsizepath );
 
           if ( $result_code !== 200 ) {
-            if(!$this->get_attachment_if_exist($image->ID, $fullsizepath)){ // Save file to local from proxy.
-              $this->store_failed_attachment( $image->ID, 'images' );
+            if(!Utility::sync_get_attachment_if_exist($image->ID, $fullsizepath)){ // Save file to local from proxy.
+              Utility::sync_store_failed_attachment( $image->ID, 'images' );
               throw new \Exception(sprintf(__('Both local and remote files are missing. Unable to resize. (%s)', ud_get_stateless_media()->domain), $image->guid));
             }
           }
@@ -189,18 +158,18 @@ namespace wpCloud\StatelessMedia {
 
         @set_time_limit( -1 );
 
-        // 
+        //
         do_action( 'sm:pre::synced::image', $id);
         $metadata = wp_generate_attachment_metadata( $image->ID, $fullsizepath );
 
         if(get_post_mime_type($image->ID) !== 'image/svg+xml'){
           if ( is_wp_error( $metadata ) ) {
-            $this->store_failed_attachment( $image->ID, 'images' );
+            Utility::sync_store_failed_attachment( $image->ID, 'images' );
             throw new \Exception($metadata->get_error_message());
           }
-          
+
           if ( empty( $metadata ) ) {
-            $this->store_failed_attachment( $image->ID, 'images' );
+            Utility::sync_store_failed_attachment( $image->ID, 'images' );
             throw new \Exception(sprintf( __('No metadata generated for %1$s (ID %2$s).', ud_get_stateless_media()->domain), esc_html( get_the_title( $image->ID ) ), $image->ID));
           }
         }
@@ -208,8 +177,8 @@ namespace wpCloud\StatelessMedia {
         // If this fails, then it just means that nothing was changed (old value == new value)
         wp_update_attachment_metadata( $image->ID, $metadata );
 
-        $this->store_current_progress( 'images', $id );
-        $this->maybe_fix_failed_attachment( 'images', $image->ID );
+        Utility::sync_store_current_progress( 'images', $id );
+        Utility::sync_maybe_fix_failed_attachment( 'images', $image->ID );
         do_action( 'sm:synced::image', $id, $metadata);
 
         return sprintf( __( '%1$s (ID %2$s) was successfully resized in %3$s seconds.', ud_get_stateless_media()->domain ), esc_html( get_the_title( $image->ID ) ), $image->ID, timer_stop() );
@@ -245,8 +214,8 @@ namespace wpCloud\StatelessMedia {
           $result_code = ud_get_stateless_media()->get_client()->get_media( str_replace( trailingslashit( $upload_dir[ 'basedir' ] ), '', $fullsizepath ), true, $fullsizepath );
 
           if ( $result_code !== 200 ) {
-            if(!$this->get_attachment_if_exist($file->ID, $fullsizepath)){ // Save file to local from proxy.
-              $this->store_failed_attachment( $file->ID, 'other' );
+            if(!Utility::sync_get_attachment_if_exist($file->ID, $fullsizepath)){ // Save file to local from proxy.
+              Utility::sync_store_failed_attachment( $file->ID, 'other' );
               throw new \Exception(sprintf(__('File not found (%s)', ud_get_stateless_media()->domain), $file->guid));
             }
             else{
@@ -268,7 +237,7 @@ namespace wpCloud\StatelessMedia {
             $metadata = wp_generate_attachment_metadata( $file->ID, $fullsizepath );
 
             if ( is_wp_error( $metadata ) ) {
-              $this->store_failed_attachment( $file->ID, 'other' );
+              Utility::sync_store_failed_attachment( $file->ID, 'other' );
               throw new \Exception($metadata->get_error_message());
             }
 
@@ -285,8 +254,8 @@ namespace wpCloud\StatelessMedia {
 
         }
 
-        $this->store_current_progress( 'other', $id );
-        $this->maybe_fix_failed_attachment( 'other', $file->ID );
+        Utility::sync_store_current_progress( 'other', $id );
+        Utility::sync_maybe_fix_failed_attachment( 'other', $file->ID );
 
         return sprintf( __( '%1$s (ID %2$s) was successfully synchronised in %3$s seconds.', ud_get_stateless_media()->domain ), esc_html( get_the_title( $file->ID ) ), $file->ID, timer_stop() );
       }
@@ -302,7 +271,7 @@ namespace wpCloud\StatelessMedia {
         if(ud_get_stateless_media()->is_connected_to_gs() !== true){
           throw new \Exception( __( 'Not connected to GCS', ud_get_stateless_media()->domain) );
         }
-        
+
         $upload_dir = wp_upload_dir();
         $client = ud_get_stateless_media()->get_client();
 
@@ -342,7 +311,7 @@ namespace wpCloud\StatelessMedia {
           $start_from = isset( $_REQUEST['start_from'] ) ? (int) $_REQUEST['start_from'] : 0;
         }
 
-        return $this->get_non_processed_media_ids( 'images', $images, $continue, $start_from );
+        return Utility::sync_get_non_processed_media_ids( 'images', $images, $continue, $start_from );
       }
 
       /**
@@ -366,7 +335,7 @@ namespace wpCloud\StatelessMedia {
           $start_from = isset( $_REQUEST['start_from'] ) ? (int) $_REQUEST['start_from'] : 0;
         }
 
-        return $this->get_non_processed_media_ids( 'other', $files, $continue, $start_from );
+        return Utility::sync_get_non_processed_media_ids( 'other', $files, $continue, $start_from );
       }
 
       /**
@@ -390,8 +359,8 @@ namespace wpCloud\StatelessMedia {
        */
       public function action_stateless_get_current_progresses() {
         return array(
-          'images'  => $this->retrieve_current_progress( 'images' ),
-          'other'   => $this->retrieve_current_progress( 'other' ),
+          'images'  => Utility::sync_retrieve_current_progress( 'images' ),
+          'other'   => Utility::sync_retrieve_current_progress( 'other' ),
         );
       }
 
@@ -400,23 +369,9 @@ namespace wpCloud\StatelessMedia {
        */
       public function action_stateless_get_all_fails() {
         return array(
-          'images' => $this->get_fails( 'images' ),
-          'other'  => $this->get_fails( 'other' )
+          'images' => Utility::sync_get_fails( 'images' ),
+          'other'  => Utility::sync_get_fails( 'other' )
         );
-      }
-
-      /**
-       * Get_fails
-       *
-       * @param $mode
-       * @return mixed|void
-       */
-      private function get_fails( $mode ) {
-        if ( $mode !== 'other' ) {
-          $mode = 'images';
-        }
-
-        return get_option( 'wp_stateless_failed_' . $mode );
       }
 
       /**
@@ -428,141 +383,9 @@ namespace wpCloud\StatelessMedia {
           $mode = 'other';
         }
 
-        $this->reset_current_progress( $mode );
+        Utility::sync_reset_current_progress( $mode );
 
         return true;
-      }
-
-      /**
-       * Get_non_processed_media_ids
-       *
-       * @param $mode
-       * @param $files
-       * @param bool $continue
-       * @return array
-       * @throws \Exception
-       */
-      private function get_non_processed_media_ids( $mode, $files, $continue = false, $start_from = 0 ) {
-        if(ud_get_stateless_media()->is_connected_to_gs() !== true){
-          throw new \Exception( __( 'Not connected to GCS', ud_get_stateless_media()->domain) );
-        }
-
-        if ( $continue ) {
-          $progress = $this->retrieve_current_progress( $mode );
-
-          if ( false !== $progress ) {
-            if($start_from && $start_from != 0){
-              // adding 1 because we subtracted 1 in js code for presentation.
-              $progress[1] = $start_from + 1;
-            }
-            $ids = array();
-            foreach ( $files as $file ) {
-              $id = (int) $file->ID;
-              // only include IDs that have not been processed yet
-              if ( $id > $progress[0] || $id < $progress[1] ) {
-                $ids[] = $id;
-              }
-            }
-            return $ids;
-          }
-        }
-
-        $this->reset_current_progress( $mode );
-
-        $ids = array();
-        foreach ( $files as $file )
-          $ids[] = (int)$file->ID;
-
-        return $ids;
-      }
-
-      /**
-       * @param $mode
-       * @param $id
-       */
-      private function store_current_progress( $mode, $id ) {
-        if ( $mode !== 'other' ) {
-          $mode = 'images';
-        }
-
-        $first_processed = get_option( 'wp_stateless_' . $mode . '_first_processed' );
-        if ( ! $first_processed ) {
-          update_option( 'wp_stateless_' . $mode . '_first_processed', $id );
-        }
-        $last_processed = get_option( 'wp_stateless_' . $mode . '_last_processed' );
-        if ( ! $last_processed || $id < (int) $last_processed ) {
-          update_option( 'wp_stateless_' . $mode . '_last_processed', $id );
-        }
-      }
-
-      /**
-       * @param $attachment_id
-       * @param $mode
-       */
-      private function store_failed_attachment( $attachment_id, $mode ) {
-        if ( $mode !== 'other' ) {
-          $mode = 'images';
-        }
-
-        $fails = get_option( 'wp_stateless_failed_' . $mode );
-        if ( !empty( $fails ) && is_array( $fails ) ) {
-          if ( !in_array( $attachment_id, $fails ) ) {
-            $fails[] = $attachment_id;
-          }
-        } else {
-          $fails = array( $attachment_id );
-        }
-
-        update_option( 'wp_stateless_failed_' . $mode, $fails );
-      }
-
-      /**
-       * @param $mode
-       * @param $attachment_id
-       */
-      private function maybe_fix_failed_attachment( $mode, $attachment_id ) {
-        $fails = get_option( 'wp_stateless_failed_' . $mode );
-
-        if ( !empty( $fails ) && is_array( $fails ) ) {
-          if ( in_array( $attachment_id, $fails ) ) {
-            foreach (array_keys($fails, $attachment_id) as $key) {
-              unset($fails[$key]);
-            }
-          }
-        }
-
-        update_option( 'wp_stateless_failed_' . $mode, $fails );
-      }
-
-      /**
-       * @param $mode
-       * @return array|bool
-       */
-      private function retrieve_current_progress( $mode ) {
-        if ( $mode !== 'other' ) {
-          $mode = 'images';
-        }
-
-        $first_processed = get_option( 'wp_stateless_' . $mode . '_first_processed' );
-        $last_processed = get_option( 'wp_stateless_' . $mode . '_last_processed' );
-
-        if ( ! $first_processed || ! $last_processed ) {
-          return false;
-        }
-
-        return array( (int) $first_processed, (int) $last_processed );
-      }
-
-      /**
-       * @param $mode
-       */
-      private function reset_current_progress( $mode ) {
-        if ( $mode !== 'other' ) {
-          $mode = 'images';
-        }
-
-        delete_option( 'wp_stateless_' . $mode . '_first_processed' );
-        delete_option( 'wp_stateless_' . $mode . '_last_processed' );
       }
 
     }
