@@ -74,3 +74,11 @@ td.image-icon img.wp-stateless-media-item {
 #go #regenthumbs-bar {
 	margin-bottom: 10px;
 }
+
+.clearfix:after {
+  content: " "; /* Older browser do not support empty content */
+  visibility: hidden;
+  display: block;
+  height: 0;
+  clear: both;
+}

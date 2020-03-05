@@ -210,6 +210,15 @@ namespace wpCloud\StatelessMedia {
             
             return true;
         }
+
+        /**
+         * add_webp_mime
+         * 
+         */
+        public function add_webp_mime($t, $user){
+            $t['webp'] = 'image/webp';
+            return $t;
+        }
     }
 
  }

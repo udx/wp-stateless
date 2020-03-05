@@ -127,10 +127,18 @@ namespace wpCloud\StatelessMedia {
              */
             new VidoRev();
 
+
             /**
              * Simple Local Avatars
              */
             new SimpleLocalAvatars();
+
+            
+            /**
+             * Polylang Pro
+             */
+            new Polylang();
+
         }
 
         /**

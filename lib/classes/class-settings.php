@@ -16,6 +16,11 @@ namespace wpCloud\StatelessMedia {
       public $setup_wizard_ui = null;
 
       /**
+       * @var Array
+       */
+      public $wildcards = array();
+
+      /**
        * @var false|null|string
        */
       public $stateless_settings = null;
@@ -31,7 +36,7 @@ namespace wpCloud\StatelessMedia {
           'delete_remote'          => array('WP_STATELESS_MEDIA_DELETE_REMOTE', 'true'), 
           'custom_domain'          => array('WP_STATELESS_MEDIA_CUSTOM_DOMAIN', ''), 
           'organize_media'         => array('', 'true'), 
-          'hashify_file_name'      => array(['WP_STATELESS_MEDIA_HASH_FILENAME' => 'WP_STATELESS_MEDIA_CACHE_BUSTING'], 'true'), 
+          'hashify_file_name'      => array(['WP_STATELESS_MEDIA_HASH_FILENAME' => 'WP_STATELESS_MEDIA_CACHE_BUSTING'], 'false'), 
         );
 
       private $network_only_settings = array(
@@ -52,7 +57,6 @@ namespace wpCloud\StatelessMedia {
 
         add_action('admin_menu', array( $this, 'admin_menu' ));
 
-        
         $this->save_media_settings();
         
 
@@ -82,6 +86,41 @@ namespace wpCloud\StatelessMedia {
 
         /** Register options */
         add_action( 'init', array( $this, 'init' ), 3 );
+
+        
+        $site_url = parse_url( site_url() );
+        $this->wildcards = array(
+          '%date_year%'            => [
+                                    date('Y'),
+                                    __("year", ud_get_stateless_media()->domain),
+                                    __("The year of the post, four digits, for example 2004.", ud_get_stateless_media()->domain),
+                                 ],
+          '%date_month%'           => [
+                                    date('m'),
+                                    __("monthnum", ud_get_stateless_media()->domain),
+                                    __("Month of the year, for example 05.", ud_get_stateless_media()->domain),
+                                 ],
+          '%site_id%'         => [
+                                    get_current_blog_id(),
+                                    __("site id", ud_get_stateless_media()->domain),
+                                    __("Site ID, for example 1.", ud_get_stateless_media()->domain),
+                                 ],
+          '%site_url%'        => [
+                                    trim( $site_url['host'] . $site_url['path'], '/ ' ),
+                                    __("site url", ud_get_stateless_media()->domain),
+                                    __("Site URL, for example example.com/site-1.", ud_get_stateless_media()->domain),
+                                 ],
+          '%site_url_host%'   => [
+                                    trim( $site_url['host'], '/ ' ),
+                                    __("host name", ud_get_stateless_media()->domain),
+                                    __("Host name, for example example.com.", ud_get_stateless_media()->domain),
+                                 ],
+          '%site_url_path%'   => [
+                                    trim( $site_url['path'], '/ ' ),
+                                    __("site path", ud_get_stateless_media()->domain),
+                                    __("Site path, for example site-1.", ud_get_stateless_media()->domain),
+                                 ],
+        );
       }
 
       public function init(){
@@ -301,6 +340,7 @@ namespace wpCloud\StatelessMedia {
        * Draw interface
        */
       public function settings_interface() {
+        $wildcards = apply_filters('wp_stateless_root_dir_wildcard', $this->wildcards);
         include ud_get_stateless_media()->path( '/static/views/settings_interface.php', 'dir' );
       }
 

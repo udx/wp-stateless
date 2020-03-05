@@ -65,7 +65,7 @@ class Google_Service_Storage extends Google_Service
   public function __construct(Google_Client $client)
   {
     parent::__construct($client);
-    $this->rootUrl = 'https://www.googleapis.com/';
+    $this->rootUrl = 'https://storage.googleapis.com/';
     $this->servicePath = 'storage/v1/';
     $this->version = 'v1';
     $this->serviceName = 'storage';

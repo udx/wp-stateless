@@ -758,6 +758,40 @@ var wpStatelessApp = angular.module('wpStatelessApp', ['ngSanitize'])
       }
     }
   });
+  
+  $scope.$watch('sm.bucket_folder_type', function(value) {
+    if(value == 'single-site'){
+      $scope.sm.root_dir = '/%date_year%/%date_month%/';
+    }
+    else if(value == 'multi-site'){
+      $scope.sm.root_dir = '/sites/%site_id%/%date_year%/%date_month%/';
+    }
+    setTimeout(function(){
+      jQuery( '#permalink_structure' ).trigger('change');
+    }, 1);
+  });
+  
+  $scope.$watch('sm.root_dir', function(value) {
+    if(value == '/%date_year%/%date_month%/'){
+      $scope.sm.bucket_folder_type = 'single-site';
+    }
+    else if(value == '/sites/%site_id%/%date_year%/%date_month%/'){
+      $scope.sm.bucket_folder_type = 'multi-site';
+    }
+    else{
+      $scope.sm.bucket_folder_type = 'custom';
+    }
+    setTimeout(function(){
+      jQuery( '#permalink_structure' ).trigger('change');
+    }, 1);
+  });
+
+  $scope.tagClicked = function(){
+    $scope.sm.bucket_folder_type = 'custom';
+    setTimeout(function(){
+      jQuery( '#permalink_structure' ).trigger('change');
+    }, 1);
+  }
 
   $scope.sm.showNotice = function(option){
     if($scope.sm.readonly && $scope.sm.readonly[option]){
@@ -769,11 +803,18 @@ var wpStatelessApp = angular.module('wpStatelessApp', ['ngSanitize'])
   $scope.sm.generatePreviewUrl = function() {
     $scope.sm.is_custom_domain = false;
     var host = 'https://storage.googleapis.com/';
-    var rootdir = $scope.sm.root_dir ? $scope.sm.root_dir + '/' : '';
-    var subdir = $scope.sm.organize_media == '1' ? $filter('date')(Date.now(), 'yyyy/MM') + '/' : '';
     var hash = $scope.sm.hashify_file_name == 'true' ? Date.now().toString(36) + '-' : '';
     var is_ssl = $scope.sm.custom_domain.indexOf('https://');
     var custom_domain = $scope.sm.custom_domain.toString();
+    var root_dir = $scope.sm.root_dir ? $scope.sm.root_dir : '';
+
+    jQuery.each($scope.sm.wildcards, function(index, item){
+      var reg = new RegExp(index, 'g');
+      root_dir = root_dir.replace(reg, item[0]);
+    });
+    root_dir = root_dir.replace(/(\/+)/g, '/');
+    root_dir = root_dir.replace(/^\//, '');
+    root_dir = root_dir.replace(/\/$/, '');
     
     custom_domain = custom_domain.replace(/\/+$/, ''); // removing trailing slashes
     custom_domain = custom_domain.replace(/https?:\/\//, ''); // removing http:// or https:// from the beginning.
@@ -786,7 +827,7 @@ var wpStatelessApp = angular.module('wpStatelessApp', ['ngSanitize'])
       host += custom_domain;
     }
 
-    $scope.sm.preview_url = host + "/" + rootdir + subdir + hash + "your-image-name.jpeg";
+    $scope.sm.preview_url = host + "/" + root_dir + hash + "your-image-name.jpeg";
   }
 
   $scope.sm.generatePreviewUrl();

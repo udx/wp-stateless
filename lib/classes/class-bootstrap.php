@@ -81,6 +81,12 @@ namespace wpCloud\StatelessMedia {
         new SyncNonMedia();
         
         /**
+         * This needed to be before initializing settings.
+         * 
+         */
+        add_filter( 'wp_stateless_handle_root_dir', array( $this, 'root_dir_wildcards' ));
+
+        /**
          * Define settings and UI.
          *
          * Example:
@@ -105,11 +111,6 @@ namespace wpCloud\StatelessMedia {
          * Init hook
          */
         add_action( 'admin_init', array( $this, 'admin_init' ) );
-
-        /**
-         * Add custom actions to media rows
-         */
-        add_filter( 'media_row_actions', array( $this, 'add_custom_row_actions' ), 10, 3 );
 
         /**
          * Handle switch blog properly.
@@ -171,6 +172,16 @@ namespace wpCloud\StatelessMedia {
            * Carry on only if we do not have errors.
            */
           if( !$this->has_errors() ) {
+
+            /**
+             * Add custom actions to media rows
+             */
+            add_filter( 'media_row_actions', array( $this, 'add_custom_row_actions' ), 10, 3 );
+
+            /**
+             * Allow bucket folder wildcard to organize file on server also.
+             */
+            add_filter( 'upload_dir', array( $this, 'upload_dir' ) );
 
             /**
              * Hashify file name if option is enabled
@@ -609,7 +620,7 @@ namespace wpCloud\StatelessMedia {
        */
       public function handle_root_dir( $current_path, $use_root = true ) {
         $root_dir = $this->get( 'sm.root_dir' );
-        $root_dir = trim( $root_dir, '/ ' ); // Remove any forward slash and empty space.
+        $root_dir = apply_filters("wp_stateless_handle_root_dir", $root_dir);
 
         $upload_dir = wp_upload_dir();
         $current_path = str_replace( wp_normalize_path( trailingslashit( $upload_dir[ 'basedir' ] ) ), '', wp_normalize_path( $current_path ) );
@@ -860,6 +871,7 @@ namespace wpCloud\StatelessMedia {
         ));
         
         $settings = ud_get_stateless_media()->get('sm');
+        $settings['wildcards'] = $this->settings->wildcards;
         if(defined('WP_STATELESS_MEDIA_JSON_KEY') && WP_STATELESS_MEDIA_JSON_KEY){
           $settings['key_json'] = "Currently configured via a constant.";
         }
@@ -867,6 +879,30 @@ namespace wpCloud\StatelessMedia {
         wp_localize_script('wp-stateless', 'wp_stateless_compatibility', Module::get_modules());
         wp_register_style( 'jquery-ui-regenthumbs', ud_get_stateless_media()->path( 'static/scripts/jquery-ui/redmond/jquery-ui-1.7.2.custom.css', 'url' ), array(), '1.7.2' );
 
+
+        add_action( 'admin_footer', array($this, 'admin_footer'));
+
+      }
+
+      /**
+       * Get_l10n_data
+       *
+       * @param string $value
+       * @return mixed
+       */
+      public function admin_footer($value=''){
+        $current_screen = get_current_screen();
+        $message = printf(__("<p>This setting is managed by the <a href='%s'>WP-Stateless</a> Bucket Folder setting.</p>", ud_get_stateless_media()->domain), admin_url("upload.php?page=stateless-settings"));
+        if($current_screen->base == 'options-media'){
+          ?>
+          <script>
+            jQuery(document).ready(function(){
+              jQuery('#uploads_use_yearmonth_folders').attr('disabled',true)
+              .parent().after("<?php echo $message;?>");
+            });
+          </script>
+          <?php
+        }
       }
 
       /**
@@ -1447,13 +1483,35 @@ namespace wpCloud\StatelessMedia {
        * @param $data
        * @return mixed
        */
-      public function upload_dir( $data ) {
-        $data[ 'basedir' ] = $this->get_gs_host();
-        $data[ 'baseurl' ] = $this->get_gs_host();
-        $data[ 'url' ] = $data[ 'baseurl' ] . $data[ 'subdir' ];
+      public function upload_dir( $upload_data ) {
+        $root_dir = $this->get( 'sm.root_dir' );
+        $root_dir = apply_filters("wp_stateless_handle_root_dir", $root_dir);
+        $upload_data[ 'path' ]   = $upload_data[ 'path' ]   . '/' . $root_dir;
+        $upload_data[ 'url' ]    = $upload_data[ 'url' ]    . '/' . $root_dir;
+        $upload_data[ 'subdir' ] = $upload_data[ 'subdir' ] . '/' . $root_dir;
 
-        return $data;
+        return $upload_data;
+      }
 
+      /**
+       * 
+       * 
+       */
+      public function root_dir_wildcards( $root_dir ) {
+
+        $wildcards = apply_filters('wp_stateless_root_dir_wildcard', $this->settings->wildcards);
+
+        foreach ($wildcards as $wildcard => $replace) {
+          if(!empty($wildcard)){
+            $root_dir = str_replace($wildcard, $replace[0], $root_dir);
+          }
+        }
+
+        $root_dir = preg_replace('/(\/+)/', '/', $root_dir);
+        $root_dir = trim( $root_dir, '/ ' ); // Remove any forward slash and empty space.
+
+
+        return $root_dir;
       }
 
       /**

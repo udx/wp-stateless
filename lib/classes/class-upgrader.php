@@ -104,6 +104,19 @@ namespace wpCloud\StatelessMedia {
           }
         }
 
+        if ( $version && version_compare( $version, '2.4.0', '<' ) ){
+          $sm_root_dir    = get_option('sm_root_dir', array());
+          $organize_media = get_option('uploads_use_yearmonth_folders');
+          if(!empty($organize_media) && empty($sm_root_dir)){
+            $sm_root_dir  =  '/%date_year%/%date_month%/';
+          }
+        }
+        else{
+
+        }
+
+
+
         update_option( 'wp_sm_version', ud_get_stateless_media()->args[ 'version' ]  );
 
       }
