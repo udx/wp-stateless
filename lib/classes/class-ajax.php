@@ -146,7 +146,7 @@ namespace wpCloud\StatelessMedia {
           $upload_dir = wp_upload_dir();
 
           // Try get it and save
-          $result_code = ud_get_stateless_media()->get_client()->get_media( apply_filters( 'wp_stateless_file_name', str_replace( trailingslashit( $upload_dir[ 'basedir' ] ), '', $fullsizepath )), true, $fullsizepath );
+          $result_code = ud_get_stateless_media()->get_client()->get_media( apply_filters( 'wp_stateless_file_name', str_replace( trailingslashit( $upload_dir[ 'basedir' ] ), '', $fullsizepath ), true, $id ), true, $fullsizepath );
 
           if ( $result_code !== 200 ) {
             if(!Utility::sync_get_attachment_if_exist($image->ID, $fullsizepath)){ // Save file to local from proxy.

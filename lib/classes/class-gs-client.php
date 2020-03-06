@@ -119,14 +119,14 @@ namespace wpCloud\StatelessMedia {
        * Wrapper for listObjects()
        */
       public function list_objects( $options = array() ) {
-        
+
         $options = wp_parse_args( $options, array(
-            'delimiter'  => '',
-            'maxResults' => 1000,
-            'pageToken'  => '',
-            'prefix'     => '',
-            'projection' => 'noAcl',
-            'versions'   => false
+          'delimiter'  => '',
+          'maxResults' => 1000,
+          'pageToken'  => '',
+          'prefix'     => '',
+          'projection' => 'noAcl',
+          'versions'   => false
         ) );
 
         return $this->service->objects->listObjects( $this->bucket, $options );
@@ -160,7 +160,7 @@ namespace wpCloud\StatelessMedia {
           return $this->temp_objects;
         }
       }
-      
+
       /**
        * Add/Update Media Object to Bucket
        *
@@ -194,7 +194,10 @@ namespace wpCloud\StatelessMedia {
             $name = basename( $args['name'] );
           }
 
-          $name = apply_filters( 'wp_stateless_file_name', $name );
+          $object_id = isset( $args['metadata']['object-id'] ) ? $args['metadata']['object-id'] : (isset( $args['metadata']['child-of'] ) ? $args['metadata']['child-of'] : "");
+          $object_size = isset( $args['metadata']['size'] ) ? $args['metadata']['size'] : "";
+
+          $name = apply_filters( 'wp_stateless_file_name', $name, true, $object_id, $object_size );
 
           // If media exists we just return it
           if ( !$args['force'] && $media = $this->media_exists( $name ) ) {
@@ -223,10 +226,10 @@ namespace wpCloud\StatelessMedia {
 
           /* Upload Media file to Google storage */
           $media = $this->service->objects->insert($this->bucket, $media, array_filter(array(
-              'data' => file_get_contents($args['absolutePath']),
-              'uploadType' => 'media',
-              'mimeType' => $args['mimeType'],
-              'predefinedAcl' => 'bucketOwnerFullControl',
+            'data' => file_get_contents($args['absolutePath']),
+            'uploadType' => 'media',
+            'mimeType' => $args['mimeType'],
+            'predefinedAcl' => 'bucketOwnerFullControl',
           )));
 
           $this->mediaInsertACL($media);
@@ -238,18 +241,18 @@ namespace wpCloud\StatelessMedia {
       }
 
       /**
-       * 
-       * 
+       *
+       *
        */
       public function mediaInsertACL($media){
-          /* Make Media Public READ for all on success */
-          if (!empty($media->name)) {
-            $acl = new \wpCloud\StatelessMedia\Google_Client\Google_Service_Storage_ObjectAccessControl();
-            $acl->setEntity('allUsers');
-            $acl->setRole('READER');
+        /* Make Media Public READ for all on success */
+        if (!empty($media->name)) {
+          $acl = new \wpCloud\StatelessMedia\Google_Client\Google_Service_Storage_ObjectAccessControl();
+          $acl->setEntity('allUsers');
+          $acl->setRole('READER');
 
-            $this->service->objectAccessControls->insert($this->bucket, $media->name, $acl);
-          }
+          $this->service->objectAccessControls->insert($this->bucket, $media->name, $acl);
+        }
       }
 
       /**
@@ -336,7 +339,7 @@ namespace wpCloud\StatelessMedia {
         if ( empty( $media->id ) ) return false;
         return $media;
       }
-      
+
       /**
        * Fired for every file remove action
        *
