@@ -628,7 +628,8 @@ namespace wpCloud\StatelessMedia {
         $current_path = str_replace( trailingslashit( $this->get_gs_host() ), '', $current_path );
 
         if($root_dir){
-          $current_path = str_replace( trailingslashit( $root_dir ), '', $current_path );
+          // removing the root dir if already exists in the begaining.
+          $current_path = preg_replace('/^' . preg_quote(trailingslashit( $root_dir ), '/') . '/', '', $current_path);
         }
 
         // skip adding root dir if it's already added.
