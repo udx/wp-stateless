@@ -131,6 +131,11 @@ namespace wpCloud\StatelessMedia {
              * Polylang Pro
              */
             new Polylang();
+
+            /**
+             * Simple Local Avatars
+             */
+            new SimpleLocalAvatars();
         }
 
         /**

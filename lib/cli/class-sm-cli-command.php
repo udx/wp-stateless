@@ -48,6 +48,119 @@ if( defined( 'WP_CLI' ) && WP_CLI ) {
     }
 
     /**
+     * Sync Data
+     *
+     * ## OPTIONS
+     *
+     * <type>
+     * : Which data we want to sync. May be images or files.
+     *
+     * --start
+     * : Indent (sql start). It's ignored on batches.
+     *
+     * --limit
+     * : Limit per query (sql limit)
+     *
+     * --end
+     * : Where ( on which row ) we should stop script. It's ignored on batches
+     *
+     * --batch
+     * : Number of Batch. Default is 1.
+     *
+     * --batches
+     * : General amount of batches.
+     *
+     * --b
+     * : Runs command using batches till it's done. Other parameters will be ignored. There are 10 batches by default. Batch is external command process
+     *
+     * --log
+     * : Show more information in command line
+     *
+     * --o
+     * : Process includes database optimization and transient removing.
+     *
+     * --force
+     * : Force sync all images
+     *
+     * --continue
+     * : Continue the last process
+     *
+     * --fix
+     * : Try to fix previously failed items
+     *
+     * --order
+     * : Order. May be ASC or DESC
+     *
+     * ## EXAMPLES
+     *
+     * wp stateless sync images --url=example.com --b
+     * : Run process looping 10 batches. Every batch is external command 'wp stateless sync images --url=example.com --batch=<number> --batches=10'
+     *
+     * wp stateless sync images --url=example.com --b --batches=100
+     * : Run process looping 100 batches.
+     *
+     * wp stateless sync images --url=example.com --b --batches=10 --batch=2
+     * : Run second batch from 10 batches manually.
+     *
+     * wp stateless sync images --url=example.com --log
+     * : Run default process showing additional information in command line.
+     *
+     * wp stateless sync images --url=example.com --end=3000 --limit=50
+     * : Run process from 1 to 3000 row. Splits process by limiting queries to 50 rows. So, the current example does 60 queries ( 3000 / 50 = 60 )
+     *
+     * wp stateless sync images --url=example.com --start=777 --end=3000 --o
+     * : Run process from 777 to 3000 row. Also does database optimization and removes transient in the end.
+     *
+     * wp stateless sync images --force
+     * : Run process for all existing images.
+     *
+     * wp stateless sync images --continue
+     * : Run process from last synchronized image
+     *
+     * wp stateless sync files --fix
+     * : Run process and trying to fix previously failed items
+     *
+     * @synopsis [<type>] [--start=<val>] [--limit=<val>] [--end=<val>] [--batch=<val>] [--batches=<val>] [--b] [--log] [--o] [--force] [--continue] [--fix] [--order]
+     * @param $args
+     * @param $assoc_args
+     */
+    public function sync( $args, $assoc_args ) {
+
+      //** DB Optimization process */
+      if( isset( $assoc_args[ 'o' ] ) ) {
+        $this->_before_command_run();
+      }
+      //** Run batches */
+      if( isset( $assoc_args[ 'b' ] ) ) {
+        if( empty( $args[0] ) ) {
+          WP_CLI::error( 'Invalid type parameter' );
+        }
+        $this->_run_batches( 'sync', $args[0], $assoc_args );
+      }
+      //** Or run command as is. */
+      else {
+        if( !class_exists( 'SM_CLI_Sync' ) ) {
+          require_once( dirname( __FILE__ ) . '/class-sm-cli-sync.php' );
+        }
+        if( class_exists( 'SM_CLI_Sync' ) ) {
+          $object = new SM_CLI_Sync( $args, $assoc_args );
+          $controller = !empty( $args[0] ) ? $args[0] : false;
+          if( $controller && is_callable( array( $object, $controller ) ) ) {
+            call_user_func( array( $object, $controller ) );
+          } else {
+            WP_CLI::error( 'Invalid type parameter' );
+          }
+        } else {
+          WP_CLI::error( 'Class SM_CLI_Sync is undefined.' );
+        }
+      }
+      //** Get rid of all transients and run DB optimization again */
+      if( isset( $assoc_args[ 'o' ] ) ) {
+        $this->_after_command_run();
+      }
+    }
+
+    /**
      * Upgrade Data
      *
      * ## OPTIONS
@@ -81,22 +194,22 @@ if( defined( 'WP_CLI' ) && WP_CLI ) {
      *
      * ## EXAMPLES
      *
-     * wp sm upgrade meta --url=example.com --b
-     * : Run process looping 10 batches. Every batch is external command 'wp sm upgrade meta --url=example.com --batch=<number> --batches=10'
+     * wp stateless upgrade meta --url=example.com --b
+     * : Run process looping 10 batches. Every batch is external command 'wp stateless upgrade meta --url=example.com --batch=<number> --batches=10'
      *
-     * wp sm upgrade meta --url=example.com --b --batches=100
+     * wp stateless upgrade meta --url=example.com --b --batches=100
      * : Run process looping 100 batches.
      *
-     * wp sm upgrade meta --url=example.com --b --batches=10 --batch=2
+     * wp stateless upgrade meta --url=example.com --b --batches=10 --batch=2
      * : Run second batch from 10 batches manually.
      *
-     * wp sm upgrade meta --url=example.com --log
+     * wp stateless upgrade meta --url=example.com --log
      * : Run default process showing additional information in command line.
      *
-     * wp sm upgrade meta --url=example.com --end=3000 --limit=50
+     * wp stateless upgrade meta --url=example.com --end=3000 --limit=50
      * : Run process from 1 to 3000 row. Splits process by limiting queries to 50 rows. So, the current example does 60 queries ( 3000 / 50 = 60 )
      *
-     * wp sm upgrade meta --url=example.com --start=777 --end=3000 --o
+     * wp stateless upgrade meta --url=example.com --start=777 --end=3000 --o
      * : Run process from 777 to 3000 row. Also does database optimization and removes transient in the end.
      *
      * @synopsis [<type>] [--start=<val>] [--limit=<val>] [--end=<val>] [--batch=<val>] [--batches=<val>] [--b] [--log] [--o]
@@ -154,9 +267,9 @@ if( defined( 'WP_CLI' ) && WP_CLI ) {
       for( $i=1; $i<=$batches; $i++ ) {
 
         if( !empty( $this->url ) ) {
-          $command = "wp sm {$method} {$type} --batch={$i} --batches={$batches} --limit={$limit} --url={$this->url}";
+          $command = "wp stateless {$method} {$type} --batch={$i} --batches={$batches} --limit={$limit} --url={$this->url}";
         } else {
-          $command = "wp sm {$method} {$type} --batch={$i} --batches={$batches} --limit={$limit}";
+          $command = "wp stateless {$method} {$type} --batch={$i} --batches={$batches} --limit={$limit}";
         }
 
         WP_CLI::line( '...' );
@@ -226,6 +339,6 @@ if( defined( 'WP_CLI' ) && WP_CLI ) {
   }
 
   /** Add the commands from above */
-  WP_CLI::add_command( 'sm', 'SM_CLI_Command' );
+  WP_CLI::add_command( 'stateless', 'SM_CLI_Command' );
 
 }

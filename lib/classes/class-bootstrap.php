@@ -156,7 +156,7 @@ namespace wpCloud\StatelessMedia {
           $is_connected = $this->is_connected_to_gs();
 
           if ( is_wp_error( $is_connected ) ) {
-            $this->errors->add( $is_connected->get_error_message() );
+            $this->errors->add( $is_connected->get_error_message(), 'warning' );
           }
 
           if ( $googleSDKVersionConflictError = get_transient( "wp_stateless_google_sdk_conflict" ) ) {
@@ -167,9 +167,6 @@ namespace wpCloud\StatelessMedia {
           if( version_compare(PHP_VERSION, '5.5', '<') ) {
             $this->errors->add( sprintf( __( 'The plugin requires PHP %s or higher. You current PHP version %s is too old.', ud_get_stateless_media()->domain ), '<b>5.5</b>', '<b>' . PHP_VERSION . '</b>' ) );
           }
-
-          /** Temporary fix to WP 4.4 srcset feature **/
-          //add_filter( 'max_srcset_image_width', function(){return 1;} );
 
           /**
            * Carry on only if we do not have errors.
@@ -253,13 +250,6 @@ namespace wpCloud\StatelessMedia {
             if(!defined('WP_STATELESS_MEDIA_DISABLE_FULL_IMAGE_FIRST') || WP_STATELESS_MEDIA_DISABLE_FULL_IMAGE_FIRST != true){
               add_filter( 'intermediate_image_sizes_advanced', array( $this, 'before_intermediate_image_sizes' ), 10, 2 );
             }
-
-            /**
-             * Add Media
-             *
-             * Once added we can get into Attachment ID then get all image sizes and sync them with GS
-             */
-            // add_filter( 'wp_generate_attachment_metadata', array( $this, 'add_media' ), 100, 2 );
 
             if ( $this->get( 'sm.delete_remote' ) == 'true' ) {
               /**

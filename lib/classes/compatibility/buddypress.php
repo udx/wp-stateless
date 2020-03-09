@@ -23,7 +23,6 @@ namespace wpCloud\StatelessMedia {
                 add_action('groups_avatar_uploaded', array($this, 'avatar_uploaded'), 10, 3);
                 
                 add_filter('bp_core_fetch_avatar', array($this, 'bp_core_fetch_avatar'), 10, 3);
-                add_filter('bp_core_fetch_avatar_url', array($this, 'bp_core_fetch_avatar_url'), 10, 3);
                 add_filter('bp_core_pre_delete_existing_avatar', array($this, 'delete_existing_avatar'), 10, 2);
                 add_filter('bp_attachments_pre_get_attachment', array($this, 'bp_attachments_pre_get_attachment'), 10, 2);
 
@@ -68,7 +67,7 @@ namespace wpCloud\StatelessMedia {
              */
             public function bp_core_fetch_avatar($image_html){
                 try {
-                    preg_match("/src=(?:'|\")(.*?)(?:'|\")/", $image_html, $image_url);
+                    preg_match("/src=(?:'|\")(http.*?)(?:'|\")/", $image_html, $image_url);
                     if(!empty($image_url[1])){
                         $gs_image_url = $this->bp_core_fetch_avatar_url($image_url[1]);
                         $image_html = str_replace($image_url[1], $gs_image_url, $image_html);
