@@ -123,6 +123,49 @@ var wpStatelessApp = angular.module('wpStatelessApp', ['ngSanitize'])
    *
    * @param callback
    */
+  $scope.getBucketFolder = function( callback ) {
+      $scope.isLoading = true;
+
+      $http({
+          method: 'GET',
+          url: ajaxurl,
+          params: {
+              action: 'stateless_get_bucket_folder'
+          }
+      }).then(function(response){
+          var data = response.data || {};
+
+          if ( data.success ) {
+              if ( typeof data.data !== 'undefined' ) {
+                  $scope.bucket_folder = data.data.bucket_folder;
+
+                  if ( 'function' === typeof callback ) {
+                      callback();
+                  }
+              } else {
+                  console.error( stateless_l10n.could_not_retrieve_progress );
+              }
+          } else {
+              console.error( stateless_l10n.could_not_retrieve_progress );
+          }
+
+          $scope.isLoading = false;
+      }, function(response) {
+          console.error( stateless_l10n.could_not_retrieve_progress );
+
+          $scope.isLoading = false;
+      });
+  };
+
+  /**
+   *
+   */
+  $scope.getBucketFolder();
+
+  /**
+   *
+   * @param callback
+   */
   $scope.getCurrentProgresses = function( callback ) {
     $scope.isLoading = true;
 
@@ -253,13 +296,18 @@ var wpStatelessApp = angular.module('wpStatelessApp', ['ngSanitize'])
       cont = 1;
     }
 
+    var use_wildcards = 0;
+    if ( 'use_wildcards' === $scope.method ) {
+      use_wildcards = 1;
+    }
+
     if ( $scope.action ) {
       switch( $scope.action ) {
         case 'regenerate_images':
-          $scope.getImagesMedia( $scope.regenerateImages, cont );
+          $scope.getImagesMedia( $scope.regenerateImages, cont, use_wildcards );
           break;
         case 'sync_non_images':
-          $scope.getOtherMedia( $scope.syncFiles, cont );
+          $scope.getOtherMedia( $scope.syncFiles, cont, use_wildcards );
           break;
         case 'sync_non_library_files':
           $scope.getNonLibraryFiles( $scope.syncNonLibraryFiles, cont );
@@ -350,7 +398,7 @@ var wpStatelessApp = angular.module('wpStatelessApp', ['ngSanitize'])
    * Load images IDs
    * @param callback
    */
-  $scope.getImagesMedia = function( callback, cont ) {
+  $scope.getImagesMedia = function( callback, cont, use_wildcards ) {
 
     $scope.continue = true;
     $scope.isLoading = true;
@@ -371,6 +419,7 @@ var wpStatelessApp = angular.module('wpStatelessApp', ['ngSanitize'])
         if ( typeof callback === 'function' ) {
           if ( typeof data.data !== 'undefined' ) {
             $scope.objectIDs = data.data;
+            $scope.use_wildcards = use_wildcards;
             callback();
           } else {
             $scope.status = stateless_l10n.ids_are_malformed;
@@ -404,7 +453,7 @@ var wpStatelessApp = angular.module('wpStatelessApp', ['ngSanitize'])
    * Load non-images media files
    * @param callback
    */
-  $scope.getOtherMedia = function( callback, cont ) {
+  $scope.getOtherMedia = function( callback, cont, use_wildcards ) {
 
     $scope.continue = true;
     $scope.isLoading = true;
@@ -425,6 +474,7 @@ var wpStatelessApp = angular.module('wpStatelessApp', ['ngSanitize'])
         if ( typeof callback === 'function' ) {
           if ( typeof data.data !== 'undefined' ) {
             $scope.objectIDs = data.data;
+            $scope.use_wildcards = use_wildcards;
             callback();
           } else {
             $scope.status = $scope.getError(response, stateless_l10n.ids_are_malformed);
@@ -541,7 +591,7 @@ var wpStatelessApp = angular.module('wpStatelessApp', ['ngSanitize'])
       //$scope.syncSingleFile( $scope.objectIDs.shift() );
       $scope.chunkIDs = array_bulk( $scope.objectIDs, $scope.bulk_size );
       for ( var i in $scope.chunkIDs ) {
-        $scope.syncSingleFile( $scope.chunkIDs[ i ].shift(), i );
+        $scope.syncSingleFile( $scope.chunkIDs[ i ].shift(), $scope.use_wildcards, i );
       }
     }
   }
@@ -563,7 +613,7 @@ var wpStatelessApp = angular.module('wpStatelessApp', ['ngSanitize'])
       //$scope.regenerateSingle( $scope.objectIDs.shift() );
       $scope.chunkIDs = array_bulk( $scope.objectIDs, $scope.bulk_size );
       for ( var i in $scope.chunkIDs ) {
-        $scope.regenerateSingle( $scope.chunkIDs[ i ].shift(), i );
+        $scope.regenerateSingle( $scope.chunkIDs[ i ].shift(), $scope.use_wildcards, i );
       }
     }
   };
@@ -572,14 +622,15 @@ var wpStatelessApp = angular.module('wpStatelessApp', ['ngSanitize'])
    * Process Single Image
    * @param id
    */
-  $scope.regenerateSingle = function( id, chunk_id ) {
+  $scope.regenerateSingle = function( id, use_wildcards, chunk_id ) {
 
     $http({
       method: 'GET',
       url: ajaxurl,
       params: {
         action: "stateless_process_image",
-        id: id
+        id: id,
+        use_wildcards: use_wildcards
       }
     }).then(
       function(response) {
@@ -597,13 +648,13 @@ var wpStatelessApp = angular.module('wpStatelessApp', ['ngSanitize'])
         
         if ( 'undefined' !== typeof chunk_id ) {
           if ( $scope.chunkIDs[ chunk_id ].length && $scope.continue ) {
-            $scope.regenerateSingle( $scope.chunkIDs[ chunk_id ].shift(), chunk_id );
+            $scope.regenerateSingle( $scope.chunkIDs[ chunk_id ].shift(), use_wildcards, chunk_id );
           } else {
             $scope.finishProcess( chunk_id );
           }
         } else {
           if ( $scope.objectIDs.length && $scope.continue ) {
-            $scope.regenerateSingle( $scope.objectIDs.shift() );
+            $scope.regenerateSingle( $scope.objectIDs.shift(), use_wildcards );
           } else {
             $scope.finishProcess();
           }
@@ -628,14 +679,15 @@ var wpStatelessApp = angular.module('wpStatelessApp', ['ngSanitize'])
    * Process single file
    * @param id
    */
-  $scope.syncSingleFile = function( id, chunk_id ) {
+  $scope.syncSingleFile = function( id, use_wildcards, chunk_id ) {
 
     $http({
       method: 'GET',
       url: ajaxurl,
       params: {
         action: "stateless_process_file",
-        id: id
+        id: id,
+        use_wildcards: use_wildcards
       }
     }).then(
       function(response) {
@@ -653,13 +705,13 @@ var wpStatelessApp = angular.module('wpStatelessApp', ['ngSanitize'])
         
         if ( 'undefined' !== typeof chunk_id ) {
           if ( $scope.chunkIDs[ chunk_id ].length && $scope.continue ) {
-            $scope.syncSingleFile( $scope.chunkIDs[ chunk_id ].shift(), chunk_id );
+            $scope.syncSingleFile( $scope.chunkIDs[ chunk_id ].shift(), use_wildcards, chunk_id );
           } else {
             $scope.finishProcess( chunk_id );
           }
         } else {
           if ( $scope.objectIDs.length && $scope.continue ) {
-            $scope.syncSingleFile( $scope.objectIDs.shift() );
+            $scope.syncSingleFile( $scope.objectIDs.shift(), use_wildcards );
           } else {
             $scope.finishProcess();
           }

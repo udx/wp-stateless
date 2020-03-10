@@ -319,7 +319,7 @@ class SM_CLI_Sync extends SM_CLI_Scaffold {
     $image = get_post( $id );
 
     if ( ! $image || 'attachment' != $image->post_type || 'image/' != substr( $image->post_mime_type, 0, 6 ) )
-      throw new \Exception( sprintf( __( 'Failed resize: %s is an invalid image ID.', ud_get_stateless_media()->domain ), esc_html( $_REQUEST['id'] ) ) );
+      throw new \Exception( sprintf( __( 'Failed resize: %s is an invalid image ID.', ud_get_stateless_media()->domain ), esc_html( $id ) ) );
 
     $fullsizepath = get_attached_file( $image->ID );
 

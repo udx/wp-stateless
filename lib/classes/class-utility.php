@@ -422,7 +422,9 @@ namespace wpCloud\StatelessMedia {
         $gs_name_path   = array();
         $full_size_path = get_attached_file( $attachment_id );
         $base_dir       = dirname( $full_size_path );
-        $gs_name        = apply_filters('wp_stateless_file_name', $full_size_path, true, $attachment_id);
+
+        $use_wildcards  = $_REQUEST['use_wildcards'];
+        $gs_name        = apply_filters('wp_stateless_file_name', $full_size_path, true, $attachment_id, '', $use_wildcards );
 
         if( !isset($metadata['width']) && file_exists($full_size_path) ){
           try{
@@ -452,7 +454,7 @@ namespace wpCloud\StatelessMedia {
           foreach( $metadata[ 'sizes' ] as $image_size => $data ) {
             if(empty($data[ 'file' ])) continue;
             $absolutePath = wp_normalize_path( $base_dir . '/' . $data[ 'file' ] );
-            $gs_name = apply_filters('wp_stateless_file_name', $absolutePath, true, $attachment_id, $image_size);
+            $gs_name = apply_filters('wp_stateless_file_name', $absolutePath, true, $attachment_id, $image_size, $use_wildcards);
 
             $gs_name_path[$image_size] = array(
               'gs_name'   => $gs_name,

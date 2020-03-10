@@ -25,7 +25,8 @@ namespace wpCloud\StatelessMedia {
         'stateless_get_current_progresses',
         'stateless_wizard_update_settings',
         'stateless_reset_progress',
-        'stateless_get_all_fails'
+        'stateless_get_all_fails',
+        'stateless_get_bucket_folder'
       );
 
       /**
@@ -130,6 +131,7 @@ namespace wpCloud\StatelessMedia {
 
         @error_reporting( 0 );
 
+        $use_wildcards = $_REQUEST['use_wildcards'];
         $id = (int) $_REQUEST['id'];
         $image = get_post( $id );
 
@@ -141,12 +143,13 @@ namespace wpCloud\StatelessMedia {
 
         $fullsizepath = get_attached_file( $image->ID );
 
+        $upload_dir = wp_upload_dir();
+
         // If no file found
         if ( false === $fullsizepath || ! file_exists( $fullsizepath ) ) {
-          $upload_dir = wp_upload_dir();
 
           // Try get it and save
-          $result_code = ud_get_stateless_media()->get_client()->get_media( apply_filters( 'wp_stateless_file_name', str_replace( trailingslashit( $upload_dir[ 'basedir' ] ), '', $fullsizepath ), true, $id ), true, $fullsizepath );
+          $result_code = ud_get_stateless_media()->get_client()->get_media( apply_filters( 'wp_stateless_file_name', str_replace( trailingslashit( $upload_dir[ 'basedir' ] ), '', $fullsizepath ), true, "", "", $use_wildcards), true, $fullsizepath );
 
           if ( $result_code !== 200 ) {
             if(!Utility::sync_get_attachment_if_exist($image->ID, $fullsizepath)){ // Save file to local from proxy.
@@ -154,6 +157,24 @@ namespace wpCloud\StatelessMedia {
               throw new \Exception(sprintf(__('Both local and remote files are missing. Unable to resize. (%s)', ud_get_stateless_media()->domain), $image->guid));
             }
           }
+        }
+
+        // If replace file with wildcards
+        if ( false !== $fullsizepath && '1' == $use_wildcards ) {
+          $fullsizepath_original = wp_get_original_image_path( $image->ID );
+          $fullsizepath_wildcard = apply_filters( 'wp_stateless_file_name', basename($fullsizepath_original), true, "", "", $use_wildcards);
+
+          //copy original image
+          copy( $fullsizepath_original, $upload_dir[ 'basedir' ] . '/' . $fullsizepath_wildcard);
+          //copy scaled image
+          copy( $fullsizepath, $upload_dir[ 'basedir' ] . '/' . apply_filters( 'wp_stateless_file_name', basename($fullsizepath), true, "", "", $use_wildcards));
+
+          //removing old file
+          //ud_get_stateless_media()->get_client()->remove_media($fullsizepath, $id);
+          //unlink( $fullsizepath );
+
+          update_attached_file( $image->ID, apply_filters( 'wp_stateless_file_name', basename($fullsizepath), true, "", "", $use_wildcards) );
+          $fullsizepath = $upload_dir[ 'basedir' ] . '/' . $fullsizepath_wildcard;
         }
 
         @set_time_limit( -1 );
@@ -197,6 +218,7 @@ namespace wpCloud\StatelessMedia {
 
         $id = (int) $_REQUEST['id'];
         $file = get_post( $id );
+        $use_wildcards = $_REQUEST['use_wildcards'];
 
         if ( ! $file || 'attachment' != $file->post_type )
           throw new \Exception( sprintf( __( 'Attachment not found: %s is an invalid file ID.', ud_get_stateless_media()->domain ), esc_html( $id ) ) );
@@ -206,9 +228,9 @@ namespace wpCloud\StatelessMedia {
 
         $fullsizepath = get_attached_file( $file->ID );
         $local_file_exists = file_exists( $fullsizepath );
+        $upload_dir = wp_upload_dir();
 
         if ( false === $fullsizepath || ! $local_file_exists ) {
-          $upload_dir = wp_upload_dir();
 
           // Try get it and save
           $result_code = ud_get_stateless_media()->get_client()->get_media( str_replace( trailingslashit( $upload_dir[ 'basedir' ] ), '', $fullsizepath ), true, $fullsizepath );
@@ -225,6 +247,20 @@ namespace wpCloud\StatelessMedia {
           else{
             $local_file_exists = true;
           }
+        }
+
+        // If replace file with wildcards
+        if ( false !== $fullsizepath && '1' == $use_wildcards ) {
+
+          $fullsizepath_wildcard = apply_filters( 'wp_stateless_file_name', basename($fullsizepath), true, "", "", $use_wildcards);
+
+          //copy file
+          copy( $fullsizepath, $upload_dir[ 'basedir' ] . '/' . $fullsizepath_wildcard);
+
+          update_attached_file( $file->ID, apply_filters( 'wp_stateless_file_name', basename($fullsizepath), true, "", "", $use_wildcards) );
+          $fullsizepath = $upload_dir[ 'basedir' ] . '/' . $fullsizepath_wildcard;
+
+          $local_file_exists = file_exists( $fullsizepath );
         }
 
         if($local_file_exists){
@@ -386,6 +422,13 @@ namespace wpCloud\StatelessMedia {
         Utility::sync_reset_current_progress( $mode );
 
         return true;
+      }
+
+      /**
+       * Returns bucket folder (to check whether there is something to continue in JS)
+       */
+      public function action_stateless_get_bucket_folder() {
+        return array ( 'bucket_folder'  =>get_option('sm_root_dir') );
       }
 
     }
