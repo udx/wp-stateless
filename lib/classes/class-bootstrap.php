@@ -222,7 +222,7 @@ namespace wpCloud\StatelessMedia {
               }
             }
 
-            add_filter( 'wp_stateless_file_name', array( $this, 'handle_root_dir' ), 10, 4 );
+            add_filter( 'wp_stateless_file_name', array( $this, 'handle_root_dir' ), 10, 5 );
 
             /**
              * Rewrite Image URLS
@@ -619,15 +619,16 @@ namespace wpCloud\StatelessMedia {
        * @param $use_root
        * @param $attachment_id
        * @param $size
-       * @todo $attachment_id need be required
+       * @param $use_wildcards
        * @return string
        */
-      public function handle_root_dir( $current_path, $use_root = true, $attachment_id = '', $size = '' ) {
+      public function handle_root_dir( $current_path, $use_root = true, $attachment_id = '', $size = '', $use_wildcards = false ) {
+        global $wpdb;
 
         //for existing media
         $cloud_meta = get_post_meta( $attachment_id, 'sm_cloud', true );
 
-        if ( $cloud_meta ) {
+        if ( !$use_wildcards && $cloud_meta ) {
             if ( ( !$size || $size === '__full' )  && !empty( $cloud_meta['name'] ) ) {
               return $cloud_meta['name'];
             } else {
@@ -636,6 +637,15 @@ namespace wpCloud\StatelessMedia {
                 }
             }
         }
+
+        //non media files
+        // @todo need to investigate how will be better for non-media
+        /*$table_name = $wpdb->prefix . 'sm_sync';
+        $non_media = $wpdb->get_var($wpdb->prepare("SELECT file FROM {$table_name} WHERE file = '%s';", $current_path));
+        if ( $non_media ) {
+            return $non_media;
+        }*/
+
 
         $root_dir = $this->get( 'sm.root_dir' );
         $root_dir = apply_filters("wp_stateless_handle_root_dir", $root_dir);
@@ -646,8 +656,7 @@ namespace wpCloud\StatelessMedia {
         $current_path = str_replace( trailingslashit( $this->get_gs_host() ), '', $current_path );
 
         if($root_dir){
-          // removing the root dir if already exists in the begaining.
-          $current_path = preg_replace('/^' . preg_quote(trailingslashit( $root_dir ), '/') . '/', '', $current_path);
+          $current_path = str_replace( trailingslashit( $root_dir ), '', $current_path );
         }
 
         // skip adding root dir if it's already added.

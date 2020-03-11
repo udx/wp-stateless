@@ -69,7 +69,7 @@ namespace wpCloud\StatelessMedia {
           delete_option( 'sm.post_content_rewrite' );
 
         }
-
+        
         update_option('dismissed_notice_stateless_cache_busting', true);
         if ( !$version || version_compare( $version, '2.1.7', '<' ) ){
           $sm_mode = get_option('sm_mode', null);
@@ -86,11 +86,11 @@ namespace wpCloud\StatelessMedia {
             // Backing up the old data with autoload false.
             // @todo delete in future release.
             add_option('__sm_synced_files', $sm_synced_files, null, false);
-
+  
             $files = array();
             $place_holders = array();
             $query = "INSERT INTO $table_name (file, status) VALUES ";
-
+  
             $sm_synced_files = array_unique($sm_synced_files);
             foreach ($sm_synced_files as $key => $file) {
               array_push($files, $file, 'synced');
@@ -164,6 +164,40 @@ namespace wpCloud\StatelessMedia {
             delete_site_option( 'sm.service_account_name' );
           }
 
+        }
+
+        /**
+         * Upgrade to v.2.4.0 requirements
+         */
+        if ( $version && version_compare( $version, '2.4.0', '<' ) ){
+          $sm_root_dir    = get_site_option('sm_root_dir', array());
+          $organize_media = get_site_option('uploads_use_yearmonth_folders');
+          $sm_bucket_folder_type = 'custom';
+
+          if( !empty( $organize_media ) && empty( $sm_root_dir ) ){
+            $sm_bucket_folder_type  =  'single-site';
+            $sm_root_dir  =  '/%date_year%/%date_month%/';
+          } elseif ( !empty( $sm_root_dir ) ) {
+            $sm_bucket_folder_type  =  'custom';
+          } elseif ( empty( $organize_media ) ) {
+            $sm_bucket_folder_type  =  'custom';
+            $sm_root_dir  =  '';
+          }
+
+          if ( is_multisite() ) {
+            $sm_bucket_folder_type  =  'multi-site';
+            if ( empty( $sm_root_dir ) || $sm_root_dir[0] !== '/' ) {
+              $sm_root_dir = "/" . $sm_root_dir;
+            }
+            $sm_root_dir  =  '/sites/%site_id%' . $sm_root_dir;
+          }
+
+
+          update_site_option( 'sm_bucket_folder_type', $sm_bucket_folder_type  );
+          update_site_option( 'sm_root_dir', $sm_root_dir  );
+
+          //managed in WP-Stateless settings (via Bucket Folder control)
+          update_site_option( 'uploads_use_yearmonth_folders', '0'  );
         }
 
         update_site_option( 'wp_sm_version', ud_get_stateless_media()->args[ 'version' ]  );

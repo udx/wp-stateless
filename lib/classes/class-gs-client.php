@@ -189,15 +189,17 @@ namespace wpCloud\StatelessMedia {
             return new \WP_Error( 'sm_error', __( 'Unable to locate file on disk', ud_get_stateless_media()->domain ) );
           }
 
+          $use_wildcards = $_REQUEST['use_wildcards'];
+
           /* Set default name if parameter was not passed. */
-          if( empty( $name ) ) {
+          if( empty( $name ) || $use_wildcards ) {
             $name = basename( $args['name'] );
           }
 
           $object_id = isset( $args['metadata']['object-id'] ) ? $args['metadata']['object-id'] : (isset( $args['metadata']['child-of'] ) ? $args['metadata']['child-of'] : "");
           $object_size = isset( $args['metadata']['size'] ) ? $args['metadata']['size'] : "";
 
-          $name = apply_filters( 'wp_stateless_file_name', $name, true, $object_id, $object_size );
+          $name = apply_filters( 'wp_stateless_file_name', $name, true, $object_id, $object_size, $use_wildcards );
 
           // If media exists we just return it
           if ( !$args['force'] && $media = $this->media_exists( $name ) ) {
@@ -345,11 +347,12 @@ namespace wpCloud\StatelessMedia {
        *
        * @author peshkov@UD
        * @param string $name
+       * @param string $id
        * @return bool
        */
-      public function remove_media( $name ) {
+      public function remove_media( $name, $id = "" ) {
         try {
-          $name = apply_filters( 'wp_stateless_file_name', $name );
+          $name = apply_filters( 'wp_stateless_file_name', $name, true, $id );
           $this->service->objects->delete( $this->bucket, $name );
         } catch( Exception $e ) {
           return new WP_Error( 'sm_error', $e->getMessage() );
