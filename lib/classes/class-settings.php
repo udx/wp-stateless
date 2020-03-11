@@ -89,6 +89,7 @@ namespace wpCloud\StatelessMedia {
 
         
         $site_url = parse_url( site_url() );
+        $site_url['path'] = isset($site_url['path']) ? $site_url['path'] : '';
         $this->wildcards = array(
           '%date_year%'            => [
                                     date('Y'),
