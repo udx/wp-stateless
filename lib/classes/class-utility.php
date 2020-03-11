@@ -423,7 +423,7 @@ namespace wpCloud\StatelessMedia {
         $full_size_path = get_attached_file( $attachment_id );
         $base_dir       = dirname( $full_size_path );
 
-        $use_wildcards  = $_REQUEST['use_wildcards'];
+        $use_wildcards  = isset($_REQUEST['use_wildcards']) ? $_REQUEST['use_wildcards'] : false;
         $gs_name        = apply_filters('wp_stateless_file_name', $full_size_path, true, $attachment_id, '', $use_wildcards );
 
         if( !isset($metadata['width']) && file_exists($full_size_path) ){
