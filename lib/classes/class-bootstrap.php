@@ -650,7 +650,7 @@ namespace wpCloud\StatelessMedia {
         $root_dir = $this->get( 'sm.root_dir' );
         $root_dir = apply_filters("wp_stateless_handle_root_dir", $root_dir);
 
-        $upload_dir = wp_upload_dir();
+        $upload_dir = $this->_wp_upload_dir();
         $current_path = str_replace( wp_normalize_path( trailingslashit( $upload_dir[ 'basedir' ] ) ), '', wp_normalize_path( $current_path ) );
         $current_path = str_replace( wp_normalize_path( trailingslashit( $upload_dir[ 'baseurl' ] ) ), '', wp_normalize_path( $current_path ) );
         $current_path = str_replace( trailingslashit( $this->get_gs_host() ), '', $current_path );
@@ -666,6 +666,80 @@ namespace wpCloud\StatelessMedia {
 
         return $current_path;
       }
+
+      /**
+       * Undocumented function
+       * https://developer.wordpress.org/reference/functions/_wp_upload_dir/
+       * 
+       * @todo add marker to mark new vs old uploads.
+       * @todo Then make sure no duplicates are made.
+       * @todo Check compatibility filses.
+       *
+       * @param [type] $time
+       * @return void
+       */
+      function _wp_upload_dir( $time = null ) {
+        if ( !is_multisite() ){
+          return wp_upload_dir();
+        }
+
+        $siteurl     = get_option( 'siteurl' );
+        $upload_path = trim( get_option( 'upload_path' ) );
+     
+        if ( empty( $upload_path ) || 'wp-content/uploads' == $upload_path ) {
+            $dir = WP_CONTENT_DIR . '/uploads';
+        } elseif ( 0 !== strpos( $upload_path, ABSPATH ) ) {
+            // $dir is absolute, $upload_path is (maybe) relative to ABSPATH
+            $dir = path_join( ABSPATH, $upload_path );
+        } else {
+            $dir = $upload_path;
+        }
+
+        $url = get_option( 'upload_url_path' );
+        if ( ! $url ) {
+            if ( empty( $upload_path ) || ( 'wp-content/uploads' == $upload_path ) || ( $upload_path == $dir ) ) {
+                $url = WP_CONTENT_URL . '/uploads';
+            } else {
+                $url = trailingslashit( $siteurl ) . $upload_path;
+            }
+        }
+     
+        /*
+         * Honor the value of UPLOADS. This happens as long as ms-files rewriting is disabled.
+         * We also sometimes obey UPLOADS when rewriting is enabled -- see the next block.
+         */
+        if ( defined( 'UPLOADS' ) && ! ( is_multisite() && get_site_option( 'ms_files_rewriting' ) ) ) {
+            $dir = ABSPATH . UPLOADS;
+            $url = trailingslashit( $siteurl ) . UPLOADS;
+        }
+     
+        $basedir = $dir;
+        $baseurl = $url;
+     
+        $subdir = '';
+        if ( get_option( 'uploads_use_yearmonth_folders' ) ) {
+            // Generate the yearly and monthly dirs
+            if ( ! $time ) {
+                $time = current_time( 'mysql' );
+            }
+            $y      = substr( $time, 0, 4 );
+            $m      = substr( $time, 5, 2 );
+            $subdir = "/$y/$m";
+        }
+     
+        $dir .= $subdir;
+        $url .= $subdir;
+     
+        return apply_filters('upload_dir', array(
+            'path'    => $dir,
+            'url'     => $url,
+            'subdir'  => $subdir,
+            'basedir' => $basedir,
+            'baseurl' => $baseurl,
+            'error'   => false,
+        ));
+      }
+
 
       /**
        * @param $content
