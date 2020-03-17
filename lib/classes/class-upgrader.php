@@ -110,31 +110,8 @@ namespace wpCloud\StatelessMedia {
         }
 
         if ( $version && version_compare( $version, '2.4.0', '<' ) ){
-          $sm_root_dir    = get_option('sm_root_dir', array());
-          $organize_media = get_option('uploads_use_yearmonth_folders');
-          $sm_bucket_folder_type = 'custom';
-
-          if( !empty( $organize_media ) && empty( $sm_root_dir ) ){
-            $sm_bucket_folder_type  =  'single-site';
-            $sm_root_dir  =  '/%date_year%/%date_month%/';
-          } elseif ( !empty( $sm_root_dir ) && !empty( $organize_media ) ) {
-            $sm_root_dir  =  trim($sm_root_dir, ' /') . '/%date_year%/%date_month%/';
-            $sm_bucket_folder_type  =  'custom';
-          } elseif ( !empty( $sm_root_dir ) ) {
-            $sm_bucket_folder_type  =  'custom';
-          } elseif ( empty( $organize_media ) ) {
-            $sm_bucket_folder_type  =  'custom';
-            $sm_root_dir  =  '';
-          }
-
-          update_option( 'sm_bucket_folder_type', $sm_bucket_folder_type  );
-          update_option( 'sm_root_dir', $sm_root_dir  );
-
-          //managed in WP-Stateless settings (via Bucket Folder control)
-          update_option( 'uploads_use_yearmonth_folders', '0'  );
+          $sm_root_dir    = self::migrate_root_dir();
         }
-
-
 
         update_option( 'wp_sm_version', ud_get_stateless_media()->args[ 'version' ]  );
 
@@ -169,48 +146,17 @@ namespace wpCloud\StatelessMedia {
          * Upgrade to v.2.4.0 requirements
          */
         if ( $version && version_compare( $version, '2.4.0', '<' ) ){
-          $sm_root_dir    = get_site_option('sm_root_dir', array());
-          $organize_media = get_site_option('uploads_use_yearmonth_folders');
-          $sm_bucket_folder_type = 'custom';
-
-          if( !empty( $organize_media ) && empty( $sm_root_dir ) ){
-            $sm_bucket_folder_type  =  'single-site';
-            $sm_root_dir  =  '/%date_year%/%date_month%/';
-          } elseif ( !empty( $sm_root_dir ) && !empty( $organize_media ) ) {
-            $sm_root_dir  =  trim($sm_root_dir, ' /') . '/%date_year%/%date_month%/';
-            $sm_bucket_folder_type  =  'custom';
-          } elseif ( !empty( $sm_root_dir ) ) {
-            $sm_bucket_folder_type  =  'custom';
-          } elseif ( empty( $organize_media ) ) {
-            $sm_bucket_folder_type  =  'custom';
-            $sm_root_dir  =  '';
-          }
 
           if ( is_multisite() ) {
-            $sm_bucket_folder_type  =  'multi-site';
-            if ( empty( $sm_root_dir ) || $sm_root_dir[0] !== '/' ) {
-              $sm_root_dir = "/" . $sm_root_dir;
-            }
-
-            if(false === strpos($sm_root_dir, '/sites/%site_id%')){
-              $sm_root_dir  =  '/sites/%site_id%' . $sm_root_dir;
-            }
-
             $sites = get_sites();
             foreach ( $sites as $site ) {
               switch_to_blog( $site->blog_id );
-              update_option( 'sm_root_dir', $sm_root_dir  );
-              update_option( 'uploads_use_yearmonth_folders', '0'  );
+              self::migrate_root_dir(true);
               restore_current_blog();
             }
+
+            self::migrate_root_dir(2);
           }
-
-
-          update_site_option( 'sm_bucket_folder_type', $sm_bucket_folder_type  );
-          update_site_option( 'sm_root_dir', $sm_root_dir  );
-
-          //managed in WP-Stateless settings (via Bucket Folder control)
-          update_site_option( 'uploads_use_yearmonth_folders', '0'  );
         }
 
         update_site_option( 'wp_sm_version', ud_get_stateless_media()->args[ 'version' ]  );
@@ -236,6 +182,52 @@ namespace wpCloud\StatelessMedia {
           }
         }
 
+      }
+
+      /**
+       * 
+       * @param bool | int $multisite pass true to use multisite prefix and 2 to use site option instead of get_option.
+       */
+      private static function migrate_root_dir($multisite = false){
+        if($multisite == 2){
+          $sm_root_dir    = get_site_option('sm_root_dir', '');
+          $organize_media = get_site_option('uploads_use_yearmonth_folders');
+        }
+        else{
+          $sm_root_dir    = get_option('sm_root_dir', '');
+          $organize_media = get_option('uploads_use_yearmonth_folders');
+        }
+
+        if( !empty( $organize_media ) && empty( $sm_root_dir ) ){
+          $sm_root_dir  =  '/%date_year%/%date_month%/';
+        } elseif ( !empty( $sm_root_dir ) && !empty( $organize_media ) ) {
+          $sm_root_dir  =  trim($sm_root_dir, ' /') . '/%date_year%/%date_month%/';
+        } elseif ( !empty( $sm_root_dir ) ) {
+        } elseif ( empty( $organize_media ) ) {
+          $sm_root_dir  =  '';
+        }
+
+        if($multisite){
+          if ( empty( $sm_root_dir ) || $sm_root_dir[0] !== '/' ) {
+            $sm_root_dir = "/" . $sm_root_dir;
+          }
+          if(false === strpos($sm_root_dir, '/sites/%site_id%')){
+            $sm_root_dir  =  '/sites/%site_id%' . $sm_root_dir;
+          }
+        }
+
+        if($multisite == 2){
+          update_site_option( 'sm_root_dir', $sm_root_dir  );
+          //managed in WP-Stateless settings (via Bucket Folder control)
+          update_site_option( 'uploads_use_yearmonth_folders', '0'  );
+        }
+        else{
+          update_option( 'sm_root_dir', $sm_root_dir  );
+          //managed in WP-Stateless settings (via Bucket Folder control)
+          update_option( 'uploads_use_yearmonth_folders', '0'  );
+        }
+
+        return $sm_root_dir;
       }
 
     }
