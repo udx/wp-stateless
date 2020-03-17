@@ -796,6 +796,7 @@ var wpStatelessApp = angular.module('wpStatelessApp', ['ngSanitize'])
 .controller('wpStatelessSettings', function($scope, $filter) {
   $scope.backup = {};
   $scope.sm = wp_stateless_settings || {};
+  $scope.sm.readonly = $scope.sm.readonly || {}
   
   $scope.$watch('sm.mode', function(value) {
     if(value == 'stateless' && $scope.sm.readonly.hashify_file_name != 'constant'){

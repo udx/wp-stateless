@@ -30,7 +30,7 @@ namespace wpCloud\StatelessMedia {
           'body_rewrite'           => array('WP_STATELESS_MEDIA_BODY_REWRITE', 'false'),
           'body_rewrite_types'     => array('WP_STATELESS_MEDIA_BODY_REWRITE_TYPES', 'jpg jpeg png gif pdf'), 
           'bucket'                 => array('WP_STATELESS_MEDIA_BUCKET', ''), 
-          'root_dir'               => array('WP_STATELESS_MEDIA_ROOT_DIR', ['/%date_year%/%date_month%/', '/sites/%site_id%/%date_year%/%date_month%/'], 
+          'root_dir'               => array('WP_STATELESS_MEDIA_ROOT_DIR', ['/%date_year%/%date_month%/', '/sites/%site_id%/%date_year%/%date_month%/']), 
           'key_json'               => array('WP_STATELESS_MEDIA_JSON_KEY', ''),
           'cache_control'          => array('WP_STATELESS_MEDIA_CACHE_CONTROL', ''), 
           'delete_remote'          => array('WP_STATELESS_MEDIA_DELETE_REMOTE', 'true'), 

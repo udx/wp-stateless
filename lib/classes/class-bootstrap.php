@@ -650,13 +650,14 @@ namespace wpCloud\StatelessMedia {
         $root_dir = $this->get( 'sm.root_dir' );
         $root_dir = apply_filters("wp_stateless_handle_root_dir", $root_dir);
 
-        $upload_dir = $this->_wp_upload_dir();
+        $upload_dir = wp_upload_dir();
         $current_path = str_replace( wp_normalize_path( trailingslashit( $upload_dir[ 'basedir' ] ) ), '', wp_normalize_path( $current_path ) );
         $current_path = str_replace( wp_normalize_path( trailingslashit( $upload_dir[ 'baseurl' ] ) ), '', wp_normalize_path( $current_path ) );
         $current_path = str_replace( trailingslashit( $this->get_gs_host() ), '', $current_path );
 
         if($root_dir){
-          $current_path = str_replace( trailingslashit( $root_dir ), '', $current_path );
+          // removing the root dir if already exists in the begaining.
+          $current_path = preg_replace('/^' . preg_quote(trailingslashit( $root_dir ), '/') . '/', '', $current_path);	
         }
 
         // skip adding root dir if it's already added.
@@ -668,21 +669,17 @@ namespace wpCloud\StatelessMedia {
       }
 
       /**
-       * Undocumented function
+       * Returns upload_dir as it was single site, even in multisite.
+       * So that we can append our root_dir to the root upload dir.
+       * This make sure that upload_dir doesn't contain "site/1".
        * https://developer.wordpress.org/reference/functions/_wp_upload_dir/
        * 
-       * @todo add marker to mark new vs old uploads.
-       * @todo Then make sure no duplicates are made.
-       * @todo Check compatibility filses.
+       * @todo Check compatibility files.
        *
        * @param [type] $time
        * @return void
        */
       function _wp_upload_dir( $time = null ) {
-        if ( !is_multisite() ){
-          return wp_upload_dir();
-        }
-
         $siteurl     = get_option( 'siteurl' );
         $upload_path = trim( get_option( 'upload_path' ) );
      
@@ -716,28 +713,14 @@ namespace wpCloud\StatelessMedia {
         $basedir = $dir;
         $baseurl = $url;
      
-        $subdir = '';
-        if ( get_option( 'uploads_use_yearmonth_folders' ) ) {
-            // Generate the yearly and monthly dirs
-            if ( ! $time ) {
-                $time = current_time( 'mysql' );
-            }
-            $y      = substr( $time, 0, 4 );
-            $m      = substr( $time, 5, 2 );
-            $subdir = "/$y/$m";
-        }
-     
-        $dir .= $subdir;
-        $url .= $subdir;
-     
-        return apply_filters('upload_dir', array(
+        return array(
             'path'    => $dir,
             'url'     => $url,
             'subdir'  => $subdir,
             'basedir' => $basedir,
             'baseurl' => $baseurl,
             'error'   => false,
-        ));
+        );
       }
 
 
@@ -902,7 +885,7 @@ namespace wpCloud\StatelessMedia {
        *
        * @author peshkov@UD
        */
-      public function is_network_detected() {
+      public function is_network_detected($is_multisite = false) {
         /* Plugin is loaded via mu-plugins. */
 
         if( strpos( Utility::normalize_path( $this->root_path ), Utility::normalize_path( WPMU_PLUGIN_DIR ) ) !== false ) {
@@ -910,6 +893,7 @@ namespace wpCloud\StatelessMedia {
         }
 
         if( is_multisite() ) {
+          if($is_multisite) return true;
           /* Looks through network enabled plugins to see if our one is there. */
           foreach (wp_get_active_network_plugins() as $path) {
             // Trying again using readlink in case it's a symlink file.
@@ -1586,9 +1570,11 @@ namespace wpCloud\StatelessMedia {
        * @return mixed
        */
       public function upload_dir( $upload_data ) {
+        $upload_data = $this->_wp_upload_dir();
         $root_dir = $this->get( 'sm.root_dir' );
         $root_dir = apply_filters("wp_stateless_handle_root_dir", $root_dir);
-        if(-1 == strpos($upload_data['path'], $root_dir)){
+
+        if(false === strpos($upload_data['path'], $root_dir)){
           $upload_data[ 'path' ]   = $upload_data[ 'path' ]   . '/' . $root_dir;
           $upload_data[ 'url' ]    = $upload_data[ 'url' ]    . '/' . $root_dir;
           $upload_data[ 'subdir' ] = $upload_data[ 'subdir' ] . '/' . $root_dir;
