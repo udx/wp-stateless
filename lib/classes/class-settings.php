@@ -30,7 +30,7 @@ namespace wpCloud\StatelessMedia {
           'body_rewrite'           => array('WP_STATELESS_MEDIA_BODY_REWRITE', 'false'),
           'body_rewrite_types'     => array('WP_STATELESS_MEDIA_BODY_REWRITE_TYPES', 'jpg jpeg png gif pdf'), 
           'bucket'                 => array('WP_STATELESS_MEDIA_BUCKET', ''), 
-          'root_dir'               => array('WP_STATELESS_MEDIA_ROOT_DIR', ''), 
+          'root_dir'               => array('WP_STATELESS_MEDIA_ROOT_DIR', ['/%date_year%/%date_month%/', '/sites/%site_id%/%date_year%/%date_month%/'], 
           'key_json'               => array('WP_STATELESS_MEDIA_JSON_KEY', ''),
           'cache_control'          => array('WP_STATELESS_MEDIA_CACHE_CONTROL', ''), 
           'delete_remote'          => array('WP_STATELESS_MEDIA_DELETE_REMOTE', 'true'), 
@@ -140,14 +140,14 @@ namespace wpCloud\StatelessMedia {
           $value    = '';
           $_option  = 'sm_' . $option;
           $constant = $array[0]; // Constant name
-          $default  = $array[1]; // Default value
+          $default  = is_array($array[1]) ? $array[1] : array($array[1], $array[1]); // Default value
 
           if($option == 'organize_media'){
             $_option = 'uploads_use_yearmonth_folders';
           }
 
           // Getting settings
-          $value = get_option($_option, $default);
+          $value = get_option($_option, $default[0]);
           
           if ($option == 'body_rewrite_types' && empty($value) && !is_multisite()) {
             $value = $default;
@@ -183,7 +183,7 @@ namespace wpCloud\StatelessMedia {
           }
           // Getting network settings
           elseif(is_multisite() && $option != 'organize_media'){
-            $network = get_site_option( $_option, $default );
+            $network = get_site_option( $_option, $default[1] );
             // If network settings available then override by network settings.
             if($network || is_network_admin()){
               $value = $network;

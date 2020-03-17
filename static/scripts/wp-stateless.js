@@ -838,7 +838,12 @@ var wpStatelessApp = angular.module('wpStatelessApp', ['ngSanitize'])
     }, 1);
   });
 
+  var readonlyTag = $scope.sm.readonly.root_dir || false;
+  if(readonlyTag){
+    jQuery('.available-structure-tags .button').off('click').css('opacity', '.5');
+  }
   $scope.tagClicked = function(){
+    if(readonlyTag) return false;
     $scope.sm.bucket_folder_type = 'custom';
     setTimeout(function(){
       jQuery( '#permalink_structure' ).trigger('change');

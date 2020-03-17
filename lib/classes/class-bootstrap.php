@@ -865,19 +865,19 @@ namespace wpCloud\StatelessMedia {
         wp_register_style( 'bootstrap-grid-v4', $this->path( 'static/styles/bootstrap-grid.min.css', 'url'  ), array(), '3.3.7' );
         wp_register_style( 'wp-stateless-setup-wizard', $this->path( 'static/styles/wp-stateless-setup-wizard.css', 'url'  ), array(), self::$version );
 
-        wp_register_script( 'async.min', ud_get_stateless_media()->path( 'static/scripts/async.js', 'url'  ), array(), ud_get_stateless_media()->version );
-        wp_register_script( 'jquery.history', ud_get_stateless_media()->path( 'static/scripts/jquery.history.js', 'url'  ), array( 'jquery' ), ud_get_stateless_media()->version, true );
-        wp_register_script( 'wp-stateless-validation', ud_get_stateless_media()->path( 'static/scripts/jquery.validation.js', 'url'  ), array( 'jquery' ), ud_get_stateless_media()->version, true );
-        wp_register_script( 'wp-stateless-loading', ud_get_stateless_media()->path( 'static/scripts/jquery.loading.js', 'url'  ), array( 'jquery' ), ud_get_stateless_media()->version, true );
-        wp_register_script( 'wp-stateless-comboBox', ud_get_stateless_media()->path( 'static/scripts/jquery.wp-stateless-combo-box.js', 'url'  ), array( 'jquery' ), ud_get_stateless_media()->version, true );
-        wp_register_script( 'wp-stateless-setup', ud_get_stateless_media()->path( 'static/scripts/wp-stateless-setup.js', 'url'  ), array( 'jquery-ui-core', 'wp-api', 'jquery.history' ), ud_get_stateless_media()->version, true );
+        wp_register_script( 'async.min', ud_get_stateless_media()->path( 'static/scripts/async.js', 'url'  ), array(), self::$version );
+        wp_register_script( 'jquery.history', ud_get_stateless_media()->path( 'static/scripts/jquery.history.js', 'url'  ), array( 'jquery' ), self::$version, true );
+        wp_register_script( 'wp-stateless-validation', ud_get_stateless_media()->path( 'static/scripts/jquery.validation.js', 'url'  ), array( 'jquery' ), self::$version, true );
+        wp_register_script( 'wp-stateless-loading', ud_get_stateless_media()->path( 'static/scripts/jquery.loading.js', 'url'  ), array( 'jquery' ), self::$version, true );
+        wp_register_script( 'wp-stateless-comboBox', ud_get_stateless_media()->path( 'static/scripts/jquery.wp-stateless-combo-box.js', 'url'  ), array( 'jquery' ), self::$version, true );
+        wp_register_script( 'wp-stateless-setup', ud_get_stateless_media()->path( 'static/scripts/wp-stateless-setup.js', 'url'  ), array( 'jquery-ui-core', 'wp-api', 'jquery.history' ), self::$version, true );
         wp_localize_script( 'wp-stateless-setup', 'stateless_l10n', $this->get_l10n_data() );
 
-        wp_register_script( 'wp-stateless-setup-wizard-js', ud_get_stateless_media()->path( 'static/scripts/wp-stateless-setup-wizard.js', 'url'  ), array( 'jquery', 'wp-api', 'async.min', 'wp-stateless-setup', 'wp-stateless-comboBox', 'wp-stateless-validation', 'wp-stateless-loading' ), ud_get_stateless_media()->version, true );
+        wp_register_script( 'wp-stateless-setup-wizard-js', ud_get_stateless_media()->path( 'static/scripts/wp-stateless-setup-wizard.js', 'url'  ), array( 'jquery', 'wp-api', 'async.min', 'wp-stateless-setup', 'wp-stateless-comboBox', 'wp-stateless-validation', 'wp-stateless-loading' ), self::$version, true );
 
 
         /* Stateless settings page */
-        wp_register_script( 'wp-stateless-settings', ud_get_stateless_media()->path( 'static/scripts/wp-stateless-settings.js', 'url'  ), array(), ud_get_stateless_media()->version );
+        wp_register_script( 'wp-stateless-settings', ud_get_stateless_media()->path( 'static/scripts/wp-stateless-settings.js', 'url'  ), array(), self::$version );
         wp_localize_script( 'wp-stateless-settings', 'stateless_l10n', $this->get_l10n_data() );
 
         wp_register_style( 'wp-stateless-settings', $this->path( 'static/styles/wp-stateless-settings.css', 'url'  ), array(), self::$version );
@@ -891,7 +891,7 @@ namespace wpCloud\StatelessMedia {
         }
         wp_register_script( 'wp-stateless-angular', ud_get_stateless_media()->path( 'static/scripts/angular.min.js', 'url' ), array(), '1.5.0', true );
         wp_register_script( 'wp-stateless-angular-sanitize', ud_get_stateless_media()->path( 'static/scripts/angular-sanitize.min.js', 'url' ), array('wp-stateless-angular'), '1.5.0', true );
-        wp_register_script( 'wp-stateless', ud_get_stateless_media()->path( 'static/scripts/wp-stateless.js', 'url'  ), array( 'jquery-ui-core', 'wp-stateless-settings' ), ud_get_stateless_media()->version, true );
+        wp_register_script( 'wp-stateless', ud_get_stateless_media()->path( 'static/scripts/wp-stateless.js', 'url'  ), array( 'jquery-ui-core', 'wp-stateless-settings' ), self::$version, true );
 
         wp_localize_script( 'wp-stateless', 'stateless_l10n', $this->get_l10n_data() );
         wp_localize_script('wp-stateless', 'wp_stateless_configs', array(
@@ -1514,10 +1514,11 @@ namespace wpCloud\StatelessMedia {
       public function upload_dir( $upload_data ) {
         $root_dir = $this->get( 'sm.root_dir' );
         $root_dir = apply_filters("wp_stateless_handle_root_dir", $root_dir);
-        $upload_data[ 'path' ]   = $upload_data[ 'path' ]   . '/' . $root_dir;
-        $upload_data[ 'url' ]    = $upload_data[ 'url' ]    . '/' . $root_dir;
-        $upload_data[ 'subdir' ] = $upload_data[ 'subdir' ] . '/' . $root_dir;
-
+        if(-1 == strpos($upload_data['path'], $root_dir)){
+          $upload_data[ 'path' ]   = $upload_data[ 'path' ]   . '/' . $root_dir;
+          $upload_data[ 'url' ]    = $upload_data[ 'url' ]    . '/' . $root_dir;
+          $upload_data[ 'subdir' ] = $upload_data[ 'subdir' ] . '/' . $root_dir;
+        }
         return $upload_data;
       }
 
