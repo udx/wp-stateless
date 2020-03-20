@@ -131,7 +131,7 @@ namespace wpCloud\StatelessMedia {
 
         @error_reporting( 0 );
 
-        $use_wildcards = $_REQUEST['use_wildcards'];
+        $use_wildcards = isset($_REQUEST['use_wildcards']) ? $_REQUEST['use_wildcards'] : false;
         $id = (int) $_REQUEST['id'];
         $image = get_post( $id );
 
@@ -218,7 +218,7 @@ namespace wpCloud\StatelessMedia {
 
         $id = (int) $_REQUEST['id'];
         $file = get_post( $id );
-        $use_wildcards = $_REQUEST['use_wildcards'];
+        $use_wildcards = isset($_REQUEST['use_wildcards']) ? $_REQUEST['use_wildcards'] : false;
 
         if ( ! $file || 'attachment' != $file->post_type )
           throw new \Exception( sprintf( __( 'Attachment not found: %s is an invalid file ID.', ud_get_stateless_media()->domain ), esc_html( $id ) ) );
