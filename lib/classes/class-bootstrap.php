@@ -716,7 +716,7 @@ namespace wpCloud\StatelessMedia {
         return array(
             'path'    => $dir,
             'url'     => $url,
-            'subdir'  => $subdir,
+            'subdir'  => '',
             'basedir' => $basedir,
             'baseurl' => $baseurl,
             'error'   => false,
