@@ -460,7 +460,7 @@ class SM_CLI_Sync extends SM_CLI_Scaffold {
       }
       $this->batch = $args[ 'batch' ];
       $this->batches = isset( $args[ 'batches' ] ) ? $args[ 'batches' ] : 10;
-      if( !is_numeric( $args[ 'batches' ] ) || $args[ 'batches' ] <= 0 ) {
+      if( !is_numeric( $this->batches ) || $this->batches <= 0 ) {
         WP_CLI::error( 'Invalid parameter --batches' );
       } elseif ( $this->batch > $this->batches ) {
         WP_CLI::error( '--batch parameter must is invalid. It must not equal or less then --batches' );
