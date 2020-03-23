@@ -268,9 +268,9 @@ if( defined( 'WP_CLI' ) && WP_CLI ) {
       for( $i=1; $i<=$batches; $i++ ) {
 
         if( !empty( $this->url ) ) {
-          $command = "wp stateless {$method} {$type} $force --batch={$i} --batches={$batches} --limit={$limit} --url={$this->url}";
+          $command = "wp stateless {$method} {$type} {$force} --batch={$i} --batches={$batches} --limit={$limit} --url={$this->url}";
         } else {
-          $command = "wp stateless {$method} {$type} $force --batch={$i} --batches={$batches} --limit={$limit}";
+          $command = "wp stateless {$method} {$type} {$force} --batch={$i} --batches={$batches} --limit={$limit}";
         }
 
         WP_CLI::line( '...' );
