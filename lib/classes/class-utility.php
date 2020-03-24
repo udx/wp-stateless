@@ -359,7 +359,7 @@ namespace wpCloud\StatelessMedia {
            * @param bool              $force          (optional) Whether to force the sync even the file already exist in GCS.
            * @param bool              $args           (optional) Whether to only sync the full size image.
            */
-          do_action( 'wp_stateless_media_synced', $metadata, $attachment_id, $force, $args);
+          $metadata = apply_filters( 'wp_stateless_media_synced', $metadata, $attachment_id, $force, $args);
         }
 
         return $metadata;
@@ -423,7 +423,7 @@ namespace wpCloud\StatelessMedia {
         $full_size_path = get_attached_file( $attachment_id );
         $base_dir       = dirname( $full_size_path );
 
-        $use_wildcards  = $_REQUEST['use_wildcards'];
+        $use_wildcards  = isset($_REQUEST['use_wildcards']) ? $_REQUEST['use_wildcards'] : false;
         $gs_name        = apply_filters('wp_stateless_file_name', $full_size_path, true, $attachment_id, '', $use_wildcards );
 
         if( !isset($metadata['width']) && file_exists($full_size_path) ){
