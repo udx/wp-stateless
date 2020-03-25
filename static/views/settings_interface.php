@@ -6,9 +6,9 @@
     </div>
     <h2 class="nav-tab-wrapper">
         <a href="#stless_settings_tab" class="stless_setting_tab nav-tab  nav-tab-active"><?php _e( 'Settings', ud_get_stateless_media()->domain ); ?></a>
-      <?php if(!is_network_admin()): ?>
-          <a href="#stless_sync_tab" class="stless_setting_tab nav-tab"><?php _e( 'Sync', ud_get_stateless_media()->domain ); ?></a>
-      <?php endif; ?>
+        <?php if(!is_network_admin()): ?>
+            <a href="#stless_sync_tab" class="stless_setting_tab nav-tab"><?php _e( 'Sync', ud_get_stateless_media()->domain ); ?></a>
+        <?php endif; ?>
         <a href="#stless_compatibility_tab" class="stless_setting_tab nav-tab"><?php _e( 'Compatibility', ud_get_stateless_media()->domain ); ?></a>
         <a href="#stless_questions_tab" class="stless_setting_tab nav-tab"><?php _e( 'Support', ud_get_stateless_media()->domain ); ?></a>
     </h2>
@@ -17,7 +17,7 @@
         <div id="stless_settings_tab" class="stless_settings_content active" ng-controller="wpStatelessSettings">
             <form method="post" action="">
                 <input type="hidden" name="action" value="stateless_settings">
-              <?php wp_nonce_field('wp-stateless-settings', '_smnonce');?>
+                <?php wp_nonce_field('wp-stateless-settings', '_smnonce');?>
                 <table class="form-table">
                     <tbody>
                     <?php if(is_network_admin()): ?>
@@ -59,11 +59,11 @@
                                 <legend class="screen-reader-text"><span><?php _e( 'General', ud_get_stateless_media()->domain ); ?></span></legend>
                                 <h4><?php _e( 'Mode', ud_get_stateless_media()->domain ); ?></h4>
                                 <p class="description"><strong ng-bind="sm.showNotice('mode')" ></strong></p>
-                              <?php if(is_network_admin()): ?>
+                                <?php if(is_network_admin()): ?>
                                   <p class="sm-mode">
                                       <label for="sm_mode_disabled"><input ng-model="sm.mode" id="sm_mode_not_override" type="radio" name="sm[mode]" value="" ng-checked="sm.mode == ''" ng-disabled="sm.readonly.mode"><?php _e( 'Don\'t override', ud_get_stateless_media()->domain ); ?><small class="description"><?php _e( 'Don\'t override.', ud_get_stateless_media()->domain ); ?></small></label>
                                   </p>
-                              <?php endif; ?>
+                                <?php endif; ?>
                                 <p class="sm-mode">
                                     <label for="sm_mode_disabled"><input ng-model="sm.mode" id="sm_mode_disabled" type="radio" name="sm[mode]" value="disabled" ng-checked="sm.mode == 'disabled'" ng-disabled="sm.readonly.mode"><?php _e( 'Disabled', ud_get_stateless_media()->domain ); ?><small class="description"><?php _e( 'Disable Stateless Media.', ud_get_stateless_media()->domain ); ?></small></label>
                                 </p>
@@ -81,9 +81,9 @@
                                 <h4><?php _e( 'File URL Replacement', ud_get_stateless_media()->domain ); ?></h4>
                                 <p class="sm-file-url">
                                     <select name="sm[body_rewrite]" id="sm_file_url" ng-model="sm.body_rewrite" ng-disabled="sm.readonly.body_rewrite">
-                                      <?php if(is_network_admin()): ?>
+                                        <?php if(is_network_admin()): ?>
                                           <option value=""><?php _e("Don't override");?></option>
-                                      <?php endif; ?>
+                                        <?php endif; ?>
                                         <option value="false"><?php _e( 'Disable', ud_get_stateless_media()->domain ); ?></option>
                                         <option value="enable_editor"><?php _e( 'Enable Editor', ud_get_stateless_media()->domain ); ?></option>
                                         <option value="enable_meta"><?php _e( 'Enable Meta', ud_get_stateless_media()->domain ); ?></option>
@@ -140,9 +140,9 @@
                                 <h4><?php _e( 'Delete GCS File', ud_get_stateless_media()->domain ); ?></h4>
                                 <p>
                                     <select name="sm[delete_remote]" id="gcs_delete_file" ng-model="sm.delete_remote" ng-disabled="sm.readonly.delete_remote">
-                                      <?php if(is_network_admin()): ?>
+                                        <?php if(is_network_admin()): ?>
                                           <option value=""><?php _e( 'Don\'t override', ud_get_stateless_media()->domain ); ?></option>
-                                      <?php endif; ?>
+                                        <?php endif; ?>
                                         <option value="true"><?php _e( 'Enable', ud_get_stateless_media()->domain ); ?></option>
                                         <option value="false"><?php _e( 'Disable', ud_get_stateless_media()->domain ); ?></option>
                                     </select>
@@ -169,9 +169,9 @@
                                     <p>
                                         <label for="bucket_folder_name">
                                             <select id="sm_file_url" ng-model="sm.bucket_folder_type" ng-disabled="sm.readonly.root_dir">
-                                              <?php if(is_network_admin()): ?>
+                                                <?php if(is_network_admin()): ?>
                                                   <option value=""><?php _e("Don't override");?></option>
-                                              <?php endif; ?>
+                                                <?php endif; ?>
                                                 <option value="single-site"><?php _e( 'Single Site', ud_get_stateless_media()->domain ); ?></option>
                                                 <option value="multi-site"><?php _e( 'Multisite', ud_get_stateless_media()->domain ); ?></option>
                                                 <option value="custom"><?php _e( 'Custom', ud_get_stateless_media()->domain ); ?></option>
@@ -244,18 +244,18 @@
               <?php submit_button(); ?>
             </form>
         </div>
-      <?php if(!is_network_admin()): ?>
+        <?php if(!is_network_admin()): ?>
           <div id="stless_sync_tab" class="stless_settings_content">
             <?php include 'regenerate_interface.php'; ?>
           </div>
-      <?php endif; ?>
+        <?php endif; ?>
         <div id="stless_compatibility_tab" class="stless_settings_content" ng-controller="wpStatelessCompatibility">
             <div class="container-fluid">
                 <h2><?php _e("Enable or disable compatibility with other plugins.");?></h2>
                 <p><?php _e(sprintf("Having an issue with another plugin? <a class='stless_setting_tab' href='%s'>Submit feedback</a> and let us know your issue!", "#stless_questions_tab"));?></p>
                 <form method="post" action="">
                     <input type="hidden" name="action" value="stateless_modules">
-                  <?php wp_nonce_field('wp-stateless-modules', '_smnonce');?>
+                    <?php wp_nonce_field('wp-stateless-modules', '_smnonce');?>
 
                     <table class="form-table">
                         <tr ng-repeat="module in modules">
