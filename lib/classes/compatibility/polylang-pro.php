@@ -10,43 +10,46 @@
 
 namespace wpCloud\StatelessMedia {
 
-    if(!class_exists('wpCloud\StatelessMedia\Polylang')) {
-        
-        class Polylang extends ICompatibility {
-            protected $id = 'polylang-pro';
-            protected $title = 'Polylang Pro';
-            protected $constant = 'WP_STATELESS_COMPATIBILITY_POLYLANG_PRO';
-            protected $description = 'Ensures compatibility with Polylang Pro.';
-            protected $plugin_file = ['polylang-pro/polylang.php'];
+  if(!class_exists('wpCloud\StatelessMedia\Polylang')) {
 
-            public function module_init($sm){
-                add_action( 'pll_translate_media', array($this, 'pll_translate_media'), 10, 3 );
-                
+    class Polylang extends ICompatibility {
+      protected $id = 'polylang-pro';
+      protected $title = 'Polylang Pro';
+      protected $constant = 'WP_STATELESS_COMPATIBILITY_POLYLANG_PRO';
+      protected $description = 'Ensures compatibility with Polylang Pro.';
+      protected $plugin_file = ['polylang-pro/polylang.php'];
+
+      public function module_init($sm){
+        add_action( 'pll_translate_media', array($this, 'pll_translate_media'), 10, 3 );
+
+      }
+
+      /**
+       *
+       */
+      public function pll_translate_media($post_id, $tr_id, $lang_slug){
+
+        // We need to delay the metadata update until the metadata is fully generated.
+        add_filter( 'wp_stateless_media_synced', function($metadata, $attachment_id, $force, $args) use($post_id, $tr_id, $lang_slug){
+          if($attachment_id == $post_id){
+            $meta = get_post_meta( $tr_id, '_wp_attachment_metadata', true );
+            if(!empty($meta['sizes'])){
+              // with Polylang Pro 2.6 the sizes of original image gets missing.
+              update_post_meta( $attachment_id, '_wp_attachment_metadata', wp_slash( $meta ) );
+              return $meta;
             }
-
-            /**
-             * 
-             */
-            public function pll_translate_media($post_id, $tr_id, $lang_slug){
-
-                // We need to delay the metadata update until the metadata is fully generated.
-                add_action( 'wp_stateless_media_synced', function($metadata, $attachment_id, $force, $args) use($post_id, $tr_id, $lang_slug){
-                    if($attachment_id == $post_id){
-                        $meta = get_post_meta( $tr_id, '_wp_attachment_metadata', true );
-                        if(!empty($meta['sizes'])){
-                            // with Polylang Pro 2.6 the sizes of original image gets missing.
-                            update_post_meta( $attachment_id, '_wp_attachment_metadata', wp_slash( $meta ) );
-                        }
-                        else if(!empty($metadata['sizes'])){
-                            // But user reported that metadata gets missing on duplicate.
-                            update_post_meta( $tr_id, '_wp_attachment_metadata', wp_slash( $metadata ) );
-                        }
-                    }
-                }, 10, 4 );
+            else if(!empty($metadata['sizes'])){
+              // But user reported that metadata gets missing on duplicate.
+              update_post_meta( $tr_id, '_wp_attachment_metadata', wp_slash( $metadata ) );
+              return $metadata;
             }
-
-        }
+          }
+          return $metadata;
+        }, 10, 4 );
+      }
 
     }
+
+  }
 
 }

@@ -359,7 +359,7 @@ namespace wpCloud\StatelessMedia {
            * @param bool              $force          (optional) Whether to force the sync even the file already exist in GCS.
            * @param bool              $args           (optional) Whether to only sync the full size image.
            */
-          do_action( 'wp_stateless_media_synced', $metadata, $attachment_id, $force, $args);
+          $metadata = apply_filters( 'wp_stateless_media_synced', $metadata, $attachment_id, $force, $args);
         }
 
         return $metadata;
