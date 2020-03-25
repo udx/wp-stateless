@@ -201,6 +201,7 @@ namespace wpCloud\StatelessMedia {
             if( $this->get( 'sm.mode' ) === 'cdn' || $this->get( 'sm.mode' ) === 'stateless' ) {
               add_filter( 'wp_get_attachment_image_attributes', array( $this, 'wp_get_attachment_image_attributes' ), 20, 3 );
               add_filter( 'wp_get_attachment_url', array( $this, 'wp_get_attachment_url' ), 20, 2 );
+              add_filter( 'get_attached_file', array( $this, 'get_attached_file' ), 9, 2 );
               add_filter( 'attachment_url_to_postid', array( $this, 'attachment_url_to_postid' ), 20, 2 );
 
               if ( $this->get( 'sm.body_rewrite' ) == 'true' ||  $this->get( 'sm.body_rewrite' ) == 'enable_editor' ) {
@@ -1237,8 +1238,36 @@ namespace wpCloud\StatelessMedia {
             }
           }
         }
+        elseif(empty( $sm_cloud) && !empty($metadata['file'])){
+          $uploads = wp_get_upload_dir();
+          $blog_id = get_current_blog_id();
+          $file_path_fix = $uploads['basedir'] . "/sites/$blog_id/{$metadata['file']}";
+          if(file_exists($file_path_fix)){
+            $metadata['file'] = "sites/$blog_id/{$metadata['file']}";
+          }
+        }
 
         return $metadata;
+      }
+
+      /**
+       * 
+       */
+      public function get_attached_file($file, $attachment_id){
+        /* Determine if the media file has GS data at all. */
+        $sm_cloud = get_post_meta( $attachment_id, 'sm_cloud', true );
+        $_file = get_post_meta( $attachment_id, '_wp_attached_file', true );
+        if(empty($sm_cloud) && $_file){
+          $blog_id = get_current_blog_id();
+          $uploads = wp_get_upload_dir();
+          $_file = apply_filters( 'wp_stateless_file_name', $_file, false);
+          $file_path_fix = $uploads['basedir'] . "/sites/$blog_id/$_file";
+          if(file_exists($file_path_fix)){
+            $file = $file_path_fix;
+          }
+        }
+
+        return $file;
       }
 
       /**
@@ -1478,6 +1507,19 @@ namespace wpCloud\StatelessMedia {
           $_url = parse_url($sm_cloud[ 'fileLink' ]);
           $url = !isset($_url['scheme']) ? ( 'https:' . $sm_cloud[ 'fileLink' ] ) : $sm_cloud[ 'fileLink' ];
           return apply_filters('wp_stateless_bucket_link', $url);
+        }
+        elseif(empty($sm_cloud)){
+          $_file = get_post_meta( $post_id, '_wp_attached_file', true );
+          if($_file){
+            $uploads = wp_get_upload_dir();
+            $_file = apply_filters( 'wp_stateless_file_name', $_file, false);
+            $blog_id = get_current_blog_id();
+            $file_path_fix = $uploads['basedir'] . "/sites/$blog_id/$_file";
+
+            if(file_exists($file_path_fix)){
+              $url = $uploads['baseurl'] . "/sites/$blog_id/$_file";
+            }
+          }
         }
         return $url;
       }
