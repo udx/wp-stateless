@@ -25,6 +25,14 @@ namespace wpCloud\StatelessMedia {
        */
       public $stateless_settings = null;
 
+      /**
+       * Instance of 
+       *  - ud_get_stateless_media
+       *  - wpCloud\StatelessMedia\Bootstrap
+       * @var false|null|string
+       */
+      public $bootstrap = null;
+
       private $settings = array(
           'mode'                   => array('WP_STATELESS_MEDIA_MODE', 'cdn'), 
           'body_rewrite'           => array('WP_STATELESS_MEDIA_BODY_REWRITE', 'false'),
@@ -53,15 +61,15 @@ namespace wpCloud\StatelessMedia {
       /**
        * Overridden construct
        */
-      public function __construct() {
-
+      public function __construct($bootstrap = null) {
+        $this->bootstrap = $bootstrap ? $bootstrap : ud_get_stateless_media();
         add_action('admin_menu', array( $this, 'admin_menu' ));
 
         $this->save_media_settings();
         
 
         /* Add 'Settings' link for SM plugin on plugins page. */
-        $_basename = plugin_basename( ud_get_stateless_media()->boot_file );
+        $_basename = plugin_basename( $this->bootstrap->boot_file );
 
         parent::__construct( array(
           'store'       => 'options',
@@ -81,45 +89,46 @@ namespace wpCloud\StatelessMedia {
           add_action( 'network_admin_menu', array( $this, 'network_admin_menu' ));
         }
 
-        $this->set('page_url.stateless_setup', ud_get_stateless_media()->get_settings_page_url('?page=stateless-setup'));
-        $this->set('page_url.stateless_settings', ud_get_stateless_media()->get_settings_page_url('?page=stateless-settings'));
+        $this->set('page_url.stateless_setup', $this->bootstrap->get_settings_page_url('?page=stateless-setup'));
+        $this->set('page_url.stateless_settings', $this->bootstrap->get_settings_page_url('?page=stateless-settings'));
 
         /** Register options */
         add_action( 'init', array( $this, 'init' ), 3 );
-
+        // apply wildcard to root dir.
+        add_filter( 'wp_stateless_handle_root_dir', array( $this, 'root_dir_wildcards' ));
         
         $site_url = parse_url( site_url() );
         $site_url['path'] = isset($site_url['path']) ? $site_url['path'] : '';
         $this->wildcards = array(
           '%date_year%'            => [
                                     date('Y'),
-                                    __("year", ud_get_stateless_media()->domain),
-                                    __("The year of the post, four digits, for example 2004.", ud_get_stateless_media()->domain),
+                                    __("year", $this->bootstrap->domain),
+                                    __("The year of the post, four digits, for example 2004.", $this->bootstrap->domain),
                                  ],
           '%date_month%'           => [
                                     date('m'),
-                                    __("monthnum", ud_get_stateless_media()->domain),
-                                    __("Month of the year, for example 05.", ud_get_stateless_media()->domain),
+                                    __("monthnum", $this->bootstrap->domain),
+                                    __("Month of the year, for example 05.", $this->bootstrap->domain),
                                  ],
           '%site_id%'         => [
                                     get_current_blog_id(),
-                                    __("site id", ud_get_stateless_media()->domain),
-                                    __("Site ID, for example 1.", ud_get_stateless_media()->domain),
+                                    __("site id", $this->bootstrap->domain),
+                                    __("Site ID, for example 1.", $this->bootstrap->domain),
                                  ],
           '%site_url%'        => [
                                     trim( $site_url['host'] . $site_url['path'], '/ ' ),
-                                    __("site url", ud_get_stateless_media()->domain),
-                                    __("Site URL, for example example.com/site-1.", ud_get_stateless_media()->domain),
+                                    __("site url", $this->bootstrap->domain),
+                                    __("Site URL, for example example.com/site-1.", $this->bootstrap->domain),
                                  ],
           '%site_url_host%'   => [
                                     trim( $site_url['host'], '/ ' ),
-                                    __("host name", ud_get_stateless_media()->domain),
-                                    __("Host name, for example example.com.", ud_get_stateless_media()->domain),
+                                    __("host name", $this->bootstrap->domain),
+                                    __("Host name, for example example.com.", $this->bootstrap->domain),
                                  ],
           '%site_url_path%'   => [
                                     trim( $site_url['path'], '/ ' ),
-                                    __("site path", ud_get_stateless_media()->domain),
-                                    __("Site path, for example site-1.", ud_get_stateless_media()->domain),
+                                    __("site path", $this->bootstrap->domain),
+                                    __("Site path, for example site-1.", $this->bootstrap->domain),
                                  ],
         );
       }
@@ -167,10 +176,10 @@ namespace wpCloud\StatelessMedia {
               }
               if(is_string($old_const) && defined($old_const)){
                   $value = constant($old_const);
-                  ud_get_stateless_media()->errors->add( array(
+                  $this->bootstrap->errors->add( array(
                       'key' => $new_const,
-                      'title' => sprintf( __( "%s: Deprecated Notice (%s)", ud_get_stateless_media()->domain ), ud_get_stateless_media()->name, $new_const ),
-                      'message' => sprintf(__("<i>%s</i> constant is deprecated, please use <i>%s</i> instead.", ud_get_stateless_media()->domain), $old_const, $new_const),
+                      'title' => sprintf( __( "%s: Deprecated Notice (%s)", $this->bootstrap->domain ), $this->bootstrap->name, $new_const ),
+                      'message' => sprintf(__("<i>%s</i> constant is deprecated, please use <i>%s</i> instead.", $this->bootstrap->domain), $old_const, $new_const),
                   ), 'notice' );
                   $this->set( "sm.readonly.{$option}", "constant" );
                   break;
@@ -267,8 +276,8 @@ namespace wpCloud\StatelessMedia {
                 $key_file_path = wp_normalize_path( $upload_dir[ 'basedir' ] ) . '/' . $key_file_path;
                 break;
               /* Look using Plugin root */
-              case (file_exists(ud_get_stateless_media()->path( $key_file_path, 'dir') ) ):
-                $key_file_path = ud_get_stateless_media()->path( $key_file_path, 'dir' );
+              case (file_exists($this->bootstrap->path( $key_file_path, 'dir') ) ):
+                $key_file_path = $this->bootstrap->path( $key_file_path, 'dir' );
                 break;
 
             }
@@ -316,16 +325,37 @@ namespace wpCloud\StatelessMedia {
       }
 
       /**
+       *
+       *
+       */
+      public function root_dir_wildcards( $root_dir ) {
+
+        $wildcards = apply_filters('wp_stateless_root_dir_wildcard', $this->wildcards);
+
+        foreach ($wildcards as $wildcard => $replace) {
+          if(!empty($wildcard)){
+            $root_dir = str_replace($wildcard, $replace[0], $root_dir);
+          }
+        }
+
+        $root_dir = preg_replace('/(\/+)/', '/', $root_dir);
+        $root_dir = trim( $root_dir, '/ ' ); // Remove any forward slash and empty space.
+
+
+        return $root_dir;
+      }
+
+      /**
        * Add menu options
        */
       public function admin_menu() {
         $key_json = $this->get('sm.key_json');
         if($this->get('sm.hide_setup_assistant') != 'true' && empty($key_json) ){
-          $this->setup_wizard_ui = add_media_page( __( 'Stateless Setup', ud_get_stateless_media()->domain ), __( 'Stateless Setup', ud_get_stateless_media()->domain ), 'manage_options', 'stateless-setup', array($this, 'setup_wizard_interface') );
+          $this->setup_wizard_ui = add_media_page( __( 'Stateless Setup', $this->bootstrap->domain ), __( 'Stateless Setup', $this->bootstrap->domain ), 'manage_options', 'stateless-setup', array($this, 'setup_wizard_interface') );
         }
 
         if($this->get('sm.hide_settings_panel') != 'true'){
-          $this->stateless_settings = add_media_page( __( 'Stateless Settings', ud_get_stateless_media()->domain ), __( 'Stateless Settings', ud_get_stateless_media()->domain ), 'manage_options', 'stateless-settings', array($this, 'settings_interface') );
+          $this->stateless_settings = add_media_page( __( 'Stateless Settings', $this->bootstrap->domain ), __( 'Stateless Settings', $this->bootstrap->domain ), 'manage_options', 'stateless-settings', array($this, 'settings_interface') );
         }
       }
 
@@ -333,8 +363,8 @@ namespace wpCloud\StatelessMedia {
        * Add menu options
        */
       public function network_admin_menu($slug) {
-        $this->setup_wizard_ui = add_submenu_page( 'settings.php', __( 'Stateless Setup', ud_get_stateless_media()->domain ), __( 'Stateless Setup', ud_get_stateless_media()->domain ), 'manage_options', 'stateless-setup', array($this, 'setup_wizard_interface') );
-        $this->stateless_settings = add_submenu_page( 'settings.php', __( 'Stateless Settings', ud_get_stateless_media()->domain ), __( 'Stateless Settings', ud_get_stateless_media()->domain ), 'manage_options', 'stateless-settings', array($this, 'settings_interface') );
+        $this->setup_wizard_ui = add_submenu_page( 'settings.php', __( 'Stateless Setup', $this->bootstrap->domain ), __( 'Stateless Setup', $this->bootstrap->domain ), 'manage_options', 'stateless-setup', array($this, 'setup_wizard_interface') );
+        $this->stateless_settings = add_submenu_page( 'settings.php', __( 'Stateless Settings', $this->bootstrap->domain ), __( 'Stateless Settings', $this->bootstrap->domain ), 'manage_options', 'stateless-settings', array($this, 'settings_interface') );
       }
 
       /**
@@ -342,14 +372,14 @@ namespace wpCloud\StatelessMedia {
        */
       public function settings_interface() {
         $wildcards = apply_filters('wp_stateless_root_dir_wildcard', $this->wildcards);
-        include ud_get_stateless_media()->path( '/static/views/settings_interface.php', 'dir' );
+        include $this->bootstrap->path( '/static/views/settings_interface.php', 'dir' );
       }
 
       /**
        * Draw interface
        */
       public function regenerate_interface() {
-        include ud_get_stateless_media()->path( '/static/views/regenerate_interface.php', 'dir' );
+        include $this->bootstrap->path( '/static/views/regenerate_interface.php', 'dir' );
       }
 
       /**
@@ -361,11 +391,11 @@ namespace wpCloud\StatelessMedia {
           case 'google-login':
           case 'setup-project':
           case 'finish':
-            include ud_get_stateless_media()->path( '/static/views/setup_wizard_interface.php', 'dir' );
+            include $this->bootstrap->path( '/static/views/setup_wizard_interface.php', 'dir' );
             break;
           
           default:
-            include ud_get_stateless_media()->path( '/static/views/stateless_splash_screen.php', 'dir' );
+            include $this->bootstrap->path( '/static/views/stateless_splash_screen.php', 'dir' );
             break;
         }
       }
@@ -397,7 +427,7 @@ namespace wpCloud\StatelessMedia {
             }
           }
 
-          ud_get_stateless_media()->flush_transients();
+          $this->bootstrap->flush_transients();
         }
       }
 

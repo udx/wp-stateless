@@ -56,6 +56,19 @@ namespace wpCloud\StatelessMedia {
         add_action( 'plugins_loaded', function(){
           new Module();
         });
+
+        /**
+         * Define settings and UI.
+         *
+         * Example:
+         *
+         * Get option
+         * $this->get( 'sm.client_id' )
+         *
+         * Manually Update/Add option
+         * $this->set( 'sm.client_id', 'zxcvv12adffse' );
+         */
+        $this->settings = new Settings($this);
       }
 
       /**
@@ -79,25 +92,6 @@ namespace wpCloud\StatelessMedia {
         $this->parse_feature_flags();
 
         new SyncNonMedia();
-
-        /**
-         * This needed to be before initializing settings.
-         *
-         */
-        add_filter( 'wp_stateless_handle_root_dir', array( $this, 'root_dir_wildcards' ));
-
-        /**
-         * Define settings and UI.
-         *
-         * Example:
-         *
-         * Get option
-         * $this->get( 'sm.client_id' )
-         *
-         * Manually Update/Add option
-         * $this->set( 'sm.client_id', 'zxcvv12adffse' );
-         */
-        $this->settings = new Settings();
 
         // Invoke REST API
         add_action( 'rest_api_init', array( $this, 'api_init' ) );
@@ -1622,27 +1616,6 @@ namespace wpCloud\StatelessMedia {
           $upload_data[ 'subdir' ] = $upload_data[ 'subdir' ] . '/' . $root_dir;
         }
         return $upload_data;
-      }
-
-      /**
-       *
-       *
-       */
-      public function root_dir_wildcards( $root_dir ) {
-
-        $wildcards = apply_filters('wp_stateless_root_dir_wildcard', $this->settings->wildcards);
-
-        foreach ($wildcards as $wildcard => $replace) {
-          if(!empty($wildcard)){
-            $root_dir = str_replace($wildcard, $replace[0], $root_dir);
-          }
-        }
-
-        $root_dir = preg_replace('/(\/+)/', '/', $root_dir);
-        $root_dir = trim( $root_dir, '/ ' ); // Remove any forward slash and empty space.
-
-
-        return $root_dir;
       }
 
       /**
