@@ -1232,7 +1232,7 @@ namespace wpCloud\StatelessMedia {
             }
           }
         }
-        elseif(is_multisite() && empty( $sm_cloud) && !empty($metadata['file'])){
+        if(is_multisite() && !empty($metadata['file'])){
           $uploads = wp_get_upload_dir();
           $blog_id = get_current_blog_id();
           $file_path_fix = $uploads['basedir'] . "/sites/$blog_id/{$metadata['file']}";
@@ -1252,7 +1252,7 @@ namespace wpCloud\StatelessMedia {
         if(is_multisite()){
           $sm_cloud = get_post_meta( $attachment_id, 'sm_cloud', true );
           $_file = get_post_meta( $attachment_id, '_wp_attached_file', true );
-          if(empty($sm_cloud) && $_file){
+          if($_file){
             $blog_id = get_current_blog_id();
             $uploads = wp_get_upload_dir();
             $_file = apply_filters( 'wp_stateless_file_name', $_file, false);
