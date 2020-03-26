@@ -161,7 +161,14 @@ namespace wpCloud\StatelessMedia {
 
         // If replace file with wildcards
         if ( false !== $fullsizepath && '1' == $use_wildcards ) {
-          $fullsizepath_original = wp_get_original_image_path( $image->ID );
+          $image_meta = wp_get_attachment_metadata( $image->ID );
+          $image_file = get_attached_file( $image->ID );
+
+          if ( empty( $image_meta['original_image'] ) ) {
+            $fullsizepath_original = $image_file;
+          } else {
+            $fullsizepath_original = path_join( dirname( $image_file ), $image_meta['original_image'] );
+          }
           $fullsizepath_wildcard = apply_filters( 'wp_stateless_file_name', basename($fullsizepath_original), true, "", "", $use_wildcards);
 
           //copy original image

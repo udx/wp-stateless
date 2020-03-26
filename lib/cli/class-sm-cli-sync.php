@@ -322,13 +322,13 @@ class SM_CLI_Sync extends SM_CLI_Scaffold {
       throw new \Exception( sprintf( __( 'Failed resize: %s is an invalid image ID.', ud_get_stateless_media()->domain ), esc_html( $id ) ) );
 
     $fullsizepath = get_attached_file( $image->ID );
+    $upload_dir = wp_upload_dir();
 
     // If no file found
     if ( false === $fullsizepath || ! file_exists( $fullsizepath ) ) {
-      $upload_dir = wp_upload_dir();
 
       // Try get it and save
-      $result_code = ud_get_stateless_media()->get_client()->get_media( apply_filters( 'wp_stateless_file_name', str_replace( trailingslashit( $upload_dir[ 'basedir' ] ), '', $fullsizepath ), true, $id ), true, $fullsizepath );
+      $result_code = ud_get_stateless_media()->get_client()->get_media( apply_filters( 'wp_stateless_file_name', str_replace( trailingslashit( $upload_dir[ 'basedir' ] ), '', $fullsizepath ), true, $id, "", $this->use_wildcards), true, $fullsizepath );
 
       if ( $result_code !== 200 ) {
         if(!Utility::sync_get_attachment_if_exist($image->ID, $fullsizepath)){ // Save file to local from proxy.
@@ -336,6 +336,31 @@ class SM_CLI_Sync extends SM_CLI_Scaffold {
           throw new \Exception(sprintf(__('Both local and remote files are missing. Unable to resize. (%s)', ud_get_stateless_media()->domain), $image->guid));
         }
       }
+    }
+
+    // If replace file with wildcards
+    if ( false !== $fullsizepath && '1' == $this->use_wildcards ) {
+      $image_meta = wp_get_attachment_metadata( $image->ID );
+      $image_file = get_attached_file( $image->ID );
+
+      if ( empty( $image_meta['original_image'] ) ) {
+        $fullsizepath_original = $image_file;
+      } else {
+        $fullsizepath_original = path_join( dirname( $image_file ), $image_meta['original_image'] );
+      }
+      $fullsizepath_wildcard = apply_filters( 'wp_stateless_file_name', basename($fullsizepath_original), true, "", "", $this->use_wildcards);
+
+      //copy original image
+      copy( $fullsizepath_original, $upload_dir[ 'basedir' ] . '/' . $fullsizepath_wildcard);
+      //copy scaled image
+      copy( $fullsizepath, $upload_dir[ 'basedir' ] . '/' . apply_filters( 'wp_stateless_file_name', basename($fullsizepath), true, "", "", $this->use_wildcards));
+
+      //removing old file
+      //ud_get_stateless_media()->get_client()->remove_media($fullsizepath, $id);
+      //unlink( $fullsizepath );
+
+      update_attached_file( $image->ID, apply_filters( 'wp_stateless_file_name', basename($fullsizepath), true, "", "", $this->use_wildcards) );
+      $fullsizepath = $upload_dir[ 'basedir' ] . '/' . $fullsizepath_wildcard;
     }
 
     @set_time_limit( -1 );
@@ -387,8 +412,9 @@ class SM_CLI_Sync extends SM_CLI_Scaffold {
     $fullsizepath = get_attached_file( $file->ID );
     $local_file_exists = file_exists( $fullsizepath );
 
+    $upload_dir = wp_upload_dir();
+
     if ( false === $fullsizepath || ! $local_file_exists ) {
-      $upload_dir = wp_upload_dir();
 
       // Try get it and save
       $result_code = ud_get_stateless_media()->get_client()->get_media( str_replace( trailingslashit( $upload_dir[ 'basedir' ] ), '', $fullsizepath ), true, $fullsizepath );
@@ -405,6 +431,20 @@ class SM_CLI_Sync extends SM_CLI_Scaffold {
       else{
         $local_file_exists = true;
       }
+    }
+
+    // If replace file with wildcards
+    if ( false !== $fullsizepath && '1' == $this->use_wildcards ) {
+
+      $fullsizepath_wildcard = apply_filters( 'wp_stateless_file_name', basename($fullsizepath), true, "", "", $this->use_wildcards);
+
+      //copy file
+      copy( $fullsizepath, $upload_dir[ 'basedir' ] . '/' . $fullsizepath_wildcard);
+
+      update_attached_file( $file->ID, apply_filters( 'wp_stateless_file_name', basename($fullsizepath), true, "", "", $this->use_wildcards) );
+      $fullsizepath = $upload_dir[ 'basedir' ] . '/' . $fullsizepath_wildcard;
+
+      $local_file_exists = file_exists( $fullsizepath );
     }
 
     if($local_file_exists){
@@ -448,12 +488,14 @@ class SM_CLI_Sync extends SM_CLI_Scaffold {
     if( isset( $args[ 'b' ] ) ) {
       WP_CLI::error( 'Invalid parameter --b. Command must not be run directly with --b parameter.' );
     }
-    $this->start    = isset( $args[ 'start' ] ) && is_numeric( $args[ 'start' ] ) ? $args[ 'start' ] : 0;
-    $this->limit    = isset( $args[ 'limit' ] ) && is_numeric( $args[ 'limit' ] ) ? $args[ 'limit' ] : 100;
-    $this->force    = isset( $args[ 'force' ] )     ? true : false;
-    $this->continue = isset( $args[ 'continue' ] )  ? true : false;
-    $this->fix      = isset( $args[ 'fix' ] )       ? true : false;
-    $this->order    = isset( $args[ 'order' ]) && $args[ 'order' ] === 'ASC' ? 'ASC' : 'DESC';
+    $this->start          = isset( $args[ 'start' ] ) && is_numeric( $args[ 'start' ] ) ? $args[ 'start' ] : 0;
+    $this->limit          = isset( $args[ 'limit' ] ) && is_numeric( $args[ 'limit' ] ) ? $args[ 'limit' ] : 100;
+    $this->force          = isset( $args[ 'force' ] )         ? true : false;
+    $this->continue       = isset( $args[ 'continue' ] )      ? true : false;
+    $this->fix            = isset( $args[ 'fix' ] )           ? true : false;
+    $this->use_wildcards  = isset( $args[ 'use_wildcards' ] ) ? true : false;
+    $_REQUEST['use_wildcards'] = $this->use_wildcards;
+    $this->order          = isset( $args[ 'order' ]) && $args[ 'order' ] === 'ASC' ? 'ASC' : 'DESC';
     if( isset( $args[ 'batch' ] ) ) {
       if( !is_numeric( $args[ 'batch' ] ) || $args[ 'batch' ] <= 0 ) {
         WP_CLI::error( 'Invalid parameter --batch' );

@@ -120,7 +120,10 @@ if( defined( 'WP_CLI' ) && WP_CLI ) {
      * wp stateless sync files --fix
      * : Run process and trying to fix previously failed items
      *
-     * @synopsis [<type>] [--start=<val>] [--limit=<val>] [--end=<val>] [--batch=<val>] [--batches=<val>] [--b] [--log] [--o] [--force] [--continue] [--fix] [--order]
+     * wp stateless sync files --use_wildcards
+     * : Run process with using wildcards for file path
+     *
+     * @synopsis [<type>] [--start=<val>] [--limit=<val>] [--end=<val>] [--batch=<val>] [--batches=<val>] [--b] [--log] [--o] [--force] [--continue] [--fix] [--use_wildcards] [--order]
      * @param $args
      * @param $assoc_args
      */

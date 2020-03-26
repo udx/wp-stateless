@@ -61,7 +61,7 @@
                                 <p class="description"><strong ng-bind="sm.showNotice('mode')" ></strong></p>
                                 <?php if(is_network_admin()): ?>
                                   <p class="sm-mode">
-                                      <label for="sm_mode_disabled"><input ng-model="sm.mode" id="sm_mode_not_override" type="radio" name="sm[mode]" value="" ng-checked="sm.mode == ''" ng-disabled="sm.readonly.mode"><?php _e( 'Don\'t override', ud_get_stateless_media()->domain ); ?><small class="description"><?php _e( 'Don\'t override.', ud_get_stateless_media()->domain ); ?></small></label>
+                                      <label for="sm_mode_not_override"><input ng-model="sm.mode" id="sm_mode_not_override" type="radio" name="sm[mode]" value="" ng-checked="sm.mode == ''" ng-disabled="sm.readonly.mode"><?php _e( 'Don\'t override', ud_get_stateless_media()->domain ); ?><small class="description"><?php _e( 'Don\'t override.', ud_get_stateless_media()->domain ); ?></small></label>
                                   </p>
                                 <?php endif; ?>
                                 <p class="sm-mode">
