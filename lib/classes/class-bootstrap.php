@@ -1232,7 +1232,7 @@ namespace wpCloud\StatelessMedia {
             }
           }
         }
-        elseif(empty( $sm_cloud) && !empty($metadata['file'])){
+        elseif(is_multisite() && empty( $sm_cloud) && !empty($metadata['file'])){
           $uploads = wp_get_upload_dir();
           $blog_id = get_current_blog_id();
           $file_path_fix = $uploads['basedir'] . "/sites/$blog_id/{$metadata['file']}";
@@ -1249,15 +1249,17 @@ namespace wpCloud\StatelessMedia {
        */
       public function get_attached_file($file, $attachment_id){
         /* Determine if the media file has GS data at all. */
-        $sm_cloud = get_post_meta( $attachment_id, 'sm_cloud', true );
-        $_file = get_post_meta( $attachment_id, '_wp_attached_file', true );
-        if(empty($sm_cloud) && $_file){
-          $blog_id = get_current_blog_id();
-          $uploads = wp_get_upload_dir();
-          $_file = apply_filters( 'wp_stateless_file_name', $_file, false);
-          $file_path_fix = $uploads['basedir'] . "/sites/$blog_id/$_file";
-          if(file_exists($file_path_fix)){
-            $file = $file_path_fix;
+        if(is_multisite()){
+          $sm_cloud = get_post_meta( $attachment_id, 'sm_cloud', true );
+          $_file = get_post_meta( $attachment_id, '_wp_attached_file', true );
+          if(empty($sm_cloud) && $_file){
+            $blog_id = get_current_blog_id();
+            $uploads = wp_get_upload_dir();
+            $_file = apply_filters( 'wp_stateless_file_name', $_file, false);
+            $file_path_fix = $uploads['basedir'] . "/sites/$blog_id/$_file";
+            if(file_exists($file_path_fix)){
+              $file = $file_path_fix;
+            }
           }
         }
 
@@ -1502,7 +1504,7 @@ namespace wpCloud\StatelessMedia {
           $url = !isset($_url['scheme']) ? ( 'https:' . $sm_cloud[ 'fileLink' ] ) : $sm_cloud[ 'fileLink' ];
           return apply_filters('wp_stateless_bucket_link', $url);
         }
-        elseif(empty($sm_cloud)){
+        elseif(is_multisite() && empty($sm_cloud)){
           $_file = get_post_meta( $post_id, '_wp_attached_file', true );
           if($_file){
             $uploads = wp_get_upload_dir();
