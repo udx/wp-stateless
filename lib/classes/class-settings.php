@@ -414,6 +414,9 @@ namespace wpCloud\StatelessMedia {
             if($name == 'organize_media'){
               $option = 'uploads_use_yearmonth_folders';
             }
+            elseif($name == 'key_json'){
+              $value = stripslashes($value);
+            }
 
             // Be sure to cleanup values before saving
             $value = trim($value);
