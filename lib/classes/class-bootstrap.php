@@ -1610,7 +1610,7 @@ namespace wpCloud\StatelessMedia {
         $root_dir = $this->get( 'sm.root_dir' );
         $root_dir = apply_filters("wp_stateless_handle_root_dir", $root_dir);
 
-        if(false === strpos($upload_data['path'], $root_dir)){
+        if($root_dir && false === strpos($upload_data['path'], $root_dir)){
           $upload_data[ 'path' ]   = $upload_data[ 'path' ]   . '/' . $root_dir;
           $upload_data[ 'url' ]    = $upload_data[ 'url' ]    . '/' . $root_dir;
           $upload_data[ 'subdir' ] = $upload_data[ 'subdir' ] . '/' . $root_dir;
