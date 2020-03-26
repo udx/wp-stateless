@@ -819,6 +819,9 @@ var wpStatelessApp = angular.module('wpStatelessApp', ['ngSanitize'])
     else if(value == 'multi-site'){
       $scope.sm.root_dir = '/sites/%site_id%/%date_year%/%date_month%/';
     }
+    else if(value == '' && $scope.sm.network_admin){
+      $scope.sm.root_dir = '';
+    }
     setTimeout(function(){
       jQuery( '#permalink_structure' ).trigger('change');
     }, 1);
@@ -830,6 +833,9 @@ var wpStatelessApp = angular.module('wpStatelessApp', ['ngSanitize'])
     }
     else if(value == '/sites/%site_id%/%date_year%/%date_month%/'){
       $scope.sm.bucket_folder_type = 'multi-site';
+    }
+    else if(value == '' && $scope.sm.network_admin){
+      $scope.sm.bucket_folder_type = '';
     }
     else{
       $scope.sm.bucket_folder_type = 'custom';
@@ -885,7 +891,7 @@ var wpStatelessApp = angular.module('wpStatelessApp', ['ngSanitize'])
       host += custom_domain;
     }
 
-    $scope.sm.preview_url = host + "/" + root_dir + hash + "your-image-name.jpeg";
+    $scope.sm.preview_url = host + "/" + root_dir + "/" + hash + "your-image-name.jpeg";
   }
 
   $scope.sm.generatePreviewUrl();

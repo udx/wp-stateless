@@ -953,6 +953,7 @@ namespace wpCloud\StatelessMedia {
 
         $settings = ud_get_stateless_media()->get('sm');
         $settings['wildcards'] = $this->settings->wildcards;
+        $settings['network_admin'] = is_network_admin();
         if(defined('WP_STATELESS_MEDIA_JSON_KEY') && WP_STATELESS_MEDIA_JSON_KEY){
           $settings['key_json'] = "Currently configured via a constant.";
         }
