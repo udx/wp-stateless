@@ -63,9 +63,6 @@ namespace wpCloud\StatelessMedia {
        */
       public function __construct($bootstrap = null) {
         $this->bootstrap = $bootstrap ? $bootstrap : ud_get_stateless_media();
-        add_action('admin_menu', array( $this, 'admin_menu' ));
-
-        $this->save_media_settings();
         
 
         /* Add 'Settings' link for SM plugin on plugins page. */
@@ -81,13 +78,6 @@ namespace wpCloud\StatelessMedia {
         
         // Setting sm variable
         $this->refresh();
-
-        /**
-         * Manage specific Network Settings
-         */
-        if( is_network_admin() ) {
-          add_action( 'network_admin_menu', array( $this, 'network_admin_menu' ));
-        }
 
         $this->set('page_url.stateless_setup', $this->bootstrap->get_settings_page_url('?page=stateless-setup'));
         $this->set('page_url.stateless_settings', $this->bootstrap->get_settings_page_url('?page=stateless-settings'));
@@ -134,6 +124,15 @@ namespace wpCloud\StatelessMedia {
       }
 
       public function init(){
+        $this->save_media_settings();
+
+        add_action('admin_menu', array( $this, 'admin_menu' ));
+        /**
+         * Manage specific Network Settings
+         */
+        if( is_network_admin() ) {
+          add_action( 'network_admin_menu', array( $this, 'network_admin_menu' ));
+        }
 
       }
 
