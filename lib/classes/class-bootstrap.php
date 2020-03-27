@@ -635,11 +635,11 @@ namespace wpCloud\StatelessMedia {
 
         //non media files
         // @todo need to investigate how will be better for non-media
-        /*$table_name = $wpdb->prefix . 'sm_sync';
+        $table_name = $wpdb->prefix . 'sm_sync';
         $non_media = $wpdb->get_var($wpdb->prepare("SELECT file FROM {$table_name} WHERE file = '%s';", $current_path));
         if ( $non_media ) {
             return $non_media;
-        }*/
+        }
 
 
         $root_dir = $this->get( 'sm.root_dir' );
