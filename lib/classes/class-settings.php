@@ -140,8 +140,7 @@ namespace wpCloud\StatelessMedia {
        * Refresh settings
        */
       public function refresh() {
-        $constant_mode = false;
-        $upload_data = wp_upload_dir();
+        $this->set( "sm.readonly", []);
         $google_app_key_file = getenv('GOOGLE_APPLICATION_CREDENTIALS') ?: getenv('GOOGLE_APPLICATION_CREDENTIALS');
 
         foreach ($this->settings as $option => $array) {
@@ -149,10 +148,6 @@ namespace wpCloud\StatelessMedia {
           $_option  = 'sm_' . $option;
           $constant = $array[0]; // Constant name
           $default  = is_array($array[1]) ? $array[1] : array($array[1], $array[1]); // Default value
-
-          if($option == 'organize_media'){
-            $_option = 'uploads_use_yearmonth_folders';
-          }
 
           // Getting settings
           $value = get_option($_option, $default[0]);
@@ -189,8 +184,10 @@ namespace wpCloud\StatelessMedia {
             $value = constant($constant);
             $this->set( "sm.readonly.{$option}", "constant" );
           }
+          
           // Getting network settings
-          elseif(is_multisite() && $option != 'organize_media'){
+          if(is_multisite() && !$this->get( "sm.readonly.{$option}")){
+            
             $network = get_site_option( $_option, $default[1] );
             // If network settings available then override by network settings.
             if($network || is_network_admin()){

@@ -1441,7 +1441,7 @@ namespace wpCloud\StatelessMedia {
        * @param string $plugin
        */
       public function redirect_to_splash($plugin =''){
-        $this->settings = new Settings();
+        // $this->settings = new Settings();
 
         if(defined( 'WP_CLI' ) || $this->settings->get('sm.key_json') || isset($_POST['checked']) && count($_POST['checked']) > 1){
           return;
