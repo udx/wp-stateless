@@ -1,0 +1,82 @@
+<?php
+
+/*
+ * This file is a part of dflydev/apache-mime-types.
+ *
+ * (c) Dragonfly Development Inc.
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
+namespace Dflydev\ApacheMimeTypes;
+
+/**
+ * PHP Repository
+ *
+ * @author Beau Simensen <beau@dflydev.com>
+ */
+class PhpRepository implements RepositoryInterface
+{
+    protected $extensionToType = array(
+        {% spaceless %}
+
+    {% for extension, type in extensionToType %}
+    '{{ extension }}' => '{{ type }}',
+    {% endfor %}
+
+        {% endspaceless %}
+
+    );
+
+    protected $typeToExtensions = array(
+        {% spaceless %}
+
+    {% for type, extensions in typeToExtensions %}
+    '{{ type }}' => array({% for extension in extensions %}{% if not loop.first %}, {% endif %}'{{ extension }}'{% endfor %}),
+    {% endfor %}
+
+        {% endspaceless %}
+
+    );
+
+    /**
+     * {@inheritdoc}
+     */
+    public function dumpExtensionToType()
+    {
+        return $this->extensionToType;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function dumpTypeToExtensions()
+    {
+        return $this->typeToExtensions;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function findExtensions($type)
+    {
+        if (isset($this->typeToExtensions[$type])) {
+            return $this->typeToExtensions[$type];
+        }
+
+        return array();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function findType($extension)
+    {
+        if (isset($this->extensionToType[$extension])) {
+            return $this->extensionToType[$extension];
+        }
+
+        return null;
+    }
+}

@@ -23,7 +23,8 @@
     "udx/lib-settings": "~0.3",
     "udx/lib-wp-bootstrap": "~1.3",
     "udx/lib-ud-api-client": "~1.2",
-    "ccampbell/chromephp": "^4.1"
+    "ccampbell/chromephp": "^4.1",
+    "adrienrn/php-mimetyper": "dev-master"
   },
   "require-dev": {
     "php": ">=5.5",

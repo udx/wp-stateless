@@ -1,0 +1,40 @@
+{
+    "name": "dflydev/apache-mime-types",
+    "description": "Apache MIME Types",
+    "keywords": ["apache", "mime", "mimetypes"],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Dragonfly Development Inc.",
+            "email": "info@dflydev.com",
+            "homepage": "http://dflydev.com"
+        },
+        {
+            "name": "Beau Simensen",
+            "email": "beau@dflydev.com",
+            "homepage": "http://beausimensen.com"
+        }
+    ],
+    "require": {
+        "php": ">=5.3"
+    },
+    "require-dev": {
+        "twig/twig": "1.*",
+        "phpunit/phpunit": "^7.4"
+    },
+    "autoload": {
+        "psr-0": {
+            "Dflydev\\ApacheMimeTypes": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Dflydev\\ApacheMimeTypes\\Test\\": "tests"
+        }
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "1.0-dev"
+        }
+    }
+}
