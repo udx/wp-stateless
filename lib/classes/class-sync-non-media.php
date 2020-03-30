@@ -80,10 +80,7 @@ namespace wpCloud\StatelessMedia {
                     return false;
                 }
 
-                $mimeRepository = new \MimeTyper\Repository\MimeDbRepository();
-                $ext = pathinfo($absolutePath, PATHINFO_EXTENSION);
-                $file_type = $mimeRepository->findType($ext);
-
+                $file_type = wp_check_filetype($absolutePath);
                 if(empty($this->client)){
                     $this->client = ud_get_stateless_media()->get_client();
                 }
@@ -115,7 +112,7 @@ namespace wpCloud\StatelessMedia {
                         'absolutePath' => $absolutePath,
                         'cacheControl' => apply_filters( 'sm:item:cacheControl', 'public, max-age=36000, must-revalidate', $absolutePath), //@todo use cacheControl from settings page.
                         'contentDisposition' => apply_filters( 'sm:item:contentDisposition', null, $absolutePath),
-                        'mimeType' => $file_type,
+                        'mimeType' => $file_type['type'],
                         'metadata' => array(
                             'child-of' => dirname($name),
                             'file-hash' => md5( $name ),

@@ -7,10 +7,6 @@ namespace Composer\Autoload;
 class ComposerStaticInitc00cd3c666f8dfa818cb7edfd488ed20
 {
     public static $prefixLengthsPsr4 = array (
-        'M' => 
-        array (
-            'MimeTyper\\' => 10,
-        ),
         'C' => 
         array (
             'Composer\\Installers\\' => 20,
@@ -18,10 +14,6 @@ class ComposerStaticInitc00cd3c666f8dfa818cb7edfd488ed20
     );
 
     public static $prefixDirsPsr4 = array (
-        'MimeTyper\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/adrienrn/php-mimetyper/src',
-        ),
         'Composer\\Installers\\' => 
         array (
             0 => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers',
@@ -29,13 +21,6 @@ class ComposerStaticInitc00cd3c666f8dfa818cb7edfd488ed20
     );
 
     public static $prefixesPsr0 = array (
-        'D' => 
-        array (
-            'Dflydev\\ApacheMimeTypes' => 
-            array (
-                0 => __DIR__ . '/..' . '/dflydev/apache-mime-types/src',
-            ),
-        ),
         'C' => 
         array (
             'ChromePhp' => 

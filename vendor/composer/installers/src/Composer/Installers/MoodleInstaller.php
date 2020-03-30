@@ -20,7 +20,6 @@ class MoodleInstaller extends BaseInstaller
         'calendartype'       => 'calendar/type/{$name}/',
         'format'             => 'course/format/{$name}/',
         'coursereport'       => 'course/report/{$name}/',
-        'customcertelement'  => 'mod/customcert/element/{$name}/',
         'datafield'          => 'mod/data/field/{$name}/',
         'datapreset'         => 'mod/data/preset/{$name}/',
         'editor'             => 'lib/editor/{$name}/',
