@@ -105,14 +105,14 @@ namespace wpCloud\StatelessMedia {
                  * Try to get all missing files from GCS
                  */
                 if ( !file_exists( $file ) ) {
-                    ud_get_stateless_media()->get_client()->get_media( apply_filters( 'wp_stateless_file_name', $meta_data['file'], 0), true, $file );
+                    ud_get_stateless_media()->get_client()->get_media( apply_filters( 'wp_stateless_file_name', $meta_data['file']), true, $file );
                 }
 
                 if ( !empty( $meta_data['sizes'] ) && is_array( $meta_data['sizes'] ) ) {
                     $upload_basedir = trailingslashit( dirname($file) );
                     foreach( $meta_data['sizes'] as $image ) {
                         if ( !empty( $image['gs_name'] ) && !file_exists( $file = $upload_basedir . $image['file'] ) ) {
-                            ud_get_stateless_media()->get_client()->get_media( apply_filters( 'wp_stateless_file_name', $image['gs_name'], 0), true, $file );
+                            ud_get_stateless_media()->get_client()->get_media( apply_filters( 'wp_stateless_file_name', $image['gs_name']), true, $file );
                         }
                     }
                 }
@@ -157,7 +157,7 @@ namespace wpCloud\StatelessMedia {
                     if(file_exists($backup_path)){
                         $overwrite = apply_filters( 'imagify_backup_overwrite_backup', false, $file_path, $backup_path );
                         // wp_stateless_file_name filter will remove the basedir from the path and prepend with root dir.
-                        $name = apply_filters( 'wp_stateless_file_name', $backup_path, 0);
+                        $name = apply_filters( 'wp_stateless_file_name', $backup_path);
                         do_action( 'sm:sync::syncFile', $name, $backup_path, $overwrite);
                     }
                 }
@@ -172,7 +172,7 @@ namespace wpCloud\StatelessMedia {
                 if(!file_exists($backup_path)){
                     $upload_dir = wp_upload_dir();
                     $name = str_replace(trailingslashit( $upload_dir[ 'basedir' ] ), '', $backup_path);
-                    $name = apply_filters( 'wp_stateless_file_name', $name, 0);
+                    $name = apply_filters( 'wp_stateless_file_name', $name);
                     do_action( 'sm:sync::syncFile', $name, $backup_path, true);
                 }
             }
@@ -182,7 +182,7 @@ namespace wpCloud\StatelessMedia {
              */
             public function imagify_has_backup($return, $has_backup){
                 if(!$return && $has_backup){
-                    $name = apply_filters( 'wp_stateless_file_name', $has_backup, 0);
+                    $name = apply_filters( 'wp_stateless_file_name', $has_backup);
                     $return = (bool) apply_filters( 'sm:sync::queue_is_exists', $name);
                 }
                 return $return;

@@ -611,7 +611,9 @@ namespace wpCloud\StatelessMedia {
 
       /**
        * @param $current_path
-       * @param $use_root
+       * @param $use_root boolean: whether to use the root dir or not.
+       *        0 will be passed from various compatibilities so that the root dir is not used.
+       *        false will passed from some compatibilities to use the value as local path.
        * @param $attachment_id
        * @param $size
        * @param $use_wildcards

@@ -112,12 +112,16 @@ namespace wpCloud\StatelessMedia {
                     $client = ud_get_stateless_media()->get_client();
                     $metadata = wp_get_attachment_metadata( $attachment_id );
                     if(!empty($metadata['gs_name'])){
+                        $image_sizes = Utility::get_path_and_url($metadata, $attachment_id);
+                        foreach ($image_sizes as $size => $img) {
+                            $client->get_media( apply_filters( 'wp_stateless_file_name', $img['gs_name']), true, $img['path'] );
+                        }
+
                         $gs_name = dirname($metadata['gs_name']) . '/' . basename($file_path);
-                        $client->get_media( apply_filters( 'wp_stateless_file_name', $gs_name, 0), true, $file_path );
-                        
                         // We need to remove backup from GCS if it's a restore action
+                        // @todo revise this code
                         if($this->hook_from_restore_image()){
-                            $client->remove_media( apply_filters( 'wp_stateless_file_name', $gs_name, 0) );
+                            $client->remove_media( apply_filters( 'wp_stateless_file_name', $gs_name) );
                         }
                     }
                 }
@@ -142,7 +146,7 @@ namespace wpCloud\StatelessMedia {
                         $gs_name = $gs_dir . '/' . basename($data['file']);
                         // Path of backup image
                         $backup_path = $base_dir . '/' . basename($data['file']);
-                        do_action( 'sm:sync::deleteFile', apply_filters( 'wp_stateless_file_name', $gs_name, 0), $backup_path);
+                        do_action( 'sm:sync::deleteFile', apply_filters( 'wp_stateless_file_name', $gs_name), $backup_path);
                         delete_transient('sm-wp-smush-backup-exists-' . $attachment_id);
                     }
                 }
@@ -166,7 +170,7 @@ namespace wpCloud\StatelessMedia {
                     $metadata = wp_get_attachment_metadata( $attachment_id );
                     if(!empty($metadata['gs_name'])){
                         $gs_name = dirname($metadata['gs_name']) . '/' . basename($backup_path);
-                        if ( ud_get_stateless_media()->get_client()->media_exists( apply_filters( 'wp_stateless_file_name', $gs_name, 0) ) ) {
+                        if ( ud_get_stateless_media()->get_client()->media_exists( apply_filters( 'wp_stateless_file_name', $gs_name) ) ) {
                             set_transient( 'sm-wp-smush-backup-exists-' . $attachment_id, true, HOUR_IN_SECONDS );
                             return true;
                         }
@@ -199,7 +203,7 @@ namespace wpCloud\StatelessMedia {
                         // Path of backup image
                         $backup_path = $base_dir . '/' . basename($data['file']);
                         // Sync backup image with GCS
-                        do_action( 'sm:sync::syncFile', apply_filters( 'wp_stateless_file_name', $gs_name, 0), $backup_path);
+                        do_action( 'sm:sync::syncFile', apply_filters( 'wp_stateless_file_name', $gs_name), $backup_path);
                         delete_transient('sm-wp-smush-backup-exists-' . $attachment_id);
                     }
                 }

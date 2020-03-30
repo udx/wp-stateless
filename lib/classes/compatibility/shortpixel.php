@@ -125,7 +125,7 @@ namespace wpCloud\StatelessMedia {
                         $gs_name = str_replace(trailingslashit($wp_uploads_dir['basedir']), '', $path);
                         $gs_name = str_replace(trailingslashit($wp_uploads_dir['baseurl']), '', $gs_name);
                         $gs_name = str_replace(trailingslashit(ud_get_stateless_media()->get_gs_host()), '', $gs_name);
-                        $gs_name = apply_filters( 'wp_stateless_file_name', $gs_name, 0);
+                        $gs_name = apply_filters( 'wp_stateless_file_name', $gs_name);
                         if ( $media = ud_get_stateless_media()->get_client()->media_exists( $gs_name ) ) {
                             $return = true;
                         }
@@ -149,14 +149,14 @@ namespace wpCloud\StatelessMedia {
 
                 foreach ($paths as $key => $path) {
                     // Removing backup
-                    $name = apply_filters( 'wp_stateless_file_name',  SHORTPIXEL_BACKUP . '/' . $fullSubDir . basename($path), 0);
+                    $name = apply_filters( 'wp_stateless_file_name',  SHORTPIXEL_BACKUP . '/' . $fullSubDir . basename($path));
                     do_action( 'sm:sync::deleteFile', $name);
 
                     // Removing WebP
                     $backup_images = \WPShortPixelSettings::getOpt('wp-short-create-webp');
                     if($backup_images){
                         $name = str_replace($sp__uploads['basedir'], '', $path);
-                        $name = apply_filters( 'wp_stateless_file_name',  $name . '.webp', 0);
+                        $name = apply_filters( 'wp_stateless_file_name',  $name . '.webp');
                         do_action( 'sm:sync::deleteFile', $name);
                     }
                 }
@@ -260,12 +260,12 @@ namespace wpCloud\StatelessMedia {
                     }
                     
                     $absolutePath = trailingslashit($backup_path) . basename($metadata[ 'file' ]);
-                    $name = apply_filters( 'wp_stateless_file_name',  SHORTPIXEL_BACKUP . '/' . $fullSubDir . basename($metadata[ 'file' ]), 0);
+                    $name = apply_filters( 'wp_stateless_file_name',  SHORTPIXEL_BACKUP . '/' . $fullSubDir . basename($metadata[ 'file' ]));
                     do_action( 'sm:sync::syncFile', $name, $absolutePath, $force, $args);
 
                     foreach( (array) $metadata[ 'sizes' ] as $image_size => $data ) {
                         $absolutePath = trailingslashit($backup_path) . $data[ 'file' ];
-                        $name = apply_filters( 'wp_stateless_file_name',  SHORTPIXEL_BACKUP . '/' . $fullSubDir . $data[ 'file' ], 0);
+                        $name = apply_filters( 'wp_stateless_file_name',  SHORTPIXEL_BACKUP . '/' . $fullSubDir . $data[ 'file' ]);
                         
                         do_action( 'sm:sync::syncFile', $name, $absolutePath, $force, $args);
                     }
@@ -356,7 +356,7 @@ namespace wpCloud\StatelessMedia {
                     );
 
                     if(file_exists($fullsizepath)){
-                        $file = apply_filters( 'wp_stateless_file_name', $file, 0);
+                        $file = apply_filters( 'wp_stateless_file_name', $file);
 
                         /* Add default image */
                         $media = $client->add_media( $_mediaOptions = array_filter( array(
@@ -379,7 +379,7 @@ namespace wpCloud\StatelessMedia {
                     if( !empty( $metadata[ 'sizes' ] ) && is_array( $metadata[ 'sizes' ] ) ) {
 
                         $path = wp_normalize_path( dirname( get_attached_file( $attachment_id ) ) );
-                        $mediaPath = apply_filters( 'wp_stateless_file_name', trim( dirname( $metadata[ 'file' ] ), '\/\\' ), 0 );
+                        $mediaPath = apply_filters( 'wp_stateless_file_name', trim( dirname( $metadata[ 'file' ] ), '\/\\' ) );
 
                         foreach( (array) $metadata[ 'sizes' ] as $image_size => $data ) {
 

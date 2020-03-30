@@ -30,7 +30,7 @@ namespace wpCloud\StatelessMedia {
              */
             public function pre_optimization( $file, $type, $fullsize ) {
                 // wp_stateless_file_name filter will remove the basedir from the path and prepend with root dir.
-                $name = apply_filters( 'wp_stateless_file_name', $file, 0);
+                $name = apply_filters( 'wp_stateless_file_name', $file);
                 do_action( 'sm:sync::syncFile', $name, $file, true, array('stateless' => false, 'download'  => true));
             }
 
@@ -40,7 +40,7 @@ namespace wpCloud\StatelessMedia {
              */
             public function post_optimization($file, $type, $fullsize){
                 // wp_stateless_file_name filter will remove the basedir from the path and prepend with root dir.
-                $name = apply_filters( 'wp_stateless_file_name', $file, 0);
+                $name = apply_filters( 'wp_stateless_file_name', $file);
                 do_action( 'sm:sync::syncFile', $name, $file, true);
 
                 // if($fullsize && file_exists($file . '.bak'))
