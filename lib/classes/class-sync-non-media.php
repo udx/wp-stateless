@@ -207,7 +207,7 @@ namespace wpCloud\StatelessMedia {
                         return false;
                     }
                     // Removing file for GCS
-                    $this->client->remove_media($file);
+                    $this->client->remove_media($file, "", 0);
                     $this->queue_remove_file($file);
                     return true;
                 }
@@ -234,7 +234,7 @@ namespace wpCloud\StatelessMedia {
                 // Removing the files one by one.
                 foreach ($this->queue_get_all($dir) as $key => $file) {
                     if(strpos($file, $dir) !== false){
-                        $this->client->remove_media($file);
+                        $this->client->remove_media($file, "", 0);
                         $this->queue_remove_file($file);
                     }
                 }
