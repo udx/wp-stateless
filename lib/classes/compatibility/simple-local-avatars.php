@@ -64,7 +64,7 @@ namespace wpCloud\StatelessMedia {
         if ( !empty( $user_meta[0] ) && is_array( $user_meta[0] ) ) {
           foreach ( $user_meta[0] as $key => &$value ) {
             if ( is_numeric( $key ) ) {
-              $value = trailingslashit( $bucketLink ) . apply_filters( 'wp_stateless_file_name', str_replace( $upload['baseurl'], '', $value ) );
+              $value = trailingslashit( $bucketLink ) . apply_filters( 'wp_stateless_file_name', str_replace( $upload['baseurl'], '', $value ), 0 );
             }
           }
         }

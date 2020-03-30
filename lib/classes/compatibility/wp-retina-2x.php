@@ -71,7 +71,7 @@ namespace wpCloud\StatelessMedia {
              * @return void
              */
             public function retina_file_added($attachment_id, $retina_file, $name){
-                $gs_name = apply_filters('wp_stateless_file_name', $retina_file);
+                $gs_name = apply_filters('wp_stateless_file_name', $retina_file, 0);
                 do_action('sm:sync::syncFile', $gs_name, $retina_file, true);
             }
 
@@ -122,7 +122,7 @@ namespace wpCloud\StatelessMedia {
 
                     $pathinfo       = pathinfo( $img['path'] ) ;
                     $retina_file    = trailingslashit( $pathinfo['dirname'] ) . $pathinfo['filename'] . '@2x.' . $pathinfo['extension'];
-                    $gs_name        = apply_filters( 'wp_stateless_file_name', $retina_file );
+                    $gs_name        = apply_filters( 'wp_stateless_file_name', $retina_file, 0);
                 
                     // @todo Sometime relevant file don't exist on GCS. Try to skip those when retina don't exist.
                     do_action( 'sm:sync::syncFile', $gs_name, $retina_file);

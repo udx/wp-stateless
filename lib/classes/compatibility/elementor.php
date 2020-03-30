@@ -43,7 +43,7 @@ namespace wpCloud\StatelessMedia {
                         $name = str_replace($wp_uploads_dir['baseurl'] . '/', '', $url);
                         if($name != $url){
                             $absolutePath = $wp_uploads_dir['basedir'] . '/' . $name;
-                            $name = apply_filters( 'wp_stateless_file_name', $name);
+                            $name = apply_filters( 'wp_stateless_file_name', $name, 0);
                             do_action('sm:sync::syncFile', $name, $absolutePath);
                             $url = ud_get_stateless_media()->get_gs_host() . '/' . $name;
                         }
@@ -79,7 +79,7 @@ namespace wpCloud\StatelessMedia {
 
                     //      elementor/               css/                           'post-' . $post_id . '.css' 
                     $name = $post_css::UPLOADS_DIR . $post_css::DEFAULT_FILES_DIR . $post_css->get_file_name();
-                    $name = apply_filters( 'wp_stateless_file_name', $name);
+                    $name = apply_filters( 'wp_stateless_file_name', $name, 0);
                     do_action('sm:sync::deleteFile', $name);
 
                     // $meta = $post_css->update();
@@ -105,7 +105,7 @@ namespace wpCloud\StatelessMedia {
                     $post_css = new \Elementor\Core\Files\CSS\Global_CSS( 'global.css' );
                     //      elementor/               css/                           'global.css' 
                     $name = $post_css::UPLOADS_DIR . $post_css::DEFAULT_FILES_DIR . $post_css->get_file_name();
-                    $name = apply_filters( 'wp_stateless_file_name', $name);
+                    $name = apply_filters( 'wp_stateless_file_name', $name, 0);
                     do_action('sm:sync::deleteFile', $name);
                 }
                 catch(Exception $e){

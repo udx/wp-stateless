@@ -82,7 +82,7 @@ namespace wpCloud\StatelessMedia {
              */
             public function sync_image($row_img, $local_file){
                 $rm_ori_bkup = \LiteSpeed_Cache::config( \LiteSpeed_Cache_Config::OPT_MEDIA_RM_ORI_BKUP ) ;
-                $gs_name = apply_filters( 'wp_stateless_file_name', $row_img->src );
+                $gs_name = apply_filters( 'wp_stateless_file_name', $row_img->src, 0 );
                 $cloud_meta = get_post_meta( $row_img->post_id, 'sm_cloud', true );
         
                 if ( ! $rm_ori_bkup ){
@@ -104,7 +104,7 @@ namespace wpCloud\StatelessMedia {
             public function sync_webp($row_img, $local_file){
                 $optm_webp = \LiteSpeed_Cache::config( \LiteSpeed_Cache_Config::OPT_MEDIA_OPTM_WEBP ) ;
                 if($optm_webp){
-                    $gs_name = apply_filters( 'wp_stateless_file_name', $row_img->src . '.webp' );
+                    $gs_name = apply_filters( 'wp_stateless_file_name', $row_img->src . '.webp', 0 );
 
                     $cloud_meta = get_post_meta( $row_img->post_id, 'sm_cloud', true );
                     $cloud_meta['fileMd5'][$gs_name] = md5_file($local_file);
@@ -143,7 +143,7 @@ namespace wpCloud\StatelessMedia {
                     $cloud_meta = get_post_meta( $post_id, 'sm_cloud', true );
                     
                     if(!empty($metadata['gs_link'])){
-                        $short_file_path = apply_filters( 'wp_stateless_file_name', $short_file_path );
+                        $short_file_path = apply_filters( 'wp_stateless_file_name', $short_file_path, 0);
                         $url = ud_get_stateless_media()->get_gs_host() . '/' . $short_file_path;
                         $md5 = !empty($cloud_meta['fileMd5'][$short_file_path]) ? $cloud_meta['fileMd5'][$short_file_path] : null;
     
@@ -181,7 +181,7 @@ namespace wpCloud\StatelessMedia {
              * 
              */
             public function litespeed_media_del($short_file_path, $post_id){
-                $short_file_path = apply_filters( 'wp_stateless_file_name', $short_file_path );
+                $short_file_path = apply_filters( 'wp_stateless_file_name', $short_file_path, 0);
                 do_action( 'sm:sync::deleteFile', $name);
                 $this->update_hash($post_id, $short_file_path_new, false, true);
 
@@ -194,8 +194,8 @@ namespace wpCloud\StatelessMedia {
              * 
              */
             public function litespeed_media_rename($short_file_path, $short_file_path_new, $post_id){
-                $short_file_path     = apply_filters( 'wp_stateless_file_name', $short_file_path );
-                $short_file_path_new = apply_filters( 'wp_stateless_file_name', $short_file_path_new );
+                $short_file_path     = apply_filters( 'wp_stateless_file_name', $short_file_path, 0);
+                $short_file_path_new = apply_filters( 'wp_stateless_file_name', $short_file_path_new, 0);
 
                 // copy file to the new location and delete the old one.
                 do_action( 'sm:sync::moveFile', $short_file_path, $short_file_path_new);
@@ -322,12 +322,12 @@ namespace wpCloud\StatelessMedia {
                             $bk_file            = substr( $file_path, 0, -strlen( $extension ) ) . 'bk.' . $extension ;
                             $bk_file_optm       = substr( $file_path, 0, -strlen( $extension ) ) . 'bk.optm.' . $extension;
                             if(file_exists($bk_file)){
-                                $gs_name    = apply_filters( 'wp_stateless_file_name', $bk_file );
+                                $gs_name    = apply_filters( 'wp_stateless_file_name', $bk_file, 0);
                                 $cloud_meta['fileMd5'][$gs_name] = md5_file($bk_file);
                                 do_action( 'sm:sync::syncFile', $gs_name, $bk_file );
                             }
                             elseif(file_exists($bk_file_optm)){
-                                $gs_name    = apply_filters( 'wp_stateless_file_name', $bk_file_optm );
+                                $gs_name    = apply_filters( 'wp_stateless_file_name', $bk_file_optm, 0);
                                 $cloud_meta['fileMd5'][$gs_name] = md5_file($bk_file_optm);
                                 do_action( 'sm:sync::syncFile', $gs_name, $bk_file_optm );
                             }
@@ -337,12 +337,12 @@ namespace wpCloud\StatelessMedia {
                             $gs_name_webp       = $file_path . '.webp';
                             $gs_name_webp_optm  = $file_path . '.optm.webp';
                             if(file_exists($gs_name_webp)){
-                                $gs_name    = apply_filters( 'wp_stateless_file_name', $gs_name_webp );
+                                $gs_name    = apply_filters( 'wp_stateless_file_name', $gs_name_webp, 0);
                                 $cloud_meta['fileMd5'][$gs_name] = md5_file($gs_name_webp);
                                 do_action( 'sm:sync::syncFile', $gs_name, $gs_name_webp );
                             }
                             elseif(file_exists($gs_name_webp_optm)){
-                                $gs_name    = apply_filters( 'wp_stateless_file_name', $gs_name_webp_optm );
+                                $gs_name    = apply_filters( 'wp_stateless_file_name', $gs_name_webp_optm, 0);
                                 $cloud_meta['fileMd5'][$gs_name] = md5_file($gs_name_webp_optm);
                                 do_action( 'sm:sync::syncFile', $gs_name, $gs_name_webp_optm );
                             }

@@ -49,10 +49,10 @@ namespace wpCloud\StatelessMedia {
 
 
                 $full_avatar_path = $wp_uploads_dir['basedir'] . '/' . apply_filters( 'wp_stateless_file_name', $full_avatar, false);
-                $full_avatar = apply_filters( 'wp_stateless_file_name', $full_avatar);
+                $full_avatar = apply_filters( 'wp_stateless_file_name', $full_avatar, 0);
 
                 $thumb_avatar_path = $wp_uploads_dir['basedir'] . '/' . apply_filters( 'wp_stateless_file_name', $thumb_avatar, false);
-                $thumb_avatar = apply_filters( 'wp_stateless_file_name', $thumb_avatar);
+                $thumb_avatar = apply_filters( 'wp_stateless_file_name', $thumb_avatar, 0);
 
                 do_action( 'sm:sync::syncFile', $full_avatar, $full_avatar_path, true, array('stateless' => false));
                 do_action( 'sm:sync::syncFile', $thumb_avatar, $thumb_avatar_path, true, array('stateless' => false));
@@ -86,7 +86,7 @@ namespace wpCloud\StatelessMedia {
              */
             public function bp_core_fetch_avatar_url($url){
                 $wp_uploads_dir = wp_get_upload_dir();
-                $name = apply_filters( 'wp_stateless_file_name', $url);
+                $name = apply_filters( 'wp_stateless_file_name', $url, 0);
                 $full_avatar_path = $wp_uploads_dir['basedir'] . '/' . $name;
 
                 
@@ -98,7 +98,7 @@ namespace wpCloud\StatelessMedia {
 
                 if(strpos($name, plugins_url()) === 0){
                     $name = str_replace(plugins_url() . '/', '', $name);
-                    $name = apply_filters( 'wp_stateless_file_name', $name);
+                    $name = apply_filters( 'wp_stateless_file_name', $name, 0);
                     $full_avatar_path = WP_PLUGIN_DIR . '/' . $name;
                 }
                 
@@ -130,8 +130,8 @@ namespace wpCloud\StatelessMedia {
                     'type'    => 'thumb',
                 ) );
 
-                do_action( 'sm:sync::deleteFile', apply_filters( 'wp_stateless_file_name', $full_avatar));
-                do_action( 'sm:sync::deleteFile', apply_filters( 'wp_stateless_file_name', $thumb_avatar));
+                do_action( 'sm:sync::deleteFile', apply_filters( 'wp_stateless_file_name', $full_avatar, 0));
+                do_action( 'sm:sync::deleteFile', apply_filters( 'wp_stateless_file_name', $thumb_avatar, 0));
 
                 if(ud_get_stateless_media()->get( 'sm.mode' ) === 'stateless'){
                     $return = false;
@@ -163,7 +163,7 @@ namespace wpCloud\StatelessMedia {
                         $r['recursive'] = true;
 
                         $url = bp_attachments_get_attachment('url', $r);
-                        $name = apply_filters( 'wp_stateless_file_name', $url);
+                        $name = apply_filters( 'wp_stateless_file_name', $url, 0);
 
                         $root_dir = ud_get_stateless_media()->get( 'sm.root_dir' );
                         $root_dir = trim( $root_dir, '/ ' ); // Remove any forward slash and empty space.
