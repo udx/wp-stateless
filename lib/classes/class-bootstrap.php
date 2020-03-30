@@ -662,6 +662,13 @@ namespace wpCloud\StatelessMedia {
           return $root_dir . '/' . trim( $current_path, '/ ' );
         }
 
+        if($use_root === 0){
+          if(is_multisite()){
+            $blog_id = get_current_blog_id();
+            if(strpos($current_path, "sites/$blog_id/") === false)
+            $current_path = "sites/$blog_id/$current_path";	
+          }
+        }
         return $current_path;
       }
 
