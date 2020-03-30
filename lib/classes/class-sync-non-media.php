@@ -107,6 +107,7 @@ namespace wpCloud\StatelessMedia {
                 if($local_file_exists && !$file_copied_from_gcs && !$args['download']){
 
                     $media = $this->client->add_media( array(
+                        'use_root' => 0,
                         'name' => $name,
                         'force' => ($forced == 2),
                         'absolutePath' => $absolutePath,

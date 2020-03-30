@@ -174,6 +174,7 @@ namespace wpCloud\StatelessMedia {
           @set_time_limit( -1 );
 
           $args = wp_parse_args( $args, array(
+            'use_root' => true,
             'force' => false,
             'name' => false,
             'absolutePath' => false,
@@ -199,7 +200,7 @@ namespace wpCloud\StatelessMedia {
           $object_id = isset( $args['metadata']['object-id'] ) ? $args['metadata']['object-id'] : (isset( $args['metadata']['child-of'] ) ? $args['metadata']['child-of'] : "");
           $object_size = isset( $args['metadata']['size'] ) ? $args['metadata']['size'] : "";
 
-          $name = apply_filters( 'wp_stateless_file_name', $name, true, $object_id, $object_size, $use_wildcards );
+          $name = apply_filters( 'wp_stateless_file_name', $name, $args['use_root'], $object_id, $object_size, $use_wildcards );
 
           // If media exists we just return it
           if ( !$args['force'] && $media = $this->media_exists( $name ) ) {
