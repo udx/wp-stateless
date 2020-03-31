@@ -1635,13 +1635,13 @@ namespace wpCloud\StatelessMedia {
            */
           if ( is_multisite() ) {
             $blog_id = get_current_blog_id();
-            if( strpos($root_dir_sm, "/sites/%site_id%/%date_year%/%date_month%/") !== false || strpos($root_dir_sm, "/sites/%site_id%/") !== false ) {
+            $root_dir_sm = trim($root_dir_sm, '/ ');
+            if( strpos($root_dir_sm, "sites/%site_id%/%date_year%/%date_month%") === 0 || strpos($root_dir_sm, "sites/%site_id%") === 0 ) {
               $upload_data[ 'basedir' ] = $upload_data[ 'basedir' ] . "/sites/$blog_id";
               $upload_data[ 'baseurl' ] = $upload_data[ 'baseurl' ] . "/sites/$blog_id";
-              $root_dir    = apply_filters("wp_stateless_handle_root_dir", str_replace('/sites/%site_id%/', '', $root_dir_sm));
+              $root_dir    = apply_filters("wp_stateless_handle_root_dir", str_replace('sites/%site_id%/', '', $root_dir_sm));
             }
           }
-
           $upload_data[ 'subdir' ] = $upload_data[ 'subdir' ] . '/' . $root_dir;
         }
         return $upload_data;
