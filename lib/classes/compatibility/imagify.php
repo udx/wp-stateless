@@ -97,7 +97,7 @@ namespace wpCloud\StatelessMedia {
                 }
 
                 $upload_basedir = wp_upload_dir();
-                $upload_basedir = trailingslashit( $upload_basedir[ 'path' ] );
+                $upload_basedir = trailingslashit( $upload_basedir[ 'basedir' ] );
                 $meta_data = wp_get_attachment_metadata( $attachment_id );
                 $file = $upload_basedir . $meta_data['file'];
                 

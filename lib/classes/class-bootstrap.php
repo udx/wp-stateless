@@ -716,23 +716,8 @@ namespace wpCloud\StatelessMedia {
           $url = trailingslashit( $siteurl ) . UPLOADS;
         }
 
-        /**
-         * checking is it multisite and sm_upload_dir has `/sites/%site_id%/%date_year%/%date_month%/`
-         * if so - it is standard multisite
-         *
-         */
-        if ( is_multisite() ) {
-          $blog_id = get_current_blog_id();
-          $root_dir = $this->get( 'sm.root_dir' );
-          if( strpos($root_dir, "/sites/%site_id%/%date_year%/%date_month%/") !== false ) {
-            $basedir = $dir."/sites/$blog_id";
-            $baseurl = $url."/sites/$blog_id";
-          }
-        } else{
-          $basedir = $dir;
-          $baseurl = $url;
-        }
-
+        $basedir = $dir;
+        $baseurl = $url;
 
         return array(
           'path'    => $dir,
@@ -1636,12 +1621,27 @@ namespace wpCloud\StatelessMedia {
        */
       public function upload_dir( $upload_data ) {
         $upload_data = $this->_wp_upload_dir();
-        $root_dir = $this->get( 'sm.root_dir' );
-        $root_dir = apply_filters("wp_stateless_handle_root_dir", $root_dir);
+        $root_dir_sm = $this->get( 'sm.root_dir' );
+        $root_dir    = apply_filters("wp_stateless_handle_root_dir", $root_dir_sm);
 
         if($root_dir && false === strpos($upload_data['path'], $root_dir)){
           $upload_data[ 'path' ]   = $upload_data[ 'path' ]   . '/' . $root_dir;
           $upload_data[ 'url' ]    = $upload_data[ 'url' ]    . '/' . $root_dir;
+
+          /**
+           * checking is it multisite and sm_upload_dir has `/sites/%site_id%/%date_year%/%date_month%/` or `/sites/%site_id%/`
+           * if so - it is standard multisite, which using structure sites/$site_id
+           * https://github.com/wpCloud/wp-stateless/issues/461
+           */
+          if ( is_multisite() ) {
+            $blog_id = get_current_blog_id();
+            if( strpos($root_dir_sm, "/sites/%site_id%/%date_year%/%date_month%/") !== false || strpos($root_dir_sm, "/sites/%site_id%/") !== false ) {
+              $upload_data[ 'basedir' ] = $upload_data[ 'basedir' ] . "/sites/$blog_id";
+              $upload_data[ 'baseurl' ] = $upload_data[ 'baseurl' ] . "/sites/$blog_id";
+              $root_dir    = apply_filters("wp_stateless_handle_root_dir", str_replace('/sites/%site_id%/', '', $root_dir_sm));
+            }
+          }
+
           $upload_data[ 'subdir' ] = $upload_data[ 'subdir' ] . '/' . $root_dir;
         }
         return $upload_data;
