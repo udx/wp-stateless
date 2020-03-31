@@ -50,7 +50,7 @@ namespace wpCloud\StatelessMedia {
                 $client = ud_get_stateless_media()->get_client();
                 $upload_dir = wp_upload_dir();
 
-                $file_path = str_replace(trailingslashit($upload_dir[ 'basedir' ]), '', $file);
+                $file_path = str_replace(trailingslashit($upload_dir[ 'path' ]), '', $file);
                 $file_info = @getimagesize($file);
                 $mimeType = wp_check_filetype($file);
 

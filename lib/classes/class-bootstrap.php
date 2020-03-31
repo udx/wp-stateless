@@ -626,13 +626,13 @@ namespace wpCloud\StatelessMedia {
         $cloud_meta = get_post_meta( $attachment_id, 'sm_cloud', true );
 
         if ( !$use_wildcards && $cloud_meta ) {
-            if ( ( !$size || $size === '__full' )  && !empty( $cloud_meta['name'] ) ) {
-              return $cloud_meta['name'];
-            } else {
-                if ( !empty( $cloud_meta['sizes'] ) && isset( $cloud_meta['sizes'][$size] ) ) {
-                    return !empty( $cloud_meta['sizes'][$size]['name'] ) ? $cloud_meta['sizes'][$size]['name'] : $current_path;
-                }
+          if ( ( !$size || $size === '__full' )  && !empty( $cloud_meta['name'] ) ) {
+            return $cloud_meta['name'];
+          } else {
+            if ( !empty( $cloud_meta['sizes'] ) && isset( $cloud_meta['sizes'][$size] ) ) {
+              return !empty( $cloud_meta['sizes'][$size]['name'] ) ? $cloud_meta['sizes'][$size]['name'] : $current_path;
             }
+          }
         }
 
         //non media files
@@ -641,7 +641,7 @@ namespace wpCloud\StatelessMedia {
           $table_name = $wpdb->prefix . 'sm_sync';
           $non_media = $wpdb->get_var($wpdb->prepare("SELECT file FROM {$table_name} WHERE file like '%%%s';", $current_path));
           if ( $non_media ) {
-              return $non_media;
+            return $non_media;
           }
         }
 
@@ -656,7 +656,7 @@ namespace wpCloud\StatelessMedia {
 
         if($root_dir){
           // removing the root dir if already exists in the begaining.
-          $current_path = preg_replace('/^' . preg_quote(trailingslashit( $root_dir ), '/') . '/', '', $current_path);	
+          $current_path = preg_replace('/^' . preg_quote(trailingslashit( $root_dir ), '/') . '/', '', $current_path);
         }
 
         // skip adding root dir if it's already added.
@@ -668,7 +668,7 @@ namespace wpCloud\StatelessMedia {
           if(is_multisite()){
             $blog_id = get_current_blog_id();
             if(strpos($current_path, "sites/$blog_id/") === false)
-            $current_path = "sites/$blog_id/$current_path";	
+              $current_path = "sites/$blog_id/$current_path";
           }
         }
         return $current_path;
@@ -679,7 +679,7 @@ namespace wpCloud\StatelessMedia {
        * So that we can append our root_dir to the root upload dir.
        * This make sure that upload_dir doesn't contain "site/1".
        * https://developer.wordpress.org/reference/functions/_wp_upload_dir/
-       * 
+       *
        * @todo Check compatibility files.
        *
        * @param [type] $time
@@ -688,44 +688,59 @@ namespace wpCloud\StatelessMedia {
       function _wp_upload_dir( $time = null ) {
         $siteurl     = get_option( 'siteurl' );
         $upload_path = trim( get_option( 'upload_path' ) );
-     
+
         if ( empty( $upload_path ) || 'wp-content/uploads' == $upload_path ) {
-            $dir = WP_CONTENT_DIR . '/uploads';
+          $dir = WP_CONTENT_DIR . '/uploads';
         } elseif ( 0 !== strpos( $upload_path, ABSPATH ) ) {
-            // $dir is absolute, $upload_path is (maybe) relative to ABSPATH
-            $dir = path_join( ABSPATH, $upload_path );
+          // $dir is absolute, $upload_path is (maybe) relative to ABSPATH
+          $dir = path_join( ABSPATH, $upload_path );
         } else {
-            $dir = $upload_path;
+          $dir = $upload_path;
         }
 
         $url = get_option( 'upload_url_path' );
         if ( ! $url ) {
-            if ( empty( $upload_path ) || ( 'wp-content/uploads' == $upload_path ) || ( $upload_path == $dir ) ) {
-                $url = WP_CONTENT_URL . '/uploads';
-            } else {
-                $url = trailingslashit( $siteurl ) . $upload_path;
-            }
+          if ( empty( $upload_path ) || ( 'wp-content/uploads' == $upload_path ) || ( $upload_path == $dir ) ) {
+            $url = WP_CONTENT_URL . '/uploads';
+          } else {
+            $url = trailingslashit( $siteurl ) . $upload_path;
+          }
         }
-     
+
         /*
          * Honor the value of UPLOADS. This happens as long as ms-files rewriting is disabled.
          * We also sometimes obey UPLOADS when rewriting is enabled -- see the next block.
          */
         if ( defined( 'UPLOADS' ) && ! ( is_multisite() && get_site_option( 'ms_files_rewriting' ) ) ) {
-            $dir = ABSPATH . UPLOADS;
-            $url = trailingslashit( $siteurl ) . UPLOADS;
+          $dir = ABSPATH . UPLOADS;
+          $url = trailingslashit( $siteurl ) . UPLOADS;
         }
-     
-        $basedir = $dir;
-        $baseurl = $url;
-     
+
+        /**
+         * checking is it multisite and sm_upload_dir has `/sites/%site_id%/%date_year%/%date_month%/`
+         * if so - it is standard multisite
+         *
+         */
+        if ( is_multisite() ) {
+          $blog_id = get_current_blog_id();
+          $root_dir = $this->get( 'sm.root_dir' );
+          if( strpos($root_dir, "/sites/%site_id%/%date_year%/%date_month%/") !== false ) {
+            $basedir = $dir."/sites/$blog_id";
+            $baseurl = $url."/sites/$blog_id";
+          }
+        } else{
+          $basedir = $dir;
+          $baseurl = $url;
+        }
+
+
         return array(
-            'path'    => $dir,
-            'url'     => $url,
-            'subdir'  => '',
-            'basedir' => $basedir,
-            'baseurl' => $baseurl,
-            'error'   => false,
+          'path'    => $dir,
+          'url'     => $url,
+          'subdir'  => '',
+          'basedir' => $basedir,
+          'baseurl' => $baseurl,
+          'error'   => false,
         );
       }
 
@@ -1257,7 +1272,7 @@ namespace wpCloud\StatelessMedia {
       }
 
       /**
-       * 
+       *
        */
       public function get_attached_file($file, $attachment_id){
         /* Determine if the media file has GS data at all. */
