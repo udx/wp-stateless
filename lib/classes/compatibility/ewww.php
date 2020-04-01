@@ -31,7 +31,7 @@ namespace wpCloud\StatelessMedia {
       public function pre_optimization( $file, $type, $fullsize ) {
         // wp_stateless_file_name filter will remove the basedir from the path and prepend with root dir.
         $name = apply_filters( 'wp_stateless_file_name', $file);
-        do_action( 'sm:sync::syncFile', $name, $file, true, array('stateless' => false, 'download'  => true), true);
+        do_action( 'sm:sync::syncFile', $name, $file, true, array('stateless' => false, 'download'  => true, 'use_root' => true ));
       }
 
       /**
@@ -41,7 +41,7 @@ namespace wpCloud\StatelessMedia {
       public function post_optimization($file, $type, $fullsize){
         // wp_stateless_file_name filter will remove the basedir from the path and prepend with root dir.
         $name = apply_filters( 'wp_stateless_file_name', $file);
-        do_action( 'sm:sync::syncFile', $name, $file, true, array(), true);
+        do_action( 'sm:sync::syncFile', $name, $file, true, array( 'use_root' => true ));
 
 
         // if($fullsize && file_exists($file . '.bak'))
@@ -49,7 +49,7 @@ namespace wpCloud\StatelessMedia {
 
         if(file_exists($file . '.webp')){
           add_filter( 'upload_mimes', array($this, 'add_webp_mime'), 10, 2 );
-          do_action( 'sm:sync::syncFile', $name . '.webp', $file . '.webp', true, array(), true );
+          do_action( 'sm:sync::syncFile', $name . '.webp', $file . '.webp', true, array( 'use_root' => true ) );
           remove_filter( 'upload_mimes', array($this, 'add_webp_mime'), 10 );
         }
       }
