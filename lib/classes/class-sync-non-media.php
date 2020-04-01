@@ -29,7 +29,7 @@ namespace wpCloud\StatelessMedia {
                 add_action( 'sm:sync::register_dir', array($this, 'register_dir') );
                 add_action( 'sm:sync::addFile', array($this, 'add_file') );
                 // Sync a file.
-                add_action( 'sm:sync::syncFile', array($this, 'sync_file'), 10, 4 );
+                add_action( 'sm:sync::syncFile', array($this, 'sync_file'), 10, 5 );
                 add_action( 'sm:sync::copyFile', array($this, 'copy_file'), 10, 2 );
                 add_action( 'sm:sync::moveFile', array($this, 'move_file'), 10, 2 );
                 add_action( 'sm:sync::deleteFile', array($this, 'delete_file') );
@@ -65,12 +65,13 @@ namespace wpCloud\StatelessMedia {
              *  $forced: Type: bool/int; Whether to force to move the file to GCS even it's already exists.
              *           true: Check whether it's already synced or not in database.
              *           2 (int): Force to overwrite on GCS
+             * $use_root: Using on add_media function
              * 
              * @return:
              *  $media: Media object returned from client->add_media() method.
              * @throws: Exception File not found
              */
-            public function sync_file($name, $absolutePath, $forced = false, $args = array()){
+            public function sync_file($name, $absolutePath, $forced = false, $args = array(), $use_root = 0 ){
                 $args = wp_parse_args($args, array(
                     'stateless' => true, // whether to delete local file in stateless mode.
                     'download'  => false, // whether to delete local file in stateless mode.
@@ -107,7 +108,7 @@ namespace wpCloud\StatelessMedia {
                 if($local_file_exists && !$file_copied_from_gcs && !$args['download']){
 
                     $media = $this->client->add_media( array(
-                        'use_root' => 0,
+                        'use_root' => $use_root,
                         'name' => $name,
                         'force' => ($forced == 2),
                         'absolutePath' => $absolutePath,
