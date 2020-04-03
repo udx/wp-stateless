@@ -153,7 +153,7 @@ namespace wpCloud\StatelessMedia {
           $value = get_option($_option, $default[0]);
           
           if ($option == 'body_rewrite_types' && empty($value) && !is_multisite()) {
-            $value = $default;
+            $value = $default[0];
           }
           
           if ($option == 'hashify_file_name' && $this->get("sm.mode") == 'stateless') {
