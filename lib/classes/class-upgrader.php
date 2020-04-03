@@ -109,7 +109,7 @@ namespace wpCloud\StatelessMedia {
           }
         }
 
-        if ( $version && version_compare( $version, '2.4.0', '<' ) ){
+        if ( !is_multisite() && $version && version_compare( $version, '2.4.0', '<' ) ){
           $sm_root_dir    = self::migrate_root_dir();
         }
 
