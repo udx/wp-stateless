@@ -190,7 +190,7 @@ namespace wpCloud\StatelessMedia {
             return new \WP_Error( 'sm_error', __( 'Unable to locate file on disk', ud_get_stateless_media()->domain ) );
           }
 
-          $use_wildcards = isset($_REQUEST['use_wildcards']) ? $_REQUEST['use_wildcards'] : false;
+          $use_wildcards = Utility::is_use_wildcards();
 
           /* Set default name if parameter was not passed. */
           if( empty( $name ) || $use_wildcards ) {
