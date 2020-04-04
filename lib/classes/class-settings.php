@@ -427,6 +427,7 @@ namespace wpCloud\StatelessMedia {
           }
 
           $this->bootstrap->flush_transients();
+          $this->refresh();
         }
       }
 
