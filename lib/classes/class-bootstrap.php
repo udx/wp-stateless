@@ -634,8 +634,6 @@ namespace wpCloud\StatelessMedia {
             }
           }
           return $current_path;
-        } elseif ( !$use_wildcards ) {
-          return $current_path;
         }
 
         //non media files
