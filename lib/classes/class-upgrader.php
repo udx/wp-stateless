@@ -187,13 +187,13 @@ namespace wpCloud\StatelessMedia {
         $sm_root_dir      = $network_root_dir ? $network_root_dir : get_option('sm_root_dir', '');
         $organize_media   = get_option('uploads_use_yearmonth_folders');
 
-        if( !empty( $organize_media ) && empty( $sm_root_dir ) ){
+        if( $organize_media == '1' && empty( $sm_root_dir ) ){
           $sm_root_dir  =  '/%date_year%/%date_month%/';
-        } elseif ( !empty( $sm_root_dir ) && !empty( $organize_media ) ) {
+        } elseif ( !empty( $sm_root_dir ) && $organize_media == '1' ) {
           $sm_root_dir  =  trim($sm_root_dir, ' /') . '/%date_year%/%date_month%/';
         } elseif ( !empty( $sm_root_dir ) ) {
           // $sm_root_dir  =  $sm_root_dir;
-        } elseif ( empty( $organize_media ) ) {
+        } elseif ( $organize_media != '1' ) {
           $sm_root_dir  =  '';
         }
 
