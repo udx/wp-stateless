@@ -633,7 +633,6 @@ namespace wpCloud\StatelessMedia {
               return !empty( $cloud_meta['sizes'][$size]['name'] ) ? $cloud_meta['sizes'][$size]['name'] : $current_path;
             }
           }
-          return $current_path;
         }
 
         //non media files
