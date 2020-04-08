@@ -171,7 +171,7 @@ namespace wpCloud\StatelessMedia {
           $sites = get_sites();
           foreach ( $sites as $site ) {
             switch_to_blog( $site->blog_id );
-            self::migrate_root_dir(true);
+            self::migrate_root_dir(true, true);
             restore_current_blog();
           }
         }
@@ -182,7 +182,7 @@ namespace wpCloud\StatelessMedia {
        * 
        * @param bool | int $multisite pass true to use multisite prefix and 2 to use site option instead of get_option.
        */
-      private static function migrate_root_dir($multisite = false){
+      private static function migrate_root_dir($multisite = false, $fresh_install = false){
         $network_root_dir = get_network_option(1, 'sm_root_dir');
         $sm_root_dir      = $network_root_dir ? $network_root_dir : get_option('sm_root_dir', '');
         $organize_media   = get_option('uploads_use_yearmonth_folders');
@@ -197,7 +197,7 @@ namespace wpCloud\StatelessMedia {
           $sm_root_dir  =  '';
         }
 
-        if($multisite){
+        if($multisite && $fresh_install){
           if ( empty( $sm_root_dir ) || $sm_root_dir[0] !== '/' ) {
             $sm_root_dir = "/" . $sm_root_dir;
           }
