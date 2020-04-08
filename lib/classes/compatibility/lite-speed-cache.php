@@ -87,7 +87,7 @@ namespace wpCloud\StatelessMedia {
         
                 if ( ! $rm_ori_bkup ){
                     $extension = pathinfo( $gs_name, PATHINFO_EXTENSION ) ;
-                    $bk_file = substr( $gs_name, -strlen( $extension ) ) . 'bk.' . $extension ;
+                    $bk_file = substr( $gs_name, 0, -strlen( $extension ) ) . 'bk.' . $extension ;
                     $cloud_meta['fileMd5'][$bk_file]   = $cloud_meta['fileMd5'][$gs_name];
                     do_action( 'sm:sync::copyFile', $gs_name, $bk_file);
                 }
@@ -256,7 +256,7 @@ namespace wpCloud\StatelessMedia {
                 if($file_hash = md5_file( $img['path'] )){
                     $gs_name    = !empty($media['name']) ? $media['name'] : $img['gs_name'];
                     $extension  = pathinfo( $gs_name, PATHINFO_EXTENSION ) ;
-                    $bk_file    = substr( $gs_name, -strlen( $extension ) ) . 'bk.' . $extension ;
+                    $bk_file    = substr( $gs_name, 0, -strlen( $extension ) ) . 'bk.' . $extension ;
     
                     // Storing file hash
                     $cloud_meta['fileMd5'][$gs_name]   = $file_hash;
@@ -319,8 +319,8 @@ namespace wpCloud\StatelessMedia {
 
                         if(!$rm_ori_bkup){
                             $extension          = pathinfo( $file_path, PATHINFO_EXTENSION ) ;
-                            $bk_file            = substr( $file_path, -strlen( $extension ) ) . 'bk.' . $extension ;
-                            $bk_file_optm       = substr( $file_path, -strlen( $extension ) ) . 'bk.optm.' . $extension;
+                            $bk_file            = substr( $file_path, 0, -strlen( $extension ) ) . 'bk.' . $extension ;
+                            $bk_file_optm       = substr( $file_path, 0, -strlen( $extension ) ) . 'bk.optm.' . $extension;
                             if(file_exists($bk_file)){
                                 $gs_name    = apply_filters( 'wp_stateless_file_name', $bk_file);
                                 $cloud_meta['fileMd5'][$gs_name] = md5_file($bk_file);

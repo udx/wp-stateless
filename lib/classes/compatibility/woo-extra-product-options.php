@@ -39,10 +39,8 @@ namespace wpCloud\StatelessMedia {
                 $type = $upload['type'];
 
                 $client = ud_get_stateless_media()->get_client();
-                $upload_dir = wp_upload_dir();
 
-                $file_path = str_replace(trailingslashit($upload_dir[ 'basedir' ]), '', $file);
-                $file_path = apply_filters('wp_stateless_file_name', $file_path, 0);
+                $file_path = apply_filters('wp_stateless_file_name', $file, 0);
                 $file_info = @getimagesize($file);
 
                 if ($file_info) {
@@ -55,14 +53,15 @@ namespace wpCloud\StatelessMedia {
                     );
                 }
 
-                $media = $client->add_media(apply_filters('sm:item:on_fly:before_add', array_filter(array(
+                $media = $client->add_media(apply_filters('sm:item:on_fly:before_add', array(
+                    'use_root' => false,
                     'name' => $file_path,
                     'absolutePath' => wp_normalize_path($file),
                     'cacheControl' => apply_filters('sm:item:cacheControl', 'public, max-age=36000, must-revalidate', $_metadata),
                     'contentDisposition' => null,
                     'mimeType' => $type,
                     'metadata' => $_metadata
-                ))));
+                )));
                 
                 $upload['url'] = ud_get_stateless_media()->get_gs_host() . '/' . $file_path;
                 return $upload;
