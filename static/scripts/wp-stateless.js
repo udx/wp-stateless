@@ -879,6 +879,9 @@ var wpStatelessApp = angular.module('wpStatelessApp', ['ngSanitize'])
     root_dir = root_dir.replace(/(\/+)/g, '/');
     root_dir = root_dir.replace(/^\//, '');
     root_dir = root_dir.replace(/\/$/, '');
+    if(root_dir){
+      root_dir = root_dir + "/";
+    }
     
     custom_domain = custom_domain.replace(/\/+$/, ''); // removing trailing slashes
     custom_domain = custom_domain.replace(/https?:\/\//, ''); // removing http:// or https:// from the beginning.
@@ -891,7 +894,7 @@ var wpStatelessApp = angular.module('wpStatelessApp', ['ngSanitize'])
       host += custom_domain;
     }
 
-    $scope.sm.preview_url = host + "/" + root_dir + "/" + hash + "your-image-name.jpeg";
+    $scope.sm.preview_url = host + "/" + root_dir + hash + "your-image-name.jpeg";
   }
 
   $scope.sm.generatePreviewUrl();
