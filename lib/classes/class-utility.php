@@ -477,8 +477,9 @@ namespace wpCloud\StatelessMedia {
        * Return URL and path for all image sizes of a attachment.
        */
       public static function generate_cloud_meta( $cloud_meta, $media, $image_size, $img, $bucketLink ){
-        $gs_name = !empty($media['name']) ? $media['name'] : $img['gs_name'];
+        $gs_name  = !empty($media['name']) ? $media['name'] : $img['gs_name'];
         $fileLink = trailingslashit($bucketLink) . $gs_name;
+        $version  = get_option( 'wp_sm_version', false );
 
         if($img['is_thumb']){
           // Cloud meta for thumbs.
@@ -497,6 +498,7 @@ namespace wpCloud\StatelessMedia {
           $cloud_meta['mediaLink']              = $media[ 'mediaLink' ];
           $cloud_meta['selfLink']               = $media[ 'selfLink' ];
           $cloud_meta['bucket']                 = ud_get_stateless_media()->get( 'sm.bucket' );
+          $cloud_meta['sm_version']             = $version;
           $cloud_meta['object']                 = $media;
         }
         return apply_filters( 'wp_stateless_generate_cloud_meta', $cloud_meta, $media, $image_size, $img, $bucketLink );
