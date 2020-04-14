@@ -338,31 +338,6 @@ class SM_CLI_Sync extends SM_CLI_Scaffold {
       }
     }
 
-    // If replace file with wildcards
-    if ( false !== $fullsizepath && '1' == $this->use_wildcards ) {
-      $image_meta = wp_get_attachment_metadata( $image->ID );
-      $image_file = get_attached_file( $image->ID );
-
-      if ( empty( $image_meta['original_image'] ) ) {
-        $fullsizepath_original = $image_file;
-      } else {
-        $fullsizepath_original = path_join( dirname( $image_file ), $image_meta['original_image'] );
-      }
-      $fullsizepath_wildcard = apply_filters( 'wp_stateless_file_name', basename($fullsizepath_original), true, "", "", $this->use_wildcards);
-
-      //copy original image
-      copy( $fullsizepath_original, $upload_dir[ 'basedir' ] . '/' . $fullsizepath_wildcard);
-      //copy scaled image
-      copy( $fullsizepath, $upload_dir[ 'basedir' ] . '/' . apply_filters( 'wp_stateless_file_name', basename($fullsizepath), true, "", "", $this->use_wildcards));
-
-      //removing old file
-      //ud_get_stateless_media()->get_client()->remove_media($fullsizepath, $id);
-      //unlink( $fullsizepath );
-
-      update_attached_file( $image->ID, apply_filters( 'wp_stateless_file_name', basename($fullsizepath), true, "", "", $this->use_wildcards) );
-      $fullsizepath = $upload_dir[ 'basedir' ] . '/' . $fullsizepath_wildcard;
-    }
-
     @set_time_limit( -1 );
 
     //
@@ -433,22 +408,7 @@ class SM_CLI_Sync extends SM_CLI_Scaffold {
       }
     }
 
-    // If replace file with wildcards
-    if ( false !== $fullsizepath && '1' == $this->use_wildcards ) {
-
-      $fullsizepath_wildcard = apply_filters( 'wp_stateless_file_name', basename($fullsizepath), true, "", "", $this->use_wildcards);
-
-      //copy file
-      copy( $fullsizepath, $upload_dir[ 'basedir' ] . '/' . $fullsizepath_wildcard);
-
-      update_attached_file( $file->ID, apply_filters( 'wp_stateless_file_name', basename($fullsizepath), true, "", "", $this->use_wildcards) );
-      $fullsizepath = $upload_dir[ 'basedir' ] . '/' . $fullsizepath_wildcard;
-
-      $local_file_exists = file_exists( $fullsizepath );
-    }
-
     if($local_file_exists){
-      $upload_dir = wp_upload_dir();
 
       if ( !ud_get_stateless_media()->get_client()->media_exists( str_replace( trailingslashit( $upload_dir[ 'basedir' ] ), '', $fullsizepath ) ) ) {
 

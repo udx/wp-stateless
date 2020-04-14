@@ -321,22 +321,24 @@ namespace wpCloud\StatelessMedia {
       }
 
       /**
-       *
-       *
+       * Replacing wildcards with real values
+       * @param $root_dir
+       * @return mixed|null|string|string[]
        */
       public function root_dir_wildcards( $root_dir ) {
 
         $wildcards = apply_filters('wp_stateless_root_dir_wildcard', $this->wildcards);
 
-        foreach ($wildcards as $wildcard => $replace) {
-          if(!empty($wildcard)){
-            $root_dir = str_replace($wildcard, $replace[0], $root_dir);
+        if ( is_array( $wildcards ) && !empty( $wildcards ) ) {
+          foreach ($wildcards as $wildcard => $replace) {
+            if (!empty($wildcard)) {
+              $root_dir = str_replace($wildcard, $replace[0], $root_dir);
+            }
           }
         }
 
         $root_dir = preg_replace('/(\/+)/', '/', $root_dir);
         $root_dir = trim( $root_dir, '/ ' ); // Remove any forward slash and empty space.
-
 
         return $root_dir;
       }

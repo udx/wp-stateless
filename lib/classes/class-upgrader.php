@@ -207,8 +207,6 @@ namespace wpCloud\StatelessMedia {
         }
 
         update_option( 'sm_root_dir', $sm_root_dir  );
-        //managed in WP-Stateless settings (via Bucket Folder control)
-        update_option( 'uploads_use_yearmonth_folders', '0'  );
 
         return $sm_root_dir;
       }

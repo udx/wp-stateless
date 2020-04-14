@@ -37,7 +37,6 @@ namespace wpCloud\StatelessMedia {
        */
       protected static $instance = null;
 
-
       /**
        * Constructor
        * Attention: MUST NOT BE CALLED DIRECTLY! USE get_instance() INSTEAD!
@@ -171,11 +170,6 @@ namespace wpCloud\StatelessMedia {
              * Add custom actions to media rows
              */
             add_filter( 'media_row_actions', array( $this, 'add_custom_row_actions' ), 10, 3 );
-
-            /**
-             * Allow bucket folder wildcard to organize file on server also.
-             */
-            add_filter( 'upload_dir', array( $this, 'upload_dir' ) );
 
             /**
              * Hashify file name if option is enabled
@@ -663,71 +657,8 @@ namespace wpCloud\StatelessMedia {
           return $root_dir . '/' . trim( $current_path, '/ ' );
         }
 
-        if($use_root === 0){
-          if(is_multisite()){
-            $blog_id = get_current_blog_id();
-            if(strpos($current_path, "sites/$blog_id/") === false)
-              $current_path = "sites/$blog_id/$current_path";
-          }
-        }
         return $current_path;
       }
-
-      /**
-       * Returns upload_dir as it was single site, even in multisite.
-       * So that we can append our root_dir to the root upload dir.
-       * This make sure that upload_dir doesn't contain "site/1".
-       * https://developer.wordpress.org/reference/functions/_wp_upload_dir/
-       *
-       * @todo Check compatibility files.
-       *
-       * @param [type] $time
-       * @return void
-       */
-      function _wp_upload_dir( $time = null ) {
-        $siteurl     = get_option( 'siteurl' );
-        $upload_path = trim( get_option( 'upload_path' ) );
-
-        if ( empty( $upload_path ) || 'wp-content/uploads' == $upload_path ) {
-          $dir = WP_CONTENT_DIR . '/uploads';
-        } elseif ( 0 !== strpos( $upload_path, ABSPATH ) ) {
-          // $dir is absolute, $upload_path is (maybe) relative to ABSPATH
-          $dir = path_join( ABSPATH, $upload_path );
-        } else {
-          $dir = $upload_path;
-        }
-
-        $url = get_option( 'upload_url_path' );
-        if ( ! $url ) {
-          if ( empty( $upload_path ) || ( 'wp-content/uploads' == $upload_path ) || ( $upload_path == $dir ) ) {
-            $url = WP_CONTENT_URL . '/uploads';
-          } else {
-            $url = trailingslashit( $siteurl ) . $upload_path;
-          }
-        }
-
-        /*
-         * Honor the value of UPLOADS. This happens as long as ms-files rewriting is disabled.
-         * We also sometimes obey UPLOADS when rewriting is enabled -- see the next block.
-         */
-        if ( defined( 'UPLOADS' ) && ! ( is_multisite() && get_site_option( 'ms_files_rewriting' ) ) ) {
-          $dir = ABSPATH . UPLOADS;
-          $url = trailingslashit( $siteurl ) . UPLOADS;
-        }
-
-        $basedir = $dir;
-        $baseurl = $url;
-
-        return array(
-          'path'    => $dir,
-          'url'     => $url,
-          'subdir'  => '',
-          'basedir' => $basedir,
-          'baseurl' => $baseurl,
-          'error'   => false,
-        );
-      }
-
 
       /**
        * @param $content
@@ -863,7 +794,6 @@ namespace wpCloud\StatelessMedia {
         return $meta;
       }
 
-
       /**
        * @param $links
        * @param $file
@@ -971,30 +901,6 @@ namespace wpCloud\StatelessMedia {
         wp_localize_script('wp-stateless', 'wp_stateless_compatibility', Module::get_modules());
         wp_register_style( 'jquery-ui-regenthumbs', ud_get_stateless_media()->path( 'static/scripts/jquery-ui/redmond/jquery-ui-1.7.2.custom.css', 'url' ), array(), '1.7.2' );
 
-
-        add_action( 'admin_footer', array($this, 'admin_footer'));
-
-      }
-
-      /**
-       * Get_l10n_data
-       *
-       * @param string $value
-       * @return mixed
-       */
-      public function admin_footer($value=''){
-        $current_screen = get_current_screen();
-        $message = sprintf(__("<p>This setting is managed by the <a href='%s'>WP-Stateless</a> Bucket Folder setting.</p>", ud_get_stateless_media()->domain), admin_url("upload.php?page=stateless-settings"));
-        if($current_screen->base == 'options-media'){
-          ?>
-            <script>
-                jQuery(document).ready(function(){
-                    jQuery('#uploads_use_yearmonth_folders').attr('disabled',true)
-                        .parent().after("<?php echo $message;?>");
-                });
-            </script>
-          <?php
-        }
       }
 
       /**
@@ -1256,7 +1162,7 @@ namespace wpCloud\StatelessMedia {
       }
 
       /**
-       *
+       * @todo check multisite
        */
       public function get_attached_file($file, $attachment_id){
         /* Determine if the media file has GS data at all. */
@@ -1503,7 +1409,7 @@ namespace wpCloud\StatelessMedia {
 
       /**
        * Filter for wp_get_attachment_url();
-       *
+       * @todo check multisite
        * @param string $url
        * @param string $post_id
        * @return mixed|null|string
@@ -1618,34 +1524,13 @@ namespace wpCloud\StatelessMedia {
        * @param $data
        * @return mixed
        */
-      public function upload_dir( $upload_data ) {
-        $upload_data = $this->_wp_upload_dir();
-        $root_dir_sm = $this->get( 'sm.root_dir' );
-        $root_dir    = apply_filters("wp_stateless_handle_root_dir", $root_dir_sm);
+      public function upload_dir( $data ) {
+        $data[ 'basedir' ] = $this->get_gs_host();
+        $data[ 'baseurl' ] = $this->get_gs_host();
+        $data[ 'url' ] = $data[ 'baseurl' ] . $data[ 'subdir' ];
 
-        if($root_dir && false === strpos($upload_data['path'], $root_dir)){
-          $upload_data[ 'path' ]   = $upload_data[ 'path' ]   . '/' . $root_dir;
-          $upload_data[ 'url' ]    = $upload_data[ 'url' ]    . '/' . $root_dir;
+        return $data;
 
-          /**
-           * checking is it multisite and sm_upload_dir has `/sites/%site_id%/%date_year%/%date_month%/` or `/sites/%site_id%/`
-           * if so - it is standard multisite, which using structure sites/$site_id
-           * https://github.com/wpCloud/wp-stateless/issues/461
-           */
-          if ( is_multisite() ) {
-            if ( ! is_main_site() ) {
-              $blog_id = get_current_blog_id();
-              $root_dir_sm = trim($root_dir_sm, '/ ');
-              if ( strpos($root_dir_sm, "sites/%site_id%/%date_year%/%date_month%") === 0 || strpos($root_dir_sm, "sites/%site_id%") === 0 ) {
-                $upload_data['basedir'] = $upload_data['basedir'] . "/sites/$blog_id";
-                $upload_data['baseurl'] = $upload_data['baseurl'] . "/sites/$blog_id";
-                $root_dir = apply_filters("wp_stateless_handle_root_dir", str_replace('sites/%site_id%/', '', $root_dir_sm));
-              }
-            }
-          }
-          $upload_data[ 'subdir' ] = $upload_data[ 'subdir' ] . '/' . $root_dir;
-        }
-        return $upload_data;
       }
 
       /**
