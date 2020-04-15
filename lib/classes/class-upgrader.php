@@ -22,6 +22,7 @@ namespace wpCloud\StatelessMedia {
 
         /* Maybe upgrade blog ( single site ) */
         self::upgrade();
+
         /* Maybe upgrade network options */
         if( ud_get_stateless_media()->is_network_detected(true) ) {
           self::upgrade_network();
@@ -74,7 +75,7 @@ namespace wpCloud\StatelessMedia {
           delete_option( 'sm.post_content_rewrite' );
 
         }
-        
+
         update_option('dismissed_notice_stateless_cache_busting', true);
         if ( !$version || version_compare( $version, '2.1.7', '<' ) ){
           $sm_mode = get_option('sm_mode', null);
@@ -91,11 +92,11 @@ namespace wpCloud\StatelessMedia {
             // Backing up the old data with autoload false.
             // @todo delete in future release.
             add_option('__sm_synced_files', $sm_synced_files, null, false);
-  
+
             $files = array();
             $place_holders = array();
             $query = "INSERT INTO $table_name (file, status) VALUES ";
-  
+
             $sm_synced_files = array_unique($sm_synced_files);
             foreach ($sm_synced_files as $key => $file) {
               array_push($files, $file, 'synced');
@@ -110,7 +111,7 @@ namespace wpCloud\StatelessMedia {
         }
 
         if ( !is_multisite() && $version && version_compare( $version, '2.4.0', '<' ) ){
-          $sm_root_dir    = self::migrate_root_dir();
+          self::migrate_root_dir();
         }
 
         update_option( 'wp_sm_version', ud_get_stateless_media()->args[ 'version' ]  );
@@ -145,18 +146,19 @@ namespace wpCloud\StatelessMedia {
         /**
          * Upgrade to v.2.4.0 requirements
          */
-        if ( $version && version_compare( $version, '2.4.0', '<' ) ){
-
-          if ( is_multisite() ) {
-            $sites = get_sites();
-            foreach ( $sites as $site ) {
-              switch_to_blog( $site->blog_id );
-              self::migrate_root_dir(true);
-              restore_current_blog();
-            }
-
-            update_network_option( 1, 'sm_root_dir', '' );
+        if ( is_multisite() && $version && version_compare( $version, '2.4.0', '<' ) ){
+          $sites = get_sites();
+          foreach ( $sites as $site ) {
+            switch_to_blog( $site->blog_id );
+            self::migrate_root_dir(true);
+            restore_current_blog();
           }
+
+          //removing network option, because sites could uses different setting for Orginize media
+          update_network_option( 1, 'sm_root_dir', '' );
+
+          //forcing `Cache-Busting` for multisite to prevent replacing media with same filenames
+          update_network_option( 1, 'sm_hashify_file_name', 'true' );
         }
 
         update_site_option( 'wp_sm_version', ud_get_stateless_media()->args[ 'version' ]  );
@@ -175,12 +177,13 @@ namespace wpCloud\StatelessMedia {
             restore_current_blog();
           }
         }
-
       }
 
       /**
-       * 
-       * @param bool | int $multisite pass true to use multisite prefix and 2 to use site option instead of get_option.
+       *
+       * @param bool $multisite pass true to use multisite prefix
+       * @param bool $fresh_install for first install
+       * @return string `sm_root_dir` value
        */
       private static function migrate_root_dir($multisite = false, $fresh_install = false){
         $network_root_dir = get_network_option(1, 'sm_root_dir');
@@ -208,9 +211,11 @@ namespace wpCloud\StatelessMedia {
 
         update_option( 'sm_root_dir', $sm_root_dir  );
 
+        //forcing `Cache-Busting` for multisite to prevent replacing media with same filenames
+        update_option( 'sm_hashify_file_name', 'true' );
+
         return $sm_root_dir;
       }
-
     }
 
   }

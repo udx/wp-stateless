@@ -107,7 +107,7 @@ var wpStatelessApp = angular.module('wpStatelessApp', ['ngSanitize'])
       $scope.extraStatus = response.data;
       return message;
     }
-    
+
     if(!response.data && response.statusText){
       return response.statusText + " (" + stateless_l10n.response_code + response.status + ")";
     }
@@ -369,7 +369,7 @@ var wpStatelessApp = angular.module('wpStatelessApp', ['ngSanitize'])
       });
     } else if ( 'undefined' !== typeof chunk_id ) {
       // process cancelled, but this is only a chunk finishing request
-      
+
       $scope.chunkIDs[ chunk_id ] = false;
       var all_done = true;
       for ( var i in $scope.chunkIDs ) {
@@ -645,7 +645,7 @@ var wpStatelessApp = angular.module('wpStatelessApp', ['ngSanitize'])
           $scope.status = $scope.getError(response, stateless_l10n.regenerate_single_image_failed);
           // $scope.isRunning = false;
         }
-        
+
         if ( 'undefined' !== typeof chunk_id ) {
           if ( $scope.chunkIDs[ chunk_id ].length && $scope.continue ) {
             $scope.regenerateSingle( $scope.chunkIDs[ chunk_id ].shift(), use_wildcards, chunk_id );
@@ -702,7 +702,7 @@ var wpStatelessApp = angular.module('wpStatelessApp', ['ngSanitize'])
           $scope.status = $scope.getError(response, stateless_l10n.sync_single_file_failed);
           // $scope.isRunning = false;
         }
-        
+
         if ( 'undefined' !== typeof chunk_id ) {
           if ( $scope.chunkIDs[ chunk_id ].length && $scope.continue ) {
             $scope.syncSingleFile( $scope.chunkIDs[ chunk_id ].shift(), use_wildcards, chunk_id );
@@ -760,7 +760,7 @@ var wpStatelessApp = angular.module('wpStatelessApp', ['ngSanitize'])
           $scope.status = $scope.getError(response, stateless_l10n.sync_non_library_file_failed);
           // $scope.isRunning = false;
         }
-        
+
         if ( 'undefined' !== typeof chunk_id ) {
           if ( $scope.chunkIDs[ chunk_id ].length && $scope.continue ) {
             $scope.syncSingleNonLibraryFile( $scope.chunkIDs[ chunk_id ].shift(), chunk_id );
@@ -797,7 +797,12 @@ var wpStatelessApp = angular.module('wpStatelessApp', ['ngSanitize'])
   $scope.backup = {};
   $scope.sm = wp_stateless_settings || {};
   $scope.sm.readonly = $scope.sm.readonly || {}
-  
+
+  if ($scope.sm.network_admin) {
+    $scope.sm.hashify_file_name = 'true';
+    $scope.sm.readonly.hashify_file_name = true;
+  }
+
   $scope.$watch('sm.mode', function(value) {
     if(value == 'stateless' && $scope.sm.readonly.hashify_file_name != 'constant'){
       $scope.backup.hashify_file_name = $scope.sm.hashify_file_name;
@@ -811,7 +816,7 @@ var wpStatelessApp = angular.module('wpStatelessApp', ['ngSanitize'])
       }
     }
   });
-  
+
   $scope.$watch('sm.bucket_folder_type', function(value) {
     if(value == 'single-site'){
       $scope.sm.root_dir = '/%date_year%/%date_month%/';
@@ -826,7 +831,7 @@ var wpStatelessApp = angular.module('wpStatelessApp', ['ngSanitize'])
       jQuery( '#permalink_structure' ).trigger('change');
     }, 1);
   });
-  
+
   $scope.$watch('sm.root_dir', function(value) {
     if(value == '/%date_year%/%date_month%/'){
       $scope.sm.bucket_folder_type = 'single-site';
@@ -882,7 +887,7 @@ var wpStatelessApp = angular.module('wpStatelessApp', ['ngSanitize'])
     if(root_dir){
       root_dir = root_dir + "/";
     }
-    
+
     custom_domain = custom_domain.replace(/\/+$/, ''); // removing trailing slashes
     custom_domain = custom_domain.replace(/https?:\/\//, ''); // removing http:// or https:// from the beginning.
     host += $scope.sm.bucket ? $scope.sm.bucket : '{bucket-name}';
