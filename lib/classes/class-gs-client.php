@@ -349,12 +349,14 @@ namespace wpCloud\StatelessMedia {
        * @author peshkov@UD
        * @param string $name
        * @param string $id
-       * @param string $use_root
+       * @param boolean $use_root
+       * @param string $size
        * @return bool
        */
-      public function remove_media( $name, $id = "", $use_root = true ) {
+      public function remove_media( $name, $id = "", $use_root = true, $size = "" ) {
         try {
-          $name = apply_filters( 'wp_stateless_file_name', $name, $use_root, $id );
+          $name = apply_filters( 'wp_stateless_file_name', $name, $use_root, $id, $size, false );
+
           $this->service->objects->delete( $this->bucket, $name );
         } catch( Exception $e ) {
           return new WP_Error( 'sm_error', $e->getMessage() );

@@ -385,29 +385,26 @@ namespace wpCloud\StatelessMedia {
           isset( $metadata[ 'gs_bucket' ] ) &&
           $metadata[ 'gs_bucket' ] == ud_get_stateless_media()->get( 'sm.bucket' )
         ) {
-
           $client = ud_get_stateless_media()->get_client();
           if( !is_wp_error( $client ) ) {
 
             /* Remove default image */
-            $client->remove_media( $metadata[ 'gs_name' ] );
+            $client->remove_media( $metadata[ 'gs_name' ], $post_id );
             // Remove webp
-            $client->remove_media( $metadata[ 'gs_name' ] . '.webp' );
+            $client->remove_media( $metadata[ 'gs_name' ] . '.webp', $post_id );
 
             /* Now, go through all sizes and remove 'image sizes' images from Bucket too. */
             if( !empty( $metadata[ 'sizes' ] ) && is_array( $metadata[ 'sizes' ] ) ) {
               foreach( $metadata[ 'sizes' ] as $k => $v ) {
                 if( !empty( $v[ 'gs_name' ] ) ) {
-                  $client->remove_media( $v[ 'gs_name' ] );
-                  $client->remove_media( $v[ 'gs_name' ] . '.webp' );
+                  $client->remove_media( $v[ 'gs_name' ], $post_id, true, $k );
+                  $client->remove_media( $v[ 'gs_name' ] . '.webp', $post_id, true, $k );
                 }
               }
             }
 
           }
-
         }
-
       }
 
       /**
