@@ -845,6 +845,14 @@ var wpStatelessApp = angular.module('wpStatelessApp', ['ngSanitize'])
     else{
       $scope.sm.bucket_folder_type = 'custom';
     }
+    let tags = [ "%date_year%", "%date_month%", "%site_id%", "%site_url%", "%site_url_host%", "%site_url_path%" ];
+    value_splitted = value.split("/");
+    for ( i = 0; i < value_splitted.length; i ++ ) {
+        if (! /^[a-zA-Z0-9]+$/.test(value_splitted[i]) && value_splitted[i] != '' && jQuery.inArray (value_splitted[i], tags) == -1) {
+            value_splitted[i] = value_splitted[i].replace(/[^a-zA-Z0-9]/g,'');
+        }
+    }
+    $scope.sm.root_dir = value_splitted.join('/');
     setTimeout(function(){
       jQuery( '#permalink_structure' ).trigger('change');
     }, 1);
