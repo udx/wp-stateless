@@ -26,7 +26,7 @@ namespace wpCloud\StatelessMedia {
       public $stateless_settings = null;
 
       /**
-       * Instance of 
+       * Instance of
        *  - ud_get_stateless_media
        *  - wpCloud\StatelessMedia\Bootstrap
        * @var false|null|string
@@ -34,36 +34,38 @@ namespace wpCloud\StatelessMedia {
       public $bootstrap = null;
 
       private $settings = array(
-          'mode'                   => array('WP_STATELESS_MEDIA_MODE', 'cdn'), 
-          'body_rewrite'           => array('WP_STATELESS_MEDIA_BODY_REWRITE', 'false'),
-          'body_rewrite_types'     => array('WP_STATELESS_MEDIA_BODY_REWRITE_TYPES', 'jpg jpeg png gif pdf'), 
-          'bucket'                 => array('WP_STATELESS_MEDIA_BUCKET', ''), 
-          'root_dir'               => array('WP_STATELESS_MEDIA_ROOT_DIR', ['/%date_year%/%date_month%/', '/sites/%site_id%/%date_year%/%date_month%/']), 
-          'key_json'               => array('WP_STATELESS_MEDIA_JSON_KEY', ''),
-          'cache_control'          => array('WP_STATELESS_MEDIA_CACHE_CONTROL', ''), 
-          'delete_remote'          => array('WP_STATELESS_MEDIA_DELETE_REMOTE', 'true'), 
-          'custom_domain'          => array('WP_STATELESS_MEDIA_CUSTOM_DOMAIN', ''), 
-          'organize_media'         => array('', 'true'), 
-          'hashify_file_name'      => array(['WP_STATELESS_MEDIA_HASH_FILENAME' => 'WP_STATELESS_MEDIA_CACHE_BUSTING'], 'false'), 
-        );
+        'mode'                   => array('WP_STATELESS_MEDIA_MODE', 'cdn'),
+        'body_rewrite'           => array('WP_STATELESS_MEDIA_BODY_REWRITE', 'false'),
+        'body_rewrite_types'     => array('WP_STATELESS_MEDIA_BODY_REWRITE_TYPES', 'jpg jpeg png gif pdf'),
+        'bucket'                 => array('WP_STATELESS_MEDIA_BUCKET', ''),
+        'root_dir'               => array('WP_STATELESS_MEDIA_ROOT_DIR', ['/%date_year%/%date_month%/', '/sites/%site_id%/%date_year%/%date_month%/']),
+        'key_json'               => array('WP_STATELESS_MEDIA_JSON_KEY', ''),
+        'cache_control'          => array('WP_STATELESS_MEDIA_CACHE_CONTROL', ''),
+        'delete_remote'          => array('WP_STATELESS_MEDIA_DELETE_REMOTE', 'true'),
+        'custom_domain'          => array('WP_STATELESS_MEDIA_CUSTOM_DOMAIN', ''),
+        'organize_media'         => array('', 'true'),
+        'hashify_file_name'      => array(['WP_STATELESS_MEDIA_HASH_FILENAME' => 'WP_STATELESS_MEDIA_CACHE_BUSTING'], 'false'),
+      );
 
       private $network_only_settings = array(
-          'hide_settings_panel'   => array('WP_STATELESS_MEDIA_HIDE_SETTINGS_PANEL', false), 
-          'hide_setup_assistant'  => array('WP_STATELESS_MEDIA_HIDE_SETUP_ASSISTANT', false), 
-        );
+        'hide_settings_panel'   => array('WP_STATELESS_MEDIA_HIDE_SETTINGS_PANEL', false),
+        'hide_setup_assistant'  => array('WP_STATELESS_MEDIA_HIDE_SETUP_ASSISTANT', false),
+      );
 
       private $strings = array(
-          'network' => 'Currently configured via Network Settings.',
-          'constant' => 'Currently configured via a constant.',
-          'environment' => 'Currently configured via an environment variable.',
-        );
+        'network' => 'Currently configured via Network Settings.',
+        'constant' => 'Currently configured via a constant.',
+        'environment' => 'Currently configured via an environment variable.',
+      );
 
       /**
-       * Overridden construct
+       *
+       * Settings constructor.
+       * @param null $bootstrap
        */
       public function __construct($bootstrap = null) {
         $this->bootstrap = $bootstrap ? $bootstrap : ud_get_stateless_media();
-        
+
 
         /* Add 'Settings' link for SM plugin on plugins page. */
         $_basename = plugin_basename( $this->bootstrap->boot_file );
@@ -75,7 +77,7 @@ namespace wpCloud\StatelessMedia {
             'sm' => array()
           )
         ));
-        
+
         // Setting sm variable
         $this->refresh();
 
@@ -86,7 +88,7 @@ namespace wpCloud\StatelessMedia {
         add_action( 'init', array( $this, 'init' ), 3 );
         // apply wildcard to root dir.
         add_filter( 'wp_stateless_handle_root_dir', array( $this, 'root_dir_wildcards' ));
-        
+
         $site_url = parse_url( site_url() );
         $site_url['path'] = isset($site_url['path']) ? $site_url['path'] : '';
         $this->wildcards = array(
@@ -123,6 +125,9 @@ namespace wpCloud\StatelessMedia {
         );
       }
 
+      /**
+       * Init
+       */
       public function init(){
         $this->save_media_settings();
 
@@ -151,11 +156,11 @@ namespace wpCloud\StatelessMedia {
 
           // Getting settings
           $value = get_option($_option, $default[0]);
-          
+
           if ($option == 'body_rewrite_types' && empty($value) && !is_multisite()) {
             $value = $default[0];
           }
-          
+
           if ($option == 'hashify_file_name' && $this->get("sm.mode") == 'stateless') {
             $value = true;
           }
@@ -164,19 +169,19 @@ namespace wpCloud\StatelessMedia {
           if(is_array($constant)){
             foreach($constant as $old_const => $new_const){
               if(defined($new_const)){
-                  $value = constant($new_const);
-                  $this->set( "sm.readonly.{$option}", "constant" );
+                $value = constant($new_const);
+                $this->set( "sm.readonly.{$option}", "constant" );
                 break;
               }
               if(is_string($old_const) && defined($old_const)){
-                  $value = constant($old_const);
-                  $this->bootstrap->errors->add( array(
-                      'key' => $new_const,
-                      'title' => sprintf( __( "%s: Deprecated Notice (%s)", $this->bootstrap->domain ), $this->bootstrap->name, $new_const ),
-                      'message' => sprintf(__("<i>%s</i> constant is deprecated, please use <i>%s</i> instead.", $this->bootstrap->domain), $old_const, $new_const),
-                  ), 'notice' );
-                  $this->set( "sm.readonly.{$option}", "constant" );
-                  break;
+                $value = constant($old_const);
+                $this->bootstrap->errors->add( array(
+                  'key' => $new_const,
+                  'title' => sprintf( __( "%s: Deprecated Notice (%s)", $this->bootstrap->domain ), $this->bootstrap->name, $new_const ),
+                  'message' => sprintf(__("<i>%s</i> constant is deprecated, please use <i>%s</i> instead.", $this->bootstrap->domain), $old_const, $new_const),
+                ), 'notice' );
+                $this->set( "sm.readonly.{$option}", "constant" );
+                break;
               }
             }
           }
@@ -184,10 +189,10 @@ namespace wpCloud\StatelessMedia {
             $value = constant($constant);
             $this->set( "sm.readonly.{$option}", "constant" );
           }
-          
+
           // Getting network settings
           if(is_multisite() && !$this->get( "sm.readonly.{$option}")){
-            
+
             $network = get_site_option( $_option, $default[1] );
             // If network settings available then override by network settings.
             if($network || is_network_admin()){
@@ -197,7 +202,7 @@ namespace wpCloud\StatelessMedia {
             }
 
           }
-          
+
           // Converting to string true false for angular.
           if(is_bool($value)){
             $value = $value === true ? "true" : "false";
@@ -234,7 +239,7 @@ namespace wpCloud\StatelessMedia {
           elseif(is_multisite()){
             $value = get_site_option( $_option, $default );
           }
-          
+
           // Converting to string true false for angular.
           if(is_bool($value)){
             $value = $value === true ? "true" : "false";
@@ -242,7 +247,7 @@ namespace wpCloud\StatelessMedia {
 
           $this->set( "sm.$option", $value);
         }
-        
+
         /**
          * JSON key file path
          */
@@ -292,6 +297,7 @@ namespace wpCloud\StatelessMedia {
 
       /**
        * Remove settings
+       * @param bool $network
        */
       public function reset($network = false) {
         foreach ($this->settings as $option => $array) {
@@ -315,7 +321,7 @@ namespace wpCloud\StatelessMedia {
             delete_option($_option);
           }
         }
-        
+
         $this->set('sm', []);
         $this->refresh();
       }
@@ -336,7 +342,8 @@ namespace wpCloud\StatelessMedia {
             }
           }
         }
-
+        //removing all special chars except slash
+        $root_dir = preg_replace('/[^A-Za-z0-9\/]/', '', $root_dir);
         $root_dir = preg_replace('/(\/+)/', '/', $root_dir);
         $root_dir = trim( $root_dir, '/ ' ); // Remove any forward slash and empty space.
 
@@ -359,6 +366,7 @@ namespace wpCloud\StatelessMedia {
 
       /**
        * Add menu options
+       * @param $slug
        */
       public function network_admin_menu($slug) {
         $this->setup_wizard_ui = add_submenu_page( 'settings.php', __( 'Stateless Setup', $this->bootstrap->domain ), __( 'Stateless Setup', $this->bootstrap->domain ), 'manage_options', 'stateless-setup', array($this, 'setup_wizard_interface') );
@@ -391,7 +399,7 @@ namespace wpCloud\StatelessMedia {
           case 'finish':
             include $this->bootstrap->path( '/static/views/setup_wizard_interface.php', 'dir' );
             break;
-          
+
           default:
             include $this->bootstrap->path( '/static/views/stateless_splash_screen.php', 'dir' );
             break;
@@ -404,7 +412,7 @@ namespace wpCloud\StatelessMedia {
        * @author alim@UD
        */
       public function save_media_settings(){
-        if(isset($_POST['action']) && $_POST['action'] == 'stateless_settings' && wp_verify_nonce( $_POST['_smnonce'], 'wp-stateless-settings' )){ 
+        if(isset($_POST['action']) && $_POST['action'] == 'stateless_settings' && wp_verify_nonce( $_POST['_smnonce'], 'wp-stateless-settings' )){
 
           $settings = apply_filters('stateless::settings::save', $_POST['sm']);
           foreach ( $settings as $name => $value ) {
