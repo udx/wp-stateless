@@ -889,6 +889,14 @@ var wpStatelessApp = angular.module('wpStatelessApp', ['ngSanitize'])
       var reg = new RegExp(index, 'g');
       root_dir = root_dir.replace(reg, item[0]);
     });
+    let tags = [ "%date_year%", "%date_month%", "%site_id%", "%site_url%", "%site_url_host%", "%site_url_path%" ];
+    let value_splitted = root_dir.split("/");
+    for ( let i = 0; i < value_splitted.length; i ++ ) {
+      if (! /^[a-zA-Z0-9]+$/.test(value_splitted[i]) && value_splitted[i] != '' && jQuery.inArray (value_splitted[i], tags) == -1) {
+        value_splitted[i] = value_splitted[i].replace(/[^a-zA-Z0-9]/g,'');
+      }
+    }
+    root_dir = value_splitted.join('/');
     root_dir = root_dir.replace(/(\/+)/g, '/');
     root_dir = root_dir.replace(/^\//, '');
     root_dir = root_dir.replace(/\/$/, '');
