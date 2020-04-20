@@ -17,6 +17,7 @@
 
 namespace Google\Auth;
 
+use Google\Auth\Credentials\InsecureCredentials;
 use Google\Auth\Credentials\ServiceAccountCredentials;
 use Google\Auth\Credentials\UserRefreshCredentials;
 
@@ -26,7 +27,7 @@ use Google\Auth\Credentials\UserRefreshCredentials;
  */
 abstract class CredentialsLoader implements FetchAuthTokenInterface
 {
-    const TOKEN_CREDENTIAL_URI = 'https://www.googleapis.com/oauth2/v4/token';
+    const TOKEN_CREDENTIAL_URI = 'https://oauth2.googleapis.com/token';
     const ENV_VAR = 'GOOGLE_APPLICATION_CREDENTIALS';
     const WELL_KNOWN_PATH = 'gcloud/application_default_credentials.json';
     const NON_WINDOWS_WELL_KNOWN_PATH_BASE = '.config';
@@ -120,11 +121,13 @@ abstract class CredentialsLoader implements FetchAuthTokenInterface
 
         if ($jsonKey['type'] == 'service_account') {
             return new ServiceAccountCredentials($scope, $jsonKey);
-        } elseif ($jsonKey['type'] == 'authorized_user') {
-            return new UserRefreshCredentials($scope, $jsonKey);
-        } else {
-            throw new \InvalidArgumentException('invalid value in the type field');
         }
+
+        if ($jsonKey['type'] == 'authorized_user') {
+            return new UserRefreshCredentials($scope, $jsonKey);
+        }
+
+        throw new \InvalidArgumentException('invalid value in the type field');
     }
 
     /**
@@ -172,6 +175,16 @@ abstract class CredentialsLoader implements FetchAuthTokenInterface
             default:
                 throw new \Exception('Version not supported');
         }
+    }
+
+    /**
+     * Create a new instance of InsecureCredentials.
+     *
+     * @return InsecureCredentials
+     */
+    public static function makeInsecureCredentials()
+    {
+        return new InsecureCredentials();
     }
 
     /**

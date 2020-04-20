@@ -1,6 +1,10 @@
 <?php
 namespace wpCloud\StatelessMedia\Google_Client;
 
+if (!class_exists('Google_Client')) {
+  require_once __DIR__ . '/autoload.php';
+}
+
 /**
  * Extension to the regular Google_Model that automatically
  * exposes the items array for iteration, so you can just

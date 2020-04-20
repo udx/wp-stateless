@@ -16,7 +16,6 @@
  */
 namespace wpCloud\StatelessMedia\Google_Client;
 
-
 class Google_Service_Storage_Bucket extends Google_Collection
 {
   protected $collection_key = 'defaultObjectAcl';
@@ -32,12 +31,15 @@ class Google_Service_Storage_Bucket extends Google_Collection
   protected $encryptionType = 'Google_Service_Storage_BucketEncryption';
   protected $encryptionDataType = '';
   public $etag;
+  protected $iamConfigurationType = 'Google_Service_Storage_BucketIamConfiguration';
+  protected $iamConfigurationDataType = '';
   public $id;
   public $kind;
   public $labels;
   protected $lifecycleType = 'Google_Service_Storage_BucketLifecycle';
   protected $lifecycleDataType = '';
   public $location;
+  public $locationType;
   protected $loggingType = 'Google_Service_Storage_BucketLogging';
   protected $loggingDataType = '';
   public $metageneration;
@@ -142,6 +144,20 @@ class Google_Service_Storage_Bucket extends Google_Collection
   {
     return $this->etag;
   }
+  /**
+   * @param Google_Service_Storage_BucketIamConfiguration
+   */
+  public function setIamConfiguration(Google_Service_Storage_BucketIamConfiguration $iamConfiguration)
+  {
+    $this->iamConfiguration = $iamConfiguration;
+  }
+  /**
+   * @return Google_Service_Storage_BucketIamConfiguration
+   */
+  public function getIamConfiguration()
+  {
+    return $this->iamConfiguration;
+  }
   public function setId($id)
   {
     $this->id = $id;
@@ -187,6 +203,14 @@ class Google_Service_Storage_Bucket extends Google_Collection
   public function getLocation()
   {
     return $this->location;
+  }
+  public function setLocationType($locationType)
+  {
+    $this->locationType = $locationType;
+  }
+  public function getLocationType()
+  {
+    return $this->locationType;
   }
   /**
    * @param Google_Service_Storage_BucketLogging
