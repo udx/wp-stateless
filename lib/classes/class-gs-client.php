@@ -351,11 +351,13 @@ namespace wpCloud\StatelessMedia {
        * @param string $id
        * @param boolean $use_root
        * @param string $size
+       * @param boolean $is_webp
        * @return bool
        */
-      public function remove_media( $name, $id = "", $use_root = true, $size = "" ) {
+      public function remove_media( $name, $id = "", $use_root = true, $size = "", $is_webp = false ) {
         try {
           $name = apply_filters( 'wp_stateless_file_name', $name, $use_root, $id, $size, false );
+          if ( $is_webp && substr( $name, -4) !=  "webp") $name .= ".webp";
 
           $this->service->objects->delete( $this->bucket, $name );
         } catch( Exception $e ) {
