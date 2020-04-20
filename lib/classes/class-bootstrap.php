@@ -40,7 +40,7 @@ namespace wpCloud\StatelessMedia {
       /**
        * Constructor
        * Attention: MUST NOT BE CALLED DIRECTLY! USE get_instance() INSTEAD!
-       *
+       * @param $args
        * @author peshkov@UD
        */
       protected function __construct( $args ) {
@@ -259,6 +259,12 @@ namespace wpCloud\StatelessMedia {
        * Rebuild srcset from gs_link.
        * Using calculations returned from WordPress wp_calculate_image_srcset()
        *
+       * @param $sources
+       * @param $size_array
+       * @param $image_src
+       * @param $image_meta
+       * @param $attachment_id
+       * @return array
        */
       public function wp_calculate_image_srcset($sources, $size_array, $image_src, $image_meta, $attachment_id){
         if (empty($image_meta['gs_link'])) {
@@ -443,6 +449,7 @@ namespace wpCloud\StatelessMedia {
 
       /**
        * Remove all settings.
+       * @param bool $network
        */
       public function reset($network = false) {
         $this->settings->reset($network);
@@ -749,6 +756,7 @@ namespace wpCloud\StatelessMedia {
        * Replace all image link with gs link and return only if meta modified.
        *
        * @param $meta
+       * @param $return
        * @return mixed or null when not changed.
        */
       public function convert_to_gs_link($meta, $return = false){
@@ -774,7 +782,10 @@ namespace wpCloud\StatelessMedia {
        * Replace all image link with gs link
        *
        * @param $meta
-       * @return mixed
+       * @param $image_host
+       * @param $baseurl
+       * @param $file_ext
+       * @return array|null|string|string[]
        */
       public function _convert_to_gs_link($meta, $image_host, $baseurl, $file_ext){
         if(is_array($meta)){
@@ -818,6 +829,8 @@ namespace wpCloud\StatelessMedia {
        * Determines if plugin is loaded via mu-plugins
        * or Network Enabled.
        *
+       * @param bool $is_multisite
+       * @return bool
        * @author peshkov@UD
        */
       public function is_network_detected($is_multisite = false) {
@@ -1162,7 +1175,10 @@ namespace wpCloud\StatelessMedia {
       }
 
       /**
-       * @todo check multisite
+       *
+       * @param $file
+       * @param $attachment_id
+       * @return string
        */
       public function get_attached_file($file, $attachment_id){
         /* Determine if the media file has GS data at all. */
@@ -1337,8 +1353,9 @@ namespace wpCloud\StatelessMedia {
       }
 
       /**
-       *
        * Delete table when blog is deleted.
+       *
+       * @param $old_site
        */
       public function wp_delete_site($old_site){
         global $wpdb;
@@ -1409,7 +1426,6 @@ namespace wpCloud\StatelessMedia {
 
       /**
        * Filter for wp_get_attachment_url();
-       * @todo check multisite
        * @param string $url
        * @param string $post_id
        * @return mixed|null|string
@@ -1501,6 +1517,9 @@ namespace wpCloud\StatelessMedia {
       /**
        * Upload the full size image first.
        *
+       * @param $sizes
+       * @param array $metadata
+       * @return mixed
        */
       public function before_intermediate_image_sizes($sizes, $metadata = array()){
         if(empty($metadata)){
