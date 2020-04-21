@@ -343,7 +343,7 @@ namespace wpCloud\StatelessMedia {
           }
         }
         //removing all special chars except slash
-        $root_dir = preg_replace('/[^A-Za-z0-9\/]/', '', $root_dir);
+        $root_dir = preg_replace('/[^A-Za-z0-9\/_]/', '', $root_dir);
         $root_dir = preg_replace('/(\/+)/', '/', $root_dir);
         $root_dir = trim( $root_dir, '/ ' ); // Remove any forward slash and empty space.
 
