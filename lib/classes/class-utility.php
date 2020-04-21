@@ -235,16 +235,12 @@ namespace wpCloud\StatelessMedia {
           $cloud_meta = get_post_meta( $attachment_id, 'sm_cloud', true );
 
           $cloud_meta = wp_parse_args($cloud_meta, array(
-            'id'                 => '',
             'name'               => '',
             'bucket'             => ud_get_stateless_media()->get( 'sm.bucket' ),
-            'storageClass'       => '',
             'fileLink'           => '',
             'mediaLink'          => '',
-            'selfLink'           => '',
             'cacheControl'       => $_cacheControl,
             'contentDisposition' => $_contentDisposition,
-            'object'             => '',
             'sizes'              => array(),
           ));
 
@@ -478,23 +474,17 @@ namespace wpCloud\StatelessMedia {
 
         if( $img[ 'is_thumb' ] ) {
           // Cloud meta for thumbs.
-          $cloud_meta[ 'sizes' ][ $image_size ]['id']           = $media[ 'id' ];
           $cloud_meta[ 'sizes' ][ $image_size ]['name']         = $gs_name;
           $cloud_meta[ 'sizes' ][ $image_size ]['fileLink']     = $fileLink;
           $cloud_meta[ 'sizes' ][ $image_size ]['mediaLink']    = $media[ 'mediaLink' ];
-          $cloud_meta[ 'sizes' ][ $image_size ]['selfLink']     = $media[ 'selfLink' ];
         }
         else{
           // cloud meta for full size image.
-          $cloud_meta['id']                     = $media[ 'id' ];
           $cloud_meta['name']                   = $gs_name;
           $cloud_meta['fileLink']               = $fileLink;
-          $cloud_meta['storageClass']           = $media[ 'storageClass' ];
           $cloud_meta['mediaLink']              = $media[ 'mediaLink' ];
-          $cloud_meta['selfLink']               = $media[ 'selfLink' ];
           $cloud_meta['bucket']                 = ud_get_stateless_media()->get( 'sm.bucket' );
           $cloud_meta['sm_version']             = $version;
-          $cloud_meta['object']                 = $media;
         }
         return apply_filters( 'wp_stateless_generate_cloud_meta', $cloud_meta, $media, $image_size, $img, $bucketLink );
       }
