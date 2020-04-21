@@ -161,8 +161,8 @@ namespace wpCloud\StatelessMedia {
        * @author peshkov@UD
        * @param $metadata
        * @param $attachment_id
-       * @param $force Whether to force the upload incase of it's already exists.
-       * @param $args Whether to only sync the full size image.
+       * @param boolean $force Whether to force the upload incase of it's already exists.
+       * @param array $args Whether to only sync the full size image.
        * @return bool|string
        */
       public static function add_media( $metadata, $attachment_id, $force = false, $args = array() ) {
@@ -220,6 +220,25 @@ namespace wpCloud\StatelessMedia {
             }
           }
 
+          /**
+           * To skip removing files from server
+           *
+           * Returning a non-null value
+           * will effectively short-circuit the function.
+           *
+           * $force and $args params will no be passed on non media library uploads.
+           * This two will be passed on by compatibility.
+           *
+           * @since 3.0
+           *
+           * @param bool              $value          This should return true if want to skip the sync.
+           * @param int               $metadata       Metadata for the attachment.
+           * @param string            $attachment_id  Attachment ID.
+           * @param bool              $force          (optional) Whether to force the sync even the file already exist in GCS.
+           * @param bool              $args           (optional) Whether to only sync the full size image.
+           */
+          $skip_remove_media = apply_filters( 'wp_stateless_skip_remove_media', false, $metadata, $attachment_id, $force, $args );
+
           // Make non-images uploadable.
           // empty $metadata['file'] can cause problem, so we need to generate it.
           if( empty( $metadata[ 'file' ] ) && $attachment_id ) {
@@ -257,15 +276,13 @@ namespace wpCloud\StatelessMedia {
             $metadata[ 'filesize' ] = $cloud_meta[ 'filesize' ];
           }
 
-          /**
-           *
-           */
           $image_sizes = self::get_path_and_url( $metadata, $attachment_id );
           foreach( $image_sizes as $size => $img ) {
             // also skips full size image if already uploaded using that feature.
             // and delete it in stateless mode as it already bin uploaded through intermediate_image_sizes_advanced filter.
             if( !$img[ 'is_thumb' ] && $stateless_synced_full_size == $attachment_id ) {
-              if( ud_get_stateless_media()->get( 'sm.mode' ) === 'stateless' && $args[ 'no_thumb' ] != true && \file_exists( $img[ 'path' ] ) ) {
+              if( ud_get_stateless_media()->get( 'sm.mode' ) === 'stateless' && $args[ 'no_thumb' ] != true && \file_exists( $img[ 'path' ] )
+              && !$skip_remove_media ) {
                 unlink( $img[ 'path' ] );
               }
               continue;
@@ -311,7 +328,7 @@ namespace wpCloud\StatelessMedia {
 
               // Stateless mode: we don't need the local version.
               // Except when uploading the full size image first.
-              if( self::can_delete_attachment( $attachment_id, $args ) ) {
+              if( self::can_delete_attachment( $attachment_id, $args ) && !$skip_remove_media ) {
                 unlink( $img[ 'path' ] );
               }
 
@@ -423,7 +440,6 @@ namespace wpCloud\StatelessMedia {
           }
         }
 
-
         $gs_name_path['__full'] = array(
           'gs_name'   => $gs_name,
           'path'      => $full_size_path,
@@ -433,7 +449,6 @@ namespace wpCloud\StatelessMedia {
           'width'     => isset($metadata['width']) ? $metadata['width'] : null,
           'height'    => isset($metadata['height']) ? $metadata['height'] : null,
         );
-
 
         /* Now we go through all available image sizes and upload them to Google Storage */
         if( !empty( $metadata[ 'sizes' ] ) && is_array( $metadata[ 'sizes' ] ) ) {
