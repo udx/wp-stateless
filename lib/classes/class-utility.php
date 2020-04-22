@@ -492,12 +492,16 @@ namespace wpCloud\StatelessMedia {
           $cloud_meta[ 'sizes' ][ $image_size ]['name']         = $gs_name;
           $cloud_meta[ 'sizes' ][ $image_size ]['fileLink']     = $fileLink;
           $cloud_meta[ 'sizes' ][ $image_size ]['mediaLink']    = $media[ 'mediaLink' ];
+          $cloud_meta[ 'sizes' ][ $image_size ]['width']        = $media[ 'metadata' ][ 'width' ];
+          $cloud_meta[ 'sizes' ][ $image_size ]['height']       = $media[ 'metadata' ][ 'height' ];
         }
         else{
           // cloud meta for full size image.
           $cloud_meta['name']                   = $gs_name;
           $cloud_meta['fileLink']               = $fileLink;
           $cloud_meta['mediaLink']              = $media[ 'mediaLink' ];
+          $cloud_meta['width']                  = $media[ 'metadata' ][ 'width' ];
+          $cloud_meta['height']                 = $media[ 'metadata' ][ 'height' ];
           $cloud_meta['bucket']                 = ud_get_stateless_media()->get( 'sm.bucket' );
           $cloud_meta['sm_version']             = $version;
         }
