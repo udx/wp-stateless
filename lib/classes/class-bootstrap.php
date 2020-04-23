@@ -98,7 +98,13 @@ namespace wpCloud\StatelessMedia {
         /**
          * Register SM metaboxes
          */
-        add_action( 'admin_init', array( $this, 'register_metaboxes' ) );
+        //add_action( 'admin_init', array( $this, 'register_metaboxes' ) );
+
+        // Register meta boxes and fields for media edit page
+        add_filter( 'rwmb_meta_boxes', array( $this, 'mb_attachment_meta_box_callback' ) );
+
+        // Register meta boxes and fields for media modal page
+        add_filter( 'attachment_fields_to_edit', array( $this, 'mb_attachment_modal_meta_box_callback' ), 11, 2 );
 
         /**
          * Init hook
@@ -608,6 +614,172 @@ namespace wpCloud\StatelessMedia {
         }
 
         echo apply_filters( 'sm::attachment::meta', ob_get_clean(), $post->ID );
+      }
+
+
+      /**
+       * Metabox for media modal page
+       * @param $form_fields
+       * @param $post
+       * @return array
+       */
+      public function mb_attachment_modal_meta_box_callback ( $form_fields, $post ) {
+        //do not show on media edit page, only on modal
+        if ( isset($_GET['post'])) {
+          return $form_fields;
+        }
+
+        $fields = $this->prepare_data_for_metabox( array(), $post->ID );
+
+        if ( !empty( $fields ) ) {
+          foreach( $fields[ 'fields' ] as $field ) {
+            if ( isset( $field[ 'media_modal' ] ) ) {
+              $form_field = $field;
+              $form_field[ 'label' ] = $field[ 'name' ];
+              $form_field[ 'input' ] = 'html';
+              $form_field[ 'input' ] = 'html';
+
+              // Just ignore the field 'std' because there's no way to check it.
+              $meta = \RWMB_Field::call( $field, 'meta', $post->ID, true );
+              $form_field[ 'value' ] = $meta;
+
+              $field[ 'field_name' ] = 'attachments[' . $post->ID . '][' . $field[ 'field_name' ] . ']';
+              $form_field[ 'html' ] = \RWMB_Field::call( $field, 'html', $meta );
+
+              $form_field[ 'show_in_modal' ] = true;
+
+              $form_fields[ $field[ 'id' ] ] = $form_field;
+            }
+          }
+        }
+
+        return $form_fields;
+      }
+
+      /**
+       * Metabox for media edit page
+       * @param $meta_boxes
+       * @return array
+       */
+      public function mb_attachment_meta_box_callback( $meta_boxes ) {
+        $post_id = false;
+        if ( isset( $_GET['post'] ) ) {
+          $post_id = intval( $_GET['post'] );
+        } elseif ( isset( $_POST['post_ID'] ) ) {
+          $post_id = intval( $_POST['post_ID'] );
+        } elseif ( isset( $_GET['item'] ) ) {
+          $post_id = intval( $_GET['item'] );
+        } elseif ( isset( $_POST['item'] ) ) {
+          $post_id = intval( $_POST['item'] );
+        }
+        $metabox = $this->prepare_data_for_metabox( $meta_boxes, $post_id );
+        return array( $metabox );
+      }
+
+      /**
+       * Prepare data for metabox fields
+       * @param $meta_boxes
+       * @param $post_id
+       * @return array
+       */
+      private function prepare_data_for_metabox ( $meta_boxes, $post_id ) {
+        $post = get_post ( $post_id );
+        $sm_cloud = get_post_meta( $post_id, 'sm_cloud', 1 );
+
+        //if attachment has not sm_cloud meta - do not add metabox
+        if ( empty( $post ) || empty( $sm_cloud ) ) {
+          return $meta_boxes;
+        }
+
+        $fields = array();
+
+        if ( is_array( $sm_cloud ) && !empty( $sm_cloud[ 'fileLink' ] ) ) {
+          $sync = '';
+          if ( current_user_can( 'upload_files' ) ) {
+            if ( $post && 'attachment' == $post->post_type && 'image/' == substr( $post->post_mime_type, 0, 6 ) ) {
+              $sync = '<a href="javascript:;" data-type="image" data-id="'.$post->ID.'"
+                   class="sm_inline_sync"><i class="dashicons dashicons-image-rotate"></i></a>';
+            }
+            if ( $post && 'attachment' == $post->post_type && 'image/' != substr( $post->post_mime_type, 0, 6 ) ) {
+              $sync = '<a href="javascript:;" data-type="other" data-id="'.$post->ID.'"
+                   class="sm_inline_sync"><i class="dashicons dashicons-image-rotate"></i></a>';
+            }
+          }
+
+          $fields[] = array(
+            'name' =>  __( 'Original:', ud_get_stateless_media()->domain ),
+            'id'   => 'storage_bucket_url',
+            'type' => 'custom_html',
+            'media_modal' => true,
+            'std'  => '<label><input type="text" class="widefat urlfield" readonly="readonly" value="'.esc_attr($sm_cloud[ 'fileLink' ]).'" />
+                        <a href="'.$sm_cloud[ 'fileLink' ].'" target="_blank" class="sm-view-link"><i class="dashicons dashicons-format-image"></i></a> '.$sync.' </label>',
+            'tab'  => 'thumbnails',
+          );
+
+          if ( !empty( $sm_cloud['sizes'] ) && is_array( $sm_cloud['sizes'] ) ) {
+            foreach( $sm_cloud['sizes'] as $size_label => $size ) {
+              $fields[] = array(
+                'name' =>  __( sprintf( "%s x %s:", $size['height'], $size['width'] ), ud_get_stateless_media()->domain ),
+                'id'   => 'storage_bucket_url'.$size_label,
+                'type' => 'custom_html',
+                'media_modal' => true,
+                'std'  => '<label><input type="text" class="widefat urlfield" readonly="readonly" value="'.esc_attr($size[ 'fileLink' ]).'" />
+                            <a href="'.$size[ 'fileLink' ].'" target="_blank" class="sm-view-link"><i class="dashicons dashicons-format-image"></i></a> '.$sync.' </label>',
+                'tab'  => 'thumbnails',
+              );
+            }
+          }
+
+          if( !empty( $sm_cloud[ 'cacheControl' ] ) ) {
+            $fields[] = array(
+              'name' =>  __( 'Cache Control:', ud_get_stateless_media()->domain ),
+              'id'   => 'cache_control',
+              'type' => 'custom_html',
+              'std'  => $sm_cloud[ 'cacheControl' ],
+              'tab'  => 'meta',
+            );
+          }
+
+          if ( !empty( $sm_cloud[ 'bucket' ] ) ) {
+            $fields[] = array(
+              'name' =>  __( 'Storage Bucket:', ud_get_stateless_media()->domain ),
+              'id'   => 'storage_bukcet',
+              'type' => 'custom_html',
+              'std'  => '<input type="text" class="widefat urlfield" readonly="readonly" value="gs://'.esc_attr($sm_cloud[ 'bucket' ]).'" />',
+              'tab'  => 'meta',
+            );
+          }
+
+        }
+
+        $meta_boxes = array(
+          'id'         => 'sm-attachment-metabox',
+          'title'      => __( 'Stateless', ud_get_stateless_media()->domain ),
+          'post_types' => 'attachment',
+          //'media_modal' => true,
+          //set context `side` for left column
+          'context'    => 'normal',
+          'priority'   => 'low',
+          'tabs'      => array(
+            'thumbnails' => array(
+              'label' => __( 'Thumbnails', ud_get_stateless_media()->domain ),
+              'icon'  => 'dashicons-format-gallery',
+            ),
+            'meta'  => array(
+              'label' => __( 'Meta', ud_get_stateless_media()->domain ),
+              'icon'  => 'dashicons-admin-site',
+            ),
+          ),
+          // Tab style: 'default', 'box' or 'left'. Optional
+          'tab_style' => 'left',
+          // Show meta box wrapper around tabs? true (default) or false. Optional
+          'tab_wrapper' => true,
+          'fields' => $fields
+        );
+
+        $meta_boxes = apply_filters( 'sm::attachment::meta', $meta_boxes, $post->ID );
+
+        return $meta_boxes;
       }
 
       /**

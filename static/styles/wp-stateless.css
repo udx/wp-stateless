@@ -82,3 +82,11 @@ td.image-icon img.wp-stateless-media-item {
   height: 0;
   clear: both;
 }
+
+#sm-attachment-metabox .rwmb-input input {
+    max-width: 90%;
+}
+
+#sm-attachment-metabox a i.dashicons {
+    text-decoration: none;
+}
