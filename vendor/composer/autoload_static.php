@@ -6,6 +6,10 @@ namespace Composer\Autoload;
 
 class ComposerStaticInitc00cd3c666f8dfa818cb7edfd488ed20
 {
+    public static $files = array (
+        '8ca8a91f0a826d6c6c8f274c90ca7d88' => __DIR__ . '/..' . '/wpmetabox/meta-box/meta-box.php',
+    );
+
     public static $prefixLengthsPsr4 = array (
         'C' => 
         array (

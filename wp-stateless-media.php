@@ -65,6 +65,9 @@ if( !function_exists( 'ud_check_stateless_media' ) ) {
       if( !class_exists( '\wpCloud\StatelessMedia\Bootstrap' ) ) {
         throw new Exception( __( 'Distributive is broken. Plugin loader is not available. Try to remove and upload plugin again.', 'stateless-media' ) );
       }
+
+      // Include metabox tabs addon
+      require_once(  dirname( __FILE__ ) . '/meta-box-tabs/meta-box-tabs.php' );
     } catch( Exception $e ) {
       $_ud_stateless_media_error = $e->getMessage();
       return false;
