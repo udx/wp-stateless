@@ -707,24 +707,24 @@ namespace wpCloud\StatelessMedia {
           }
 
           $fields[] = array(
-            'name' =>  __( 'Original:', ud_get_stateless_media()->domain ),
+            'name' =>  __( 'Original', ud_get_stateless_media()->domain ),
             'id'   => 'storage_bucket_url',
             'type' => 'custom_html',
             'media_modal' => true,
             'std'  => '<label><input type="text" class="widefat urlfield" readonly="readonly" value="'.esc_attr($sm_cloud[ 'fileLink' ]).'" />
-                        <a href="'.$sm_cloud[ 'fileLink' ].'" target="_blank" class="sm-view-link"><i class="dashicons dashicons-format-image"></i></a> '.$sync.' </label>',
+                        <a href="'.$sm_cloud[ 'fileLink' ].'" target="_blank" class="sm-view-link"><i class="dashicons dashicons-external"></i></a>&nbsp;&nbsp;&nbsp;'.$sync.' </label>',
             'tab'  => 'thumbnails',
           );
 
           if ( !empty( $sm_cloud['sizes'] ) && is_array( $sm_cloud['sizes'] ) ) {
             foreach( $sm_cloud['sizes'] as $size_label => $size ) {
               $fields[] = array(
-                'name' =>  __( sprintf( "%s x %s:", $size['height'], $size['width'] ), ud_get_stateless_media()->domain ),
+                'name' =>  __( sprintf( "%s x %s", $size['height'], $size['width'] ), ud_get_stateless_media()->domain ),
                 'id'   => 'storage_bucket_url'.$size_label,
                 'type' => 'custom_html',
                 'media_modal' => true,
                 'std'  => '<label><input type="text" class="widefat urlfield" readonly="readonly" value="'.esc_attr($size[ 'fileLink' ]).'" />
-                            <a href="'.$size[ 'fileLink' ].'" target="_blank" class="sm-view-link"><i class="dashicons dashicons-format-image"></i></a> '.$sync.' </label>',
+                            <a href="'.$size[ 'fileLink' ].'" target="_blank" class="sm-view-link"><i class="dashicons dashicons-external"></i></a>&nbsp;&nbsp;&nbsp;'.$sync.' </label>',
                 'tab'  => 'thumbnails',
               );
             }
@@ -732,20 +732,21 @@ namespace wpCloud\StatelessMedia {
 
           if( !empty( $sm_cloud[ 'cacheControl' ] ) ) {
             $fields[] = array(
-              'name' =>  __( 'Cache Control:', ud_get_stateless_media()->domain ),
+              'name' =>  __( 'Cache Control', ud_get_stateless_media()->domain ),
               'id'   => 'cache_control',
               'type' => 'custom_html',
-              'std'  => $sm_cloud[ 'cacheControl' ],
+              'std'  => '<label><input type="text" class="widefat urlfield" readonly="readonly" value="'.$sm_cloud[ 'cacheControl' ].'" /></label>',
               'tab'  => 'meta',
             );
           }
 
           if ( !empty( $sm_cloud[ 'bucket' ] ) ) {
             $fields[] = array(
-              'name' =>  __( 'Storage Bucket:', ud_get_stateless_media()->domain ),
+              'name' =>  __( 'Storage Bucket', ud_get_stateless_media()->domain ),
               'id'   => 'storage_bukcet',
               'type' => 'custom_html',
-              'std'  => '<input type="text" class="widefat urlfield" readonly="readonly" value="gs://'.esc_attr($sm_cloud[ 'bucket' ]).'" />',
+              'std'  => '<label><input type="text" class="widefat urlfield" readonly="readonly" value="gs://'.esc_attr($sm_cloud[ 'bucket' ]).'" />
+                            <a href="https://console.cloud.google.com/storage/browser/'.esc_attr($sm_cloud[ 'bucket' ]).'" target="_blank" class="sm-view-link"><i class="dashicons dashicons-external"></i></a></label>',
               'tab'  => 'meta',
             );
           }
@@ -1783,6 +1784,44 @@ namespace wpCloud\StatelessMedia {
         } else {
           return NULL;
         }
+      }
+
+      /**
+       * Get all thumbnail sizes
+       *
+       * @global $_wp_additional_image_sizes
+       * @uses   get_intermediate_image_sizes()
+       *
+       * @param  boolean [$unset_disabled = true]
+       * @return array
+       */
+      function get_image_sizes( $unset_disabled = true ) {
+        $wais = & $GLOBALS['_wp_additional_image_sizes'];
+
+        $sizes = array();
+
+        foreach ( get_intermediate_image_sizes() as $_size ) {
+          if ( in_array( $_size, array('thumbnail', 'medium', 'medium_large', 'large') ) ) {
+            $sizes[ $_size ] = array(
+              'width'  => get_option( "{$_size}_size_w" ),
+              'height' => get_option( "{$_size}_size_h" ),
+              'crop'   => (bool) get_option( "{$_size}_crop" ),
+            );
+          }
+          elseif ( isset( $wais[$_size] ) ) {
+            $sizes[ $_size ] = array(
+              'width'  => $wais[ $_size ]['width'],
+              'height' => $wais[ $_size ]['height'],
+              'crop'   => $wais[ $_size ]['crop'],
+            );
+          }
+
+          // size registered, but has 0 width and height
+          if( $unset_disabled && ($sizes[ $_size ]['width'] == 0) && ($sizes[ $_size ]['height'] == 0) )
+            unset( $sizes[ $_size ] );
+        }
+
+        return $sizes;
       }
     }
   }
