@@ -624,35 +624,20 @@ namespace wpCloud\StatelessMedia {
        * @return array
        */
       public function mb_attachment_modal_meta_box_callback ( $form_fields, $post ) {
+
         //do not show on media edit page, only on modal
         if ( isset($_GET['post'])) {
           return $form_fields;
         }
 
-        $fields = $this->prepare_data_for_metabox( array(), $post->ID );
+        $link = get_edit_post_link($post->ID);
 
-        if ( !empty( $fields ) ) {
-          foreach( $fields[ 'fields' ] as $field ) {
-            if ( isset( $field[ 'media_modal' ] ) ) {
-              $form_field = $field;
-              $form_field[ 'label' ] = $field[ 'name' ];
-              $form_field[ 'input' ] = 'html';
-              $form_field[ 'input' ] = 'html';
+        $form_field[ 'label' ] = '';
+        $form_field[ 'input' ] = 'html';
+        $form_field[ 'html' ] = "<script>jQuery('.actions').prepend('<a href=\"$link#sm-attachment-metabox\">View stateless meta</a> | ')</script>";
+        $form_field[ 'show_in_modal' ] = true;
 
-              // Just ignore the field 'std' because there's no way to check it.
-              $meta = \RWMB_Field::call( $field, 'meta', $post->ID, true );
-              $form_field[ 'value' ] = $meta;
-
-              $field[ 'field_name' ] = 'attachments[' . $post->ID . '][' . $field[ 'field_name' ] . ']';
-              $form_field[ 'html' ] = \RWMB_Field::call( $field, 'html', $meta );
-
-              $form_field[ 'show_in_modal' ] = true;
-
-              $form_fields[ $field[ 'id' ] ] = $form_field;
-            }
-          }
-        }
-
+        $form_fields[ 'sm_html' ] = $form_field;
         return $form_fields;
       }
 

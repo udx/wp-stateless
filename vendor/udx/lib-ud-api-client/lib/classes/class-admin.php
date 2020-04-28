@@ -1049,9 +1049,9 @@ namespace UsabilityDynamics\UD_API {
 
         $stateless_media = $wpdb->get_var($wpdb->prepare("
             SELECT COUNT(meta_id)
-            FROM %s
-            WHERE meta_key = 'sm_cloud'
-          ", $wpdb->postmeta));
+            FROM ".$wpdb->postmeta."
+            WHERE meta_key = %s
+          ", 'sm_cloud'));
 
         return $stateless_media;
       }
