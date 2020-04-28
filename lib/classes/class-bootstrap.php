@@ -634,7 +634,7 @@ namespace wpCloud\StatelessMedia {
 
         $form_field[ 'label' ] = '';
         $form_field[ 'input' ] = 'html';
-        $form_field[ 'html' ] = "<script>jQuery('.actions').prepend('<a href=\"$link#sm-attachment-metabox\">View stateless meta</a> | ')</script>";
+        $form_field[ 'html' ] = sprintf("<script>jQuery('.actions').prepend('<a href=\"%s#sm-attachment-metabox\">%s</a> | ')</script>", $link, __("View stateless meta", ud_get_stateless_media()->domain));
         $form_field[ 'show_in_modal' ] = true;
 
         $form_fields[ 'sm_html' ] = $form_field;
