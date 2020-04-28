@@ -67,7 +67,7 @@ if( !function_exists( 'ud_check_stateless_media' ) ) {
       }
 
       // Include metabox tabs addon
-      require_once(  dirname( __FILE__ ) . '/meta-box-tabs/meta-box-tabs.php' );
+      require_once(  dirname( __FILE__ ) . '/lib/meta-box-tabs/meta-box-tabs.php' );
     } catch( Exception $e ) {
       $_ud_stateless_media_error = $e->getMessage();
       return false;
