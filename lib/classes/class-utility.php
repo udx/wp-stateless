@@ -278,51 +278,51 @@ namespace wpCloud\StatelessMedia {
 
           $image_sizes = self::get_path_and_url( $metadata, $attachment_id );
           foreach( $image_sizes as $size => $img ) {
-            // also skips full size image if already uploaded using that feature.
-            // and delete it in stateless mode as it already bin uploaded through intermediate_image_sizes_advanced filter.
-            if( !$img[ 'is_thumb' ] && $stateless_synced_full_size == $attachment_id ) {
-              if( ud_get_stateless_media()->get( 'sm.mode' ) === 'stateless' && $args[ 'no_thumb' ] != true && \file_exists( $img[ 'path' ] )
-              && !$skip_remove_media ) {
-                unlink( $img[ 'path' ] );
+            if ( (isset($_REQUEST['size']) && $_REQUEST['size'] == $size) || empty($_REQUEST['size']) ) {
+              // also skips full size image if already uploaded using that feature.
+              // and delete it in stateless mode as it already bin uploaded through intermediate_image_sizes_advanced filter.
+              if( !$img[ 'is_thumb' ] && $stateless_synced_full_size == $attachment_id ) {
+                if( ud_get_stateless_media()->get( 'sm.mode' ) === 'stateless' && $args[ 'no_thumb' ] != true && \file_exists( $img[ 'path' ] ) && !$skip_remove_media ) {
+                  unlink( $img[ 'path' ] );
+                }
+                continue;
               }
-              continue;
-            }
 
-            // skips thumbs when it's called from Upload the full size image first, through intermediate_image_sizes_advanced filter.
-            if( $args[ 'no_thumb' ] && $img[ 'is_thumb' ] || !empty( self::$synced_sizes[ $attachment_id ][ $size ] ) ) {
-              continue;
-            }
+              // skips thumbs when it's called from Upload the full size image first, through intermediate_image_sizes_advanced filter.
+              if( $args[ 'no_thumb' ] && $img[ 'is_thumb' ] || !empty( self::$synced_sizes[ $attachment_id ][ $size ] ) ) {
+                continue;
+              }
 
-            // GCS metadata
-            $_metadata = array(
-              "width"     => $img[ 'width' ],
-              "height"    => $img[ 'height' ],
-              'child-of'  => $attachment_id,
-              'file-hash' => md5( $file ),
-              'size'      => $size,
-            );
+              // GCS metadata
+              $_metadata = array(
+                "width"     => $img[ 'width' ],
+                "height"    => $img[ 'height' ],
+                'child-of'  => $attachment_id,
+                'file-hash' => md5( $file ),
+                'size'      => $size,
+              );
 
-            // adding extra GCS meta for full size image.
-            if( !$img[ 'is_thumb' ] ) {
-              unset( $_metadata[ 'child-of' ] ); // no need in full size image.
-              $_metadata[ 'object-id' ] = $attachment_id;
-              $_metadata[ 'source-id' ] = md5( $attachment_id . ud_get_stateless_media()->get( 'sm.bucket' ) );
-            }
+              // adding extra GCS meta for full size image.
+              if( !$img[ 'is_thumb' ] ) {
+                unset( $_metadata[ 'child-of' ] ); // no need in full size image.
+                $_metadata[ 'object-id' ] = $attachment_id;
+                $_metadata[ 'source-id' ] = md5( $attachment_id . ud_get_stateless_media()->get( 'sm.bucket' ) );
+              }
 
-            /* Add default image */
-            $media = $client->add_media( array_filter( array(
-              'force'              => $img['is_thumb'] ? $force : $force && $stateless_synced_full_size != $attachment_id,
-              'name'               => $img['gs_name'],
-              'is_webp'            => $args['is_webp'],
-              'mimeType'           => $img['mime_type'],
-              'metadata'           => $_metadata,
-              'absolutePath'       => $img['path'],
-              'cacheControl'       => $_cacheControl,
-              'contentDisposition' => $_contentDisposition,
-            ) ));
+              /* Add default image */
+              $media = $client->add_media( array_filter( array(
+                'force'              => $img['is_thumb'] ? $force : $force && $stateless_synced_full_size != $attachment_id,
+                'name'               => $img['gs_name'],
+                'is_webp'            => $args['is_webp'],
+                'mimeType'           => $img['mime_type'],
+                'metadata'           => $_metadata,
+                'absolutePath'       => $img['path'],
+                'cacheControl'       => $_cacheControl,
+                'contentDisposition' => $_contentDisposition,
+              ) ));
 
-            /* Break if we have errors. */
-            if( !is_wp_error( $media ) ) {
+              /* Break if we have errors. */
+              if( !is_wp_error( $media ) ) {
               // @note We don't add storageClass because it's same as parent...
               $cloud_meta = self::generate_cloud_meta( $cloud_meta, $media, $size, $img, $bucketLink );
 
@@ -332,14 +332,14 @@ namespace wpCloud\StatelessMedia {
                 unlink( $img[ 'path' ] );
               }
 
-              // Setting
-              if( empty( self::$synced_sizes[ $attachment_id ][ $size ] ) ) {
-                self::$synced_sizes[ $attachment_id ][ $size ] = true;
+                // Setting
+                if( empty( self::$synced_sizes[ $attachment_id ][ $size ] ) ) {
+                  self::$synced_sizes[ $attachment_id ][ $size ] = true;
+                }
               }
             }
           }
           // End of image sync loop
-
           if( !$args[ 'is_webp' ] ) {
             update_post_meta( $attachment_id, 'sm_cloud', $cloud_meta );
           } else {

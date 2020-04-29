@@ -484,20 +484,6 @@ namespace wpCloud\StatelessMedia {
       }
 
       /**
-       * Register metaboxes
-       */
-      public function register_metaboxes() {
-        add_meta_box(
-          'sm-attachment-metabox',
-          __( 'Google Cloud Storage', ud_get_stateless_media()->domain ),
-          array($this, 'attachment_meta_box_callback'),
-          'attachment',
-          'side',
-          'low'
-        );
-      }
-
-      /**
        * Define REST API.
        *
        * // https://usabilitydynamics-sandbox-uds-io-stateless-testing.c.rabbit.ci/wp-json/wp-stateless/v1
@@ -561,63 +547,6 @@ namespace wpCloud\StatelessMedia {
       }
 
       /**
-       * @param $post
-       */
-      public function attachment_meta_box_callback( $post ) {
-        ob_start();
-
-        $sm_cloud = get_post_meta( $post->ID, 'sm_cloud', 1 );
-
-        if ( is_array( $sm_cloud ) && !empty( $sm_cloud[ 'fileLink' ] ) ) { ?>
-
-          <?php if( !empty( $sm_cloud[ 'cacheControl' ] ) ) { ?>
-                <div class="misc-pub-cache-control hidden">
-                  <?php _e( 'Cache Control:', ud_get_stateless_media()->domain ); ?> <strong><span><?php echo $sm_cloud[ 'cacheControl' ]; ?></span> </strong>
-                </div>
-          <?php } ?>
-
-            <div class="misc-pub-gs-file-link" style="margin-bottom: 15px;">
-                <label>
-                  <?php _e( 'Storage Bucket URL:', ud_get_stateless_media()->domain ); ?> <a href="<?php echo $sm_cloud[ 'fileLink' ]; ?>" target="_blank" class="sm-view-link"><?php _e( '[view]' ); ?></a>
-                    <input type="text" class="widefat urlfield" readonly="readonly" value="<?php echo esc_attr($sm_cloud[ 'fileLink' ]); ?>" />
-                </label>
-            </div>
-
-          <?php
-
-          if ( !empty( $sm_cloud[ 'bucket' ] ) ) {
-            ?>
-              <div class="misc-pub-gs-bucket" style="margin-bottom: 15px;">
-                  <label>
-                    <?php _e( 'Storage Bucket:', ud_get_stateless_media()->domain ); ?>
-                      <input type="text" class="widefat urlfield" readonly="readonly" value="gs://<?php echo esc_attr($sm_cloud[ 'bucket' ]); ?>" />
-                  </label>
-              </div>
-            <?php
-          }
-
-          if ( current_user_can( 'upload_files' ) ) {
-            if ( $post && 'attachment' == $post->post_type && 'image/' == substr( $post->post_mime_type, 0, 6 ) ) {
-              ?>
-                <a href="javascript:;" data-type="image" data-id="<?php echo $post->ID; ?>"
-                   class="button-secondary sm_inline_sync"><?php _e('Regenerate and Sync with GCS', ud_get_stateless_media()->domain); ?></a>
-              <?php
-            }
-
-            if ( $post && 'attachment' == $post->post_type && 'image/' != substr( $post->post_mime_type, 0, 6 ) ) {
-              ?>
-                <a href="javascript:;" data-type="other" data-id="<?php echo $post->ID; ?>"
-                   class="button-secondary sm_inline_sync"><?php _e('Sync with GCS', ud_get_stateless_media()->domain); ?></a>
-              <?php
-            }
-          }
-        }
-
-        echo apply_filters( 'sm::attachment::meta', ob_get_clean(), $post->ID );
-      }
-
-
-      /**
        * Metabox for media modal page
        * @param $form_fields
        * @param $post
@@ -672,24 +601,29 @@ namespace wpCloud\StatelessMedia {
         $sm_cloud = get_post_meta( $post_id, 'sm_cloud', 1 );
 
         //if attachment has not sm_cloud meta - do not add metabox
-        if ( empty( $post ) || empty( $sm_cloud ) ) {
+        if ( empty( $post ) ) {
           return $meta_boxes;
         }
 
+        $sizes = $this->get_image_sizes();
+
         $fields = array();
 
+        $fields[] = array(
+          'name' =>  __( 'Regenerate', ud_get_stateless_media()->domain ),
+          'id'   => 'storage_bucket_url',
+          'type' => 'custom_html',
+          'std'  => $this->_prepare_generate_link( $post, false, '', true ),
+          'tab'  => 'thumbnails',
+        );
+
         if ( is_array( $sm_cloud ) && !empty( $sm_cloud[ 'fileLink' ] ) ) {
-          $sync = '';
-          if ( current_user_can( 'upload_files' ) ) {
-            if ( $post && 'attachment' == $post->post_type && 'image/' == substr( $post->post_mime_type, 0, 6 ) ) {
-              $sync = '<a href="javascript:;" data-type="image" data-id="'.$post->ID.'"
-                   class="sm_inline_sync"><i class="dashicons dashicons-image-rotate"></i></a>';
-            }
-            if ( $post && 'attachment' == $post->post_type && 'image/' != substr( $post->post_mime_type, 0, 6 ) ) {
-              $sync = '<a href="javascript:;" data-type="other" data-id="'.$post->ID.'"
-                   class="sm_inline_sync"><i class="dashicons dashicons-image-rotate"></i></a>';
-            }
-          }
+
+          $fields[] = array(
+            'type' => 'heading',
+            'name' => 'Files',
+            'tab'  => 'thumbnails',
+          );
 
           $fields[] = array(
             'name' =>  __( 'Original', ud_get_stateless_media()->domain ),
@@ -697,19 +631,20 @@ namespace wpCloud\StatelessMedia {
             'type' => 'custom_html',
             'media_modal' => true,
             'std'  => '<label><input type="text" class="widefat urlfield" readonly="readonly" value="'.esc_attr($sm_cloud[ 'fileLink' ]).'" />
-                        <a href="'.$sm_cloud[ 'fileLink' ].'" target="_blank" class="sm-view-link"><i class="dashicons dashicons-external"></i></a>&nbsp;&nbsp;&nbsp;'.$sync.' </label>',
+                        <a href="'.$sm_cloud[ 'fileLink' ].'" target="_blank" class="sm-view-link"><i class="dashicons dashicons-external"></i></a>&nbsp;&nbsp;&nbsp;'.$this->_prepare_generate_link( $post, true ).' </label>',
             'tab'  => 'thumbnails',
           );
 
           if ( !empty( $sm_cloud['sizes'] ) && is_array( $sm_cloud['sizes'] ) ) {
             foreach( $sm_cloud['sizes'] as $size_label => $size ) {
+
               $fields[] = array(
-                'name' =>  __( sprintf( "%s x %s", $size['height'], $size['width'] ), ud_get_stateless_media()->domain ),
+                'name' =>  __( sprintf( "%s x %s", ($size['width'] ?: $sizes[$size_label]['width']), ($size['height'] ?: $sizes[$size_label]['height']) ), ud_get_stateless_media()->domain ),
                 'id'   => 'storage_bucket_url'.$size_label,
                 'type' => 'custom_html',
                 'media_modal' => true,
                 'std'  => '<label><input type="text" class="widefat urlfield" readonly="readonly" value="'.esc_attr($size[ 'fileLink' ]).'" />
-                            <a href="'.$size[ 'fileLink' ].'" target="_blank" class="sm-view-link"><i class="dashicons dashicons-external"></i></a>&nbsp;&nbsp;&nbsp;'.$sync.' </label>',
+                            <a href="'.$size[ 'fileLink' ].'" target="_blank" class="sm-view-link"><i class="dashicons dashicons-external"></i></a>&nbsp;&nbsp;&nbsp;'.$this->_prepare_generate_link( $post, true, $size_label ).' </label>',
                 'tab'  => 'thumbnails',
               );
             }
@@ -766,6 +701,30 @@ namespace wpCloud\StatelessMedia {
         $meta_boxes = apply_filters( 'sm::attachment::meta', $meta_boxes, $post->ID );
 
         return $meta_boxes;
+      }
+
+      /**
+       * Preparing link for sync
+       * @param $post
+       * @param bool $use_icon
+       * @param string $size
+       * @param bool $button
+       * @return string
+       */
+      private function _prepare_generate_link ( $post, $use_icon = false, $size = '', $button = false  ) {
+        $sync = '';
+
+        if ( current_user_can( 'upload_files' ) ) {
+          if ( $post && 'attachment' == $post->post_type && 'image/' == substr( $post->post_mime_type, 0, 6 ) ) {
+            $sync = '<a href="javascript:;" data-type="image" data-id="'.$post->ID.'" data-size="'.$size.'"
+                   class="sm_inline_sync '.($button ? 'button button-primary button-large' : '').'">'. ( $use_icon ? "<i class='dashicons dashicons-image-rotate'></i>" : __( 'Regenerate and Sync with GCS', ud_get_stateless_media()->domain )).'</a>';
+          }
+          if ( $post && 'attachment' == $post->post_type && 'image/' != substr( $post->post_mime_type, 0, 6 ) ) {
+            $sync = '<a href="javascript:;" data-type="other" data-id="'.$post->ID.'" data-size="'.$size.'"
+                   class="sm_inline_sync '.($button ? 'button button-primary button-large' : '').'">'. ($use_icon ? "<i class='dashicons dashicons-image-rotate'></i>" : __( 'Sync with GCS', ud_get_stateless_media()->domain )).'</a>';
+          }
+        }
+        return $sync;
       }
 
       /**
