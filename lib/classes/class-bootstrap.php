@@ -95,11 +95,6 @@ namespace wpCloud\StatelessMedia {
         // Invoke REST API
         add_action( 'rest_api_init', array( $this, 'api_init' ) );
 
-        /**
-         * Register SM metaboxes
-         */
-        //add_action( 'admin_init', array( $this, 'register_metaboxes' ) );
-
         // Register meta boxes and fields for media edit page
         add_filter( 'rwmb_meta_boxes', array( $this, 'mb_attachment_meta_box_callback' ) );
 
@@ -600,9 +595,16 @@ namespace wpCloud\StatelessMedia {
         $post = get_post ( $post_id );
         $sm_cloud = get_post_meta( $post_id, 'sm_cloud', 1 );
 
-        //if attachment has not sm_cloud meta - do not add metabox
+        /**
+         * If it is not a post - do not add metabox
+         *
+         * Added array with key `title` for prevent error on metabox
+         * Notice	Undefined index: title
+         * wp-content/plugins/wp-stateless/vendor/wpmetabox/meta-box/inc/meta-box.php:346
+         * @author palant@ud
+         */
         if ( empty( $post ) ) {
-          return $meta_boxes;
+          return $meta_boxes + array( 'title' => 'Stateless' );
         }
 
         $sizes = $this->get_image_sizes();
@@ -714,15 +716,18 @@ namespace wpCloud\StatelessMedia {
       private function _prepare_generate_link ( $post, $use_icon = false, $size = '', $button = false  ) {
         $sync = '';
 
-        if ( current_user_can( 'upload_files' ) ) {
+        if ( current_user_can( 'upload_files' ) && $this->get( 'sm.mode' ) !== 'disabled' ) {
           if ( $post && 'attachment' == $post->post_type && 'image/' == substr( $post->post_mime_type, 0, 6 ) ) {
-            $sync = '<a href="javascript:;" data-type="image" data-id="'.$post->ID.'" data-size="'.$size.'"
-                   class="sm_inline_sync '.($button ? 'button button-primary button-large' : '').'">'. ( $use_icon ? "<i class='dashicons dashicons-image-rotate'></i>" : __( 'Regenerate and Sync with GCS', ud_get_stateless_media()->domain )).'</a>';
+            $sync = '<a href="javascript:;" data-type="image" data-id="'.$post->ID.'" data-size="'.$size.'" data-reload_page="'.$button.'"
+                   class="sm_inline_sync '.($button ? 'button button-primary button-large' : '').'">
+                   '. ( $use_icon ? "<i class='dashicons dashicons-image-rotate'></i>" : __( 'Regenerate and Sync with GCS', ud_get_stateless_media()->domain )).'</a>';
           }
           if ( $post && 'attachment' == $post->post_type && 'image/' != substr( $post->post_mime_type, 0, 6 ) ) {
-            $sync = '<a href="javascript:;" data-type="other" data-id="'.$post->ID.'" data-size="'.$size.'"
+            $sync = '<a href="javascript:;" data-type="other" data-id="'.$post->ID.'" data-size="'.$size.'" data-reload_page="'.$button.'"
                    class="sm_inline_sync '.($button ? 'button button-primary button-large' : '').'">'. ($use_icon ? "<i class='dashicons dashicons-image-rotate'></i>" : __( 'Sync with GCS', ud_get_stateless_media()->domain )).'</a>';
           }
+        } elseif ( $button ) {
+          $sync = __('You do not have access to sync or Stateless mode is Disabled', ud_get_stateless_media()->domain );
         }
         return $sync;
       }
