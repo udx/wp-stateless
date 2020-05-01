@@ -769,6 +769,7 @@ namespace wpCloud\StatelessMedia {
 
 
         $root_dir = $this->get( 'sm.root_dir' );
+        $root_dir_regex = '~^' . apply_filters("wp_stateless_handle_root_dir", $root_dir, true) . '/~';
         $root_dir = apply_filters("wp_stateless_handle_root_dir", $root_dir);
 
         $upload_dir = wp_upload_dir();
@@ -776,13 +777,13 @@ namespace wpCloud\StatelessMedia {
         $current_path = str_replace( wp_normalize_path( trailingslashit( $upload_dir[ 'baseurl' ] ) ), '', wp_normalize_path( $current_path ) );
         $current_path = str_replace( trailingslashit( $this->get_gs_host() ), '', $current_path );
 
-        if($root_dir){
+        if(!$use_root){
           // removing the root dir if already exists in the begaining.
-          $current_path = preg_replace('/^' . preg_quote(trailingslashit( $root_dir ), '/') . '/', '', $current_path);
+          return preg_replace($root_dir_regex, '', $current_path);
         }
 
         // skip adding root dir if it's already added.
-        if ( $use_root && !empty( $root_dir ) && strpos($current_path, $root_dir) !== 0 ) {
+        if ( !empty( $root_dir ) && !preg_match($root_dir_regex, $current_path) ) {
           return $root_dir . '/' . trim( $current_path, '/ ' );
         }
 

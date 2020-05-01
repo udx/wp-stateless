@@ -87,7 +87,7 @@ namespace wpCloud\StatelessMedia {
         /** Register options */
         add_action( 'init', array( $this, 'init' ), 3 );
         // apply wildcard to root dir.
-        add_filter( 'wp_stateless_handle_root_dir', array( $this, 'root_dir_wildcards' ));
+        add_filter( 'wp_stateless_handle_root_dir', array( $this, 'root_dir_wildcards' ), 10, 2);
 
         $site_url = parse_url( site_url() );
         $site_url['path'] = isset($site_url['path']) ? $site_url['path'] : '';
@@ -96,11 +96,13 @@ namespace wpCloud\StatelessMedia {
                                     date('Y'),
                                     __("year", $this->bootstrap->domain),
                                     __("The year of the post, four digits, for example 2004.", $this->bootstrap->domain),
+                                    "\d{4}"
                                  ],
           '%date_month%'           => [
                                     date('m'),
                                     __("monthnum", $this->bootstrap->domain),
                                     __("Month of the year, for example 05.", $this->bootstrap->domain),
+                                    "\d{2}"
                                  ],
           '%site_id%'         => [
                                     get_current_blog_id(),
@@ -331,19 +333,30 @@ namespace wpCloud\StatelessMedia {
        * @param $root_dir
        * @return mixed|null|string|string[]
        */
-      public function root_dir_wildcards( $root_dir ) {
+      public function root_dir_wildcards( $root_dir, $regex = false ) {
 
+        $not_allowed_char = '/[^A-Za-z0-9\/_]/';
         $wildcards = apply_filters('wp_stateless_root_dir_wildcard', $this->wildcards);
+        
+        if($regex){
+          $root_dir = preg_quote($root_dir);
+          $not_allowed_char = '/[^A-Za-z0-9\/_\.\-\\\\{}]/';
+        }
 
         if ( is_array( $wildcards ) && !empty( $wildcards ) ) {
-          foreach ($wildcards as $wildcard => $replace) {
+          foreach ($wildcards as $wildcard => $values) {
             if (!empty($wildcard)) {
-              $root_dir = str_replace($wildcard, $replace[0], $root_dir);
+              $replace = $values[0];
+              if($regex){
+                $replace = isset($values[3]) ? $values[3] : preg_quote($values[0]);
+              }
+              $root_dir = str_replace($wildcard, $replace, $root_dir);
             }
           }
         }
+
         //removing all special chars except slash
-        $root_dir = preg_replace('/[^A-Za-z0-9\/_]/', '', $root_dir);
+        $root_dir = preg_replace($not_allowed_char, '', $root_dir);
         $root_dir = preg_replace('/(\/+)/', '/', $root_dir);
         $root_dir = trim( $root_dir, '/ ' ); // Remove any forward slash and empty space.
 
