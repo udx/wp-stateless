@@ -85,7 +85,7 @@ namespace wpCloud\StatelessMedia {
 
       /**
        * Added fix for Imagify version 1.9
-       * In Stateless mode remove files from server after optimization process `imagify_after_optimize_file`
+       * In Ephemeral mode remove files from server after optimization process `imagify_after_optimize_file`
        * @param $return
        * @param $metadata
        * @param $attachment_id
@@ -127,13 +127,13 @@ namespace wpCloud\StatelessMedia {
        */
       public function fix_missing_file( $attachment_id ) {
         /**
-         * If mode is stateless then we change it to cdn in order images not being deleted before optimization
+         * If mode is ephemeral then we change it to cdn in order images not being deleted before optimization
          * Remember that we changed mode via global var
          */
-        if( ud_get_stateless_media()->get( 'sm.mode' ) == 'stateless' ) {
+        if( ud_get_stateless_media()->get( 'sm.mode' ) == 'ephemeral' ) {
           ud_get_stateless_media()->set( 'sm.mode', 'cdn' );
           global $wp_stateless_imagify_mode;
-          $wp_stateless_imagify_mode = 'stateless';
+          $wp_stateless_imagify_mode = 'ephemeral';
         }
 
         $upload_basedir = wp_upload_dir();
@@ -170,11 +170,11 @@ namespace wpCloud\StatelessMedia {
        */
       public function after_imagify_optimize_attachment( $id ) {
         /**
-         * Restore stateless mode if needed
+         * Restore ephemeral mode if needed
          */
         global $wp_stateless_imagify_mode;
-        if( $wp_stateless_imagify_mode == 'stateless' ) {
-          ud_get_stateless_media()->set( 'sm.mode', 'stateless' );
+        if( $wp_stateless_imagify_mode == 'ephemeral' ) {
+          ud_get_stateless_media()->set( 'sm.mode', 'ephemeral' );
         }
 
         $metadata = wp_get_attachment_metadata( $id );
@@ -183,14 +183,14 @@ namespace wpCloud\StatelessMedia {
         // Sync backup file with GCS
         if( current_filter() == 'after_imagify_optimize_attachment' ) {
           /**
-           * If mode is stateless then we change it to cdn in order images not being deleted before optimization
+           * If mode is ephemeral then we change it to cdn in order images not being deleted before optimization
            * Remember that we changed mode via global var
            * @todo remove if Imagify implement "imagify_has_backup" filter.
            */
-          if( ud_get_stateless_media()->get( 'sm.mode' ) == 'stateless' ) {
+          if( ud_get_stateless_media()->get( 'sm.mode' ) == 'ephemeral' ) {
             ud_get_stateless_media()->set( 'sm.mode', 'cdn' );
             global $wp_stateless_imagify_mode;
-            $wp_stateless_imagify_mode = 'stateless';
+            $wp_stateless_imagify_mode = 'ephemeral';
           }
 
           $file_path = get_attached_file( $id );
@@ -241,8 +241,8 @@ namespace wpCloud\StatelessMedia {
       public function imagify_after_optimize_file( $file, $args = array() ) {
 
         global $wp_stateless_imagify_mode;
-        if( $wp_stateless_imagify_mode == 'stateless' ) {
-          ud_get_stateless_media()->set( 'sm.mode', 'stateless' );
+        if( $wp_stateless_imagify_mode == 'ephemeral' ) {
+          ud_get_stateless_media()->set( 'sm.mode', 'ephemeral' );
         }
 
         $name = apply_filters( 'wp_stateless_file_name', basename( $file ) );

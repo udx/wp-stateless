@@ -70,8 +70,8 @@ namespace wpCloud\StatelessMedia {
        */
       public function sync_file($name, $absolutePath, $forced = false, $args = array() ){
         $args = wp_parse_args($args, array(
-          'stateless' => true, // whether to delete local file in stateless mode.
-          'download'  => false, // whether to delete local file in stateless mode.
+          'ephemeral' => true, // whether to delete local file in ephemeral mode.
+          'download'  => false, // whether to delete local file in ephemeral mode.
           'use_root'  => 0,
           'skip_db'   => false
         ));
@@ -94,7 +94,7 @@ namespace wpCloud\StatelessMedia {
 
         do_action( 'sm::pre::sync::nonMediaFiles', $name, $absolutePath); // , $media
 
-        if ( !$local_file_exists && ( $args['download'] || ud_get_stateless_media()->get( 'sm.mode' ) !== 'stateless' ) ) {
+        if ( !$local_file_exists && ( $args['download'] || ud_get_stateless_media()->get( 'sm.mode' ) !== 'ephemeral' || ud_get_stateless_media()->get( 'sm.mode' ) !== 'stateless' ) ) {
           // Try get it and save
           $result_code = $this->client->get_media( $name, true, $absolutePath );
 
@@ -123,8 +123,8 @@ namespace wpCloud\StatelessMedia {
           // Addon can hook this function to modify database after manual sync done.
           do_action( 'sm::synced::nonMediaFiles', $name, $absolutePath, $media); // , $media
 
-          // Stateless mode: we don't need the local version.
-          if($args['stateless'] == true && ud_get_stateless_media()->get( 'sm.mode' ) === 'stateless'){
+          // Ephemeral mode: we don't need the local version.
+          if($args['ephemeral'] == true && ud_get_stateless_media()->get( 'sm.mode' ) === 'ephemeral' ){
             unlink($absolutePath);
           }
 

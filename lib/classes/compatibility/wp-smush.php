@@ -22,7 +22,7 @@ namespace wpCloud\StatelessMedia {
             public function module_init($sm){
                 add_action('wp_smush_image_optimised', array($this, 'image_optimized'), 10, 2);
                 // Check if the file not exists for the given path then download
-                // Useful in Stateless mode
+                // Useful in Ephemeral mode
                 add_action( 'smush_file_exists', array( $this, 'maybe_download_file' ), 10, 3 );
 
                 // Skip sync when attachment is image, sync will be handled after image is optimized.

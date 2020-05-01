@@ -27,8 +27,8 @@ namespace wpCloud\StatelessMedia {
        * @param $sm
        */
       public function module_init( $sm ) {
-        // Only makes sense in CDN or Stateless modes
-        if ( in_array( $sm['mode'], ['cdn', 'stateless'] ) ) {
+        // Only makes sense in CDN or Ephemeral modes
+        if ( in_array( $sm['mode'], ['cdn', 'ephemeral'] ) ) {
           add_filter( 'get_user_metadata', array( $this, 'get_user_metadata' ), 10, 4 );
         }
       }

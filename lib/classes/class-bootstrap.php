@@ -187,7 +187,7 @@ namespace wpCloud\StatelessMedia {
               add_filter( 'sm:item:cacheControl', array( $this, 'override_cache_control' ) );
             }
 
-            if( $this->get( 'sm.mode' ) === 'cdn' || $this->get( 'sm.mode' ) === 'stateless' ) {
+            if( in_array( $this->get( 'sm.mode' ) , array( 'cdn', 'stateless', 'ephemeral' ) )  ) {
               add_filter( 'wp_get_attachment_image_attributes', array( $this, 'wp_get_attachment_image_attributes' ), 20, 3 );
               add_filter( 'wp_get_attachment_url', array( $this, 'wp_get_attachment_url' ), 20, 2 );
               add_filter( 'get_attached_file', array( $this, 'get_attached_file' ), 9, 2 );
@@ -204,7 +204,7 @@ namespace wpCloud\StatelessMedia {
               add_filter( 'wp_stateless_bucket_link', array( $this, 'wp_stateless_bucket_link' ) );
             }
 
-            if($this->get( 'sm.mode' ) === 'stateless'){
+            if($this->get( 'sm.mode' ) === 'ephemeral'){
               // Store attachment id in a static variable on 'intermediate_image_sizes_advanced' filter.
               // Utility::store_can_delete_attachment();
               if(function_exists('is_wp_version_compatible') && is_wp_version_compatible('5.3-RC4-46673')){
@@ -311,13 +311,13 @@ namespace wpCloud\StatelessMedia {
                 }
               }
 
-              // if no size found and mode is stateless and nothing to show for srcset item - unset that item
-              if (!$found && $this->get( 'sm.mode' ) === 'stateless') {
+              // if no size found and mode is ephemeral and nothing to show for srcset item - unset that item
+              if (!$found && $this->get( 'sm.mode' ) === 'ephemeral') {
                 $image = null;
               }
             } else {
               // if mode is stateless and nothing to show for srcset item - unset that item
-              if ( $this->get( 'sm.mode' ) === 'stateless' ) {
+              if ( $this->get( 'sm.mode' ) === 'ephemeral' ) {
                 $image = null;
               }
             }
@@ -1180,7 +1180,7 @@ namespace wpCloud\StatelessMedia {
         /**
          * Check if enabled
          */
-        if ( $this->get( 'sm.mode' ) !== 'cdn' && $this->get( 'sm.mode' ) !== 'stateless' ) {
+        if ( !in_array( $this->get( 'sm.mode' ), array( 'cdn', 'stateless', 'ephemeral' ) )) {
           return $false;
         }
 

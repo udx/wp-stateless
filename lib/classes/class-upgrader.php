@@ -159,6 +159,16 @@ namespace wpCloud\StatelessMedia {
 
           //forcing `Cache-Busting` for multisite to prevent replacing media with same filenames
           update_network_option( 1, 'sm_hashify_file_name', 'true' );
+
+
+          //updating mode name `stateless` to `ephemeral`
+          $sm_mode = get_option( 'sm_mode' );
+          if ($sm_mode == 'stateless') update_option( 'sm_mode', 'ephemeral' );
+
+          $sm_mode_site = get_site_option( 'sm_mode' );
+          if ($sm_mode_site == 'stateless') update_site_option( 'sm_mode', 'ephemeral' );
+
+
         }
 
         update_site_option( 'wp_sm_version', ud_get_stateless_media()->args[ 'version' ]  );

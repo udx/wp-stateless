@@ -138,7 +138,7 @@ namespace wpCloud\StatelessMedia {
             /**
              * Short-circuit filter.
              * We need to remove backup image from GCS when shortpixel tries to delete from server.
-             * We are returning true to short-circuit in stateless mood, because file not exist in server.
+             * We are returning true to short-circuit in ephemeral mode, because file not exist in server.
              */
             public function shortpixel_skip_delete_backups_and_webps($return, $paths){
                 if(empty($paths) || !is_array($paths)) return $return;
@@ -161,29 +161,29 @@ namespace wpCloud\StatelessMedia {
                     }
                 }
 
-                if ( ud_get_stateless_media()->get( 'sm.mode' ) == 'stateless' ) {
+                if ( ud_get_stateless_media()->get( 'sm.mode' ) == 'ephemeral' ) {
                     return true;
                 }
-                // When stateless mode isn't set backup files will be available in server. So no short-circuit.
+                // When ephemeral mode isn't set backup files will be available in server. So no short-circuit.
                 return $return;
             }
 
             /**
-             * Skip the original backup process in stateless mode.
+             * Skip the original backup process in ephemeral mode.
              */
             public function shortpixel_skip_backup( $return, $mainPath, $PATHs ){
-                if ( ud_get_stateless_media()->get( 'sm.mode' ) == 'stateless' ) {
+                if ( ud_get_stateless_media()->get( 'sm.mode' ) == 'ephemeral' ) {
                     return true;
                 }
                 return $return;
             }
 
             /**
-             * In stateless mode we need to take backup directly from original location.
+             * In ephemeral mode we need to take backup directly from original location.
              * Because we will skip the backup process of shortpixel.
              */
             public function wp_update_attachment_metadata( $metadata, $attachment_id ){
-                if ( ud_get_stateless_media()->get( 'sm.mode' ) == 'stateless' ) {
+                if ( ud_get_stateless_media()->get( 'sm.mode' ) == 'ephemeral' ) {
                     $backup_images = \WPShortPixelSettings::getOpt('wp-short-backup_images');
                     if($backup_images){
                         $this->sync_backup_file($attachment_id, $metadata, false, array('before_optimization' => true));
@@ -206,8 +206,8 @@ namespace wpCloud\StatelessMedia {
                     ud_get_stateless_media()->add_media( $metadata, $id, true, array('is_webp' => '.webp') );
                     remove_filter( 'upload_mimes', array($this, 'add_webp_mime'), 10 );
                 }
-                // Don't needed in stateless mode. In stateless mode the back will be sync once on wp_update_attachment_metadata filter.
-                if ( ud_get_stateless_media()->get( 'sm.mode' ) !== 'stateless' ) {
+                // Don't needed in ephemeral mode. In ephemeral mode the back will be sync once on wp_update_attachment_metadata filter.
+                if ( ud_get_stateless_media()->get( 'sm.mode' ) !== 'ephemeral' ) {
                     $this->sync_backup_file($id, $metadata, true);
                 }
             }
@@ -223,7 +223,7 @@ namespace wpCloud\StatelessMedia {
              * Disable default shortpixel restore and directly update image on GCS from backup copy in GCS.
              */
             public function shortpixel_skip_restore_image($return, $id = null){
-                if(ud_get_stateless_media()->get( 'sm.mode' ) === 'stateless'){
+                if(ud_get_stateless_media()->get( 'sm.mode' ) === 'ephemeral'){
                     $this->client = ud_get_stateless_media()->get_client();
                     $this->client->copy_media('localhost/ShortpixelBackups/wp-content/uploads/2019/04/htpps.png', 'localhost/2019/04/htpps.png');
                     return true;
@@ -239,7 +239,7 @@ namespace wpCloud\StatelessMedia {
             public function sync_backup_file($id, $metadata = null, $force = false, $args = array()){
                 $args = wp_parse_args($args, array(
                     'download'              => false, // whether to only download.
-                    'before_optimization'   => false, // whether to delete local file in stateless mode.
+                    'before_optimization'   => false, // whether to delete local file in ephemeral mode.
                 ));
                 
                 /* Get metadata in case if method is called directly. */
@@ -256,7 +256,7 @@ namespace wpCloud\StatelessMedia {
                     if($args['before_optimization']){
                         $upload_dir = wp_upload_dir();
                         $backup_path = $upload_dir['basedir'] . '/' . dirname($metadata[ 'file' ]);
-                        $args = array( 'stateless' => false );
+                        $args = array( 'ephemeral' => false );
                     }
                     
                     $absolutePath = trailingslashit($backup_path) . basename($metadata[ 'file' ]);
@@ -369,8 +369,8 @@ namespace wpCloud\StatelessMedia {
                             'metadata' => $_metadata
                         ) ));
 
-                        // Stateless mode: we don't need the local version.
-                        if(ud_get_stateless_media()->get( 'sm.mode' ) === 'stateless'){
+                        // ephemeral mode: we don't need the local version.
+                        if(ud_get_stateless_media()->get( 'sm.mode' ) === 'ephemeral'){
                             unlink($fullsizepath);
                         }
                     }
@@ -407,8 +407,8 @@ namespace wpCloud\StatelessMedia {
 
                             /* Break if we have errors. */
                             if( !is_wp_error( $media ) ) {
-                                // Stateless mode: we don't need the local version.
-                                if(ud_get_stateless_media()->get( 'sm.mode' ) === 'stateless'){
+                                // ephemeral mode: we don't need the local version.
+                                if(ud_get_stateless_media()->get( 'sm.mode' ) === 'ephemeral'){
                                     unlink($absolutePath);
                                 }
                             }

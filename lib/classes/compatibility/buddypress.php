@@ -54,8 +54,8 @@ namespace wpCloud\StatelessMedia {
                 $thumb_avatar_path = $wp_uploads_dir['basedir'] . '/' . apply_filters( 'wp_stateless_file_name', $thumb_avatar, false);
                 $thumb_avatar = apply_filters( 'wp_stateless_file_name', $thumb_avatar, 0);
 
-                do_action( 'sm:sync::syncFile', $full_avatar, $full_avatar_path, true, array('stateless' => false));
-                do_action( 'sm:sync::syncFile', $thumb_avatar, $thumb_avatar_path, true, array('stateless' => false));
+                do_action( 'sm:sync::syncFile', $full_avatar, $full_avatar_path, true, array('ephemeral' => false));
+                do_action( 'sm:sync::syncFile', $thumb_avatar, $thumb_avatar_path, true, array('ephemeral' => false));
 
             }
 
@@ -103,7 +103,7 @@ namespace wpCloud\StatelessMedia {
                 }
                 
                 if(strpos($name, "$root_dir/http") !== 0 && strpos($name, "http") !== 0 && $root_dir !== $name){
-                    do_action( 'sm:sync::syncFile', $name, $full_avatar_path, false, array('stateless' => false));
+                    do_action( 'sm:sync::syncFile', $name, $full_avatar_path, false, array('ephemeral' => false));
                     $url = ud_get_stateless_media()->get_gs_host() . '/' . $name;
                 }
                 return $url;
@@ -133,7 +133,7 @@ namespace wpCloud\StatelessMedia {
                 do_action( 'sm:sync::deleteFile', apply_filters( 'wp_stateless_file_name', $full_avatar, 0));
                 do_action( 'sm:sync::deleteFile', apply_filters( 'wp_stateless_file_name', $thumb_avatar, 0));
 
-                if(ud_get_stateless_media()->get( 'sm.mode' ) === 'stateless'){
+                if(ud_get_stateless_media()->get( 'sm.mode' ) === 'ephemeral'){
                     $return = false;
                 }
 
@@ -170,7 +170,7 @@ namespace wpCloud\StatelessMedia {
 
                         if(!empty($name) && $root_dir . "/" != $name){
                             $full_path = bp_attachments_get_attachment(false, $r);
-                            do_action( 'sm:sync::syncFile', $name, $full_path, false, array('stateless' => false));
+                            do_action( 'sm:sync::syncFile', $name, $full_path, false, array('ephemeral' => false));
                             $return = ud_get_stateless_media()->get_gs_host() . '/' . $name;
                         }
 

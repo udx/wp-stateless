@@ -3,7 +3,7 @@
  * Plugin Name: Advanced Custom Fields: Image Crop Add-on
  * Plugin URI: https://wordpress.org/plugins/acf-image-crop-add-on/
  *
- * Compatibility Description: Ensures compatibility with image cropping and WP-Stateless in the Stateless mode.
+ * Compatibility Description: Ensures compatibility with image cropping and WP-Stateless in the Ephemeral mode.
  *
  */
 
@@ -15,11 +15,11 @@ namespace wpCloud\StatelessMedia {
             protected $id = 'acf-image-crop';
             protected $title = 'Advanced Custom Fields Image Crop Addon';
             protected $constant = 'WP_STATELESS_COMPATIBILITY_ACFIC';
-            protected $description = 'Ensures compatibility with image cropping and WP-Stateless in the Stateless mode.';
+            protected $description = 'Ensures compatibility with image cropping and WP-Stateless in the Ephemeral mode.';
             protected $plugin_file = ['ACF-Image-Crop/acf-image-crop.php', 'acf-image-crop-add-on/acf-image-crop.php'];
 
             public function module_init($sm){
-                if ($sm['mode'] === 'stateless') {
+                if ($sm['mode'] === 'ephemeral') {
                     /**
                      * ACF image crop addons compatibility.
                      * We hook into image crops admin_ajax crop request and alter
@@ -30,7 +30,7 @@ namespace wpCloud\StatelessMedia {
                     add_action( 'wp_ajax_acf_image_crop_perform_crop', array( $this, 'acf_image_crop_perform_crop' ), 1 );
                     
                     /*
-                    * In stateless mode no local copy of images is available.
+                    * In ephemeral mode no local copy of images is available.
                     * So we need to filter full image path before generate_cropped_image() function uses to 
                     * get image editor using wp_get_image_editor.
                     * We will hook into acf-image-crop/full_image_path filter and return GCS link if available.
@@ -65,7 +65,7 @@ namespace wpCloud\StatelessMedia {
             }
 
             /*
-            * Only for stateless mode.
+            * Only for ephemeral mode.
             * Filter image link generate_cropped_image() uses to get image editor.
             * As no local copy of the image is available we need to filter the image path.
             *

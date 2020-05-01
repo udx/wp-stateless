@@ -248,8 +248,8 @@ namespace wpCloud\StatelessMedia {
 
           }
           else{
-            // Stateless mode: we don't need the local version.
-            if(ud_get_stateless_media()->get( 'sm.mode' ) === 'stateless'){
+            // Ephemeral mode: we don't need the local version.
+            if(ud_get_stateless_media()->get( 'sm.mode' ) === 'ephemeral'){
               unlink($fullsizepath);
             }
           }
