@@ -967,6 +967,28 @@ namespace wpCloud\StatelessMedia {
       public static function is_use_wildcards() {
         return isset( $_REQUEST[ 'use_wildcards' ] ) ? $_REQUEST[ 'use_wildcards' ] : false;
       }
+
+      public static function convert_to_byte($size){
+        $lastCharacter = \substr($size, -1);
+        $base = \strtoupper($lastCharacter);
+        if (!\ctype_digit($lastCharacter)) {
+          switch ($base) {
+            case 'B':
+              $size = (int) $size;
+              break;
+            case 'K':
+              $size = (int) $size * 1024 ** 1;
+              break;
+            case 'M':
+              $size = (int) $size * 1024 ** 2;
+              break;
+            case 'G':
+              $size = (int) $size * 1024 ** 3;
+              break;
+          }  
+        }
+        return $size;
+      }
     }
   }
 }

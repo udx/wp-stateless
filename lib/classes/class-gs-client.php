@@ -7,7 +7,7 @@
  */
 namespace wpCloud\StatelessMedia {
 
-  use Google_Client;
+  use wpCloud\StatelessMedia\Google_Client;
   use Google_Service_Storage;
   use WP_Error;
   use Exception;
@@ -28,7 +28,7 @@ namespace wpCloud\StatelessMedia {
       /**
        * Google Client manager
        *
-       * @var \Google_Client $client
+       * @var \wpCloud\StatelessMedia\Google_Client\Google_Client $client
        */
       public $client;
 
@@ -163,7 +163,9 @@ namespace wpCloud\StatelessMedia {
 
       /**
        * Add/Update Media Object to Bucket
-       *
+       * 
+       * https://stackoverflow.com/questions/26872851/resumable-uploading-to-google-cloud-storage-using-php-api
+       * 
        * @author peshkov@UD
        * @param array $args
        * @return bool
@@ -211,7 +213,7 @@ namespace wpCloud\StatelessMedia {
             return get_object_vars( $media );
           }
 
-          $media = new \wpCloud\StatelessMedia\Google_Client\Google_Service_Storage_StorageObject();
+          $media = new Google_Client\Google_Service_Storage_StorageObject();
           $media->setName($name);
           $media->setMetadata($args['metadata']);
 
@@ -227,16 +229,32 @@ namespace wpCloud\StatelessMedia {
             $media->getContentDisposition($args['contentDisposition']);
           }
 
-          /* Upload Media file to Google storage */
-          $media = $this->service->objects->insert($this->bucket, $media, array_filter(array(
-            'data' => file_get_contents($args['absolutePath']),
-            'uploadType' => 'media',
-            'mimeType' => $args['mimeType'],
-            'predefinedAcl' => 'bucketOwnerFullControl',
-          )));
+          $file_size = filesize($args['absolutePath']);
+          $chunkSizeBytes = $this->get_chunk_size();
 
-          $this->mediaInsertACL($media);
+          $this->client->setDefer(true);
 
+          $filetoupload = array('name' => $name, 'uploadType' => 'resumable');
+          $request = $this->service->objects->insert($this->bucket, $media, $filetoupload);
+          $uploader = new Google_Client\Google_Http_MediaFileUpload($this->client, $request, $args['mimeType'], null, true, $chunkSizeBytes);
+          $uploader->setFileSize($file_size);
+          $handle = fopen($args['absolutePath'], "rb");
+
+          $status = false;
+          while (!$status && !feof($handle)) {
+              $chunk = fread($handle, $chunkSizeBytes);
+              $status = $uploader->nextChunk($chunk);
+          }
+
+          $media = false;
+          if($status != false) {
+              $media = $status;
+          }
+
+          fclose($handle);
+          // Reset to the client to execute requests immediately in the future.
+          $this->client->setDefer(false);
+          $this->mediaInsertACL($name, $media, $args);
         } catch( Exception $e ) {
           return new WP_Error( 'sm_error', $e->getMessage() );
         }
@@ -244,17 +262,37 @@ namespace wpCloud\StatelessMedia {
       }
 
       /**
+       * 
+       */
+      public function get_chunk_size(){
+        if(defined('WP_STATELESS_MEDIA_UPLOAD_CHUNK_SIZE')){
+          return WP_STATELESS_MEDIA_UPLOAD_CHUNK_SIZE;
+        }
+        $memory_limit = ini_get('memory_limit');
+        if($memory_limit){
+          $memory_limit = Utility::convert_to_byte($memory_limit);
+          $memory_get_usage = memory_get_usage();
+          $free_memory = $memory_limit - $memory_get_usage;
+        }
+        else{
+          $free_memory = 10 * 1024 * 1024; // Default chunk size 10MB
+        }
+
+        return $free_memory * 0.8;
+      }
+
+      /**
        *
        *
        */
-      public function mediaInsertACL($media){
+      public function mediaInsertACL($name, $media = array(), $agrs = array()){
         /* Make Media Public READ for all on success */
-        if (!empty($media->name)) {
+        if (!empty($name)) {
           $acl = new \wpCloud\StatelessMedia\Google_Client\Google_Service_Storage_ObjectAccessControl();
           $acl->setEntity('allUsers');
           $acl->setRole('READER');
-
-          $this->service->objectAccessControls->insert($this->bucket, $media->name, $acl);
+          $acl = apply_filters( 'wp_stateless_media_acl', $acl, $name, $media, $agrs );
+          $this->service->objectAccessControls->insert($this->bucket, $name, $acl);
         }
       }
 
