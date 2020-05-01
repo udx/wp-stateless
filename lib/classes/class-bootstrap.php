@@ -719,8 +719,7 @@ namespace wpCloud\StatelessMedia {
         if ( current_user_can( 'upload_files' ) && $this->get( 'sm.mode' ) !== 'disabled' ) {
           if ( $post && 'attachment' == $post->post_type && 'image/' == substr( $post->post_mime_type, 0, 6 ) ) {
             $sync = '<a href="javascript:;" data-type="image" data-id="'.$post->ID.'" data-size="'.$size.'" data-reload_page="'.$button.'"
-                   class="sm_inline_sync '.($button ? 'button button-primary button-large' : '').'">
-                   '. ( $use_icon ? "<i class='dashicons dashicons-image-rotate'></i>" : __( 'Regenerate and Sync with GCS', ud_get_stateless_media()->domain )).'</a>';
+                   class="sm_inline_sync '.($button ? 'button button-primary button-large' : '').'">'. ( $use_icon ? "<i class='dashicons dashicons-image-rotate'></i>" : __( 'Regenerate and Sync with GCS', ud_get_stateless_media()->domain )).'</a>';
           }
           if ( $post && 'attachment' == $post->post_type && 'image/' != substr( $post->post_mime_type, 0, 6 ) ) {
             $sync = '<a href="javascript:;" data-type="other" data-id="'.$post->ID.'" data-size="'.$size.'" data-reload_page="'.$button.'"
