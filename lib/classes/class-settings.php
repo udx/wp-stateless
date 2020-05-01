@@ -93,35 +93,35 @@ namespace wpCloud\StatelessMedia {
         $site_url['path'] = isset($site_url['path']) ? $site_url['path'] : '';
         $this->wildcards = array(
           '%date_year%'            => [
-                                    date('Y'),
-                                    __("year", $this->bootstrap->domain),
-                                    __("The year of the post, four digits, for example 2004.", $this->bootstrap->domain),
-                                 ],
+            date('Y'),
+            __("year", $this->bootstrap->domain),
+            __("The year of the post, four digits, for example 2004.", $this->bootstrap->domain),
+          ],
           '%date_month%'           => [
-                                    date('m'),
-                                    __("monthnum", $this->bootstrap->domain),
-                                    __("Month of the year, for example 05.", $this->bootstrap->domain),
-                                 ],
+            date('m'),
+            __("monthnum", $this->bootstrap->domain),
+            __("Month of the year, for example 05.", $this->bootstrap->domain),
+          ],
           '%site_id%'         => [
-                                    get_current_blog_id(),
-                                    __("site id", $this->bootstrap->domain),
-                                    __("Site ID, for example 1.", $this->bootstrap->domain),
-                                 ],
+            get_current_blog_id(),
+            __("site id", $this->bootstrap->domain),
+            __("Site ID, for example 1.", $this->bootstrap->domain),
+          ],
           '%site_url%'        => [
-                                    trim( $site_url['host'] . $site_url['path'], '/ ' ),
-                                    __("site url", $this->bootstrap->domain),
-                                    __("Site URL, for example example.com/site-1.", $this->bootstrap->domain),
-                                 ],
+            trim( $site_url['host'] . $site_url['path'], '/ ' ),
+            __("site url", $this->bootstrap->domain),
+            __("Site URL, for example example.com/site-1.", $this->bootstrap->domain),
+          ],
           '%site_url_host%'   => [
-                                    trim( $site_url['host'], '/ ' ),
-                                    __("host name", $this->bootstrap->domain),
-                                    __("Host name, for example example.com.", $this->bootstrap->domain),
-                                 ],
+            trim( $site_url['host'], '/ ' ),
+            __("host name", $this->bootstrap->domain),
+            __("Host name, for example example.com.", $this->bootstrap->domain),
+          ],
           '%site_url_path%'   => [
-                                    trim( $site_url['path'], '/ ' ),
-                                    __("site path", $this->bootstrap->domain),
-                                    __("Site path, for example site-1.", $this->bootstrap->domain),
-                                 ],
+            trim( $site_url['path'], '/ ' ),
+            __("site path", $this->bootstrap->domain),
+            __("Site path, for example site-1.", $this->bootstrap->domain),
+          ],
         );
       }
 
@@ -343,7 +343,7 @@ namespace wpCloud\StatelessMedia {
           }
         }
         //removing all special chars except slash
-        $root_dir = preg_replace('/[^A-Za-z0-9\/_]/', '', $root_dir);
+        $root_dir = preg_replace('/[^A-Za-z0-9\./_]/', '', $root_dir);
         $root_dir = preg_replace('/(\/+)/', '/', $root_dir);
         $root_dir = trim( $root_dir, '/ ' ); // Remove any forward slash and empty space.
 
