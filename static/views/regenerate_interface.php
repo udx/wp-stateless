@@ -37,7 +37,7 @@
         </label>
       </div>
       <?php endif;?>
-
+      <?php do_action('stateless_sync_mode');?>
     </div>
 
     <div ng-if="action == 'regenerate_images' && progresses.images || action == 'sync_non_images' && progresses.other">
