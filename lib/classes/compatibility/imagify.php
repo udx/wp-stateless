@@ -30,7 +30,7 @@ namespace wpCloud\StatelessMedia {
         //hook for Imagify since version 1.9
         add_filter( 'wp_stateless_skip_remove_media', array( $this, 'skip_remove_media' ), 10, 5 );
         add_action( 'imagify_after_optimize_file', array( $this, 'imagify_after_optimize_file' ), 10, 2 );
-        //add_action( 'imagify_before_optimize_file', array($this, 'fix_missing_file'), 10, 2 );
+        add_action( 'imagify_before_optimize_size', array($this, 'imagify_before_optimize_size'), 10, 7 );
 
         // if imagify implement this filter then enable it.
         add_filter( 'imagify_has_backup', array( $this, 'imagify_has_backup' ), 10, 2 );
@@ -255,6 +255,17 @@ namespace wpCloud\StatelessMedia {
           do_action( 'sm:sync::syncFile', $name, $file, true, array( 'use_root' => true, 'skip_db' => ( substr( $name, -4 ) == "webp" ? false : true ) ) );
           remove_filter( 'upload_mimes', array( $this, 'add_webp_mime' ), 10 );
         }
+      }
+
+      /**
+       * 
+       */
+      public function imagify_before_optimize_size( $return, $process, $file, $thumb_size, $optimization_level, $webp, $is_disabled ){
+        $full_size_path = $file->get_path();
+        $name = apply_filters( 'wp_stateless_file_name', basename($full_size_path) );
+        do_action( 'sm:sync::syncFile', $name, $full_size_path, true, ['download' => true] );
+        // error_log("\n\ndo_action( 'sm:sync::syncFile', $name, $full_size_path, true, ['download' => true] );");
+        return $return;
       }
 
 
