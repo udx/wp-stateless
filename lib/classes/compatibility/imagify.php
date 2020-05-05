@@ -258,9 +258,19 @@ namespace wpCloud\StatelessMedia {
       }
 
       /**
-       * 
+       * @param $return
+       * @param $process
+       * @param $file
+       * @param $thumb_size
+       * @param $optimization_level
+       * @param $webp
+       * @param $is_disabled
+       * @return mixed
        */
       public function imagify_before_optimize_size( $return, $process, $file, $thumb_size, $optimization_level, $webp, $is_disabled ){
+
+        $attachment_id = $this->getProperties($this->getProperties($this->getProperties($process)['data'])['media'])['id'];
+
         $full_size_path = $file->get_path();
         $name = apply_filters( 'wp_stateless_file_name', basename($full_size_path) );
         do_action( 'sm:sync::syncFile', $name, $full_size_path, true, ['download' => true] );
@@ -268,6 +278,27 @@ namespace wpCloud\StatelessMedia {
         return $return;
       }
 
+      /**
+       * Get properties from protected value
+       * @param $process
+       * @return array
+       */
+      public function getProperties($process) {
+        $properties = array();
+        try {
+          $rc = new \ReflectionClass($process);
+          do {
+            $rp = array();
+            /* @var $p \ReflectionProperty */
+            foreach ($rc->getProperties() as $p) {
+              $p->setAccessible(true);
+              $rp[$p->getName()] = $p->getValue($process);
+            }
+            $properties = array_merge($rp, $properties);
+          } while ($rc = $rc->getParentClass());
+        } catch (\ReflectionException $e) { }
+        return $properties;
+      }
 
     }
 
