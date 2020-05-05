@@ -6,6 +6,9 @@
  */
 namespace wpCloud\StatelessMedia {
 
+  use Google\Cloud\Storage\StorageClient;
+  use Google\Auth\HttpHandler\HttpHandlerFactory;
+
   if( !class_exists( 'wpCloud\StatelessMedia\Bootstrap' ) ) {
 
     final class Bootstrap extends \UsabilityDynamics\WP\Bootstrap_Plugin {
@@ -141,7 +144,7 @@ namespace wpCloud\StatelessMedia {
         add_action( 'wp_delete_site', array($this, 'wp_delete_site'));
 
         /* Initialize plugin only if Mode is not 'disabled'. */
-        if ( $this->get( 'sm.mode' ) !== 'disabled' ) {
+        if ( $this->get( 'sm.mode' ) !== 'disabled' && $this->get( 'sm.mode' ) !== 'stateless' ) {
 
           /**
            * Determine if we have issues with connection to Google Storage Bucket
@@ -253,7 +256,95 @@ namespace wpCloud\StatelessMedia {
             do_action('sm::module::init', $this->get( 'sm' ));
           }
 
+        } elseif ( $this->get( 'sm.mode' ) == 'stateless' ) {
+          /**
+           * Replacing local path to gs:// for using it on StreamWrapper
+           */
+          add_filter('upload_dir', array( $this, 'filter_upload_dir' ), 99);
+
+          /**
+           * Stateless mode working only with GD library
+           */
+          add_filter( 'wp_image_editors', array($this, 'select_wp_image_editors') );
+
+          /**
+           * Add/Edit Media
+           *
+           * Once added or edited we can get into Attachment ID then get all image sizes and sync them with GS
+           * We can't use this. That's prevent removing this filter.
+           */
+          add_filter( 'wp_update_attachment_metadata', array( 'wpCloud\StatelessMedia\Utility', 'add_media' ), 999, 2 );
+
+          //init GS client
+          $gs_client = $this->init_gs_client();
+          $gs_client->registerStreamWrapper();
         }
+      }
+
+      /**
+       * The default $editors value:
+       *
+       * array( 'WP_Image_Editor_Imagick', 'WP_Image_Editor_GD' )
+       * @param $editors
+       * @return array
+       */
+      function select_wp_image_editors( $editors ) {
+        return array( 'WP_Image_Editor_GD' );
+      }
+
+      /**
+       * @param callable|null $httpHandler
+       * @return StorageClient
+       * @throws \Exception
+       */
+      public function init_gs_client( callable $httpHandler = null ) {
+        // May be Loading Google SDK....
+        if( !class_exists( 'HttpHandlerFactory' ) ) {
+          include_once( ud_get_stateless_media()->path('lib/Google/vendor/autoload.php', 'dir') );
+        }
+
+        $httpHandler = $httpHandler ? $httpHandler : HttpHandlerFactory::build();
+
+        return new StorageClient([
+          'keyFile'     => json_decode($this->settings->get('sm.key_json'), true),
+          'httpHandler' => function ($request, $options) use ($httpHandler) {
+            $xGoogApiClientHeader = $request->getHeaderLine('x-goog-api-client');
+            $request = $request->withHeader(
+              'x-goog-api-client',
+              $xGoogApiClientHeader
+            );
+
+            return call_user_func_array($httpHandler, [$request, $options]);
+          },
+          'authHttpHandler' => HttpHandlerFactory::build(),
+        ]);
+      }
+
+      /**
+       * Replacing root dir with GCS path
+       * @param $uploads
+       * @return array
+       */
+      public function filter_upload_dir( $uploads ) {
+        //Bucket
+        $bucket = $this->get( 'sm.bucket' );
+
+        //Bucket folder path
+        $root_dir = $this->get( 'sm.root_dir' );
+        $root_dir = apply_filters("wp_stateless_handle_root_dir", $root_dir);
+
+        $basedir = rtrim(sprintf('gs://%s/%s', $bucket, $root_dir), '/');
+        $baseurl = rtrim(sprintf('https://storage.googleapis.com/%s/%s', $bucket, $root_dir ), '/');
+
+        $uploads = array(
+          'url' => rtrim($baseurl . $uploads['subdir'], '/'),
+          'path' => $basedir . $uploads['subdir'],
+          'subdir' => $uploads['subdir'],
+          'basedir' => $basedir,
+          'baseurl' => $baseurl,
+          'error' => false,
+        );
+        return $uploads;
       }
 
       /**

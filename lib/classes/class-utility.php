@@ -167,6 +167,7 @@ namespace wpCloud\StatelessMedia {
        */
       public static function add_media( $metadata, $attachment_id, $force = false, $args = array() ) {
         global $stateless_synced_full_size;
+        $sm_mode = ud_get_stateless_media()->get( 'sm.mode' );
         $file = '';
         $upload_dir = wp_upload_dir();
         $args = wp_parse_args( $args, array( 'no_thumb' => false, 'is_webp' => '', // expected value ".webp";
@@ -203,7 +204,7 @@ namespace wpCloud\StatelessMedia {
 
         $client = ud_get_stateless_media()->get_client();
 
-        if( !is_wp_error( $client ) && !$check ) {
+        if( ( !is_wp_error( $client ) || $sm_mode == 'stateless' ) && !$check ) {
 
           $image_host          = ud_get_stateless_media()->get_gs_host();
           $bucketLink          = apply_filters('wp_stateless_bucket_link', $image_host);
@@ -309,33 +310,42 @@ namespace wpCloud\StatelessMedia {
                 $_metadata[ 'source-id' ] = md5( $attachment_id . ud_get_stateless_media()->get( 'sm.bucket' ) );
               }
 
-              /* Add default image */
-              $media = $client->add_media( array_filter( array(
-                'force'              => $img['is_thumb'] ? $force : $force && $stateless_synced_full_size != $attachment_id,
-                'name'               => $img['gs_name'],
-                'is_webp'            => $args['is_webp'],
-                'mimeType'           => $img['mime_type'],
-                'metadata'           => $_metadata,
-                'absolutePath'       => $img['path'],
-                'cacheControl'       => $_cacheControl,
-                'contentDisposition' => $_contentDisposition,
-              ) ));
+              if ($sm_mode == 'stateless') {
+                $root_dir = ud_get_stateless_media()->get( 'sm.root_dir' );
+                $root_dir = apply_filters("wp_stateless_handle_root_dir", $root_dir);
 
-              /* Break if we have errors. */
-              if( !is_wp_error( $media ) ) {
-              // @note We don't add storageClass because it's same as parent...
-              $cloud_meta = self::generate_cloud_meta( $cloud_meta, $media, $size, $img, $bucketLink );
+                $img['gs_name'] = trailingslashit($root_dir).$img['gs_name'];
 
-              // Ephemeral mode: we don't need the local version.
-              // Except when uploading the full size image first.
-              if( self::can_delete_attachment( $attachment_id, $args ) && !$skip_remove_media ) {
-                unlink( $img[ 'path' ] );
-              }
+                // @note We don't add storageClass because it's same as parent...
+                $cloud_meta = self::generate_cloud_meta($cloud_meta, array(), $size, $img, $bucketLink);
+              } else {
+                /* Add default image */
+                $media = $client->add_media( array_filter( array(
+                  'force'              => $img['is_thumb'] ? $force : $force && $stateless_synced_full_size != $attachment_id,
+                  'name'               => $img['gs_name'],
+                  'is_webp'            => $args['is_webp'],
+                  'mimeType'           => $img['mime_type'],
+                  'metadata'           => $_metadata,
+                  'absolutePath'       => $img['path'],
+                  'cacheControl'       => $_cacheControl,
+                  'contentDisposition' => $_contentDisposition,
+                ) ));
 
-                // Setting
-                if( empty( self::$synced_sizes[ $attachment_id ][ $size ] ) ) {
-                  self::$synced_sizes[ $attachment_id ][ $size ] = true;
+                /* Break if we have errors. */
+                if( !is_wp_error( $media ) ) {
+                  // @note We don't add storageClass because it's same as parent...
+                  $cloud_meta = self::generate_cloud_meta( $cloud_meta, $media, $size, $img, $bucketLink );
+
+                  // Ephemeral mode: we don't need the local version.
+                  // Except when uploading the full size image first.
+                  if( self::can_delete_attachment( $attachment_id, $args ) && !$skip_remove_media ) {
+                    unlink( $img[ 'path' ] );
+                  }
                 }
+              }
+              // Setting
+              if( empty( self::$synced_sizes[ $attachment_id ][ $size ] ) ) {
+                self::$synced_sizes[ $attachment_id ][ $size ] = true;
               }
             }
           }
@@ -492,16 +502,16 @@ namespace wpCloud\StatelessMedia {
           $cloud_meta[ 'sizes' ][ $image_size ]['name']         = $gs_name;
           $cloud_meta[ 'sizes' ][ $image_size ]['fileLink']     = $fileLink;
           $cloud_meta[ 'sizes' ][ $image_size ]['mediaLink']    = $media[ 'mediaLink' ];
-          $cloud_meta[ 'sizes' ][ $image_size ]['width']        = $media[ 'metadata' ][ 'width' ];
-          $cloud_meta[ 'sizes' ][ $image_size ]['height']       = $media[ 'metadata' ][ 'height' ];
+          $cloud_meta[ 'sizes' ][ $image_size ]['width']        = ($media[ 'metadata' ][ 'width' ]) ? $media[ 'metadata' ][ 'width' ] : $img[ 'width' ];
+          $cloud_meta[ 'sizes' ][ $image_size ]['height']       = ($media[ 'metadata' ][ 'height' ]) ? $media[ 'metadata' ][ 'width' ] : $img[ 'height' ];
         }
         else{
           // cloud meta for full size image.
           $cloud_meta['name']                   = $gs_name;
           $cloud_meta['fileLink']               = $fileLink;
           $cloud_meta['mediaLink']              = $media[ 'mediaLink' ];
-          $cloud_meta['width']                  = $media[ 'metadata' ][ 'width' ];
-          $cloud_meta['height']                 = $media[ 'metadata' ][ 'height' ];
+          $cloud_meta['width']                  = ($media[ 'metadata' ][ 'width' ]) ? $media[ 'metadata' ][ 'width' ] : $img[ 'width' ];
+          $cloud_meta['height']                 = ($media[ 'metadata' ][ 'height' ]) ? $media[ 'metadata' ][ 'width' ] : $img[ 'height' ];
           $cloud_meta['bucket']                 = ud_get_stateless_media()->get( 'sm.bucket' );
           $cloud_meta['sm_version']             = $version;
         }
@@ -968,6 +978,10 @@ namespace wpCloud\StatelessMedia {
         return isset( $_REQUEST[ 'use_wildcards' ] ) ? $_REQUEST[ 'use_wildcards' ] : false;
       }
 
+      /**
+       * @param $size
+       * @return float|int
+       */
       public static function convert_to_byte($size){
         $lastCharacter = \substr($size, -1);
         $base = \strtoupper($lastCharacter);
@@ -985,7 +999,7 @@ namespace wpCloud\StatelessMedia {
             case 'G':
               $size = (int) $size * 1024 ** 3;
               break;
-          }  
+          }
         }
         return $size;
       }

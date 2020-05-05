@@ -76,6 +76,9 @@
                                 <p class="sm-mode">
                                     <label for="sm_mode_ephemeral"><input ng-model="sm.mode" id="sm_mode_ephemeral" type="radio" name="sm[mode]" value="ephemeral" ng-checked="sm.mode == 'ephemeral'" ng-disabled="sm.readonly.mode"><?php _e( 'Ephemeral', ud_get_stateless_media()->domain ); ?><small class="description"><?php _e( 'Store and serve media files with Google Cloud Storage only. Media files are not stored locally, but local storage is used temporarily for processing and is required for certain compatibles.', ud_get_stateless_media()->domain ); ?></small></label>
                                 </p>
+                                <p class="sm-mode">
+                                    <label for="sm_mode_stateless"><input ng-model="sm.mode" id="sm_mode_stateless" type="radio" name="sm[mode]" value="stateless" ng-checked="sm.mode == 'stateless'" ng-disabled="sm.readonly.mode"><?php _e( 'Stateless', ud_get_stateless_media()->domain ); ?><small class="description"><?php _e( 'Store and serve media files with Google Cloud Storage only. Media files are not stored locally.', ud_get_stateless_media()->domain ); ?></small></label>
+                                </p>
                                 <hr>
 
                                 <h4><?php _e( 'File URL Replacement', ud_get_stateless_media()->domain ); ?></h4>
