@@ -977,13 +977,13 @@ namespace wpCloud\StatelessMedia {
               $size = (int) $size;
               break;
             case 'K':
-              $size = (int) $size * 1024 ** 1;
+              $size = (int) $size * 1024;
               break;
             case 'M':
-              $size = (int) $size * 1024 ** 2;
+              $size = (int) $size * pow(1024, 2);
               break;
             case 'G':
-              $size = (int) $size * 1024 ** 3;
+              $size = (int) $size * pow(1024, 3);
               break;
           }  
         }
