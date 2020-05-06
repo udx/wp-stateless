@@ -204,7 +204,7 @@ namespace wpCloud\StatelessMedia {
 
         $client = ud_get_stateless_media()->get_client();
 
-        if( ( !is_wp_error( $client ) || $sm_mode == 'stateless' ) && !$check ) {
+        if( ( !is_wp_error( $client ) || ( $sm_mode == 'stateless' && !wp_doing_ajax() ) ) && !$check ) {
 
           $image_host          = ud_get_stateless_media()->get_gs_host();
           $bucketLink          = apply_filters('wp_stateless_bucket_link', $image_host);
@@ -310,7 +310,7 @@ namespace wpCloud\StatelessMedia {
                 $_metadata[ 'source-id' ] = md5( $attachment_id . ud_get_stateless_media()->get( 'sm.bucket' ) );
               }
 
-              if ($sm_mode == 'stateless') {
+              if ( $sm_mode == 'stateless' && !wp_doing_ajax() ) {
                 $root_dir = ud_get_stateless_media()->get( 'sm.root_dir' );
                 $root_dir = apply_filters("wp_stateless_handle_root_dir", $root_dir);
 

@@ -92,6 +92,7 @@ namespace wpCloud\StatelessMedia {
 
         // Parse feature falgs, set constants.
         $this->parse_feature_flags();
+        $sm_mode = $this->get( 'sm.mode' );
 
         new SyncNonMedia();
 
@@ -144,7 +145,7 @@ namespace wpCloud\StatelessMedia {
         add_action( 'wp_delete_site', array($this, 'wp_delete_site'));
 
         /* Initialize plugin only if Mode is not 'disabled'. */
-        if ( $this->get( 'sm.mode' ) !== 'disabled' && $this->get( 'sm.mode' ) !== 'stateless' ) {
+        if ( ($sm_mode !== 'disabled' && $sm_mode !== 'stateless') || ( $sm_mode === 'stateless' && wp_doing_ajax() )) {
 
           /**
            * Determine if we have issues with connection to Google Storage Bucket
@@ -190,12 +191,12 @@ namespace wpCloud\StatelessMedia {
               add_filter( 'sm:item:cacheControl', array( $this, 'override_cache_control' ) );
             }
 
-            if( in_array( $this->get( 'sm.mode' ) , array( 'cdn', 'ephemeral' ) )  ) {
+            if( in_array( $sm_mode , array( 'cdn', 'ephemeral' ) )  ) {
               //init additional filters
               $this->_init_filters();
             }
 
-            if($this->get( 'sm.mode' ) === 'ephemeral'){
+            if( $sm_mode === 'ephemeral'){
               // Store attachment id in a static variable on 'intermediate_image_sizes_advanced' filter.
               // Utility::store_can_delete_attachment();
               if(function_exists('is_wp_version_compatible') && is_wp_version_compatible('5.3-RC4-46673')){
@@ -244,7 +245,7 @@ namespace wpCloud\StatelessMedia {
             do_action('sm::module::init', $this->get( 'sm' ));
           }
 
-        } elseif ( $this->get( 'sm.mode' ) == 'stateless' ) {
+        } elseif ( $sm_mode == 'stateless' ) {
           /**
            * Replacing local path to gs:// for using it on StreamWrapper
            */
