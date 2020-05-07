@@ -100,10 +100,10 @@ namespace wpCloud\StatelessMedia {
         add_action( 'rest_api_init', array( $this, 'api_init' ) );
 
         // Register meta boxes and fields for media edit page
-        add_filter( 'rwmb_meta_boxes', array( $this, 'mb_attachment_meta_box_callback' ) );
+        add_filter( 'rwmb_meta_boxes', array( $this, 'attachment_meta_box_callback' ) );
 
         // Register meta boxes and fields for media modal page
-        add_filter( 'attachment_fields_to_edit', array( $this, 'mb_attachment_modal_meta_box_callback' ), 11, 2 );
+        add_filter( 'attachment_fields_to_edit', array( $this, 'attachment_modal_meta_box_callback' ), 11, 2 );
 
         /**
          * Init hook
@@ -171,6 +171,85 @@ namespace wpCloud\StatelessMedia {
            */
           if( !$this->has_errors() ) {
 
+            if( in_array( $sm_mode , array( 'cdn', 'ephemeral' ) )  ) {
+              /**
+               * init main filters
+               */
+              $this->_init_filters( 'main' );
+            }
+
+            if( $sm_mode === 'ephemeral'){
+              // Store attachment id in a static variable on 'intermediate_image_sizes_advanced' filter.
+              // Utility::store_can_delete_attachment();
+              if(function_exists('is_wp_version_compatible') && is_wp_version_compatible('5.3-RC4-46673')){
+                add_filter( 'intermediate_image_sizes_advanced', array('wpCloud\StatelessMedia\Utility', 'store_can_delete_attachment'), 10, 3 );
+              }
+            }
+
+            if ( $this->get( 'sm.delete_remote' ) == 'true' ) {
+              /**
+               * On physical file deletion we remove any from GS
+               * We need priority grater than default (10) for ShortPixel plugin to work properly.
+               */
+              add_filter('delete_attachment', array($this, 'remove_media'), 11);
+            }
+
+            /**
+             * init client's filters
+             */
+            $this->_init_filters( 'client' );
+          }
+
+        } elseif ( $sm_mode == 'stateless' ) {
+          /**
+           * Replacing local path to gs:// for using it on StreamWrapper
+           */
+          add_filter('upload_dir', array( $this, 'filter_upload_dir' ), 99);
+
+          /**
+           * Stateless mode working only with GD library
+           */
+          add_filter( 'wp_image_editors', array($this, 'select_wp_image_editors') );
+
+          //init GS client
+          $gs_client = $this->init_gs_client();
+          $gs_client->registerStreamWrapper();
+
+          /**
+           * init client's filters
+           */
+          $this->_init_filters( 'client' );
+
+          /**
+           * init main filters
+           */
+          $this->_init_filters( 'main' );
+        }
+      }
+
+      /**
+       * Init additional filters which uses on all modes
+       * @param string $type
+       */
+      private function _init_filters ( $type = '' ) {
+        switch( $type) {
+          case 'main':
+            add_filter( 'wp_get_attachment_image_attributes', array( $this, 'wp_get_attachment_image_attributes' ), 20, 3 );
+            add_filter( 'wp_get_attachment_url', array( $this, 'wp_get_attachment_url' ), 20, 2 );
+            add_filter( 'get_attached_file', array( $this, 'get_attached_file' ), 9, 2 );
+            add_filter( 'attachment_url_to_postid', array( $this, 'attachment_url_to_postid' ), 20, 2 );
+
+            if( $this->get( 'sm.body_rewrite' ) == 'true' || $this->get( 'sm.body_rewrite' ) == 'enable_editor' ) {
+              add_filter( 'the_content', array( $this, 'the_content_filter' ), 99 );
+            }
+
+            if( $this->get( 'sm.body_rewrite' ) == 'true' || $this->get( 'sm.body_rewrite' ) == 'enable_meta' ) {
+              add_filter( 'get_post_metadata', array( $this, 'post_metadata_filter' ), 2, 4 );
+            }
+
+            add_filter( 'wp_stateless_bucket_link', array( $this, 'wp_stateless_bucket_link' ) );
+            break;
+          case 'client':
             /**
              * Add custom actions to media rows
              */
@@ -191,26 +270,7 @@ namespace wpCloud\StatelessMedia {
               add_filter( 'sm:item:cacheControl', array( $this, 'override_cache_control' ) );
             }
 
-            if( in_array( $sm_mode , array( 'cdn', 'ephemeral' ) )  ) {
-              //init additional filters
-              $this->_init_filters();
-            }
-
-            if( $sm_mode === 'ephemeral'){
-              // Store attachment id in a static variable on 'intermediate_image_sizes_advanced' filter.
-              // Utility::store_can_delete_attachment();
-              if(function_exists('is_wp_version_compatible') && is_wp_version_compatible('5.3-RC4-46673')){
-                add_filter( 'intermediate_image_sizes_advanced', array($this, 'store_can_delete_attachment'), 10, 3 );
-              }
-            }
-
             add_filter( 'wp_stateless_file_name', array( $this, 'handle_root_dir' ), 10, 5 );
-
-            /**
-             * Rewrite Image URLS
-             */
-            add_filter( 'image_downsize', array( $this, 'image_downsize' ), 99, 3 );
-            add_filter( 'wp_calculate_image_srcset', array($this, 'wp_calculate_image_srcset'), 10, 5 );
 
             /**
              * Extends metadata by adding GS information.
@@ -233,69 +293,21 @@ namespace wpCloud\StatelessMedia {
               add_filter( 'intermediate_image_sizes_advanced', array( $this, 'before_intermediate_image_sizes' ), 10, 2 );
             }
 
-            if ( $this->get( 'sm.delete_remote' ) == 'true' ) {
-              /**
-               * On physical file deletion we remove any from GS
-               * We need priority grater than default (10) for ShortPixel plugin to work properly.
-               */
-              add_filter('delete_attachment', array($this, 'remove_media'), 11);
-            }
+            /**
+             * Rewrite Image URLS
+             */
+            add_filter( 'image_downsize', array( $this, 'image_downsize' ), 99, 3 );
+            add_filter( 'wp_calculate_image_srcset', array($this, 'wp_calculate_image_srcset'), 10, 5 );
 
-            // Trigger module initialization and registration.
+            /**
+             * Trigger module initialization and registration.
+             */
             do_action('sm::module::init', $this->get( 'sm' ));
-          }
 
-        } elseif ( $sm_mode == 'stateless' ) {
-          /**
-           * Replacing local path to gs:// for using it on StreamWrapper
-           */
-          add_filter('upload_dir', array( $this, 'filter_upload_dir' ), 99);
-
-          /**
-           * Stateless mode working only with GD library
-           */
-          add_filter( 'wp_image_editors', array($this, 'select_wp_image_editors') );
-
-          /**
-           * Extends metadata by adding GS information.
-           */
-          add_filter( 'wp_get_attachment_metadata', array( $this, 'wp_get_attachment_metadata' ), 10, 2 );
-
-          /**
-           * Add/Edit Media
-           *
-           * Once added or edited we can get into Attachment ID then get all image sizes and sync them with GS
-           * We can't use this. That's prevent removing this filter.
-           */
-          add_filter( 'wp_update_attachment_metadata', array( 'wpCloud\StatelessMedia\Utility', 'add_media' ), 999, 2 );
-
-          //init GS client
-          $gs_client = $this->init_gs_client();
-          $gs_client->registerStreamWrapper();
-
-          //init additional filters
-          $this->_init_filters();
+            break;
+          case 'default':
+            break;
         }
-      }
-
-      /**
-       * Init additional filters which uses on all modes
-       */
-      private function _init_filters () {
-        add_filter( 'wp_get_attachment_image_attributes', array( $this, 'wp_get_attachment_image_attributes' ), 20, 3 );
-        add_filter( 'wp_get_attachment_url', array( $this, 'wp_get_attachment_url' ), 20, 2 );
-        add_filter( 'get_attached_file', array( $this, 'get_attached_file' ), 9, 2 );
-        add_filter( 'attachment_url_to_postid', array( $this, 'attachment_url_to_postid' ), 20, 2 );
-
-        if ( $this->get( 'sm.body_rewrite' ) == 'true' ||  $this->get( 'sm.body_rewrite' ) == 'enable_editor' ) {
-          add_filter( 'the_content', array( $this, 'the_content_filter' ), 99 );
-        }
-
-        if ( $this->get( 'sm.body_rewrite' ) == 'true' ||  $this->get( 'sm.body_rewrite' ) == 'enable_meta' ) {
-          add_filter( 'get_post_metadata', array( $this, 'post_metadata_filter' ), 2, 4 );
-        }
-
-        add_filter( 'wp_stateless_bucket_link', array( $this, 'wp_stateless_bucket_link' ) );
       }
 
       /**
@@ -658,7 +670,7 @@ namespace wpCloud\StatelessMedia {
        * @param $post
        * @return array
        */
-      public function mb_attachment_modal_meta_box_callback ( $form_fields, $post ) {
+      public function attachment_modal_meta_box_callback ( $form_fields, $post ) {
 
         //do not show on media edit page, only on modal
         if ( isset($_GET['post'])) {
@@ -681,7 +693,7 @@ namespace wpCloud\StatelessMedia {
        * @param $meta_boxes
        * @return array
        */
-      public function mb_attachment_meta_box_callback( $meta_boxes ) {
+      public function attachment_meta_box_callback( $meta_boxes ) {
         $post_id = false;
         if ( isset( $_GET['post'] ) ) {
           $post_id = intval( $_GET['post'] );
@@ -692,7 +704,7 @@ namespace wpCloud\StatelessMedia {
         } elseif ( isset( $_POST['item'] ) ) {
           $post_id = intval( $_POST['item'] );
         }
-        $metabox = $this->prepare_data_for_metabox( $meta_boxes, $post_id );
+        $metabox = $this->_prepare_data_for_metabox( $meta_boxes, $post_id );
         return array( $metabox );
       }
 
@@ -702,7 +714,7 @@ namespace wpCloud\StatelessMedia {
        * @param $post_id
        * @return array
        */
-      private function prepare_data_for_metabox ( $meta_boxes, $post_id ) {
+      private function _prepare_data_for_metabox ( $meta_boxes, $post_id ) {
         $post     = get_post ( $post_id );
         $sm_cloud = get_post_meta( $post_id, 'sm_cloud', 1 );
         $sm_mode  = $this->get( 'sm.mode' );
@@ -930,7 +942,7 @@ namespace wpCloud\StatelessMedia {
 
       /**
        * Return file types supported by File URL Replacement.
-       *
+       * @return string
        */
       public function replaceable_file_types(){
         $types = $this->get('sm.body_rewrite_types');

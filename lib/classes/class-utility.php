@@ -311,11 +311,6 @@ namespace wpCloud\StatelessMedia {
               }
 
               if ( $sm_mode == 'stateless' && !wp_doing_ajax() ) {
-                $root_dir = ud_get_stateless_media()->get( 'sm.root_dir' );
-                $root_dir = apply_filters("wp_stateless_handle_root_dir", $root_dir);
-
-                $img['gs_name'] = trailingslashit($root_dir).$img['gs_name'];
-
                 // @note We don't add storageClass because it's same as parent...
                 $cloud_meta = self::generate_cloud_meta($cloud_meta, array(), $size, $img, $bucketLink);
               } else {
