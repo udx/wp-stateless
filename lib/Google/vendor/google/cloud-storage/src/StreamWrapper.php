@@ -164,7 +164,7 @@ class StreamWrapper
       $this->stream->setUploader(
         $this->bucket->getStreamableUploader(
           $this->stream,
-          $options + ['name' => $this->file, 'predefinedAcl' => 'publicRead']
+          $options + ['name' => $this->file]
         )
       );
     } elseif ($mode == 'r') {

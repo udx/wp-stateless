@@ -310,21 +310,48 @@ namespace wpCloud\StatelessMedia {
                 $_metadata[ 'source-id' ] = md5( $attachment_id . ud_get_stateless_media()->get( 'sm.bucket' ) );
               }
 
+              $media_args = array_filter( array(
+                'force'              => $img['is_thumb'] ? $force : $force && $stateless_synced_full_size != $attachment_id,
+                'name'               => $img['gs_name'],
+                'is_webp'            => $args['is_webp'],
+                'mimeType'           => $img['mime_type'],
+                'metadata'           => $_metadata,
+                'absolutePath'       => $img['path'],
+                'cacheControl'       => $_cacheControl,
+                'contentDisposition' => $_contentDisposition,
+              ) );
+
               if ( $sm_mode == 'stateless' && !wp_doing_ajax() ) {
+                global $gs_client;
+
+                //Bucket
+                $bucket = ud_get_stateless_media()->get( 'sm.bucket' );
+
+                $bucket = $gs_client->bucket($bucket);
+                $object = $bucket->object($img['gs_name']);
+
+                $args = wp_parse_args( $media_args, array(
+                  'use_root' => true,
+                  'force' => false,
+                  'name' => false,
+                  'absolutePath' => false,
+                  'mimeType' => 'image/jpeg',
+                  'metadata' => array(),
+                  'is_webp' => '',
+                ) );
+                $args = apply_filters('wp_stateless_add_media_args', $args);
+                $media = $object->update( array( 'metadata' => $args['metadata']) +
+                  array('cacheControl' => $_cacheControl,
+                    'predefinedAcl' => 'publicRead',
+                    'contentDisposition' => $_contentDisposition)
+                );
+
                 // @note We don't add storageClass because it's same as parent...
-                $cloud_meta = self::generate_cloud_meta($cloud_meta, array(), $size, $img, $bucketLink);
+                $cloud_meta = self::generate_cloud_meta($cloud_meta, $media, $size, $img, $bucketLink);
+
               } else {
                 /* Add default image */
-                $media = $client->add_media( array_filter( array(
-                  'force'              => $img['is_thumb'] ? $force : $force && $stateless_synced_full_size != $attachment_id,
-                  'name'               => $img['gs_name'],
-                  'is_webp'            => $args['is_webp'],
-                  'mimeType'           => $img['mime_type'],
-                  'metadata'           => $_metadata,
-                  'absolutePath'       => $img['path'],
-                  'cacheControl'       => $_cacheControl,
-                  'contentDisposition' => $_contentDisposition,
-                ) ));
+                $media = $client->add_media( $media_args);
 
                 /* Break if we have errors. */
                 if( !is_wp_error( $media ) ) {
