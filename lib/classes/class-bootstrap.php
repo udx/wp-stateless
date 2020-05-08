@@ -178,7 +178,7 @@ namespace wpCloud\StatelessMedia {
               $this->_init_filters( 'main' );
             }
 
-            if( $sm_mode === 'ephemeral'){
+            if( $sm_mode === 'ephemeral' || $sm_mode === 'stateless' ){
               // Store attachment id in a static variable on 'intermediate_image_sizes_advanced' filter.
               // Utility::store_can_delete_attachment();
               if(function_exists('is_wp_version_compatible') && is_wp_version_compatible('5.3-RC4-46673')){
@@ -589,6 +589,10 @@ namespace wpCloud\StatelessMedia {
       public function add_custom_row_actions( $actions, $post, $detached ) {
 
         if ( !current_user_can( 'upload_files' ) ) return $actions;
+
+        $sm_cloud = get_post_meta( $post->ID, 'sm_cloud', 1 );
+        $sm_mode = $this->get( 'sm.mode' );
+        if ( !empty($sm_cloud) && $sm_mode === 'stateless' ) return $actions;
 
         if ( $post && 'attachment' == $post->post_type && 'image/' == substr( $post->post_mime_type, 0, 6 ) ) {
           $actions['sm_sync'] = '<a href="javascript:;" data-id="'.$post->ID.'" data-type="image" class="sm_inline_sync">' . __('Regenerate and Sync with GCS', ud_get_stateless_media()->domain) . '</a>';

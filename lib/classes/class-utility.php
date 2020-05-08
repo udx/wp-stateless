@@ -283,7 +283,7 @@ namespace wpCloud\StatelessMedia {
               // also skips full size image if already uploaded using that feature.
               // and delete it in ephemeral mode as it already bin uploaded through intermediate_image_sizes_advanced filter.
               if( !$img[ 'is_thumb' ] && $stateless_synced_full_size == $attachment_id ) {
-                if( ud_get_stateless_media()->get( 'sm.mode' ) === 'ephemeral' && $args[ 'no_thumb' ] != true && \file_exists( $img[ 'path' ] ) && !$skip_remove_media ) {
+                if( ( $sm_mode === 'ephemeral' || $sm_mode == 'stateless' ) && $args[ 'no_thumb' ] != true && \file_exists( $img[ 'path' ] ) && !$skip_remove_media ) {
                   unlink( $img[ 'path' ] );
                 }
                 continue;
@@ -340,13 +340,17 @@ namespace wpCloud\StatelessMedia {
                   'is_webp' => '',
                 ) );
                 $args = apply_filters('wp_stateless_add_media_args', $args);
+
+                /**
+                 * Updating object metadata, ACL, CacheControl and contentDisposition
+                 * @return media object
+                 */
                 $media = $object->update( array( 'metadata' => $args['metadata']) +
                   array('cacheControl' => $_cacheControl,
                         'predefinedAcl' => 'publicRead',
                         'contentDisposition' => $_contentDisposition)
                 );
 
-                // @note We don't add storageClass because it's same as parent...
                 $cloud_meta = self::generate_cloud_meta($cloud_meta, $media, $size, $img, $bucketLink);
 
               } else {
@@ -358,8 +362,10 @@ namespace wpCloud\StatelessMedia {
                   // @note We don't add storageClass because it's same as parent...
                   $cloud_meta = self::generate_cloud_meta( $cloud_meta, $media, $size, $img, $bucketLink );
 
-                  // Ephemeral mode: we don't need the local version.
-                  // Except when uploading the full size image first.
+                  /**
+                   * Ephemeral and stateless mode: we don't need the local version.
+                   * Except when uploading the full size image first.
+                   */
                   if( self::can_delete_attachment( $attachment_id, $args ) && !$skip_remove_media ) {
                     unlink( $img[ 'path' ] );
                   }
@@ -629,7 +635,9 @@ namespace wpCloud\StatelessMedia {
        * @return boolean
        */
       public static function can_delete_attachment( $attachment_id, $args ) {
-        if( ud_get_stateless_media()->get( 'sm.mode' ) === 'ephemeral' && $args[ 'no_thumb' ] != true ) {
+        $sm_mode = ud_get_stateless_media()->get( 'sm.mode' );
+
+        if( in_array( $sm_mode, array( 'ephemeral', 'stateless' ) ) && $args[ 'no_thumb' ] != true ) {
           // checks whether it's WP 5.3 and 'intermediate_image_sizes_advanced' is passed.
           // To be sure that we don't delete full size image before thumbnails are generated.
           if(
