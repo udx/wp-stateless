@@ -342,8 +342,8 @@ namespace wpCloud\StatelessMedia {
                 $args = apply_filters('wp_stateless_add_media_args', $args);
                 $media = $object->update( array( 'metadata' => $args['metadata']) +
                   array('cacheControl' => $_cacheControl,
-                    'predefinedAcl' => 'publicRead',
-                    'contentDisposition' => $_contentDisposition)
+                        'predefinedAcl' => 'publicRead',
+                        'contentDisposition' => $_contentDisposition)
                 );
 
                 // @note We don't add storageClass because it's same as parent...

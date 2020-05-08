@@ -212,6 +212,7 @@ namespace wpCloud\StatelessMedia {
           add_filter( 'wp_image_editors', array($this, 'select_wp_image_editors') );
 
           //init GS client
+          global $gs_client;
           $gs_client = $this->init_gs_client();
           $gs_client->registerStreamWrapper();
 
