@@ -281,7 +281,7 @@ namespace wpCloud\StatelessMedia {
           foreach( $image_sizes as $size => $img ) {
             if ( (isset($_REQUEST['size']) && $_REQUEST['size'] == $size) || empty($_REQUEST['size']) ) {
               // also skips full size image if already uploaded using that feature.
-              // and delete it in ephemeral mode as it already bin uploaded through intermediate_image_sizes_advanced filter.
+              // and delete it in ephemeral and stateless modes as it already bin uploaded through intermediate_image_sizes_advanced filter.
               if( !$img[ 'is_thumb' ] && $stateless_synced_full_size == $attachment_id ) {
                 if( ( $sm_mode === 'ephemeral' || $sm_mode == 'stateless' ) && $args[ 'no_thumb' ] != true && \file_exists( $img[ 'path' ] ) && !$skip_remove_media ) {
                   unlink( $img[ 'path' ] );

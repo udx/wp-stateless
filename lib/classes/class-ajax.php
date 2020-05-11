@@ -101,16 +101,45 @@ namespace wpCloud\StatelessMedia {
       public function action_stateless_wizard_update_settings($data) {
         $bucket = $data['bucket'];
         $privateKeyData = base64_decode($data['privateKeyData']);
+        $is_gae         = isset($_SERVER["GAE_VERSION"]) ? true : false;
 
         if(current_user_can('manage_network_options') && wp_verify_nonce( $data['nonce'], 'network_update_json')){
           if(get_site_option('sm_mode', 'disabled') == 'disabled')
             update_site_option( 'sm_mode', 'cdn');
+          /**
+           * If Googl App Engine detected - set Stateless mode
+           * and Google App Engine compatibility by default
+           */
+          if ( $is_gae ) {
+            update_site_option( 'sm_mode', 'stateless' );
+
+            $modules = get_site_option('stateless-modules', array());
+            if (empty($modules['google-app-engine']) || $modules['google-app-engine'] != 'true') {
+              $modules['google-app-engine'] = 'true';
+              update_site_option('stateless-modules', $modules, true);
+            }
+          }
           update_site_option( 'sm_bucket', $bucket);
           update_site_option( 'sm_key_json', $privateKeyData);
         }
         elseif(wp_verify_nonce( $data['nonce'], 'update_json')){
           if(get_option('sm_mode', 'disabled') == 'disabled')
             update_option( 'sm_mode', 'cdn');
+
+          /**
+           * If Googl App Engine detected - set Stateless mode
+           * and Google App Engine compatibility by default
+           */
+          if ( $is_gae ) {
+            update_option( 'sm_mode', 'stateless' );
+
+            $modules = get_option('stateless-modules', array());
+            if (empty($modules['google-app-engine']) || $modules['google-app-engine'] != 'true') {
+              $modules['google-app-engine'] = 'true';
+              update_option('stateless-modules', $modules, true);
+            }
+          }
+
           update_option( 'sm_bucket', $bucket);
           update_option( 'sm_key_json', $privateKeyData);
         }
@@ -248,8 +277,8 @@ namespace wpCloud\StatelessMedia {
 
           }
           else{
-            // Ephemeral mode: we don't need the local version.
-            if(ud_get_stateless_media()->get( 'sm.mode' ) === 'ephemeral'){
+            // Ephemeral and Stateless modes: we don't need the local version.
+            if(ud_get_stateless_media()->get( 'sm.mode' ) === 'ephemeral' || ud_get_stateless_media()->get( 'sm.mode' ) === 'stateless'){
               unlink($fullsizepath);
             }
           }

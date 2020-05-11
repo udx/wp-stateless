@@ -34,6 +34,9 @@ namespace wpCloud\StatelessMedia {
     protected $theme_name = null;
     protected $first_party = false;
     protected $non_library_sync = false;
+    protected $server_constant = false;
+    protected $sm_mode = '';
+    protected $sm_mode_title = '';
 
     public function __construct() {
       $this->init();
@@ -90,6 +93,16 @@ namespace wpCloud\StatelessMedia {
           }
         }
 
+        return false;
+      }
+
+      /**
+       * If server constant is set - check if exist it on global $_SERVER
+       */
+      if (!empty( $this->server_constant )) {
+        if ( isset($_SERVER[ $this->server_constant ]) ) {
+          return true;
+        }
         return false;
       }
 
@@ -186,6 +199,20 @@ namespace wpCloud\StatelessMedia {
           'button' => __("Enable Compatibility", ud_get_stateless_media()->domain),
           'message' => __("Please enable the compatibility to ensure the functionality will work properly between <b>{$this->title}</b> and <b>WP-Stateless</b>.", ud_get_stateless_media()->domain),
         ), 'notice');
+      }
+
+      /**
+       * Check requires WP-Stateless mode
+       */
+      if ( !empty( $this->sm_mode ) && $this->enabled ) {
+        $sm_mode = isset($_POST['sm']['mode']) ? $_POST['sm']['mode'] : ud_get_stateless_media()->get( 'sm.mode' );
+        if ( $sm_mode !== $this->sm_mode ) {
+          ud_get_stateless_media()->errors->add( array(
+            'key' => $this->id,
+            'title' => sprintf( __( "%s: Current Mode is not compatible with  %s.", ud_get_stateless_media()->domain ), ud_get_stateless_media()->name, $this->title ),
+            'message' => sprintf( __( "%s compatibility requires %s in %s mode.", ud_get_stateless_media()->domain ), $this->title, ud_get_stateless_media()->name, $this->sm_mode_title ),
+            ), 'notice' );
+        }
       }
     }
 

@@ -28,6 +28,11 @@ namespace wpCloud\StatelessMedia {
             new DynamicImageSupport();
 
             /**
+             * Google App Engine
+             */
+            new GoogleAppEngine();
+
+            /**
              * ACF image crop addons compatibility.
              */
             new CompatibilityAcfImageCrop();

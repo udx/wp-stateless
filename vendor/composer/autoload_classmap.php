@@ -42,6 +42,7 @@ return array(
     'wpCloud\\StatelessMedia\\CompatibilityWooExtraProductOptions' => $baseDir . '/lib/classes/compatibility/woo-extra-product-options.php',
     'wpCloud\\StatelessMedia\\Divi' => $baseDir . '/lib/classes/compatibility/divi.php',
     'wpCloud\\StatelessMedia\\DynamicImageSupport' => $baseDir . '/lib/classes/compatibility/dynamic-image-support.php',
+    'wpCloud\\StatelessMedia\\GoogleAppEngine' => $baseDir . '/lib/classes/compatibility/google-app-engine.php',
     'wpCloud\\StatelessMedia\\EDDDownloadMethod' => $baseDir . '/lib/classes/compatibility/easy-digital-downloads.php',
     'wpCloud\\StatelessMedia\\EWWW' => $baseDir . '/lib/classes/compatibility/ewww.php',
     'wpCloud\\StatelessMedia\\Elementor' => $baseDir . '/lib/classes/compatibility/elementor.php',

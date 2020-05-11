@@ -435,7 +435,7 @@ namespace wpCloud\StatelessMedia {
                 }
               }
 
-              // if no size found and mode is ephemeral and nothing to show for srcset item - unset that item
+              // if no size found and mode is ephemeral or stateless and nothing to show for srcset item - unset that item
               if (!$found && ( $sm_mode === 'ephemeral' || $sm_mode === 'stateless' )) {
                 $image = null;
               }

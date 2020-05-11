@@ -6,7 +6,7 @@
     </div>
     <h2 class="nav-tab-wrapper">
         <a href="#stless_settings_tab" class="stless_setting_tab nav-tab  nav-tab-active"><?php _e( 'Settings', ud_get_stateless_media()->domain ); ?></a>
-        <?php if(!is_network_admin()): ?>
+        <?php if(!is_network_admin() && !isset($_SERVER["GAE_VERSION"]) ): ?>
             <a href="#stless_sync_tab" class="stless_setting_tab nav-tab"><?php _e( 'Sync', ud_get_stateless_media()->domain ); ?></a>
         <?php endif; ?>
         <a href="#stless_compatibility_tab" class="stless_setting_tab nav-tab"><?php _e( 'Compatibility', ud_get_stateless_media()->domain ); ?></a>
