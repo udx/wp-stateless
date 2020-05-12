@@ -290,7 +290,7 @@ namespace wpCloud\StatelessMedia {
               }
 
               // skips thumbs when it's called from Upload the full size image first, through intermediate_image_sizes_advanced filter.
-              if( $args[ 'no_thumb' ] && $img[ 'is_thumb' ] || !empty( self::$synced_sizes[ $attachment_id ][ $size ] ) ) {
+              if( $args[ 'no_thumb' ] && $img[ 'is_thumb' ] || !empty( self::$synced_sizes[ $attachment_id ][ $size ] ) && $sm_mode !== 'stateless' ) {
                 continue;
               }
 
@@ -347,8 +347,8 @@ namespace wpCloud\StatelessMedia {
                  */
                 $media = $object->update( array( 'metadata' => $args['metadata']) +
                   array('cacheControl' => $_cacheControl,
-                        'predefinedAcl' => 'publicRead',
-                        'contentDisposition' => $_contentDisposition)
+                    'predefinedAcl' => 'publicRead',
+                    'contentDisposition' => $_contentDisposition)
                 );
 
                 $cloud_meta = self::generate_cloud_meta($cloud_meta, $media, $size, $img, $bucketLink);

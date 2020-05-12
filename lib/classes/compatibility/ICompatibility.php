@@ -204,14 +204,14 @@ namespace wpCloud\StatelessMedia {
       /**
        * Check requires WP-Stateless mode
        */
-      if ( !empty( $this->sm_mode ) && $this->enabled ) {
+      if ( !empty( $this->sm_mode ) && $this->enabled !== 'inactive' ) {
         $sm_mode = isset($_POST['sm']['mode']) ? $_POST['sm']['mode'] : ud_get_stateless_media()->get( 'sm.mode' );
         if ( $sm_mode !== $this->sm_mode ) {
           ud_get_stateless_media()->errors->add( array(
             'key' => $this->id,
             'title' => sprintf( __( "%s: Current Mode is not compatible with  %s.", ud_get_stateless_media()->domain ), ud_get_stateless_media()->name, $this->title ),
             'message' => sprintf( __( "%s compatibility requires %s in %s mode.", ud_get_stateless_media()->domain ), $this->title, ud_get_stateless_media()->name, $this->sm_mode_title ),
-            ), 'notice' );
+          ), 'notice' );
         }
       }
     }
