@@ -144,6 +144,13 @@ namespace wpCloud\StatelessMedia {
          */
         add_action( 'wp_delete_site', array($this, 'wp_delete_site'));
 
+        /**
+         * To prevent fatal errors for users who use PHP 5.5 or less.
+         */
+        if( version_compare(PHP_VERSION, '5.5', '<') ) {
+          $this->errors->add( sprintf( __( 'The plugin requires PHP %s or higher. You current PHP version %s is too old.', ud_get_stateless_media()->domain ), '<b>5.5</b>', '<b>' . PHP_VERSION . '</b>' ) );
+        }
+
         /* Initialize plugin only if Mode is not 'disabled'. */
         if ( ($sm_mode !== 'disabled' && $sm_mode !== 'stateless') || ( $sm_mode === 'stateless' && wp_doing_ajax() )) {
 
@@ -159,11 +166,6 @@ namespace wpCloud\StatelessMedia {
 
           if ( $googleSDKVersionConflictError = get_transient( "wp_stateless_google_sdk_conflict" ) ) {
             $this->errors->add( $googleSDKVersionConflictError, 'warning' );
-          }
-
-          // To prevent fatal errors for users who use PHP 5.5 or less.
-          if( version_compare(PHP_VERSION, '5.5', '<') ) {
-            $this->errors->add( sprintf( __( 'The plugin requires PHP %s or higher. You current PHP version %s is too old.', ud_get_stateless_media()->domain ), '<b>5.5</b>', '<b>' . PHP_VERSION . '</b>' ) );
           }
 
           /**
@@ -1306,7 +1308,7 @@ namespace wpCloud\StatelessMedia {
        */
       public function image_downsize( $false = false, $id, $size ) {
 
-        if ( !isset( $this->client ) || !$this->client || is_wp_error( $this->client ) ) {
+        if ( (!isset( $this->client ) || !$this->client || is_wp_error( $this->client )) && $this->get( 'sm.mode' ) !== 'stateless' ) {
           return $false;
         }
 
