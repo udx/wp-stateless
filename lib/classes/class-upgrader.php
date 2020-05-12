@@ -112,6 +112,9 @@ namespace wpCloud\StatelessMedia {
 
         if ( !is_multisite() && $version && version_compare( $version, '2.4.0', '<' ) ){
           self::migrate_root_dir();
+          //updating mode name `stateless` to `ephemeral`
+          $sm_mode = get_option( 'sm_mode' );
+          if ($sm_mode == 'stateless') update_option( 'sm_mode', 'ephemeral' );
         }
 
         update_option( 'wp_sm_version', ud_get_stateless_media()->args[ 'version' ]  );
@@ -151,6 +154,9 @@ namespace wpCloud\StatelessMedia {
           foreach ( $sites as $site ) {
             switch_to_blog( $site->blog_id );
             self::migrate_root_dir(true);
+            //updating mode name `stateless` to `ephemeral`
+            $sm_mode = get_option( 'sm_mode' );
+            if ($sm_mode == 'stateless') update_option( 'sm_mode', 'ephemeral' );
             restore_current_blog();
           }
 
@@ -161,9 +167,6 @@ namespace wpCloud\StatelessMedia {
           update_network_option( 1, 'sm_hashify_file_name', 'true' );
 
 
-          //updating mode name `stateless` to `ephemeral`
-          $sm_mode = get_option( 'sm_mode' );
-          if ($sm_mode == 'stateless') update_option( 'sm_mode', 'ephemeral' );
 
           $sm_mode_site = get_site_option( 'sm_mode' );
           if ($sm_mode_site == 'stateless') update_site_option( 'sm_mode', 'ephemeral' );
