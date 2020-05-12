@@ -224,8 +224,10 @@ namespace wpCloud\StatelessMedia {
 
         update_option( 'sm_root_dir', $sm_root_dir  );
 
-        //forcing `Cache-Busting` for multisite to prevent replacing media with same filenames
-        update_option( 'sm_hashify_file_name', 'true' );
+        if( $multisite ) {
+          //forcing `Cache-Busting` for multisite to prevent replacing media with same filenames
+          update_option( 'sm_hashify_file_name', 'true' );
+        }
 
         return $sm_root_dir;
       }
