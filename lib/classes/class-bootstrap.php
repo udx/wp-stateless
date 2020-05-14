@@ -734,8 +734,12 @@ namespace wpCloud\StatelessMedia {
          * wp-content/plugins/wp-stateless/vendor/wpmetabox/meta-box/inc/meta-box.php:346
          * @author palant@ud
          */
-        if ( empty( $post ) ) {
+        /*if ( empty( $post ) ) {
           return $meta_boxes + array( 'title' => 'Stateless' );
+        }*/
+
+        if ( empty( $post ) ) {
+          return $meta_boxes;
         }
 
         $sizes = $this->get_image_sizes();
