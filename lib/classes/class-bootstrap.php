@@ -1169,6 +1169,7 @@ namespace wpCloud\StatelessMedia {
         $settings = ud_get_stateless_media()->get('sm');
         $settings['wildcards'] = $this->settings->wildcards;
         $settings['network_admin'] = is_network_admin();
+        $settings['is_multisite'] = is_multisite();
         if(defined('WP_STATELESS_MEDIA_JSON_KEY') && WP_STATELESS_MEDIA_JSON_KEY){
           $settings['key_json'] = "Currently configured via a constant.";
         }
@@ -1254,12 +1255,22 @@ namespace wpCloud\StatelessMedia {
             $data = array(
               'key' => 'stateless-cache-busting',
               'class' => 'notice',
-              'title' => sprintf( __( "Stateless mode enables and requires the Cache-Busting option.", ud_get_stateless_media()->domain ) ),
+              'title' => sprintf( __( "Stateless and Ephemeral modes enables and requires the Cache-Busting option.", ud_get_stateless_media()->domain ) ),
               'message' => sprintf( __("WordPress looks at local files to prevent files with the same filenames. 
                                           Since Stateless mode bypasses this check, there is a potential for files to be stored with the same file name. We enforce the Cache-Busting option to prevent this. 
                                           Override with the <a href='%s' target='_blank'>%s</a> constant.", ud_get_stateless_media()->domain),"https://wp-stateless.github.io/docs/constants/#wp_stateless_media_cache_busting", "WP_STATELESS_MEDIA_CACHE_BUSTING" ),
             );
             echo "<script id='template-stateless-cache-busting' type='text/html'>";
+            include ud_get_stateless_media()->path( '/static/views/error-notice.php', 'dir' );
+            echo "</script>";
+
+            $data = array(
+              'key' => 'stateless-folder',
+              'class' => 'notice',
+              'title' => sprintf( __( "Stateless mode requires the Folder value.", ud_get_stateless_media()->domain ) ),
+              'message' => sprintf( __("Field Folder shoul be filled for correct work Stateless mode. ", ud_get_stateless_media()->domain) ),
+            );
+            echo "<script id='template-stateless-folder' type='text/html'>";
             include ud_get_stateless_media()->path( '/static/views/error-notice.php', 'dir' );
             echo "</script>";
             break;
