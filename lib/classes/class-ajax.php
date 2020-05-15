@@ -102,6 +102,8 @@ namespace wpCloud\StatelessMedia {
         $bucket = $data['bucket'];
         $privateKeyData = base64_decode($data['privateKeyData']);
         $is_gae         = isset($_SERVER["GAE_VERSION"]) ? true : false;
+        $upload_dir = wp_upload_dir();
+        $is_upload_dir_writable = is_writable( $upload_dir['basedir'] );
 
         if(current_user_can('manage_network_options') && wp_verify_nonce( $data['nonce'], 'network_update_json')){
           if(get_site_option('sm_mode', 'disabled') == 'disabled')
@@ -110,11 +112,11 @@ namespace wpCloud\StatelessMedia {
            * If Googl App Engine detected - set Stateless mode
            * and Google App Engine compatibility by default
            */
-          if ( $is_gae ) {
+          if ( $is_gae || !$is_upload_dir_writable ) {
             update_site_option( 'sm_mode', 'stateless' );
 
             $modules = get_site_option('stateless-modules', array());
-            if (empty($modules['google-app-engine']) || $modules['google-app-engine'] != 'true') {
+            if ( $is_gae && empty($modules['google-app-engine']) || $modules['google-app-engine'] != 'true') {
               $modules['google-app-engine'] = 'true';
               update_site_option('stateless-modules', $modules, true);
             }
