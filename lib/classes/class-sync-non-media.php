@@ -69,6 +69,8 @@ namespace wpCloud\StatelessMedia {
        * @throws: Exception File not found@throws: Exception File not found
        */
       public function sync_file($name, $absolutePath, $forced = false, $args = array() ){
+        $sm_mode = ud_get_stateless_media()->get( 'sm.mode' );
+
         $args = wp_parse_args($args, array(
           'ephemeral' => true, // whether to delete local file in ephemeral mode.
           'download'  => false, // whether to delete local file in ephemeral mode.
@@ -106,19 +108,56 @@ namespace wpCloud\StatelessMedia {
 
         if($local_file_exists && !$file_copied_from_gcs && !$args['download']){
 
-          $media = $this->client->add_media( array(
-            'use_root' => $args['use_root'],
-            'name' => $name,
-            'force' => ($forced == 2),
-            'absolutePath' => $absolutePath,
-            'cacheControl' => apply_filters( 'sm:item:cacheControl', 'public, max-age=36000, must-revalidate', $absolutePath), //@todo use cacheControl from settings page.
-            'contentDisposition' => apply_filters( 'sm:item:contentDisposition', null, $absolutePath),
-            'mimeType' => $file_type,
-            'metadata' => array(
-              'child-of' => dirname($name),
-              'file-hash' => md5( $name ),
-            ),
-          ));
+          if ( $sm_mode == 'stateless' && !wp_doing_ajax() ) {
+            global $gs_client;
+
+            $gs_name = apply_filters( 'wp_stateless_file_name', $name, true );
+
+            //Bucket
+            $bucket = ud_get_stateless_media()->get( 'sm.bucket' );
+
+            $bucket = $gs_client->bucket($bucket);
+            $object = $bucket->object($gs_name);
+            $args = wp_parse_args( $args, array(
+              'use_root' => $args['use_root'],
+              'force' => ($forced == 2),
+              'name' => $name,
+              'absolutePath' => $absolutePath,
+              'mimeType' => $file_type,
+              'metadata' => array(
+                'child-of' => dirname($name),
+                'file-hash' => md5( $name ),
+              ),
+              'is_webp' => '',
+            ) );
+            $args = apply_filters('wp_stateless_add_media_args', $args);
+
+            /**
+             * Updating object metadata, ACL, CacheControl and contentDisposition
+             * @return media object
+             */
+            $media = $object->update( array( 'metadata' => $args['metadata']) +
+              array('cacheControl' => apply_filters( 'sm:item:cacheControl', 'public, max-age=36000, must-revalidate', $absolutePath),
+                'predefinedAcl' => 'publicRead',
+                'contentDisposition' => apply_filters( 'sm:item:contentDisposition', null, $absolutePath))
+            );
+
+
+          } else {
+            $media = $this->client->add_media( array(
+              'use_root' => $args['use_root'],
+              'name' => $name,
+              'force' => ($forced == 2),
+              'absolutePath' => $absolutePath,
+              'cacheControl' => apply_filters( 'sm:item:cacheControl', 'public, max-age=36000, must-revalidate', $absolutePath), //@todo use cacheControl from settings page.
+              'contentDisposition' => apply_filters( 'sm:item:contentDisposition', null, $absolutePath),
+              'mimeType' => $file_type,
+              'metadata' => array(
+                'child-of' => dirname($name),
+                'file-hash' => md5( $name ),
+              ),
+            ));
+          }
 
           // Addon can hook this function to modify database after manual sync done.
           do_action( 'sm::synced::nonMediaFiles', $name, $absolutePath, $media); // , $media
