@@ -367,6 +367,10 @@ namespace wpCloud\StatelessMedia {
         $root_dir = $this->get( 'sm.root_dir' );
         $root_dir = apply_filters("wp_stateless_handle_root_dir", $root_dir);
 
+        if ( !empty( $root_dir ) ) {
+          $uploads['subdir'] = '';
+        }
+
         $basedir = rtrim(sprintf('gs://%s/%s', $bucket, $root_dir), '/');
         $baseurl = rtrim(sprintf('https://storage.googleapis.com/%s/%s', $bucket, $root_dir ), '/');
 
