@@ -269,12 +269,16 @@ namespace wpCloud\StatelessMedia {
        */
       public function imagify_before_optimize_size( $return, $process, $file, $thumb_size, $optimization_level, $webp, $is_disabled ){
 
-        $attachment_id = $this->getProperties($this->getProperties($this->getProperties($process)['data'])['media'])['id'];
-
-        $full_size_path = $file->get_path();
-        $name = apply_filters( 'wp_stateless_file_name', basename($full_size_path) );
-        do_action( 'sm:sync::syncFile', $name, $full_size_path, true, ['download' => true] );
-        // error_log("\n\ndo_action( 'sm:sync::syncFile', $name, $full_size_path, true, ['download' => true] );");
+        try {
+          $attachment_id = $this->getProperties($this->getProperties($this->getProperties($process)['data'])['media'])['id'];
+  
+          $full_size_path = $file->get_path();
+          $name = apply_filters( 'wp_stateless_file_name', basename($full_size_path), true, $attachment_id );
+          do_action( 'sm:sync::syncFile', $name, $full_size_path, true, ['download' => true] );
+          // error_log("\n\ndo_action( 'sm:sync::syncFile', $name, $full_size_path, true, ['download' => true] );");
+        } catch (\Throwable $th) {
+          //throw $th;
+        }
         return $return;
       }
 
