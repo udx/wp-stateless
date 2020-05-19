@@ -21,6 +21,9 @@ namespace wpCloud\StatelessMedia {
       protected $plugin_version;
       protected $non_library_sync = true;
 
+      /**
+       * @param $sm
+       */
       public function module_init($sm){
         if ( class_exists('GFForms') ) {
           $this->plugin_version = \GFForms::$version;
@@ -35,12 +38,12 @@ namespace wpCloud\StatelessMedia {
 
       /**
        * On gform save field value sync file to GCS and alter the file url to GCS link.
-       *
        * @param $value
        * @param $lead
        * @param $field
        * @param $form
        * @param $input_id
+       * @return array|false|mixed|string
        */
       public function gform_save_field_value( $value, $lead, $field, $form, $input_id ) {
         if(empty($value)) return $value;
@@ -65,9 +68,10 @@ namespace wpCloud\StatelessMedia {
             $position = strpos($v, 'gravity_forms/');
 
             if( $position !== false ){
+              $sm_mode = ud_get_stateless_media()->get( 'sm.mode' );
               $name = substr($v, $position);
               $absolutePath = $dir['basedir'] . '/' .  $name;
-              $name = apply_filters( 'wp_stateless_file_name', $name, 0);
+              $name = apply_filters( 'wp_stateless_file_name', $name, ( $sm_mode == 'stateless' ? true : 0));
               // doing sync
               do_action( 'sm:sync::syncFile', $name, $absolutePath);
               $value[$k] = ud_get_stateless_media()->get_gs_host() . '/' . $name;
@@ -97,8 +101,9 @@ namespace wpCloud\StatelessMedia {
             $name = rgar( $arr_name, 0 ); // Removed |:| from end of the url.
 
             // doing sync
+            $sm_mode = ud_get_stateless_media()->get( 'sm.mode' );
             $absolutePath = $dir['basedir'] . '/' .  $name;
-            $name = apply_filters( 'wp_stateless_file_name', $name, 0);
+            $name = apply_filters( 'wp_stateless_file_name', $name, ( $sm_mode == 'stateless' ? true : 0));
             do_action( 'sm:sync::syncFile', $name, $absolutePath);
 
             $value = ud_get_stateless_media()->get_gs_host() . '/' . $name;
@@ -116,7 +121,10 @@ namespace wpCloud\StatelessMedia {
 
       /**
        * Modify value in database after sync from Sync tab.
-       *
+       * @param $file_path
+       * @param $fullsizepath
+       * @param $media
+       * @throws \Exception
        */
       public function modify_db( $file_path, $fullsizepath, $media ){
         global $wpdb;
@@ -218,6 +226,9 @@ namespace wpCloud\StatelessMedia {
 
       /**
        * Delete file from GCS
+       * @param $file_path
+       * @param $url
+       * @return string
        */
       public function gform_file_path_pre_delete_file( $file_path, $url ){
         $file_path = wp_normalize_path($file_path);
@@ -227,9 +238,10 @@ namespace wpCloud\StatelessMedia {
 
         // If the url is a GCS link then remove it from GCS.
         if($is_stateless !== false){
+          $sm_mode = ud_get_stateless_media()->get( 'sm.mode' );
           $gs_name = substr($file_path, strpos($file_path, '/gravity_forms/'));
           $file_path = $dir['basedir'] . $gs_name;
-          $gs_name = apply_filters( 'wp_stateless_file_name', $gs_name, 0);
+          $gs_name = apply_filters( 'wp_stateless_file_name', $gs_name, ( $sm_mode == 'stateless' ? true : 0));
 
           $client = ud_get_stateless_media()->get_client();
           if( !is_wp_error( $client ) ) {
@@ -241,7 +253,9 @@ namespace wpCloud\StatelessMedia {
       }
 
       /**
-       *
+       * @param $return
+       * @param $filename
+       * @return mixed
        */
       public function skip_cache_busting($return, $filename){
         $backtrace = debug_backtrace(false, 8);
