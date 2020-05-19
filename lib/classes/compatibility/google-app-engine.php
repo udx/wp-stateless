@@ -17,8 +17,7 @@ namespace wpCloud\StatelessMedia {
       protected $constant = ['WP_STATELESS_COMPATIBILITY_GAE' => 'WP_STATELESS_COMPATIBILITY_GAE'];
       protected $description = 'Ensures compatibility between WordPress media and Google App Engine in Stateless mode.';
       protected $server_constant = 'GAE_VERSION';
-      protected $sm_mode = 'stateless';
-      protected $sm_mode_title = 'Stateless';
+      protected $sm_mode_required = 'stateless';
 
       public function __construct(){
         $modules = get_option('stateless-modules', array());

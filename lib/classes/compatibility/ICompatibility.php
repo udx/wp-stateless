@@ -35,8 +35,8 @@ namespace wpCloud\StatelessMedia {
     protected $first_party = false;
     protected $non_library_sync = false;
     protected $server_constant = false;
-    protected $sm_mode = '';
-    protected $sm_mode_title = '';
+    protected $sm_mode_required = '';
+    protected $sm_mode_not_supported = [];
 
     public function __construct() {
       $this->init();
@@ -110,6 +110,20 @@ namespace wpCloud\StatelessMedia {
     }
 
     /**
+     * Checking whether current mode is supported.
+     * By default return true.
+     *
+     * @todo caching.
+     */
+    public function is_mode_supported () {
+      $sm_mode = isset($_POST['sm']['mode']) ? $_POST['sm']['mode'] : ud_get_stateless_media()->get( 'sm.mode' );
+      if ( in_array( $sm_mode, $this->sm_mode_not_supported ) ) {
+        return false;
+      }
+      return true;
+    }
+
+    /**
      * Initialize the module
      * Check whether plugin is active or not.
      * Register module.
@@ -119,6 +133,7 @@ namespace wpCloud\StatelessMedia {
     public function init() {
       $is_constant = false;
       $is_network_override = false;
+      $sm_mode = isset($_POST['sm']['mode']) ? $_POST['sm']['mode'] : ud_get_stateless_media()->get( 'sm.mode' );
       if (is_network_admin()) {
         $this->enabled = null;
       }
@@ -162,7 +177,7 @@ namespace wpCloud\StatelessMedia {
         }
       }
 
-      if (!is_network_admin() && !$this->is_plugin_active()) {
+      if (!is_network_admin() && ( !$this->is_plugin_active() || !$this->is_mode_supported() )) {
         $this->enabled = 'inactive';
       }
 
@@ -186,9 +201,11 @@ namespace wpCloud\StatelessMedia {
         'is_network_admin' => is_network_admin(),
         'is_plugin' => !empty($this->plugin_file),
         'is_theme' => !empty($this->theme_name),
+        'is_mode_supported' => $this->is_mode_supported(),
+        'mode' => ucfirst( $sm_mode )
       ));
 
-      if ($this->enabled && $this->is_plugin_active()) {
+      if ($this->enabled && $this->is_plugin_active() && $this->is_mode_supported()) {
         add_action('sm::module::init', array($this, 'module_init'));
       }
 
@@ -204,13 +221,12 @@ namespace wpCloud\StatelessMedia {
       /**
        * Check requires WP-Stateless mode
        */
-      if ( !empty( $this->sm_mode ) && $this->enabled !== 'inactive' ) {
-        $sm_mode = isset($_POST['sm']['mode']) ? $_POST['sm']['mode'] : ud_get_stateless_media()->get( 'sm.mode' );
-        if ( $sm_mode !== $this->sm_mode ) {
+      if ( !empty( $this->sm_mode_required ) && $this->enabled !== 'inactive' ) {
+        if ( $sm_mode !== $this->sm_mode_required ) {
           ud_get_stateless_media()->errors->add( array(
             'key' => $this->id,
             'title' => sprintf( __( "%s: Current Mode is not compatible with  %s.", ud_get_stateless_media()->domain ), ud_get_stateless_media()->name, $this->title ),
-            'message' => sprintf( __( "%s compatibility requires %s in %s mode.", ud_get_stateless_media()->domain ), $this->title, ud_get_stateless_media()->name, $this->sm_mode_title ),
+            'message' => sprintf( __( "%s compatibility requires %s in %s mode.", ud_get_stateless_media()->domain ), $this->title, ud_get_stateless_media()->name, ucfirst( $this->sm_mode_required ) ),
           ), 'notice' );
         }
       }

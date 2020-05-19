@@ -19,6 +19,7 @@ namespace wpCloud\StatelessMedia {
       protected $constant = 'WP_STATELESS_COMPATIBILITY_IMAGIFY';
       protected $description = 'Enables support for these Imagify Image Optimizer features: auto-optimize images on upload, bulk optimizer, resize larger images, optimization levels (normal, aggressive, ultra).';
       protected $plugin_file = [ 'imagify/imagify.php', 'imagify-plugin/imagify.php' ];
+      protected $sm_mode_not_supported = [ 'stateless' ];
 
       public function module_init( $sm ) {
         // Skip sync on upload when attachment is image, sync will be handled after image is optimized.
@@ -30,7 +31,7 @@ namespace wpCloud\StatelessMedia {
         //hook for Imagify since version 1.9
         add_filter( 'wp_stateless_skip_remove_media', array( $this, 'skip_remove_media' ), 10, 5 );
         add_action( 'imagify_after_optimize_file', array( $this, 'imagify_after_optimize_file' ), 10, 2 );
-        add_action( 'imagify_before_optimize_size', array($this, 'imagify_before_optimize_size'), 10, 7 );
+        add_action( 'imagify_before_optimize_size', array( $this, 'imagify_before_optimize_size' ), 10, 7 );
 
         // if imagify implement this filter then enable it.
         add_filter( 'imagify_has_backup', array( $this, 'imagify_has_backup' ), 10, 2 );
@@ -39,7 +40,6 @@ namespace wpCloud\StatelessMedia {
         add_action( 'after_imagify_restore_attachment', array( $this, 'after_imagify_optimize_attachment' ), 10 );
         // Sync from sync tab
         add_action( 'sm:synced::image', array( $this, 'get_image_from_gcs' ) );
-
       }
 
       /**
@@ -58,25 +58,23 @@ namespace wpCloud\StatelessMedia {
        * @return bool  $return         True to skip the sync and false to do the sync.
        *
        */
-      public function skip_add_media($return, $metadata, $attachment_id, $force = false, $args = array()) {
+      public function skip_add_media( $return, $metadata, $attachment_id, $force = false, $args = array() ) {
         global $doing_manual_sync;
-        $args = wp_parse_args($args, array(
-          'no_thumb' => false,
-        ));
+        $args = wp_parse_args( $args, array( 'no_thumb' => false, ) );
 
-        if($force || $doing_manual_sync || !get_imagify_option( 'auto_optimize' ) || $args['no_thumb'] == true ) return false;
+        if( $force || $doing_manual_sync || !get_imagify_option( 'auto_optimize' ) || $args[ 'no_thumb' ] == true ) return false;
 
-        $imagify = new \Imagify_Attachment($attachment_id);
-        if ( is_callable( array( $imagify, 'is_extension_supported' ) ) ) {
-          if ( ! $imagify->is_extension_supported() ) {
+        $imagify = new \Imagify_Attachment( $attachment_id );
+        if( is_callable( array( $imagify, 'is_extension_supported' ) ) ) {
+          if( !$imagify->is_extension_supported() ) {
             return false;
           }
-        } elseif ( function_exists( 'imagify_is_attachment_mime_type_supported' ) ) {
+        } elseif( function_exists( 'imagify_is_attachment_mime_type_supported' ) ) {
           // Use `imagify_is_attachment_mime_type_supported( $attachment_id )`.
-          if ( ! imagify_is_attachment_mime_type_supported( $attachment_id ) ) {
+          if( !imagify_is_attachment_mime_type_supported( $attachment_id ) ) {
             return false;
           }
-        } elseif(!wp_attachment_is_image($attachment_id)){
+        } elseif( !wp_attachment_is_image( $attachment_id ) ) {
           return false;
         }
 
@@ -267,16 +265,16 @@ namespace wpCloud\StatelessMedia {
        * @param $is_disabled
        * @return mixed
        */
-      public function imagify_before_optimize_size( $return, $process, $file, $thumb_size, $optimization_level, $webp, $is_disabled ){
+      public function imagify_before_optimize_size( $return, $process, $file, $thumb_size, $optimization_level, $webp, $is_disabled ) {
 
         try {
-          $attachment_id = $this->getProperties($this->getProperties($this->getProperties($process)['data'])['media'])['id'];
-  
+          $attachment_id = $this->getProperties( $this->getProperties( $this->getProperties( $process )[ 'data' ] )[ 'media' ] )[ 'id' ];
+
           $full_size_path = $file->get_path();
-          $name = apply_filters( 'wp_stateless_file_name', basename($full_size_path), true, $attachment_id );
-          do_action( 'sm:sync::syncFile', $name, $full_size_path, true, ['download' => true] );
+          $name = apply_filters( 'wp_stateless_file_name', basename( $full_size_path ), true, $attachment_id );
+          do_action( 'sm:sync::syncFile', $name, $full_size_path, true, [ 'download' => true ] );
           // error_log("\n\ndo_action( 'sm:sync::syncFile', $name, $full_size_path, true, ['download' => true] );");
-        } catch (\Throwable $th) {
+        } catch( \Throwable $th ) {
           //throw $th;
         }
         return $return;
@@ -287,20 +285,22 @@ namespace wpCloud\StatelessMedia {
        * @param $process
        * @return array
        */
-      public function getProperties($process) {
+      public function getProperties( $process ) {
         $properties = array();
         try {
-          $rc = new \ReflectionClass($process);
+          $rc = new \ReflectionClass( $process );
           do {
             $rp = array();
             /* @var $p \ReflectionProperty */
-            foreach ($rc->getProperties() as $p) {
-              $p->setAccessible(true);
-              $rp[$p->getName()] = $p->getValue($process);
+            foreach( $rc->getProperties() as $p ) {
+              $p->setAccessible( true );
+              $rp[ $p->getName() ] = $p->getValue( $process );
             }
-            $properties = array_merge($rp, $properties);
-          } while ($rc = $rc->getParentClass());
-        } catch (\ReflectionException $e) { }
+            $properties = array_merge( $rp, $properties );
+          } while( $rc = $rc->getParentClass() );
+        } catch( \ReflectionException $e ) {
+
+        }
         return $properties;
       }
 

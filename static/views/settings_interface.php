@@ -266,7 +266,7 @@
                                 <label for="{{module.id}}">{{module.title}}</label>
                             </th>
                             <td>
-                                <select name="stateless-modules[{{module.id}}]" id="{{module.id}}" ng-model="module.enabled" ng-disabled="module.is_constant || (module.is_network_override ||!module.is_plugin_active) && !module.is_network_admin">
+                                <select name="stateless-modules[{{module.id}}]" id="{{module.id}}" ng-model="module.enabled" ng-disabled="module.is_constant || (module.is_network_override ||!module.is_plugin_active ||!module.is_mode_supported) && !module.is_network_admin">
                                   <?php if(is_network_admin()): ?>
                                       <option value=""><?php _e("Don't override");?></option>
                                   <?php endif; ?>
@@ -275,8 +275,9 @@
                                     <option value="true"><?php _e( 'Enable', ud_get_stateless_media()->domain ); ?></option>
                                 </select>
                                 <p class="description">
-                                    <strong ng-show="!module.is_plugin_active && module.is_plugin"><?php _e("Please activate the plugin first.");?></strong>
-                                    <strong ng-show="!module.is_plugin_active && module.is_theme"><?php _e("Please activate the theme first.");?></strong>
+                                    <strong ng-show="!module.is_plugin_active && module.is_plugin && module.is_mode_supported"><?php _e("Please activate the plugin first.");?></strong>
+                                    <strong ng-show="!module.is_plugin_active && module.is_theme && module.is_mode_supported"><?php _e("Please activate the theme first.");?></strong>
+                                    <strong ng-show="!module.is_mode_supported"><?php _e("This compatibility does not support {{module.mode}} mode.");?></strong>
                                     <strong ng-show="module.is_constant"><?php _e("Currently configured via a constant.");?></strong>
                                     <strong ng-show="module.is_network_override"><?php _e("Currently configured via network settings.");?></strong>
                                     <span ng-bind-html="module.description"></span>
@@ -294,11 +295,11 @@
             <![endif]-->
             <script charset="utf-8" type="text/javascript" src="//js.hsforms.net/forms/v2.js"></script>
             <script>
-                hbspt.forms.create({
-                    portalId: '3453418',
-                    formId: 'cad1f6e1-7825-4e6d-a3e7-278c91abce7e',
-                    submitButtonClass: 'button button-primary',
-                });
+              hbspt.forms.create({
+                portalId: '3453418',
+                formId: 'cad1f6e1-7825-4e6d-a3e7-278c91abce7e',
+                submitButtonClass: 'button button-primary',
+              });
             </script>
         </div>
     </div>

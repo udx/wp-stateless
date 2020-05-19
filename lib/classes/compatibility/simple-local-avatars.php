@@ -20,6 +20,7 @@ namespace wpCloud\StatelessMedia {
       protected $constant = 'WP_STATELESS_COMPATIBILITY_SLA';
       protected $description = 'Ensures compatibility with Simple Local Avatars plugin.';
       protected $plugin_file = 'simple-local-avatars/simple-local-avatars.php';
+      protected $sm_mode_not_supported = [ 'stateless' ];
 
       /**
        * Initialize compatibility module
