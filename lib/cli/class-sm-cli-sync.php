@@ -427,7 +427,7 @@ class SM_CLI_Sync extends SM_CLI_Scaffold {
       }
       else{
         // Stateless mode: we don't need the local version.
-        if(ud_get_stateless_media()->get( 'sm.mode' ) === 'stateless'){
+        if(ud_get_stateless_media()->get( 'sm.mode' ) === 'ephemeral'){
           unlink($fullsizepath);
         }
       }

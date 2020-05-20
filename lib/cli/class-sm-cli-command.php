@@ -129,6 +129,10 @@ if( defined( 'WP_CLI' ) && WP_CLI ) {
      */
     public function sync( $args, $assoc_args ) {
 
+      $sm_mode = ud_get_stateless_media()->get( 'sm.mode' );
+      if ( $sm_mode === 'stateless' ) {
+        WP_CLI::error( 'Sync not working on Stateless mode' );
+      }
       //** DB Optimization process */
       if( isset( $assoc_args[ 'o' ] ) ) {
         $this->_before_command_run();

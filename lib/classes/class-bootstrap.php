@@ -738,9 +738,9 @@ namespace wpCloud\StatelessMedia {
          * wp-content/plugins/wp-stateless/vendor/wpmetabox/meta-box/inc/meta-box.php:346
          * @author palant@ud
          */
-        /*if ( empty( $post ) ) {
+        if( defined( 'WP_CLI' ) && WP_CLI ) {
           return $meta_boxes + array( 'title' => 'Stateless' );
-        }*/
+        }
 
         if ( empty( $post ) ) {
           return $meta_boxes;
