@@ -324,13 +324,7 @@ namespace wpCloud\StatelessMedia {
               if ( $sm_mode == 'stateless' && !wp_doing_ajax() ) {
                 global $gs_client;
 
-                //Bucket
-                $bucket = ud_get_stateless_media()->get( 'sm.bucket' );
-
-                $bucket = $gs_client->bucket($bucket);
-                $object = $bucket->object($img['gs_name']);
-
-                $args = wp_parse_args( $media_args, array(
+                $media_args = wp_parse_args( $media_args, array(
                   'use_root' => true,
                   'force' => false,
                   'name' => false,
@@ -339,7 +333,13 @@ namespace wpCloud\StatelessMedia {
                   'metadata' => array(),
                   'is_webp' => '',
                 ) );
-                $args = apply_filters('wp_stateless_add_media_args', $args);
+                $media_args = apply_filters('wp_stateless_add_media_args', $media_args);
+
+                //Bucket
+                $bucket = ud_get_stateless_media()->get( 'sm.bucket' );
+
+                $bucket = $gs_client->bucket($bucket);
+                $object = $bucket->object($media_args['name']);
 
                 /**
                  * Updating object metadata, ACL, CacheControl and contentDisposition
