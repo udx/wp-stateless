@@ -31,7 +31,7 @@ namespace wpCloud\StatelessMedia {
         add_action( 'litespeed_img_pull_ori', array( $this, 'sync_image' ), 10, 2 );
         add_action( 'litespeed_img_pull_webp', array( $this, 'sync_webp' ), 10, 2 );
         // Deleting images from GCS.
-        add_action( 'litespeed_media_del', array( $this, 'litespeed_media_del' ), 10, 3 );
+        add_action( 'litespeed_media_del', array( $this, 'litespeed_media_del' ), 10, 2 );
         // moving images in GCS.
         add_action( 'litespeed_media_rename', array( $this, 'litespeed_media_rename' ), 10, 3 );
 
@@ -191,8 +191,7 @@ namespace wpCloud\StatelessMedia {
        */
       public function litespeed_media_del( $short_file_path, $post_id ) {
         $short_file_path = apply_filters( 'wp_stateless_file_name', $short_file_path );
-        do_action( 'sm:sync::deleteFile', $name );
-        $this->update_hash( $post_id, $short_file_path_new, false, true );
+        do_action( 'sm:sync::deleteFile', $short_file_path );
       }
 
       /**
