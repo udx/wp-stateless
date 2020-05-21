@@ -197,6 +197,14 @@ namespace wpCloud\StatelessMedia {
             }
 
             /**
+             * Upload the full size image first.
+             *
+             */
+            if(!defined('WP_STATELESS_MEDIA_DISABLE_FULL_IMAGE_FIRST') || WP_STATELESS_MEDIA_DISABLE_FULL_IMAGE_FIRST != true){
+              add_filter( 'intermediate_image_sizes_advanced', array( $this, 'before_intermediate_image_sizes' ), 10, 2 );
+            }
+
+            /**
              * init client's filters
              */
             $this->_init_filters( 'client' );
@@ -216,7 +224,7 @@ namespace wpCloud\StatelessMedia {
           //init GS client
           global $gs_client;
           $gs_client = $this->init_gs_client();
-          $gs_client->registerStreamWrapper();
+          StreamWrapper::register($gs_client);
 
           /**
            * init client's filters
@@ -287,14 +295,6 @@ namespace wpCloud\StatelessMedia {
              * We can't use this. That's prevent removing this filter.
              */
             add_filter( 'wp_update_attachment_metadata', array( 'wpCloud\StatelessMedia\Utility', 'add_media' ), 999, 2 );
-
-            /**
-             * Upload the full size image first.
-             *
-             */
-            if(!defined('WP_STATELESS_MEDIA_DISABLE_FULL_IMAGE_FIRST') || WP_STATELESS_MEDIA_DISABLE_FULL_IMAGE_FIRST != true){
-              add_filter( 'intermediate_image_sizes_advanced', array( $this, 'before_intermediate_image_sizes' ), 10, 2 );
-            }
 
             /**
              * Rewrite Image URLS
