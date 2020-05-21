@@ -345,7 +345,7 @@ namespace wpCloud\StatelessMedia {
                  * Updating object metadata, ACL, CacheControl and contentDisposition
                  * @return media object
                  */
-                $media = $object->update( array( 'metadata' => $args['metadata']) +
+                $media = $object->update( array( 'metadata' => $media_args['metadata']) +
                   array('cacheControl' => $_cacheControl,
                     'predefinedAcl' => 'publicRead',
                     'contentDisposition' => $_contentDisposition)
