@@ -1442,15 +1442,27 @@ namespace wpCloud\StatelessMedia {
           }
         }
         if(is_multisite() && !empty($metadata['file'])){
-          $uploads = wp_get_upload_dir();
-          $blog_id = get_current_blog_id();
-          $file_path_fix = $uploads['basedir'] . "/sites/$blog_id/{$metadata['file']}";
-          if(file_exists($file_path_fix)){
-            $metadata['file'] = "sites/$blog_id/{$metadata['file']}";
+          if ( $this->get('sm.mode') == 'stateless'  ) {
+            $default_dir = true;
+            $uploads = wp_get_upload_dir();
+            $default_dir = false;
+
+            $file_path_fix = $uploads['basedir'] . "/{$metadata['file']}";
+            if(file_exists($file_path_fix)) {
+              $metadata[ 'file' ] = "{$metadata['file']}";
+            }
+          } else {
+            $uploads = wp_get_upload_dir();
+            $blog_id = get_current_blog_id();
+            $file_path_fix = $uploads[ 'basedir' ] . "/sites/$blog_id/{$metadata['file']}";
+            if( file_exists( $file_path_fix ) ) {
+              $metadata[ 'file' ] = "sites/$blog_id/{$metadata['file']}";
+            }
           }
         } elseif ( empty($sm_cloud) && $this->get('sm.mode') == 'stateless' ) {
           $default_dir = true;
           $uploads = wp_get_upload_dir();
+          $default_dir = false;
 
           $file_path_fix = $uploads['basedir'] . "/{$metadata['file']}";
           if(file_exists($file_path_fix)) {
@@ -1737,13 +1749,21 @@ namespace wpCloud\StatelessMedia {
         elseif(is_multisite() && empty($sm_cloud)){
           $_file = get_post_meta( $post_id, '_wp_attached_file', true );
           if($_file){
-            $uploads = wp_get_upload_dir();
-            $_file = apply_filters( 'wp_stateless_file_name', $_file, false);
-            $blog_id = get_current_blog_id();
-            $file_path_fix = $uploads['basedir'] . "/sites/$blog_id/$_file";
+            if ( $this->get('sm.mode') == 'stateless' ) {
+              $default_dir = true;
+              $uploads = wp_get_upload_dir();
+              $default_dir = false;
+              return $uploads['baseurl'].'/'.$_file;
+            } else {
+              $uploads = wp_get_upload_dir();
+              $default_dir = false;
+              $_file = apply_filters( 'wp_stateless_file_name', $_file, false );
+              $blog_id = get_current_blog_id();
+              $file_path_fix = $uploads[ 'basedir' ] . "/sites/$blog_id/$_file";
 
-            if(file_exists($file_path_fix)){
-              $url = $uploads['baseurl'] . "/sites/$blog_id/$_file";
+              if( file_exists( $file_path_fix ) ) {
+                $url = $uploads[ 'baseurl' ] . "/sites/$blog_id/$_file";
+              }
             }
           }
         } elseif ( empty($sm_cloud) && $this->get('sm.mode') == 'stateless' ) {
