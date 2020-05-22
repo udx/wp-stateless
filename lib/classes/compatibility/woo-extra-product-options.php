@@ -48,9 +48,7 @@ namespace wpCloud\StatelessMedia {
 
         $client = ud_get_stateless_media()->get_client();
 
-        $sm_mode = ud_get_stateless_media()->get( 'sm.mode' );
-
-        $file_path = apply_filters( 'wp_stateless_file_name', $file, ( $sm_mode == 'stateless' ? true : 0 ) );
+        $file_path = apply_filters( 'wp_stateless_file_name', $file, 0 );
         $file_info = @getimagesize( $file );
 
         if ($file_info) {

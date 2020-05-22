@@ -815,19 +815,6 @@ var wpStatelessApp = angular.module('wpStatelessApp', ['ngSanitize'])
           // $scope.apply();
         }
       }
-
-      /**
-       * For Stateless mode folder is required
-       */
-      if ( $scope.sm.mode == 'stateless' && $scope.sm.root_dir == '' && !$scope.sm.network_admin ) {
-        if ( $scope.sm.is_multisite ) {
-          $scope.sm.root_dir = '/sites/%site_id%/%date_year%/%date_month%/';
-          $scope.sm.bucket_folder_type = 'multi-site';
-        } else {
-          $scope.sm.root_dir = '/%date_year%/%date_month%/';
-          $scope.sm.bucket_folder_type = 'single-site';
-        }
-      }
     });
 
     $scope.$watch('sm.bucket_folder_type', function(value) {
@@ -858,19 +845,6 @@ var wpStatelessApp = angular.module('wpStatelessApp', ['ngSanitize'])
       }
       else{
         $scope.sm.bucket_folder_type = 'custom';
-      }
-
-      /**
-       * For Stateless mode folder is required
-       */
-      if ( $scope.sm.mode == 'stateless' && value == '' && !$scope.sm.network_admin ) {
-        if ( $scope.sm.is_multisite ) {
-          value = '/sites/%site_id%/%date_year%/%date_month%/';
-          $scope.sm.bucket_folder_type = 'multi-site';
-        } else {
-          value = '/%date_year%/%date_month%/';
-          $scope.sm.bucket_folder_type = 'single-site';
-        }
       }
 
       let tags = [ "%date_year%", "%date_month%", "%site_id%", "%site_url%", "%site_url_host%", "%site_url_path%" ];

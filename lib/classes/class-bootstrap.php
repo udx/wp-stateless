@@ -1268,15 +1268,6 @@ namespace wpCloud\StatelessMedia {
             include ud_get_stateless_media()->path( '/static/views/error-notice.php', 'dir' );
             echo "</script>";
 
-            $data = array(
-              'key' => 'stateless-folder',
-              'class' => 'notice',
-              'title' => sprintf( __( "Stateless mode requires the Folder value.", ud_get_stateless_media()->domain ) ),
-              'message' => sprintf( __("Field Folder shoul be filled for correct work Stateless mode. ", ud_get_stateless_media()->domain) ),
-            );
-            echo "<script id='template-stateless-folder' type='text/html'>";
-            include ud_get_stateless_media()->path( '/static/views/error-notice.php', 'dir' );
-            echo "</script>";
             break;
           default: break;
         }

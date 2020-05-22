@@ -58,10 +58,9 @@ namespace wpCloud\StatelessMedia {
         if( $position !== false ) {
           $upload_data = wp_upload_dir();
           $name = substr( $url, $position );
-          $sm_mode = ud_get_stateless_media()->get( 'sm.mode' );
           // We need to get the absolute path before adding the bucket dir to name.
           $absolutePath = $upload_data[ 'basedir' ] . '/' . $name;
-          $name = apply_filters( 'wp_stateless_file_name', $name, ( $sm_mode == 'stateless' ? true : 0 ) );
+          $name = apply_filters( 'wp_stateless_file_name', $name, 0);
           do_action( 'sm:sync::syncFile', $name, $absolutePath );
           // echo "do_action( 'sm:sync::syncFile', $name, $absolutePath);\n";
           $url = ud_get_stateless_media()->get_gs_host() . '/' . $name;

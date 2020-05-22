@@ -45,12 +45,11 @@ namespace wpCloud\StatelessMedia {
       public function sync_rewrite_url($url, $scheme, $orig_scheme){
         try{
           if(strpos($url, 'elementor/') !== false){
-            $sm_mode = ud_get_stateless_media()->get( 'sm.mode' );
             $wp_uploads_dir = wp_get_upload_dir();
             $name = str_replace($wp_uploads_dir['baseurl'] . '/', '', $url);
             if($name != $url){
               $absolutePath = $wp_uploads_dir['basedir'] . '/' . $name;
-              $name = apply_filters( 'wp_stateless_file_name', $name, ( $sm_mode == 'stateless' ? true : 0));
+              $name = apply_filters( 'wp_stateless_file_name', $name, 0);
               do_action('sm:sync::syncFile', $name, $absolutePath);
               $url = ud_get_stateless_media()->get_gs_host() . '/' . $name;
             }
@@ -84,13 +83,12 @@ namespace wpCloud\StatelessMedia {
 
         if($update || current_action() === 'deleted_post'){
           $wp_uploads_dir = wp_get_upload_dir();
-          $sm_mode = ud_get_stateless_media()->get( 'sm.mode' );
 
           $post_css = new \Elementor\Core\Files\CSS\Post( $post_ID );
 
           //      elementor/               css/                           'post-' . $post_id . '.css'
           $name = $post_css::UPLOADS_DIR . $post_css::DEFAULT_FILES_DIR . $post_css->get_file_name();
-          $name = apply_filters( 'wp_stateless_file_name', $name, ( $sm_mode == 'stateless' ? true : 0));
+          $name = apply_filters( 'wp_stateless_file_name', $name, 0);
           do_action('sm:sync::deleteFile', $name);
 
           // $meta = $post_css->update();
@@ -116,11 +114,10 @@ namespace wpCloud\StatelessMedia {
        */
       public function delete_global_css($success_response_data, $id, $data){
         try{
-          $sm_mode = ud_get_stateless_media()->get( 'sm.mode' );
           $post_css = new \Elementor\Core\Files\CSS\Global_CSS( 'global.css' );
           //      elementor/               css/                           'global.css'
           $name = $post_css::UPLOADS_DIR . $post_css::DEFAULT_FILES_DIR . $post_css->get_file_name();
-          $name = apply_filters( 'wp_stateless_file_name', $name, ( $sm_mode == 'stateless' ? true : 0));
+          $name = apply_filters( 'wp_stateless_file_name', $name, 0);
           do_action('sm:sync::deleteFile', $name);
         }
         catch(Exception $e){

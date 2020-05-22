@@ -43,8 +43,7 @@ namespace wpCloud\StatelessMedia {
           $upload_data = wp_upload_dir();
           $name = substr( $url, $position );
           $absolutePath = $upload_data[ 'basedir' ] . '/' . $name;
-          $sm_mode = ud_get_stateless_media()->get( 'sm.mode' );
-          $name = apply_filters( 'wp_stateless_file_name', $name, ( $sm_mode == 'stateless' ? true : 0 ) );
+          $name = apply_filters( 'wp_stateless_file_name', $name, 0 );
           do_action( 'sm:sync::syncFile', $name, $absolutePath );
           $url = ud_get_stateless_media()->get_gs_host() . '/' . $name;
         }

@@ -67,17 +67,6 @@ jQuery( document ).ready( function ($) {
       jQuery('#stateless-notice-stateless-cache-busting').hide();
     }
 
-    if( $(this).val() == 'stateless' ){
-      var notice = jQuery('#stateless-notice-stateless-folder');
-      if(!notice.length){
-        notice = jQuery(jQuery('#template-stateless-folder').html());
-        notice.appendTo("#stateless-settings-page-title");
-      }
-      jQuery('#stateless-notice-stateless-folder').show();
-    }
-    else{
-      jQuery('#stateless-notice-stateless-folder').hide();
-    }
   });
 
 } );

@@ -15,7 +15,21 @@ namespace wpCloud\StatelessMedia {
     if (!class_exists('wpCloud\StatelessMedia\StreamWrapper')) {
         class StreamWrapper extends \Google\Cloud\Storage\StreamWrapper
         {
-            
+            /**
+             * @var string Protocol used to open this stream
+             */
+            private $protocol;
+
+            /**
+             * @var Bucket Reference to the bucket the opened file
+             *      lives in or will live in.
+             */
+            private $bucket;
+
+            /**
+             * @var string Name of the file opened by this stream.
+             */
+            private $file;
 
             /**
              * Callback handler for retrieving information about a file

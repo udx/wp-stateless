@@ -68,10 +68,9 @@ namespace wpCloud\StatelessMedia {
             $position = strpos($v, 'gravity_forms/');
 
             if( $position !== false ){
-              $sm_mode = ud_get_stateless_media()->get( 'sm.mode' );
               $name = substr($v, $position);
               $absolutePath = $dir['basedir'] . '/' .  $name;
-              $name = apply_filters( 'wp_stateless_file_name', $name, ( $sm_mode == 'stateless' ? true : 0));
+              $name = apply_filters( 'wp_stateless_file_name', $name, 0);
               // doing sync
               do_action( 'sm:sync::syncFile', $name, $absolutePath);
               $value[$k] = ud_get_stateless_media()->get_gs_host() . '/' . $name;
@@ -101,9 +100,8 @@ namespace wpCloud\StatelessMedia {
             $name = rgar( $arr_name, 0 ); // Removed |:| from end of the url.
 
             // doing sync
-            $sm_mode = ud_get_stateless_media()->get( 'sm.mode' );
             $absolutePath = $dir['basedir'] . '/' .  $name;
-            $name = apply_filters( 'wp_stateless_file_name', $name, ( $sm_mode == 'stateless' ? true : 0));
+            $name = apply_filters( 'wp_stateless_file_name', $name, 0);
             do_action( 'sm:sync::syncFile', $name, $absolutePath);
 
             $value = ud_get_stateless_media()->get_gs_host() . '/' . $name;
@@ -238,10 +236,9 @@ namespace wpCloud\StatelessMedia {
 
         // If the url is a GCS link then remove it from GCS.
         if($is_stateless !== false){
-          $sm_mode = ud_get_stateless_media()->get( 'sm.mode' );
           $gs_name = substr($file_path, strpos($file_path, '/gravity_forms/'));
           $file_path = $dir['basedir'] . $gs_name;
-          $gs_name = apply_filters( 'wp_stateless_file_name', $gs_name, ( $sm_mode == 'stateless' ? true : 0));
+          $gs_name = apply_filters( 'wp_stateless_file_name', $gs_name, 0);
 
           $client = ud_get_stateless_media()->get_client();
           if( !is_wp_error( $client ) ) {
