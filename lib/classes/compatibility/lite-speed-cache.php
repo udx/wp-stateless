@@ -292,6 +292,7 @@ namespace wpCloud\StatelessMedia {
           $upload_dir = wp_upload_dir();
           $fileMd5 = $cloud_meta[ 'fileMd5' ];
           $root_dir = ud_get_stateless_media()->get( 'sm.root_dir' );
+          $root_dir = apply_filters("wp_stateless_handle_root_dir", $root_dir);
           $root_dir = trim( $root_dir, '/ ' ); // Remove any forward slash and empty space.
 
           foreach( $fileMd5 as $gs_name => $value ) {

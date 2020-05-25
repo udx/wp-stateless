@@ -107,7 +107,9 @@ namespace wpCloud\StatelessMedia {
        */
       public function upload_dir( $data ) {
         if( $this->hook_from_fes() ) {
-          $data[ 'baseurl' ] = ud_get_stateless_media()->get_gs_host() . '/' . ud_get_stateless_media()->get( 'sm.root_dir' );
+          $root_dir = ud_get_stateless_media()->get( 'sm.root_dir' );
+          $root_dir = apply_filters("wp_stateless_handle_root_dir", $root_dir);
+          $data[ 'baseurl' ] = ud_get_stateless_media()->get_gs_host() . '/' . $root_dir;
         }
         return $data;
       }

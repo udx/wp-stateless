@@ -131,6 +131,7 @@ namespace wpCloud\StatelessMedia {
         $is_index = strpos($file_path, 'index.html');
         $is_htaccess = strpos($file_path, '.htaccess');
         $root_dir = ud_get_stateless_media()->get( 'sm.root_dir' );
+        $root_dir = apply_filters("wp_stateless_handle_root_dir", $root_dir);
 
         if ( empty($this->plugin_version) && class_exists('GFForms') ) {
           $this->plugin_version = \GFForms::$version;

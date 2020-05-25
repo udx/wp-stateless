@@ -155,6 +155,7 @@ namespace wpCloud\StatelessMedia {
             if ( !empty( $upload_data['baseurl'] ) && !empty( $content ) ) {
               $baseurl = preg_replace('/https?:\/\//','',$upload_data['baseurl']);
               $root_dir = trim( ud_get_stateless_media()->get( 'sm.root_dir' ), '/ ' ); // Remove any forward slash and empty space.
+              $root_dir = apply_filters("wp_stateless_handle_root_dir", $root_dir);
               $root_dir = !empty( $root_dir ) ? $root_dir . '/' : '';
               $image_host = ud_get_stateless_media()->get_gs_host() . $root_dir;
               $file_ext = ud_get_stateless_media()->replaceable_file_types();

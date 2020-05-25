@@ -94,6 +94,7 @@ namespace wpCloud\StatelessMedia {
 
 
         $root_dir = ud_get_stateless_media()->get( 'sm.root_dir' );
+        $root_dir = apply_filters("wp_stateless_handle_root_dir", $root_dir);
         $root_dir = trim( $root_dir, '/ ' ); // Remove any forward slash and empty space.
         // Making sure that we only modify url for uploads dir.
         // @todo support photo in plugins directory.
@@ -161,6 +162,7 @@ namespace wpCloud\StatelessMedia {
             $name = apply_filters( 'wp_stateless_file_name', $url, 0 );
 
             $root_dir = ud_get_stateless_media()->get( 'sm.root_dir' );
+            $root_dir = apply_filters("wp_stateless_handle_root_dir", $root_dir);
             $root_dir = trim( $root_dir, '/ ' ); // Remove any forward slash and empty space.
 
             if( !empty( $name ) && $root_dir . "/" != $name ) {

@@ -944,6 +944,7 @@ namespace wpCloud\StatelessMedia {
           if ( !empty( $upload_data['baseurl'] ) && !empty( $content ) ) {
             $baseurl = preg_replace('/https?:\/\//','',$upload_data['baseurl']);
             $root_dir = trim( $this->get( 'sm.root_dir' ), '/ ' ); // Remove any forward slash and empty space.
+            $root_dir = apply_filters("wp_stateless_handle_root_dir", $root_dir);
             $root_dir = !empty( $root_dir ) ? $root_dir . '/' : false;
             $image_host = $this->get_gs_host();
             $file_ext = $this->replaceable_file_types();
@@ -1031,6 +1032,7 @@ namespace wpCloud\StatelessMedia {
           if ( !empty( $upload_data['baseurl'] ) && !empty( $meta ) ) {
             $baseurl = preg_replace('/https?:\/\//','',$upload_data['baseurl']);
             $root_dir = trim( $this->get( 'sm.root_dir' ), '/ ' ); // Remove any forward slash and empty space.
+            $root_dir = apply_filters("wp_stateless_handle_root_dir", $root_dir);
             $root_dir = !empty( $root_dir ) ? $root_dir . '/': false;
             $image_host = $this->get_gs_host().'/'.($root_dir?$root_dir:'');
             $file_ext = $this->replaceable_file_types();
@@ -1799,7 +1801,9 @@ namespace wpCloud\StatelessMedia {
 
           if(empty($post_id)){
             $gs_base_url =  $this->get_gs_host();
-            $gs_url =  $this->get_gs_host() . '/' . $this->get( 'sm.root_dir' );
+            $root_dir = $this->get( 'sm.root_dir' );
+            $root_dir = apply_filters("wp_stateless_handle_root_dir", $root_dir);
+            $gs_url =  $this->get_gs_host() . '/' . $root_dir;
             $site_url = parse_url($gs_url);
             $image_path = parse_url( $url );
 
