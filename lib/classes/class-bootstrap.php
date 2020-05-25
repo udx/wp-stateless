@@ -947,14 +947,15 @@ namespace wpCloud\StatelessMedia {
 
         if ( $upload_data = wp_upload_dir() ) {
 
-          if ( !empty( $upload_data['baseurl'] ) && !empty( $content ) ) {
-            $baseurl = preg_replace('/https?:\/\//','',$upload_data['baseurl']);
+          if ( !empty( $upload_data['url'] ) && !empty( $content ) ) {
+            $url = preg_replace('/https?:\/\//','',$upload_data['url']);
+
             $root_dir = trim( $this->get( 'sm.root_dir' ), '/ ' ); // Remove any forward slash and empty space.
             $root_dir = apply_filters("wp_stateless_handle_root_dir", $root_dir);
             $root_dir = !empty( $root_dir ) ? $root_dir . '/' : false;
             $image_host = $this->get_gs_host();
             $file_ext = $this->replaceable_file_types();
-            $content = preg_replace( '/(href|src)=(\'|")(https?:\/\/'.str_replace('/', '\/', $baseurl).')\/(.+?)('.$file_ext.')(\'|")/i',
+            $content = preg_replace( '/(href|src)=(\'|")(https?:\/\/'.str_replace('/', '\/', $url).')\/(.+?)('.$file_ext.')(\'|")/i',
               '$1=$2'.$image_host.'/'.($root_dir?$root_dir:'').'$4$5$6', $content);
           }
         }
@@ -1035,14 +1036,14 @@ namespace wpCloud\StatelessMedia {
       public function convert_to_gs_link($meta, $return = false){
         $updated = $meta;
         if ( $meta && $upload_data = wp_upload_dir() ) {
-          if ( !empty( $upload_data['baseurl'] ) && !empty( $meta ) ) {
-            $baseurl = preg_replace('/https?:\/\//','',$upload_data['baseurl']);
+          if ( !empty( $upload_data['url'] ) && !empty( $meta ) ) {
+            $url = preg_replace('/https?:\/\//','',$upload_data['url']);
             $root_dir = trim( $this->get( 'sm.root_dir' ), '/ ' ); // Remove any forward slash and empty space.
             $root_dir = apply_filters("wp_stateless_handle_root_dir", $root_dir);
             $root_dir = !empty( $root_dir ) ? $root_dir . '/': false;
             $image_host = $this->get_gs_host().'/'.($root_dir?$root_dir:'');
             $file_ext = $this->replaceable_file_types();
-            $updated = $this->_convert_to_gs_link($meta, $image_host, $baseurl, $file_ext);
+            $updated = $this->_convert_to_gs_link($meta, $image_host, $url, $file_ext);
           }
         }
 
@@ -1057,23 +1058,23 @@ namespace wpCloud\StatelessMedia {
        *
        * @param $meta
        * @param $image_host
-       * @param $baseurl
+       * @param $url
        * @param $file_ext
        * @return array|null|string|string[]
        */
-      public function _convert_to_gs_link($meta, $image_host, $baseurl, $file_ext){
+      public function _convert_to_gs_link($meta, $image_host, $url, $file_ext){
         if(is_array($meta)){
           foreach ($meta as $key => $value) {
-            $meta[$key] = $this->_convert_to_gs_link($value, $image_host, $baseurl, $file_ext);
+            $meta[$key] = $this->_convert_to_gs_link($value, $image_host, $url, $file_ext);
           }
           return $meta;
         } elseif (is_object($meta) && $meta instanceof \stdClass ) {
           foreach (get_object_vars($meta) as $key => $value) {
-            $meta->{$key} = $this->_convert_to_gs_link($value, $image_host, $baseurl, $file_ext);
+            $meta->{$key} = $this->_convert_to_gs_link($value, $image_host, $url, $file_ext);
           }
           return $meta;
         } elseif(is_string($meta)){
-          return preg_replace( '/(https?:\/\/'.str_replace('/', '\/', $baseurl).')\/(.+?)(' . $file_ext . ')/i', $image_host.'$2$3', $meta);
+          return preg_replace( '/(https?:\/\/'.str_replace('/', '\/', $url).')\/(.+?)(' . $file_ext . ')/i', $image_host.'$2$3', $meta);
         }
 
         return $meta;
