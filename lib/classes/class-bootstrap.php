@@ -452,6 +452,11 @@ namespace wpCloud\StatelessMedia {
               }
             }
           }
+        } elseif ( is_array( $sources ) && $sm_mode === 'stateless' ) {
+          foreach ($sources as $width => &$image) {
+            // Set default src
+            $image['url'] = $image_src;
+          }
         }
 
         return array_filter( $sources );
