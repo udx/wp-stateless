@@ -913,7 +913,8 @@ namespace wpCloud\StatelessMedia {
 
         $root_dir = $this->get( 'sm.root_dir' );
         $root_dir_regex = '~^' . apply_filters("wp_stateless_handle_root_dir", $root_dir, true) . '/~';
-        $root_dir = apply_filters("wp_stateless_handle_root_dir", $root_dir);
+        $path_elements = apply_filters( 'wp_stateless_unhandle_root_dir', $current_path );
+        $root_dir = apply_filters("wp_stateless_handle_root_dir", $root_dir, $path_elements);
 
         $upload_dir = wp_upload_dir();
         $current_path = str_replace( wp_normalize_path( trailingslashit( $upload_dir[ 'basedir' ] ) ), '', wp_normalize_path( $current_path ) );
@@ -1802,7 +1803,8 @@ namespace wpCloud\StatelessMedia {
           if(empty($post_id)){
             $gs_base_url =  $this->get_gs_host();
             $root_dir = $this->get( 'sm.root_dir' );
-            $root_dir = apply_filters("wp_stateless_handle_root_dir", $root_dir);
+            $path_elements = apply_filters( 'wp_stateless_unhandle_root_dir', $url );
+            $root_dir = apply_filters("wp_stateless_handle_root_dir", $root_dir, false, $path_elements);
             $gs_url =  $this->get_gs_host() . '/' . $root_dir;
             $site_url = parse_url($gs_url);
             $image_path = parse_url( $url );
@@ -1819,6 +1821,21 @@ namespace wpCloud\StatelessMedia {
               // In case user added Bucket Folder (root_dir) after uploading image.
               $url = substr( $url, strlen( $gs_base_url . '/' ) );
             }
+
+            /**
+             * If `uploads_use_yearmonth_folders` is set - adding year and month to url
+             */
+            $organize_media   = get_option('uploads_use_yearmonth_folders');
+            $path = '';
+            if ( $organize_media == '1' ) {
+              if ( isset ($path_elements['%date_year%']) ) {
+                $path .= $path_elements['%date_year%'].'/';
+              }
+              if ( isset ($path_elements['%date_month%']) ) {
+                $path .= $path_elements['%date_month%'].'/';
+              }
+            }
+            $url = $path . $url;
 
             $sql = $wpdb->prepare(
               "SELECT post_id FROM $wpdb->postmeta WHERE meta_key = '_wp_attached_file' AND meta_value = %s",
