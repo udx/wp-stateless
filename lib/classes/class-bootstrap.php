@@ -366,14 +366,8 @@ namespace wpCloud\StatelessMedia {
         //Bucket folder path
         $root_dir = $this->get( 'sm.root_dir' );
         $root_dir = apply_filters("wp_stateless_handle_root_dir", $root_dir);
-
-        /**
-         * Subdir not uses on Stateless mode
-         */
-        $uploads['subdir'] = '';
-
         $basedir = rtrim(sprintf('gs://%s/%s', $bucket, $root_dir), '/');
-        $baseurl = rtrim(sprintf('https://storage.googleapis.com/%s/%s', $bucket, $root_dir ), '/');
+        $baseurl = rtrim($this->get_gs_host(), '/');
 
         $uploads = array(
           'url' => rtrim($baseurl . $uploads['subdir'], '/'),
@@ -920,7 +914,7 @@ namespace wpCloud\StatelessMedia {
         $root_dir = $this->get( 'sm.root_dir' );
         $root_dir_regex = '~^' . apply_filters("wp_stateless_handle_root_dir", $root_dir, true) . '/~';
         $path_elements = apply_filters( 'wp_stateless_unhandle_root_dir', $current_path );
-        $root_dir = apply_filters("wp_stateless_handle_root_dir", $root_dir, $path_elements);
+        $root_dir = apply_filters("wp_stateless_handle_root_dir", $root_dir, false, $path_elements);
 
         $upload_dir = wp_upload_dir();
         $current_path = str_replace( wp_normalize_path( trailingslashit( $upload_dir[ 'basedir' ] ) ), '', wp_normalize_path( $current_path ) );

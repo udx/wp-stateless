@@ -95,18 +95,18 @@ namespace wpCloud\StatelessMedia {
         $site_url = parse_url( site_url() );
         $site_url['path'] = isset($site_url['path']) ? $site_url['path'] : '';
         $this->wildcards = array(
-          '%date_year%'            => [
-            date('Y'),
-            __("year", $this->bootstrap->domain),
-            __("The year of the post, four digits, for example 2004.", $this->bootstrap->domain),
-            "\d{4}"
-          ],
-          '%date_month%'           => [
-            date('m'),
-            __("monthnum", $this->bootstrap->domain),
-            __("Month of the year, for example 05.", $this->bootstrap->domain),
-            "\d{2}"
-          ],
+          // '%date_year%'            => [
+          //   date('Y'),
+          //   __("year", $this->bootstrap->domain),
+          //   __("The year of the post, four digits, for example 2004.", $this->bootstrap->domain),
+          //   "\d{4}"
+          // ],
+          // '%date_month%'           => [
+          //   date('m'),
+          //   __("monthnum", $this->bootstrap->domain),
+          //   __("Month of the year, for example 05.", $this->bootstrap->domain),
+          //   "\d{2}"
+          // ],
           '%site_id%'         => [
             get_current_blog_id(),
             __("site id", $this->bootstrap->domain),
