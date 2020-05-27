@@ -89,6 +89,8 @@ namespace wpCloud\StatelessMedia {
         $gs_name = apply_filters( 'wp_stateless_file_name', $row_img->src );
         $cloud_meta = get_post_meta( $row_img->post_id, 'sm_cloud', true );
 
+        if(empty($cloud_meta)) $cloud_meta = array();
+
         if( !$rm_ori_bkup ) {
           $extension = pathinfo( $gs_name, PATHINFO_EXTENSION );
           $bk_file = substr( $gs_name, 0, -strlen( $extension ) ) . 'bk.' . $extension;

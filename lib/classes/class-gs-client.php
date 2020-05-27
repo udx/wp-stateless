@@ -327,7 +327,7 @@ namespace wpCloud\StatelessMedia {
         try {
           $media = $this->service->objects->get($this->bucket, $path);
           $media = $this->service->objects->copy($this->bucket, $path, $this->bucket, $new_path, $media);
-          $this->mediaInsertACL($media);
+          $this->mediaInsertACL($new_path, $media);
         } catch ( \Exception $e ) {
           return false;
         }
