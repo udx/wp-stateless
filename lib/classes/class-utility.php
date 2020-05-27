@@ -893,6 +893,11 @@ namespace wpCloud\StatelessMedia {
        * @link http://svn.apache.org/repos/asf/httpd/httpd/branches/1.3.x/conf/mime.types
        */
       public static function mimetype_from_extension($extension){
+        $file_type = wp_check_filetype($extension);
+        if(!empty($file_type['type'])){
+          return $file_type['type'];
+        }
+
         static $mimetypes = [
           '7z' => 'application/x-7z-compressed',
           'aac' => 'audio/x-aac',
@@ -996,7 +1001,7 @@ namespace wpCloud\StatelessMedia {
 
         $extension = strtolower( $extension );
 
-        return isset( $mimetypes[ $extension ] ) ? $mimetypes[ $extension ] : null;
+        return isset( $mimetypes[ $extension ] ) ? $mimetypes[ $extension ] : false;
       }
 
       /**
