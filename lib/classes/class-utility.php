@@ -837,6 +837,40 @@ namespace wpCloud\StatelessMedia {
         return $ids;
       }
 
+      /**
+       * Generate JWT token signed by current site AUTH_SALT
+       * If no AUTH_SALT defined - admin email used
+       *
+       * @param $payload
+       * @param int $ttl
+       * @return string
+       */
+      public static function generate_jwt_token($payload, $ttl = 3600) {
+        $payload = wp_parse_args( $payload, [
+          'iat' => $now = time(),
+          'iss' => $site_url = get_site_url(),
+          'aud' => $site_url,
+          'exp' => $now + $ttl
+        ] );
+
+        $key = defined('AUTH_SALT') ? AUTH_SALT : get_option('admin_email');
+        return \Firebase\JWT\JWT::encode( $payload, $key );
+      }
+
+      /**
+       * Verify and decode token
+       * If no AUTH_SALT defined - admin email used
+       * Throws exceptions if cannot decode
+       *
+       * @param $token
+       * @return object
+       * @throws \Exception
+       */
+      public static function verify_jwt_token($token) {
+        $key = defined('AUTH_SALT') ? AUTH_SALT : get_option('admin_email');
+        return \Firebase\JWT\JWT::decode($token, $key, ['HS256']);
+      }
+
     }
   }
 }
