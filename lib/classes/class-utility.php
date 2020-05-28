@@ -290,7 +290,7 @@ namespace wpCloud\StatelessMedia {
               }
 
               // skips thumbs when it's called from Upload the full size image first, through intermediate_image_sizes_advanced filter.
-              if( $args[ 'no_thumb' ] && $img[ 'is_thumb' ] || !empty( self::$synced_sizes[ $attachment_id ][ $size ] ) && $sm_mode !== 'stateless' ) {
+              if( $args[ 'no_thumb' ] && $img[ 'is_thumb' ] || !empty( self::$synced_sizes[ $attachment_id ][ $size ] ) && $sm_mode !== 'stateless' && !$args[ 'is_webp' ] ) {
                 continue;
               }
 
