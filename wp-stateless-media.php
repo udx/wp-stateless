@@ -95,9 +95,3 @@ if( ud_check_stateless_media() ) {
   //** Initialize. */
   ud_get_stateless_media();
 }
-
-echo $token = \wpCloud\StatelessMedia\Utility::generate_jwt_token(['data' => ['user' => 1]]);
-
-var_dump( \wpCloud\StatelessMedia\Utility::verify_jwt_token( $token ) );
-
-die();
