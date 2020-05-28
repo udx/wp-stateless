@@ -819,14 +819,17 @@ var wpStatelessApp = angular.module('wpStatelessApp', ['ngSanitize'])
 
     $scope.$watch('sm.bucket_folder_type', function(value) {
       if(value == 'single-site'){
-        $scope.sm.root_dir = '/%date_year%/%date_month%/';
+        $scope.sm.root_dir = '';
       }
       else if(value == 'multi-site'){
-        $scope.sm.root_dir = '/sites/%site_id%/%date_year%/%date_month%/';
+        $scope.sm.root_dir = '/sites/%site_id%/';
       }
       else if(value == '' && $scope.sm.network_admin){
         $scope.sm.root_dir = '';
       }
+
+      $scope.sm.generatePreviewUrl();
+
       setTimeout(function(){
         jQuery( '#permalink_structure' ).trigger('change');
       }, 1);
@@ -837,7 +840,7 @@ var wpStatelessApp = angular.module('wpStatelessApp', ['ngSanitize'])
       if(value == '/%date_year%/%date_month%/'){
         $scope.sm.bucket_folder_type = 'single-site';
       }
-      else if(value == '/sites/%site_id%/%date_year%/%date_month%/'){
+      else if(value == '/sites/%site_id%/'){
         $scope.sm.bucket_folder_type = 'multi-site';
       }
       else if(value == '' && $scope.sm.network_admin){
@@ -886,6 +889,7 @@ var wpStatelessApp = angular.module('wpStatelessApp', ['ngSanitize'])
       var is_ssl = $scope.sm.custom_domain.indexOf('https://');
       var custom_domain = $scope.sm.custom_domain.toString();
       var root_dir = $scope.sm.root_dir ? $scope.sm.root_dir : '';
+      var subdir = $scope.sm.organize_media == '1' ? $filter('date')(Date.now(), 'yyyy/MM') + '/' : '';
 
       jQuery.each($scope.sm.wildcards, function(index, item){
         var reg = new RegExp(index, 'g');
@@ -917,7 +921,7 @@ var wpStatelessApp = angular.module('wpStatelessApp', ['ngSanitize'])
         host += custom_domain;
       }
 
-      $scope.sm.preview_url = host + "/" + root_dir + hash + "your-image-name.jpeg";
+      $scope.sm.preview_url = host + "/" + root_dir + subdir + hash + "your-image-name.jpeg";
     }
 
     $scope.sm.generatePreviewUrl();

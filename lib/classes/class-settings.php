@@ -159,6 +159,10 @@ namespace wpCloud\StatelessMedia {
           $constant = $array[0]; // Constant name
           $default  = is_array($array[1]) ? $array[1] : array($array[1], $array[1]); // Default value
 
+          if($option == 'organize_media'){
+            $_option = 'uploads_use_yearmonth_folders';
+          }
+
           // Getting settings
           $value = get_option($_option, $default[0]);
 
@@ -196,7 +200,7 @@ namespace wpCloud\StatelessMedia {
           }
 
           // Getting network settings
-          if(is_multisite() && !$this->get( "sm.readonly.{$option}")){
+          if(is_multisite() && $option != 'organize_media' && !$this->get( "sm.readonly.{$option}")){
 
             $network = get_site_option( $_option, $default[1] );
             // If network settings available then override by network settings.
