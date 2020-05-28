@@ -345,13 +345,17 @@ namespace wpCloud\StatelessMedia {
                  * Updating object metadata, ACL, CacheControl and contentDisposition
                  * @return media object
                  */
-                $media = $object->update( array( 'metadata' => $media_args['metadata']) +
-                  array('cacheControl' => $_cacheControl,
-                    'predefinedAcl' => 'publicRead',
-                    'contentDisposition' => $_contentDisposition)
-                );
-
-                $cloud_meta = self::generate_cloud_meta($cloud_meta, $media, $size, $img, $bucketLink);
+                try {
+                  $media = $object->update( array( 'metadata' => $media_args['metadata']) +
+                    array('cacheControl' => $_cacheControl,
+                      'predefinedAcl' => 'publicRead',
+                      'contentDisposition' => $_contentDisposition)
+                  );
+  
+                  $cloud_meta = self::generate_cloud_meta($cloud_meta, $media, $size, $img, $bucketLink);
+                } catch (\Throwable $th) {
+                  //throw $th;
+                }
 
               } else {
                 /* Add default image */

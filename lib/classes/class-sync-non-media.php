@@ -136,11 +136,15 @@ namespace wpCloud\StatelessMedia {
              * Updating object metadata, ACL, CacheControl and contentDisposition
              * @return media object
              */
-            $media = $object->update( array( 'metadata' => $args['metadata']) +
-              array('cacheControl' => apply_filters( 'sm:item:cacheControl', 'public, max-age=36000, must-revalidate', $absolutePath),
-                'predefinedAcl' => 'publicRead',
-                'contentDisposition' => apply_filters( 'sm:item:contentDisposition', null, $absolutePath))
-            );
+            try {
+              $media = $object->update( array( 'metadata' => $args['metadata']) +
+                array('cacheControl' => apply_filters( 'sm:item:cacheControl', 'public, max-age=36000, must-revalidate', $absolutePath),
+                  'predefinedAcl' => 'publicRead',
+                  'contentDisposition' => apply_filters( 'sm:item:contentDisposition', null, $absolutePath))
+              );
+            } catch (\Throwable $th) {
+              //throw $th;
+            }
 
 
           } else {
