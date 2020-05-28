@@ -197,14 +197,6 @@ namespace wpCloud\StatelessMedia {
             }
 
             /**
-             * Upload the full size image first.
-             *
-             */
-            if(!defined('WP_STATELESS_MEDIA_DISABLE_FULL_IMAGE_FIRST') || WP_STATELESS_MEDIA_DISABLE_FULL_IMAGE_FIRST != true){
-              add_filter( 'intermediate_image_sizes_advanced', array( $this, 'before_intermediate_image_sizes' ), 10, 2 );
-            }
-
-            /**
              * init client's filters
              */
             $this->_init_filters( 'client' );
@@ -1859,29 +1851,6 @@ namespace wpCloud\StatelessMedia {
         }
 
         return $post_id;
-      }
-
-      /**
-       * Upload the full size image first.
-       *
-       * @param $sizes
-       * @param array $metadata
-       * @return mixed
-       */
-      public function before_intermediate_image_sizes($sizes, $metadata = array()){
-        if(empty($metadata)){
-          return $sizes;
-        }
-
-        try{
-          $attachment_id = attachment_url_to_postid($metadata['file']);
-          $this->add_media(null, $attachment_id, false, array('no_thumb' => true));
-        }
-        catch(Exception $e){
-
-        }
-
-        return $sizes;
       }
 
       /**
