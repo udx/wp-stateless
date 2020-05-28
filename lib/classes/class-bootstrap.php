@@ -329,19 +329,19 @@ namespace wpCloud\StatelessMedia {
 
         $httpHandler = $httpHandler ? $httpHandler : HttpHandlerFactory::build();
 
-        return new StorageClient([
-          'keyFile'     => json_decode($this->settings->get('sm.key_json'), true),
-          'httpHandler' => function ($request, $options) use ($httpHandler) {
-            $xGoogApiClientHeader = $request->getHeaderLine('x-goog-api-client');
-            $request = $request->withHeader(
-              'x-goog-api-client',
-              $xGoogApiClientHeader
-            );
+        $json_key = json_decode($this->settings->get('sm.key_json'), true);
 
-            return call_user_func_array($httpHandler, [$request, $options]);
-          },
-          'authHttpHandler' => HttpHandlerFactory::build(),
-        ]);
+        if ( !empty( $json_key ) ) {
+          return new StorageClient(
+            [ 'keyFile' => $json_key,
+              'httpHandler' => function ( $request, $options ) use ( $httpHandler ) {
+                                $xGoogApiClientHeader = $request->getHeaderLine( 'x-goog-api-client' );
+                                $request = $request->withHeader( 'x-goog-api-client', $xGoogApiClientHeader );
+
+                                return call_user_func_array( $httpHandler, [ $request, $options ] );
+                              },
+              'authHttpHandler' => HttpHandlerFactory::build(), ] );
+        }
       }
 
       /**
