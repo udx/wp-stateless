@@ -20,7 +20,7 @@ namespace wpCloud\StatelessMedia {
       /**
        * Decoded auth_token data
        *
-       * @var null
+       * @var null|\stdClass
        */
       static private $tokenData = null;
 
@@ -51,6 +51,7 @@ namespace wpCloud\StatelessMedia {
         return new \WP_REST_Response( array(
           "ok" => true,
           "message" => "API up.",
+          // @todo: remove this
           "test_token" => Utility::generate_jwt_token( ['hello' => 'test'] )
         ), 200 );
       }
@@ -75,9 +76,13 @@ namespace wpCloud\StatelessMedia {
        *
        * @todo Implement this
        * @param \WP_REST_Request $request
-       * @return \WP_REST_Response
+       * @return \WP_REST_Response|\WP_Error
        */
       static public function updateSettings( \WP_REST_Request $request ) {
+        if ( self::$tokenData === null || empty( self::$tokenData->user_id ) ) {
+          return new \WP_Error( 'unauthorized', 'Auth token looks incorrect', ['status' => 401] );
+        }
+
         return new \WP_REST_Response(array(
           'setting_1' => 1,
           'setting_2' => 2,

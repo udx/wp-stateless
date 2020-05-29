@@ -11,6 +11,11 @@ if(is_network_admin()){
 else{
     $nonce = wp_create_nonce( 'update_json' );
 }
+//
+//echo '<pre>';
+//print_r( \wpCloud\StatelessMedia\Utility::generate_wizard_auth_token() );
+//echo '</pre>';
+//die();
 
 ?>
 <div id="wp-stateless-wrapper" data-nonce="<?php echo $nonce;?>">

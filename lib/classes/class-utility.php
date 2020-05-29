@@ -871,6 +871,20 @@ namespace wpCloud\StatelessMedia {
         return \Firebase\JWT\JWT::decode($token, $key, ['HS256']);
       }
 
+      /**
+       * Generate auth token for wizard iframe
+       *
+       * @param int $ttl
+       * @return string
+       */
+      public static function generate_wizard_auth_token( $ttl = 3600 ) {
+        $payload = [
+          'is_network' => is_network_admin(),
+          'user_id' => get_current_user_id()
+        ];
+        return self::generate_jwt_token( $payload, $ttl );
+      }
+
     }
   }
 }
