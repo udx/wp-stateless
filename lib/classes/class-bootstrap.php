@@ -487,9 +487,7 @@ namespace wpCloud\StatelessMedia {
       /**
        * Define REST API.
        *
-       * // https://usabilitydynamics-sandbox-uds-io-stateless-testing.c.rabbit.ci/wp-json/wp-stateless/v1
-       *
-       * @author potanin@UD
+       * @author korotkov@UD
        */
       public function api_init() {
 
@@ -497,53 +495,21 @@ namespace wpCloud\StatelessMedia {
         $api_namespace = 'wpCloud\StatelessMedia\API';
 
         register_rest_route( $route_namespace, '/status', array(
-          'methods' => 'GET',
+          'methods' => \WP_REST_Server::READABLE,
           'callback' => array( $api_namespace, 'status' ),
         ) );
 
-        register_rest_route( $route_namespace, '/jobs', array(
-          'methods' => 'GET',
-          'callback' => array( $api_namespace, 'jobs' ),
+        register_rest_route( $route_namespace, '/getSettings', array(
+          'methods' => \WP_REST_Server::READABLE,
+          'callback' => array( $api_namespace, 'getSettings' ),
+          'permission_callback' => array( $api_namespace, 'authCheck' )
         ) );
 
-        /**
-         * Return stateless settings.
-         *
-         * Request parameter: none
-         *
-         * Response:
-         *    ok: Whether API is up or not
-         *    message: Describe what is done or error message on error.
-         *    settings: array of stateless settings
-         *
-         */
-        register_rest_route( $route_namespace, '/getSettings', array( 'methods' => 'GET', 'callback' => array( $api_namespace, 'getSettings' ), ) );
-
-        /**
-         * Essentially for scrolling through media library to build our index.
-         *
-         * Request parameter: none
-         *
-         * Response:
-         *    ok: Whether API is up or not
-         *    message: Describe what is done or error message on error.
-         *    settings: array of media files
-         *
-         */
-        register_rest_route( $route_namespace, '/getMediaLibrary', array( 'methods' => 'GET', 'callback' => array( $api_namespace, 'getMediaLibrary' ), ) );
-
-        /**
-         * Get detailed information of media file
-         *
-         * Request parameter: none
-         *
-         * Response:
-         *    ok: Whether API is up or not
-         *    message: Describe what is done or error message on error.
-         *    settings: media file array
-         *
-         */
-        register_rest_route( $route_namespace, '/getMediaItem', array( 'methods' => 'GET', 'callback' => array( $api_namespace, 'getMediaItem' ), ) );
+        register_rest_route( $route_namespace, '/updateSettings', array(
+          'methods' => \WP_REST_Server::CREATABLE,
+          'callback' => array( $api_namespace, 'updateSettings' ),
+          'permission_callback' => array( $api_namespace, 'authCheck' )
+        ) );
 
       }
 
