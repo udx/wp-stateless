@@ -282,6 +282,7 @@ namespace wpCloud\StatelessMedia {
         $key_json = $this->get('sm.key_json');
         if($this->get('sm.hide_setup_assistant') != 'true' && empty($key_json) ){
           $this->setup_wizard_ui = add_media_page( __( 'Stateless Setup', ud_get_stateless_media()->domain ), __( 'Stateless Setup', ud_get_stateless_media()->domain ), 'manage_options', 'stateless-setup', array($this, 'setup_wizard_interface') );
+          add_media_page( __( 'Stateless Setup New', ud_get_stateless_media()->domain ), __( 'Stateless Setup New', ud_get_stateless_media()->domain ), 'manage_options', 'stateless-setup-new', array($this, 'new_setup_wizard_interface') );
         }
 
         if($this->get('sm.hide_settings_panel') != 'true'){
@@ -327,6 +328,10 @@ namespace wpCloud\StatelessMedia {
             include ud_get_stateless_media()->path( '/static/views/stateless_splash_screen.php', 'dir' );
             break;
         }
+      }
+
+      public function new_setup_wizard_interface() {
+        include ud_get_stateless_media()->path( '/static/views/new_setup_wizard_interface.php', 'dir' );
       }
 
       /**
