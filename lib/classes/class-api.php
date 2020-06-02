@@ -50,31 +50,27 @@ namespace wpCloud\StatelessMedia {
       static public function status(): \WP_REST_Response {
         return new \WP_REST_Response( array(
           "ok" => true,
-          "message" => "API up.",
-          // @todo: remove this
-          "test_token" => Utility::generate_jwt_token( ['hello' => 'test'] )
+          "message" => "API up."
         ), 200 );
       }
 
       /**
        * Get settings
        *
-       * @todo Implement this
+       * @todo Implement this if needed
        * @param \WP_REST_Request $request
-       * @return \WP_REST_Response
+       * @return \WP_REST_Response|\WP_Error
        */
       static public function getSettings( \WP_REST_Request $request ) {
-        return new \WP_REST_Response(array(
-          'setting_1' => 1,
-          'setting_2' => 2,
-          'data' => self::$tokenData
-        ), 200);
+        return new \WP_Error('not_implemented', 'Method not implemented', ['status' => 501]);
+//        return new \WP_REST_Response(array(
+//          //
+//        ), 200);
       }
 
       /**
        * Update settings
        *
-       * @todo Implement this
        * @param \WP_REST_Request $request
        * @return \WP_REST_Response|\WP_Error
        */
@@ -83,12 +79,52 @@ namespace wpCloud\StatelessMedia {
           return new \WP_Error( 'unauthorized', 'Auth token looks incorrect', ['status' => 401] );
         }
 
-        return new \WP_REST_Response(array(
-          'setting_1' => 1,
-          'setting_2' => 2,
-          'data' => self::$tokenData,
-          'request' => $request->get_json_params()
-        ));
+        try {
+          $queryParams = $request->get_json_params();
+          if ( empty( $queryParams ) ) throw new \Exception('Query is empty');
+
+          $bucketName = isset($queryParams['bucket_name'])?$queryParams['bucket_name']:null;
+          $privateKeyData = isset($queryParams['private_key_data'])?$queryParams['private_key_data']:null;
+
+          if ( !$bucketName || !$privateKeyData ) {
+            throw new \Exception('bucket_name and private_key_data are required');
+          }
+
+          if ($privateKeyData) {
+            $privateKeyData = base64_decode($privateKeyData);
+          }
+
+          switch ( self::$tokenData->is_network ) {
+            case true:
+              if ( !user_can( self::$tokenData->user_id, 'manage_network_options' ) ) {
+                throw new \Exception('Sorry, you are not allowed to perform this action');
+              }
+              if ( get_site_option('sm_mode', 'disabled') == 'disabled' ) {
+                update_site_option( 'sm_mode', 'cdn');
+              }
+              update_site_option( 'sm_bucket', $bucketName);
+              update_site_option( 'sm_key_json', $privateKeyData);
+              break;
+
+            case false:
+              if ( !user_can( self::$tokenData->user_id, 'manage_options' ) ) {
+                return new \WP_Error( 'not_allowed', 'Sorry, you are not allowed to perform this action', ['status' => 403] );
+              }
+              if ( get_option('sm_mode', 'disabled') == 'disabled') {
+                update_option('sm_mode', 'cdn');
+              }
+              update_option( 'sm_bucket', $bucketName);
+              update_option( 'sm_key_json', $privateKeyData);
+              break;
+          }
+
+          return new \WP_REST_Response(array(
+            'ok' => true,
+            'message' => 'Settings updated successfully'
+          ));
+        } catch (\Throwable $e) {
+          return new \WP_Error( 'internal_server_error', $e->getMessage(), ['status' => 500] );
+        }
       }
 
     }
