@@ -97,7 +97,7 @@ namespace wpCloud\StatelessMedia {
           switch ( self::$tokenData->is_network ) {
             case true:
               if ( !user_can( self::$tokenData->user_id, 'manage_network_options' ) ) {
-                throw new \Exception('Sorry, you are not allowed to perform this action');
+                return new \WP_Error( 'not_allowed', 'Sorry, you are not allowed to perform this action', ['status' => 403] );
               }
               if ( get_site_option('sm_mode', 'disabled') == 'disabled' ) {
                 update_site_option( 'sm_mode', 'cdn');
