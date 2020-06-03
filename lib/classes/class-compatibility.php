@@ -58,6 +58,11 @@ namespace wpCloud\StatelessMedia {
             new GravityForm();
             
             /**
+             * Support for Gravity Forms Signature Add-On
+             */
+            new GravityFormSignature();
+            
+            /**
              * Support for WPBakery Page Builder
              */
             new WPBakeryPageBuilder();
