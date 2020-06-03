@@ -34,10 +34,6 @@ namespace wpCloud\StatelessMedia {
         do_action('sm:sync::register_dir', '/gravity_forms/');
         add_action( 'sm::synced::nonMediaFiles', array($this, 'modify_db'), 10, 3);
         add_action( 'gform_file_path_pre_delete_file', array($this, 'gform_file_path_pre_delete_file'), 10, 2);
-
-        // Signature addon
-        add_filter( 'site_url', array($this, 'signature_url'), 10, 4 );
-        add_filter( 'gform_signature_delete_file_pre_delete_entry', array($this, 'delete_signature'), 10, 4 );
       }
 
       /**
@@ -118,66 +114,7 @@ namespace wpCloud\StatelessMedia {
             }
           }, 10, 3);
         }
-        else if($type == 'signature'){
-          /**
-           * Compatibility for Signature addon.
-           */
-          try {
-            $folder = \GFSignature::get_signatures_folder();
-            $file_path = $folder . $value;
-  
-            $name = apply_filters( 'wp_stateless_file_name', $file_path);
-            do_action( 'sm:sync::syncFile', $name, $file_path, true);
-          } catch (\Throwable $th) {
-            //throw $th;
-          }
-        }
         return $value;
-      }
-
-      /**
-       * Currently there is no way to fileter signature url. So instead we are filtering site_url function
-       * with help of debug backtrace.
-       * 
-       * Also doing sync on the fly for previous entries.
-       */
-      public function signature_url($url, $path, $scheme, $blog_id){
-        try {
-          $db = debug_backtrace(false, 7);
-          foreach ($db as $key => $value) {
-            if($value['function'] == 'get_signature_url' && rgar($value, 'class') == 'GFSignature'){
-              $folder = \GFSignature::get_signatures_folder();
-              $name = $value['args'][0];
-              $file_path = $folder . $name . '.png';
-              $name = apply_filters( 'wp_stateless_file_name', $file_path);
-              do_action( 'sm:sync::syncFile', $name, $file_path);
-              $url = ud_get_stateless_media()->get_gs_host() . '/' . $name;
-              break;
-            }
-          }
-        } catch (\Throwable $th) {
-          //throw $th;
-        }
-        return $url;
-      }
-
-      /**
-       * Deleting signature file from GCS.
-       */
-      public function delete_signature($return, $form, $lead_id, $field_id){
-        try {
-          $lead = \RGFormsModel::get_lead( $lead_id );
-          $folder = \GFSignature::get_signatures_folder();
-
-          $name = rgar( $lead, $field_id );
-          $file_path = $folder . $name;
-
-          $name = apply_filters( 'wp_stateless_file_name', $file_path);
-          do_action( 'sm:sync::deleteFile', $name);
-        } catch (\Throwable $th) {
-          //throw $th;
-        }
-        return $return;
       }
 
       /**
