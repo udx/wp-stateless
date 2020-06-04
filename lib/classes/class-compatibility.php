@@ -73,6 +73,11 @@ namespace wpCloud\StatelessMedia {
       new GravityForm();
 
       /**
+       * Support for Gravity Forms Signature Add-On
+       */
+      new GravityFormSignature();
+
+      /**
        * Support for Imagify
        */
       new Imagify();

@@ -49,6 +49,7 @@ return array(
     'wpCloud\\StatelessMedia\\GS_Client' => $baseDir . '/lib/classes/class-gs-client.php',
     'wpCloud\\StatelessMedia\\GoogleAppEngine' => $baseDir . '/lib/classes/compatibility/google-app-engine.php',
     'wpCloud\\StatelessMedia\\GravityForm' => $baseDir . '/lib/classes/compatibility/gravity-forms.php',
+    'wpCloud\\StatelessMedia\\GravityFormSignature' => $baseDir . '/lib/classes/compatibility/gravity-forms-signature.php',
     'wpCloud\\StatelessMedia\\ICompatibility' => $baseDir . '/lib/classes/compatibility/ICompatibility.php',
     'wpCloud\\StatelessMedia\\Imagify' => $baseDir . '/lib/classes/compatibility/imagify.php',
     'wpCloud\\StatelessMedia\\LSCacheWP' => $baseDir . '/lib/classes/compatibility/lite-speed-cache.php',
