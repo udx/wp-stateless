@@ -8,20 +8,20 @@ td.image-icon img.wp-stateless-media-item {
 
 
 .submitbox span.sm-view-link {
-  float: right;
+    float: right;
 }
 
 .wp-stateless-media-options input.sm_service_account_name {
-  width: 40em;
+    width: 40em;
 }
 
 .wp-stateless-media-options input.sm_key_file_path {
-  width: 40em;
+    width: 40em;
 }
 
 .sm-mode small.description {
-  display: inline-block;
-  margin-left: 10px;
+    display: inline-block;
+    margin-left: 10px;
 }
 
 .key_type{
@@ -52,25 +52,46 @@ td.image-icon img.wp-stateless-media-item {
 }
 
 #go .option {
-  margin-bottom: 5px;
+    margin-bottom: 5px;
 }
 
 #go .status {
-  color: grey;
-  font-family: monospace;
-  margin-bottom: 10px;
-  margin-top: 10px;
+    color: grey;
+    font-family: monospace;
+    margin-bottom: 10px;
+    margin-top: 10px;
 }
 
 #go .buttons {
-	margin-top: 10px;
+    margin-top: 10px;
 }
 
 #go ol {
-	margin: 0 0 0 25px;
-	font-family: monospace;
+    margin: 0 0 0 25px;
+    font-family: monospace;
 }
 
 #go #regenthumbs-bar {
-	margin-bottom: 10px;
+    margin-bottom: 10px;
+}
+
+.clearfix:after {
+    content: " "; /* Older browser do not support empty content */
+    visibility: hidden;
+    display: block;
+    height: 0;
+    clear: both;
+}
+
+#sm-attachment-metabox .rwmb-input input {
+    max-width: 90%;
+}
+#sm-attachment-metabox a i.dashicons {
+    text-decoration: none;
+}
+#sm-attachment-metabox a i.dashicons-external {
+    font-size: 25px;
+}
+#sm-attachment-metabox a i.dashicons-image-rotate {
+    margin-top: 4px;
 }

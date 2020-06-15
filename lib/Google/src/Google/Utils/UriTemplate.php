@@ -14,13 +14,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+namespace wpCloud\StatelessMedia\Google_Client;
 
 /**
  * Implementation of levels 1-3 of the URI Template spec.
  * @see http://tools.ietf.org/html/rfc6570
  */
-namespace wpCloud\StatelessMedia\Google_Client;
-
 class Google_Utils_UriTemplate
 {
   const TYPE_MAP = "1";

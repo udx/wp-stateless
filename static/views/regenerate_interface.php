@@ -37,7 +37,7 @@
         </label>
       </div>
       <?php endif;?>
-
+      <?php do_action('stateless_sync_mode');?>
     </div>
 
     <div ng-if="action == 'regenerate_images' && progresses.images || action == 'sync_non_images' && progresses.other">
@@ -89,6 +89,22 @@
           </span>
         </label>
       </div>
+
+    </div>
+
+    <div ng-if="bucket_folder !== '' && (action == 'regenerate_images' || action == 'sync_non_images')">
+
+      <h2><?php _e( 'Use Bucket Folder setting', ud_get_stateless_media()->domain ); ?></h2>
+
+        <div class="option">
+            <label>
+                <input ng-disabled="isRunning || isLoading" type="checkbox" name="method" ng-true-value="'use_wildcards'" ng-model="$parent.method" />
+              <?php _e( 'Use Bucket Folder setting', ud_get_stateless_media()->domain ); ?>
+                <span class="notice notice-warning" style="margin-left:20px;">
+            <?php _e( '<strong>Warning:</strong> This will replace existing files to new folder', ud_get_stateless_media()->domain ); ?>
+          </span>
+            </label>
+        </div>
 
     </div>
 

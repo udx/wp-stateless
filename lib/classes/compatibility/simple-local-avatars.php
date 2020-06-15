@@ -20,6 +20,7 @@ namespace wpCloud\StatelessMedia {
       protected $constant = 'WP_STATELESS_COMPATIBILITY_SLA';
       protected $description = 'Ensures compatibility with Simple Local Avatars plugin.';
       protected $plugin_file = 'simple-local-avatars/simple-local-avatars.php';
+      protected $sm_mode_not_supported = [ 'stateless' ];
 
       /**
        * Initialize compatibility module
@@ -27,8 +28,8 @@ namespace wpCloud\StatelessMedia {
        * @param $sm
        */
       public function module_init( $sm ) {
-        // Only makes sense in CDN or Stateless modes
-        if ( in_array( $sm['mode'], ['cdn', 'stateless'] ) ) {
+        // Only makes sense in CDN or Ephemeral modes
+        if ( in_array( $sm['mode'], ['cdn', 'ephemeral'] ) ) {
           add_filter( 'get_user_metadata', array( $this, 'get_user_metadata' ), 10, 4 );
         }
       }
@@ -64,7 +65,7 @@ namespace wpCloud\StatelessMedia {
         if ( !empty( $user_meta[0] ) && is_array( $user_meta[0] ) ) {
           foreach ( $user_meta[0] as $key => &$value ) {
             if ( is_numeric( $key ) ) {
-              $value = trailingslashit( $bucketLink ) . apply_filters( 'wp_stateless_file_name', str_replace( $upload['baseurl'], '', $value ) );
+              $value = trailingslashit( $bucketLink ) . apply_filters( 'wp_stateless_file_name', str_replace( $upload['baseurl'], '', $value ), 0 );
             }
           }
         }

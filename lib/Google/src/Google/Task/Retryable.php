@@ -14,13 +14,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+namespace wpCloud\StatelessMedia\Google_Client;
 
 /**
  * Interface for checking how many times a given task can be retried following
  * a failure.
  */
-namespace wpCloud\StatelessMedia\Google_Client;
-
 interface Google_Task_Retryable
 {
 }

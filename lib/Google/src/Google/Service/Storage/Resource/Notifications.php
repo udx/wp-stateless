@@ -34,6 +34,8 @@ class Google_Service_Storage_Resource_Notifications extends Google_Service_Resou
    * @param string $notification ID of the notification to delete.
    * @param array $optParams Optional parameters.
    *
+   * @opt_param string provisionalUserProject The project to be billed for this
+   * request if the target bucket is requester-pays bucket.
    * @opt_param string userProject The project to be billed for this request.
    * Required for Requester Pays buckets.
    */
@@ -50,6 +52,8 @@ class Google_Service_Storage_Resource_Notifications extends Google_Service_Resou
    * @param string $notification Notification ID
    * @param array $optParams Optional parameters.
    *
+   * @opt_param string provisionalUserProject The project to be billed for this
+   * request if the target bucket is requester-pays bucket.
    * @opt_param string userProject The project to be billed for this request.
    * Required for Requester Pays buckets.
    * @return Google_Service_Storage_Notification
@@ -68,6 +72,8 @@ class Google_Service_Storage_Resource_Notifications extends Google_Service_Resou
    * @param Google_Service_Storage_Notification $postBody
    * @param array $optParams Optional parameters.
    *
+   * @opt_param string provisionalUserProject The project to be billed for this
+   * request if the target bucket is requester-pays bucket.
    * @opt_param string userProject The project to be billed for this request.
    * Required for Requester Pays buckets.
    * @return Google_Service_Storage_Notification
@@ -85,6 +91,8 @@ class Google_Service_Storage_Resource_Notifications extends Google_Service_Resou
    * @param string $bucket Name of a Google Cloud Storage bucket.
    * @param array $optParams Optional parameters.
    *
+   * @opt_param string provisionalUserProject The project to be billed for this
+   * request if the target bucket is requester-pays bucket.
    * @opt_param string userProject The project to be billed for this request.
    * Required for Requester Pays buckets.
    * @return Google_Service_Storage_Notifications

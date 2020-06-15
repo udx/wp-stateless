@@ -25,7 +25,8 @@ namespace wpCloud\StatelessMedia {
         'stateless_get_current_progresses',
         'stateless_wizard_update_settings',
         'stateless_reset_progress',
-        'stateless_get_all_fails'
+        'stateless_get_all_fails',
+        'stateless_get_bucket_folder'
       );
 
       /**
@@ -100,16 +101,47 @@ namespace wpCloud\StatelessMedia {
       public function action_stateless_wizard_update_settings($data) {
         $bucket = $data['bucket'];
         $privateKeyData = base64_decode($data['privateKeyData']);
+        $is_gae         = isset($_SERVER["GAE_VERSION"]) ? true : false;
+        $upload_dir = wp_upload_dir();
+        $is_upload_dir_writable = is_writable( $upload_dir['basedir'] );
 
         if(current_user_can('manage_network_options') && wp_verify_nonce( $data['nonce'], 'network_update_json')){
           if(get_site_option('sm_mode', 'disabled') == 'disabled')
             update_site_option( 'sm_mode', 'cdn');
+          /**
+           * If Googl App Engine detected - set Stateless mode
+           * and Google App Engine compatibility by default
+           */
+          if ( $is_gae || !$is_upload_dir_writable ) {
+            update_site_option( 'sm_mode', 'stateless' );
+
+            $modules = get_site_option('stateless-modules', array());
+            if ( $is_gae && empty($modules['google-app-engine']) || $modules['google-app-engine'] != 'true') {
+              $modules['google-app-engine'] = 'true';
+              update_site_option('stateless-modules', $modules, true);
+            }
+          }
           update_site_option( 'sm_bucket', $bucket);
           update_site_option( 'sm_key_json', $privateKeyData);
         }
         elseif(wp_verify_nonce( $data['nonce'], 'update_json')){
           if(get_option('sm_mode', 'disabled') == 'disabled')
             update_option( 'sm_mode', 'cdn');
+
+          /**
+           * If Googl App Engine detected - set Stateless mode
+           * and Google App Engine compatibility by default
+           */
+          if ( $is_gae ) {
+            update_option( 'sm_mode', 'stateless' );
+
+            $modules = get_option('stateless-modules', array());
+            if (empty($modules['google-app-engine']) || $modules['google-app-engine'] != 'true') {
+              $modules['google-app-engine'] = 'true';
+              update_option('stateless-modules', $modules, true);
+            }
+          }
+
           update_option( 'sm_bucket', $bucket);
           update_option( 'sm_key_json', $privateKeyData);
         }
@@ -130,6 +162,7 @@ namespace wpCloud\StatelessMedia {
 
         @error_reporting( 0 );
 
+        $use_wildcards = Utility::is_use_wildcards();
         $id = (int) $_REQUEST['id'];
         $image = get_post( $id );
 
@@ -141,12 +174,13 @@ namespace wpCloud\StatelessMedia {
 
         $fullsizepath = get_attached_file( $image->ID );
 
+        $upload_dir = wp_upload_dir();
+
         // If no file found
         if ( false === $fullsizepath || ! file_exists( $fullsizepath ) ) {
-          $upload_dir = wp_upload_dir();
 
           // Try get it and save
-          $result_code = ud_get_stateless_media()->get_client()->get_media( apply_filters( 'wp_stateless_file_name', str_replace( trailingslashit( $upload_dir[ 'basedir' ] ), '', $fullsizepath )), true, $fullsizepath );
+          $result_code = ud_get_stateless_media()->get_client()->get_media( apply_filters( 'wp_stateless_file_name', str_replace( trailingslashit( $upload_dir[ 'basedir' ] ), '', $fullsizepath ), true, "", "", $use_wildcards), true, $fullsizepath );
 
           if ( $result_code !== 200 ) {
             if(!Utility::sync_get_attachment_if_exist($image->ID, $fullsizepath)){ // Save file to local from proxy.
@@ -206,9 +240,9 @@ namespace wpCloud\StatelessMedia {
 
         $fullsizepath = get_attached_file( $file->ID );
         $local_file_exists = file_exists( $fullsizepath );
+        $upload_dir = wp_upload_dir();
 
         if ( false === $fullsizepath || ! $local_file_exists ) {
-          $upload_dir = wp_upload_dir();
 
           // Try get it and save
           $result_code = ud_get_stateless_media()->get_client()->get_media( str_replace( trailingslashit( $upload_dir[ 'basedir' ] ), '', $fullsizepath ), true, $fullsizepath );
@@ -228,7 +262,6 @@ namespace wpCloud\StatelessMedia {
         }
 
         if($local_file_exists){
-          $upload_dir = wp_upload_dir();
 
           if ( !ud_get_stateless_media()->get_client()->media_exists( str_replace( trailingslashit( $upload_dir[ 'basedir' ] ), '', $fullsizepath ) ) ) {
 
@@ -246,8 +279,8 @@ namespace wpCloud\StatelessMedia {
 
           }
           else{
-            // Stateless mode: we don't need the local version.
-            if(ud_get_stateless_media()->get( 'sm.mode' ) === 'stateless'){
+            // Ephemeral and Stateless modes: we don't need the local version.
+            if(ud_get_stateless_media()->get( 'sm.mode' ) === 'ephemeral' || ud_get_stateless_media()->get( 'sm.mode' ) === 'stateless'){
               unlink($fullsizepath);
             }
           }
@@ -386,6 +419,13 @@ namespace wpCloud\StatelessMedia {
         Utility::sync_reset_current_progress( $mode );
 
         return true;
+      }
+
+      /**
+       * Returns bucket folder (to check whether there is something to continue in JS)
+       */
+      public function action_stateless_get_bucket_folder() {
+        return array ( 'bucket_folder'  =>get_option('sm_root_dir') );
       }
 
     }
