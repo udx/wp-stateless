@@ -319,16 +319,16 @@ class SM_CLI_Sync extends SM_CLI_Scaffold {
     $image = get_post( $id );
 
     if ( ! $image || 'attachment' != $image->post_type || 'image/' != substr( $image->post_mime_type, 0, 6 ) )
-      throw new \Exception( sprintf( __( 'Failed resize: %s is an invalid image ID.', ud_get_stateless_media()->domain ), esc_html( $_REQUEST['id'] ) ) );
+      throw new \Exception( sprintf( __( 'Failed resize: %s is an invalid image ID.', ud_get_stateless_media()->domain ), esc_html( $id ) ) );
 
     $fullsizepath = get_attached_file( $image->ID );
+    $upload_dir = wp_upload_dir();
 
     // If no file found
     if ( false === $fullsizepath || ! file_exists( $fullsizepath ) ) {
-      $upload_dir = wp_upload_dir();
 
       // Try get it and save
-      $result_code = ud_get_stateless_media()->get_client()->get_media( apply_filters( 'wp_stateless_file_name', str_replace( trailingslashit( $upload_dir[ 'basedir' ] ), '', $fullsizepath )), true, $fullsizepath );
+      $result_code = ud_get_stateless_media()->get_client()->get_media( apply_filters( 'wp_stateless_file_name', str_replace( trailingslashit( $upload_dir[ 'basedir' ] ), '', $fullsizepath ), true, $id, "", $this->use_wildcards), true, $fullsizepath );
 
       if ( $result_code !== 200 ) {
         if(!Utility::sync_get_attachment_if_exist($image->ID, $fullsizepath)){ // Save file to local from proxy.
@@ -387,8 +387,9 @@ class SM_CLI_Sync extends SM_CLI_Scaffold {
     $fullsizepath = get_attached_file( $file->ID );
     $local_file_exists = file_exists( $fullsizepath );
 
+    $upload_dir = wp_upload_dir();
+
     if ( false === $fullsizepath || ! $local_file_exists ) {
-      $upload_dir = wp_upload_dir();
 
       // Try get it and save
       $result_code = ud_get_stateless_media()->get_client()->get_media( str_replace( trailingslashit( $upload_dir[ 'basedir' ] ), '', $fullsizepath ), true, $fullsizepath );
@@ -408,7 +409,6 @@ class SM_CLI_Sync extends SM_CLI_Scaffold {
     }
 
     if($local_file_exists){
-      $upload_dir = wp_upload_dir();
 
       if ( !ud_get_stateless_media()->get_client()->media_exists( str_replace( trailingslashit( $upload_dir[ 'basedir' ] ), '', $fullsizepath ) ) ) {
 
@@ -427,7 +427,7 @@ class SM_CLI_Sync extends SM_CLI_Scaffold {
       }
       else{
         // Stateless mode: we don't need the local version.
-        if(ud_get_stateless_media()->get( 'sm.mode' ) === 'stateless'){
+        if(ud_get_stateless_media()->get( 'sm.mode' ) === 'ephemeral'){
           unlink($fullsizepath);
         }
       }
@@ -448,19 +448,21 @@ class SM_CLI_Sync extends SM_CLI_Scaffold {
     if( isset( $args[ 'b' ] ) ) {
       WP_CLI::error( 'Invalid parameter --b. Command must not be run directly with --b parameter.' );
     }
-    $this->start    = isset( $args[ 'start' ] ) && is_numeric( $args[ 'start' ] ) ? $args[ 'start' ] : 0;
-    $this->limit    = isset( $args[ 'limit' ] ) && is_numeric( $args[ 'limit' ] ) ? $args[ 'limit' ] : 100;
-    $this->force    = isset( $args[ 'force' ] )     ? true : false;
-    $this->continue = isset( $args[ 'continue' ] )  ? true : false;
-    $this->fix      = isset( $args[ 'fix' ] )       ? true : false;
-    $this->order    = isset( $args[ 'order' ]) && $args[ 'order' ] === 'ASC' ? 'ASC' : 'DESC';
+    $this->start          = isset( $args[ 'start' ] ) && is_numeric( $args[ 'start' ] ) ? $args[ 'start' ] : 0;
+    $this->limit          = isset( $args[ 'limit' ] ) && is_numeric( $args[ 'limit' ] ) ? $args[ 'limit' ] : 100;
+    $this->force          = isset( $args[ 'force' ] )         ? true : false;
+    $this->continue       = isset( $args[ 'continue' ] )      ? true : false;
+    $this->fix            = isset( $args[ 'fix' ] )           ? true : false;
+    $this->use_wildcards  = isset( $args[ 'use_wildcards' ] ) ? true : false;
+    $_REQUEST['use_wildcards'] = $this->use_wildcards;
+    $this->order          = isset( $args[ 'order' ]) && $args[ 'order' ] === 'ASC' ? 'ASC' : 'DESC';
     if( isset( $args[ 'batch' ] ) ) {
       if( !is_numeric( $args[ 'batch' ] ) || $args[ 'batch' ] <= 0 ) {
         WP_CLI::error( 'Invalid parameter --batch' );
       }
       $this->batch = $args[ 'batch' ];
       $this->batches = isset( $args[ 'batches' ] ) ? $args[ 'batches' ] : 10;
-      if( !is_numeric( $args[ 'batches' ] ) || $args[ 'batches' ] <= 0 ) {
+      if( !is_numeric( $this->batches ) || $this->batches <= 0 ) {
         WP_CLI::error( 'Invalid parameter --batches' );
       } elseif ( $this->batch > $this->batches ) {
         WP_CLI::error( '--batch parameter must is invalid. It must not equal or less then --batches' );

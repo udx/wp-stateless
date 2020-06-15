@@ -18,7 +18,11 @@
 namespace Google\Auth\Credentials;
 
 use Google\Auth\CredentialsLoader;
+use Google\Auth\GetQuotaProjectInterface;
 use Google\Auth\OAuth2;
+use Google\Auth\ProjectIdProviderInterface;
+use Google\Auth\ServiceAccountSignerTrait;
+use Google\Auth\SignBlobInterface;
 
 /**
  * Authenticates requests using Google's Service Account credentials via
@@ -29,14 +33,24 @@ use Google\Auth\OAuth2;
  * console (via 'Generate new Json Key').  It is not part of any OAuth2
  * flow, rather it creates a JWT and sends that as a credential.
  */
-class ServiceAccountJwtAccessCredentials extends CredentialsLoader
+class ServiceAccountJwtAccessCredentials extends CredentialsLoader implements
+    GetQuotaProjectInterface,
+    SignBlobInterface,
+    ProjectIdProviderInterface
 {
+    use ServiceAccountSignerTrait;
+
     /**
      * The OAuth2 instance used to conduct authorization.
      *
      * @var OAuth2
      */
     protected $auth;
+
+    /**
+     * The quota project associated with the JSON credentials
+     */
+    protected $quotaProject;
 
     /**
      * Create a new ServiceAccountJwtAccessCredentials.
@@ -63,12 +77,19 @@ class ServiceAccountJwtAccessCredentials extends CredentialsLoader
             throw new \InvalidArgumentException(
                 'json key is missing the private_key field');
         }
+        if (array_key_exists('quota_project', $jsonKey)) {
+            $this->quotaProject = (string) $jsonKey['quota_project'];
+        }
         $this->auth = new OAuth2([
             'issuer' => $jsonKey['client_email'],
             'sub' => $jsonKey['client_email'],
             'signingAlgorithm' => 'RS256',
             'signingKey' => $jsonKey['private_key'],
         ]);
+
+        $this->projectId = isset($jsonKey['project_id'])
+            ? $jsonKey['project_id']
+            : null;
     }
 
     /**
@@ -99,7 +120,9 @@ class ServiceAccountJwtAccessCredentials extends CredentialsLoader
      *
      * @param callable $httpHandler
      *
-     * @return array|void
+     * @return array|void A set of auth related metadata, containing the
+     * following keys:
+     *   - access_token (string)
      */
     public function fetchAuthToken(callable $httpHandler = null)
     {
@@ -127,5 +150,41 @@ class ServiceAccountJwtAccessCredentials extends CredentialsLoader
     public function getLastReceivedToken()
     {
         return $this->auth->getLastReceivedToken();
+    }
+
+    /**
+     * Get the project ID from the service account keyfile.
+     *
+     * Returns null if the project ID does not exist in the keyfile.
+     *
+     * @param callable $httpHandler Not used by this credentials type.
+     * @return string|null
+     */
+    public function getProjectId(callable $httpHandler = null)
+    {
+        return $this->projectId;
+    }
+
+    /**
+     * Get the client name from the keyfile.
+     *
+     * In this case, it returns the keyfile's client_email key.
+     *
+     * @param callable $httpHandler Not used by this credentials type.
+     * @return string
+     */
+    public function getClientName(callable $httpHandler = null)
+    {
+        return $this->auth->getIssuer();
+    }
+
+    /**
+     * Get the quota project used for this API request
+     *
+     * @return string|null
+     */
+    public function getQuotaProject()
+    {
+        return $this->quotaProject;
     }
 }

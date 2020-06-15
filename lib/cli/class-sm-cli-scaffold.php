@@ -30,11 +30,12 @@ class SM_CLI_Scaffold {
     $this->limit = is_numeric( $this->limit ) && $this->limit > 0 ? $this->limit : 100;
   }
 
-	/**
-	 * Forces data printing to command line ignoring buffer.
-	 *
-	 * @param string $msg
-	 */
+  /**
+   * Forces data printing to command line ignoring buffer.
+   *
+   * @param string $msg
+   * @return null
+   */
   public function output( $msg = '' ) {
     $args = $this->assoc_args;
     if( !isset( $args['log'] ) ) return null;

@@ -4,7 +4,7 @@
  * Plugin URI: https://www.usabilitydynamics.com
  * Description: Upload and serve your WordPress media files from Google Cloud Storage.
  * Author: Usability Dynamics, Inc.
- * Version: 2.3.3
+ * Version: 2.4.0-RC.3
  * Text Domain: stateless-media
  * Author URI: https://www.usabilitydynamics.com
  *
@@ -65,6 +65,9 @@ if( !function_exists( 'ud_check_stateless_media' ) ) {
       if( !class_exists( '\wpCloud\StatelessMedia\Bootstrap' ) ) {
         throw new Exception( __( 'Distributive is broken. Plugin loader is not available. Try to remove and upload plugin again.', 'stateless-media' ) );
       }
+
+      // Include metabox tabs addon
+      require_once(  dirname( __FILE__ ) . '/lib/meta-box-tabs/meta-box-tabs.php' );
     } catch( Exception $e ) {
       $_ud_stateless_media_error = $e->getMessage();
       return false;

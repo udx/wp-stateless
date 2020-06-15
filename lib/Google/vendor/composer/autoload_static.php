@@ -4,11 +4,15 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInitc076203943a4ff0eb8323084e54ac84a
+class ComposerStaticInitc3e923ed25651a932bf958403aba88eb
 {
     public static $files = array (
+        '7b11c4dc42b3b3023073cb14e519683c' => __DIR__ . '/..' . '/ralouphie/getallheaders/src/getallheaders.php',
         'c964ee0ededf28c96ebd9db5099ef910' => __DIR__ . '/..' . '/guzzlehttp/promises/src/functions_include.php',
         'a0edc8309cc5e1d60e3047b5df6b7052' => __DIR__ . '/..' . '/guzzlehttp/psr7/src/functions_include.php',
+        '0e6d7bf4a5811bfa5cf40c5ccd6fae6a' => __DIR__ . '/..' . '/symfony/polyfill-mbstring/bootstrap.php',
+        '25072dd6e2470089de65ae7bf11d3109' => __DIR__ . '/..' . '/symfony/polyfill-php72/bootstrap.php',
+        'f598d06aa772fa33d905e87be6398fb1' => __DIR__ . '/..' . '/symfony/polyfill-intl-idn/bootstrap.php',
         '37a3dc5111fe8f707ab4c132ef1dbc62' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/functions_include.php',
         'decc78cc4436b1292c6c0d151b19445c' => __DIR__ . '/..' . '/phpseclib/phpseclib/phpseclib/bootstrap.php',
     );
@@ -17,6 +21,12 @@ class ComposerStaticInitc076203943a4ff0eb8323084e54ac84a
         'p' => 
         array (
             'phpseclib\\' => 10,
+        ),
+        'S' => 
+        array (
+            'Symfony\\Polyfill\\Php72\\' => 23,
+            'Symfony\\Polyfill\\Mbstring\\' => 26,
+            'Symfony\\Polyfill\\Intl\\Idn\\' => 26,
         ),
         'P' => 
         array (
@@ -33,6 +43,9 @@ class ComposerStaticInitc076203943a4ff0eb8323084e54ac84a
             'GuzzleHttp\\Psr7\\' => 16,
             'GuzzleHttp\\Promise\\' => 19,
             'GuzzleHttp\\' => 11,
+            'Google\\Cloud\\Storage\\' => 21,
+            'Google\\Cloud\\Core\\' => 18,
+            'Google\\CRC32\\' => 13,
             'Google\\Auth\\' => 12,
         ),
         'F' => 
@@ -45,6 +58,18 @@ class ComposerStaticInitc076203943a4ff0eb8323084e54ac84a
         'phpseclib\\' => 
         array (
             0 => __DIR__ . '/..' . '/phpseclib/phpseclib/phpseclib',
+        ),
+        'Symfony\\Polyfill\\Php72\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/symfony/polyfill-php72',
+        ),
+        'Symfony\\Polyfill\\Mbstring\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/symfony/polyfill-mbstring',
+        ),
+        'Symfony\\Polyfill\\Intl\\Idn\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/symfony/polyfill-intl-idn',
         ),
         'Psr\\Log\\' => 
         array (
@@ -74,6 +99,18 @@ class ComposerStaticInitc076203943a4ff0eb8323084e54ac84a
         array (
             0 => __DIR__ . '/..' . '/guzzlehttp/guzzle/src',
         ),
+        'Google\\Cloud\\Storage\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/google/cloud-storage/src',
+        ),
+        'Google\\Cloud\\Core\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/google/cloud-core/src',
+        ),
+        'Google\\CRC32\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/google/crc32/src',
+        ),
         'Google\\Auth\\' => 
         array (
             0 => __DIR__ . '/..' . '/google/auth/src',
@@ -81,6 +118,16 @@ class ComposerStaticInitc076203943a4ff0eb8323084e54ac84a
         'Firebase\\JWT\\' => 
         array (
             0 => __DIR__ . '/..' . '/firebase/php-jwt/src',
+        ),
+    );
+
+    public static $prefixesPsr0 = array (
+        'R' => 
+        array (
+            'Rize\\UriTemplate' => 
+            array (
+                0 => __DIR__ . '/..' . '/rize/uri-template/src',
+            ),
         ),
     );
 
@@ -108,6 +155,9 @@ class ComposerStaticInitc076203943a4ff0eb8323084e54ac84a
         'wpCloud\\StatelessMedia\\Google_Client\\Google_Service_Storage_BucketBilling' => __DIR__ . '/../..' . '/src/Google/Service/Storage/BucketBilling.php',
         'wpCloud\\StatelessMedia\\Google_Client\\Google_Service_Storage_BucketCors' => __DIR__ . '/../..' . '/src/Google/Service/Storage/BucketCors.php',
         'wpCloud\\StatelessMedia\\Google_Client\\Google_Service_Storage_BucketEncryption' => __DIR__ . '/../..' . '/src/Google/Service/Storage/BucketEncryption.php',
+        'wpCloud\\StatelessMedia\\Google_Client\\Google_Service_Storage_BucketIamConfiguration' => __DIR__ . '/../..' . '/src/Google/Service/Storage/BucketIamConfiguration.php',
+        'wpCloud\\StatelessMedia\\Google_Client\\Google_Service_Storage_BucketIamConfigurationBucketPolicyOnly' => __DIR__ . '/../..' . '/src/Google/Service/Storage/BucketIamConfigurationBucketPolicyOnly.php',
+        'wpCloud\\StatelessMedia\\Google_Client\\Google_Service_Storage_BucketIamConfigurationUniformBucketLevelAccess' => __DIR__ . '/../..' . '/src/Google/Service/Storage/BucketIamConfigurationUniformBucketLevelAccess.php',
         'wpCloud\\StatelessMedia\\Google_Client\\Google_Service_Storage_BucketLifecycle' => __DIR__ . '/../..' . '/src/Google/Service/Storage/BucketLifecycle.php',
         'wpCloud\\StatelessMedia\\Google_Client\\Google_Service_Storage_BucketLifecycleRule' => __DIR__ . '/../..' . '/src/Google/Service/Storage/BucketLifecycleRule.php',
         'wpCloud\\StatelessMedia\\Google_Client\\Google_Service_Storage_BucketLifecycleRuleAction' => __DIR__ . '/../..' . '/src/Google/Service/Storage/BucketLifecycleRuleAction.php',
@@ -122,6 +172,10 @@ class ComposerStaticInitc076203943a4ff0eb8323084e54ac84a
         'wpCloud\\StatelessMedia\\Google_Client\\Google_Service_Storage_ComposeRequest' => __DIR__ . '/../..' . '/src/Google/Service/Storage/ComposeRequest.php',
         'wpCloud\\StatelessMedia\\Google_Client\\Google_Service_Storage_ComposeRequestSourceObjects' => __DIR__ . '/../..' . '/src/Google/Service/Storage/ComposeRequestSourceObjects.php',
         'wpCloud\\StatelessMedia\\Google_Client\\Google_Service_Storage_ComposeRequestSourceObjectsObjectPreconditions' => __DIR__ . '/../..' . '/src/Google/Service/Storage/ComposeRequestSourceObjectsObjectPreconditions.php',
+        'wpCloud\\StatelessMedia\\Google_Client\\Google_Service_Storage_Expr' => __DIR__ . '/../..' . '/src/Google/Service/Storage/Expr.php',
+        'wpCloud\\StatelessMedia\\Google_Client\\Google_Service_Storage_HmacKey' => __DIR__ . '/../..' . '/src/Google/Service/Storage/HmacKey.php',
+        'wpCloud\\StatelessMedia\\Google_Client\\Google_Service_Storage_HmacKeyMetadata' => __DIR__ . '/../..' . '/src/Google/Service/Storage/HmacKeyMetadata.php',
+        'wpCloud\\StatelessMedia\\Google_Client\\Google_Service_Storage_HmacKeysMetadata' => __DIR__ . '/../..' . '/src/Google/Service/Storage/HmacKeysMetadata.php',
         'wpCloud\\StatelessMedia\\Google_Client\\Google_Service_Storage_Notification' => __DIR__ . '/../..' . '/src/Google/Service/Storage/Notification.php',
         'wpCloud\\StatelessMedia\\Google_Client\\Google_Service_Storage_Notifications' => __DIR__ . '/../..' . '/src/Google/Service/Storage/Notifications.php',
         'wpCloud\\StatelessMedia\\Google_Client\\Google_Service_Storage_ObjectAccessControl' => __DIR__ . '/../..' . '/src/Google/Service/Storage/ObjectAccessControl.php',
@@ -138,6 +192,7 @@ class ComposerStaticInitc076203943a4ff0eb8323084e54ac84a
         'wpCloud\\StatelessMedia\\Google_Client\\Google_Service_Storage_Resource_ObjectAccessControls' => __DIR__ . '/../..' . '/src/Google/Service/Storage/Resource/ObjectAccessControls.php',
         'wpCloud\\StatelessMedia\\Google_Client\\Google_Service_Storage_Resource_Objects' => __DIR__ . '/../..' . '/src/Google/Service/Storage/Resource/Objects.php',
         'wpCloud\\StatelessMedia\\Google_Client\\Google_Service_Storage_Resource_Projects' => __DIR__ . '/../..' . '/src/Google/Service/Storage/Resource/Projects.php',
+        'wpCloud\\StatelessMedia\\Google_Client\\Google_Service_Storage_Resource_ProjectsHmacKeys' => __DIR__ . '/../..' . '/src/Google/Service/Storage/Resource/ProjectsHmacKeys.php',
         'wpCloud\\StatelessMedia\\Google_Client\\Google_Service_Storage_Resource_ProjectsServiceAccount' => __DIR__ . '/../..' . '/src/Google/Service/Storage/Resource/ProjectsServiceAccount.php',
         'wpCloud\\StatelessMedia\\Google_Client\\Google_Service_Storage_RewriteResponse' => __DIR__ . '/../..' . '/src/Google/Service/Storage/RewriteResponse.php',
         'wpCloud\\StatelessMedia\\Google_Client\\Google_Service_Storage_ServiceAccount' => __DIR__ . '/../..' . '/src/Google/Service/Storage/ServiceAccount.php',
@@ -154,9 +209,10 @@ class ComposerStaticInitc076203943a4ff0eb8323084e54ac84a
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInitc076203943a4ff0eb8323084e54ac84a::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInitc076203943a4ff0eb8323084e54ac84a::$prefixDirsPsr4;
-            $loader->classMap = ComposerStaticInitc076203943a4ff0eb8323084e54ac84a::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInitc3e923ed25651a932bf958403aba88eb::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInitc3e923ed25651a932bf958403aba88eb::$prefixDirsPsr4;
+            $loader->prefixesPsr0 = ComposerStaticInitc3e923ed25651a932bf958403aba88eb::$prefixesPsr0;
+            $loader->classMap = ComposerStaticInitc3e923ed25651a932bf958403aba88eb::$classMap;
 
         }, null, ClassLoader::class);
     }

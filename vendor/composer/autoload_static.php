@@ -6,6 +6,10 @@ namespace Composer\Autoload;
 
 class ComposerStaticInitc00cd3c666f8dfa818cb7edfd488ed20
 {
+    public static $files = array (
+        '8ca8a91f0a826d6c6c8f274c90ca7d88' => __DIR__ . '/..' . '/wpmetabox/meta-box/meta-box.php',
+    );
+
     public static $prefixLengthsPsr4 = array (
         'C' => 
         array (
@@ -72,18 +76,22 @@ class ComposerStaticInitc00cd3c666f8dfa818cb7edfd488ed20
         'wpCloud\\StatelessMedia\\Elementor' => __DIR__ . '/../..' . '/lib/classes/compatibility/elementor.php',
         'wpCloud\\StatelessMedia\\Errors' => __DIR__ . '/../..' . '/lib/classes/class-errors.php',
         'wpCloud\\StatelessMedia\\GS_Client' => __DIR__ . '/../..' . '/lib/classes/class-gs-client.php',
+        'wpCloud\\StatelessMedia\\GoogleAppEngine' => __DIR__ . '/../..' . '/lib/classes/compatibility/google-app-engine.php',
         'wpCloud\\StatelessMedia\\GravityForm' => __DIR__ . '/../..' . '/lib/classes/compatibility/gravity-forms.php',
+        'wpCloud\\StatelessMedia\\GravityFormSignature' => __DIR__ . '/../..' . '/lib/classes/compatibility/gravity-forms-signature.php',
         'wpCloud\\StatelessMedia\\ICompatibility' => __DIR__ . '/../..' . '/lib/classes/compatibility/ICompatibility.php',
         'wpCloud\\StatelessMedia\\Imagify' => __DIR__ . '/../..' . '/lib/classes/compatibility/imagify.php',
         'wpCloud\\StatelessMedia\\LSCacheWP' => __DIR__ . '/../..' . '/lib/classes/compatibility/lite-speed-cache.php',
         'wpCloud\\StatelessMedia\\LearnDash' => __DIR__ . '/../..' . '/lib/classes/compatibility/learn-dash.php',
         'wpCloud\\StatelessMedia\\Logger' => __DIR__ . '/../..' . '/lib/classes/class-logger.php',
         'wpCloud\\StatelessMedia\\Module' => __DIR__ . '/../..' . '/lib/classes/class-compatibility.php',
+        'wpCloud\\StatelessMedia\\Polylang' => __DIR__ . '/../..' . '/lib/classes/compatibility/polylang-pro.php',
         'wpCloud\\StatelessMedia\\SOCSS' => __DIR__ . '/../..' . '/lib/classes/compatibility/siteorigin-css.php',
         'wpCloud\\StatelessMedia\\SOWidgetCSS' => __DIR__ . '/../..' . '/lib/classes/compatibility/siteorigin-widget-bundle.php',
         'wpCloud\\StatelessMedia\\Settings' => __DIR__ . '/../..' . '/lib/classes/class-settings.php',
         'wpCloud\\StatelessMedia\\ShortPixel' => __DIR__ . '/../..' . '/lib/classes/compatibility/shortpixel.php',
         'wpCloud\\StatelessMedia\\SimpleLocalAvatars' => __DIR__ . '/../..' . '/lib/classes/compatibility/simple-local-avatars.php',
+        'wpCloud\\StatelessMedia\\StreamWrapper' => __DIR__ . '/../..' . '/lib/classes/class-gs-stream-wrapper.php',
         'wpCloud\\StatelessMedia\\SyncNonMedia' => __DIR__ . '/../..' . '/lib/classes/class-sync-non-media.php',
         'wpCloud\\StatelessMedia\\Upgrader' => __DIR__ . '/../..' . '/lib/classes/class-upgrader.php',
         'wpCloud\\StatelessMedia\\Utility' => __DIR__ . '/../..' . '/lib/classes/class-utility.php',

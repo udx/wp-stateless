@@ -1,20 +1,23 @@
-[![Build Status](https://travis-ci.org/google/google-api-php-client.svg?branch=master)](https://travis-ci.org/google/google-api-php-client)
+[![Build Status](https://travis-ci.org/googleapis/google-api-php-client.svg?branch=master)](https://travis-ci.org/googleapis/google-api-php-client)
 
 # Google APIs Client Library for PHP #
 
-The Google API Client Library enables you to work with Google APIs such as Google+, Drive, or YouTube on your server.
+The Google API Client Library enables you to work with Google APIs such as Gmail, Drive or YouTube on your server.
 
 These client libraries are officially supported by Google.  However, the libraries are considered complete and are in maintenance mode. This means that we will address critical bugs and security issues but will not add any new features.
 
+**NOTE** The actively maintained (v2) version of this client requires PHP 5.4 or above. If you require support for PHP 5.2 or 5.3, use the v1 branch.
+
 ## Google Cloud Platform
 
-For Google Cloud Platform APIs such as Datastore, Cloud Storage or Pub/Sub, we recommend using [GoogleCloudPlatform/google-cloud-php](https://github.com/GoogleCloudPlatform/google-cloud-php) which is under active development.
+For Google Cloud Platform APIs such as Datastore, Cloud Storage or Pub/Sub, we recommend using [GoogleCloudPlatform/google-cloud-php](https://github.com/googleapis/google-cloud-php) which is under active development.
 
 ## Requirements ##
-* [PHP 5.4.0 or higher](http://www.php.net/)
+* [PHP 5.4.0 or higher](https://www.php.net/)
 
 ## Developer Documentation ##
-http://developers.google.com/api-client-library/php
+
+The [docs folder](docs/) provides detailed guides for using this library.
 
 ## Installation ##
 
@@ -22,14 +25,14 @@ You can use **Composer** or simply **Download the Release**
 
 ### Composer
 
-The preferred method is via [composer](https://getcomposer.org). Follow the
+The preferred method is via [composer](https://getcomposer.org/). Follow the
 [installation instructions](https://getcomposer.org/doc/00-intro.md) if you do not already have
 composer installed.
 
 Once composer is installed, execute the following command in your project root to install this library:
 
 ```sh
-composer require google/apiclient:^2.0
+composer require google/apiclient:"^2.0"
 ```
 
 Finally, be sure to include the autoloader:
@@ -40,7 +43,7 @@ require_once '/path/to/your-project/vendor/autoload.php';
 
 ### Download the Release
 
-If you abhor using composer, you can download the package in its entirety. The [Releases](https://github.com/google/google-api-php-client/releases) page lists all stable versions. Download any file
+If you prefer not to use composer, you can download the package in its entirety. The [Releases](https://github.com/googleapis/google-api-php-client/releases) page lists all stable versions. Download any file
 with the name `google-api-php-client-[RELEASE_NAME].zip` for a package including this library and its dependencies.
 
 Uncompress the zip file you download, and include the autoloader in your project:
@@ -49,7 +52,7 @@ Uncompress the zip file you download, and include the autoloader in your project
 require_once '/path/to/google-api-php-client/vendor/autoload.php';
 ```
 
-For additional installation and setup instructions, see [the documentation](https://developers.google.com/api-client-library/php/start/installation).
+For additional installation and setup instructions, see [the documentation](docs/).
 
 ## Examples ##
 See the [`examples/`](examples) directory for examples of the key client features. You can
@@ -76,7 +79,7 @@ $service = new Google_Service_Books($client);
 $optParams = array('filter' => 'free-ebooks');
 $results = $service->volumes->listVolumes('Henry David Thoreau', $optParams);
 
-foreach ($results as $item) {
+foreach ($results->getItems() as $item) {
   echo $item['volumeInfo']['title'], "<br /> \n";
 }
 ```
@@ -85,7 +88,7 @@ foreach ($results as $item) {
 
 > An example of this can be seen in [`examples/simple-file-upload.php`](examples/simple-file-upload.php).
 
-1. Follow the instructions to [Create Web Application Credentials](https://developers.google.com/api-client-library/php/auth/web-app#creatingcred)
+1. Follow the instructions to [Create Web Application Credentials](docs/oauth-web.md#create-authorization-credentials)
 1. Download the JSON credentials
 1. Set the path to these credentials using `Google_Client::setAuthConfig`:
 
@@ -126,7 +129,7 @@ Some APIs
 not support service accounts. Check with the specific API documentation if API
 calls return unexpected 401 or 403 errors.
 
-1. Follow the instructions to [Create a Service Account](https://developers.google.com/api-client-library/php/auth/service-accounts#creatinganaccount)
+1. Follow the instructions to [Create a Service Account](docs/oauth-server.md#creating-a-service-account)
 1. Download the JSON credentials
 1. Set the path to these credentials using the `GOOGLE_APPLICATION_CREDENTIALS` environment variable:
 
@@ -155,7 +158,7 @@ calls return unexpected 401 or 403 errors.
 
 ### Making Requests ###
 
-The classes used to call the API in [google-api-php-client-services](https://github.com/Google/google-api-php-client-services) are autogenerated. They map directly to the JSON requests and responses found in the [APIs Explorer](https://developers.google.com/apis-explorer/#p/).
+The classes used to call the API in [google-api-php-client-services](https://github.com/googleapis/google-api-php-client-services) are autogenerated. They map directly to the JSON requests and responses found in the [APIs Explorer](https://developers.google.com/apis-explorer/#p/).
 
 A JSON request to the [Datastore API](https://developers.google.com/apis-explorer/#p/datastore/v1beta3/datastore.projects.runQuery) would look like this:
 
@@ -262,7 +265,7 @@ $response = $httpClient->get('https://www.googleapis.com/plus/v1/people/me');
 
 ### Caching ###
 
-It is recommended to use another caching library to improve performance. This can be done by passing a [PSR-6](http://www.php-fig.org/psr/psr-6/) compatible library to the client:
+It is recommended to use another caching library to improve performance. This can be done by passing a [PSR-6](https://www.php-fig.org/psr/psr-6/) compatible library to the client:
 
 ```php
 use League\Flysystem\Adapter\Local;
@@ -284,7 +287,7 @@ composer require cache/filesystem-adapter
 
 ### Updating Tokens ###
 
-When using [Refresh Tokens](https://developers.google.com/identity/protocols/OAuth2InstalledApp#refresh) or [Service Account Credentials](https://developers.google.com/identity/protocols/OAuth2ServiceAccount#overview), it may be useful to perform some action when a new access token is granted. To do this, pass a callable to the `setTokenCallback` method on the client:
+When using [Refresh Tokens](https://developers.google.com/identity/protocols/OAuth2InstalledApp#offline) or [Service Account Credentials](https://developers.google.com/identity/protocols/OAuth2ServiceAccount#overview), it may be useful to perform some action when a new access token is granted. To do this, pass a callable to the `setTokenCallback` method on the client:
 
 ```php
 $logger = new Monolog\Logger;
@@ -313,29 +316,46 @@ Now all calls made by this library will appear in the Charles UI.
 
 One additional step is required in Charles to view SSL requests. Go to **Charles > Proxy > SSL Proxying Settings** and add the domain you'd like captured. In the case of the Google APIs, this is usually `*.googleapis.com`.
 
+### Controlling HTTP Client Configuration Directly
+
+Google API Client uses [Guzzle](http://docs.guzzlephp.org/) as its default HTTP client. That means that you can control your HTTP requests in the same manner you would for any application using Guzzle.
+
+Let's say, for instance, we wished to apply a referrer to each request.
+
+```php
+use GuzzleHttp\Client;
+
+$httpClient = new Client([
+    'headers' => [
+        'referer' => 'mysite.com'
+    ]
+]);
+
+$client = new Google_Client();
+$client->setHttpClient($httpClient);
+```
+
+Other Guzzle features such as [Handlers and Middleware](http://docs.guzzlephp.org/en/stable/handlers-and-middleware.html) offer even more control.
+
 ### Service Specific Examples ###
 
 YouTube: https://github.com/youtube/api-samples/tree/master/php
 
 ## How Do I Contribute? ##
 
-Please see the [contributing](CONTRIBUTING.md) page for more information. In particular, we love pull requests - but please make sure to sign the [contributor license agreement](https://developers.google.com/api-client-library/php/contribute).
+Please see the [contributing](.github/CONTRIBUTING.md) page for more information. In particular, we love pull requests - but please make sure to sign the contributor license agreement.
 
 ## Frequently Asked Questions ##
 
 ### What do I do if something isn't working? ###
 
-For support with the library the best place to ask is via the google-api-php-client tag on StackOverflow: http://stackoverflow.com/questions/tagged/google-api-php-client
+For support with the library the best place to ask is via the google-api-php-client tag on StackOverflow: https://stackoverflow.com/questions/tagged/google-api-php-client
 
-If there is a specific bug with the library, please [file a issue](https://github.com/google/google-api-php-client/issues) in the Github issues tracker, including an example of the failing code and any specific errors retrieved. Feature requests can also be filed, as long as they are core library requests, and not-API specific: for those, refer to the documentation for the individual APIs for the best place to file requests. Please try to provide a clear statement of the problem that the feature would address.
+If there is a specific bug with the library, please [file an issue](https://github.com/googleapis/google-api-php-client/issues) in the GitHub issues tracker, including an example of the failing code and any specific errors retrieved. Feature requests can also be filed, as long as they are core library requests, and not-API specific: for those, refer to the documentation for the individual APIs for the best place to file requests. Please try to provide a clear statement of the problem that the feature would address.
 
 ### I want an example of X! ###
 
 If X is a feature of the library, file away! If X is an example of using a specific service, the best place to go is to the teams for those specific APIs - our preference is to link to their examples rather than add them to the library, as they can then pin to specific versions of the library. If you have any examples for other APIs, let us know and we will happily add a link to the README above!
-
-### Why do you still support 5.2? ###
-
-When we started working on the 1.0.0 branch we knew there were several fundamental issues to fix with the 0.6 releases of the library. At that time we looked at the usage of the library, and other related projects, and determined that there was still a large and active base of PHP 5.2 installs. You can see this in statistics such as the PHP versions chart in the WordPress stats: http://wordpress.org/about/stats/. We will keep looking at the types of usage we see, and try to take advantage of newer PHP features where possible.
 
 ### Why does Google_..._Service have weird names? ###
 

@@ -46,31 +46,34 @@
     },
     {
         "name": "composer/installers",
-        "version": "v1.6.0",
-        "version_normalized": "1.6.0.0",
+        "version": "v1.9.0",
+        "version_normalized": "1.9.0.0",
         "source": {
             "type": "git",
             "url": "https://github.com/composer/installers.git",
-            "reference": "cfcca6b1b60bc4974324efb5783c13dca6932b5b"
+            "reference": "b93bcf0fa1fccb0b7d176b0967d969691cd74cca"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/composer/installers/zipball/cfcca6b1b60bc4974324efb5783c13dca6932b5b",
-            "reference": "cfcca6b1b60bc4974324efb5783c13dca6932b5b",
+            "url": "https://api.github.com/repos/composer/installers/zipball/b93bcf0fa1fccb0b7d176b0967d969691cd74cca",
+            "reference": "b93bcf0fa1fccb0b7d176b0967d969691cd74cca",
             "shasum": ""
         },
         "require": {
-            "composer-plugin-api": "^1.0"
+            "composer-plugin-api": "^1.0 || ^2.0"
         },
         "replace": {
             "roundcube/plugin-installer": "*",
             "shama/baton": "*"
         },
         "require-dev": {
-            "composer/composer": "1.0.*@dev",
-            "phpunit/phpunit": "^4.8.36"
+            "composer/composer": "1.6.* || 2.0.*@dev",
+            "composer/semver": "1.0.* || 2.0.*@dev",
+            "phpunit/phpunit": "^4.8.36",
+            "sebastian/comparator": "^1.2.4",
+            "symfony/process": "^2.3"
         },
-        "time": "2018-08-27T06:10:37+00:00",
+        "time": "2020-04-07T06:57:05+00:00",
         "type": "composer-plugin",
         "extra": {
             "class": "Composer\\Installers\\Plugin",
@@ -106,6 +109,7 @@
             "Kanboard",
             "Lan Management System",
             "MODX Evo",
+            "MantisBT",
             "Mautic",
             "Maya",
             "OXID",
@@ -114,6 +118,7 @@
             "RadPHP",
             "SMF",
             "Thelia",
+            "Whmcs",
             "WolfCMS",
             "agl",
             "aimeos",
@@ -136,6 +141,7 @@
             "installer",
             "itop",
             "joomla",
+            "known",
             "kohana",
             "laravel",
             "lavalite",
@@ -158,6 +164,7 @@
             "shopware",
             "silverstripe",
             "sydes",
+            "sylius",
             "symfony",
             "typo3",
             "wordpress",
@@ -178,8 +185,7 @@
         "dist": {
             "type": "zip",
             "url": "https://github.com/udx/lib-settings/archive/0.3.0.zip",
-            "reference": "0.3.0",
-            "shasum": null
+            "reference": "0.3.0"
         },
         "require": {
             "udx/lib-utility": "~0.3"
@@ -248,8 +254,7 @@
         "dist": {
             "type": "zip",
             "url": "https://github.com/udx/lib-ud-api-client/archive/1.2.0.zip",
-            "reference": "1.2.0",
-            "shasum": null
+            "reference": "1.2.0"
         },
         "require": {
             "php": ">=5.3"
@@ -289,8 +294,7 @@
         "dist": {
             "type": "zip",
             "url": "https://github.com/udx/lib-utility/archive/0.4.0.zip",
-            "reference": "0.4.0",
-            "shasum": null
+            "reference": "0.4.0"
         },
         "require-dev": {
             "phpunit/phpunit": "4.1.*"
@@ -352,8 +356,7 @@
         "dist": {
             "type": "zip",
             "url": "https://github.com/udx/lib-wp-bootstrap/archive/1.3.0.zip",
-            "reference": "1.3.0",
-            "shasum": null
+            "reference": "1.3.0"
         },
         "require": {
             "php": ">=5.3",
@@ -376,6 +379,53 @@
         "homepage": "https://github.com/udx/lib-wp-bootstrap",
         "keywords": [
             "wordpress"
+        ]
+    },
+    {
+        "name": "wpmetabox/meta-box",
+        "version": "5.2.3",
+        "version_normalized": "5.2.3.0",
+        "source": {
+            "type": "git",
+            "url": "https://github.com/wpmetabox/meta-box.git",
+            "reference": "e8ec782b0a1cf77f6c6828f2a67116a63c56e0d5"
+        },
+        "dist": {
+            "type": "zip",
+            "url": "https://api.github.com/repos/wpmetabox/meta-box/zipball/e8ec782b0a1cf77f6c6828f2a67116a63c56e0d5",
+            "reference": "e8ec782b0a1cf77f6c6828f2a67116a63c56e0d5",
+            "shasum": ""
+        },
+        "time": "2019-11-01T10:13:50+00:00",
+        "type": "library",
+        "installation-source": "dist",
+        "autoload": {
+            "files": [
+                "meta-box.php"
+            ]
+        },
+        "notification-url": "https://packagist.org/downloads/",
+        "license": [
+            "GPL-2.0"
+        ],
+        "authors": [
+            {
+                "name": "Tran Ngoc Tuan Anh",
+                "email": "anhtnt@elightup.com",
+                "homepage": "https://deluxeblogtips.com",
+                "role": "Developer"
+            }
+        ],
+        "description": "A powerful, professional developer toolkit to create custom meta boxes and custom fields for WordPress websites.",
+        "homepage": "https://metabox.io",
+        "keywords": [
+            "custom-field",
+            "meta-box",
+            "select2",
+            "ui",
+            "wordpress",
+            "wordpress-plugin",
+            "wp-admin"
         ]
     }
 ]

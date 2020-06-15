@@ -6,7 +6,7 @@ License: GPLv2 or later
 Requires PHP: 5.5
 Requires at least: 4.7.0
 Tested up to: 5.3
-Stable tag: 2.3.3
+Stable tag: 2.4.0-RC.3
 
 Upload and serve your WordPress media files from Google Cloud Storage.
 
