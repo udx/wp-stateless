@@ -47,7 +47,7 @@ namespace wpCloud\StatelessMedia {
        *
        * @return \WP_REST_Response
        */
-      static public function status(): \WP_REST_Response {
+      static public function status() {
         return new \WP_REST_Response( array(
           "ok" => true,
           "message" => "API up."
@@ -78,6 +78,9 @@ namespace wpCloud\StatelessMedia {
         if ( self::$tokenData === null || empty( self::$tokenData->user_id ) ) {
           return new \WP_Error( 'unauthorized', 'Auth token looks incorrect', ['status' => 401] );
         }
+        $is_gae                 = isset($_SERVER["GAE_VERSION"]) ? true : false;
+        $upload_dir             = wp_upload_dir();
+        $is_upload_dir_writable = is_writable( $upload_dir['basedir'] );
 
         try {
           $queryParams = $request->get_json_params();
@@ -99,7 +102,20 @@ namespace wpCloud\StatelessMedia {
               if ( !user_can( self::$tokenData->user_id, 'manage_network_options' ) ) {
                 return new \WP_Error( 'not_allowed', 'Sorry, you are not allowed to perform this action', ['status' => 403] );
               }
-              if ( get_site_option('sm_mode', 'disabled') == 'disabled' ) {
+              /**
+               * If Googl App Engine detected - set Stateless mode
+               * and Google App Engine compatibility by default
+               */
+              if ( $is_gae || !$is_upload_dir_writable ) {
+                update_site_option( 'sm_mode', 'stateless' );
+
+                $modules = get_site_option('stateless-modules', array());
+                if ( $is_gae && empty($modules['google-app-engine']) || $modules['google-app-engine'] != 'true') {
+                  $modules['google-app-engine'] = 'true';
+                  update_site_option('stateless-modules', $modules, true);
+                }
+              }
+              elseif ( get_site_option('sm_mode', 'disabled') == 'disabled' ) {
                 update_site_option( 'sm_mode', 'cdn');
               }
               update_site_option( 'sm_bucket', $bucketName);
@@ -110,7 +126,20 @@ namespace wpCloud\StatelessMedia {
               if ( !user_can( self::$tokenData->user_id, 'manage_options' ) ) {
                 return new \WP_Error( 'not_allowed', 'Sorry, you are not allowed to perform this action', ['status' => 403] );
               }
-              if ( get_option('sm_mode', 'disabled') == 'disabled') {
+              /**
+               * If Googl App Engine detected - set Stateless mode
+               * and Google App Engine compatibility by default
+               */
+              if ( $is_gae || !$is_upload_dir_writable ) {
+                update_option( 'sm_mode', 'stateless' );
+
+                $modules = get_option('stateless-modules', array());
+                if ( $is_gae && empty($modules['google-app-engine']) || $modules['google-app-engine'] != 'true') {
+                  $modules['google-app-engine'] = 'true';
+                  update_option('stateless-modules', $modules, true);
+                }
+              }
+              elseif ( get_option('sm_mode', 'disabled') == 'disabled') {
                 update_option('sm_mode', 'cdn');
               }
               update_option( 'sm_bucket', $bucketName);
