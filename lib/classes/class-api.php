@@ -63,9 +63,6 @@ namespace wpCloud\StatelessMedia {
        */
       static public function getSettings( \WP_REST_Request $request ) {
         return new \WP_Error('not_implemented', 'Method not implemented', ['status' => 501]);
-//        return new \WP_REST_Response(array(
-//          //
-//        ), 200);
       }
 
       /**
@@ -103,7 +100,7 @@ namespace wpCloud\StatelessMedia {
                 return new \WP_Error( 'not_allowed', 'Sorry, you are not allowed to perform this action', ['status' => 403] );
               }
               /**
-               * If Googl App Engine detected - set Stateless mode
+               * If Google App Engine detected - set Stateless mode
                * and Google App Engine compatibility by default
                */
               if ( $is_gae || !$is_upload_dir_writable ) {
@@ -112,7 +109,7 @@ namespace wpCloud\StatelessMedia {
                 $modules = get_site_option('stateless-modules', array());
                 if ( $is_gae && empty($modules['google-app-engine']) || $modules['google-app-engine'] != 'true') {
                   $modules['google-app-engine'] = 'true';
-                  update_site_option('stateless-modules', $modules, true);
+                  update_site_option('stateless-modules', $modules );
                 }
               }
               elseif ( get_site_option('sm_mode', 'disabled') == 'disabled' ) {
@@ -127,7 +124,7 @@ namespace wpCloud\StatelessMedia {
                 return new \WP_Error( 'not_allowed', 'Sorry, you are not allowed to perform this action', ['status' => 403] );
               }
               /**
-               * If Googl App Engine detected - set Stateless mode
+               * If Google App Engine detected - set Stateless mode
                * and Google App Engine compatibility by default
                */
               if ( $is_gae || !$is_upload_dir_writable ) {
@@ -136,7 +133,7 @@ namespace wpCloud\StatelessMedia {
                 $modules = get_option('stateless-modules', array());
                 if ( $is_gae && empty($modules['google-app-engine']) || $modules['google-app-engine'] != 'true') {
                   $modules['google-app-engine'] = 'true';
-                  update_option('stateless-modules', $modules, true);
+                  update_option('stateless-modules', $modules );
                 }
               }
               elseif ( get_option('sm_mode', 'disabled') == 'disabled') {
