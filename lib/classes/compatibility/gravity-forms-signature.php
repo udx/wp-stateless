@@ -48,7 +48,7 @@ namespace wpCloud\StatelessMedia {
           try {
             $folder = \GFSignature::get_signatures_folder();
             $file_path = $folder . $value;
-
+  
             $name = apply_filters( 'wp_stateless_file_name', $file_path);
             do_action( 'sm:sync::syncFile', $name, $file_path, true);
           } catch (\Throwable $th) {
@@ -61,7 +61,7 @@ namespace wpCloud\StatelessMedia {
       /**
        * Currently there is no way to fileter signature url. So instead we are filtering site_url function
        * with help of debug backtrace.
-       *
+       * 
        * Also doing sync on the fly for previous entries.
        */
       public function signature_url($url, $path, $scheme, $blog_id){

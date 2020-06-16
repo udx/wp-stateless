@@ -290,7 +290,7 @@ namespace wpCloud\StatelessMedia {
               }
 
               // skips thumbs when it's called from Upload the full size image first, through intermediate_image_sizes_advanced filter.
-              if( $args[ 'no_thumb' ] && $img[ 'is_thumb' ] || !empty( self::$synced_sizes[ $attachment_id ][ $size ] ) && $sm_mode !== 'stateless' ) {
+              if( $args[ 'no_thumb' ] && $img[ 'is_thumb' ] || !empty( self::$synced_sizes[ $attachment_id ][ $size ] ) && $sm_mode !== 'stateless' && !$args[ 'is_webp' ] ) {
                 continue;
               }
 
@@ -345,13 +345,17 @@ namespace wpCloud\StatelessMedia {
                  * Updating object metadata, ACL, CacheControl and contentDisposition
                  * @return media object
                  */
-                $media = $object->update( array( 'metadata' => $media_args['metadata']) +
-                  array('cacheControl' => $_cacheControl,
-                    'predefinedAcl' => 'publicRead',
-                    'contentDisposition' => $_contentDisposition)
-                );
-
-                $cloud_meta = self::generate_cloud_meta($cloud_meta, $media, $size, $img, $bucketLink);
+                try {
+                  $media = $object->update( array( 'metadata' => $media_args['metadata']) +
+                    array('cacheControl' => $_cacheControl,
+                      'predefinedAcl' => 'publicRead',
+                      'contentDisposition' => $_contentDisposition)
+                  );
+  
+                  $cloud_meta = self::generate_cloud_meta($cloud_meta, $media, $size, $img, $bucketLink);
+                } catch (\Throwable $th) {
+                  //throw $th;
+                }
 
               } else {
                 /* Add default image */
@@ -465,7 +469,7 @@ namespace wpCloud\StatelessMedia {
         $base_dir = dirname( $full_size_path );
 
         $use_wildcards = self::is_use_wildcards();
-        $gs_name = apply_filters( 'wp_stateless_file_name', basename( $full_size_path ), true, $attachment_id, '', $use_wildcards );
+        $gs_name = apply_filters( 'wp_stateless_file_name', $full_size_path, true, $attachment_id, '', $use_wildcards );
         $gs_base_dir = dirname( $gs_name ) == '.' ? '' : trailingslashit(dirname( $gs_name ));
 
         if( !isset( $metadata[ 'width' ] ) && file_exists( $full_size_path ) ) {
@@ -493,8 +497,7 @@ namespace wpCloud\StatelessMedia {
           foreach( $metadata[ 'sizes' ] as $image_size => $data ) {
             if( empty( $data[ 'file' ] ) ) continue;
             $absolutePath = wp_normalize_path( $base_dir . '/' . $data[ 'file' ] );
-            $gs_name = $gs_base_dir . $data[ 'file' ];
-            $gs_name = apply_filters( 'wp_stateless_file_name', $gs_name, true, $attachment_id, $image_size, $use_wildcards );
+            $gs_name = apply_filters( 'wp_stateless_file_name', $absolutePath, true, $attachment_id, $image_size, $use_wildcards );
 
             $gs_name_path[$image_size] = array(
               'gs_name'   => $gs_name,
@@ -894,6 +897,11 @@ namespace wpCloud\StatelessMedia {
        * @link http://svn.apache.org/repos/asf/httpd/httpd/branches/1.3.x/conf/mime.types
        */
       public static function mimetype_from_extension($extension){
+        $file_type = wp_check_filetype($extension);
+        if(!empty($file_type['type'])){
+          return $file_type['type'];
+        }
+
         static $mimetypes = [
           '7z' => 'application/x-7z-compressed',
           'aac' => 'audio/x-aac',
@@ -980,6 +988,7 @@ namespace wpCloud\StatelessMedia {
           'txt' => 'text/plain',
           'wav' => 'audio/x-wav',
           'webm' => 'video/webm',
+          'webp' => 'image/webp',
           'wma' => 'audio/x-ms-wma',
           'wmv' => 'video/x-ms-wmv',
           'woff' => 'application/x-font-woff',
@@ -997,7 +1006,7 @@ namespace wpCloud\StatelessMedia {
 
         $extension = strtolower( $extension );
 
-        return isset( $mimetypes[ $extension ] ) ? $mimetypes[ $extension ] : null;
+        return isset( $mimetypes[ $extension ] ) ? $mimetypes[ $extension ] : false;
       }
 
       /**

@@ -243,7 +243,7 @@ namespace wpCloud\StatelessMedia {
           ud_get_stateless_media()->set( 'sm.mode', 'ephemeral' );
         }
 
-        $name = apply_filters( 'wp_stateless_file_name', basename( $file ) );
+        $name = apply_filters( 'wp_stateless_file_name', $file );
 
         if( file_exists( $file ) ) {
           add_filter( 'upload_mimes', array( $this, 'add_webp_mime' ), 10, 2 );
@@ -271,7 +271,7 @@ namespace wpCloud\StatelessMedia {
           $attachment_id = $this->getProperties( $this->getProperties( $this->getProperties( $process )[ 'data' ] )[ 'media' ] )[ 'id' ];
 
           $full_size_path = $file->get_path();
-          $name = apply_filters( 'wp_stateless_file_name', basename( $full_size_path ), true, $attachment_id );
+          $name = apply_filters( 'wp_stateless_file_name', $full_size_path, true, $attachment_id );
           do_action( 'sm:sync::syncFile', $name, $full_size_path, true, [ 'download' => true ] );
           // error_log("\n\ndo_action( 'sm:sync::syncFile', $name, $full_size_path, true, ['download' => true] );");
         } catch( \Throwable $th ) {
