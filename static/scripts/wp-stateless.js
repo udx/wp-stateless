@@ -3,6 +3,71 @@
  *
  */
 
+var $wildcards_select = jQuery(".select-wildcards").select2({
+  tags: true,
+  createTag: function (params) {
+    var term = jQuery.trim(params.term);
+
+    if (term === '') {
+      return null;
+    }
+
+    let tags = [ "%site_id%", "%site_url%", "%site_url_host%", "%site_url_path%", "%date_year/date_month%" ];
+
+    // Remove special chars from tags
+    if (! /^[a-zA-Z0-9_.]+$/.test(term) && jQuery.inArray (term, tags) == -1) {
+      term = term.replace(/[^a-zA-Z0-9_.]/g,'');
+    }
+
+    return {
+      id: term,
+      text: term
+    }
+  },
+  templateSelection: function (state) {
+    // Add slash at the en of the tag
+    return state.text+ '/';
+  },
+  insertTag: function (data, tag) {
+    // Insert the tag at the end of the results
+    data.push(tag);
+  }
+});
+jQuery(".select-wildcards").on("select2:select", function (evt) {
+  var element = evt.params.data.element;
+  var $element = jQuery(element);
+
+  $element.detach();
+  jQuery(this).append($element);
+  jQuery(this).trigger("change");
+  prepare_preview_url();
+});
+
+jQuery(".select-wildcards").on("select2:unselect", function (evt) {
+  prepare_preview_url();
+});
+
+function prepare_preview_url () {
+  let root_dir = '';
+  let selected_wildcards = jQuery('.select-wildcards').val();
+
+  if (selected_wildcards !== null) {
+    root_dir = selected_wildcards.join('/');
+  }
+
+  jQuery("#sm_root_dir").val(root_dir);
+  jQuery("#sm_root_dir").trigger("change");
+}
+
+function replace_wildcard_to_the_end ( wildcard ) {
+  jQuery(".select-wildcards > option").each(function() {
+    if ( this.value === wildcard ) {
+      jQuery(this).detach();
+      jQuery(".select-wildcards").append(jQuery(this));
+    }
+  });
+}
+
 // Application
 var wpStatelessApp = angular.module('wpStatelessApp', ['ngSanitize'])
 
@@ -819,25 +884,27 @@ var wpStatelessApp = angular.module('wpStatelessApp', ['ngSanitize'])
 
     $scope.$watch('sm.bucket_folder_type', function(value) {
       if(value == 'single-site'){
-        $scope.sm.root_dir = '/%date_year%/%date_month%/';
+        $wildcards_select.val([ "%date_year/date_month%" ]).trigger("change");
       }
       else if(value == 'multi-site'){
-        $scope.sm.root_dir = '/sites/%site_id%/%date_year%/%date_month%/';
+        //changins wildcards position
+        replace_wildcard_to_the_end("sites");
+        replace_wildcard_to_the_end("%site_id%");
+        replace_wildcard_to_the_end("%date_year/date_month%");
+        $wildcards_select.val([ "sites", "%site_id%", "%date_year/date_month%" ]).trigger("change");
       }
       else if(value == '' && $scope.sm.network_admin){
-        $scope.sm.root_dir = '';
+        $wildcards_select.val(null).trigger("change");
       }
-      setTimeout(function(){
-        jQuery( '#permalink_structure' ).trigger('change');
-      }, 1);
+      prepare_preview_url();
     });
 
     $scope.$watch('sm.root_dir', function(value) {
 
-      if(value == '/%date_year%/%date_month%/'){
+      if(value == '/%date_year/date_month%/'){
         $scope.sm.bucket_folder_type = 'single-site';
       }
-      else if(value == '/sites/%site_id%/%date_year%/%date_month%/'){
+      else if(value == '/sites/%site_id%/%date_year/ate_month%/'){
         $scope.sm.bucket_folder_type = 'multi-site';
       }
       else if(value == '' && $scope.sm.network_admin){
@@ -847,14 +914,6 @@ var wpStatelessApp = angular.module('wpStatelessApp', ['ngSanitize'])
         $scope.sm.bucket_folder_type = 'custom';
       }
 
-      let tags = [ "%date_year%", "%date_month%", "%site_id%", "%site_url%", "%site_url_host%", "%site_url_path%" ];
-      value_splitted = value.split("/");
-      for ( i = 0; i < value_splitted.length; i ++ ) {
-        if (! /^[a-zA-Z0-9_.]+$/.test(value_splitted[i]) && value_splitted[i] != '' && jQuery.inArray (value_splitted[i], tags) == -1) {
-          value_splitted[i] = value_splitted[i].replace(/[^a-zA-Z0-9_.]/g,'');
-        }
-      }
-      $scope.sm.root_dir = value_splitted.join('/');
       setTimeout(function(){
         jQuery( '#permalink_structure' ).trigger('change');
       }, 1);

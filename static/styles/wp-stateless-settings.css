@@ -100,3 +100,10 @@
 .permalink-structure h4 {
 	margin: 1.33em 0 !important;
 }
+
+.sm-wildcards .select2-container {
+	width: 700px !important;
+}
+.select2-dropdown li {
+	margin-bottom: 0px !important;
+}

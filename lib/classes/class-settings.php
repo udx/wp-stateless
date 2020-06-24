@@ -38,7 +38,7 @@ namespace wpCloud\StatelessMedia {
         'body_rewrite'           => array('WP_STATELESS_MEDIA_BODY_REWRITE', 'false'),
         'body_rewrite_types'     => array('WP_STATELESS_MEDIA_BODY_REWRITE_TYPES', 'jpg jpeg png gif pdf'),
         'bucket'                 => array('WP_STATELESS_MEDIA_BUCKET', ''),
-        'root_dir'               => array('WP_STATELESS_MEDIA_ROOT_DIR', ['/%date_year%/%date_month%/', '/sites/%site_id%/%date_year%/%date_month%/']),
+        'root_dir'               => array('WP_STATELESS_MEDIA_ROOT_DIR', ['/%date_year/date_month%/', '/sites/%site_id%/%date_year/date_month%/']),
         'key_json'               => array('WP_STATELESS_MEDIA_JSON_KEY', ''),
         'cache_control'          => array('WP_STATELESS_MEDIA_CACHE_CONTROL', ''),
         'delete_remote'          => array('WP_STATELESS_MEDIA_DELETE_REMOTE', 'true'),
@@ -95,17 +95,10 @@ namespace wpCloud\StatelessMedia {
         $site_url = parse_url( site_url() );
         $site_url['path'] = isset($site_url['path']) ? $site_url['path'] : '';
         $this->wildcards = array(
-          '%date_year%'            => [
-            date('Y'),
-            __("year", $this->bootstrap->domain),
-            __("The year of the post, four digits, for example 2004.", $this->bootstrap->domain),
-            "\d{4}"
-          ],
-          '%date_month%'           => [
-            date('m'),
-            __("monthnum", $this->bootstrap->domain),
-            __("Month of the year, for example 05.", $this->bootstrap->domain),
-            "\d{2}"
+          'sites'         => [
+            'sites',
+            __("sites", $this->bootstrap->domain),
+            __("Sites uses for multisite.", $this->bootstrap->domain),
           ],
           '%site_id%'         => [
             get_current_blog_id(),
@@ -127,6 +120,12 @@ namespace wpCloud\StatelessMedia {
             __("site path", $this->bootstrap->domain),
             __("Site path, for example site-1.", $this->bootstrap->domain),
           ],
+          '%date_year/date_month%' => [
+            date('Y').'/'.date('m'),
+            __("year and monthnum", $this->bootstrap->domain),
+            __("The year of the post, four digits, for example 2004. Month of the year, for example 05", $this->bootstrap->domain),
+            "\d{4}/\d{2}"
+          ]
         );
       }
 
@@ -403,6 +402,18 @@ namespace wpCloud\StatelessMedia {
             $result[$root_dir_elements[$key]] = $path_element;
           }
         }
+
+        /**
+         * hack for year/month wildcard
+         */
+        if ( isset ($result['%date_year']) && isset ($result['date_month%']) ) {
+          //combine it into one tag
+          $result['%date_year/date_month%'] = $result['%date_year'].'/'.$result['date_month%'];
+          //remove separated tags
+          unset($result['%date_year']);
+          unset($result['date_month%']);
+        }
+
         return $result;
       }
 
@@ -436,6 +447,40 @@ namespace wpCloud\StatelessMedia {
        */
       public function settings_interface() {
         $wildcards = apply_filters('wp_stateless_root_dir_wildcard', $this->wildcards);
+        $wildcard_year_month = '%date_year/date_month%';
+        $root_dir = $this->get( 'sm.root_dir' );
+
+        $use_year_month = strpos($root_dir, $wildcard_year_month);
+
+        // removing year/month wildcard
+        if ($use_year_month) {
+          $root_dir = str_replace($wildcard_year_month, '', $root_dir);
+        }
+
+        //preparing array with wildcards
+        $root_dir_values = explode('/', $root_dir);
+
+        // adding year/month wildcard
+        if ($use_year_month) {
+          if ( !empty($root_dir_values) ) {
+            foreach( $root_dir_values as $k=>$root_dir_value ) {
+              if ( empty($root_dir_value) ) {
+                $root_dir_values[$k] = $wildcard_year_month;
+              }
+            }
+          } else {
+            $root_dir_values[] = $wildcard_year_month;
+          }
+        }
+
+        //removing empty values
+        $root_dir_values = array_filter($root_dir_values);
+
+        // merging user's wildcards with default values
+        if (!empty($root_dir_values)) {
+          $wildcards = array_merge(array_flip($root_dir_values), $wildcards);
+        }
+
         include $this->bootstrap->path( '/static/views/settings_interface.php', 'dir' );
       }
 
@@ -473,7 +518,26 @@ namespace wpCloud\StatelessMedia {
         if(isset($_POST['action']) && $_POST['action'] == 'stateless_settings' && wp_verify_nonce( $_POST['_smnonce'], 'wp-stateless-settings' )){
 
           $settings = apply_filters('stateless::settings::save', $_POST['sm']);
+
           foreach ( $settings as $name => $value ) {
+
+            /**
+             * root_dir settings
+             */
+            if ( 'root_dir' == $name && is_array($value) ) {
+              //managed in WP-Stateless settings (via Bucket Folder control)
+              if ( in_array('%date_year/date_month%', $value)) {
+                update_option( 'uploads_use_yearmonth_folders', '1'  );
+              } else {
+                update_option( 'uploads_use_yearmonth_folders', '0'  );
+              }
+
+              /**
+               * preparing path from tags
+               */
+              $value = implode('/', $value);
+            }
+
             $option = 'sm_'. $name;
 
             if($name == 'organize_media'){
