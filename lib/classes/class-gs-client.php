@@ -184,6 +184,8 @@ namespace wpCloud\StatelessMedia {
             'metadata' => array(),
             'is_webp' => '',
           ) );
+          $args = apply_filters('wp_stateless_add_media_args', $args);
+          $name = $args['name'];
 
           /* Be sure file exists. */
           if( !file_exists( $args['absolutePath'] ) ) {
@@ -191,12 +193,16 @@ namespace wpCloud\StatelessMedia {
           }
 
           $use_wildcards = Utility::is_use_wildcards();
+
+          /* Set default name if parameter was not passed. */
+          if( empty( $name ) || $use_wildcards ) {
+            $name = basename( $args['name'] );
+          }
+
           $object_id = isset( $args['metadata']['object-id'] ) ? $args['metadata']['object-id'] : (isset( $args['metadata']['child-of'] ) ? $args['metadata']['child-of'] : "");
           $object_size = isset( $args['metadata']['size'] ) ? $args['metadata']['size'] : "";
 
-          $args['name'] = apply_filters( 'wp_stateless_file_name', $args['name'], $args['use_root'], $object_id, $object_size, $use_wildcards );
-          $args = apply_filters('wp_stateless_add_media_args', $args);
-          $name = $args['name'];
+          $name = apply_filters( 'wp_stateless_file_name', $name, $args['use_root'], $object_id, $object_size, $use_wildcards );
 
           // If media exists we just return it
           if ( !$args['force'] && $media = $this->media_exists( $name ) ) {
@@ -327,7 +333,7 @@ namespace wpCloud\StatelessMedia {
         try {
           $media = $this->service->objects->get($this->bucket, $path);
           $media = $this->service->objects->copy($this->bucket, $path, $this->bucket, $new_path, $media);
-          $this->mediaInsertACL($new_path, $media);
+          $this->mediaInsertACL($media);
         } catch ( \Exception $e ) {
           return false;
         }
