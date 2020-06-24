@@ -85,11 +85,9 @@ namespace wpCloud\StatelessMedia {
        *
        */
       public function sync_image( $row_img, $local_file ) {
-        $rm_ori_bkup = apply_filters('litespeed_conf', 'img_optm-rm_bkup' );
+        $rm_ori_bkup = apply_filter('litespeed_conf', 'img_optm-rm_bkup' );
         $gs_name = apply_filters( 'wp_stateless_file_name', $row_img->src );
         $cloud_meta = get_post_meta( $row_img->post_id, 'sm_cloud', true );
-
-        if(empty($cloud_meta)) $cloud_meta = array();
 
         if( !$rm_ori_bkup ) {
           $extension = pathinfo( $gs_name, PATHINFO_EXTENSION );
@@ -110,7 +108,7 @@ namespace wpCloud\StatelessMedia {
        * @param $local_file
        */
       public function sync_webp( $row_img, $local_file ) {
-        $optm_webp = apply_filters('litespeed_conf', 'img_optm-webp' );
+        $optm_webp = apply_filter('litespeed_conf', 'img_optm-webp' );
         if( $optm_webp ) {
           $gs_name = apply_filters( 'wp_stateless_file_name', $row_img->src . '.webp' );
 
@@ -334,8 +332,8 @@ namespace wpCloud\StatelessMedia {
           // We only need to copy from local to GCS, otherwise file_md5 meta should be available.
           foreach( $image_sizes as $img ) {
             $file_path = $img[ 'path' ];
-            $rm_ori_bkup = apply_filters('litespeed_conf', 'img_optm-rm_bkup' );
-            $optm_webp = apply_filters('litespeed_conf', 'img_optm-webp' );
+            $rm_ori_bkup = apply_filter('litespeed_conf', 'img_optm-rm_bkup' );
+            $optm_webp = apply_filter('litespeed_conf', 'img_optm-webp' );
 
             if( !$rm_ori_bkup ) {
               $extension = pathinfo( $file_path, PATHINFO_EXTENSION );

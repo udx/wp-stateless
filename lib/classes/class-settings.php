@@ -87,23 +87,26 @@ namespace wpCloud\StatelessMedia {
         /** Register options */
         add_action( 'init', array( $this, 'init' ), 3 );
         // apply wildcard to root dir.
-        add_filter( 'wp_stateless_handle_root_dir', array( $this, 'root_dir_wildcards' ), 10, 2);
+        add_filter( 'wp_stateless_handle_root_dir', array( $this, 'root_dir_wildcards' ), 10, 3);
+
+        // Parse root dir by wildcards
+        add_filter( 'wp_stateless_unhandle_root_dir', array( $this, 'parse_root_dir_wildcards' ), 10, 3);
 
         $site_url = parse_url( site_url() );
         $site_url['path'] = isset($site_url['path']) ? $site_url['path'] : '';
         $this->wildcards = array(
-          // '%date_year%'            => [
-          //   date('Y'),
-          //   __("year", $this->bootstrap->domain),
-          //   __("The year of the post, four digits, for example 2004.", $this->bootstrap->domain),
-          //   "\d{4}"
-          // ],
-          // '%date_month%'           => [
-          //   date('m'),
-          //   __("monthnum", $this->bootstrap->domain),
-          //   __("Month of the year, for example 05.", $this->bootstrap->domain),
-          //   "\d{2}"
-          // ],
+          '%date_year%'            => [
+            date('Y'),
+            __("year", $this->bootstrap->domain),
+            __("The year of the post, four digits, for example 2004.", $this->bootstrap->domain),
+            "\d{4}"
+          ],
+          '%date_month%'           => [
+            date('m'),
+            __("monthnum", $this->bootstrap->domain),
+            __("Month of the year, for example 05.", $this->bootstrap->domain),
+            "\d{2}"
+          ],
           '%site_id%'         => [
             get_current_blog_id(),
             __("site id", $this->bootstrap->domain),
@@ -156,10 +159,6 @@ namespace wpCloud\StatelessMedia {
           $constant = $array[0]; // Constant name
           $default  = is_array($array[1]) ? $array[1] : array($array[1], $array[1]); // Default value
 
-          if($option == 'organize_media'){
-            $_option = 'uploads_use_yearmonth_folders';
-          }
-
           // Getting settings
           $value = get_option($_option, $default[0]);
 
@@ -197,7 +196,7 @@ namespace wpCloud\StatelessMedia {
           }
 
           // Getting network settings
-          if(is_multisite() && $option != 'organize_media' && !$this->get( "sm.readonly.{$option}")){
+          if(is_multisite() && !$this->get( "sm.readonly.{$option}")){
 
             $network = get_site_option( $_option, $default[1] );
             // If network settings available then override by network settings.
@@ -335,13 +334,16 @@ namespace wpCloud\StatelessMedia {
       /**
        * Replacing wildcards with real values
        * @param $root_dir
+       * @param bool $regex
+       * @param array $current_values
        * @return mixed|null|string|string[]
+       *
        */
-      public function root_dir_wildcards( $root_dir, $regex = false ) {
+      public function root_dir_wildcards( $root_dir, $regex = false, $current_values = [] ) {
 
         $not_allowed_char = '/[^A-Za-z0-9\/_.]/';
         $wildcards = apply_filters('wp_stateless_root_dir_wildcard', $this->wildcards);
-        
+
         if($regex){
           $root_dir = preg_quote($root_dir);
           $not_allowed_char = '/[^A-Za-z0-9\/_.\.\-\\\\{}]/';
@@ -353,6 +355,9 @@ namespace wpCloud\StatelessMedia {
               $replace = $values[0];
               if($regex){
                 $replace = isset($values[3]) ? $values[3] : preg_quote($values[0]);
+              }
+              if ( isset($current_values[$wildcard]) ) {
+                $replace = $current_values[$wildcard];
               }
               $root_dir = str_replace($wildcard, $replace, $root_dir);
             }
@@ -366,6 +371,42 @@ namespace wpCloud\StatelessMedia {
 
         return $root_dir;
       }
+
+
+      /**
+       * Parse path by wildcards and return array ('wildcard' => 'value')
+       * @param $path
+       * @return array
+       */
+      public function parse_root_dir_wildcards ( $path ) {
+        $root_dir = $this->get( 'sm.root_dir' );
+        $result = [];
+
+        /**
+         * removing GS host from path
+         */
+        $gs_url =  $this->bootstrap->get_gs_host();
+        if( 0 === strpos( $path, $gs_url . '/' ) ) {
+          $path = substr( $path, strlen( $gs_url . '/' ) );
+        }
+
+        /**
+         * removing filename and last slash
+         */
+        $path = untrailingslashit( str_replace(basename($path), '', $path) );
+
+        $path_elements = explode('/', $path);
+        $root_dir_elements = explode('/', $root_dir);
+
+        if ( count( $path_elements ) == count( $root_dir_elements ) && !empty($path_elements)) {
+          foreach( $path_elements as $key=>$path_element ) {
+            $result[$root_dir_elements[$key]] = $path_element;
+          }
+        }
+        return $result;
+      }
+
+
 
       /**
        * Add menu options

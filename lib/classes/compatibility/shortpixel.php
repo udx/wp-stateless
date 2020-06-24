@@ -226,7 +226,9 @@ namespace wpCloud\StatelessMedia {
         // Sync the webp to GCS
         $create_webp = \WPShortPixelSettings::getOpt( 'wp-short-create-webp' );
         if( $create_webp ) {
-          $this->sync_webp_file($id, $metadata);
+          add_filter( 'upload_mimes', array( $this, 'add_webp_mime' ), 10, 2 );
+          ud_get_stateless_media()->add_media( $metadata, $id, true, array( 'is_webp' => '.webp' ) );
+          remove_filter( 'upload_mimes', array( $this, 'add_webp_mime' ), 10 );
         }
         // Don't needed in ephemeral mode. In ephemeral mode the back will be sync once on wp_update_attachment_metadata filter.
         if( ud_get_stateless_media()->get( 'sm.mode' ) !== 'ephemeral' ) {

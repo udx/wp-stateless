@@ -175,6 +175,7 @@
                                                 <?php if(is_network_admin()): ?>
                                                   <option value=""><?php _e("Don't override");?></option>
                                                 <?php endif; ?>
+                                                <option value="single-site"><?php _e( 'Single Site', ud_get_stateless_media()->domain ); ?></option>
                                                 <option value="multi-site"><?php _e( 'Multisite', ud_get_stateless_media()->domain ); ?></option>
                                                 <option value="custom"><?php _e( 'Custom', ud_get_stateless_media()->domain ); ?></option>
                                             </select>
@@ -207,23 +208,6 @@
                                 </div>
 
                                 <hr>
-                                
-                                <?php if(!is_network_admin()): ?>
-                                    <h4><?php _e( 'Organization', ud_get_stateless_media()->domain ); ?></h4>
-                                    <p>
-                                        <select id="org_url_grp" name="sm[organize_media]" ng-model="sm.organize_media" ng-change="sm.generatePreviewUrl()" ng-disabled="sm.readonly.organize_media">
-                                            <?php if(is_network_admin()): ?>
-                                            <option value=""><?php _e( 'Don\'t override', ud_get_stateless_media()->domain ); ?></option>
-                                            <?php endif; ?>
-                                            <option value="1"><?php _e( 'Enable', ud_get_stateless_media()->domain ); ?></option>
-                                            <option value=""><?php _e( 'Disable', ud_get_stateless_media()->domain ); ?></option>
-                                        </select>
-                                    </p>
-                                    <p class="description">
-                                    <?php printf(__( 'Organize uploads into year and month based folders. This will update the <a href="%s">related WordPress media setting</a>.', ud_get_stateless_media()->domain ), admin_url("options-media.php")); ?>
-                                    </p>
-                                    <hr>
-                                <?php endif; ?>  
 
                                 <h4><?php _e( 'Domain', ud_get_stateless_media()->domain ); ?></h4>
                                 <p>
