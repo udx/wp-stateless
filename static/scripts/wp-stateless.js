@@ -5,6 +5,7 @@
 
 var $wildcards_select = jQuery(".select-wildcards").select2({
   tags: true,
+  tokenSeparators: ['/'],
   createTag: function (params) {
     var term = jQuery.trim(params.term);
 
