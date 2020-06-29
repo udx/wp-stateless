@@ -508,7 +508,7 @@ namespace wpCloud\StatelessMedia {
         $custom_domain = str_replace(array('http://', 'https://'), '', $custom_domain);
         $custom_domain = trim($custom_domain, '/');
 
-        if ( $custom_domain !== 'storage.googleapis.com' && $custom_domain == $bucketname && strpos($fileLink, $bucketname) > 8 ) {
+        if ( !empty($bucketname) && $custom_domain !== 'storage.googleapis.com' && $custom_domain == $bucketname && strpos($fileLink, $bucketname) > 8 ) {
           $fileLink = ($is_ssl ? 'https://' : 'http://') . substr($fileLink, strpos($fileLink, $bucketname));
         }
         elseif( $custom_domain !== 'storage.googleapis.com' && $custom_domain == $bucketname && $fileLink_is_ssl !== $is_ssl){
@@ -687,8 +687,8 @@ namespace wpCloud\StatelessMedia {
         } elseif ( isset( $_POST['item'] ) ) {
           $post_id = intval( $_POST['item'] );
         }
-        $metabox = $this->_prepare_data_for_metabox( $meta_boxes, $post_id );
-        return array( $metabox );
+      
+        return $this->_prepare_data_for_metabox( $meta_boxes, $post_id );
       }
 
       /**
@@ -701,18 +701,6 @@ namespace wpCloud\StatelessMedia {
         $post     = get_post ( $post_id );
         $sm_cloud = get_post_meta( $post_id, 'sm_cloud', 1 );
         $sm_mode  = $this->get( 'sm.mode' );
-
-        /**
-         * If it is not a post - do not add metabox
-         *
-         * Added array with key `title` for prevent error on metabox
-         * Notice	Undefined index: title
-         * wp-content/plugins/wp-stateless/vendor/wpmetabox/meta-box/inc/meta-box.php:346
-         * @author palant@ud
-         */
-        if( defined( 'WP_CLI' ) && WP_CLI ) {
-          return $meta_boxes + array( 'title' => 'Stateless' );
-        }
 
         if ( empty( $post ) ) {
           return $meta_boxes;
@@ -788,7 +776,7 @@ namespace wpCloud\StatelessMedia {
 
         }
 
-        $meta_boxes = array(
+        $meta_boxes[] = apply_filters( 'sm::attachment::meta', array(
           'id'         => 'sm-attachment-metabox',
           'title'      => __( 'Stateless', ud_get_stateless_media()->domain ),
           'post_types' => 'attachment',
@@ -811,9 +799,7 @@ namespace wpCloud\StatelessMedia {
           // Show meta box wrapper around tabs? true (default) or false. Optional
           'tab_wrapper' => true,
           'fields' => $fields
-        );
-
-        $meta_boxes = apply_filters( 'sm::attachment::meta', $meta_boxes, $post->ID );
+        ), $post->ID );
 
         return $meta_boxes;
       }
@@ -1814,7 +1800,7 @@ namespace wpCloud\StatelessMedia {
           $attachment_id = attachment_url_to_postid($metadata['file']);
           $this->add_media(null, $attachment_id, false, array('no_thumb' => true));
         }
-        catch(Exception $e){
+        catch(\Exception $e){
 
         }
 
@@ -1871,7 +1857,7 @@ namespace wpCloud\StatelessMedia {
 
           }
 
-        } catch ( Exception $e ) {
+        } catch ( \Exception $e ) {
           Utility::log( 'Unable to parse [composer.json] feature flags. Error: [' . $e->getMessage() . ']' );
           // echo 'Caught exception: ', $e->getMessage(), "\n";
         }
