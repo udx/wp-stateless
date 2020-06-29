@@ -1108,21 +1108,8 @@ namespace wpCloud\StatelessMedia {
         /* Attachment or upload page */
         wp_register_script( 'wp-stateless-uploads-js', $this->path( 'static/scripts/wp-stateless-uploads.js', 'url'  ), array( 'jquery' ), self::$version );
 
-        /* Setup wizard styles and scripts. */
-        wp_register_style( 'wp-stateless-bootstrap', $this->path( 'static/styles/bootstrap.min.css', 'url'  ), array(), '3.3.7' );
-        wp_register_style( 'bootstrap-grid-v4', $this->path( 'static/styles/bootstrap-grid.min.css', 'url'  ), array(), '3.3.7' );
+        /* Setup wizard styles. */
         wp_register_style( 'wp-stateless-setup-wizard', $this->path( 'static/styles/wp-stateless-setup-wizard.css', 'url'  ), array(), self::$version );
-
-        wp_register_script( 'async.min', ud_get_stateless_media()->path( 'static/scripts/async.js', 'url'  ), array(), self::$version );
-        wp_register_script( 'jquery.history', ud_get_stateless_media()->path( 'static/scripts/jquery.history.js', 'url'  ), array( 'jquery' ), self::$version, true );
-        wp_register_script( 'wp-stateless-validation', ud_get_stateless_media()->path( 'static/scripts/jquery.validation.js', 'url'  ), array( 'jquery' ), self::$version, true );
-        wp_register_script( 'wp-stateless-loading', ud_get_stateless_media()->path( 'static/scripts/jquery.loading.js', 'url'  ), array( 'jquery' ), self::$version, true );
-        wp_register_script( 'wp-stateless-comboBox', ud_get_stateless_media()->path( 'static/scripts/jquery.wp-stateless-combo-box.js', 'url'  ), array( 'jquery' ), self::$version, true );
-        wp_register_script( 'wp-stateless-setup', ud_get_stateless_media()->path( 'static/scripts/wp-stateless-setup.js', 'url'  ), array( 'jquery-ui-core', 'wp-api', 'jquery.history' ), self::$version, true );
-        wp_localize_script( 'wp-stateless-setup', 'stateless_l10n', $this->get_l10n_data() );
-
-        wp_register_script( 'wp-stateless-setup-wizard-js', ud_get_stateless_media()->path( 'static/scripts/wp-stateless-setup-wizard.js', 'url'  ), array( 'jquery', 'wp-api', 'async.min', 'wp-stateless-setup', 'wp-stateless-comboBox', 'wp-stateless-validation', 'wp-stateless-loading' ), self::$version, true );
-
 
         /* Stateless settings page */
         wp_register_script( 'wp-stateless-settings', ud_get_stateless_media()->path( 'static/scripts/wp-stateless-settings.js', 'url'  ), array(), self::$version );
@@ -1180,14 +1167,10 @@ namespace wpCloud\StatelessMedia {
         switch( $hook ) {
 
           case 'options-media.php':
-            //wp_enqueue_script( 'wp-api' );
-
             wp_enqueue_style( 'wp-stateless');
-            wp_enqueue_script( 'wp-stateless-setup' );
             break;
 
           case 'upload.php':
-
             wp_enqueue_style( 'wp-stateless');
             wp_enqueue_script( 'wp-stateless-uploads-js' );
 
@@ -1207,22 +1190,12 @@ namespace wpCloud\StatelessMedia {
           case 'media_page_stateless-setup':
           case 'settings_page_stateless-setup':
             wp_enqueue_style( 'wp-stateless');
-            wp_enqueue_style( 'wp-stateless-bootstrap' );
             wp_enqueue_style( 'wp-stateless-setup-wizard' );
-
-            wp_enqueue_script( 'async.min' );
-            wp_enqueue_script( 'jquery.history' );
-            wp_enqueue_script( 'wp-stateless-validation' );
-            wp_enqueue_script( 'wp-stateless-loading' );
-            wp_enqueue_script( 'wp-stateless-comboBox' );
-            wp_enqueue_script( 'wp-stateless-setup' );
-            wp_enqueue_script( 'wp-stateless-setup-wizard-js' );
             break;
           case 'media_page_stateless-settings':
           case 'settings_page_stateless-settings':
             wp_enqueue_style( 'wp-stateless');
             wp_enqueue_script( 'wp-stateless-settings' );
-            wp_enqueue_style( 'bootstrap-grid-v4' );
             wp_enqueue_style( 'wp-stateless-settings' );
 
             // Sync tab
