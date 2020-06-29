@@ -16,8 +16,8 @@ var $wildcards_select = jQuery(".select-wildcards").select2({
     let tags = [ "%site_id%", "%site_url%", "%site_url_host%", "%site_url_path%", "%date_year/date_month%" ];
 
     // Remove special chars from tags
-    if (! /^[a-zA-Z0-9_.]+$/.test(term) && jQuery.inArray (term, tags) == -1) {
-      term = term.replace(/[^a-zA-Z0-9_.]/g,'');
+    if (! /^[a-zA-Z0-9_\-.]+$/.test(term) && jQuery.inArray (term, tags) == -1) {
+      term = term.replace(/[^a-zA-Z0-9_\-.]/g,'');
     }
 
     return {
@@ -27,7 +27,7 @@ var $wildcards_select = jQuery(".select-wildcards").select2({
   },
   templateSelection: function (state) {
     // Add slash at the en of the tag
-    return state.text+ '/';
+    return state.text;
   },
   insertTag: function (data, tag) {
     // Insert the tag at the end of the results
@@ -37,14 +37,32 @@ var $wildcards_select = jQuery(".select-wildcards").select2({
 jQuery(".select-wildcards").on("select2:select", function (evt) {
   var element = evt.params.data.element;
   var $element = jQuery(element);
+  let $element_value = $element.value;
 
   $element.detach();
   jQuery(this).append($element);
+
+  /**
+   * add slash after tag
+   */
+  if ( $element_value !== '/' ) {
+    // Create the DOM option that is pre-selected by default
+    var newState = new Option('/', '/', true, true);
+    jQuery(newState).prop('disabled', true);
+    // Append it to the select
+    jQuery(this).append(newState);
+  }
+
   jQuery(this).trigger("change");
   prepare_preview_url();
 });
 
 jQuery(".select-wildcards").on("select2:unselect", function (evt) {
+  if (evt.params.data.id === '/') {
+    var element = evt.params.data.element;
+    var $element = jQuery(element);
+    $element.detach();
+  }
   prepare_preview_url();
 });
 
@@ -60,11 +78,28 @@ function prepare_preview_url () {
   jQuery("#sm_root_dir").trigger("change");
 }
 
-function replace_wildcard_to_the_end ( wildcard ) {
-  jQuery(".select-wildcards > option").each(function() {
-    if ( this.value === wildcard ) {
-      jQuery(this).detach();
-      jQuery(".select-wildcards").append(jQuery(this));
+function replace_wildcard_to_the_end ( wildcards, remove_slashes = false ) {
+  if ( remove_slashes ) {
+    jQuery(".select-wildcards > option").each(function() {
+      if ( this.value == '/' ) {
+        jQuery(this).detach();
+      }
+    });
+  }
+  wildcards.forEach(function(wildcard) {
+    wildcard_exist = false;
+    jQuery(".select-wildcards > option").each(function () {
+      if (this.value === wildcard && this.value !== '/') {
+        jQuery(this).detach();
+        jQuery(".select-wildcards").append(jQuery(this));
+        wildcard_exist = true;
+      }
+    });
+    if (!wildcard_exist) {
+      var newState = new Option('/', '/', true, true);
+      jQuery(newState).prop('disabled', true);
+      // Append it to the select
+      jQuery(".select-wildcards").append(newState);
     }
   });
 }
@@ -203,7 +238,7 @@ var wpStatelessApp = angular.module('wpStatelessApp', ['ngSanitize'])
 
         if ( data.success ) {
           if ( typeof data.data !== 'undefined' ) {
-            $scope.bucket_folder = data.data.bucket_folder;
+            $scope.root_dir = data.data.bucket_folder;
 
             if ( 'function' === typeof callback ) {
               callback();
@@ -885,14 +920,13 @@ var wpStatelessApp = angular.module('wpStatelessApp', ['ngSanitize'])
 
     $scope.$watch('sm.bucket_folder_type', function(value) {
       if(value == 'single-site'){
-        $wildcards_select.val([ "%date_year/date_month%" ]).trigger("change");
+        replace_wildcard_to_the_end( [ "/", "%date_year/date_month%", "/"], true );
+        $wildcards_select.val([ "/", "%date_year/date_month%", "/" ]).trigger("change");
       }
       else if(value == 'multi-site'){
         //changins wildcards position
-        replace_wildcard_to_the_end("sites");
-        replace_wildcard_to_the_end("%site_id%");
-        replace_wildcard_to_the_end("%date_year/date_month%");
-        $wildcards_select.val([ "sites", "%site_id%", "%date_year/date_month%" ]).trigger("change");
+        replace_wildcard_to_the_end( [ "/", "sites", "/", "%site_id%", "/", "%date_year/date_month%", "/" ],true );
+        $wildcards_select.val([ "/", "sites", "/", "%site_id%", "/", "%date_year/date_month%", "/" ]).trigger("change");
       }
       else if(value == '' && $scope.sm.network_admin){
         $wildcards_select.val(null).trigger("change");
@@ -902,10 +936,10 @@ var wpStatelessApp = angular.module('wpStatelessApp', ['ngSanitize'])
 
     $scope.$watch('sm.root_dir', function(value) {
 
-      if(value == '/%date_year/date_month%/'){
+      if(value == '%date_year/date_month%'){
         $scope.sm.bucket_folder_type = 'single-site';
       }
-      else if(value == '/sites/%site_id%/%date_year/ate_month%/'){
+      else if(value == 'sites/%site_id%/%date_year/date_month%'){
         $scope.sm.bucket_folder_type = 'multi-site';
       }
       else if(value == '' && $scope.sm.network_admin){

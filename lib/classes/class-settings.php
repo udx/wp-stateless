@@ -450,17 +450,23 @@ namespace wpCloud\StatelessMedia {
         $wildcard_year_month = '%date_year/date_month%';
         $root_dir = $this->get( 'sm.root_dir' );
 
-        $use_year_month = strpos($root_dir, $wildcard_year_month);
+        $use_year_month = (strpos($root_dir, $wildcard_year_month)) ?: ($wildcard_year_month == $root_dir ?: true);
 
-        // removing year/month wildcard
+        /**
+         * removing year/month wildcard
+         */
         if ($use_year_month) {
           $root_dir = str_replace($wildcard_year_month, '', $root_dir);
         }
 
-        //preparing array with wildcards
+        /**
+         * preparing array with wildcards
+         */
         $root_dir_values = explode('/', $root_dir);
 
-        // adding year/month wildcard
+        /**
+         * adding year/month wildcard
+         */
         if ($use_year_month) {
           if ( !empty($root_dir_values) ) {
             foreach( $root_dir_values as $k=>$root_dir_value ) {
@@ -473,10 +479,19 @@ namespace wpCloud\StatelessMedia {
           }
         }
 
-        //removing empty values
+        /**
+         * first slash
+         */
+        array_unshift($root_dir_values , '/');
+
+        /**
+         * removing empty values
+         */
         $root_dir_values = array_filter($root_dir_values);
 
-        // merging user's wildcards with default values
+        /**
+         * merging user's wildcards with default values
+         */
         if (!empty($root_dir_values)) {
           $wildcards = array_merge(array_flip($root_dir_values), $wildcards);
         }
@@ -518,6 +533,7 @@ namespace wpCloud\StatelessMedia {
         if(isset($_POST['action']) && $_POST['action'] == 'stateless_settings' && wp_verify_nonce( $_POST['_smnonce'], 'wp-stateless-settings' )){
 
           $settings = apply_filters('stateless::settings::save', $_POST['sm']);
+          $root_dir_value = false;
 
           foreach ( $settings as $name => $value ) {
 
@@ -536,6 +552,7 @@ namespace wpCloud\StatelessMedia {
                * preparing path from tags
                */
               $value = implode('/', $value);
+              $root_dir_value = true;
             }
 
             $option = 'sm_'. $name;
@@ -555,6 +572,15 @@ namespace wpCloud\StatelessMedia {
             }
             else{
               update_option( $option, $value );
+            }
+          }
+
+          if ( !$root_dir_value ) {
+            if(is_network_admin()){
+              update_site_option( 'sm_root_dir', '' );
+            }
+            else{
+              update_option( 'sm_root_dir', '' );
             }
           }
 

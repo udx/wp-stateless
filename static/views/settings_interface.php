@@ -157,7 +157,7 @@
                     <tr>
                         <th scope="row"><?php _e( 'File URL', ud_get_stateless_media()->domain ); ?></th>
                         <td>
-                            <fieldset>
+                            <fieldset class="file_url_block">
                                 <legend class="screen-reader-text"><span><?php _e( 'File URL', ud_get_stateless_media()->domain ); ?></span></legend>
                                 <h4><?php _e( 'Preview', ud_get_stateless_media()->domain ); ?></h4>
                                 <p>
@@ -184,7 +184,10 @@
                                     <div class="sm-wildcards">
                                         <select class=" select-wildcards" multiple="multiple"  name="sm[root_dir][]">
                                           <?php foreach($wildcards as $wildcard => $replace): ?>
-                                              <option <?php echo in_array( $wildcard, $root_dir_values ) ? 'selected="selected"' : ""; ?>><?php echo $wildcard; ?></option>
+                                              <option <?php echo in_array( $wildcard, $root_dir_values ) ? 'selected="selected"' : ""; ?> <?php echo ($wildcard == '/') ? 'disabled="disabled"' : ""; ?>><?php echo $wildcard; ?></option>
+                                            <?php if (in_array( $wildcard, $root_dir_values ) && $wildcard != '/') : ?>
+                                                  <option selected="selected" disabled="disabled">/</option>
+                                            <?php endif; ?>
                                           <?php endforeach;?>
                                         </select>
                                         <input type="text" style="display: none;" id="sm_root_dir" ng-model="sm.root_dir" ng-change="sm.generatePreviewUrl()" />

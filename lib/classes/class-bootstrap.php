@@ -919,6 +919,9 @@ namespace wpCloud\StatelessMedia {
 
         $root_dir = $this->get( 'sm.root_dir' );
         $root_dir_regex = '~^' . apply_filters("wp_stateless_handle_root_dir", $root_dir, true) . '/~';
+        /**
+         * Retrieve Y/M and other tags from current path
+         */
         $path_elements = apply_filters( 'wp_stateless_unhandle_root_dir', $current_path );
         $root_dir = apply_filters("wp_stateless_handle_root_dir", $root_dir, false, $path_elements);
 
@@ -926,6 +929,11 @@ namespace wpCloud\StatelessMedia {
         $current_path = str_replace( wp_normalize_path( trailingslashit( $upload_dir[ 'basedir' ] ) ), '', wp_normalize_path( $current_path ) );
         $current_path = str_replace( wp_normalize_path( trailingslashit( $upload_dir[ 'baseurl' ] ) ), '', wp_normalize_path( $current_path ) );
         $current_path = str_replace( trailingslashit( $this->get_gs_host() ), '', $current_path );
+
+        /**
+         * Using only filename. Other parts of path included to $root_dir.
+         */
+        $current_path = basename($current_path);
 
         if(!$use_root){
           // removing the root dir if already exists in the begaining.
