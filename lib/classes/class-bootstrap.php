@@ -343,11 +343,11 @@ namespace wpCloud\StatelessMedia {
           return new StorageClient(
             [ 'keyFile' => $json_key,
               'httpHandler' => function ( $request, $options ) use ( $httpHandler ) {
-                                $xGoogApiClientHeader = $request->getHeaderLine( 'x-goog-api-client' );
-                                $request = $request->withHeader( 'x-goog-api-client', $xGoogApiClientHeader );
+                $xGoogApiClientHeader = $request->getHeaderLine( 'x-goog-api-client' );
+                $request = $request->withHeader( 'x-goog-api-client', $xGoogApiClientHeader );
 
-                                return call_user_func_array( $httpHandler, [ $request, $options ] );
-                              },
+                return call_user_func_array( $httpHandler, [ $request, $options ] );
+              },
               'authHttpHandler' => HttpHandlerFactory::build(), ] );
         }
       }
@@ -871,13 +871,21 @@ namespace wpCloud\StatelessMedia {
 
         $root_dir = $this->get( 'sm.root_dir' );
         $root_dir_regex = '~^' . apply_filters("wp_stateless_handle_root_dir", $root_dir, true) . '/~';
+        /**
+         * Retrieve Y/M and other tags from current path
+         */
         $path_elements = apply_filters( 'wp_stateless_unhandle_root_dir', $current_path );
-        $root_dir = apply_filters("wp_stateless_handle_root_dir", $root_dir, $path_elements);
+        $root_dir = apply_filters("wp_stateless_handle_root_dir", $root_dir, false, $path_elements);
 
         $upload_dir = wp_upload_dir();
         $current_path = str_replace( wp_normalize_path( trailingslashit( $upload_dir[ 'basedir' ] ) ), '', wp_normalize_path( $current_path ) );
         $current_path = str_replace( wp_normalize_path( trailingslashit( $upload_dir[ 'baseurl' ] ) ), '', wp_normalize_path( $current_path ) );
         $current_path = str_replace( trailingslashit( $this->get_gs_host() ), '', $current_path );
+
+        /**
+         * Using only filename. Other parts of path included to $root_dir.
+         */
+        $current_path = basename($current_path);
 
         if(!$use_root){
           // removing the root dir if already exists in the begaining.
@@ -1091,11 +1099,18 @@ namespace wpCloud\StatelessMedia {
         $this->show_notice_stateless_cache_busting();
         wp_register_style( 'wp-stateless', $this->path( 'static/styles/wp-stateless.css', 'url'  ), array(), self::$version );
 
+        /**
+         * select2 styles
+         */
+        wp_register_style( 'wp-stateless-select2', $this->path( 'static/styles/select2.min.css', 'url'  ), array(), self::$version );
+
         /* Attachment or upload page */
         wp_register_script( 'wp-stateless-uploads-js', $this->path( 'static/scripts/wp-stateless-uploads.js', 'url'  ), array( 'jquery' ), self::$version );
 
         /* Setup wizard styles. */
         wp_register_style( 'wp-stateless-setup-wizard', $this->path( 'static/styles/wp-stateless-setup-wizard.css', 'url'  ), array(), self::$version );
+
+        wp_register_script( 'wp-stateless-select2', ud_get_stateless_media()->path( 'static/scripts/select2.min.js', 'url'  ), array( 'jquery' ), self::$version, true );
 
         /* Stateless settings page */
         wp_register_script( 'wp-stateless-settings', ud_get_stateless_media()->path( 'static/scripts/wp-stateless-settings.js', 'url'  ), array(), self::$version );
@@ -1181,7 +1196,9 @@ namespace wpCloud\StatelessMedia {
           case 'media_page_stateless-settings':
           case 'settings_page_stateless-settings':
             wp_enqueue_style( 'wp-stateless');
+            wp_enqueue_style( 'wp-stateless-select2');
             wp_enqueue_script( 'wp-stateless-settings' );
+            wp_enqueue_script( 'wp-stateless-select2' );
             wp_enqueue_style( 'wp-stateless-settings' );
 
             // Sync tab
@@ -1759,13 +1776,8 @@ namespace wpCloud\StatelessMedia {
              */
             $organize_media   = get_option('uploads_use_yearmonth_folders');
             $path = '';
-            if ( $organize_media == '1' ) {
-              if ( isset ($path_elements['%date_year%']) ) {
-                $path .= $path_elements['%date_year%'].'/';
-              }
-              if ( isset ($path_elements['%date_month%']) ) {
-                $path .= $path_elements['%date_month%'].'/';
-              }
+            if ( $organize_media == '1' && isset ($path_elements['%date_year/date_month%']) ) {
+              $path .= $path_elements['%date_year/date_month%'].'/';
             }
             $url = $path . $url;
 
