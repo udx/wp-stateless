@@ -309,6 +309,7 @@ namespace wpCloud\StatelessMedia {
               'metadata'           => $_metadata,
               'absolutePath'       => $img['path'],
               'cacheControl'       => $_cacheControl,
+              'contentEncoding'    => 'gzip',
               'contentDisposition' => $_contentDisposition,
             ) ));
 
