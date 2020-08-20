@@ -191,6 +191,12 @@ namespace wpCloud\StatelessMedia {
           }
 
           $use_wildcards = Utility::is_use_wildcards();
+
+          /* Set default name if parameter was not passed. */
+          if( empty( $name ) || $use_wildcards ) {
+            $name = basename( $args['name'] );
+          }
+
           $object_id = isset( $args['metadata']['object-id'] ) ? $args['metadata']['object-id'] : (isset( $args['metadata']['child-of'] ) ? $args['metadata']['child-of'] : "");
           $object_size = isset( $args['metadata']['size'] ) ? $args['metadata']['size'] : "";
 

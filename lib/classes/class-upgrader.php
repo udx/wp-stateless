@@ -201,14 +201,28 @@ namespace wpCloud\StatelessMedia {
       private static function migrate_root_dir($multisite = false, $fresh_install = false){
         $network_root_dir = get_network_option(1, 'sm_root_dir');
         $sm_root_dir      = $network_root_dir ? $network_root_dir : get_option('sm_root_dir', '');
+        $organize_media   = get_option('uploads_use_yearmonth_folders');
+
+        if( $organize_media == '1' && empty( $sm_root_dir ) ){
+          $sm_root_dir  =  '/%date_year/date_month%/';
+        } elseif ( !empty( $sm_root_dir ) && $organize_media == '1' ) {
+          $sm_root_dir  =  trim($sm_root_dir, ' /') . '/%date_year/date_month%/';
+        } elseif ( !empty( $sm_root_dir ) ) {
+          // $sm_root_dir  =  $sm_root_dir;
+        } elseif ( $organize_media != '1' ) {
+          $sm_root_dir  =  '';
+        }
 
         if($multisite && $fresh_install){
+          if ( empty( $sm_root_dir ) || $sm_root_dir[0] !== '/' ) {
+            $sm_root_dir = "/" . $sm_root_dir;
+          }
           if(false === strpos($sm_root_dir, '/sites/%site_id%')){
-            $sm_root_dir  =  '/sites/%site_id%/';
-            update_option( 'sm_root_dir', $sm_root_dir  );
+            $sm_root_dir  =  '/sites/%site_id%' . $sm_root_dir;
           }
         }
 
+        update_option( 'sm_root_dir', $sm_root_dir  );
 
         if( $multisite ) {
           //forcing `Cache-Busting` for multisite to prevent replacing media with same filenames

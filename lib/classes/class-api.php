@@ -10,215 +10,147 @@ namespace wpCloud\StatelessMedia {
 
   if( !class_exists( 'wpCloud\StatelessMedia\API' ) ) {
 
-
+    /**
+     * Class API
+     *
+     * @package wpCloud\StatelessMedia
+     */
     final class API {
+
+      /**
+       * Decoded auth_token data
+       *
+       * @var null|\stdClass
+       */
+      static private $tokenData = null;
+
+      /**
+       * Validate auth token and save data for further processing
+       *
+       * @param \WP_REST_Request $request
+       * @return bool|\WP_Error
+       */
+      static public function authCheck( \WP_REST_Request $request ) {
+        $auth_token = $request->get_header('authorization');
+        if ( !$auth_token ) return false;
+        try {
+          self::$tokenData = Utility::verify_jwt_token( $auth_token );
+        } catch ( \Exception $e ) {
+          self::$tokenData = null;
+          return new \WP_Error( 'auth_failed', $e->getMessage(), ['status' => 401] );
+        }
+        return true;
+      }
 
       /**
        * API Status Endpoint.
        *
-       * @return array
+       * @return \WP_REST_Response
        */
       static public function status() {
-
-        return array(
+        return new \WP_REST_Response( array(
           "ok" => true,
           "message" => "API up."
-        );
-
+        ), 200 );
       }
 
       /**
-       * Jobs Endpoint.
+       * Get settings
        *
-       * @return array
+       * @todo Implement this if needed
+       * @param \WP_REST_Request $request
+       * @return \WP_REST_Response|\WP_Error
        */
-      static public function jobs() {
-
-        return array(
-          "ok" => true,
-          "message" => "Job endpoint up.",
-          "jobs" => array()
-        );
-
+      static public function getSettings( \WP_REST_Request $request ) {
+        return new \WP_Error('not_implemented', 'Method not implemented', ['status' => 501]);
       }
 
       /**
-       * Get settings Endpoint.
+       * Update settings
        *
-       * @param $request
-       * @return array
+       * @param \WP_REST_Request $request
+       * @return \WP_REST_Response|\WP_Error
        */
-      static public function getSettings( $request ) {
-
-        if( !self::authRequest( $request ) ) {
-          return array("ok" => false, "message" => __( "Auth fail." ));
+      static public function updateSettings( \WP_REST_Request $request ) {
+        if ( self::$tokenData === null || empty( self::$tokenData->user_id ) ) {
+          return new \WP_Error( 'unauthorized', 'Auth token looks incorrect', ['status' => 401] );
         }
+        $is_gae                 = isset($_SERVER["GAE_VERSION"]) ? true : false;
+        $upload_dir             = wp_upload_dir();
+        $is_upload_dir_writable = is_writable( $upload_dir['basedir'] );
 
-        $settings = apply_filters('stateless::get_settings', array());
+        try {
+          $queryParams = $request->get_json_params();
+          if ( empty( $queryParams ) ) throw new \Exception('Query is empty');
 
-        return array(
-            "ok" => true,
-            "message" => "getSettings endpoint.",
-            "settings" => $settings
-        );
+          $bucketName = isset($queryParams['bucket_name'])?$queryParams['bucket_name']:null;
+          $privateKeyData = isset($queryParams['private_key_data'])?$queryParams['private_key_data']:null;
 
-      }
+          if ( !$bucketName || !$privateKeyData ) {
+            throw new \Exception('bucket_name and private_key_data are required');
+          }
 
-      /**
-       * Get media library Endpoint.
-       *
-       * @param $request
-       * @return array
-       */
-      static public function getMediaLibrary( $request ) {
+          if ($privateKeyData) {
+            $privateKeyData = base64_decode($privateKeyData);
+          }
 
-        if( !self::authRequest( $request ) ) {
-          return array("ok" => false, "message" => __( "Auth fail." ));
+          switch ( self::$tokenData->is_network ) {
+            case true:
+              if ( !user_can( self::$tokenData->user_id, 'manage_network_options' ) ) {
+                return new \WP_Error( 'not_allowed', 'Sorry, you are not allowed to perform this action', ['status' => 403] );
+              }
+              /**
+               * If Google App Engine detected - set Stateless mode
+               * and Google App Engine compatibility by default
+               */
+              if ( $is_gae || !$is_upload_dir_writable ) {
+                update_site_option( 'sm_mode', 'stateless' );
+
+                $modules = get_site_option('stateless-modules', array());
+                if ( $is_gae && empty($modules['google-app-engine']) || $modules['google-app-engine'] != 'true') {
+                  $modules['google-app-engine'] = 'true';
+                  update_site_option('stateless-modules', $modules );
+                }
+              }
+              elseif ( get_site_option('sm_mode', 'disabled') == 'disabled' ) {
+                update_site_option( 'sm_mode', 'cdn');
+              }
+              update_site_option( 'sm_bucket', $bucketName);
+              update_site_option( 'sm_key_json', $privateKeyData);
+              break;
+
+            case false:
+              if ( !user_can( self::$tokenData->user_id, 'manage_options' ) ) {
+                return new \WP_Error( 'not_allowed', 'Sorry, you are not allowed to perform this action', ['status' => 403] );
+              }
+              /**
+               * If Google App Engine detected - set Stateless mode
+               * and Google App Engine compatibility by default
+               */
+              if ( $is_gae || !$is_upload_dir_writable ) {
+                update_option( 'sm_mode', 'stateless' );
+
+                $modules = get_option('stateless-modules', array());
+                if ( $is_gae && empty($modules['google-app-engine']) || $modules['google-app-engine'] != 'true') {
+                  $modules['google-app-engine'] = 'true';
+                  update_option('stateless-modules', $modules );
+                }
+              }
+              elseif ( get_option('sm_mode', 'disabled') == 'disabled') {
+                update_option('sm_mode', 'cdn');
+              }
+              update_option( 'sm_bucket', $bucketName);
+              update_option( 'sm_key_json', $privateKeyData);
+              break;
+          }
+
+          return new \WP_REST_Response(array(
+            'ok' => true,
+            'message' => 'Settings updated successfully'
+          ));
+        } catch (\Throwable $e) {
+          return new \WP_Error( 'internal_server_error', $e->getMessage(), ['status' => 500] );
         }
-
-        if( !self::switchBlog( $request ) ){
-          return array("ok" => false, "message" => __( "Missed blog param." ));
-        }
-
-        $query_images_args = array(
-            'post_type' => 'attachment',
-            'post_mime_type' =>'image',
-            'post_status' => 'inherit',
-            'posts_per_page' => -1,
-        );
-
-        $query_images = new \WP_Query( $query_images_args );
-        $media = array();
-        foreach ( $query_images->posts as $image) {
-          $media[] = self::mediaMapping($image);
-        }
-
-        return array(
-            "ok" => true,
-            "message" => "getMediaLibrary endpoint.",
-            "mediaLibrary" => $media
-        );
-
-      }
-
-      /**
-       * Get media item Endpoint.
-       *
-       * @param $request
-       * @return array
-       */
-      static public function getMediaItem( $request ) {
-
-        if( !self::authRequest( $request ) ) {
-          return array("ok" => false, "message" => __( "Auth fail." ));
-        }
-
-        if( !self::switchBlog( $request ) ){
-          return array("ok" => false, "message" => __( "Missed blog param." ));
-        }
-
-        $attachment_id = $request->get_param('attachment_id');
-        if(!$attachment_id){
-          return array("ok" => false, "message" => __( "Missing attachment id." ));
-        }
-
-        $attachment = get_post($attachment_id);
-
-        if(!$attachment){
-          return array("ok" => false, "message" => __( "Wrong attachment id." ));
-        }
-
-        $item = self::mediaMapping($attachment);
-
-        return array(
-            "ok" => true,
-            "message" => "getMediaItem endpoint.",
-            "mediaItem" => $item
-        );
-
-      }
-
-      /**
-       * Handle Auth.
-       *
-       * @param $request
-       * @return bool
-       */
-      static public function authRequest( $request = false ) {
-
-        if( !$request ) {
-          return false;
-        }
-
-        if( !$request->get_param('key') ) {
-          return false;
-        }
-
-        $settings = apply_filters('stateless::get_settings', array());
-
-        if( !$settings[ 'api_key' ] ) {
-          return false;
-        }
-
-        if( $request->get_param('key') !== $settings[ 'api_key' ] ) {
-          return false;
-        }
-
-        return true;
-
-
-      }
-
-      /**
-       * Check blog param and switch to requested blog
-       *
-       * @param bool $request
-       * @return bool
-       */
-      static public function switchBlog( $request = false ){
-
-        if(!is_multisite()){
-          return true;
-        }
-
-        if( !$request ) {
-          return false;
-        }
-
-        $blog_id = $request->get_param('blog');
-        if( !$blog_id ) {
-          return false;
-        }
-
-        $current_blog_id = get_current_blog_id();
-        if($current_blog_id == $blog_id){
-          return true;
-        }
-
-        return switch_to_blog( $blog_id );
-      }
-
-      /**
-       * Applying mapping for media item
-       *
-       * @param $image
-       * @return array
-       */
-      static private function mediaMapping($image){
-
-        if(!$image){
-          return array();
-        }
-
-        return array(
-            'attachment_id' => $image->ID,
-            'date_create' => $image->post_date,
-            'parent' => $image->post_parent,
-            'link' => wp_get_attachment_url($image->ID),
-            'title' => $image->post_title,
-            'description' => $image->post_content,
-            'thumbnail' => wp_get_attachment_image_src($image->ID)[0]
-        );
       }
 
     }

@@ -197,6 +197,14 @@ namespace wpCloud\StatelessMedia {
             }
 
             /**
+             * Upload the full size image first.
+             *
+             */
+            if(!defined('WP_STATELESS_MEDIA_DISABLE_FULL_IMAGE_FIRST') || WP_STATELESS_MEDIA_DISABLE_FULL_IMAGE_FIRST != true){
+              add_filter( 'intermediate_image_sizes_advanced', array( $this, 'before_intermediate_image_sizes' ), 10, 2 );
+            }
+
+            /**
              * init client's filters
              */
             $this->_init_filters( 'client' );
@@ -335,11 +343,11 @@ namespace wpCloud\StatelessMedia {
           return new StorageClient(
             [ 'keyFile' => $json_key,
               'httpHandler' => function ( $request, $options ) use ( $httpHandler ) {
-                                $xGoogApiClientHeader = $request->getHeaderLine( 'x-goog-api-client' );
-                                $request = $request->withHeader( 'x-goog-api-client', $xGoogApiClientHeader );
+                $xGoogApiClientHeader = $request->getHeaderLine( 'x-goog-api-client' );
+                $request = $request->withHeader( 'x-goog-api-client', $xGoogApiClientHeader );
 
-                                return call_user_func_array( $httpHandler, [ $request, $options ] );
-                              },
+                return call_user_func_array( $httpHandler, [ $request, $options ] );
+              },
               'authHttpHandler' => HttpHandlerFactory::build(), ] );
         }
       }
@@ -358,8 +366,14 @@ namespace wpCloud\StatelessMedia {
         //Bucket folder path
         $root_dir = $this->get( 'sm.root_dir' );
         $root_dir = apply_filters("wp_stateless_handle_root_dir", $root_dir);
+
+        /**
+         * Subdir not uses on Stateless mode
+         */
+        $uploads['subdir'] = '';
+
         $basedir = rtrim(sprintf('gs://%s/%s', $bucket, $root_dir), '/');
-        $baseurl = rtrim($this->get_gs_host(), '/');
+        $baseurl = rtrim(sprintf('https://storage.googleapis.com/%s/%s', $bucket, $root_dir ), '/');
 
         $uploads = array(
           'url' => rtrim($baseurl . $uploads['subdir'], '/'),
@@ -494,7 +508,7 @@ namespace wpCloud\StatelessMedia {
         $custom_domain = str_replace(array('http://', 'https://'), '', $custom_domain);
         $custom_domain = trim($custom_domain, '/');
 
-        if ( $custom_domain !== 'storage.googleapis.com' && $custom_domain == $bucketname && strpos($fileLink, $bucketname) > 8 ) {
+        if ( !empty($bucketname) && $custom_domain !== 'storage.googleapis.com' && $custom_domain == $bucketname && strpos($fileLink, $bucketname) > 8 ) {
           $fileLink = ($is_ssl ? 'https://' : 'http://') . substr($fileLink, strpos($fileLink, $bucketname));
         }
         elseif( $custom_domain !== 'storage.googleapis.com' && $custom_domain == $bucketname && $fileLink_is_ssl !== $is_ssl){
@@ -607,9 +621,7 @@ namespace wpCloud\StatelessMedia {
       /**
        * Define REST API.
        *
-       * // https://usabilitydynamics-sandbox-uds-io-stateless-testing.c.rabbit.ci/wp-json/wp-stateless/v1
-       *
-       * @author potanin@UD
+       * @author korotkov@UD
        */
       public function api_init() {
 
@@ -617,53 +629,22 @@ namespace wpCloud\StatelessMedia {
         $api_namespace = 'wpCloud\StatelessMedia\API';
 
         register_rest_route( $route_namespace, '/status', array(
-          'methods' => 'GET',
+          'methods' => \WP_REST_Server::READABLE,
           'callback' => array( $api_namespace, 'status' ),
+          'permission_callback' => '__return_true'
         ) );
 
-        register_rest_route( $route_namespace, '/jobs', array(
-          'methods' => 'GET',
-          'callback' => array( $api_namespace, 'jobs' ),
+        register_rest_route( $route_namespace, '/getSettings', array(
+          'methods' => \WP_REST_Server::READABLE,
+          'callback' => array( $api_namespace, 'getSettings' ),
+          'permission_callback' => array( $api_namespace, 'authCheck' )
         ) );
 
-        /**
-         * Return stateless settings.
-         *
-         * Request parameter: none
-         *
-         * Response:
-         *    ok: Whether API is up or not
-         *    message: Describe what is done or error message on error.
-         *    settings: array of stateless settings
-         *
-         */
-        register_rest_route( $route_namespace, '/getSettings', array( 'methods' => 'GET', 'callback' => array( $api_namespace, 'getSettings' ), ) );
-
-        /**
-         * Essentially for scrolling through media library to build our index.
-         *
-         * Request parameter: none
-         *
-         * Response:
-         *    ok: Whether API is up or not
-         *    message: Describe what is done or error message on error.
-         *    settings: array of media files
-         *
-         */
-        register_rest_route( $route_namespace, '/getMediaLibrary', array( 'methods' => 'GET', 'callback' => array( $api_namespace, 'getMediaLibrary' ), ) );
-
-        /**
-         * Get detailed information of media file
-         *
-         * Request parameter: none
-         *
-         * Response:
-         *    ok: Whether API is up or not
-         *    message: Describe what is done or error message on error.
-         *    settings: media file array
-         *
-         */
-        register_rest_route( $route_namespace, '/getMediaItem', array( 'methods' => 'GET', 'callback' => array( $api_namespace, 'getMediaItem' ), ) );
+        register_rest_route( $route_namespace, '/updateSettings', array(
+          'methods' => \WP_REST_Server::CREATABLE,
+          'callback' => array( $api_namespace, 'updateSettings' ),
+          'permission_callback' => array( $api_namespace, 'authCheck' )
+        ) );
 
       }
 
@@ -707,8 +688,8 @@ namespace wpCloud\StatelessMedia {
         } elseif ( isset( $_POST['item'] ) ) {
           $post_id = intval( $_POST['item'] );
         }
-        $metabox = $this->_prepare_data_for_metabox( $meta_boxes, $post_id );
-        return array( $metabox );
+      
+        return $this->_prepare_data_for_metabox( $meta_boxes, $post_id );
       }
 
       /**
@@ -721,18 +702,6 @@ namespace wpCloud\StatelessMedia {
         $post     = get_post ( $post_id );
         $sm_cloud = get_post_meta( $post_id, 'sm_cloud', 1 );
         $sm_mode  = $this->get( 'sm.mode' );
-
-        /**
-         * If it is not a post - do not add metabox
-         *
-         * Added array with key `title` for prevent error on metabox
-         * Notice	Undefined index: title
-         * wp-content/plugins/wp-stateless/vendor/wpmetabox/meta-box/inc/meta-box.php:346
-         * @author palant@ud
-         */
-        if( defined( 'WP_CLI' ) && WP_CLI ) {
-          return $meta_boxes + array( 'title' => 'Stateless' );
-        }
 
         if ( empty( $post ) ) {
           return $meta_boxes;
@@ -808,7 +777,7 @@ namespace wpCloud\StatelessMedia {
 
         }
 
-        $meta_boxes = array(
+        $meta_boxes[] = apply_filters( 'sm::attachment::meta', array(
           'id'         => 'sm-attachment-metabox',
           'title'      => __( 'Stateless', ud_get_stateless_media()->domain ),
           'post_types' => 'attachment',
@@ -831,9 +800,7 @@ namespace wpCloud\StatelessMedia {
           // Show meta box wrapper around tabs? true (default) or false. Optional
           'tab_wrapper' => true,
           'fields' => $fields
-        );
-
-        $meta_boxes = apply_filters( 'sm::attachment::meta', $meta_boxes, $post->ID );
+        ), $post->ID );
 
         return $meta_boxes;
       }
@@ -905,20 +872,21 @@ namespace wpCloud\StatelessMedia {
 
         $root_dir = $this->get( 'sm.root_dir' );
         $root_dir_regex = '~^' . apply_filters("wp_stateless_handle_root_dir", $root_dir, true) . '/~';
-        $root_dir = apply_filters("wp_stateless_handle_root_dir", $root_dir);
+        /**
+         * Retrieve Y/M and other tags from current path
+         */
+        $path_elements = apply_filters( 'wp_stateless_unhandle_root_dir', $current_path );
+        $root_dir = apply_filters("wp_stateless_handle_root_dir", $root_dir, false, $path_elements);
 
         $upload_dir = wp_upload_dir();
         $current_path = str_replace( wp_normalize_path( trailingslashit( $upload_dir[ 'basedir' ] ) ), '', wp_normalize_path( $current_path ) );
         $current_path = str_replace( wp_normalize_path( trailingslashit( $upload_dir[ 'baseurl' ] ) ), '', wp_normalize_path( $current_path ) );
         $current_path = str_replace( trailingslashit( $this->get_gs_host() ), '', $current_path );
 
-        if($this->get( 'sm.mode' ) == 'stateless'){
-          global $default_dir;
-          $default_dir = true;
-          $uploads = wp_get_upload_dir();
-          $default_dir = false;
-          $current_path = str_replace( wp_normalize_path( trailingslashit( $uploads[ 'basedir' ] ) ), '', wp_normalize_path( $current_path ) );
-        }
+        /**
+         * Using only filename. Other parts of path included to $root_dir.
+         */
+        $current_path = basename($current_path);
 
         if(!$use_root){
           // removing the root dir if already exists in the begaining.
@@ -1132,24 +1100,18 @@ namespace wpCloud\StatelessMedia {
         $this->show_notice_stateless_cache_busting();
         wp_register_style( 'wp-stateless', $this->path( 'static/styles/wp-stateless.css', 'url'  ), array(), self::$version );
 
+        /**
+         * select2 styles
+         */
+        wp_register_style( 'wp-stateless-select2', $this->path( 'static/styles/select2.min.css', 'url'  ), array(), self::$version );
+
         /* Attachment or upload page */
         wp_register_script( 'wp-stateless-uploads-js', $this->path( 'static/scripts/wp-stateless-uploads.js', 'url'  ), array( 'jquery' ), self::$version );
 
-        /* Setup wizard styles and scripts. */
-        wp_register_style( 'wp-stateless-bootstrap', $this->path( 'static/styles/bootstrap.min.css', 'url'  ), array(), '3.3.7' );
-        wp_register_style( 'bootstrap-grid-v4', $this->path( 'static/styles/bootstrap-grid.min.css', 'url'  ), array(), '3.3.7' );
+        /* Setup wizard styles. */
         wp_register_style( 'wp-stateless-setup-wizard', $this->path( 'static/styles/wp-stateless-setup-wizard.css', 'url'  ), array(), self::$version );
 
-        wp_register_script( 'async.min', ud_get_stateless_media()->path( 'static/scripts/async.js', 'url'  ), array(), self::$version );
-        wp_register_script( 'jquery.history', ud_get_stateless_media()->path( 'static/scripts/jquery.history.js', 'url'  ), array( 'jquery' ), self::$version, true );
-        wp_register_script( 'wp-stateless-validation', ud_get_stateless_media()->path( 'static/scripts/jquery.validation.js', 'url'  ), array( 'jquery' ), self::$version, true );
-        wp_register_script( 'wp-stateless-loading', ud_get_stateless_media()->path( 'static/scripts/jquery.loading.js', 'url'  ), array( 'jquery' ), self::$version, true );
-        wp_register_script( 'wp-stateless-comboBox', ud_get_stateless_media()->path( 'static/scripts/jquery.wp-stateless-combo-box.js', 'url'  ), array( 'jquery' ), self::$version, true );
-        wp_register_script( 'wp-stateless-setup', ud_get_stateless_media()->path( 'static/scripts/wp-stateless-setup.js', 'url'  ), array( 'jquery-ui-core', 'wp-api', 'jquery.history' ), self::$version, true );
-        wp_localize_script( 'wp-stateless-setup', 'stateless_l10n', $this->get_l10n_data() );
-
-        wp_register_script( 'wp-stateless-setup-wizard-js', ud_get_stateless_media()->path( 'static/scripts/wp-stateless-setup-wizard.js', 'url'  ), array( 'jquery', 'wp-api', 'async.min', 'wp-stateless-setup', 'wp-stateless-comboBox', 'wp-stateless-validation', 'wp-stateless-loading' ), self::$version, true );
-
+        wp_register_script( 'wp-stateless-select2', ud_get_stateless_media()->path( 'static/scripts/select2.min.js', 'url'  ), array( 'jquery' ), self::$version, true );
 
         /* Stateless settings page */
         wp_register_script( 'wp-stateless-settings', ud_get_stateless_media()->path( 'static/scripts/wp-stateless-settings.js', 'url'  ), array(), self::$version );
@@ -1207,14 +1169,10 @@ namespace wpCloud\StatelessMedia {
         switch( $hook ) {
 
           case 'options-media.php':
-            //wp_enqueue_script( 'wp-api' );
-
             wp_enqueue_style( 'wp-stateless');
-            wp_enqueue_script( 'wp-stateless-setup' );
             break;
 
           case 'upload.php':
-
             wp_enqueue_style( 'wp-stateless');
             wp_enqueue_script( 'wp-stateless-uploads-js' );
 
@@ -1234,22 +1192,14 @@ namespace wpCloud\StatelessMedia {
           case 'media_page_stateless-setup':
           case 'settings_page_stateless-setup':
             wp_enqueue_style( 'wp-stateless');
-            wp_enqueue_style( 'wp-stateless-bootstrap' );
             wp_enqueue_style( 'wp-stateless-setup-wizard' );
-
-            wp_enqueue_script( 'async.min' );
-            wp_enqueue_script( 'jquery.history' );
-            wp_enqueue_script( 'wp-stateless-validation' );
-            wp_enqueue_script( 'wp-stateless-loading' );
-            wp_enqueue_script( 'wp-stateless-comboBox' );
-            wp_enqueue_script( 'wp-stateless-setup' );
-            wp_enqueue_script( 'wp-stateless-setup-wizard-js' );
             break;
           case 'media_page_stateless-settings':
           case 'settings_page_stateless-settings':
             wp_enqueue_style( 'wp-stateless');
+            wp_enqueue_style( 'wp-stateless-select2');
             wp_enqueue_script( 'wp-stateless-settings' );
-            wp_enqueue_style( 'bootstrap-grid-v4' );
+            wp_enqueue_script( 'wp-stateless-select2' );
             wp_enqueue_style( 'wp-stateless-settings' );
 
             // Sync tab
@@ -1803,7 +1753,8 @@ namespace wpCloud\StatelessMedia {
           if(empty($post_id)){
             $gs_base_url =  $this->get_gs_host();
             $root_dir = $this->get( 'sm.root_dir' );
-            $root_dir = apply_filters("wp_stateless_handle_root_dir", $root_dir);
+            $path_elements = apply_filters( 'wp_stateless_unhandle_root_dir', $url );
+            $root_dir = apply_filters("wp_stateless_handle_root_dir", $root_dir, false, $path_elements);
             $gs_url =  $this->get_gs_host() . '/' . $root_dir;
             $site_url = parse_url($gs_url);
             $image_path = parse_url( $url );
@@ -1821,6 +1772,16 @@ namespace wpCloud\StatelessMedia {
               $url = substr( $url, strlen( $gs_base_url . '/' ) );
             }
 
+            /**
+             * If `uploads_use_yearmonth_folders` is set - adding year and month to url
+             */
+            $organize_media   = get_option('uploads_use_yearmonth_folders');
+            $path = '';
+            if ( $organize_media == '1' && isset ($path_elements['%date_year/date_month%']) ) {
+              $path .= $path_elements['%date_year/date_month%'].'/';
+            }
+            $url = $path . $url;
+
             $sql = $wpdb->prepare(
               "SELECT post_id FROM $wpdb->postmeta WHERE meta_key = '_wp_attached_file' AND meta_value = %s",
               $url
@@ -1834,6 +1795,29 @@ namespace wpCloud\StatelessMedia {
         }
 
         return $post_id;
+      }
+
+      /**
+       * Upload the full size image first.
+       *
+       * @param $sizes
+       * @param array $metadata
+       * @return mixed
+       */
+      public function before_intermediate_image_sizes($sizes, $metadata = array()){
+        if(empty($metadata)){
+          return $sizes;
+        }
+
+        try{
+          $attachment_id = attachment_url_to_postid($metadata['file']);
+          $this->add_media(null, $attachment_id, false, array('no_thumb' => true));
+        }
+        catch(\Exception $e){
+
+        }
+
+        return $sizes;
       }
 
       /**
@@ -1886,7 +1870,7 @@ namespace wpCloud\StatelessMedia {
 
           }
 
-        } catch ( Exception $e ) {
+        } catch ( \Exception $e ) {
           Utility::log( 'Unable to parse [composer.json] feature flags. Error: [' . $e->getMessage() . ']' );
           // echo 'Caught exception: ', $e->getMessage(), "\n";
         }

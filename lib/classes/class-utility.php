@@ -290,7 +290,7 @@ namespace wpCloud\StatelessMedia {
               }
 
               // skips thumbs when it's called from Upload the full size image first, through intermediate_image_sizes_advanced filter.
-              if( $args[ 'no_thumb' ] && $img[ 'is_thumb' ] || !empty( self::$synced_sizes[ $attachment_id ][ $size ] ) && $sm_mode !== 'stateless' && !$args[ 'is_webp' ] ) {
+              if( $args[ 'no_thumb' ] && $img[ 'is_thumb' ] || !empty( self::$synced_sizes[ $attachment_id ][ $size ] ) && $sm_mode !== 'stateless'  && !$args[ 'is_webp' ] ) {
                 continue;
               }
 
@@ -351,11 +351,13 @@ namespace wpCloud\StatelessMedia {
                       'predefinedAcl' => 'publicRead',
                       'contentDisposition' => $_contentDisposition)
                   );
-  
+
                   $cloud_meta = self::generate_cloud_meta($cloud_meta, $media, $size, $img, $bucketLink);
                 } catch (\Throwable $th) {
                   //throw $th;
                 }
+
+                $cloud_meta = self::generate_cloud_meta($cloud_meta, $media, $size, $img, $bucketLink);
 
               } else {
                 /* Add default image */
@@ -497,7 +499,8 @@ namespace wpCloud\StatelessMedia {
           foreach( $metadata[ 'sizes' ] as $image_size => $data ) {
             if( empty( $data[ 'file' ] ) ) continue;
             $absolutePath = wp_normalize_path( $base_dir . '/' . $data[ 'file' ] );
-            $gs_name = apply_filters( 'wp_stateless_file_name', $absolutePath, true, $attachment_id, $image_size, $use_wildcards );
+            $gs_name = $gs_base_dir . $data[ 'file' ];
+            $gs_name = apply_filters( 'wp_stateless_file_name', $gs_name, true, $attachment_id, $image_size, $use_wildcards );
 
             $gs_name_path[$image_size] = array(
               'gs_name'   => $gs_name,
@@ -889,6 +892,54 @@ namespace wpCloud\StatelessMedia {
       }
 
       /**
+       * Generate JWT token signed by current site AUTH_SALT
+       * If no AUTH_SALT defined - admin email used
+       *
+       * @param $payload
+       * @param int $ttl
+       * @return string
+       */
+      public static function generate_jwt_token($payload, $ttl = 3600) {
+        $payload = wp_parse_args( $payload, [
+          'iat' => $now = time(),
+          'iss' => $site_url = get_site_url(),
+          'aud' => $site_url,
+          'exp' => $now + $ttl
+        ] );
+
+        $key = defined('AUTH_SALT') ? AUTH_SALT : get_option('admin_email');
+        return \Firebase\JWT\JWT::encode( $payload, $key );
+      }
+
+      /**
+       * Verify and decode token
+       * If no AUTH_SALT defined - admin email used
+       * Throws exceptions if cannot decode
+       *
+       * @param $token
+       * @return object
+       * @throws \Exception
+       */
+      public static function verify_jwt_token($token) {
+        $key = defined('AUTH_SALT') ? AUTH_SALT : get_option('admin_email');
+        return \Firebase\JWT\JWT::decode($token, $key, ['HS256']);
+      }
+
+      /**
+       * Generate auth token for wizard iframe
+       *
+       * @param int $ttl
+       * @return string
+       */
+      public static function generate_wizard_auth_token( $ttl = 3600 ) {
+        $payload = [
+          'is_network' => is_network_admin(),
+          'user_id' => get_current_user_id()
+        ];
+        return self::generate_jwt_token( $payload, $ttl );
+      }
+
+      /**
        * Maps a file extensions to a mimetype.
        *
        * @param $extension string The file extension.
@@ -897,11 +948,6 @@ namespace wpCloud\StatelessMedia {
        * @link http://svn.apache.org/repos/asf/httpd/httpd/branches/1.3.x/conf/mime.types
        */
       public static function mimetype_from_extension($extension){
-        $file_type = wp_check_filetype($extension);
-        if(!empty($file_type['type'])){
-          return $file_type['type'];
-        }
-
         static $mimetypes = [
           '7z' => 'application/x-7z-compressed',
           'aac' => 'audio/x-aac',
@@ -1006,7 +1052,7 @@ namespace wpCloud\StatelessMedia {
 
         $extension = strtolower( $extension );
 
-        return isset( $mimetypes[ $extension ] ) ? $mimetypes[ $extension ] : false;
+        return isset( $mimetypes[ $extension ] ) ? $mimetypes[ $extension ] : null;
       }
 
       /**
@@ -1021,7 +1067,7 @@ namespace wpCloud\StatelessMedia {
        * @param $size
        * @return float|int
        */
-      public static function convert_to_byte($size){
+      public static function convert_to_byte($size) {
         $lastCharacter = \substr($size, -1);
         $base = \strtoupper($lastCharacter);
         if (!\ctype_digit($lastCharacter)) {
