@@ -1,12 +1,13 @@
-.wp-admin.media_page_stateless-setup #wpcontent, .wp-admin.settings_page_stateless-setup #wpcontent {
-    padding-left: 0px;
+.wp-admin.media_page_stateless-setup #wpcontent,
+.wp-admin.settings_page_stateless-setup #wpcontent {
+  padding-left: 0px;
 }
 #console-stateless-wizard {
-    position: absolute;
-    top:0;
-    left:0;
-    bottom:0;
-    right:0;
-    height: 100vh;
-    width: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  height: calc(100vh - 2rem);
+  width: 100%;
 }
