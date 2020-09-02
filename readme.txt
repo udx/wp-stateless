@@ -1,12 +1,12 @@
 ﻿=== WP-Stateless - Google Cloud Storage ===
-Contributors: usability_dynamics, andypotanin, ideric, maxim.peshkov, Anton Korotkoff, MariaKravchenko, alimuzzamanalim, smoot328
+Contributors: usability_dynamics, andypotanin, ideric, maxim.peshkov, Anton Korotkoff, MariaKravchenko, alimuzzamanalim, smoot328, planvova
 Donate link: https://www.usabilitydynamics.com
 Tags: google, google cloud, google cloud storage, cdn, uploads, media, stateless, backup
 License: GPLv2 or later
 Requires PHP: 5.5
 Requires at least: 4.7.0
-Tested up to: 5.3
-Stable tag: 2.4.0-RC.3
+Tested up to: 5.5
+Stable tag: 3.0
 
 Upload and serve your WordPress media files from Google Cloud Storage.
 

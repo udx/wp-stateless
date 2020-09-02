@@ -98,7 +98,7 @@
 
         <div class="option">
             <label>
-                <input ng-disabled="isRunning || isLoading" type="checkbox" name="method" ng-true-value="'use_wildcards'" ng-model="$parent.method" />
+                <input ng-disabled="isRunning || isLoading" type="checkbox" name="use_wildcards" ng-true-value="'1'" ng-model="$parent.use_wildcards" />
               <?php _e( 'Use Bucket Folder setting', ud_get_stateless_media()->domain ); ?>
                 <span class="notice notice-warning" style="margin-left:20px;">
             <?php _e( '<strong>Warning:</strong> This will replace existing files to new folder', ud_get_stateless_media()->domain ); ?>
