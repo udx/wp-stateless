@@ -397,18 +397,13 @@ var wpStatelessApp = angular.module('wpStatelessApp', ['ngSanitize'])
         cont = 1;
       }
 
-      var use_wildcards = 0;
-      if ( 'use_wildcards' === $scope.method ) {
-        use_wildcards = 1;
-      }
-
       if ( $scope.action ) {
         switch( $scope.action ) {
           case 'regenerate_images':
-            $scope.getImagesMedia( $scope.regenerateImages, cont, use_wildcards );
+            $scope.getImagesMedia( $scope.regenerateImages, cont, $scope.use_wildcards );
             break;
           case 'sync_non_images':
-            $scope.getOtherMedia( $scope.syncFiles, cont, use_wildcards );
+            $scope.getOtherMedia( $scope.syncFiles, cont, $scope.use_wildcards );
             break;
           case 'sync_non_library_files':
             $scope.getNonLibraryFiles( $scope.syncNonLibraryFiles, cont );

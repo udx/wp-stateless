@@ -1,8 +1,5 @@
 <?php
-  /**
-   * @todo: get production URL for this
-   */
-  $consoleUrl = 'https://console-stateless-ci-staging.rabbit.ci';
+  $consoleUrl = 'https://console.stateless.ci';
   $auth_token = \wpCloud\StatelessMedia\Utility::generate_wizard_auth_token();
   $api_root = get_rest_url();
 ?>
