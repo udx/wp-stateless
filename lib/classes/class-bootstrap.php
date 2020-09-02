@@ -28,7 +28,7 @@ namespace wpCloud\StatelessMedia {
        * @property $version
        * @type {Object}
        */
-      public static $version = '2.4.0-RC.3';
+      public static $version = '3.0';
 
       /**
        * Singleton Instance Reference.
@@ -631,6 +631,7 @@ namespace wpCloud\StatelessMedia {
         register_rest_route( $route_namespace, '/status', array(
           'methods' => \WP_REST_Server::READABLE,
           'callback' => array( $api_namespace, 'status' ),
+          'permission_callback' => '__return_true'
         ) );
 
         register_rest_route( $route_namespace, '/getSettings', array(

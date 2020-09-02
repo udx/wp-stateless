@@ -110,7 +110,7 @@ namespace wpCloud\StatelessMedia {
           }
         }
 
-        if ( !is_multisite() && $version && version_compare( $version, '2.4.0', '<' ) ){
+        if ( !is_multisite() && $version && version_compare( $version, '3.0', '<' ) ){
           self::migrate_root_dir();
           //updating mode name `stateless` to `ephemeral`
           $sm_mode = get_option( 'sm_mode' );
@@ -147,9 +147,9 @@ namespace wpCloud\StatelessMedia {
         }
 
         /**
-         * Upgrade to v.2.4.0 requirements
+         * Upgrade to v.3.0 requirements
          */
-        if ( is_multisite() && $version && version_compare( $version, '2.4.0', '<' ) ){
+        if ( is_multisite() && $version && version_compare( $version, '3.0', '<' ) ){
           $sites = get_sites();
           foreach ( $sites as $site ) {
             switch_to_blog( $site->blog_id );
