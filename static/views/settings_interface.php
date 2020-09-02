@@ -128,7 +128,7 @@
                                         <textarea name="sm[key_json]" type="text" id="service_account_json" class="regular-text ltr" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" ng-disabled="sm.readonly.key_json">{{sm.key_json}}</textarea>
                                     </label>
                                 </p>
-                                <p class="description"><strong ng-bind="sm.showNotice('key_json')" ></strong> <?php _e( 'Private key in JSON format for the service account WP-Stateless will use to connect to your Google Cloud project and bucket.', ud_get_stateless_media()->domain ); ?></p>
+                                <p class="description"><strong ng-bind="sm.showNotice('key_json')" ></strong> <?php _e( 'Private key in JSON format for the service account WP-Stateless will use to connect to your Google Cloud project and bucket. Empty this field to access the Stateless Setup Assistant.', ud_get_stateless_media()->domain ); ?></p>
                                 <hr>
 
                                 <h4><?php _e( 'Cache-Control', ud_get_stateless_media()->domain ); ?></h4>
