@@ -83,7 +83,7 @@
 
                                 <h4><?php _e( 'File URL Replacement', ud_get_stateless_media()->domain ); ?></h4>
                                 <p class="sm-file-url">
-                                    <select name="sm[body_rewrite]" id="sm_file_url" ng-model="sm.body_rewrite" ng-disabled="sm.readonly.body_rewrite">
+                                    <select name="sm[body_rewrite]" id="sm_body_rewrite" ng-model="sm.body_rewrite" ng-disabled="sm.readonly.body_rewrite">
                                       <?php if(is_network_admin()): ?>
                                           <option value=""><?php _e("Don't override");?></option>
                                       <?php endif; ?>
@@ -171,7 +171,7 @@
                                     <h4><?php _e( 'Folder', ud_get_stateless_media()->domain ); ?></h4>
                                     <p>
                                         <label for="bucket_folder_name">
-                                            <select id="sm_file_url" ng-model="sm.bucket_folder_type" ng-disabled="sm.readonly.root_dir">
+                                            <select id="sm_bucket_folder_type" ng-model="sm.bucket_folder_type" ng-disabled="sm.readonly.root_dir">
                                               <?php if(is_network_admin()): ?>
                                                   <option value=""><?php _e("Don't override");?></option>
                                               <?php endif; ?>
@@ -233,7 +233,7 @@
                 </table>
 
 
-              <?php submit_button(); ?>
+                <?php submit_button(null, 'primary', 'submit', true, array('id' => 'save-settings')); ?>
             </form>
         </div>
       <?php if(!is_network_admin()): ?>
@@ -274,7 +274,7 @@
                             </td>
                         </tr>
                     </table>
-                  <?php submit_button(); ?>
+                  <?php submit_button(null, 'primary', 'submit', true, array('id' => 'save-compatibility')); ?>
                 </form>
             </div>
         </div>
