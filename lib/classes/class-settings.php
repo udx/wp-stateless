@@ -450,7 +450,7 @@ namespace wpCloud\StatelessMedia {
         $wildcard_year_month = '%date_year/date_month%';
         $root_dir = $this->get( 'sm.root_dir' );
 
-        $use_year_month = (strpos($root_dir, $wildcard_year_month)) ?: ($wildcard_year_month == $root_dir ?: true);
+        $use_year_month = (strpos($root_dir, $wildcard_year_month) !== false) ?: false;
 
         /**
          * removing year/month wildcard

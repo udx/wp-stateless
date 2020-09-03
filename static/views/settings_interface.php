@@ -182,7 +182,7 @@
                                         </label>
                                     </p>
                                     <div class="sm-wildcards">
-                                        <select class=" select-wildcards" multiple="multiple"  name="sm[root_dir][]">
+                                        <select class=" select-wildcards" multiple="multiple"  name="sm[root_dir][]" ng-disabled="sm.readonly.root_dir">
                                           <?php foreach($wildcards as $wildcard => $replace): ?>
                                               <option <?php echo in_array( $wildcard, $root_dir_values ) ? 'selected="selected"' : ""; ?> <?php echo ($wildcard == '/') ? 'disabled="disabled"' : ""; ?>><?php echo $wildcard; ?></option>
                                             <?php if (in_array( $wildcard, $root_dir_values ) && $wildcard != '/') : ?>
@@ -233,7 +233,7 @@
                 </table>
 
 
-                <?php submit_button(null, 'primary', 'submit', true, array('id' => 'save-settings')); ?>
+              <?php submit_button(null, 'primary', 'submit', true, array('id' => 'save-settings')); ?>
             </form>
         </div>
       <?php if(!is_network_admin()): ?>
