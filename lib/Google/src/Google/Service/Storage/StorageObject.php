@@ -29,6 +29,7 @@ class Google_Service_Storage_StorageObject extends Google_Collection
   public $contentLanguage;
   public $contentType;
   public $crc32c;
+  public $customTime;
   protected $customerEncryptionType = 'Google_Service_Storage_StorageObjectCustomerEncryption';
   protected $customerEncryptionDataType = '';
   public $etag;
@@ -131,6 +132,14 @@ class Google_Service_Storage_StorageObject extends Google_Collection
   public function getCrc32c()
   {
     return $this->crc32c;
+  }
+  public function setCustomTime($customTime)
+  {
+    $this->customTime = $customTime;
+  }
+  public function getCustomTime()
+  {
+    return $this->customTime;
   }
   /**
    * @param Google_Service_Storage_StorageObjectCustomerEncryption

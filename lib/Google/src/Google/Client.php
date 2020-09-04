@@ -39,7 +39,7 @@ use Monolog\Handler\SyslogHandler as MonologSyslogHandler;
  */
 class Google_Client
 {
-  const LIBVER = "2.4.1";
+  const LIBVER = "2.7.0";
   const USER_AGENT_SUFFIX = "google-api-php-client/";
   const OAUTH2_REVOKE_URI = 'https://oauth2.googleapis.com/revoke';
   const OAUTH2_TOKEN_URI = 'https://oauth2.googleapis.com/token';
@@ -103,6 +103,16 @@ class Google_Client
           // https://developers.google.com/console
           'client_id' => '',
           'client_secret' => '',
+
+          // Path to JSON credentials or an array representing those credentials
+          // @see Google_Client::setAuthConfig
+          'credentials' => null,
+          // @see Google_Client::setScopes
+          'scopes' => null,
+          // Sets X-Goog-User-Project, which specifies a user project to bill
+          // for access charges associated with the request
+          'quota_project' => null,
+
           'redirect_uri' => null,
           'state' => null,
 
@@ -150,6 +160,16 @@ class Google_Client
         ],
         $config
     );
+
+    if (!is_null($this->config['credentials'])) {
+      $this->setAuthConfig($this->config['credentials']);
+      unset($this->config['credentials']);
+    }
+
+    if (!is_null($this->config['scopes'])) {
+      $this->setScopes($this->config['scopes']);
+      unset($this->config['scopes']);
+    }
   }
 
   /**
@@ -349,8 +369,8 @@ class Google_Client
    * Adds auth listeners to the HTTP client based on the credentials
    * set in the Google API Client object
    *
-   * @param GuzzleHttp\ClientInterface $http the http client object.
-   * @return GuzzleHttp\ClientInterface the http client object
+   * @param \GuzzleHttp\ClientInterface $http the http client object.
+   * @return \GuzzleHttp\ClientInterface the http client object
    */
   public function authorize(ClientInterface $http = null)
   {
@@ -746,8 +766,11 @@ class Google_Client
   /**
    * Set the scopes to be requested. Must be called before createAuthUrl().
    * Will remove any previously configured scopes.
-   * @param string|array $scope_or_scopes, ie: array('https://www.googleapis.com/auth/plus.login',
-   * 'https://www.googleapis.com/auth/moderator')
+   * @param string|array $scope_or_scopes, ie:
+   *    array(
+   *        'https://www.googleapis.com/auth/plus.login',
+   *        'https://www.googleapis.com/auth/moderator'
+   *    );
    */
   public function setScopes($scope_or_scopes)
   {
@@ -800,6 +823,7 @@ class Google_Client
    * Helper method to execute deferred HTTP requests.
    *
    * @param $request Psr\Http\Message\RequestInterface|Google_Http_Batch
+   * @param string $expectedClass
    * @throws Google_Exception
    * @return object of the type of the expected class or Psr\Http\Message\ResponseInterface.
    */
@@ -1012,7 +1036,7 @@ class Google_Client
   }
 
   /**
-   * @return Psr\Cache\CacheItemPoolInterface Cache implementation
+   * @return \Psr\Cache\CacheItemPoolInterface Cache implementation
    */
   public function getCache()
   {
@@ -1080,7 +1104,7 @@ class Google_Client
   }
 
   /**
-   * @return GuzzleHttp\ClientInterface implementation
+   * @return \GuzzleHttp\ClientInterface implementation
    */
   public function getHttpClient()
   {
@@ -1105,22 +1129,29 @@ class Google_Client
 
   protected function createDefaultHttpClient()
   {
-    $options = ['exceptions' => false];
+    $guzzleVersion = null;
+    if (defined('\GuzzleHttp\ClientInterface::MAJOR_VERSION')) {
+      $guzzleVersion = ClientInterface::MAJOR_VERSION;
+    } elseif (defined('\GuzzleHttp\ClientInterface::VERSION')) {
+      $guzzleVersion = (int)substr(ClientInterface::VERSION, 0, 1);
+    }
 
-    $version = ClientInterface::VERSION;
-    if ('5' === $version[0]) {
+    $options = ['exceptions' => false];
+    if (5 === $guzzleVersion) {
       $options = [
         'base_url' => $this->config['base_path'],
         'defaults' => $options,
       ];
       if ($this->isAppEngine()) {
         // set StreamHandler on AppEngine by default
-        $options['handler']  = new StreamHandler();
+        $options['handler'] = new StreamHandler();
         $options['defaults']['verify'] = '/etc/ca-certificates.crt';
       }
-    } else {
-      // guzzle 6
+    } elseif (6 === $guzzleVersion || 7 === $guzzleVersion) {
+      // guzzle 6 or 7
       $options['base_uri'] = $this->config['base_path'];
+    } else {
+      throw new \LogicException('Could not find supported version of Guzzle.');
     }
 
     return new Client($options);
@@ -1139,10 +1170,20 @@ class Google_Client
         'client_email' => $this->config['client_email'],
         'private_key' => $signingKey,
         'type' => 'service_account',
+        'quota_project' => $this->config['quota_project'],
       );
-      $credentials = CredentialsLoader::makeCredentials($scopes, $serviceAccountCredentials);
+      $credentials = CredentialsLoader::makeCredentials(
+          $scopes,
+          $serviceAccountCredentials
+      );
     } else {
-      $credentials = ApplicationDefaultCredentials::getCredentials($scopes);
+      $credentials = ApplicationDefaultCredentials::getCredentials(
+          $scopes,
+          null,
+          null,
+          null,
+          $this->config['quota_project']
+      );
     }
 
     // for service account domain-wide authority (impersonating a user)

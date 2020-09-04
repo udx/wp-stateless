@@ -12,7 +12,7 @@ use GuzzleHttp\ClientInterface;
 use Psr\Cache\CacheItemPoolInterface;
 
 /**
-*
+* This supports Guzzle 6
 */
 class Google_AuthHandler_Guzzle6AuthHandler
 {

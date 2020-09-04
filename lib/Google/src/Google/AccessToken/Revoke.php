@@ -29,7 +29,7 @@ use GuzzleHttp\Psr7\Request;
 class Google_AccessToken_Revoke
 {
   /**
-   * @var GuzzleHttp\ClientInterface The http client
+   * @var \GuzzleHttp\ClientInterface The http client
    */
   private $http;
 

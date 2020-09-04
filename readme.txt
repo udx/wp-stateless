@@ -1,6 +1,6 @@
 ﻿=== WP-Stateless - Google Cloud Storage ===
 Contributors: usability_dynamics, andypotanin, ideric, maxim.peshkov, Anton Korotkoff, MariaKravchenko, alimuzzamanalim, smoot328, planvova
-Donate link: https://www.usabilitydynamics.com
+Donate link: https://udx.io
 Tags: google, google cloud, google cloud storage, cdn, uploads, media, stateless, backup
 License: GPLv2 or later
 Requires PHP: 5.5
