@@ -124,7 +124,7 @@ namespace wpCloud\StatelessMedia {
             date('Y').'/'.date('m'),
             __("year and monthnum", $this->bootstrap->domain),
             __("The year of the post, four digits, for example 2004. Month of the year, for example 05", $this->bootstrap->domain),
-            "\d{4}/\d{2}"
+            "\d{4}\/\d{2}"
           ]
         );
       }
@@ -195,7 +195,7 @@ namespace wpCloud\StatelessMedia {
           }
 
           // Getting network settings
-          if(is_multisite() && !$this->get( "sm.readonly.{$option}")){
+          if(is_multisite() && $option != 'organize_media' && !$this->get( "sm.readonly.{$option}")){
 
             $network = get_site_option( $_option, $default[1] );
             // If network settings available then override by network settings.
@@ -374,11 +374,12 @@ namespace wpCloud\StatelessMedia {
 
       /**
        * Parse path by wildcards and return array ('wildcard' => 'value')
+       * The perpose of this filter is to return Y/M or other dynamic fields from the file path.
+       * For now only Y/M is dynamic. We will get it via using regex.
        * @param $path
        * @return array
        */
       public function parse_root_dir_wildcards ( $path ) {
-        $root_dir = $this->get( 'sm.root_dir' );
         $result = [];
 
         /**
@@ -393,25 +394,18 @@ namespace wpCloud\StatelessMedia {
          * removing filename and last slash
          */
         $path = untrailingslashit( str_replace(basename($path), '', $path) );
-
-        $path_elements = explode('/', $path);
-        $root_dir_elements = explode('/', $root_dir);
-
-        if ( count( $path_elements ) == count( $root_dir_elements ) && !empty($path_elements)) {
-          foreach( $path_elements as $key=>$path_element ) {
-            $result[$root_dir_elements[$key]] = $path_element;
-          }
-        }
+        $wildcards = apply_filters('wp_stateless_root_dir_wildcard', $this->wildcards);
 
         /**
-         * hack for year/month wildcard
+         * Checking if a wildcard have regex field in it.
+         * Then return the matching value using regex.
          */
-        if ( isset ($result['%date_year']) && isset ($result['date_month%']) ) {
-          //combine it into one tag
-          $result['%date_year/date_month%'] = $result['%date_year'].'/'.$result['date_month%'];
-          //remove separated tags
-          unset($result['%date_year']);
-          unset($result['date_month%']);
+        foreach ($wildcards as $key => $value) {
+          if(isset($value[3])){
+            if(preg_match("@" . $value[3] . "@", $path, $matches)){
+              $result[$key] = $matches[0];
+            }
+          }
         }
 
         return $result;
@@ -450,7 +444,7 @@ namespace wpCloud\StatelessMedia {
         $wildcard_year_month = '%date_year/date_month%';
         $root_dir = $this->get( 'sm.root_dir' );
 
-        $use_year_month = (strpos($root_dir, $wildcard_year_month)) ?: ($wildcard_year_month == $root_dir ?: true);
+        $use_year_month = (strpos($root_dir, $wildcard_year_month) !== false) ?: false;
 
         /**
          * removing year/month wildcard
