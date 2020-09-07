@@ -963,11 +963,11 @@ namespace UsabilityDynamics\UD_API {
             );
           }
 
-          $response = $this->api->ping( array(
+          $response = $this->api->ping( apply_filters('ud-api-client-ping-args', array(
             'product_id' => $this->slug,
             'version' => $this->args[ 'version' ],
             'detected_products' => base64_encode( json_encode( $detected_products ) ),
-          ) );
+          ), $this, $detected_products));
 
           if ( false !== $response && empty( $response[ 'error' ] ) ) {
             update_option( 'ud_ping_' . sanitize_key( $this->slug ), array(
