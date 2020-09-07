@@ -49,6 +49,15 @@ namespace wpCloud\StatelessMedia {
       protected function __construct( $args ) {
         parent::__construct( $args );
 
+        /**
+         * Add custom args to api ping request
+         */
+        add_filter('ud-api-client-ping-args', function($args, $_, $__) {
+          $args['multisite'] = is_multisite();
+          $args['stateless_media'] = Utility::get_stateless_media_data_count();
+          return $args;
+        }, 10, 3);
+
         //** Define our Admin Notices handler object */
         $this->errors = new Errors( array_merge( $args, array(
           'type' => $this->type
