@@ -124,6 +124,17 @@ namespace wpCloud\StatelessMedia {
               );
             }
 
+            /**
+             * @param $path
+             * @param $option
+             * @param $value
+             * @return bool
+             */
+            public function stream_metadata($path, $option, $value)
+            {
+              return false;
+            }
+
         }
     }
 }
