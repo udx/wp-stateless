@@ -450,7 +450,7 @@ namespace wpCloud\StatelessMedia {
          * removing year/month wildcard
          */
         if ($use_year_month) {
-          $root_dir = str_replace($wildcard_year_month, '', $root_dir);
+          $root_dir = str_replace($wildcard_year_month, 'YM', $root_dir);
         }
 
         /**
@@ -464,7 +464,7 @@ namespace wpCloud\StatelessMedia {
         if ($use_year_month) {
           if ( !empty($root_dir_values) ) {
             foreach( $root_dir_values as $k=>$root_dir_value ) {
-              if ( empty($root_dir_value) ) {
+              if ( $root_dir_value == 'YM' ) {
                 $root_dir_values[$k] = $wildcard_year_month;
               }
             }
