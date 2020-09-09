@@ -1,5 +1,5 @@
 <?php
 
-class Error extends Exception
-{
+if (!class_exists('Error')) {
+  class Error extends Exception{}
 }
