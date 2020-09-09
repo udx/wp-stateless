@@ -215,7 +215,7 @@ namespace wpCloud\StatelessMedia {
         Utility::sync_maybe_fix_failed_attachment( 'images', $image->ID );
         do_action( 'sm:synced::image', $id, $metadata);
 
-        return sprintf( __( '%1$s (ID %2$s) was successfully resized in %3$s seconds.', ud_get_stateless_media()->domain ), esc_html( get_the_title( $image->ID ) ), $image->ID, timer_stop() );
+        return sprintf( __( '%1$s (ID %2$s) was successfully synced in %3$s seconds.', ud_get_stateless_media()->domain ), esc_html( get_the_title( $image->ID ) ), $image->ID, timer_stop() );
       }
 
       /**

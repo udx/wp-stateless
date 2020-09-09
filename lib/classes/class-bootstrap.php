@@ -83,22 +83,14 @@ namespace wpCloud\StatelessMedia {
       }
 
       /**
+       * Prevent loading of textdomain
+       */
+      public function load_textdomain(){}
+
+      /**
        * Instantiate class.
        */
       public function init() {
-
-        /**
-         * Copied from wp-property
-         * Duplicates UsabilityDynamics\WP\Bootstrap_Plugin::load_textdomain();
-         *
-         * There is a bug with localization in lib-wp-bootstrap 1.1.3 and lower.
-         * So we load textdomain here again, in case old version lib-wp-bootstrap is being loaded
-         * by another plugin.
-         *
-         * @since 1.9.1
-         */
-        load_plugin_textdomain($this->domain, false, dirname(plugin_basename($this->boot_file)) . '/static/languages/');
-
         // Parse feature falgs, set constants.
         $this->parse_feature_flags();
         $sm_mode = $this->get( 'sm.mode' );
