@@ -107,6 +107,8 @@ Before upgrading to WP-Stateless 3.0, please, make sure you tested it on your de
 == Changelog ==
 = 3.0 =
 * NEW - Setup assistant rewrite. GitHub issue [#477](https://github.com/udx/wp-stateless/issues/477).
+* NEW - Recreate attachment metabox panel using metabox.io. GitHub issue [#470](https://github.com/udx/wp-stateless/issues/470).
+* NEW - Updated the "Stateless" mode to not use local storage at all. Current "Stateless" mode setting mapped to new "Ephemeral" mode. GitHub issue [#482](https://github.com/udx/wp-stateless/issues/482).
 * FIX - Changed the default value for the Cache-Busting setting. GitHub issue [#361](https://github.com/udx/wp-stateless/issues/361).
 * FIX - Fixed network override of Cache-Busting. GitHub issue [#468](https://github.com/udx/wp-stateless/issues/468).
 * FIX - Fixed "Passing glue string after array is deprecated.". GitHub issue [#444](https://github.com/udx/wp-stateless/issues/444).
@@ -126,6 +128,7 @@ Before upgrading to WP-Stateless 3.0, please, make sure you tested it on your de
 * ENHANCEMENT - Moved Bucket Folder setting in the File URL section. GitHub issue [#463](https://github.com/udx/wp-stateless/issues/463).
 * ENHANCEMENT - Hide Regenerate and Sync with GCS when the mode is Disabled. GitHub issue [#440](https://github.com/udx/wp-stateless/issues/440).
 * ENHANCEMENT - New endpoint for the Google Cloud Storage JSON API. GitHub issue [#384](https://github.com/udx/wp-stateless/issues/384).
+* ENHANCEMENT - Renamed current "Stateless" mode to "Ephemeral". GitHub issue [#481](https://github.com/udx/wp-stateless/issues/481).
 
 = 2.3.2 =
 * FIX - Fixed video file doesn't get deleted from the server in `Stateless` mode. GitHub issue [#418](https://github.com/udx/wp-stateless/issues/418).
