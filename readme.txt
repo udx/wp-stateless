@@ -107,24 +107,25 @@ Before upgrading to WP-Stateless 3.0, please, make sure you tested it on your de
 == Changelog ==
 = 3.0 =
 * NEW - Setup assistant rewrite. GitHub issue [#477](https://github.com/udx/wp-stateless/issues/477).
-* ENHANCEMENT - Wildcards for bucket folder settings. GitHub issue [#149](https://github.com/udx/wp-stateless/issues/149).
-* ENHANCEMENT - Better CLI integration. GitHub issue [#447](https://github.com/udx/wp-stateless/issues/447), [#450](https://github.com/udx/wp-stateless/issues/450) and [#451](https://github.com/udx/wp-stateless/issues/451).
-* ENHANCEMENT - Sync media according to new Bucket Folder settings. GitHub issue [#449](https://github.com/udx/wp-stateless/issues/449).
-* ENHANCEMENT - Moved Bucket Folder setting in the File URL section. GitHub issue [#463](https://github.com/udx/wp-stateless/issues/463).
-* ENHANCEMENT - Hide Regenerate and Sync with GCS when the mode is Disabled. GitHub issue [#440](https://github.com/udx/wp-stateless/issues/440).
-* ENHANCEMENT - New endpoint for the Google Cloud Storage JSON API. GitHub issue [#384](https://github.com/udx/wp-stateless/issues/384).
 * FIX - Changed the default value for the Cache-Busting setting. GitHub issue [#361](https://github.com/udx/wp-stateless/issues/361).
 * FIX - Fixed network override of Cache-Busting. GitHub issue [#468](https://github.com/udx/wp-stateless/issues/468).
 * FIX - Fixed "Passing glue string after array is deprecated.". GitHub issue [#444](https://github.com/udx/wp-stateless/issues/444).
 * FIX - Fixed Compatibility default value in multisite. GitHub issue [#464](https://github.com/udx/wp-stateless/issues/464).
 * FIX - Fixed multisite wrong GCS path. GitHub issue [#407](https://github.com/udx/wp-stateless/issues/407).
 * FIX - Don't check for Google Cloud Storage connectivity in stateless mode unless uploading. GitHub issue [#442](https://github.com/udx/wp-stateless/issues/442).
+* COMPATIBILITY - Google App Engine - Added new compatibility support for Google App Engine. [#486](https://github.com/udx/wp-stateless/issues/486)
 * COMPATIBILITY - Elementor - Fixed wrong MIME type for CSS files. GitHub issue [#395](https://github.com/udx/wp-stateless/issues/395).
 * COMPATIBILITY - Polylang - Fixed missing metadata issue. GitHub issue [#378](https://github.com/udx/wp-stateless/issues/378).
 * COMPATIBILITY - EWWW - Fixed mime type for WEBP images. GitHub issue [#371](https://github.com/udx/wp-stateless/issues/371).
 * COMPATIBILITY - Added compatibility support for Simple Local Avatars. GitHub issue [#297](https://github.com/udx/wp-stateless/issues/297).
 * COMPATIBILITY - BuddyPress - Fixed BuddyPress compatibility. GitHub issue [#275](https://github.com/udx/wp-stateless/issues/275).
 * COMPATIBILITY - Divi - Fixed Divi cache issue. GitHub issue [#430](https://github.com/udx/wp-stateless/issues/430).
+* ENHANCEMENT - Wildcards for bucket folder settings. GitHub issue [#149](https://github.com/udx/wp-stateless/issues/149).
+* ENHANCEMENT - Better CLI integration. GitHub issue [#447](https://github.com/udx/wp-stateless/issues/447), [#450](https://github.com/udx/wp-stateless/issues/450) and [#451](https://github.com/udx/wp-stateless/issues/451).
+* ENHANCEMENT - Sync media according to new Bucket Folder settings. GitHub issue [#449](https://github.com/udx/wp-stateless/issues/449).
+* ENHANCEMENT - Moved Bucket Folder setting in the File URL section. GitHub issue [#463](https://github.com/udx/wp-stateless/issues/463).
+* ENHANCEMENT - Hide Regenerate and Sync with GCS when the mode is Disabled. GitHub issue [#440](https://github.com/udx/wp-stateless/issues/440).
+* ENHANCEMENT - New endpoint for the Google Cloud Storage JSON API. GitHub issue [#384](https://github.com/udx/wp-stateless/issues/384).
 
 = 2.3.2 =
 * FIX - Fixed video file doesn't get deleted from the server in `Stateless` mode. GitHub issue [#418](https://github.com/udx/wp-stateless/issues/418).
