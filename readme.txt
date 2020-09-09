@@ -4,7 +4,7 @@ Donate link: https://udx.io
 Tags: google, google cloud, google cloud storage, cdn, uploads, media, stateless, backup
 License: GPLv2 or later
 Requires PHP: 5.6
-Requires at least: 4.7.0
+Requires at least: 5.0
 Tested up to: 5.5
 Stable tag: 3.0
 
@@ -70,7 +70,7 @@ For a more detailed installation and setup walkthrough, please see the [manual s
 
 = What are the minimum server requirements for this plugin? =
 
-Beyond the [official WordPress minimum requirements](https://codex.wordpress.org/Template:Server_requirements), WP-Stateless requires a minimum PHP version of 5.5 or higher and OpenSSL to be enabled.
+Beyond the [official WordPress minimum requirements](https://codex.wordpress.org/Template:Server_requirements), WP-Stateless requires a minimum PHP version of 5.6 or higher and OpenSSL to be enabled.
 
 = What wp-config constants are supported? =
 
@@ -100,8 +100,9 @@ To ensure new releases cause as little disruption as possible, we rely on a numb
 
 
 == Upgrade Notice ==
+
 = 3.0 =
-Before upgrading WP-Staless 3.0, please, make sure you tested it on your development environment.
+Before upgrading to WP-Staless 3.0, please, make sure you tested it on your development environment.
 
 == Changelog ==
 = 3.0 =
