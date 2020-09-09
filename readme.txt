@@ -1,4 +1,4 @@
-﻿=== WP-Stateless - Google Cloud Storage ===
+=== WP-Stateless - Google Cloud Storage ===
 Contributors: usability_dynamics, andypotanin, ideric, maxim.peshkov, Anton Korotkoff, alimuzzamanalim, planvova
 Donate link: https://udx.io
 Tags: google, google cloud, google cloud storage, cdn, uploads, media, stateless, backup
@@ -42,10 +42,10 @@ New to Google Cloud? Google is offering you a [$300 credit](https://cloud.google
 * Multisite compatible.
 
 = Support, Feedback, & Contribute =
-We welcome community involvement via the [GitHub repository](https://github.com/wpCloud/wp-stateless).
+We welcome community involvement via the [GitHub repository](https://github.com/udx/wp-stateless).
 
 = Custom Development =
-Looking for a unique feature for your next project? [Hire us!](https://www.usabilitydynamics.com/contact)
+Looking for a unique feature for your next project? [Hire us!](https://udx.io/)
 
 == Installation ==
 
@@ -88,78 +88,78 @@ The WP-Stateless setup assistant will create the Service Account JSON automatica
 
 = Where can I submit feature requests or bug reports? =
 
-We encourage community feedback and discussion through issues on the [GitHub repository](https://github.com/wpCloud/wp-stateless/issues).
+We encourage community feedback and discussion through issues on the [GitHub repository](https://github.com/udx/wp-stateless/issues).
 
 = Can I test new features before they are released? =
 
-To ensure new releases cause as little disruption as possible, we rely on a number of early adopters who assist us by testing out new features before they are released. [Please contact us](https://www.usabilitydynamics.com/contact) if you are interested in becoming an early adopter.
+To ensure new releases cause as little disruption as possible, we rely on a number of early adopters who assist us by testing out new features before they are released. [Please contact us](https://udx.io/) if you are interested in becoming an early adopter.
 
 = Who maintains this plugin? =
 
-[Usability Dynamics](https://www.usabilitydynamics.com/) maintains this plugin by continuing development through it's own staff, reviewing pull requests, testing, and steering the overall release schedule. Usability Dynamics is located in Durham, North Carolina and provides WordPress engineering and hosting services to clients throughout the United States.
+[UDX](https://udx.io/) maintains this plugin by continuing development through it's own staff, reviewing pull requests, testing, and steering the overall release schedule. UDX is located in Durham, North Carolina and provides WordPress engineering and hosting services to clients throughout the United States.
 
 
 == Upgrade Notice ==
 
 = 3.0 =
-Before upgrading to WP-Staless 3.0, please, make sure you tested it on your development environment.
+Before upgrading to WP-Stateless 3.0, please, make sure you tested it on your development environment.
 
 == Changelog ==
 = 3.0 =
 * NEW - Completely rewritten Setup Wizard.
-* ENHANCEMENT - Wildcards for bucket folder settings. GitHub issue [#149](https://github.com/wpCloud/wp-stateless/issues/149).
-* ENHANCEMENT - Better CLI integration. GitHub issue [#447](https://github.com/wpCloud/wp-stateless/issues/447), [#450](https://github.com/wpCloud/wp-stateless/issues/450) and [#451](https://github.com/wpCloud/wp-stateless/issues/451).
-* ENHANCEMENT - Sync media according to new Bucket Folder settings. GitHub issue [#449](https://github.com/wpCloud/wp-stateless/issues/449).
-* ENHANCEMENT - Moved Bucket Folder setting in the File URL section. GitHub issue [#463](https://github.com/wpCloud/wp-stateless/issues/463).
-* ENHANCEMENT - Hide Regenerate and Sync with GCS when the mode is Disabled. GitHub issue [#440](https://github.com/wpCloud/wp-stateless/issues/440).
-* ENHANCEMENT - New endpoint for the Google Cloud Storage JSON API. GitHub issue [#384](https://github.com/wpCloud/wp-stateless/issues/384).
-* FIX - Changed the default value for the Cache-Busting setting. GitHub issue [#361](https://github.com/wpCloud/wp-stateless/issues/361).
-* FIX - Fixed network override of Cache-Busting. GitHub issue [#468](https://github.com/wpCloud/wp-stateless/issues/468).
-* FIX - Fixed "Passing glue string after array is deprecated.". GitHub issue [#444](https://github.com/wpCloud/wp-stateless/issues/444).
-* FIX - Fixed Compatibility default value in multisite. GitHub issue [#464](https://github.com/wpCloud/wp-stateless/issues/464).
-* FIX - Fixed multisite wrong GCS path. GitHub issue [#407](https://github.com/wpCloud/wp-stateless/issues/407).
-* FIX - Don't check for Google Cloud Storage connectivity in stateless mode unless uploading. GitHub issue [#442](https://github.com/wpCloud/wp-stateless/issues/442).
-* COMPATIBILITY - Elementor - Fixed wrong MIME type for CSS files. GitHub issue [#395](https://github.com/wpCloud/wp-stateless/issues/395).
-* COMPATIBILITY - Polylang - Fixed missing metadata issue. GitHub issue [#378](https://github.com/wpCloud/wp-stateless/issues/378).
-* COMPATIBILITY - EWWW - Fixed mime type for WEBP images. GitHub issue [#371](https://github.com/wpCloud/wp-stateless/issues/371).
-* COMPATIBILITY - Added compatibility support for Simple Local Avatars. GitHub issue [#297](https://github.com/wpCloud/wp-stateless/issues/297).
-* COMPATIBILITY - BuddyPress - Fixed BuddyPress compatibility. GitHub issue [#275](https://github.com/wpCloud/wp-stateless/issues/275).
-* COMPATIBILITY - Divi - Fixed Divi cache issue. GitHub issue [#430](https://github.com/wpCloud/wp-stateless/issues/430).
+* ENHANCEMENT - Wildcards for bucket folder settings. GitHub issue [#149](https://github.com/udx/wp-stateless/issues/149).
+* ENHANCEMENT - Better CLI integration. GitHub issue [#447](https://github.com/udx/wp-stateless/issues/447), [#450](https://github.com/udx/wp-stateless/issues/450) and [#451](https://github.com/udx/wp-stateless/issues/451).
+* ENHANCEMENT - Sync media according to new Bucket Folder settings. GitHub issue [#449](https://github.com/udx/wp-stateless/issues/449).
+* ENHANCEMENT - Moved Bucket Folder setting in the File URL section. GitHub issue [#463](https://github.com/udx/wp-stateless/issues/463).
+* ENHANCEMENT - Hide Regenerate and Sync with GCS when the mode is Disabled. GitHub issue [#440](https://github.com/udx/wp-stateless/issues/440).
+* ENHANCEMENT - New endpoint for the Google Cloud Storage JSON API. GitHub issue [#384](https://github.com/udx/wp-stateless/issues/384).
+* FIX - Changed the default value for the Cache-Busting setting. GitHub issue [#361](https://github.com/udx/wp-stateless/issues/361).
+* FIX - Fixed network override of Cache-Busting. GitHub issue [#468](https://github.com/udx/wp-stateless/issues/468).
+* FIX - Fixed "Passing glue string after array is deprecated.". GitHub issue [#444](https://github.com/udx/wp-stateless/issues/444).
+* FIX - Fixed Compatibility default value in multisite. GitHub issue [#464](https://github.com/udx/wp-stateless/issues/464).
+* FIX - Fixed multisite wrong GCS path. GitHub issue [#407](https://github.com/udx/wp-stateless/issues/407).
+* FIX - Don't check for Google Cloud Storage connectivity in stateless mode unless uploading. GitHub issue [#442](https://github.com/udx/wp-stateless/issues/442).
+* COMPATIBILITY - Elementor - Fixed wrong MIME type for CSS files. GitHub issue [#395](https://github.com/udx/wp-stateless/issues/395).
+* COMPATIBILITY - Polylang - Fixed missing metadata issue. GitHub issue [#378](https://github.com/udx/wp-stateless/issues/378).
+* COMPATIBILITY - EWWW - Fixed mime type for WEBP images. GitHub issue [#371](https://github.com/udx/wp-stateless/issues/371).
+* COMPATIBILITY - Added compatibility support for Simple Local Avatars. GitHub issue [#297](https://github.com/udx/wp-stateless/issues/297).
+* COMPATIBILITY - BuddyPress - Fixed BuddyPress compatibility. GitHub issue [#275](https://github.com/udx/wp-stateless/issues/275).
+* COMPATIBILITY - Divi - Fixed Divi cache issue. GitHub issue [#430](https://github.com/udx/wp-stateless/issues/430).
 
 = 2.3.2 =
-* FIX - Fixed video file doesn't get deleted from the server in `Stateless` mode. GitHub issue [#418](https://github.com/wpCloud/wp-stateless/issues/418).
-* FIX - Fixed file size doesn't show under attachment details in `Stateless` mode. GitHub issue [#413](https://github.com/wpCloud/wp-stateless/issues/413).
-* FIX - Fixed Cache-Busting feature works even if the Mode is `Disabled`. GitHub issue [#405](https://github.com/wpCloud/wp-stateless/issues/405).
-* COMPATIBILITY - Fixed Gravity Form Post Image didn't include `Bucket Folder`. GitHub issue [#421](https://github.com/wpCloud/wp-stateless/issues/421).
-* COMPATIBILITY - Fixed Divi Builder Export. GitHub issue [#420](https://github.com/wpCloud/wp-stateless/issues/420).
-* COMPATIBILITY - Fixed BuddyBoss pages breaking after updating to 2.3.0. GitHub issue [#417](https://github.com/wpCloud/wp-stateless/issues/417).
+* FIX - Fixed video file doesn't get deleted from the server in `Stateless` mode. GitHub issue [#418](https://github.com/udx/wp-stateless/issues/418).
+* FIX - Fixed file size doesn't show under attachment details in `Stateless` mode. GitHub issue [#413](https://github.com/udx/wp-stateless/issues/413).
+* FIX - Fixed Cache-Busting feature works even if the Mode is `Disabled`. GitHub issue [#405](https://github.com/udx/wp-stateless/issues/405).
+* COMPATIBILITY - Fixed Gravity Form Post Image didn't include `Bucket Folder`. GitHub issue [#421](https://github.com/udx/wp-stateless/issues/421).
+* COMPATIBILITY - Fixed Divi Builder Export. GitHub issue [#420](https://github.com/udx/wp-stateless/issues/420).
+* COMPATIBILITY - Fixed BuddyBoss pages breaking after updating to 2.3.0. GitHub issue [#417](https://github.com/udx/wp-stateless/issues/417).
 
 = 2.3.1 =
-* Fix - Fixed fatal error, undefined function `is_wp_version_compatible`. GitHub issue [#414](https://github.com/wpCloud/wp-stateless/issues/414).
+* Fix - Fixed fatal error, undefined function `is_wp_version_compatible`. GitHub issue [#414](https://github.com/udx/wp-stateless/issues/414).
 
 = 2.3.0 =
-* FIX - Fixed problem with WordPress 5.3. GitHub issue [#406](https://github.com/wpCloud/wp-stateless/issues/406).
-* FIX - Fixed problem with the Cache Busting feature. GitHub issue [#377](https://github.com/wpCloud/wp-stateless/issues/377).
-* COMPATIBILITY - Added compatibility support for WP Retina 2x pro. GitHub issue [#380](https://github.com/wpCloud/wp-stateless/issues/380).
-* COMPATIBILITY - Enhanced compatibility support for LiteSpeed Cache. GitHub issue [#365](https://github.com/wpCloud/wp-stateless/issues/365).
-* COMPATIBILITY - Enhanced compatibility support for ShortPixel Image Optimizer. GitHub issue [#364](https://github.com/wpCloud/wp-stateless/issues/364), [#398](https://github.com/wpCloud/wp-stateless/issues/398).
-* COMPATIBILITY - Fixed Gravity Form export. GitHub issue [#408](https://github.com/wpCloud/wp-stateless/issues/408).
-* ENHANCEMENT - Improved upon add_media function for better compatibility support. GitHub issue [#382](https://github.com/wpCloud/wp-stateless/issues/382).
+* FIX - Fixed problem with WordPress 5.3. GitHub issue [#406](https://github.com/udx/wp-stateless/issues/406).
+* FIX - Fixed problem with the Cache Busting feature. GitHub issue [#377](https://github.com/udx/wp-stateless/issues/377).
+* COMPATIBILITY - Added compatibility support for WP Retina 2x pro. GitHub issue [#380](https://github.com/udx/wp-stateless/issues/380).
+* COMPATIBILITY - Enhanced compatibility support for LiteSpeed Cache. GitHub issue [#365](https://github.com/udx/wp-stateless/issues/365).
+* COMPATIBILITY - Enhanced compatibility support for ShortPixel Image Optimizer. GitHub issue [#364](https://github.com/udx/wp-stateless/issues/364), [#398](https://github.com/udx/wp-stateless/issues/398).
+* COMPATIBILITY - Fixed Gravity Form export. GitHub issue [#408](https://github.com/udx/wp-stateless/issues/408).
+* ENHANCEMENT - Improved upon add_media function for better compatibility support. GitHub issue [#382](https://github.com/udx/wp-stateless/issues/382).
 
 = 2.2.7 =
-* FIX - WP-Smush compatibility enhanced. GitHub Issue [#366](https://github.com/wpCloud/wp-stateless/issues/366).
-* FIX - Fixed multisite installation support. GitHub Issue [#370](https://github.com/wpCloud/wp-stateless/issues/370).
-* FIX - Fixed settings UI problems related to Cache-Busting option. GitHub Issue [#373](https://github.com/wpCloud/wp-stateless/issues/373).
+* FIX - WP-Smush compatibility enhanced. GitHub Issue [#366](https://github.com/udx/wp-stateless/issues/366).
+* FIX - Fixed multisite installation support. GitHub Issue [#370](https://github.com/udx/wp-stateless/issues/370).
+* FIX - Fixed settings UI problems related to Cache-Busting option. GitHub Issue [#373](https://github.com/udx/wp-stateless/issues/373).
 * FIX - Other minor fixes.
 
 = 2.2.6 =
-* FIX - Multisite Network Settings page fixed. GitHub Issue [#369](https://github.com/wpCloud/wp-stateless/issues/369).
-* FIX - Fixed incorrect Compatibilities behavior when Bucket Folder is set. GitHub Issue [#368](https://github.com/wpCloud/wp-stateless/issues/368).
+* FIX - Multisite Network Settings page fixed. GitHub Issue [#369](https://github.com/udx/wp-stateless/issues/369).
+* FIX - Fixed incorrect Compatibilities behavior when Bucket Folder is set. GitHub Issue [#368](https://github.com/udx/wp-stateless/issues/368).
 * FIX - Other minor fixes.
 
 = 2.2.5 =
-* NEW - Added ability to start sync process from specific Attachment ID. GitHub Issue [#360](https://github.com/wpCloud/wp-stateless/issues/360).
-* COMPATIBILITY - Added compatibility support for LiteSpeed Cache plugin. Especially to support optimized .webp images. GitHub Issue [#357](https://github.com/wpCloud/wp-stateless/issues/357).
+* NEW - Added ability to start sync process from specific Attachment ID. GitHub Issue [#360](https://github.com/udx/wp-stateless/issues/360).
+* COMPATIBILITY - Added compatibility support for LiteSpeed Cache plugin. Especially to support optimized .webp images. GitHub Issue [#357](https://github.com/udx/wp-stateless/issues/357).
 * FIX - Other minor fixes.
 
 = Earlier versions =
