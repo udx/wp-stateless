@@ -47,6 +47,15 @@
     ]
   },
   "extra": {
+    "mozart": {
+      "dep_namespace": "wpCloud\\StatelessMedia\\",
+      "dep_directory": "/lib/ns-vendor/deps",
+      "classmap_directory": "/lib/ns-vendor/classes",
+      "classmap_prefix": "UDX_",
+      "packages": [
+        "deliciousbrains/wp-background-processing"
+      ]
+    },
     "featureFlags": [
       {
         "name": "Google Login",
@@ -79,5 +88,9 @@
         "product": false
       }
     }
+  },
+  "require-dev": {
+    "coenjacobs/mozart": "0.6.0-beta-3",
+    "deliciousbrains/wp-background-processing": "^1.0"
   }
 }
