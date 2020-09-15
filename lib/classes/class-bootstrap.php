@@ -216,8 +216,9 @@ namespace wpCloud\StatelessMedia {
 
           //init GS client
           global $gs_client;
-          $gs_client = $this->init_gs_client();
-          StreamWrapper::register($gs_client);
+          if ( $gs_client = $this->init_gs_client() ) {
+            StreamWrapper::register($gs_client);
+          }
 
           /**
            * init client's filters
