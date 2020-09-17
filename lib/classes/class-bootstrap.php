@@ -174,7 +174,7 @@ namespace wpCloud\StatelessMedia {
            */
           if( !$this->has_errors() ) {
 
-            if( in_array( $sm_mode , array( 'cdn', 'ephemeral' ) )  ) {
+            if( in_array( $sm_mode , array( 'cdn', 'ephemeral', 'stateless' ) )  ) {
               /**
                * init main filters
                */
