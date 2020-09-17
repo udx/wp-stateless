@@ -6,7 +6,7 @@ License: GPLv2 or later
 Requires PHP: 5.6
 Requires at least: 5.0
 Tested up to: 5.5
-Stable tag: 3.0.1
+Stable tag: 3.0.2
 
 Upload and serve your WordPress media files from Google Cloud Storage.
 
@@ -105,11 +105,15 @@ To ensure new releases cause as little disruption as possible, we rely on a numb
 Before upgrading to WP-Stateless 3.0, please, make sure you tested it on your development environment.
 
 == Changelog ==
+= 3.0.2 =
+* FIX - Refactored the way files are being uploaded to GCS when `WP_STATELESS_MEDIA_UPLOAD_CHUNK_SIZE` constant is defined. GitHub issue [#553](https://github.com/udx/wp-stateless/issues/553).
+* FIX - Fixed the process of upgrading to 3.0 for multisite installations. GitHub issue [#549](https://github.com/udx/wp-stateless/issues/549).
+
 = 3.0.1 =
-* *Before upgrading to WP-Stateless 3.0, please, make sure you tested it on your development environment. It may have breaking changes.*
 * FIX - Fatal Error in Stateless mode. GitHub issue [#546](https://github.com/udx/wp-stateless/issues/546).
 
 = 3.0 =
+* **Before upgrading to WP-Stateless 3.0, please, make sure you tested it on your development environment. It may have breaking changes.**
 * NEW - Setup assistant rewrite. GitHub issue [#477](https://github.com/udx/wp-stateless/issues/477).
 * NEW - Recreate attachment metabox panel using metabox.io. GitHub issue [#470](https://github.com/udx/wp-stateless/issues/470).
 * NEW - Updated the `Stateless` mode to not use local storage at all. Current `Stateless` mode setting mapped to new `Ephemeral` mode. GitHub issue [#482](https://github.com/udx/wp-stateless/issues/482).
