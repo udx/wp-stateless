@@ -1,135 +1,150 @@
-
 /* settings css */
 
 .regular-text {
-    width: 50em;
+  width: 50em;
 }
 
 .sm-notice {
-    background-color: #fff8e5;
-    margin: 20px 0px 0px;
-    padding: 15px;
-    border-left: 3px solid #f79191;
+  background-color: #fff8e5;
+  margin: 20px 0px 0px;
+  padding: 15px;
+  border-left: 3px solid #f79191;
 }
-#stateless-settings-page-title{
-    margin-bottom: 20px;
+#stateless-settings-page-title {
+  margin-bottom: 20px;
 }
-#service_account_json{
-    height: 20em;
+#service_account_json {
+  height: 20em;
 }
 .stless_settings_content {
-    display: none;
+  display: none;
 }
 .stless_settings_content.active {
-    display: block;
+  display: block;
 }
 
 .nav-tab-active:focus {
-    box-shadow: none;
+  box-shadow: none;
 }
 
 .stless_settings_content tr td h4:first-of-type {
-    margin-top: 5px;
+  margin-top: 5px;
 }
 
 #stless_supports_tab {
-    padding: 20px 0;
+  padding: 20px 0;
 }
 
-
 .stless_settings_content tr {
-    position: relative;
-    display: block;
+  position: relative;
+  display: block;
 }
 
 .stless_settings_content tr:after {
-    border-top: 1px solid #ddd;
-    border-bottom: 1px solid #fafafa;
-    position: absolute;
-    left: 0px;
-    bottom: 0px;
-    width: 100%;
-    height: 0px;
-    content: "";
+  border-top: 1px solid #ddd;
+  border-bottom: 1px solid #fafafa;
+  position: absolute;
+  left: 0px;
+  bottom: 0px;
+  width: 100%;
+  height: 0px;
+  content: '';
+}
+
+.stless_settings_content .postbox-container {
+  width: 33%;
+}
+
+.stless_settings_content .postbox .hndle {
+  cursor: default;
+}
+
+.stless_settings_content .postbox .hndle a {
+  font-size: 20px;
+}
+
+.stless_settings_content .postbox .inside {
+  margin-bottom: 0;
 }
 
 .wpStateLess-support {
-    width: 60%;
-    margin: 0 auto;
-    display: flex;
+  width: 60%;
+  margin: 0 auto;
+  display: flex;
 }
 
 .wpStateLess-sprt-plan {
-    float: left;
-    width: 45%;
-    margin: 0px 15px;
-    text-align: center;
-    border: 1px solid #e4e4e4;
-    box-shadow: 0px 5px 35px -19px #000;
+  float: left;
+  width: 45%;
+  margin: 0px 15px;
+  text-align: center;
+  border: 1px solid #e4e4e4;
+  box-shadow: 0px 5px 35px -19px #000;
 }
 .wpStateLess-sprt-plan .wpStateLess-plan-name p {
-    font-size: 30px;
+  font-size: 30px;
 }
 
 .wpStateLess-sprt-plan ul li {
-    border-top: 1px solid #e4e4e4;
-    padding: 5px;
+  border-top: 1px solid #e4e4e4;
+  padding: 5px;
 }
-
 
 /* Angular styles */
 .ng-hide:not(.ng-hide-animate) {
-    display: none !important;
-}
-
-.hbspt-form{
-    padding-top: 20px;
+  display: none !important;
 }
 
 .hbspt-form {
-    margin-left: 10px;
+  padding-top: 20px;
 }
 
-.hbspt-form input.hs-input[type=checkbox] {
-    border: 1px solid #b4b9be;
-    height: 16px;
-    width: 16px;
-    margin-top: -2px;
+.hbspt-form {
+  margin-left: 10px;
+}
+
+.hbspt-form input.hs-input[type='checkbox'] {
+  border: 1px solid #b4b9be;
+  height: 16px;
+  width: 16px;
+  margin-top: -2px;
 }
 
 .permalink-structure h4 {
-    margin: 1.33em 0 !important;
+  margin: 1.33em 0 !important;
 }
 
 .sm-wildcards .select2-container {
-    width: 100% !important;
+  width: 100% !important;
 }
 
 .sm-wildcards .select2-selection--multiple {
-    height: 28px !important;
+  height: 28px !important;
 }
 .select2-dropdown li {
-    margin-bottom: 0px !important;
+  margin-bottom: 0px !important;
 }
 /* pillbox li container item */
 .select2-selection__choice {
-    position: relative;
-    padding-left: 15px; /* to account for the 'x' no longer taking up space */
+  position: relative;
+  padding-left: 15px; /* to account for the 'x' no longer taking up space */
 }
 
 /* the 'x' */
 .select2-selection__choice__remove {
-    position: absolute;
-    left: 0; right: 0; /* to fill width */
-    padding-left: 5px; /* whatever matches your pillbox padding */
+  position: absolute;
+  left: 0;
+  right: 0; /* to fill width */
+  padding-left: 5px; /* whatever matches your pillbox padding */
 
-    color: transparent !important; /* hide the x */
+  color: transparent !important; /* hide the x */
 }
 
-.select2-container--default .select2-results__option[aria-disabled=true] {
-    display: none;
+.select2-container--default .select2-results__option[aria-disabled='true'] {
+  display: none;
 }
 
-.file_url_block label, .file_url_block input {
-    width: 100%;
+.file_url_block label,
+.file_url_block input {
+  width: 100%;
 }

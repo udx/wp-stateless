@@ -1216,6 +1216,9 @@ namespace wpCloud\StatelessMedia {
             wp_enqueue_script('wp-stateless');
             wp_enqueue_style('jquery-ui-regenthumbs');
 
+            wp_enqueue_style('wp-pointer');
+            wp_enqueue_script('wp-pointer');
+
             $data = array(
               'key' => 'stateless-cache-busting',
               'class' => 'notice',
