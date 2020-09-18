@@ -189,7 +189,7 @@ namespace wpCloud\StatelessMedia {
            */
           if (!$this->has_errors()) {
 
-            if (in_array($sm_mode, array('cdn', 'ephemeral'))) {
+            if (in_array($sm_mode, array('cdn', 'ephemeral', 'stateless'))) {
               /**
                * init main filters
                */
@@ -230,8 +230,9 @@ namespace wpCloud\StatelessMedia {
 
           //init GS client
           global $gs_client;
-          $gs_client = $this->init_gs_client();
-          StreamWrapper::register($gs_client);
+          if ($gs_client = $this->init_gs_client()) {
+            StreamWrapper::register($gs_client);
+          }
 
           /**
            * init client's filters

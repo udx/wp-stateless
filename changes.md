@@ -1,10 +1,23 @@
+#### 3.0.3
+
+- FIX - Fixed an incorrect file URL in Stateless mode on Edit Media screen. GitHub issue [#544](https://github.com/udx/wp-stateless/issues/544).
+
+#### 3.0.2
+
+- FIX - Refactored the way files are being uploaded to GCS when `WP_STATELESS_MEDIA_UPLOAD_CHUNK_SIZE` constant is defined. GitHub issue [#553](https://github.com/udx/wp-stateless/issues/553).
+- FIX - Fixed the process of upgrading to 3.0 for multisite installations. GitHub issue [#549](https://github.com/udx/wp-stateless/issues/549).
+
+#### 3.0.1
+
+- FIX - Fatal Error in Stateless mode. GitHub issue [#546](https://github.com/udx/wp-stateless/issues/546).
+
 #### 3.0
 
 - NEW - Setup assistant rewrite. GitHub issue [#477](https://github.com/udx/wp-stateless/issues/477).
 - NEW - Recreate attachment metabox panel using metabox.io. GitHub issue [#470](https://github.com/udx/wp-stateless/issues/470).
 - NEW - Updated the `Stateless` mode to not use local storage at all. Current `Stateless` mode setting mapped to new `Ephemeral` mode. GitHub issue [#482](https://github.com/udx/wp-stateless/issues/482).
 - NEW - Files are now uploaded to GCS in chunks and chunk size will be determined based on free memory available. GitHub issue [#478](https://github.com/udx/wp-stateless/issues/478).
-- NEW - File upload chunk size can be controlled with `WP_STATELESS_MEDIA_UPLOAD_CHUNK_SIZE` constant.  GitHub issue [#478](https://github.com/udx/wp-stateless/issues/478).
+- NEW - File upload chunk size can be controlled with `WP_STATELESS_MEDIA_UPLOAD_CHUNK_SIZE` constant. GitHub issue [#478](https://github.com/udx/wp-stateless/issues/478).
 - FIX - Changed the default value for the Cache-Busting setting. GitHub issue [#361](https://github.com/udx/wp-stateless/issues/361).
 - FIX - Fixed network override of Cache-Busting. GitHub issue [#468](https://github.com/udx/wp-stateless/issues/468).
 - FIX - Fixed "Passing glue string after array is deprecated.". GitHub issue [#444](https://github.com/udx/wp-stateless/issues/444).
