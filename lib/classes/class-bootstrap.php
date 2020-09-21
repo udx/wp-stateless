@@ -1136,7 +1136,7 @@ namespace wpCloud\StatelessMedia {
         }
         wp_register_script('wp-stateless-angular', ud_get_stateless_media()->path('static/scripts/angular.min.js', 'url'), array(), '1.5.0', true);
         wp_register_script('wp-stateless-angular-sanitize', ud_get_stateless_media()->path('static/scripts/angular-sanitize.min.js', 'url'), array('wp-stateless-angular'), '1.5.0', true);
-        wp_register_script('wp-stateless', ud_get_stateless_media()->path('static/scripts/wp-stateless.js', 'url'), array('jquery-ui-core', 'wp-stateless-settings'), self::$version, true);
+        wp_register_script('wp-stateless', ud_get_stateless_media()->path('static/scripts/wp-stateless.js', 'url'), array('jquery-ui-core', 'wp-stateless-settings', 'wp-api-request'), self::$version, true);
 
         wp_localize_script('wp-stateless', 'stateless_l10n', $this->get_l10n_data());
         wp_localize_script('wp-stateless', 'wp_stateless_configs', array(
