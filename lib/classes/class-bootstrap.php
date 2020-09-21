@@ -100,12 +100,6 @@ namespace wpCloud\StatelessMedia {
        * Instantiate class.
        */
       public function init() {
-
-        $this->background_image_sync = new BackgroundImageSync();
-
-        //$this->background_image_sync->push_to_queue(1)->push_to_queue(2)->push_to_queue(3)->push_to_queue(4)->save();
-        //$this->background_image_sync->dispatch();
-
         // Parse feature falgs, set constants.
         $this->parse_feature_flags();
         $sm_mode = $this->get('sm.mode');
@@ -654,6 +648,12 @@ namespace wpCloud\StatelessMedia {
           'callback' => array($api_namespace, 'updateSettings'),
           'permission_callback' => array($api_namespace, 'authCheck')
         ));
+
+        register_rest_route($route_namespace, '/sync/getStats', array(
+          'methods' => \WP_REST_Server::READABLE,
+          'callback' => array($api_namespace, 'syncGetStats'),
+          'permission_callback' => array($api_namespace, 'authCheck')
+        ));
       }
 
       /**
@@ -1141,6 +1141,7 @@ namespace wpCloud\StatelessMedia {
         wp_localize_script('wp-stateless', 'stateless_l10n', $this->get_l10n_data());
         wp_localize_script('wp-stateless', 'wp_stateless_configs', array(
           'WP_DEBUG' => defined('WP_DEBUG') ? WP_DEBUG : false,
+          'REST_API_TOKEN' => Utility::generate_jwt_token([])
         ));
 
         $settings = ud_get_stateless_media()->get('sm');

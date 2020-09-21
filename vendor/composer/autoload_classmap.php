@@ -6,7 +6,7 @@ $vendorDir = dirname(dirname(__FILE__));
 $baseDir = dirname($vendorDir);
 
 return array(
-    'BackgroundImageSync' => $baseDir . '/lib/classes/class-background-image-sync.php',
+    'BackgroundSync' => $baseDir . '/lib/classes/sync/class-background-image-sync.php',
     'UsabilityDynamics\\Job' => $vendorDir . '/udx/lib-utility/lib/class-job.php',
     'UsabilityDynamics\\Loader' => $vendorDir . '/udx/lib-utility/lib/class-loader.php',
     'UsabilityDynamics\\Settings' => $vendorDir . '/udx/lib-settings/lib/class-settings.php',

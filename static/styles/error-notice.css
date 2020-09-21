@@ -1,55 +1,65 @@
-.stateless-admin-notice.error, .stateless-admin-notice.notice {
-    position: relative;
-    display: block;
-    background-image: url('../images/stateless.svg');
-    background-repeat: no-repeat;
-    background-size: 40px 40px;
-    background-position: 15px center;
-    padding: 15px 38px 15px 60px;
-    border-left-color: #FC5922 !important;
+.stateless-admin-notice.error,
+.stateless-admin-notice.notice,
+.stateless-admin-notice.admin-error {
+  position: relative;
+  display: block;
+  background-image: url('../images/stateless.svg');
+  background-repeat: no-repeat;
+  background-size: 40px 40px;
+  background-position: 15px center;
+  padding: 15px 38px 15px 70px;
+  background-color: #fff;
+  border: 1px solid #ccd0d4;
+  border-left-width: 4px;
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.04);
+}
 
+.stateless-admin-notice.error,
+.stateless-admin-notice.admin-error {
+  border-left-color: #fc2323 !important;
+}
+.stateless-admin-notice.notice {
+  border-left-color: #fc5922 !important;
 }
 
 .stateless-admin-notice .icon {
-    float: left;
-    width: 30px;
-    height: 30px;
+  float: left;
+  width: 30px;
+  height: 30px;
 }
 
 .stateless-admin-notice .description {
-    margin-top: 7px;
+  margin-top: 7px;
 }
 
-.stateless-admin-notice .description ul{
-    margin: 0px;
+.stateless-admin-notice .description ul {
+  margin: 0px;
 }
 
 .stateless-admin-notice ul {
-    margin: 0.5em 0;
+  margin: 0.5em 0;
 }
 
 .stateless-admin-notice .inner-contaner {
-    float: left;
+  float: left;
 }
 
 .stateless-admin-notice .title {
-    font-weight: bold;
+  font-weight: bold;
 }
 
 .stateless-admin-notice a {
-    text-decoration: underline;
+  text-decoration: underline;
 }
-
 
 .stateless-admin-notice a.notice-dismiss.dismiss,
 .stateless-admin-notice a.button-action {
-    text-decoration: none !important;
+  text-decoration: none !important;
 }
 
 .stateless-admin-notice a.button-action {
-    right: 40px;
+  right: 40px;
 }
-
 
 /**
     Responisve Design:
@@ -57,56 +67,53 @@
 
 /* Extra small devices (phones, 600px and down) */
 @media only screen and (max-width: 600px) {
-    
-} 
+}
 
 /* Small devices (portrait tablets and large phones, 600px and up) */
 @media only screen and (min-width: 600px) {
-    
-} 
+}
 
 /* Medium devices (landscape tablets, 768px and up) */
 @media only screen and (min-width: 768px) {
-    
-} 
+}
 
 /* Large devices (laptops/desktops, 992px and up) */
 @media only screen and (max-width: 992px) {
-    .stateless-admin-notice .description {
-        margin-top: 15px;
-    }
-    
-    .stateless-admin-notice a.notice-dismiss.dismiss,
-    .stateless-admin-notice a.button-action {
-        margin-top: 12px;
-    }
-} 
+  .stateless-admin-notice .description {
+    margin-top: 15px;
+  }
+
+  .stateless-admin-notice a.notice-dismiss.dismiss,
+  .stateless-admin-notice a.button-action {
+    margin-top: 12px;
+  }
+}
 
 /* Large devices (laptops/desktops, 992px and up) */
 @media only screen and (min-width: 992px) {
-    .stateless-admin-notice.error, .stateless-admin-notice.notice {
-        background-position: 10px center;
-        padding: 15px 193px 15px 60px;
-    }
+  .stateless-admin-notice.error,
+  .stateless-admin-notice.notice {
+    background-position: 10px center;
+    padding: 15px 193px 15px 60px;
+  }
 
-    .stateless-admin-notice a.notice-dismiss.dismiss,
-    .stateless-admin-notice a.button-action {
-        position: absolute;
-        top: 50%;
-        transform: translateY(-50%);
-    }
+  .stateless-admin-notice a.notice-dismiss.dismiss,
+  .stateless-admin-notice a.button-action {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+  }
 
-    .stateless-admin-notice a.notice-dismiss.dismiss:focus{
-        box-shadow: none;
-    }
+  .stateless-admin-notice a.notice-dismiss.dismiss:focus {
+    box-shadow: none;
+  }
 
-    .stateless-admin-notice a.notice-dismiss.dismiss:active,
-    .stateless-admin-notice a.button-action:active {
-        transform: translateY(-48%) !important;
-    }
-} 
+  .stateless-admin-notice a.notice-dismiss.dismiss:active,
+  .stateless-admin-notice a.button-action:active {
+    transform: translateY(-48%) !important;
+  }
+}
 
 /* Extra large devices (large laptops and desktops, 1200px and up) */
 @media only screen and (min-width: 1200px) {
-    
 }

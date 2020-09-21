@@ -67,6 +67,10 @@
   margin-bottom: 0;
 }
 
+.stless_settings_content .postbox .options {
+  margin-top: 1em;
+}
+
 .wpStateLess-support {
   width: 60%;
   margin: 0 auto;
@@ -147,4 +151,30 @@
 .file_url_block label,
 .file_url_block input {
   width: 100%;
+}
+
+.stless_settings_content .loading {
+  -webkit-animation: wps-loading-spin 1.4s infinite linear;
+  animation: wps-loading-spin 1.4s infinite linear;
+}
+
+@-webkit-keyframes wps-loading-spin {
+  0% {
+    -webkit-transform: rotate(0deg);
+    transform: rotate(0deg);
+  }
+  100% {
+    -webkit-transform: rotate(360deg);
+    transform: rotate(360deg);
+  }
+}
+@keyframes wps-loading-spin {
+  0% {
+    -webkit-transform: rotate(0deg);
+    transform: rotate(0deg);
+  }
+  100% {
+    -webkit-transform: rotate(360deg);
+    transform: rotate(360deg);
+  }
 }

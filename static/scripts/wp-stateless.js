@@ -1245,9 +1245,53 @@ var wpStatelessApp = angular
   .controller('wpStatelessCompatibility', function ($scope, $filter) {
     $scope.modules = wp_stateless_compatibility || {}
   })
-  .controller('wpStatelessProcessing', function ($scope) {
+  .controller('wpStatelessProcessing', function ($scope, $http) {
+    $scope.errors = []
+    $scope.stats = {
+      isLoading: false,
+      values: {
+        images: 0,
+        other: 0,
+        custom: 0,
+      },
+      limit: {
+        enabled: false,
+        value: 0,
+      },
+      load: function () {
+        var that = this
+        that.isLoading = true
+        $http({
+          method: 'GET',
+          url: window.wpApiSettings.root + 'wp-stateless/v1/sync/getStats',
+          headers: {
+            Authorization: window.wp_stateless_configs.REST_API_TOKEN,
+          },
+        })
+          .then(function (response) {
+            that.values.images = response.data.data.images || that.values.images
+            that.values.other = response.data.data.other || that.values.other
+            that.values.custom = response.data.data.custom || that.values.custom
+            that.isLoading = false
+          })
+          .catch(function (error) {
+            $scope.errors.push(error.data.message || 'Something went wrong')
+            that.isLoading = false
+          })
+      },
+    }
+
+    $scope.runSync = function (type, limit = 0) {
+      console.log(arguments)
+    }
+
+    $scope.canSync = function () {
+      return !$scope.stats.isLoading && !$scope.errors.length
+    }
+
+    // initialize stuff
     $scope.init = function () {
-      console.log('Init')
+      $scope.stats.load()
     }
   })
   .controller('noJSWarning', function ($scope, $filter) {

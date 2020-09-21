@@ -43,7 +43,7 @@ class ComposerStaticInitc59d002476a452800baaf79c430753cb
     );
 
     public static $classMap = array (
-        'BackgroundImageSync' => __DIR__ . '/../..' . '/lib/classes/class-background-image-sync.php',
+        'BackgroundSync' => __DIR__ . '/../..' . '/lib/classes/sync/class-background-image-sync.php',
         'UsabilityDynamics\\Job' => __DIR__ . '/..' . '/udx/lib-utility/lib/class-job.php',
         'UsabilityDynamics\\Loader' => __DIR__ . '/..' . '/udx/lib-utility/lib/class-loader.php',
         'UsabilityDynamics\\Settings' => __DIR__ . '/..' . '/udx/lib-settings/lib/class-settings.php',
