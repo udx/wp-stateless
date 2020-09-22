@@ -11,6 +11,7 @@ namespace wpCloud\StatelessMedia {
   use BackgroundImageSync;
   use Google\Cloud\Storage\StorageClient;
   use Google\Auth\HttpHandler\HttpHandlerFactory;
+  use wpCloud\StatelessMedia\Sync\ImageSync;
 
   if (!class_exists('wpCloud\StatelessMedia\Bootstrap')) {
 
@@ -105,6 +106,8 @@ namespace wpCloud\StatelessMedia {
         $sm_mode = $this->get('sm.mode');
 
         new SyncNonMedia();
+
+        ImageSync::instance();
 
         // Invoke REST API
         add_action('rest_api_init', array($this, 'api_init'));
@@ -652,6 +655,18 @@ namespace wpCloud\StatelessMedia {
         register_rest_route($route_namespace, '/sync/getStats', array(
           'methods' => \WP_REST_Server::READABLE,
           'callback' => array($api_namespace, 'syncGetStats'),
+          'permission_callback' => array($api_namespace, 'authCheck')
+        ));
+
+        register_rest_route($route_namespace, '/sync/getState', array(
+          'methods' => \WP_REST_Server::READABLE,
+          'callback' => array($api_namespace, 'syncGetState'),
+          'permission_callback' => array($api_namespace, 'authCheck')
+        ));
+
+        register_rest_route($route_namespace, '/sync/run', array(
+          'methods' => \WP_REST_Server::CREATABLE,
+          'callback' => array($api_namespace, 'syncRun'),
           'permission_callback' => array($api_namespace, 'authCheck')
         ));
       }

@@ -43,7 +43,6 @@ class ComposerStaticInitc59d002476a452800baaf79c430753cb
     );
 
     public static $classMap = array (
-        'BackgroundSync' => __DIR__ . '/../..' . '/lib/classes/sync/class-background-image-sync.php',
         'UsabilityDynamics\\Job' => __DIR__ . '/..' . '/udx/lib-utility/lib/class-job.php',
         'UsabilityDynamics\\Loader' => __DIR__ . '/..' . '/udx/lib-utility/lib/class-loader.php',
         'UsabilityDynamics\\Settings' => __DIR__ . '/..' . '/udx/lib-settings/lib/class-settings.php',
@@ -100,8 +99,13 @@ class ComposerStaticInitc59d002476a452800baaf79c430753cb
         'wpCloud\\StatelessMedia\\Settings' => __DIR__ . '/../..' . '/lib/classes/class-settings.php',
         'wpCloud\\StatelessMedia\\ShortPixel' => __DIR__ . '/../..' . '/lib/classes/compatibility/shortpixel.php',
         'wpCloud\\StatelessMedia\\SimpleLocalAvatars' => __DIR__ . '/../..' . '/lib/classes/compatibility/simple-local-avatars.php',
+        'wpCloud\\StatelessMedia\\Singleton' => __DIR__ . '/../..' . '/lib/classes/trait-singleton.php',
         'wpCloud\\StatelessMedia\\StreamWrapper' => __DIR__ . '/../..' . '/lib/classes/class-gs-stream-wrapper.php',
         'wpCloud\\StatelessMedia\\SyncNonMedia' => __DIR__ . '/../..' . '/lib/classes/class-sync-non-media.php',
+        'wpCloud\\StatelessMedia\\Sync\\BackgroundSync' => __DIR__ . '/../..' . '/lib/classes/sync/class-background-sync.php',
+        'wpCloud\\StatelessMedia\\Sync\\HelperWindow' => __DIR__ . '/../..' . '/lib/classes/sync/class-helper-window.php',
+        'wpCloud\\StatelessMedia\\Sync\\ISync' => __DIR__ . '/../..' . '/lib/classes/sync/interface-sync.php',
+        'wpCloud\\StatelessMedia\\Sync\\ImageSync' => __DIR__ . '/../..' . '/lib/classes/sync/class-image-sync.php',
         'wpCloud\\StatelessMedia\\Upgrader' => __DIR__ . '/../..' . '/lib/classes/class-upgrader.php',
         'wpCloud\\StatelessMedia\\Utility' => __DIR__ . '/../..' . '/lib/classes/class-utility.php',
         'wpCloud\\StatelessMedia\\VidoRev' => __DIR__ . '/../..' . '/lib/classes/compatibility/vidorev.php',

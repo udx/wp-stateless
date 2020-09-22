@@ -6,7 +6,6 @@ $vendorDir = dirname(dirname(__FILE__));
 $baseDir = dirname($vendorDir);
 
 return array(
-    'BackgroundSync' => $baseDir . '/lib/classes/sync/class-background-image-sync.php',
     'UsabilityDynamics\\Job' => $vendorDir . '/udx/lib-utility/lib/class-job.php',
     'UsabilityDynamics\\Loader' => $vendorDir . '/udx/lib-utility/lib/class-loader.php',
     'UsabilityDynamics\\Settings' => $vendorDir . '/udx/lib-settings/lib/class-settings.php',
@@ -63,8 +62,13 @@ return array(
     'wpCloud\\StatelessMedia\\Settings' => $baseDir . '/lib/classes/class-settings.php',
     'wpCloud\\StatelessMedia\\ShortPixel' => $baseDir . '/lib/classes/compatibility/shortpixel.php',
     'wpCloud\\StatelessMedia\\SimpleLocalAvatars' => $baseDir . '/lib/classes/compatibility/simple-local-avatars.php',
+    'wpCloud\\StatelessMedia\\Singleton' => $baseDir . '/lib/classes/trait-singleton.php',
     'wpCloud\\StatelessMedia\\StreamWrapper' => $baseDir . '/lib/classes/class-gs-stream-wrapper.php',
     'wpCloud\\StatelessMedia\\SyncNonMedia' => $baseDir . '/lib/classes/class-sync-non-media.php',
+    'wpCloud\\StatelessMedia\\Sync\\BackgroundSync' => $baseDir . '/lib/classes/sync/class-background-sync.php',
+    'wpCloud\\StatelessMedia\\Sync\\HelperWindow' => $baseDir . '/lib/classes/sync/class-helper-window.php',
+    'wpCloud\\StatelessMedia\\Sync\\ISync' => $baseDir . '/lib/classes/sync/interface-sync.php',
+    'wpCloud\\StatelessMedia\\Sync\\ImageSync' => $baseDir . '/lib/classes/sync/class-image-sync.php',
     'wpCloud\\StatelessMedia\\Upgrader' => $baseDir . '/lib/classes/class-upgrader.php',
     'wpCloud\\StatelessMedia\\Utility' => $baseDir . '/lib/classes/class-utility.php',
     'wpCloud\\StatelessMedia\\VidoRev' => $baseDir . '/lib/classes/compatibility/vidorev.php',

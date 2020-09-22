@@ -10,6 +10,8 @@
 
 namespace wpCloud\StatelessMedia {
 
+  use wpCloud\StatelessMedia\Sync\ImageSync;
+
   if (!class_exists('wpCloud\StatelessMedia\API')) {
 
     /**
@@ -162,6 +164,17 @@ namespace wpCloud\StatelessMedia {
         try {
           global $wpdb;
 
+          $syncClasses = Utility::get_available_sync_classes();
+
+          return new \WP_REST_Response(array(
+            'ok' => true,
+            'data' => $syncClasses
+          ));
+
+          foreach ($syncClasses as $syncClass) {
+            echo $syncClass->get_name();
+          }
+
           $stats = [
             'images' => 0,
             'other' => 0,
@@ -187,6 +200,35 @@ namespace wpCloud\StatelessMedia {
           return new \WP_REST_Response(array(
             'ok' => true,
             'data' => $stats
+          ));
+        } catch (\Throwable $e) {
+          return new \WP_Error('internal_server_error', $e->getMessage(), ['status' => 500]);
+        }
+      }
+
+      static public function syncGetState() {
+        try {
+          return new \WP_REST_Response(array(
+            'ok' => true,
+            'data' => []
+          ));
+        } catch (\Throwable $e) {
+          return new \WP_Error('internal_server_error', $e->getMessage(), ['status' => 500]);
+        }
+      }
+
+      static public function syncRun(\WP_REST_Request $request) {
+        try {
+          $params = wp_parse_args($request->get_params(), [
+            'type' => null,
+            'limit' => null
+          ]);
+
+          ImageSync::instance()->start($params);
+
+          return new \WP_REST_Response(array(
+            'ok' => true,
+            'data' => $request->get_params()
           ));
         } catch (\Throwable $e) {
           return new \WP_Error('internal_server_error', $e->getMessage(), ['status' => 500]);

@@ -1246,7 +1246,14 @@ var wpStatelessApp = angular
     $scope.modules = wp_stateless_compatibility || {}
   })
   .controller('wpStatelessProcessing', function ($scope, $http) {
+    /**
+     * General Errors
+     */
     $scope.errors = []
+
+    /**
+     * Stats Model
+     */
     $scope.stats = {
       isLoading: false,
       values: {
@@ -1281,17 +1288,62 @@ var wpStatelessApp = angular
       },
     }
 
+    $scope.state = {
+      isLoading: false,
+      load: function () {
+        var that = this
+        that.isLoading = true
+        $http({
+          method: 'GET',
+          url: window.wpApiSettings.root + 'wp-stateless/v1/sync/getState',
+          headers: {
+            Authorization: window.wp_stateless_configs.REST_API_TOKEN,
+          },
+        })
+          .then(function (response) {
+            that.isLoading = false
+          })
+          .catch(function (error) {
+            $scope.errors.push(error.data.message || 'Something went wrong')
+            that.isLoading = false
+          })
+      },
+    }
+
     $scope.runSync = function (type, limit = 0) {
       console.log(arguments)
+      $http({
+        method: 'POST',
+        url: window.wpApiSettings.root + 'wp-stateless/v1/sync/run',
+        headers: {
+          Authorization: window.wp_stateless_configs.REST_API_TOKEN,
+        },
+        data: {
+          type: type,
+          limit: limit,
+        },
+      })
+        .then(function (response) {
+          that.isLoading = false
+        })
+        .catch(function (error) {
+          $scope.errors.push(error.data.message || 'Something went wrong')
+          that.isLoading = false
+        })
     }
 
     $scope.canSync = function () {
-      return !$scope.stats.isLoading && !$scope.errors.length
+      return (
+        !$scope.stats.isLoading &&
+        !$scope.state.isLoading &&
+        !$scope.errors.length
+      )
     }
 
     // initialize stuff
     $scope.init = function () {
       $scope.stats.load()
+      $scope.state.load()
     }
   })
   .controller('noJSWarning', function ($scope, $filter) {

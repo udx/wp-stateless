@@ -55,7 +55,7 @@ namespace wpCloud\StatelessMedia {
               $url = ud_get_stateless_media()->get_gs_host() . '/' . $name;
             }
           }
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
           // @todo maybe log the exception.
         }
         // We are in filter so need to return the passed value.
@@ -118,7 +118,7 @@ namespace wpCloud\StatelessMedia {
           $name = $post_css::UPLOADS_DIR . $post_css::DEFAULT_FILES_DIR . $post_css->get_file_name();
           $name = apply_filters('wp_stateless_file_name', $name, 0);
           do_action('sm:sync::deleteFile', $name);
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
           // @todo maybe log the exception.
         }
         // We are in filter so need to return the passed value.
@@ -182,7 +182,7 @@ namespace wpCloud\StatelessMedia {
                 }
               }
             }
-          } catch (Exception $e) {
+          } catch (\Exception $e) {
           }
         }
       }
