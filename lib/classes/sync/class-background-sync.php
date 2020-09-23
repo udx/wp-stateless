@@ -33,6 +33,13 @@ abstract class BackgroundSync extends \UDX_WP_Background_Process implements ISyn
   }
 
   /**
+   * 
+   */
+  public function get_max_batch_size() {
+    return (defined('WP_STATELESS_SYNC_MAX_BATCH_SIZE') && is_int(WP_STATELESS_SYNC_MAX_BATCH_SIZE)) ? WP_STATELESS_SYNC_MAX_BATCH_SIZE : 10;
+  }
+
+  /**
    * Get all batches
    */
   public function get_batches($limit = 0) {
@@ -111,6 +118,20 @@ abstract class BackgroundSync extends \UDX_WP_Background_Process implements ISyn
     }
 
     $this->clear_queue_size();
+    return $this;
+  }
+
+  /**
+   * 
+   */
+  public function stop() {
+    $this
+      ->delete_all()
+      ->clear_process_meta()
+      ->unlock_process()
+      ->clear_scheduled_event();
+
+    wp_die();
   }
 
   /**
@@ -138,6 +159,39 @@ abstract class BackgroundSync extends \UDX_WP_Background_Process implements ISyn
   }
 
   /**
+   * Clear process meta
+   */
+  public function clear_process_meta() {
+    // Clear limits for future starts
+    delete_site_option("{$this->action}_meta");
+    return $this;
+  }
+
+  /**
+   * 
+   */
+  public function save_process_meta($meta = []) {
+    if (!empty($meta)) {
+      $existing_meta = get_site_option("{$this->action}_meta", []);
+      foreach ($meta as $key => $value) {
+        $existing_meta[$key] = $value;
+      }
+      update_site_option("{$this->action}_meta", $existing_meta);
+    }
+  }
+
+  /**
+   * 
+   */
+  public function get_process_meta($name = false) {
+    $meta = get_site_option("{$this->action}_meta", []);
+    if (false === $name) {
+      return $meta;
+    }
+    return isset($meta[$name]) ? $meta[$name] : null;
+  }
+
+  /**
    * Extending save queue method
    *
    * @return $this
@@ -145,7 +199,9 @@ abstract class BackgroundSync extends \UDX_WP_Background_Process implements ISyn
   public function save() {
     $batch_size = is_array($this->data) ? count($this->data) : 1;
     $this->update_queue_size($batch_size);
-    return parent::save();
+    parent::save();
+    $this->data = [];
+    return $this;
   }
 
   /**
