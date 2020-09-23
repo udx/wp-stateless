@@ -224,6 +224,7 @@ namespace wpCloud\StatelessMedia {
             'limit' => null
           ]);
 
+          // unhardcode this
           ImageSync::instance()->start($params);
 
           return new \WP_REST_Response(array(

@@ -33,7 +33,7 @@ abstract class BackgroundSync extends \UDX_WP_Background_Process implements ISyn
   }
 
   /**
-   * 
+   * Get all batches
    */
   public function get_batches($limit = 0) {
     global $wpdb;
@@ -88,7 +88,7 @@ abstract class BackgroundSync extends \UDX_WP_Background_Process implements ISyn
   }
 
   /**
-   * 
+   * Get one top batch
    */
   protected function get_batch() {
     return array_reduce(
@@ -101,7 +101,7 @@ abstract class BackgroundSync extends \UDX_WP_Background_Process implements ISyn
   }
 
   /**
-   * 
+   * Delete all batches
    */
   public function delete_all() {
     $batches = $this->get_batches();
@@ -109,24 +109,69 @@ abstract class BackgroundSync extends \UDX_WP_Background_Process implements ISyn
     foreach ($batches as $batch) {
       $this->delete($batch->key);
     }
+
+    $this->clear_queue_size();
   }
 
   /**
    * 
+   */
+  public function update_queue_size($size) {
+    $size = intval($size) + $this->get_queue_size();
+    update_site_option("{$this->action}_queue_size", $size);
+    return $this;
+  }
+
+  /**
+   * 
+   */
+  public function get_queue_size() {
+    return intval(get_site_option("{$this->action}_queue_size", 0));
+  }
+
+  /**
+   * 
+   */
+  public function clear_queue_size() {
+    delete_site_option("{$this->action}_queue_size");
+    return $this;
+  }
+
+  /**
+   * Extending save queue method
+   *
+   * @return $this
+   */
+  public function save() {
+    $batch_size = is_array($this->data) ? count($this->data) : 1;
+    $this->update_queue_size($batch_size);
+    return parent::save();
+  }
+
+  /**
+   * Extending complete process method
+   */
+  protected function complete() {
+    parent::complete();
+    $this->clear_queue_size();
+  }
+
+  /**
+   * Default name
    */
   public function get_name() {
     return __('Background Sync', ud_get_stateless_media()->domain);
   }
 
   /**
-   * 
+   * Default helper window is set to false
    */
   public function get_helper_window() {
     return false;
   }
 
   /**
-   * 
+   * Convert to json
    */
   public function jsonSerialize() {
     return [

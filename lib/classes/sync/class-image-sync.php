@@ -52,7 +52,7 @@ class ImageSync extends BackgroundSync {
   }
 
   /**
-   * 
+   * Process 1 item from the queue
    */
   protected function task($item) {
     sleep(5);
@@ -62,20 +62,53 @@ class ImageSync extends BackgroundSync {
   }
 
   /**
-   * 
+   * Extending save method
+   */
+  public function save($limit = 0, $start_datetime = false) {
+    // Remember limit for future requests
+    if (is_int($limit) && $limit > 0) {
+      update_site_option("{$this->action}_queue_limit", $limit);
+    }
+
+    // Remember start datetime to process only items created before this time
+    if ($start_datetime && $timestamp = strtotime($start_datetime)) {
+      update_site_option("{$this->action}_start_datetime", date('Y-m-d H:i:s', $timestamp));
+    }
+
+    return parent::save();
+  }
+
+  /**
+   * Clear process meta
+   */
+  public function clear_process_meta() {
+    // Clear limits for future starts
+    delete_site_option("{$this->action}_queue_limit");
+
+    // Unset date time of previous start
+    delete_site_option("{$this->action}_start_datetime");
+  }
+
+  /**
+   * Extending complete method
    */
   protected function complete() {
     parent::complete();
+
+    $this->clear_process_meta();
 
     error_log("ImageSync Complete");
   }
 
   /**
-   * 
+   * Method to start processing the queue
    */
   public function start($args = []) {
     if ($this->is_process_running()) return false;
+
+    // Make sure there is no orphaned data and state
     $this->cancel_process();
+    $this->clear_process_meta();
 
     $settings = wp_parse_args($args, [
       'limit' => null,
@@ -88,11 +121,14 @@ class ImageSync extends BackgroundSync {
     $max_batch_size = (defined('WP_STATELESS_SYNC_MAX_BATCH_SIZE') && is_int(WP_STATELESS_SYNC_MAX_BATCH_SIZE)) ? WP_STATELESS_SYNC_MAX_BATCH_SIZE : 10;
 
     global $wpdb;
-    $sql = "SELECT ID FROM $wpdb->posts WHERE post_type = 'attachment' AND post_mime_type LIKE 'image/%' ORDER BY ID $order LIMIT %d";
-    $query = $wpdb->prepare($sql, $max_batch_size);
+    $sql = "SELECT ID FROM $wpdb->posts 
+            WHERE post_type = 'attachment' 
+              AND post_mime_type LIKE 'image/%'
+              AND post_date < %s 
+            ORDER BY ID $order 
+            LIMIT %d";
+    $query = $wpdb->prepare($sql, $datetime = current_time('mysql'), $max_batch_size);
     $ids = $wpdb->get_col($query);
-
-    print_r($ids);
 
     $total = 0;
     foreach ($ids as $id) {
@@ -102,7 +138,7 @@ class ImageSync extends BackgroundSync {
       }
     }
 
-    $this->save()->dispatch();
+    $this->save($limit, $datetime)->dispatch();
   }
 
   /**
