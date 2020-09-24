@@ -1066,9 +1066,11 @@ namespace wpCloud\StatelessMedia {
       /**
        * Check using wildcards
        * @return bool
+       * 
+       * @todo remove all uses of this function
        */
       public static function is_use_wildcards() {
-        return isset($_REQUEST['use_wildcards']) ? $_REQUEST['use_wildcards'] : false;
+        return true;
       }
 
       /**

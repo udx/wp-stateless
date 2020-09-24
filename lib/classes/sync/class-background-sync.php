@@ -25,7 +25,7 @@ abstract class BackgroundSync extends \UDX_WP_Background_Process implements ISyn
     $this->action = "{$this->action}_{$blog_id}";
 
     add_filter('wp_stateless_sync_types', function ($classes) {
-      $classes[] = get_called_class();
+      $classes[$c = get_called_class()] = $c;
       return $classes;
     });
 
@@ -33,7 +33,9 @@ abstract class BackgroundSync extends \UDX_WP_Background_Process implements ISyn
   }
 
   /**
+   * Determine maximum batch size
    * 
+   * @return int Default is 10
    */
   public function get_max_batch_size() {
     return (defined('WP_STATELESS_SYNC_MAX_BATCH_SIZE') && is_int(WP_STATELESS_SYNC_MAX_BATCH_SIZE)) ? WP_STATELESS_SYNC_MAX_BATCH_SIZE : 10;
@@ -41,6 +43,9 @@ abstract class BackgroundSync extends \UDX_WP_Background_Process implements ISyn
 
   /**
    * Get all batches
+   * 
+   * @param int $limit 0
+   * @return array
    */
   public function get_batches($limit = 0) {
     global $wpdb;
@@ -76,7 +81,7 @@ abstract class BackgroundSync extends \UDX_WP_Background_Process implements ISyn
 
     $items = $wpdb->get_results($wpdb->prepare($sql, $key));
 
-    $batches = array();
+    $batches = [];
 
     if (!empty($items)) {
       $batches = array_map(
@@ -103,12 +108,14 @@ abstract class BackgroundSync extends \UDX_WP_Background_Process implements ISyn
       function ($_, $batch) {
         return $batch;
       },
-      array()
+      []
     );
   }
 
   /**
    * Delete all batches
+   * 
+   * @return self
    */
   public function delete_all() {
     $batches = $this->get_batches();
@@ -122,7 +129,7 @@ abstract class BackgroundSync extends \UDX_WP_Background_Process implements ISyn
   }
 
   /**
-   * 
+   * Stop processing
    */
   public function stop() {
     $this
@@ -135,7 +142,10 @@ abstract class BackgroundSync extends \UDX_WP_Background_Process implements ISyn
   }
 
   /**
+   * Update the whole queue size
    * 
+   * @param int $size
+   * @return self
    */
   public function update_queue_size($size) {
     $size = intval($size) + $this->get_queue_size();
@@ -144,14 +154,16 @@ abstract class BackgroundSync extends \UDX_WP_Background_Process implements ISyn
   }
 
   /**
-   * 
+   * Get current queue size
    */
   public function get_queue_size() {
     return intval(get_site_option("{$this->action}_queue_size", 0));
   }
 
   /**
+   * Clear the queue size 
    * 
+   * @return self
    */
   public function clear_queue_size() {
     delete_site_option("{$this->action}_queue_size");
@@ -160,6 +172,8 @@ abstract class BackgroundSync extends \UDX_WP_Background_Process implements ISyn
 
   /**
    * Clear process meta
+   * 
+   * @return self
    */
   public function clear_process_meta() {
     // Clear limits for future starts
@@ -168,7 +182,9 @@ abstract class BackgroundSync extends \UDX_WP_Background_Process implements ISyn
   }
 
   /**
+   * Save process meta data
    * 
+   * @param array $meta
    */
   public function save_process_meta($meta = []) {
     if (!empty($meta)) {
@@ -181,7 +197,10 @@ abstract class BackgroundSync extends \UDX_WP_Background_Process implements ISyn
   }
 
   /**
+   * Get process meta data. All or by the key.
    * 
+   * @param string|bool $key
+   * @return array|string|null
    */
   public function get_process_meta($name = false) {
     $meta = get_site_option("{$this->action}_meta", []);
@@ -214,6 +233,8 @@ abstract class BackgroundSync extends \UDX_WP_Background_Process implements ISyn
 
   /**
    * Default name
+   * 
+   * @return string
    */
   public function get_name() {
     return __('Background Sync', ud_get_stateless_media()->domain);
@@ -221,6 +242,8 @@ abstract class BackgroundSync extends \UDX_WP_Background_Process implements ISyn
 
   /**
    * Default helper window is set to false
+   * 
+   * @return HelperWindow|bool
    */
   public function get_helper_window() {
     return false;
@@ -228,13 +251,33 @@ abstract class BackgroundSync extends \UDX_WP_Background_Process implements ISyn
 
   /**
    * Convert to json
+   * 
+   * @return array
    */
   public function jsonSerialize() {
     return [
+      'id' => get_called_class(),
       'name' => $this->get_name(),
       'helper' => $this->get_helper_window(),
       'total_items' => $this->get_total_items(),
-      'is_running' => !$this->is_queue_empty() && $this->is_process_running()
+      'is_running' => !$this->is_queue_empty() && $this->is_process_running(),
+      'limit' => ($limit = $this->get_process_meta('limit')) ? $limit : 0
     ];
+  }
+
+  /**
+   * Log background process event
+   * 
+   * @param string $message
+   * @return bool TRUE on success or FALSE on failure
+   */
+  public function log($message) {
+    $message = sprintf('Background Sync - %s: %s', $this->get_name(), $message);
+
+    if (!defined('WP_STATELESS_SYNC_LOG')) {
+      return error_log($message);
+    }
+
+    return error_log(date('c') . ": $message\n", 3, WP_STATELESS_SYNC_LOG);
   }
 }

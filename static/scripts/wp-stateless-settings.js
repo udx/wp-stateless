@@ -19,7 +19,7 @@ jQuery(document).ready(function ($) {
     return false
   })
 
-  $('.pointer').on('click', function () {
+  $(document).on('click', '.pointer', function () {
     var pointer = $(this)
     pointer
       .pointer({

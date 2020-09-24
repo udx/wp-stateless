@@ -32,8 +32,8 @@ class ImageSync extends BackgroundSync {
    */
   public function get_helper_window() {
     return new HelperWindow(
-      __('What are Media Library Objects?', ud_get_stateless_media()->domain),
-      __('All images and other files that were uploaded via the media library or via plugins that use standard uploading API.', ud_get_stateless_media()->domain),
+      __('What are Media Library Images?', ud_get_stateless_media()->domain),
+      __('All image files that were uploaded via the media library or via plugins that use standard uploading API.', ud_get_stateless_media()->domain),
     );
   }
 
@@ -57,6 +57,7 @@ class ImageSync extends BackgroundSync {
    */
   protected function task($id) {
     try {
+      sleep(3);
       @error_reporting(0);
 
       if (ud_get_stateless_media()->is_connected_to_gs() !== true) {
@@ -101,24 +102,23 @@ class ImageSync extends BackgroundSync {
         }
       }
 
-      // If this fails, then it just means that nothing was changed (old value == new value)
+      // trigger processing filters
       wp_update_attachment_metadata($image->ID, $metadata);
       do_action('sm:synced::image', $id, $metadata);
 
-      // @todo Create separate log file sync processes
-      error_log(sprintf(__('%1$s (ID %2$s) was successfully synced in %3$s seconds.', ud_get_stateless_media()->domain), esc_html(get_the_title($image->ID)), $image->ID, timer_stop()));
+      $this->log(sprintf(__('%1$s (ID %2$s) was successfully synced in %3$s seconds.', ud_get_stateless_media()->domain), esc_html(get_the_title($image->ID)), $image->ID, timer_stop()));
 
       $this->extend_queue();
       return false;
     } catch (FatalException $e) {
-      error_log("{$this->get_name()} stopped due to error: {$e->getMessage()}");
+      $this->log("Stopped due to error - {$e->getMessage()}");
       $this->stop();
       return false;
     } catch (UnprocessableException $e) {
-      error_log("{$this->get_name()}: {$e->getMessage()}");
+      $this->log($e->getMessage());
       return false;
     } catch (\Throwable $e) {
-      error_log("{$this->get_name()} stopped due to error: {$e->getMessage()}");
+      $this->log("Stopped due to error - {$e->getMessage()}");
       $this->stop();
       return false;
     }
@@ -132,7 +132,7 @@ class ImageSync extends BackgroundSync {
 
     $this->clear_process_meta();
 
-    error_log("ImageSync Complete");
+    $this->log("Complete");
   }
 
   /**
@@ -140,6 +140,8 @@ class ImageSync extends BackgroundSync {
    */
   public function start($args = []) {
     if ($this->is_process_running()) return false;
+
+    $this->log("Start");
 
     // Make sure there is no orphaned data and state
     $this->cancel_process();
@@ -179,6 +181,7 @@ class ImageSync extends BackgroundSync {
     ]);
 
     $this->save()->dispatch();
+    return true;
   }
 
   /**

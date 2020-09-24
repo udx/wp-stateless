@@ -160,10 +160,8 @@ namespace wpCloud\StatelessMedia {
        * 
        * @return \WP_REST_Response|\WP_Error
        */
-      static public function syncGetStats() {
+      static public function syncGetProcesses() {
         try {
-          global $wpdb;
-
           $syncClasses = Utility::get_available_sync_classes();
 
           return new \WP_REST_Response(array(
@@ -171,65 +169,35 @@ namespace wpCloud\StatelessMedia {
             'data' => $syncClasses
           ));
 
-          foreach ($syncClasses as $syncClass) {
-            echo $syncClass->get_name();
-          }
+          // remove this once ported
+          // $statsSql = [
+          //   'other' => "SELECT count(*) FROM $wpdb->posts WHERE post_type = 'attachment' AND post_mime_type NOT LIKE 'image/%' ORDER BY ID DESC"
+          // ];
 
-          $stats = [
-            'images' => 0,
-            'other' => 0,
-            'custom' => 0
-          ];
-
-          $statsSql = [
-            'images' => "SELECT count(*) FROM $wpdb->posts WHERE post_type = 'attachment' AND post_mime_type LIKE 'image/%' ORDER BY ID DESC",
-            'other' => "SELECT count(*) FROM $wpdb->posts WHERE post_type = 'attachment' AND post_mime_type NOT LIKE 'image/%' ORDER BY ID DESC"
-          ];
-
-          foreach ($statsSql as $kind => $sql) {
-            $cached = get_transient($transKey = "wp-stateless-stats-$kind");
-            if (false === $cached) {
-              $cached = $wpdb->get_var($sql);
-              set_transient($transKey, $cached, MINUTE_IN_SECONDS * 5);
-            }
-            $stats[$kind] = intval($cached);
-          }
-
-          $stats['custom'] = count(array_unique(apply_filters('sm:sync::nonMediaFiles', [])));
-
-          return new \WP_REST_Response(array(
-            'ok' => true,
-            'data' => $stats
-          ));
+          // $stats['custom'] = count(array_unique(apply_filters('sm:sync::nonMediaFiles', [])));
         } catch (\Throwable $e) {
           return new \WP_Error('internal_server_error', $e->getMessage(), ['status' => 500]);
         }
       }
 
-      static public function syncGetState() {
-        try {
-          return new \WP_REST_Response(array(
-            'ok' => true,
-            'data' => []
-          ));
-        } catch (\Throwable $e) {
-          return new \WP_Error('internal_server_error', $e->getMessage(), ['status' => 500]);
-        }
-      }
-
+      /**
+       * Run sync by processing class id
+       */
       static public function syncRun(\WP_REST_Request $request) {
         try {
           $params = wp_parse_args($request->get_params(), [
-            'type' => null,
+            'id' => null,
             'limit' => null
           ]);
 
-          // unhardcode this
-          ImageSync::instance()->start($params);
+          if (empty($params['id']) || !class_exists($params['id'])) {
+            throw new \Exception(sprintf('Processing class not found: %s', $params['id']));
+          }
+
+          $processingClass = $params['id'];
 
           return new \WP_REST_Response(array(
-            'ok' => true,
-            'data' => $request->get_params()
+            'ok' => $processingClass::instance()->start($params)
           ));
         } catch (\Throwable $e) {
           return new \WP_Error('internal_server_error', $e->getMessage(), ['status' => 500]);

@@ -68,7 +68,11 @@
 }
 
 .stless_settings_content .postbox .options {
-  margin-top: 1em;
+  margin-bottom: 1em;
+}
+
+.stless_settings_content .postbox .actions {
+  text-align: right;
 }
 
 .wpStateLess-support {

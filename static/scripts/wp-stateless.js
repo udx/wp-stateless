@@ -1252,98 +1252,47 @@ var wpStatelessApp = angular
     $scope.errors = []
 
     /**
-     * Stats Model
+     * Processes Model
      */
-    $scope.stats = {
+    $scope.processes = {
       isLoading: false,
-      values: {
-        images: 0,
-        other: 0,
-        custom: 0,
-      },
-      limit: {
-        enabled: false,
-        value: 0,
-      },
+      classes: [],
       load: function () {
         var that = this
         that.isLoading = true
         $http({
           method: 'GET',
-          url: window.wpApiSettings.root + 'wp-stateless/v1/sync/getStats',
+          url: window.wpApiSettings.root + 'wp-stateless/v1/sync/getProcesses',
           headers: {
             Authorization: window.wp_stateless_configs.REST_API_TOKEN,
           },
         })
           .then(function (response) {
-            that.values.images = response.data.data.images || that.values.images
-            that.values.other = response.data.data.other || that.values.other
-            that.values.custom = response.data.data.custom || that.values.custom
+            that.classes = []
+            if (response && response.data) {
+              var processes = response.data.data || {}
+              for (var i in processes) {
+                that.classes.push(new ProcessingClass(processes[i]))
+              }
+            } else {
+              $scope.errors.push(window.stateless_l10n.something_went_wrong)
+            }
             that.isLoading = false
           })
           .catch(function (error) {
-            $scope.errors.push(error.data.message || 'Something went wrong')
+            $scope.errors.push(
+              error.data.message || window.stateless_l10n.something_went_wrong
+            )
             that.isLoading = false
           })
       },
-    }
-
-    $scope.state = {
-      isLoading: false,
-      load: function () {
-        var that = this
-        that.isLoading = true
-        $http({
-          method: 'GET',
-          url: window.wpApiSettings.root + 'wp-stateless/v1/sync/getState',
-          headers: {
-            Authorization: window.wp_stateless_configs.REST_API_TOKEN,
-          },
-        })
-          .then(function (response) {
-            that.isLoading = false
-          })
-          .catch(function (error) {
-            $scope.errors.push(error.data.message || 'Something went wrong')
-            that.isLoading = false
-          })
-      },
-    }
-
-    $scope.runSync = function (type, limit = 0) {
-      console.log(arguments)
-      $http({
-        method: 'POST',
-        url: window.wpApiSettings.root + 'wp-stateless/v1/sync/run',
-        headers: {
-          Authorization: window.wp_stateless_configs.REST_API_TOKEN,
-        },
-        data: {
-          type: type,
-          limit: limit,
-        },
-      })
-        .then(function (response) {
-          that.isLoading = false
-        })
-        .catch(function (error) {
-          $scope.errors.push(error.data.message || 'Something went wrong')
-          that.isLoading = false
-        })
-    }
-
-    $scope.canSync = function () {
-      return (
-        !$scope.stats.isLoading &&
-        !$scope.state.isLoading &&
-        !$scope.errors.length
-      )
     }
 
     // initialize stuff
     $scope.init = function () {
-      $scope.stats.load()
-      $scope.state.load()
+      ProcessingClass.prototype.$http = $http
+      ProcessingClass.prototype.$scope = $scope
+      $scope.processes.load()
     }
   })
   .controller('noJSWarning', function ($scope, $filter) {
@@ -1358,3 +1307,50 @@ wpStatelessApp.filter('trust', [
     }
   },
 ])
+
+/**
+ * ProcessingClass
+ *
+ * @param {*} data
+ */
+function ProcessingClass(data) {
+  this.id = false
+  this.total_items = 0
+  this.is_running = false
+  this.limit = 0
+
+  // Build an instance
+  Object.assign(this, data)
+
+  /**
+   * Run sync
+   */
+  this.run = function () {
+    this.is_running = true
+    this.$http({
+      method: 'POST',
+      url: window.wpApiSettings.root + 'wp-stateless/v1/sync/run',
+      headers: {
+        Authorization: window.wp_stateless_configs.REST_API_TOKEN,
+      },
+      data: {
+        id: this.id,
+        limit: this.limit,
+      },
+    })
+      .then(function (response) {
+        // do something here
+        console.log(response)
+      })
+      .catch(function (error) {
+        this.$scope.errors.push(error.data.message || 'Something went wrong')
+      })
+  }
+  this.canRun = function () {
+    return this.total_items > 0 && !this.is_running
+  }
+  this.stop = function () {
+    this.is_running = false
+  }
+  this.refresh = function () {}
+}

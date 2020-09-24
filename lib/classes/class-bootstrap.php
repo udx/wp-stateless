@@ -652,15 +652,9 @@ namespace wpCloud\StatelessMedia {
           'permission_callback' => array($api_namespace, 'authCheck')
         ));
 
-        register_rest_route($route_namespace, '/sync/getStats', array(
+        register_rest_route($route_namespace, '/sync/getProcesses', array(
           'methods' => \WP_REST_Server::READABLE,
-          'callback' => array($api_namespace, 'syncGetStats'),
-          'permission_callback' => array($api_namespace, 'authCheck')
-        ));
-
-        register_rest_route($route_namespace, '/sync/getState', array(
-          'methods' => \WP_REST_Server::READABLE,
-          'callback' => array($api_namespace, 'syncGetState'),
+          'callback' => array($api_namespace, 'syncGetProcesses'),
           'permission_callback' => array($api_namespace, 'authCheck')
         ));
 
