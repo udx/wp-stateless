@@ -35,10 +35,10 @@ abstract class BackgroundSync extends \UDX_WP_Background_Process implements ISyn
   /**
    * Determine maximum batch size
    * 
-   * @return int Default is 10
+   * @return int Default is 50
    */
   public function get_max_batch_size() {
-    return (defined('WP_STATELESS_SYNC_MAX_BATCH_SIZE') && is_int(WP_STATELESS_SYNC_MAX_BATCH_SIZE)) ? WP_STATELESS_SYNC_MAX_BATCH_SIZE : 10;
+    return (defined('WP_STATELESS_SYNC_MAX_BATCH_SIZE') && is_int(WP_STATELESS_SYNC_MAX_BATCH_SIZE)) ? WP_STATELESS_SYNC_MAX_BATCH_SIZE : 50;
   }
 
   /**
@@ -260,8 +260,10 @@ abstract class BackgroundSync extends \UDX_WP_Background_Process implements ISyn
       'name' => $this->get_name(),
       'helper' => $this->get_helper_window(),
       'total_items' => $this->get_total_items(),
-      'is_running' => !$this->is_queue_empty() && $this->is_process_running(),
-      'limit' => ($limit = $this->get_process_meta('limit')) ? $limit : 0
+      'is_running' => !$this->is_queue_empty() || $this->is_process_running(),
+      'limit' => ($limit = $this->get_process_meta('limit')) ? $limit : 0,
+      'order' => ($order = $this->get_process_meta('order')) ? $order : 'desc',
+      'queued_items' => $this->get_queue_size()
     ];
   }
 

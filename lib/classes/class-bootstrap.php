@@ -45,11 +45,6 @@ namespace wpCloud\StatelessMedia {
       protected static $instance = null;
 
       /**
-       * 
-       */
-      public $background_image_sync = null;
-
-      /**
        * Constructor
        * Attention: MUST NOT BE CALLED DIRECTLY! USE get_instance() INSTEAD!
        * @param $args
@@ -658,6 +653,12 @@ namespace wpCloud\StatelessMedia {
           'permission_callback' => array($api_namespace, 'authCheck')
         ));
 
+        register_rest_route($route_namespace, '/sync/getProcess/(?P<id>\S+)', array(
+          'methods' => \WP_REST_Server::READABLE,
+          'callback' => array($api_namespace, 'syncGetProcess'),
+          'permission_callback' => array($api_namespace, 'authCheck')
+        ));
+
         register_rest_route($route_namespace, '/sync/run', array(
           'methods' => \WP_REST_Server::CREATABLE,
           'callback' => array($api_namespace, 'syncRun'),
@@ -1102,7 +1103,7 @@ namespace wpCloud\StatelessMedia {
             // Trying again using readlink in case it's a symlink file.
             // boot_file is already solved.
             // wp_normalize_path is helpfull in windows.
-            if (wp_normalize_path($this->boot_file) == wp_normalize_path($path) || (is_link($path) and $this->boot_file == readlink($path))) {
+            if (wp_normalize_path($this->boot_file) == wp_normalize_path($path) || (is_link($path) && $this->boot_file == readlink($path))) {
               return true;
             }
           }

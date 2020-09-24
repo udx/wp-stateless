@@ -1272,7 +1272,13 @@ var wpStatelessApp = angular
             if (response && response.data) {
               var processes = response.data.data || {}
               for (var i in processes) {
-                that.classes.push(new ProcessingClass(processes[i]))
+                var sync = new ProcessingClass(processes[i])
+                if (sync.is_running) {
+                  sync.startPolling()
+                } else {
+                  sync.stopPolling()
+                }
+                that.classes.push(sync)
               }
             } else {
               $scope.errors.push(window.stateless_l10n.something_went_wrong)
@@ -1318,14 +1324,18 @@ function ProcessingClass(data) {
   this.total_items = 0
   this.is_running = false
   this.limit = 0
+  this.order = 'desc'
 
   // Build an instance
   Object.assign(this, data)
+
+  this.interval = null
 
   /**
    * Run sync
    */
   this.run = function () {
+    var that = this
     this.is_running = true
     this.$http({
       method: 'POST',
@@ -1336,21 +1346,88 @@ function ProcessingClass(data) {
       data: {
         id: this.id,
         limit: this.limit,
+        order: this.order,
       },
     })
       .then(function (response) {
-        // do something here
-        console.log(response)
+        if (response.data && response.data.ok) {
+          that.startPolling()
+        }
       })
       .catch(function (error) {
-        this.$scope.errors.push(error.data.message || 'Something went wrong')
+        that.stopPolling()
+        that.$scope.errors.push(
+          error.data.message || window.stateless_l10n.something_went_wrong
+        )
       })
   }
+
+  /**
+   *
+   */
   this.canRun = function () {
     return this.total_items > 0 && !this.is_running
   }
+
+  /**
+   *
+   */
   this.stop = function () {
     this.is_running = false
+    this.stopPolling()
   }
-  this.refresh = function () {}
+
+  /**
+   *
+   */
+  this.startPolling = function () {
+    var that = this
+    this.stopPolling()
+    this.interval = setInterval(function () {
+      that.refresh()
+    }, 5000)
+  }
+
+  /**
+   *
+   */
+  this.stopPolling = function () {
+    clearInterval(this.interval)
+  }
+
+  /**
+   *
+   */
+  this.refresh = function () {
+    var that = this
+    this.$http({
+      method: 'GET',
+      url:
+        window.wpApiSettings.root +
+        'wp-stateless/v1/sync/getProcess/' +
+        window.btoa(this.id),
+      headers: {
+        Authorization: window.wp_stateless_configs.REST_API_TOKEN,
+      },
+    })
+      .then(function (response) {
+        if (
+          response &&
+          response.data &&
+          response.data.ok &&
+          response.data.data
+        ) {
+          if (!response.data.data.is_running) {
+            that.stopPolling()
+          }
+          Object.assign(that, response.data.data)
+        }
+      })
+      .catch(function (error) {
+        that.stopPolling()
+        that.$scope.errors.push(
+          error.data.message || window.stateless_l10n.something_went_wrong
+        )
+      })
+  }
 }

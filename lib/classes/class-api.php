@@ -181,13 +181,39 @@ namespace wpCloud\StatelessMedia {
       }
 
       /**
+       * 
+       */
+      static public function syncGetProcess(\WP_REST_Request $request) {
+        try {
+          $id = base64_decode($request->get_param('id'));
+          if (!class_exists($id)) {
+            throw new \Exception(sprintf('Could not get process by id %s', $id));
+          }
+
+          $syncClasses = Utility::get_available_sync_classes();
+
+          if (!array_key_exists($id, $syncClasses)) {
+            throw new \Exception(sprintf('Could not get process by id %s', $id));
+          }
+
+          return new \WP_REST_Response(array(
+            'ok' => true,
+            'data' => $syncClasses[$id]
+          ));
+        } catch (\Throwable $e) {
+          return new \WP_Error('internal_server_error', $e->getMessage(), ['status' => 500]);
+        }
+      }
+
+      /**
        * Run sync by processing class id
        */
       static public function syncRun(\WP_REST_Request $request) {
         try {
           $params = wp_parse_args($request->get_params(), [
             'id' => null,
-            'limit' => null
+            'limit' => null,
+            'order' => null,
           ]);
 
           if (empty($params['id']) || !class_exists($params['id'])) {

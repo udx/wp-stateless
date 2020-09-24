@@ -57,7 +57,6 @@ class ImageSync extends BackgroundSync {
    */
   protected function task($id) {
     try {
-      sleep(3);
       @error_reporting(0);
 
       if (ud_get_stateless_media()->is_connected_to_gs() !== true) {
