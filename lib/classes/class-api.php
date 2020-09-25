@@ -156,7 +156,7 @@ namespace wpCloud\StatelessMedia {
       }
 
       /**
-       * Get media count statistics
+       * Get all available processes with their states
        * 
        * @return \WP_REST_Response|\WP_Error
        */
@@ -181,7 +181,10 @@ namespace wpCloud\StatelessMedia {
       }
 
       /**
+       * Get a single process by id (base64 encoded class name)
        * 
+       * @param \WP_REST_Request $request
+       * @return \WP_Error|\WP_REST_Response
        */
       static public function syncGetProcess(\WP_REST_Request $request) {
         try {
@@ -207,6 +210,9 @@ namespace wpCloud\StatelessMedia {
 
       /**
        * Run sync by processing class id
+       * 
+       * @param \WP_REST_Request $request
+       * @return \WP_Error|\WP_REST_Response
        */
       static public function syncRun(\WP_REST_Request $request) {
         try {
@@ -224,6 +230,32 @@ namespace wpCloud\StatelessMedia {
 
           return new \WP_REST_Response(array(
             'ok' => $processingClass::instance()->start($params)
+          ));
+        } catch (\Throwable $e) {
+          return new \WP_Error('internal_server_error', $e->getMessage(), ['status' => 500]);
+        }
+      }
+
+      /**
+       * Stop sync by processing class id
+       * 
+       * @param \WP_REST_Request $request
+       * @return \WP_Error|\WP_REST_Response
+       */
+      static public function syncStop(\WP_REST_Request $request) {
+        try {
+          $params = wp_parse_args($request->get_params(), [
+            'id' => null
+          ]);
+
+          if (empty($params['id']) || !class_exists($params['id'])) {
+            throw new \Exception(sprintf('Processing class not found: %s', $params['id']));
+          }
+
+          $processingClass = $params['id'];
+
+          return new \WP_REST_Response(array(
+            'ok' => $processingClass::instance()->stop()
           ));
         } catch (\Throwable $e) {
           return new \WP_Error('internal_server_error', $e->getMessage(), ['status' => 500]);

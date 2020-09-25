@@ -1346,7 +1346,7 @@ function ProcessingClass(data) {
   this.run = function () {
     var that = this
     this.is_running = true
-    //return
+    this.is_stopping = false
     this.$http({
       method: 'POST',
       url: window.wpApiSettings.root + 'wp-stateless/v1/sync/run',
@@ -1393,8 +1393,27 @@ function ProcessingClass(data) {
    *
    */
   this.stop = function () {
-    this.is_running = false
-    this.stopPolling()
+    var that = this
+    this.is_stopping = true
+    this.$http({
+      method: 'POST',
+      url: window.wpApiSettings.root + 'wp-stateless/v1/sync/stop',
+      headers: {
+        Authorization: window.wp_stateless_configs.REST_API_TOKEN,
+      },
+      data: {
+        id: this.id,
+      },
+    })
+      .then(function (response) {
+        if (response.data && response.data.ok) {
+        }
+      })
+      .catch(function (error) {
+        that.$scope.errors.push(
+          error.data.message || window.stateless_l10n.something_went_wrong
+        )
+      })
   }
 
   /**

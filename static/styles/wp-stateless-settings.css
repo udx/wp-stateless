@@ -83,6 +83,7 @@
 
 .stless_settings_content .postbox .progress .bar-wrapper .bar {
   box-sizing: border-box;
+  transition: width 1s;
 }
 
 .stless_settings_content .postbox .progress .bar-wrapper .bar.total {

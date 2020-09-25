@@ -67,6 +67,8 @@ class ImageSync extends BackgroundSync {
    */
   protected function task($id) {
     try {
+      if ($this->is_stopped()) return false;
+
       @error_reporting(0);
 
       if (ud_get_stateless_media()->is_connected_to_gs() !== true) {
@@ -122,7 +124,10 @@ class ImageSync extends BackgroundSync {
         'processed' => ++$processedCount
       ]);
 
-      $this->extend_queue();
+      if (!$this->is_stopped()) {
+        $this->extend_queue();
+      }
+
       return false;
     } catch (FatalException $e) {
       $this->log("Stopped due to error - {$e->getMessage()}");
@@ -153,6 +158,8 @@ class ImageSync extends BackgroundSync {
    */
   public function start($args = []) {
     if ($this->is_process_running()) return false;
+
+    parent::start($args);
 
     $this->log("Start");
 

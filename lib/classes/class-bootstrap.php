@@ -664,6 +664,12 @@ namespace wpCloud\StatelessMedia {
           'callback' => array($api_namespace, 'syncRun'),
           'permission_callback' => array($api_namespace, 'authCheck')
         ));
+
+        register_rest_route($route_namespace, '/sync/stop', array(
+          'methods' => \WP_REST_Server::CREATABLE,
+          'callback' => array($api_namespace, 'syncStop'),
+          'permission_callback' => array($api_namespace, 'authCheck')
+        ));
       }
 
       /**

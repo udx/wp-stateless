@@ -139,16 +139,27 @@ abstract class BackgroundSync extends \UDX_WP_Background_Process implements ISyn
   }
 
   /**
+   * 
+   */
+  public function start() {
+    delete_site_option("{$this->action}_stopped");
+  }
+
+  /**
    * Stop processing
    */
   public function stop() {
-    $this
-      ->delete_all()
-      ->clear_process_meta()
-      ->unlock_process()
-      ->clear_scheduled_event();
+    $this->delete_all();
+    update_site_option("{$this->action}_stopped", true);
+  }
 
-    wp_die();
+  /**
+   * 
+   */
+  public function is_stopped() {
+    $network_id = get_current_network_id();
+    wp_cache_delete("$network_id:notoptions", 'site-options');
+    return boolval(get_site_option("{$this->action}_stopped"));
   }
 
   /**
@@ -240,6 +251,7 @@ abstract class BackgroundSync extends \UDX_WP_Background_Process implements ISyn
     parent::complete();
     $this->clear_process_meta();
     $this->clear_queue_size();
+    delete_site_option("{$this->action}_stopped");
   }
 
   /**
@@ -289,6 +301,11 @@ abstract class BackgroundSync extends \UDX_WP_Background_Process implements ISyn
    */
   public function log($message) {
     $message = sprintf('Background Sync - %s: %s', $this->get_name(), $message);
+
+    if (is_multisite()) {
+      $blog_id = get_current_blog_id();
+      $message = sprintf('[Blog %s] %s', $blog_id, $message);
+    }
 
     if (!defined('WP_STATELESS_SYNC_LOG')) {
       return error_log($message);
