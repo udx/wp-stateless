@@ -17,6 +17,16 @@ if (!class_exists('UDX_WP_Background_Process')) {
 abstract class BackgroundSync extends \UDX_WP_Background_Process implements ISync, \JsonSerializable {
 
   /**
+   * Flag to allow sorting
+   */
+  protected $allow_sorting = false;
+
+  /**
+   * Flag to allow setting the limit
+   */
+  protected $allow_limit = false;
+
+  /**
    * Extend the construct
    */
   public function __construct() {
@@ -228,6 +238,7 @@ abstract class BackgroundSync extends \UDX_WP_Background_Process implements ISyn
    */
   protected function complete() {
     parent::complete();
+    $this->clear_process_meta();
     $this->clear_queue_size();
   }
 
@@ -259,11 +270,14 @@ abstract class BackgroundSync extends \UDX_WP_Background_Process implements ISyn
       'id' => get_called_class(),
       'name' => $this->get_name(),
       'helper' => $this->get_helper_window(),
-      'total_items' => $this->get_total_items(),
       'is_running' => !$this->is_queue_empty() || $this->is_process_running(),
       'limit' => ($limit = $this->get_process_meta('limit')) ? $limit : 0,
       'order' => ($order = $this->get_process_meta('order')) ? $order : 'desc',
-      'queued_items' => $this->get_queue_size()
+      'total_items' => $this->get_total_items(),
+      'queued_items' => $this->get_queue_size(),
+      'processed_items' => ($processed = $this->get_process_meta('processed')) ? $processed : 0,
+      'allow_limit' => $this->allow_limit,
+      'allow_sorting' => $this->allow_sorting
     ];
   }
 

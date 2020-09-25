@@ -1252,6 +1252,15 @@ var wpStatelessApp = angular
     $scope.errors = []
 
     /**
+     * Count percantage
+     * @param {*} part
+     * @param {*} base
+     */
+    $scope.percentage = function (part, base) {
+      return parseInt((100 / base) * part) + '%'
+    }
+
+    /**
      * Processes Model
      */
     $scope.processes = {
@@ -1337,6 +1346,7 @@ function ProcessingClass(data) {
   this.run = function () {
     var that = this
     this.is_running = true
+    //return
     this.$http({
       method: 'POST',
       url: window.wpApiSettings.root + 'wp-stateless/v1/sync/run',
@@ -1367,6 +1377,16 @@ function ProcessingClass(data) {
    */
   this.canRun = function () {
     return this.total_items > 0 && !this.is_running
+  }
+
+  /**
+   * Get Progress bar possible total
+   */
+  this.getProgressTotal = function () {
+    if (this.limit > 0 && this.limit <= this.total_items) {
+      return this.limit
+    }
+    return this.total_items
   }
 
   /**

@@ -67,12 +67,46 @@
   margin-bottom: 0;
 }
 
-.stless_settings_content .postbox .options {
+.stless_settings_content .postbox .options,
+.stless_settings_content .postbox .progress {
   margin-bottom: 1em;
 }
 
 .stless_settings_content .postbox .actions {
   text-align: right;
+}
+
+.stless_settings_content .postbox .progress .bar-wrapper .legend {
+  display: flex;
+  justify-content: space-between;
+}
+
+.stless_settings_content .postbox .progress .bar-wrapper .bar {
+  box-sizing: border-box;
+}
+
+.stless_settings_content .postbox .progress .bar-wrapper .bar.total {
+  background-color: rgb(67, 129, 187);
+  padding: 2px;
+}
+.stless_settings_content .postbox .progress .bar-wrapper .total {
+  color: rgb(67, 129, 187);
+}
+
+.stless_settings_content .postbox .progress .bar-wrapper .bar.queued {
+  background-color: rgb(192, 206, 112);
+  padding: 2px;
+}
+.stless_settings_content .postbox .progress .bar-wrapper .queued {
+  color: rgb(192, 206, 112);
+}
+
+.stless_settings_content .postbox .progress .bar-wrapper .bar.processed {
+  background-color: rgb(102, 185, 99);
+  height: 5px;
+}
+.stless_settings_content .postbox .progress .bar-wrapper .processed {
+  color: rgb(102, 185, 99);
 }
 
 .wpStateLess-support {

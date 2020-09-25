@@ -11,6 +11,8 @@
     </ul>
   </div>
 
+  <div ng-show="processes.isLoading"><?php _e('Loading available processes...', ud_get_stateless_media()->domain); ?></div>
+
   <div class="metabox-holder">
     <div class="postbox-container" ng-show="processes.classes.length">
 
@@ -28,13 +30,13 @@
           <ul>
             <li><strong><?php _e('Total Items', ud_get_stateless_media()->domain) ?>:</strong> <span>{{process.total_items}}</span></li>
           </ul>
-          <div class="options">
+          <div class="options" ng-show="process.allow_limit">
             <label><?php _e('Enable Limit', ud_get_stateless_media()->domain) ?> <input type="checkbox" ng-model="process.limit_enabled" ng-disabled="process.is_running" ng-change="process.limit = 0" /></label>
             <label ng-style="{visibility: process.limit_enabled || process.limit > 0 ? 'visible' : 'hidden'}">
               <input ng-disabled="!process.limit_enabled || process.is_running" type="number" ng-model="process.limit" style="width:80px" />
             </label>
           </div>
-          <div class="options">
+          <div class="options" ng-show="process.allow_sorting">
             <label>
               <?php _e('Start from', ud_get_stateless_media()->domain) ?>
               <select ng-model="process.order">
@@ -42,6 +44,20 @@
                 <option value="asc"><?php _e('oldest', ud_get_stateless_media()->domain) ?></option>
               </select>
             </label>
+          </div>
+          <div class="progress" ng-show="process.is_running">
+            <div class="bar-wrapper">
+              <div class="legend">
+                <strong class="total"><?php _e('Total', ud_get_stateless_media()->domain) ?>: {{process.getProgressTotal()}}</strong>
+                <strong class="queued"><?php _e('Queued', ud_get_stateless_media()->domain) ?>: {{process.queued_items}}</strong>
+                <strong class="processed"><?php _e('Processed', ud_get_stateless_media()->domain) ?>: {{process.processed_items}}</strong>
+              </div>
+              <div class="bar total">
+                <div class="bar queued" ng-style="{width: percentage(process.queued_items, process.getProgressTotal())}">
+                  <div class="bar processed" ng-style="{width: percentage(process.processed_items, process.queued_items)}">&nbsp;</div>
+                </div>
+              </div>
+            </div>
           </div>
           <div class="actions">
             <button type="button" class="button button-primary" ng-class="{disabled: !process.canRun()}" ng-click="process.run()"><?php _e('Run', ud_get_stateless_media()->domain) ?></button>

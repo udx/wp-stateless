@@ -6,7 +6,7 @@ use wpCloud\StatelessMedia\Singleton;
 use wpCloud\StatelessMedia\Utility;
 
 /**
- * 
+ * Background process for synchronization of media library images
  */
 class ImageSync extends BackgroundSync {
 
@@ -19,6 +19,16 @@ class ImageSync extends BackgroundSync {
    * Unique action
    */
   protected $action = 'wps_bg_image_sync';
+
+  /**
+   * Allow sorting for this kind of sync
+   */
+  protected $allow_sorting = true;
+
+  /**
+   * Allow setting the limit for this kind of sync
+   */
+  protected $allow_limit = true;
 
   /**
    * Name
@@ -107,6 +117,11 @@ class ImageSync extends BackgroundSync {
 
       $this->log(sprintf(__('%1$s (ID %2$s) was successfully synced in %3$s seconds.', ud_get_stateless_media()->domain), esc_html(get_the_title($image->ID)), $image->ID, timer_stop()));
 
+      $processedCount = intval($this->get_process_meta('processed'));
+      $this->save_process_meta([
+        'processed' => ++$processedCount
+      ]);
+
       $this->extend_queue();
       return false;
     } catch (FatalException $e) {
@@ -129,8 +144,7 @@ class ImageSync extends BackgroundSync {
   protected function complete() {
     parent::complete();
 
-    $this->clear_process_meta();
-
+    // @todo do something when complete
     $this->log("Complete");
   }
 
@@ -184,7 +198,7 @@ class ImageSync extends BackgroundSync {
   }
 
   /**
-   * 
+   * Provide the queue with the new data if available
    */
   public function extend_queue() {
     global $wpdb;
