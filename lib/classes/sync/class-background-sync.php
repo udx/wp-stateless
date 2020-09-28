@@ -42,6 +42,8 @@ abstract class BackgroundSync extends \UDX_WP_Background_Process implements ISyn
     parent::__construct();
   }
 
+  abstract public function start();
+
   /**
    * Determine maximum batch size
    * 
@@ -139,18 +141,12 @@ abstract class BackgroundSync extends \UDX_WP_Background_Process implements ISyn
   }
 
   /**
-   * 
-   */
-  public function start() {
-    delete_site_option("{$this->action}_stopped");
-  }
-
-  /**
    * Stop processing
    */
   public function stop() {
     $this->delete_all();
     update_site_option("{$this->action}_stopped", true);
+    $this->log("Stopped");
   }
 
   /**

@@ -68,6 +68,7 @@ class ImageSync extends BackgroundSync {
   protected function task($id) {
     try {
       if ($this->is_stopped()) return false;
+      timer_start();
 
       @error_reporting(0);
 
@@ -117,6 +118,11 @@ class ImageSync extends BackgroundSync {
       wp_update_attachment_metadata($image->ID, $metadata);
       do_action('sm:synced::image', $id, $metadata);
 
+      // Ephemeral and Stateless modes: we don't need the local version.
+      if (ud_get_stateless_media()->get('sm.mode') === 'ephemeral' || ud_get_stateless_media()->get('sm.mode') === 'stateless') {
+        unlink($fullsizepath);
+      }
+
       $this->log(sprintf(__('%1$s (ID %2$s) was successfully synced in %3$s seconds.', ud_get_stateless_media()->domain), esc_html(get_the_title($image->ID)), $image->ID, timer_stop()));
 
       $processedCount = intval($this->get_process_meta('processed'));
@@ -159,11 +165,10 @@ class ImageSync extends BackgroundSync {
   public function start($args = []) {
     if ($this->is_process_running()) return false;
 
-    parent::start($args);
-
     $this->log("Start");
 
     // Make sure there is no orphaned data and state
+    delete_site_option("{$this->action}_stopped");
     $this->cancel_process();
     $this->clear_process_meta();
 

@@ -67,6 +67,7 @@ return array(
     'wpCloud\\StatelessMedia\\SyncNonMedia' => $baseDir . '/lib/classes/class-sync-non-media.php',
     'wpCloud\\StatelessMedia\\Sync\\BackgroundSync' => $baseDir . '/lib/classes/sync/class-background-sync.php',
     'wpCloud\\StatelessMedia\\Sync\\FatalException' => $baseDir . '/lib/classes/sync/exception-fatal.php',
+    'wpCloud\\StatelessMedia\\Sync\\FileSync' => $baseDir . '/lib/classes/sync/class-file-sync.php',
     'wpCloud\\StatelessMedia\\Sync\\HelperWindow' => $baseDir . '/lib/classes/sync/class-helper-window.php',
     'wpCloud\\StatelessMedia\\Sync\\ISync' => $baseDir . '/lib/classes/sync/interface-sync.php',
     'wpCloud\\StatelessMedia\\Sync\\ImageSync' => $baseDir . '/lib/classes/sync/class-image-sync.php',

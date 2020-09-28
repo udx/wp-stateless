@@ -1362,6 +1362,10 @@ function ProcessingClass(data) {
       .then(function (response) {
         if (response.data && response.data.ok) {
           that.startPolling()
+        } else {
+          that.$scope.errors.push(
+            response.data.message || window.stateless_l10n.something_went_wrong
+          )
         }
       })
       .catch(function (error) {

@@ -477,8 +477,10 @@ namespace wpCloud\StatelessMedia {
         if (!isset($metadata['width']) && file_exists($full_size_path)) {
           try {
             $_image_size = getimagesize($full_size_path);
-            $metadata['width'] = $_image_size[0];
-            $metadata['height'] = $_image_size[1];
+            if ($_image_size !== false && is_array($_image_size)) {
+              $metadata['width'] = $_image_size[0];
+              $metadata['height'] = $_image_size[1];
+            }
           } catch (\Exception $e) {
             // lets do nothing.
           }
@@ -537,14 +539,14 @@ namespace wpCloud\StatelessMedia {
           $cloud_meta['sizes'][$image_size]['fileLink']     = $fileLink;
           $cloud_meta['sizes'][$image_size]['mediaLink']    = $media['mediaLink'];
           $cloud_meta['sizes'][$image_size]['width']        = ($media['metadata']['width']) ? $media['metadata']['width'] : $img['width'];
-          $cloud_meta['sizes'][$image_size]['height']       = ($media['metadata']['height']) ? $media['metadata']['width'] : $img['height'];
+          $cloud_meta['sizes'][$image_size]['height']       = ($media['metadata']['height']) ? $media['metadata']['height'] : $img['height'];
         } else {
           // cloud meta for full size image.
           $cloud_meta['name']                   = $gs_name;
           $cloud_meta['fileLink']               = $fileLink;
           $cloud_meta['mediaLink']              = $media['mediaLink'];
-          $cloud_meta['width']                  = ($media['metadata']['width']) ? $media['metadata']['width'] : $img['width'];
-          $cloud_meta['height']                 = ($media['metadata']['height']) ? $media['metadata']['width'] : $img['height'];
+          $cloud_meta['width']                  = isset($media['metadata']['width']) ? $media['metadata']['width'] : ($img['width'] ? $img['width'] : 0);
+          $cloud_meta['height']                 = isset($media['metadata']['height']) ? $media['metadata']['height'] : ($img['height'] ? $img['height'] : 0);
           $cloud_meta['bucket']                 = ud_get_stateless_media()->get('sm.bucket');
           $cloud_meta['sm_version']             = $version;
         }

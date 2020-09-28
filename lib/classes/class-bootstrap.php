@@ -8,9 +8,9 @@
 
 namespace wpCloud\StatelessMedia {
 
-  use BackgroundImageSync;
   use Google\Cloud\Storage\StorageClient;
   use Google\Auth\HttpHandler\HttpHandlerFactory;
+  use wpCloud\StatelessMedia\Sync\FileSync;
   use wpCloud\StatelessMedia\Sync\ImageSync;
 
   if (!class_exists('wpCloud\StatelessMedia\Bootstrap')) {
@@ -103,6 +103,7 @@ namespace wpCloud\StatelessMedia {
         new SyncNonMedia();
 
         ImageSync::instance();
+        FileSync::instance();
 
         // Invoke REST API
         add_action('rest_api_init', array($this, 'api_init'));
