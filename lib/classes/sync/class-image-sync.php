@@ -8,7 +8,7 @@ use wpCloud\StatelessMedia\Utility;
 /**
  * Background process for synchronization of media library images
  */
-class ImageSync extends BackgroundSync {
+class ImageSync extends LibrarySync {
 
   /**
    * Make is singleton
@@ -32,13 +32,26 @@ class ImageSync extends BackgroundSync {
 
   /**
    * Name
+   * 
+   * @return string
    */
   public function get_name() {
     return __('Media Library Images', ud_get_stateless_media()->domain);
   }
 
   /**
+   * Get SQL condition to compose the query to get items to process by library sync
+   * 
+   * @return string
+   */
+  public function get_sql_condition() {
+    return "AND post_mime_type LIKE 'image/%'";
+  }
+
+  /**
    * Helper window
+   * 
+   * @return HelperWindow
    */
   public function get_helper_window() {
     return new HelperWindow(
@@ -48,22 +61,10 @@ class ImageSync extends BackgroundSync {
   }
 
   /**
-   * Total items
-   */
-  public function get_total_items() {
-    $cached = get_transient($transKey = "{$this->action}_total_items");
-    if ($cached) return intval($cached);
-
-    global $wpdb;
-    $sql = "SELECT count(*) FROM $wpdb->posts WHERE post_type = 'attachment' AND post_mime_type LIKE 'image/%'";
-    $total = $wpdb->get_var($sql);
-
-    set_transient($transKey, $total, MINUTE_IN_SECONDS * 5);
-    return intval($total);
-  }
-
-  /**
    * Process 1 item from the queue
+   * 
+   * @param mixed $id
+   * @return bool
    */
   protected function task($id) {
     try {
@@ -146,112 +147,6 @@ class ImageSync extends BackgroundSync {
       $this->log("Stopped due to error - {$e->getMessage()}");
       $this->stop();
       return false;
-    }
-  }
-
-  /**
-   * Extending complete method
-   */
-  protected function complete() {
-    parent::complete();
-
-    // @todo do something when complete
-    $this->log("Complete");
-  }
-
-  /**
-   * Method to start processing the queue
-   */
-  public function start($args = []) {
-    if ($this->is_process_running()) return false;
-
-    $this->log("Start");
-
-    // Make sure there is no orphaned data and state
-    delete_site_option("{$this->action}_stopped");
-    $this->cancel_process();
-    $this->clear_process_meta();
-
-    $settings = wp_parse_args($args, [
-      'limit' => null,
-      'order' => null
-    ]);
-
-    $limit = $settings['limit'] ? intval($settings['limit']) : 0;
-    $order = in_array($settings['order'], ['desc', 'asc']) ? $settings['order'] : 'desc';
-
-    global $wpdb;
-    $sql = "SELECT ID FROM $wpdb->posts 
-            WHERE post_type = 'attachment' 
-              AND post_mime_type LIKE 'image/%'
-              AND post_date < %s 
-            ORDER BY ID $order 
-            LIMIT %d";
-    $query = $wpdb->prepare($sql, $datetime = current_time('mysql'), $this->get_max_batch_size());
-    $ids = $wpdb->get_col($query);
-
-    $total = 0;
-    foreach ($ids as $id) {
-      if (!$limit || $total < $limit) {
-        $this->push_to_queue($id);
-        $total++;
-      }
-    }
-
-    $this->save_process_meta([
-      'limit' => $limit,
-      'datetime' => $datetime,
-      'order' => $order,
-      'last_id' => $id
-    ]);
-
-    $this->save()->dispatch();
-    return true;
-  }
-
-  /**
-   * Provide the queue with the new data if available
-   */
-  public function extend_queue() {
-    global $wpdb;
-
-    $meta = $this->get_process_meta();
-    $last_id = isset($meta['last_id']) ? $meta['last_id'] : false;
-
-    if (!$last_id) return;
-
-    $limit = isset($meta['limit']) ? $meta['limit'] : 0;
-    $order = isset($meta['order']) ? $meta['order'] : 'desc';
-    $datetime = isset($meta['datetime']) ? $meta['datetime'] : current_time('mysql');
-
-    $range_condition = $order === 'desc' ? $wpdb->prepare("AND ID < %d", $last_id) : $wpdb->prepare("AND ID > %d", $last_id);
-
-    $sql = "SELECT ID FROM $wpdb->posts 
-            WHERE post_type = 'attachment' 
-              AND post_mime_type LIKE 'image/%'
-              AND post_date < %s 
-              $range_condition
-            ORDER BY ID $order 
-            LIMIT %d";
-    $query = $wpdb->prepare($sql, $datetime, $this->get_max_batch_size());
-    $ids = $wpdb->get_col($query);
-
-    $total = $this->get_queue_size();
-    foreach ($ids as $id) {
-      if (!$limit || $total < $limit) {
-        $this->push_to_queue($id);
-        $total++;
-      }
-    }
-
-    if (!empty($this->data)) {
-      $this->save()->save_process_meta([
-        'last_id' => $id
-      ]);
-    } else {
-      $this->save_process_meta([
-        'last_id' => 0
-      ]);
     }
   }
 }

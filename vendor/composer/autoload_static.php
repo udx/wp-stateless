@@ -108,6 +108,7 @@ class ComposerStaticInitc59d002476a452800baaf79c430753cb
         'wpCloud\\StatelessMedia\\Sync\\HelperWindow' => __DIR__ . '/../..' . '/lib/classes/sync/class-helper-window.php',
         'wpCloud\\StatelessMedia\\Sync\\ISync' => __DIR__ . '/../..' . '/lib/classes/sync/interface-sync.php',
         'wpCloud\\StatelessMedia\\Sync\\ImageSync' => __DIR__ . '/../..' . '/lib/classes/sync/class-image-sync.php',
+        'wpCloud\\StatelessMedia\\Sync\\LibrarySync' => __DIR__ . '/../..' . '/lib/classes/sync/class-library-sync.php',
         'wpCloud\\StatelessMedia\\Sync\\UnprocessableException' => __DIR__ . '/../..' . '/lib/classes/sync/exception-unprocessable.php',
         'wpCloud\\StatelessMedia\\Upgrader' => __DIR__ . '/../..' . '/lib/classes/class-upgrader.php',
         'wpCloud\\StatelessMedia\\Utility' => __DIR__ . '/../..' . '/lib/classes/class-utility.php',
