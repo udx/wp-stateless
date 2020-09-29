@@ -881,7 +881,7 @@ namespace wpCloud\StatelessMedia {
          * Using only filename. Other parts of path included to $root_dir.
          * excluding compatibility.
          */
-        if(!$use_root){
+        if($use_root){
           $current_path = basename($current_path);
         }
 
