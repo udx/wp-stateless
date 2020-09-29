@@ -54,7 +54,10 @@ class FileSync extends LibrarySync {
   }
 
   /**
+   * Process one file item
    * 
+   * @param mixed $id
+   * @return bool
    */
   public function task($id) {
     try {

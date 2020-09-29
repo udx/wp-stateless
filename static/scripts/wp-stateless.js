@@ -1252,6 +1252,25 @@ var wpStatelessApp = angular
     $scope.errors = []
 
     /**
+     * Global level flag for the ability to run any of the processes
+     */
+    $scope.can_run = true
+
+    /**
+     *
+     */
+    $scope.blockUI = function () {
+      $scope.can_run = false
+    }
+
+    /**
+     *
+     */
+    $scope.unblockUI = function () {
+      $scope.can_run = true
+    }
+
+    /**
      * Count percantage
      * @param {*} part
      * @param {*} base
@@ -1331,6 +1350,8 @@ wpStatelessApp.filter('trust', [
 function ProcessingClass(data) {
   this.id = false
   this.total_items = 0
+  this.queued_items = 0
+  this.processed_items = 0
   this.is_running = false
   this.limit = 0
   this.order = 'desc'
@@ -1347,6 +1368,7 @@ function ProcessingClass(data) {
     var that = this
     this.is_running = true
     this.is_stopping = false
+    this.$scope.blockUI()
     this.$http({
       method: 'POST',
       url: window.wpApiSettings.root + 'wp-stateless/v1/sync/run',
@@ -1374,13 +1396,18 @@ function ProcessingClass(data) {
           error.data.message || window.stateless_l10n.something_went_wrong
         )
       })
+      .finally(function () {
+        setTimeout(function () {
+          that.$scope.unblockUI()
+        }, 5000)
+      })
   }
 
   /**
-   *
+   * If process can be ran
    */
   this.canRun = function () {
-    return this.total_items > 0 && !this.is_running
+    return this.total_items > 0 && !this.is_running && this.$scope.can_run
   }
 
   /**
@@ -1394,7 +1421,25 @@ function ProcessingClass(data) {
   }
 
   /**
+   * Get Total queued count
+   */
+  this.getQueuedTotal = function () {
+    return this.queued_items > this.total_items
+      ? this.total_items
+      : this.queued_items
+  }
+
+  /**
    *
+   */
+  this.getProcessedTotal = function () {
+    return this.processed_items > this.getQueuedTotal()
+      ? this.getQueuedTotal()
+      : this.processed_items
+  }
+
+  /**
+   * Stop the process
    */
   this.stop = function () {
     var that = this
@@ -1421,7 +1466,7 @@ function ProcessingClass(data) {
   }
 
   /**
-   *
+   * Start polling for changes
    */
   this.startPolling = function () {
     var that = this
@@ -1432,14 +1477,14 @@ function ProcessingClass(data) {
   }
 
   /**
-   *
+   * Stop polling for changes
    */
   this.stopPolling = function () {
     clearInterval(this.interval)
   }
 
   /**
-   *
+   * Refresh the process data
    */
   this.refresh = function () {
     var that = this

@@ -22,7 +22,7 @@
             {{process.name}}
             <span>
               <span title="<?php _e('Processing in progress...', ud_get_stateless_media()->domain) ?>" ng-show="process.is_running" class="loading dashicons dashicons-update"></span>
-              <a href="#" data-position='{"edge":"left","align":"center"}' data-title="{{process.helper.title}}" data-text="{{process.helper.content}}" class="pointer dashicons dashicons-info"></a>
+              <a ng-show="process.helper" href="javascript:;" data-position='{"edge":"left","align":"center"}' data-title="{{process.helper.title}}" data-text="{{process.helper.content}}" class="pointer dashicons dashicons-info"></a>
             </span>
           </h2>
         </div>
@@ -39,7 +39,7 @@
           <div class="options" ng-show="process.allow_sorting">
             <label>
               <?php _e('Start from', ud_get_stateless_media()->domain) ?>
-              <select ng-model="process.order">
+              <select ng-model="process.order" ng-disabled="process.is_running">
                 <option value="desc"><?php _e('newest', ud_get_stateless_media()->domain) ?></option>
                 <option value="asc"><?php _e('oldest', ud_get_stateless_media()->domain) ?></option>
               </select>
@@ -49,12 +49,12 @@
             <div class="bar-wrapper">
               <div class="legend">
                 <strong class="total"><?php _e('Total', ud_get_stateless_media()->domain) ?>: {{process.getProgressTotal()}}</strong>
-                <strong class="queued"><?php _e('Queued', ud_get_stateless_media()->domain) ?>: {{process.queued_items}}</strong>
+                <strong class="queued"><?php _e('Queued', ud_get_stateless_media()->domain) ?>: {{process.getQueuedTotal()}}</strong>
                 <strong class="processed"><?php _e('Processed', ud_get_stateless_media()->domain) ?>: {{process.processed_items}}</strong>
               </div>
               <div class="bar total">
-                <div class="bar queued" ng-style="{width: percentage(process.queued_items, process.getProgressTotal())}">
-                  <div class="bar processed" ng-style="{width: percentage(process.processed_items, process.queued_items)}">&nbsp;</div>
+                <div class="bar queued" ng-style="{width: percentage(process.getQueuedTotal(), process.getProgressTotal())}">
+                  <div class="bar processed" ng-style="{width: percentage(process.processed_items, process.getQueuedTotal())}">&nbsp;</div>
                 </div>
               </div>
             </div>
