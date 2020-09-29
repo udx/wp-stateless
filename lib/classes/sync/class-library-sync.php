@@ -11,6 +11,13 @@ abstract class LibrarySync extends BackgroundSync {
   abstract public function get_sql_condition();
 
   /**
+   * Get transient key for total items value
+   */
+  private function get_total_items_trans_key() {
+    return "{$this->action}_total_items";
+  }
+
+  /**
    * Start the process
    * 
    * @param array $args []
@@ -21,7 +28,8 @@ abstract class LibrarySync extends BackgroundSync {
       if ($this->is_process_running()) return false;
 
       // Make sure there is no orphaned data and state
-      delete_site_option("{$this->action}_stopped");
+      delete_site_option($this->get_stopped_option_key());
+      delete_transient($this->get_total_items_trans_key());
       $this->clear_process_meta();
 
       $settings = wp_parse_args($args, [
@@ -139,7 +147,7 @@ abstract class LibrarySync extends BackgroundSync {
    * @return int
    */
   public function get_total_items() {
-    $cached = get_transient($transKey = "{$this->action}_total_items");
+    $cached = get_transient($this->get_total_items_trans_key());
     if ($cached) return intval($cached);
 
     global $wpdb;
@@ -149,7 +157,7 @@ abstract class LibrarySync extends BackgroundSync {
         {$this->get_sql_condition()}";
     $total = $wpdb->get_var($sql);
 
-    set_transient($transKey, $total, MINUTE_IN_SECONDS * 5);
+    set_transient($this->get_total_items_trans_key(), $total, MINUTE_IN_SECONDS * 5);
     return intval($total);
   }
 }

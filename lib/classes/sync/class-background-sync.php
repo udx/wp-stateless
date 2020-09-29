@@ -45,6 +45,13 @@ abstract class BackgroundSync extends UDX_WP_Background_Process implements ISync
   }
 
   /**
+   * Get option key for STOPPED option
+   */
+  protected function get_stopped_option_key() {
+    return "{$this->action}_stopped";
+  }
+
+  /**
    * Determine maximum batch size
    * 
    * @return int Default is 50
@@ -145,7 +152,7 @@ abstract class BackgroundSync extends UDX_WP_Background_Process implements ISync
    */
   public function stop() {
     $this->delete_all();
-    update_site_option("{$this->action}_stopped", true);
+    update_site_option($this->get_stopped_option_key(), true);
     $this->log("Stopped");
   }
 
@@ -157,7 +164,7 @@ abstract class BackgroundSync extends UDX_WP_Background_Process implements ISync
   public function is_stopped() {
     $network_id = get_current_network_id();
     wp_cache_delete("$network_id:notoptions", 'site-options');
-    return boolval(get_site_option("{$this->action}_stopped"));
+    return boolval(get_site_option($this->get_stopped_option_key()));
   }
 
   /**
@@ -249,7 +256,7 @@ abstract class BackgroundSync extends UDX_WP_Background_Process implements ISync
     parent::complete();
     $this->clear_process_meta();
     $this->clear_queue_size();
-    delete_site_option("{$this->action}_stopped");
+    delete_site_option($this->get_stopped_option_key());
   }
 
   /**
