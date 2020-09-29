@@ -5,6 +5,11 @@ namespace wpCloud\StatelessMedia\Sync;
 abstract class LibrarySync extends BackgroundSync {
 
   /**
+   * Cron Healthcheck interval
+   */
+  public $cron_interval = 5;
+
+  /**
    * Condition SQL
    * Should be defined in child classes
    */
@@ -159,5 +164,25 @@ abstract class LibrarySync extends BackgroundSync {
 
     set_transient($this->get_total_items_trans_key(), $total, MINUTE_IN_SECONDS * 5);
     return intval($total);
+  }
+
+  /**
+   * Notice if process seemed to be stuck
+   * 
+   * @return string|false
+   */
+  public function get_process_notice() {
+    $start_time = strtotime($this->get_process_meta('datetime'));
+    if (false === $start_time) return false;
+
+    $processed = intval($this->get_process_meta('processed'));
+    if ($processed > 0) return false;
+
+    if (!property_exists($this, 'cron_interval')) return false;
+
+    $waiting = current_time('timestamp') - $start_time;
+    if ($waiting < MINUTE_IN_SECONDS * $this->cron_interval) return false;
+
+    return sprintf(__('This process takes longer than it should. Please, make sure WP Cron is enabled and working, or try restarting the process.', ud_get_stateless_media()->domain));
   }
 }

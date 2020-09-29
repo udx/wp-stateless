@@ -68,8 +68,13 @@
 }
 
 .stless_settings_content .postbox .options,
-.stless_settings_content .postbox .progress {
+.stless_settings_content .postbox .progress,
+.stless_settings_content .postbox .progress-notice {
   margin-bottom: 1em;
+}
+
+.stless_settings_content .postbox .progress-notice {
+  color: darkred;
 }
 
 .stless_settings_content .postbox .actions {

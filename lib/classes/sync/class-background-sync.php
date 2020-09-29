@@ -278,6 +278,15 @@ abstract class BackgroundSync extends UDX_WP_Background_Process implements ISync
   }
 
   /**
+   * Process specific notice
+   * 
+   * @return string|bool
+   */
+  public function get_process_notice() {
+    return false;
+  }
+
+  /**
    * Convert to json
    * 
    * @return array
@@ -294,7 +303,8 @@ abstract class BackgroundSync extends UDX_WP_Background_Process implements ISync
       'queued_items' => $this->get_queue_size(),
       'processed_items' => ($processed = $this->get_process_meta('processed')) ? $processed : 0,
       'allow_limit' => $this->allow_limit,
-      'allow_sorting' => $this->allow_sorting
+      'allow_sorting' => $this->allow_sorting,
+      'notice' => $this->get_process_notice()
     ];
   }
 

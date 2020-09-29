@@ -59,6 +59,7 @@
               </div>
             </div>
           </div>
+          <div class="progress-notice" ng-show="process.notice && process.is_running">{{process.notice}}</div>
           <div class="actions">
             <button type="button" class="button button-primary" ng-class="{disabled: !process.canRun()}" ng-click="process.run()"><?php _e('Run', ud_get_stateless_media()->domain) ?></button>
             <button type="button" class="button button-secondary" ng-class="{disabled: !process.is_running || process.is_stopping}" ng-click="process.stop()"><?php _e('Stop', ud_get_stateless_media()->domain) ?></button>
