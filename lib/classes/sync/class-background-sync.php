@@ -11,10 +11,12 @@ if (!class_exists('UDX_WP_Background_Process')) {
   require_once ud_get_stateless_media()->path('lib/ns-vendor/classes/deliciousbrains/wp-background-processing/classes/wp-background-process.php', 'dir');
 }
 
+use UDX_WP_Background_Process, JsonSerializable;
+
 /**
  * Generic background process
  */
-abstract class BackgroundSync extends \UDX_WP_Background_Process implements ISync, \JsonSerializable {
+abstract class BackgroundSync extends UDX_WP_Background_Process implements ISync, JsonSerializable {
 
   /**
    * Flag to allow sorting
@@ -41,8 +43,6 @@ abstract class BackgroundSync extends \UDX_WP_Background_Process implements ISyn
 
     parent::__construct();
   }
-
-  abstract public function start();
 
   /**
    * Determine maximum batch size
@@ -150,7 +150,9 @@ abstract class BackgroundSync extends \UDX_WP_Background_Process implements ISyn
   }
 
   /**
+   * Determine if process is stopped.
    * 
+   * @return bool
    */
   public function is_stopped() {
     $network_id = get_current_network_id();
@@ -309,4 +311,10 @@ abstract class BackgroundSync extends \UDX_WP_Background_Process implements ISyn
 
     return error_log(date('c') . ": $message\n", 3, WP_STATELESS_SYNC_LOG);
   }
+
+  /**
+   * Start process.
+   * Should be implemented by subclasses.
+   */
+  abstract public function start();
 }
