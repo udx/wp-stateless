@@ -45,6 +45,38 @@ abstract class BackgroundSync extends UDX_WP_Background_Process implements ISync
   }
 
   /**
+   * Maybe process queue (extended)
+   *
+   * Checks whether data exists within the queue and that
+   * the process is not already running.
+   */
+  public function maybe_handle() {
+    // Don't lock up other requests while processing
+    session_write_close();
+
+    if ($this->is_process_running()) {
+      // Background process already running.
+      wp_die();
+    }
+
+    if ($this->is_queue_empty()) {
+      // No data to process.
+      wp_die();
+    }
+
+    $this->handle();
+
+    wp_die();
+  }
+
+  /**
+   * Determine sync healthcheck interval
+   */
+  protected function get_healthcheck_cron_interval() {
+    return (defined('WP_STATELESS_SYNC_HEALTHCHECK_INTERVAL') && is_int(WP_STATELESS_SYNC_HEALTHCHECK_INTERVAL)) ? WP_STATELESS_SYNC_HEALTHCHECK_INTERVAL : 5;
+  }
+
+  /**
    * Get option key for STOPPED option
    */
   protected function get_stopped_option_key() {
@@ -153,6 +185,7 @@ abstract class BackgroundSync extends UDX_WP_Background_Process implements ISync
   public function stop() {
     $this->delete_all();
     update_site_option($this->get_stopped_option_key(), true);
+    $this->clear_process_meta();
     $this->log("Stopped");
   }
 
@@ -257,6 +290,17 @@ abstract class BackgroundSync extends UDX_WP_Background_Process implements ISync
     $this->clear_process_meta();
     $this->clear_queue_size();
     delete_site_option($this->get_stopped_option_key());
+  }
+
+  /**
+   * Common task that should be executed in the end of each subclass task
+   */
+  protected function task($_) {
+    $processedCount = intval($this->get_process_meta('processed'));
+    $this->save_process_meta([
+      'processed' => ++$processedCount,
+      'last_at' => current_time('timestamp')
+    ]);
   }
 
   /**

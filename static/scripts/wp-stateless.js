@@ -1397,9 +1397,7 @@ function ProcessingClass(data) {
         )
       })
       .finally(function () {
-        setTimeout(function () {
-          that.$scope.unblockUI()
-        }, 5000)
+        that.$scope.unblockUI()
       })
   }
 

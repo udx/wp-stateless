@@ -10,7 +10,9 @@
 
 namespace wpCloud\StatelessMedia {
 
+  use wpCloud\StatelessMedia\Sync\FileSync;
   use wpCloud\StatelessMedia\Sync\ImageSync;
+  use wpCloud\StatelessMedia\Sync\NonLibrarySync;
 
   if (!class_exists('wpCloud\StatelessMedia\API')) {
 
@@ -162,19 +164,10 @@ namespace wpCloud\StatelessMedia {
        */
       static public function syncGetProcesses() {
         try {
-          $syncClasses = Utility::get_available_sync_classes();
-
           return new \WP_REST_Response(array(
             'ok' => true,
-            'data' => $syncClasses
+            'data' => Utility::get_available_sync_classes()
           ));
-
-          // remove this once ported
-          // $statsSql = [
-          //   'other' => "SELECT count(*) FROM $wpdb->posts WHERE post_type = 'attachment' AND post_mime_type NOT LIKE 'image/%' ORDER BY ID DESC"
-          // ];
-
-          // $stats['custom'] = count(array_unique(apply_filters('sm:sync::nonMediaFiles', [])));
         } catch (\Throwable $e) {
           return new \WP_Error('internal_server_error', $e->getMessage(), ['status' => 500]);
         }

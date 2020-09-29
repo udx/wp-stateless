@@ -172,17 +172,20 @@ abstract class LibrarySync extends BackgroundSync {
    * @return string|false
    */
   public function get_process_notice() {
-    $start_time = strtotime($this->get_process_meta('datetime'));
-    if (false === $start_time) return false;
+    $last = intval($this->get_process_meta('last_at'));
+    if (!$last) {
+      $last = strtotime($this->get_process_meta('datetime'));
+      if (false === $last) return false;
+    }
 
     $processed = intval($this->get_process_meta('processed'));
     if ($processed > 0) return false;
 
     if (!property_exists($this, 'cron_interval')) return false;
 
-    $waiting = current_time('timestamp') - $start_time;
+    $waiting = current_time('timestamp') - $last;
     if ($waiting < MINUTE_IN_SECONDS * $this->cron_interval) return false;
 
-    return sprintf(__('This process takes longer than it should. Please, make sure WP Cron is enabled and working, or try restarting the process.', ud_get_stateless_media()->domain));
+    return sprintf(__('This process takes longer than it should. Please, make sure loopback connections and WP Cron are enabled and working, or try restarting the process.', ud_get_stateless_media()->domain));
   }
 }

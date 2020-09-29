@@ -72,6 +72,7 @@ return array(
     'wpCloud\\StatelessMedia\\Sync\\ISync' => $baseDir . '/lib/classes/sync/interface-sync.php',
     'wpCloud\\StatelessMedia\\Sync\\ImageSync' => $baseDir . '/lib/classes/sync/class-image-sync.php',
     'wpCloud\\StatelessMedia\\Sync\\LibrarySync' => $baseDir . '/lib/classes/sync/class-library-sync.php',
+    'wpCloud\\StatelessMedia\\Sync\\NonLibrarySync' => $baseDir . '/lib/classes/sync/class-non-library-sync.php',
     'wpCloud\\StatelessMedia\\Sync\\UnprocessableException' => $baseDir . '/lib/classes/sync/exception-unprocessable.php',
     'wpCloud\\StatelessMedia\\Upgrader' => $baseDir . '/lib/classes/class-upgrader.php',
     'wpCloud\\StatelessMedia\\Utility' => $baseDir . '/lib/classes/class-utility.php',

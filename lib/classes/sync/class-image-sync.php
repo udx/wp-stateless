@@ -126,15 +126,11 @@ class ImageSync extends LibrarySync {
 
       $this->log(sprintf(__('%1$s (ID %2$s) was successfully synced in %3$s seconds.', ud_get_stateless_media()->domain), esc_html(get_the_title($image->ID)), $image->ID, timer_stop()));
 
-      $processedCount = intval($this->get_process_meta('processed'));
-      $this->save_process_meta([
-        'processed' => ++$processedCount
-      ]);
-
       if (!$this->is_stopped()) {
         $this->extend_queue();
       }
 
+      parent::task($id);
       return false;
     } catch (FatalException $e) {
       $this->log("Stopped due to error - {$e->getMessage()}");
