@@ -46,6 +46,11 @@ class FetchAuthTokenCache implements
      */
     private $cache;
 
+    /**
+     * @param FetchAuthTokenInterface $fetcher A credentials fetcher
+     * @param array $cacheConfig Configuration for the cache
+     * @param CacheItemPoolInterface $cache
+     */
     public function __construct(
         FetchAuthTokenInterface $fetcher,
         array $cacheConfig = null,
@@ -66,9 +71,7 @@ class FetchAuthTokenCache implements
      * from the supplied fetcher.
      *
      * @param callable $httpHandler callback which delivers psr7 request
-     *
      * @return array the response
-     *
      * @throws \Exception
      */
     public function fetchAuthToken(callable $httpHandler = null)
@@ -81,14 +84,23 @@ class FetchAuthTokenCache implements
         // TODO: correct caching; enable the cache to be cleared.
         $cacheKey = $this->fetcher->getCacheKey();
         $cached = $this->getCachedValue($cacheKey);
-        if (!empty($cached)) {
-            return ['access_token' => $cached];
+        if (is_array($cached)) {
+            if (empty($cached['expires_at'])) {
+                // If there is no expiration data, assume token is not expired.
+                // (for JwtAccess and ID tokens)
+                return $cached;
+            }
+            if (time() < $cached['expires_at']) {
+                // access token is not expired
+                return $cached;
+            }
         }
 
         $auth_token = $this->fetcher->fetchAuthToken($httpHandler);
 
-        if (isset($auth_token['access_token'])) {
-            $this->setCachedValue($cacheKey, $auth_token['access_token']);
+        if (isset($auth_token['access_token']) ||
+            isset($auth_token['id_token'])) {
+            $this->setCachedValue($cacheKey, $auth_token);
         }
 
         return $auth_token;
@@ -125,14 +137,14 @@ class FetchAuthTokenCache implements
      * Sign a blob using the fetcher.
      *
      * @param string $stringToSign The string to sign.
-     * @param bool $forceOpenssl Require use of OpenSSL for local signing. Does
+     * @param bool $forceOpenSsl Require use of OpenSSL for local signing. Does
      *        not apply to signing done using external services. **Defaults to**
      *        `false`.
      * @return string The resulting signature.
      * @throws \RuntimeException If the fetcher does not implement
      *     `Google\Auth\SignBlobInterface`.
      */
-    public function signBlob($stringToSign, $forceOpenSsl =  false)
+    public function signBlob($stringToSign, $forceOpenSsl = false)
     {
         if (!$this->fetcher instanceof SignBlobInterface) {
             throw new \RuntimeException(

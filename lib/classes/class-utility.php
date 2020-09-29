@@ -1092,6 +1092,22 @@ namespace wpCloud\StatelessMedia {
         }
         return $size;
       }
+
+      /**
+       * Get stateless data, count of stateless media
+       * @return mixed
+       */
+      public static function get_stateless_media_data_count() {
+        global $wpdb;
+
+        $stateless_media = $wpdb->get_var($wpdb->prepare("
+            SELECT COUNT(meta_id)
+            FROM ".$wpdb->postmeta."
+            WHERE meta_key = %s
+          ", 'sm_cloud'));
+
+        return $stateless_media;
+      }
     }
   }
 }

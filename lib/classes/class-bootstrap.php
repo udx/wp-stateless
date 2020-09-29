@@ -49,6 +49,15 @@ namespace wpCloud\StatelessMedia {
       protected function __construct( $args ) {
         parent::__construct( $args );
 
+        /**
+         * Add custom args to api ping request
+         */
+        add_filter('ud-api-client-ping-args', function($args, $_, $__) {
+          $args['multisite'] = is_multisite();
+          $args['stateless_media'] = Utility::get_stateless_media_data_count();
+          return $args;
+        }, 10, 3);
+
         //** Define our Admin Notices handler object */
         $this->errors = new Errors( array_merge( $args, array(
           'type' => $this->type
@@ -74,22 +83,14 @@ namespace wpCloud\StatelessMedia {
       }
 
       /**
+       * Prevent loading of textdomain
+       */
+      public function load_textdomain(){}
+
+      /**
        * Instantiate class.
        */
       public function init() {
-
-        /**
-         * Copied from wp-property
-         * Duplicates UsabilityDynamics\WP\Bootstrap_Plugin::load_textdomain();
-         *
-         * There is a bug with localization in lib-wp-bootstrap 1.1.3 and lower.
-         * So we load textdomain here again, in case old version lib-wp-bootstrap is being loaded
-         * by another plugin.
-         *
-         * @since 1.9.1
-         */
-        load_plugin_textdomain($this->domain, false, dirname(plugin_basename($this->boot_file)) . '/static/languages/');
-
         // Parse feature falgs, set constants.
         $this->parse_feature_flags();
         $sm_mode = $this->get( 'sm.mode' );
@@ -173,7 +174,7 @@ namespace wpCloud\StatelessMedia {
            */
           if( !$this->has_errors() ) {
 
-            if( in_array( $sm_mode , array( 'cdn', 'ephemeral' ) )  ) {
+            if( in_array( $sm_mode , array( 'cdn', 'ephemeral', 'stateless' ) )  ) {
               /**
                * init main filters
                */
@@ -215,8 +216,9 @@ namespace wpCloud\StatelessMedia {
 
           //init GS client
           global $gs_client;
-          $gs_client = $this->init_gs_client();
-          StreamWrapper::register($gs_client);
+          if ( $gs_client = $this->init_gs_client() ) {
+            StreamWrapper::register($gs_client);
+          }
 
           /**
            * init client's filters

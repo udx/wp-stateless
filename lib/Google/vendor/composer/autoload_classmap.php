@@ -6,11 +6,20 @@ $vendorDir = dirname(dirname(__FILE__));
 $baseDir = dirname($vendorDir);
 
 return array(
+    'ArithmeticError' => $vendorDir . '/symfony/polyfill-php70/Resources/stubs/ArithmeticError.php',
+    'AssertionError' => $vendorDir . '/symfony/polyfill-php70/Resources/stubs/AssertionError.php',
+    'DivisionByZeroError' => $vendorDir . '/symfony/polyfill-php70/Resources/stubs/DivisionByZeroError.php',
+    'Error' => $vendorDir . '/symfony/polyfill-php70/Resources/stubs/Error.php',
+    'Normalizer' => $vendorDir . '/symfony/polyfill-intl-normalizer/Resources/stubs/Normalizer.php',
+    'ParseError' => $vendorDir . '/symfony/polyfill-php70/Resources/stubs/ParseError.php',
+    'SessionUpdateTimestampHandlerInterface' => $vendorDir . '/symfony/polyfill-php70/Resources/stubs/SessionUpdateTimestampHandlerInterface.php',
+    'TypeError' => $vendorDir . '/symfony/polyfill-php70/Resources/stubs/TypeError.php',
     'wpCloud\\StatelessMedia\\Google_Client\\Google_AccessToken_Revoke' => $baseDir . '/src/Google/AccessToken/Revoke.php',
     'wpCloud\\StatelessMedia\\Google_Client\\Google_AccessToken_Verify' => $baseDir . '/src/Google/AccessToken/Verify.php',
     'wpCloud\\StatelessMedia\\Google_Client\\Google_AuthHandler_AuthHandlerFactory' => $baseDir . '/src/Google/AuthHandler/AuthHandlerFactory.php',
     'wpCloud\\StatelessMedia\\Google_Client\\Google_AuthHandler_Guzzle5AuthHandler' => $baseDir . '/src/Google/AuthHandler/Guzzle5AuthHandler.php',
     'wpCloud\\StatelessMedia\\Google_Client\\Google_AuthHandler_Guzzle6AuthHandler' => $baseDir . '/src/Google/AuthHandler/Guzzle6AuthHandler.php',
+    'wpCloud\\StatelessMedia\\Google_Client\\Google_AuthHandler_Guzzle7AuthHandler' => $baseDir . '/src/Google/AuthHandler/Guzzle7AuthHandler.php',
     'wpCloud\\StatelessMedia\\Google_Client\\Google_Client' => $baseDir . '/src/Google/Client.php',
     'wpCloud\\StatelessMedia\\Google_Client\\Google_Collection' => $baseDir . '/src/Google/Collection.php',
     'wpCloud\\StatelessMedia\\Google_Client\\Google_Exception' => $baseDir . '/src/Google/Exception.php',
@@ -74,6 +83,7 @@ return array(
     'wpCloud\\StatelessMedia\\Google_Client\\Google_Service_Storage_StorageObjectCustomerEncryption' => $baseDir . '/src/Google/Service/Storage/StorageObjectCustomerEncryption.php',
     'wpCloud\\StatelessMedia\\Google_Client\\Google_Service_Storage_StorageObjectOwner' => $baseDir . '/src/Google/Service/Storage/StorageObjectOwner.php',
     'wpCloud\\StatelessMedia\\Google_Client\\Google_Service_Storage_TestIamPermissionsResponse' => $baseDir . '/src/Google/Service/Storage/TestIamPermissionsResponse.php',
+    'wpCloud\\StatelessMedia\\Google_Client\\Google_Task_Composer' => $baseDir . '/src/Google/Task/Composer.php',
     'wpCloud\\StatelessMedia\\Google_Client\\Google_Task_Exception' => $baseDir . '/src/Google/Task/Exception.php',
     'wpCloud\\StatelessMedia\\Google_Client\\Google_Task_Retryable' => $baseDir . '/src/Google/Task/Retryable.php',
     'wpCloud\\StatelessMedia\\Google_Client\\Google_Task_Runner' => $baseDir . '/src/Google/Task/Runner.php',

@@ -1,14 +1,14 @@
 <?php
 /**
  * Plugin Name: WP-Stateless
- * Plugin URI: https://www.usabilitydynamics.com
+ * Plugin URI: https://udx.io
  * Description: Upload and serve your WordPress media files from Google Cloud Storage.
- * Author: Usability Dynamics, Inc.
- * Version: 3.0
+ * Author: UDX
+ * Version: 3.0.3
  * Text Domain: stateless-media
- * Author URI: https://www.usabilitydynamics.com
+ * Author URI: https://www.udx.io
  *
- * Copyright 2012 - 2019 Usability Dynamics, Inc.  ( email: info@usabilitydynamics.com )
+ * Copyright 2012 - 2020 UDX ( email: info@udx.io )
  *
  */
 

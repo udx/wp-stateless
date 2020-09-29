@@ -32,10 +32,10 @@ New to Google Cloud? Google is offering you a [$300 credit](https://cloud.google
 * Multisite compatible.
 
 ### Support, Feedback, & Contribute
-We welcome community involvement via the [GitHub repository](https://github.com/wpCloud/wp-stateless).
+We welcome community involvement via the [GitHub repository](https://github.com/udx/wp-stateless).
 
 ### Custom Development
-Looking for a unique feature for your next project? [Hire us!](https://www.usabilitydynamics.com/contact)
+Looking for a unique feature for your next project? [Hire us!](https://udx.io/)
 
 ## Installation
 
@@ -51,7 +51,7 @@ For a more detailed installation and setup walkthrough, please see the [manual s
 
 ### What are the minimum server requirements for this plugin?
 
-Beyond the [official WordPress minimum requirements](https://codex.wordpress.org/Template:Server_requirements), WP-Stateless requires a minimum PHP version of 5.5 or higher and OpenSSL to be enabled.
+Beyond the [official WordPress minimum requirements](https://codex.wordpress.org/Template:Server_requirements), WP-Stateless requires a minimum PHP version of 5.6 or higher and OpenSSL to be enabled.
 
 ### What wp-config constants are supported?
 
@@ -69,12 +69,12 @@ The WP-Stateless setup assistant will create the Service Account JSON automatica
 
 ### Where can I submit feature requests or bug reports?
 
-We encourage community feedback and discussion through issues on the [GitHub repository](https://github.com/wpCloud/wp-stateless/issues).
+We encourage community feedback and discussion through issues on the [GitHub repository](https://github.com/udx/wp-stateless/issues).
 
 ### Can I test new features before they are released?
 
-To ensure new releases cause as little disruption as possible, we rely on a number of early adopters who assist us by testing out new features before they are released. [Please contact us](https://www.usabilitydynamics.com/contact) if you are interested in becoming an early adopter.
+To ensure new releases cause as little disruption as possible, we rely on a number of early adopters who assist us by testing out new features before they are released. [Please contact us](https://udx.io/) if you are interested in becoming an early adopter.
 
 ### Who maintains this plugin?
 
-[Usability Dynamics](https://www.usabilitydynamics.com/) maintains this plugin by continuing development through it's own staff, reviewing pull requests, testing, and steering the overall release schedule. Usability Dynamics is located in Durham, North Carolina and provides WordPress engineering and hosting services to clients throughout the United States.
+[UDX](https://udx.io/) maintains this plugin by continuing development through it's own staff, reviewing pull requests, testing, and steering the overall release schedule. UDX is located in Durham, North Carolina and provides WordPress engineering and hosting services to clients throughout the United States.

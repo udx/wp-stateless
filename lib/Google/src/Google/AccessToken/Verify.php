@@ -37,7 +37,7 @@ class Google_AccessToken_Verify
   const OAUTH2_ISSUER_HTTPS = 'https://accounts.google.com';
 
   /**
-   * @var GuzzleHttp\ClientInterface The http client
+   * @var \GuzzleHttp\ClientInterface The http client
    */
   private $http;
 
@@ -74,7 +74,8 @@ class Google_AccessToken_Verify
    * The audience parameter can be used to control which id tokens are
    * accepted.  By default, the id token must have been issued to this OAuth2 client.
    *
-   * @param $audience
+   * @param string $idToken the ID token in JWT format
+   * @param string $audience Optional. The audience to verify against JWt "aud"
    * @return array the token payload, if successful
    */
   public function verifyIdToken($idToken, $audience = null)
@@ -190,7 +191,7 @@ class Google_AccessToken_Verify
       );
 
       if ($cache) {
-        $cacheItem->expiresAt(new DateTime('+1 hour'));
+        $cacheItem->expiresAt(new \DateTime('+1 hour'));
         $cacheItem->set($certs);
         $cache->save($cacheItem);
       }

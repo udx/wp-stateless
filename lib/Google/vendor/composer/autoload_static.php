@@ -4,13 +4,14 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInitc3e923ed25651a932bf958403aba88eb
+class ComposerStaticInit04d03cf33a9ba1d069748cf6183bc9db
 {
     public static $files = array (
         '7b11c4dc42b3b3023073cb14e519683c' => __DIR__ . '/..' . '/ralouphie/getallheaders/src/getallheaders.php',
         'c964ee0ededf28c96ebd9db5099ef910' => __DIR__ . '/..' . '/guzzlehttp/promises/src/functions_include.php',
         'a0edc8309cc5e1d60e3047b5df6b7052' => __DIR__ . '/..' . '/guzzlehttp/psr7/src/functions_include.php',
-        '0e6d7bf4a5811bfa5cf40c5ccd6fae6a' => __DIR__ . '/..' . '/symfony/polyfill-mbstring/bootstrap.php',
+        'e69f7f6ee287b969198c3c9d6777bd38' => __DIR__ . '/..' . '/symfony/polyfill-intl-normalizer/bootstrap.php',
+        '023d27dca8066ef29e6739335ea73bad' => __DIR__ . '/..' . '/symfony/polyfill-php70/bootstrap.php',
         '25072dd6e2470089de65ae7bf11d3109' => __DIR__ . '/..' . '/symfony/polyfill-php72/bootstrap.php',
         'f598d06aa772fa33d905e87be6398fb1' => __DIR__ . '/..' . '/symfony/polyfill-intl-idn/bootstrap.php',
         '37a3dc5111fe8f707ab4c132ef1dbc62' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/functions_include.php',
@@ -25,7 +26,8 @@ class ComposerStaticInitc3e923ed25651a932bf958403aba88eb
         'S' => 
         array (
             'Symfony\\Polyfill\\Php72\\' => 23,
-            'Symfony\\Polyfill\\Mbstring\\' => 26,
+            'Symfony\\Polyfill\\Php70\\' => 23,
+            'Symfony\\Polyfill\\Intl\\Normalizer\\' => 33,
             'Symfony\\Polyfill\\Intl\\Idn\\' => 26,
         ),
         'P' => 
@@ -63,9 +65,13 @@ class ComposerStaticInitc3e923ed25651a932bf958403aba88eb
         array (
             0 => __DIR__ . '/..' . '/symfony/polyfill-php72',
         ),
-        'Symfony\\Polyfill\\Mbstring\\' => 
+        'Symfony\\Polyfill\\Php70\\' => 
         array (
-            0 => __DIR__ . '/..' . '/symfony/polyfill-mbstring',
+            0 => __DIR__ . '/..' . '/symfony/polyfill-php70',
+        ),
+        'Symfony\\Polyfill\\Intl\\Normalizer\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/symfony/polyfill-intl-normalizer',
         ),
         'Symfony\\Polyfill\\Intl\\Idn\\' => 
         array (
@@ -132,11 +138,20 @@ class ComposerStaticInitc3e923ed25651a932bf958403aba88eb
     );
 
     public static $classMap = array (
+        'ArithmeticError' => __DIR__ . '/..' . '/symfony/polyfill-php70/Resources/stubs/ArithmeticError.php',
+        'AssertionError' => __DIR__ . '/..' . '/symfony/polyfill-php70/Resources/stubs/AssertionError.php',
+        'DivisionByZeroError' => __DIR__ . '/..' . '/symfony/polyfill-php70/Resources/stubs/DivisionByZeroError.php',
+        'Error' => __DIR__ . '/..' . '/symfony/polyfill-php70/Resources/stubs/Error.php',
+        'Normalizer' => __DIR__ . '/..' . '/symfony/polyfill-intl-normalizer/Resources/stubs/Normalizer.php',
+        'ParseError' => __DIR__ . '/..' . '/symfony/polyfill-php70/Resources/stubs/ParseError.php',
+        'SessionUpdateTimestampHandlerInterface' => __DIR__ . '/..' . '/symfony/polyfill-php70/Resources/stubs/SessionUpdateTimestampHandlerInterface.php',
+        'TypeError' => __DIR__ . '/..' . '/symfony/polyfill-php70/Resources/stubs/TypeError.php',
         'wpCloud\\StatelessMedia\\Google_Client\\Google_AccessToken_Revoke' => __DIR__ . '/../..' . '/src/Google/AccessToken/Revoke.php',
         'wpCloud\\StatelessMedia\\Google_Client\\Google_AccessToken_Verify' => __DIR__ . '/../..' . '/src/Google/AccessToken/Verify.php',
         'wpCloud\\StatelessMedia\\Google_Client\\Google_AuthHandler_AuthHandlerFactory' => __DIR__ . '/../..' . '/src/Google/AuthHandler/AuthHandlerFactory.php',
         'wpCloud\\StatelessMedia\\Google_Client\\Google_AuthHandler_Guzzle5AuthHandler' => __DIR__ . '/../..' . '/src/Google/AuthHandler/Guzzle5AuthHandler.php',
         'wpCloud\\StatelessMedia\\Google_Client\\Google_AuthHandler_Guzzle6AuthHandler' => __DIR__ . '/../..' . '/src/Google/AuthHandler/Guzzle6AuthHandler.php',
+        'wpCloud\\StatelessMedia\\Google_Client\\Google_AuthHandler_Guzzle7AuthHandler' => __DIR__ . '/../..' . '/src/Google/AuthHandler/Guzzle7AuthHandler.php',
         'wpCloud\\StatelessMedia\\Google_Client\\Google_Client' => __DIR__ . '/../..' . '/src/Google/Client.php',
         'wpCloud\\StatelessMedia\\Google_Client\\Google_Collection' => __DIR__ . '/../..' . '/src/Google/Collection.php',
         'wpCloud\\StatelessMedia\\Google_Client\\Google_Exception' => __DIR__ . '/../..' . '/src/Google/Exception.php',
@@ -200,6 +215,7 @@ class ComposerStaticInitc3e923ed25651a932bf958403aba88eb
         'wpCloud\\StatelessMedia\\Google_Client\\Google_Service_Storage_StorageObjectCustomerEncryption' => __DIR__ . '/../..' . '/src/Google/Service/Storage/StorageObjectCustomerEncryption.php',
         'wpCloud\\StatelessMedia\\Google_Client\\Google_Service_Storage_StorageObjectOwner' => __DIR__ . '/../..' . '/src/Google/Service/Storage/StorageObjectOwner.php',
         'wpCloud\\StatelessMedia\\Google_Client\\Google_Service_Storage_TestIamPermissionsResponse' => __DIR__ . '/../..' . '/src/Google/Service/Storage/TestIamPermissionsResponse.php',
+        'wpCloud\\StatelessMedia\\Google_Client\\Google_Task_Composer' => __DIR__ . '/../..' . '/src/Google/Task/Composer.php',
         'wpCloud\\StatelessMedia\\Google_Client\\Google_Task_Exception' => __DIR__ . '/../..' . '/src/Google/Task/Exception.php',
         'wpCloud\\StatelessMedia\\Google_Client\\Google_Task_Retryable' => __DIR__ . '/../..' . '/src/Google/Task/Retryable.php',
         'wpCloud\\StatelessMedia\\Google_Client\\Google_Task_Runner' => __DIR__ . '/../..' . '/src/Google/Task/Runner.php',
@@ -209,10 +225,10 @@ class ComposerStaticInitc3e923ed25651a932bf958403aba88eb
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInitc3e923ed25651a932bf958403aba88eb::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInitc3e923ed25651a932bf958403aba88eb::$prefixDirsPsr4;
-            $loader->prefixesPsr0 = ComposerStaticInitc3e923ed25651a932bf958403aba88eb::$prefixesPsr0;
-            $loader->classMap = ComposerStaticInitc3e923ed25651a932bf958403aba88eb::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInit04d03cf33a9ba1d069748cf6183bc9db::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInit04d03cf33a9ba1d069748cf6183bc9db::$prefixDirsPsr4;
+            $loader->prefixesPsr0 = ComposerStaticInit04d03cf33a9ba1d069748cf6183bc9db::$prefixesPsr0;
+            $loader->classMap = ComposerStaticInit04d03cf33a9ba1d069748cf6183bc9db::$classMap;
 
         }, null, ClassLoader::class);
     }

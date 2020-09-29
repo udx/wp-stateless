@@ -34,7 +34,7 @@ namespace wpCloud\StatelessMedia {
       public $bootstrap = null;
 
       private $settings = array(
-        'mode'                   => array('WP_STATELESS_MEDIA_MODE', 'ephemeral'),
+        'mode'                   => array('WP_STATELESS_MEDIA_MODE', 'cdn'),
         'body_rewrite'           => array('WP_STATELESS_MEDIA_BODY_REWRITE', 'false'),
         'body_rewrite_types'     => array('WP_STATELESS_MEDIA_BODY_REWRITE_TYPES', 'jpg jpeg png gif pdf'),
         'bucket'                 => array('WP_STATELESS_MEDIA_BUCKET', ''),
@@ -444,13 +444,13 @@ namespace wpCloud\StatelessMedia {
         $wildcard_year_month = '%date_year/date_month%';
         $root_dir = $this->get( 'sm.root_dir' );
 
-        $use_year_month = (strpos($root_dir, $wildcard_year_month)) ?: ($wildcard_year_month == $root_dir ?: true);
+        $use_year_month = (strpos($root_dir, $wildcard_year_month) !== false) ?: false;
 
         /**
          * removing year/month wildcard
          */
         if ($use_year_month) {
-          $root_dir = str_replace($wildcard_year_month, '', $root_dir);
+          $root_dir = str_replace($wildcard_year_month, '%YM%', $root_dir);
         }
 
         /**
@@ -464,7 +464,7 @@ namespace wpCloud\StatelessMedia {
         if ($use_year_month) {
           if ( !empty($root_dir_values) ) {
             foreach( $root_dir_values as $k=>$root_dir_value ) {
-              if ( empty($root_dir_value) ) {
+              if ( $root_dir_value == '%YM%' ) {
                 $root_dir_values[$k] = $wildcard_year_month;
               }
             }

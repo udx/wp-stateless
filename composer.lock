@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "4812858612261b0c9a100d7158667890",
+    "content-hash": "04a7860e7a87900b9740cc2b75e25947",
     "packages": [
         {
             "name": "ccampbell/chromephp",
@@ -295,16 +295,16 @@
         },
         {
             "name": "udx/lib-ud-api-client",
-            "version": "1.2.0",
+            "version": "1.2.1",
             "source": {
                 "type": "git",
                 "url": "git@github.com:udx/lib-ud-api-client",
-                "reference": "1.2.0"
+                "reference": "1.2.1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://github.com/udx/lib-ud-api-client/archive/1.2.0.zip",
-                "reference": "1.2.0"
+                "url": "https://github.com/udx/lib-ud-api-client/archive/1.2.1.zip",
+                "reference": "1.2.1"
             },
             "require": {
                 "php": ">=5.3"
@@ -320,6 +320,12 @@
             },
             "license": [
                 "GPLv2"
+            ],
+            "authors": [
+                {
+                    "name": "UsabilityDynamics, Inc.",
+                    "homepage": "https://www.usabilitydynamics.com"
+                }
             ],
             "description": "UD API Client for WooCommerce API Manager",
             "homepage": "https://github.com/udx/lib-ud-api-client",
@@ -479,7 +485,8 @@
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
-        "php": ">=5.5"
+        "php": ">=5.6.20"
     },
-    "platform-dev": []
+    "platform-dev": [],
+    "plugin-api-version": "1.1.0"
 }

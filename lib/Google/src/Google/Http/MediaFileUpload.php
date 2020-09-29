@@ -55,7 +55,7 @@ class Google_Http_MediaFileUpload
   /** @var Google_Client */
   private $client;
 
-  /** @var Psr\Http\Message\RequestInterface */
+  /** @var \Psr\Http\Message\RequestInterface */
   private $request;
 
   /** @var string */
@@ -115,8 +115,8 @@ class Google_Http_MediaFileUpload
 
   /**
    * Send the next part of the file to upload.
-   * @param [$chunk] the next set of bytes to send. If false will used $data passed
-   * at construct time.
+   * @param string|bool $chunk Optional. The next set of bytes to send. If false will
+   * use $data passed at construct time.
    */
   public function nextChunk($chunk = false)
   {

@@ -46,10 +46,8 @@ class Google_Service_Storage_Resource_Objects extends Google_Service_Resource
    * makes the operation succeed only if there are no live versions of the object.
    * @opt_param string ifMetagenerationMatch Makes the operation conditional on
    * whether the object's current metageneration matches the given value.
-   * @opt_param string kmsKeyName Resource name of the Cloud KMS key, of the form
-   * projects/my-project/locations/global/keyRings/my-kr/cryptoKeys/my-key, that
-   * will be used to encrypt the object. Overrides the object metadata's
-   * kms_key_name value, if any.
+   * @opt_param string kmsKeyName Not currently supported. Specifying the
+   * parameter causes the request to fail with status code 400 - Bad Request.
    * @opt_param string provisionalUserProject The project to be billed for this
    * request if the target bucket is requester-pays bucket.
    * @opt_param string userProject The project to be billed for this request.
@@ -80,6 +78,10 @@ class Google_Service_Storage_Resource_Objects extends Google_Service_Resource
    * @param Google_Service_Storage_StorageObject $postBody
    * @param array $optParams Optional parameters.
    *
+   * @opt_param string destinationKmsKeyName Resource name of the Cloud KMS key,
+   * of the form projects/my-project/locations/global/keyRings/my-kr/cryptoKeys
+   * /my-key, that will be used to encrypt the object. Overrides the object
+   * metadata's kms_key_name value, if any.
    * @opt_param string destinationPredefinedAcl Apply a predefined set of access
    * controls to the destination object.
    * @opt_param string ifGenerationMatch Makes the operation conditional on
@@ -274,6 +276,10 @@ class Google_Service_Storage_Resource_Objects extends Google_Service_Resource
    * delimiter. Objects whose names, aside from the prefix, contain delimiter will
    * have their name, truncated after the delimiter, returned in prefixes.
    * Duplicate prefixes are omitted.
+   * @opt_param string endOffset Filter results to objects whose names are
+   * lexicographically before endOffset. If startOffset is also set, the objects
+   * listed will have names between startOffset (inclusive) and endOffset
+   * (exclusive).
    * @opt_param bool includeTrailingDelimiter If true, objects that end in exactly
    * one instance of delimiter will have their metadata included in items in
    * addition to prefixes.
@@ -288,6 +294,10 @@ class Google_Service_Storage_Resource_Objects extends Google_Service_Resource
    * @opt_param string projection Set of properties to return. Defaults to noAcl.
    * @opt_param string provisionalUserProject The project to be billed for this
    * request if the target bucket is requester-pays bucket.
+   * @opt_param string startOffset Filter results to objects whose names are
+   * lexicographically equal to or after startOffset. If endOffset is also set,
+   * the objects listed will have names between startOffset (inclusive) and
+   * endOffset (exclusive).
    * @opt_param string userProject The project to be billed for this request.
    * Required for Requester Pays buckets.
    * @opt_param bool versions If true, lists all versions of an object as distinct
@@ -509,6 +519,10 @@ class Google_Service_Storage_Resource_Objects extends Google_Service_Resource
    * delimiter. Objects whose names, aside from the prefix, contain delimiter will
    * have their name, truncated after the delimiter, returned in prefixes.
    * Duplicate prefixes are omitted.
+   * @opt_param string endOffset Filter results to objects whose names are
+   * lexicographically before endOffset. If startOffset is also set, the objects
+   * listed will have names between startOffset (inclusive) and endOffset
+   * (exclusive).
    * @opt_param bool includeTrailingDelimiter If true, objects that end in exactly
    * one instance of delimiter will have their metadata included in items in
    * addition to prefixes.
@@ -523,6 +537,10 @@ class Google_Service_Storage_Resource_Objects extends Google_Service_Resource
    * @opt_param string projection Set of properties to return. Defaults to noAcl.
    * @opt_param string provisionalUserProject The project to be billed for this
    * request if the target bucket is requester-pays bucket.
+   * @opt_param string startOffset Filter results to objects whose names are
+   * lexicographically equal to or after startOffset. If endOffset is also set,
+   * the objects listed will have names between startOffset (inclusive) and
+   * endOffset (exclusive).
    * @opt_param string userProject The project to be billed for this request.
    * Required for Requester Pays buckets.
    * @opt_param bool versions If true, lists all versions of an object as distinct
