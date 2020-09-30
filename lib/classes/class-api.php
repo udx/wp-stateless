@@ -164,6 +164,10 @@ namespace wpCloud\StatelessMedia {
        */
       static public function syncGetProcesses() {
         try {
+          if (!user_can(self::$tokenData->user_id, 'manage_options')) {
+            return new \WP_Error('not_allowed', 'Sorry, you are not allowed to perform this action', ['status' => 403]);
+          }
+
           return new \WP_REST_Response(array(
             'ok' => true,
             'data' => Utility::get_available_sync_classes()
@@ -181,6 +185,10 @@ namespace wpCloud\StatelessMedia {
        */
       static public function syncGetProcess(\WP_REST_Request $request) {
         try {
+          if (!user_can(self::$tokenData->user_id, 'manage_options')) {
+            return new \WP_Error('not_allowed', 'Sorry, you are not allowed to perform this action', ['status' => 403]);
+          }
+
           $id = base64_decode($request->get_param('id'));
           if (!class_exists($id)) {
             throw new \Exception(sprintf('Could not get process by id %s', $id));
@@ -209,6 +217,10 @@ namespace wpCloud\StatelessMedia {
        */
       static public function syncRun(\WP_REST_Request $request) {
         try {
+          if (!user_can(self::$tokenData->user_id, 'manage_options')) {
+            return new \WP_Error('not_allowed', 'Sorry, you are not allowed to perform this action', ['status' => 403]);
+          }
+
           $params = wp_parse_args($request->get_params(), [
             'id' => null,
             'limit' => null,
@@ -237,6 +249,10 @@ namespace wpCloud\StatelessMedia {
        */
       static public function syncStop(\WP_REST_Request $request) {
         try {
+          if (!user_can(self::$tokenData->user_id, 'manage_options')) {
+            return new \WP_Error('not_allowed', 'Sorry, you are not allowed to perform this action', ['status' => 403]);
+          }
+
           $params = wp_parse_args($request->get_params(), [
             'id' => null
           ]);

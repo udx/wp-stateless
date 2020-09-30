@@ -1160,7 +1160,7 @@ namespace wpCloud\StatelessMedia {
         wp_localize_script('wp-stateless', 'stateless_l10n', $this->get_l10n_data());
         wp_localize_script('wp-stateless', 'wp_stateless_configs', array(
           'WP_DEBUG' => defined('WP_DEBUG') ? WP_DEBUG : false,
-          'REST_API_TOKEN' => Utility::generate_jwt_token([])
+          'REST_API_TOKEN' => Utility::generate_jwt_token(['user_id' => get_current_user_id()])
         ));
 
         $settings = ud_get_stateless_media()->get('sm');
