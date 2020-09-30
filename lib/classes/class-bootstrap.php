@@ -881,7 +881,6 @@ namespace wpCloud\StatelessMedia {
           }
         }
 
-
         $root_dir = $this->get('sm.root_dir');
         $root_dir_regex = '~^' . apply_filters("wp_stateless_handle_root_dir", $root_dir, true) . '/~';
         /**
@@ -896,7 +895,7 @@ namespace wpCloud\StatelessMedia {
         $current_path = str_replace(trailingslashit($this->get_gs_host()), '', $current_path);
 
         /**
-         * Using only filename. Other parts of path included to $root_dir.	         * Using only filename. Other parts of path included to $root_dir.
+         * Using only filename. Other parts of path included to $root_dir.
          * excluding compatibility.
          */
         if ($use_root) {

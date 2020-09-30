@@ -974,6 +974,131 @@ namespace wpCloud\StatelessMedia {
           return null;
         }, apply_filters('wp_stateless_sync_types', [])));
       }
+
+      /**
+       * Process single image attachment by id
+       * 
+       * @param mixed $id Attachment ID
+       * @return \WP_Post
+       * @throws FatalException
+       * @throws UnprocessableException
+       */
+      public static function process_image_by_id($id) {
+        if (ud_get_stateless_media()->is_connected_to_gs() !== true) {
+          throw new FatalException(__('Not connected to GCS', ud_get_stateless_media()->domain));
+        }
+
+        $image = get_post($id);
+
+        if (!$image || 'attachment' != $image->post_type || 'image/' != substr($image->post_mime_type, 0, 6))
+          throw new UnprocessableException(sprintf(__('Failed to process item: %s is an invalid image ID.', ud_get_stateless_media()->domain), $id));
+
+        $fullsizepath = get_attached_file($image->ID);
+
+        // If no file found
+        if (false === $fullsizepath || !file_exists($fullsizepath)) {
+
+          // Try get it and save
+          $result_code = ud_get_stateless_media()->get_client()->get_media(apply_filters('wp_stateless_file_name', $fullsizepath, true, "", ""), true, $fullsizepath);
+
+          if ($result_code !== 200) {
+            if (!Utility::sync_get_attachment_if_exist($image->ID, $fullsizepath)) {
+              throw new UnprocessableException(sprintf(__('Both local and remote files are missing. Unable to process. (%s)', ud_get_stateless_media()->domain), $image->guid));
+            }
+          }
+        }
+
+        do_action('sm:pre::synced::image', $id);
+        if (!function_exists('wp_generate_attachment_metadata')) {
+          require_once ABSPATH . '/wp-admin/includes/image.php';
+        }
+        $metadata = wp_generate_attachment_metadata($image->ID, $fullsizepath);
+
+        if (get_post_mime_type($image->ID) !== 'image/svg+xml') {
+          if (is_wp_error($metadata)) {
+            throw new UnprocessableException($metadata->get_error_message());
+          }
+
+          if (empty($metadata)) {
+            throw new UnprocessableException(sprintf(__('No metadata generated for %1$s (ID %2$s).', ud_get_stateless_media()->domain), esc_html(get_the_title($image->ID)), $image->ID));
+          }
+        }
+
+        // trigger processing filters
+        wp_update_attachment_metadata($image->ID, $metadata);
+        do_action('sm:synced::image', $id, $metadata);
+
+        // Ephemeral and Stateless modes: we don't need the local version.
+        if (ud_get_stateless_media()->get('sm.mode') === 'ephemeral' || ud_get_stateless_media()->get('sm.mode') === 'stateless') {
+          unlink($fullsizepath);
+        }
+
+        return $image;
+      }
+
+      /**
+       * Process single attachment file by id
+       * 
+       * @param mixed $id Attachment ID
+       * @return \WP_Post
+       * @throws FatalException
+       * @throws UnprocessableException
+       */
+      public static function process_file_by_id($id) {
+        if (ud_get_stateless_media()->is_connected_to_gs() !== true) {
+          throw new FatalException(__('Not connected to GCS', ud_get_stateless_media()->domain));
+        }
+
+        $file = get_post($id);
+
+        if (!$file || 'attachment' != $file->post_type) {
+          throw new UnprocessableException(sprintf(__('Attachment not found: %s is an invalid file ID.', ud_get_stateless_media()->domain), $id));
+        }
+
+        $fullsizepath = get_attached_file($file->ID);
+        $local_file_exists = file_exists($fullsizepath);
+
+        if (false === $fullsizepath || !$local_file_exists) {
+
+          // Try get it and save
+          $result_code = ud_get_stateless_media()->get_client()->get_media(apply_filters('wp_stateless_file_name', $fullsizepath, true, "", ""), true, $fullsizepath);
+
+          if ($result_code !== 200) {
+            if (!Utility::sync_get_attachment_if_exist($file->ID, $fullsizepath)) { // Save file to local from proxy.
+              throw new UnprocessableException(sprintf(__('File not found (%s)', ud_get_stateless_media()->domain), $file->guid));
+            } else {
+              $local_file_exists = true;
+            }
+          } else {
+            $local_file_exists = true;
+          }
+        }
+
+        if ($local_file_exists) {
+
+          if (!ud_get_stateless_media()->get_client()->media_exists(apply_filters('wp_stateless_file_name', $fullsizepath, true, "", ""))) {
+
+            if (!function_exists('wp_generate_attachment_metadata')) {
+              require_once ABSPATH . '/wp-admin/includes/image.php';
+            }
+            $metadata = wp_generate_attachment_metadata($file->ID, $fullsizepath);
+
+            if (is_wp_error($metadata)) {
+              throw new UnprocessableException($metadata->get_error_message());
+            }
+
+            wp_update_attachment_metadata($file->ID, $metadata);
+            do_action('sm:synced::nonImage', $id, $metadata);
+          } else {
+            // Ephemeral and Stateless modes: we don't need the local version.
+            if (ud_get_stateless_media()->get('sm.mode') === 'ephemeral' || ud_get_stateless_media()->get('sm.mode') === 'stateless') {
+              unlink($fullsizepath);
+            }
+          }
+        }
+
+        return $file;
+      }
     }
   }
 }

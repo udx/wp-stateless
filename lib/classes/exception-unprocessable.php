@@ -1,6 +1,6 @@
 <?php
 
-namespace wpCloud\StatelessMedia\Sync;
+namespace wpCloud\StatelessMedia;
 
 class UnprocessableException extends \Exception {
 }

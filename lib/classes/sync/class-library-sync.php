@@ -2,6 +2,8 @@
 
 namespace wpCloud\StatelessMedia\Sync;
 
+use wpCloud\StatelessMedia\UnprocessableException;
+
 abstract class LibrarySync extends BackgroundSync {
 
   /**

@@ -351,7 +351,7 @@ namespace wpCloud\StatelessMedia {
       /**
        * Check if media exists
        * @param $path
-       * @return bool
+       * @return bool|object
        */
       public function media_exists($path) {
         try {
