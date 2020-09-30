@@ -2,7 +2,9 @@
 
 namespace wpCloud\StatelessMedia\Sync;
 
+use wpCloud\StatelessMedia\FatalException;
 use wpCloud\StatelessMedia\Singleton;
+use wpCloud\StatelessMedia\UnprocessableException;
 
 class NonLibrarySync extends BackgroundSync {
 
