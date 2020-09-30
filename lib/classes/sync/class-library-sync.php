@@ -5,11 +5,6 @@ namespace wpCloud\StatelessMedia\Sync;
 abstract class LibrarySync extends BackgroundSync {
 
   /**
-   * Cron Healthcheck interval
-   */
-  public $cron_interval = 5;
-
-  /**
    * Condition SQL
    * Should be defined in child classes
    */
@@ -177,9 +172,6 @@ abstract class LibrarySync extends BackgroundSync {
       $last = strtotime($this->get_process_meta('datetime'));
       if (false === $last) return false;
     }
-
-    $processed = intval($this->get_process_meta('processed'));
-    if ($processed > 0) return false;
 
     if (!property_exists($this, 'cron_interval')) return false;
 

@@ -10,11 +10,6 @@ class NonLibrarySync extends BackgroundSync {
   use Singleton;
 
   /**
-   * Cron Healthcheck interval
-   */
-  public $cron_interval = 5;
-
-  /**
    * Unique action
    */
   protected $action = 'wps_bg_non_library_sync';
@@ -148,9 +143,6 @@ class NonLibrarySync extends BackgroundSync {
       $last = intval($this->get_process_meta('starttime'));
       if (!$last) return false;
     }
-
-    $processed = intval($this->get_process_meta('processed'));
-    if ($processed > 0) return false;
 
     if (!property_exists($this, 'cron_interval')) return false;
 

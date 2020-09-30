@@ -19,6 +19,11 @@ use UDX_WP_Background_Process, JsonSerializable;
 abstract class BackgroundSync extends UDX_WP_Background_Process implements ISync, JsonSerializable {
 
   /**
+   * Cron Healthcheck interval
+   */
+  public $cron_interval;
+
+  /**
    * Flag to allow sorting
    */
   protected $allow_sorting = false;
@@ -40,6 +45,8 @@ abstract class BackgroundSync extends UDX_WP_Background_Process implements ISync
       $classes[$c = get_called_class()] = $c;
       return $classes;
     });
+
+    $this->cron_interval = $this->get_healthcheck_cron_interval();
 
     parent::__construct();
   }
