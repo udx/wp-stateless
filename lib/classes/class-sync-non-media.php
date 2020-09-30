@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Need to improve workflow.
  * Maybe add a transient of few days to keep track of synced files.
@@ -14,26 +15,25 @@ namespace wpCloud\StatelessMedia {
       const table = 'sm_sync';
       public $table_name;
 
-      public function __construct(){
+      public function __construct() {
         global $wpdb;
         $this->table_name = $wpdb->prefix . self::table;
         ud_get_stateless_media()->create_db();
 
         // Manual sync using sync tab.
-        // called from ajax action_get_non_library_files_id
         // Return files to be manually sync from sync tab.
-        add_filter( 'sm:sync::nonMediaFiles', array($this, 'sync_non_media_files') );
-        add_filter( 'sm:sync::queue_is_exists', array($this, 'queue_is_exists'), 10, 2 );
+        add_filter('sm:sync::nonMediaFiles', array($this, 'sync_non_media_files'));
+        add_filter('sm:sync::queue_is_exists', array($this, 'queue_is_exists'), 10, 2);
 
         // register a dir to sync from sync tab
-        add_action( 'sm:sync::register_dir', array($this, 'register_dir') );
-        add_action( 'sm:sync::addFile', array($this, 'add_file') );
+        add_action('sm:sync::register_dir', array($this, 'register_dir'));
+        add_action('sm:sync::addFile', array($this, 'add_file'));
         // Sync a file.
-        add_action( 'sm:sync::syncFile', array($this, 'sync_file'), 10, 4 );
-        add_action( 'sm:sync::copyFile', array($this, 'copy_file'), 10, 2 );
-        add_action( 'sm:sync::moveFile', array($this, 'move_file'), 10, 2 );
-        add_action( 'sm:sync::deleteFile', array($this, 'delete_file') );
-        add_action( 'sm:sync::deleteFiles', array($this, 'delete_files') );
+        add_action('sm:sync::syncFile', array($this, 'sync_file'), 10, 4);
+        add_action('sm:sync::copyFile', array($this, 'copy_file'), 10, 2);
+        add_action('sm:sync::moveFile', array($this, 'move_file'), 10, 2);
+        add_action('sm:sync::deleteFile', array($this, 'delete_file'));
+        add_action('sm:sync::deleteFiles', array($this, 'delete_files'));
       }
 
       /**
@@ -41,8 +41,8 @@ namespace wpCloud\StatelessMedia {
        * @param
        * $dir: The directory to register
        */
-      public function register_dir($dir){
-        if(!in_array($dir, $this->registered_dir)){
+      public function register_dir($dir) {
+        if (!in_array($dir, $this->registered_dir)) {
           $this->registered_dir[] = $dir;
         }
       }
@@ -53,7 +53,7 @@ namespace wpCloud\StatelessMedia {
        * @param
        * $file: The file to register.
        */
-      public function add_file($file){
+      public function add_file($file) {
         $this->queue_add_file($file);
       }
 
@@ -68,8 +68,8 @@ namespace wpCloud\StatelessMedia {
        * @return bool|void $media: Media object returned from client->add_media() method.
        * @throws: Exception File not found@throws: Exception File not found
        */
-      public function sync_file($name, $absolutePath, $forced = false, $args = array() ){
-        $sm_mode = ud_get_stateless_media()->get( 'sm.mode' );
+      public function sync_file($name, $absolutePath, $forced = false, $args = array()) {
+        $sm_mode = ud_get_stateless_media()->get('sm.mode');
 
         $args = wp_parse_args($args, array(
           'ephemeral' => true, // whether to delete local file in ephemeral mode.
@@ -78,47 +78,47 @@ namespace wpCloud\StatelessMedia {
           'skip_db'   => false
         ));
 
-        if($this->queue_is_exists($name, 'synced') && !$forced){
+        if ($this->queue_is_exists($name, 'synced') && !$forced) {
           return false;
         }
 
         $file_type = Utility::mimetype_from_extension(pathinfo($absolutePath, PATHINFO_EXTENSION));
-        if(empty($this->client)){
+        if (empty($this->client)) {
           $this->client = ud_get_stateless_media()->get_client();
         }
 
-        if( is_wp_error( $this->client ) ) {
+        if (is_wp_error($this->client)) {
           return;
         }
 
         $file_copied_from_gcs = false;
-        $local_file_exists = file_exists( $absolutePath );
+        $local_file_exists = file_exists($absolutePath);
 
-        do_action( 'sm::pre::sync::nonMediaFiles', $name, $absolutePath); // , $media
+        do_action('sm::pre::sync::nonMediaFiles', $name, $absolutePath); // , $media
 
-        if ( !$local_file_exists && ( $args['download'] || ud_get_stateless_media()->get( 'sm.mode' ) !== 'ephemeral' || ud_get_stateless_media()->get( 'sm.mode' ) !== 'stateless' ) ) {
+        if (!$local_file_exists && ($args['download'] || ud_get_stateless_media()->get('sm.mode') !== 'ephemeral' || ud_get_stateless_media()->get('sm.mode') !== 'stateless')) {
           // Try get it and save
-          $result_code = $this->client->get_media( $name, true, $absolutePath );
+          $result_code = $this->client->get_media($name, true, $absolutePath);
 
-          if ( $result_code == 200 ) {
+          if ($result_code == 200) {
             $local_file_exists = true;
             $file_copied_from_gcs = true;
           }
         }
 
-        if($local_file_exists && !$file_copied_from_gcs && !$args['download']){
+        if ($local_file_exists && !$file_copied_from_gcs && !$args['download']) {
 
-          if ( $sm_mode == 'stateless' && !wp_doing_ajax() ) {
+          if ($sm_mode == 'stateless' && !wp_doing_ajax()) {
             global $gs_client;
 
-            $gs_name = apply_filters( 'wp_stateless_file_name', $name, true );
+            $gs_name = apply_filters('wp_stateless_file_name', $name, true);
 
             //Bucket
-            $bucket = ud_get_stateless_media()->get( 'sm.bucket' );
+            $bucket = ud_get_stateless_media()->get('sm.bucket');
 
             $bucket = $gs_client->bucket($bucket);
             $object = $bucket->object($gs_name);
-            $args = wp_parse_args( $args, array(
+            $args = wp_parse_args($args, array(
               'use_root' => $args['use_root'],
               'force' => ($forced == 2),
               'name' => $name,
@@ -126,10 +126,10 @@ namespace wpCloud\StatelessMedia {
               'mimeType' => $file_type,
               'metadata' => array(
                 'child-of' => dirname($name),
-                'file-hash' => md5( $name ),
+                'file-hash' => md5($name),
               ),
               'is_webp' => '',
-            ) );
+            ));
             $args = apply_filters('wp_stateless_add_media_args', $args);
 
             /**
@@ -137,48 +137,45 @@ namespace wpCloud\StatelessMedia {
              * @return media object
              */
             try {
-              $media = $object->update( array( 'metadata' => $args['metadata']) +
-                array('cacheControl' => apply_filters( 'sm:item:cacheControl', 'public, max-age=36000, must-revalidate', $absolutePath),
+              $media = $object->update(array('metadata' => $args['metadata']) +
+                array(
+                  'cacheControl' => apply_filters('sm:item:cacheControl', 'public, max-age=36000, must-revalidate', $absolutePath),
                   'predefinedAcl' => 'publicRead',
-                  'contentDisposition' => apply_filters( 'sm:item:contentDisposition', null, $absolutePath))
-              );
+                  'contentDisposition' => apply_filters('sm:item:contentDisposition', null, $absolutePath)
+                ));
             } catch (\Throwable $th) {
               //throw $th;
             }
-
-
           } else {
-            $media = $this->client->add_media( array(
+            $media = $this->client->add_media(array(
               'use_root' => $args['use_root'],
               'name' => $name,
               'force' => ($forced == 2),
               'absolutePath' => $absolutePath,
-              'cacheControl' => apply_filters( 'sm:item:cacheControl', 'public, max-age=36000, must-revalidate', $absolutePath), //@todo use cacheControl from settings page.
-              'contentDisposition' => apply_filters( 'sm:item:contentDisposition', null, $absolutePath),
+              'cacheControl' => apply_filters('sm:item:cacheControl', 'public, max-age=36000, must-revalidate', $absolutePath), //@todo use cacheControl from settings page.
+              'contentDisposition' => apply_filters('sm:item:contentDisposition', null, $absolutePath),
               'mimeType' => $file_type,
               'metadata' => array(
                 'child-of' => dirname($name),
-                'file-hash' => md5( $name ),
+                'file-hash' => md5($name),
               ),
             ));
           }
 
           // Addon can hook this function to modify database after manual sync done.
-          do_action( 'sm::synced::nonMediaFiles', $name, $absolutePath, $media); // , $media
+          do_action('sm::synced::nonMediaFiles', $name, $absolutePath, $media); // , $media
 
           // Ephemeral mode: we don't need the local version.
-          if($args['ephemeral'] == true && ud_get_stateless_media()->get( 'sm.mode' ) === 'ephemeral' ){
+          if ($args['ephemeral'] == true && ud_get_stateless_media()->get('sm.mode') === 'ephemeral') {
             unlink($absolutePath);
           }
 
-          if ( !$args['skip_db'] ) {
+          if (!$args['skip_db']) {
             // add file_path to the file list.
-            $this->queue_add_file( $name, 'synced' );
-
+            $this->queue_add_file($name, 'synced');
           }
           return $media;
         }
-
       }
 
       /**
@@ -186,22 +183,22 @@ namespace wpCloud\StatelessMedia {
        * @param array $files - Additional files to sync.
        * @return array
        */
-      public function sync_non_media_files($files = array()){
+      public function sync_non_media_files($files = array()) {
         $upload_dir = wp_upload_dir();
         $files = array_merge($files, $this->queue_get_all());
         foreach ($this->registered_dir as $key => $dir) {
           $dir = $upload_dir['basedir'] . "/" . trim($dir, '/') . "/";
-          if(is_dir($dir)){
+          if (is_dir($dir)) {
             // Getting all the files from dir recursively.
-            $_files = $this->get_files( $dir );
+            $_files = $this->get_files($dir);
             // validating and adding to the $files array.
             foreach ($_files as $id => $file) {
-              if(!file_exists($file)){
+              if (!file_exists($file)) {
                 continue;
               }
 
               $_file = str_replace(wp_normalize_path($upload_dir['basedir']), '', wp_normalize_path($file));
-              if(!in_array($_file, $files)){
+              if (!in_array($_file, $files)) {
                 $files[] = trim($_file, '/');
               }
             }
@@ -219,14 +216,14 @@ namespace wpCloud\StatelessMedia {
        */
       function get_files($dir) {
         $return = array();
-        if(is_dir($dir) && $dh = opendir($dir)) {
-          while($file = readdir($dh)){
-            if($file != '.' && $file != '..'){
-              if(is_dir($dir . $file)){
+        if (is_dir($dir) && $dh = opendir($dir)) {
+          while ($file = readdir($dh)) {
+            if ($file != '.' && $file != '..') {
+              if (is_dir($dir . $file)) {
                 // since it is a directory we recursively get files.
                 $arr = $this->get_files($dir . $file . '/');
                 $return = array_merge($return, $arr);
-              }else{
+              } else {
                 $return[] = $dir . $file;
               }
             }
@@ -243,22 +240,21 @@ namespace wpCloud\StatelessMedia {
        * @param bool $force
        * @return bool
        */
-      public function delete_file($file){
-        try{
+      public function delete_file($file) {
+        try {
           $file = trim($file, '/');
-          if(empty($this->client)){
+          if (empty($this->client)) {
             $this->client = ud_get_stateless_media()->get_client();
           }
 
-          if( is_wp_error( $this->client ) ) {
+          if (is_wp_error($this->client)) {
             return false;
           }
           // Removing file for GCS
           $this->client->remove_media($file, "", 0);
           $this->queue_remove_file($file);
           return true;
-        }
-        catch(\Exception $e){
+        } catch (\Exception $e) {
           return false;
         }
       }
@@ -269,18 +265,18 @@ namespace wpCloud\StatelessMedia {
        * @param $dir
        * @return bool|void
        */
-      public function delete_files($dir){
-        if(empty($this->client)){
+      public function delete_files($dir) {
+        if (empty($this->client)) {
           $this->client = ud_get_stateless_media()->get_client();
         }
 
-        if( is_wp_error( $this->client ) ) {
+        if (is_wp_error($this->client)) {
           return;
         }
 
         // Removing the files one by one.
         foreach ($this->queue_get_all($dir) as $key => $file) {
-          if(strpos($file, $dir) !== false){
+          if (strpos($file, $dir) !== false) {
             $this->client->remove_media($file, "", 0);
             $this->queue_remove_file($file);
           }
@@ -294,15 +290,14 @@ namespace wpCloud\StatelessMedia {
        * @param string $prefix
        * @return array of files
        */
-      public function queue_get_all($prefix = ''){
+      public function queue_get_all($prefix = '') {
         global $wpdb;
-        if($prefix){
-          $files = $wpdb->get_col( $wpdb->prepare("SELECT file FROM $this->table_name WHERE file like '%s'", $wpdb->esc_like($prefix) . '%' ) );
+        if ($prefix) {
+          $files = $wpdb->get_col($wpdb->prepare("SELECT file FROM $this->table_name WHERE file like '%s'", $wpdb->esc_like($prefix) . '%'));
+        } else {
+          $files = $wpdb->get_col("SELECT file FROM $this->table_name");
         }
-        else{
-          $files = $wpdb->get_col( "SELECT file FROM $this->table_name" );
-        }
-        if(!empty($files) && is_array($files))
+        if (!empty($files) && is_array($files))
           return $files;
         return array();
       }
@@ -313,12 +308,11 @@ namespace wpCloud\StatelessMedia {
        * @param string $status: optional. queued|synced
        * @return mixed: non boolean true. number of item found in db.
        */
-      public function queue_is_exists($file, $status = ''){
+      public function queue_is_exists($file, $status = '') {
         global $wpdb;
-        if(empty($status)){
+        if (empty($status)) {
           return $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM {$this->table_name} WHERE file = '%s';", $file));
-        }
-        else{
+        } else {
           return $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM {$this->table_name} WHERE file = '%s' AND status = '%s';", $file, $status));
         }
       }
@@ -329,13 +323,12 @@ namespace wpCloud\StatelessMedia {
        * @param string $status: optional. queued|synced
        * @return bool
        */
-      public function queue_add_file($file, $status = 'queued'){
+      public function queue_add_file($file, $status = 'queued') {
         global $wpdb;
-        if($this->queue_is_exists($file)){
-          return $wpdb->update( $this->table_name, array( 'file' => $file, 'status' => $status ), array('file' => $file), array( '%s', '%s' ), array( '%s' ) );
-        }
-        else{
-          return $wpdb->insert( $this->table_name, array( 'file' => $file, 'status' => $status ), array( '%s', '%s' ) );
+        if ($this->queue_is_exists($file)) {
+          return $wpdb->update($this->table_name, array('file' => $file, 'status' => $status), array('file' => $file), array('%s', '%s'), array('%s'));
+        } else {
+          return $wpdb->insert($this->table_name, array('file' => $file, 'status' => $status), array('%s', '%s'));
         }
         return false;
       }
@@ -345,9 +338,9 @@ namespace wpCloud\StatelessMedia {
        * @param $file: Path of file relative to upload dir.
        * @return mixed
        */
-      public function queue_remove_file($file){
+      public function queue_remove_file($file) {
         global $wpdb;
-        return $wpdb->delete( $this->table_name, array( 'file' => $file), array( '%s' ) );
+        return $wpdb->delete($this->table_name, array('file' => $file), array('%s'));
       }
 
       /**
@@ -358,9 +351,9 @@ namespace wpCloud\StatelessMedia {
        * @param string $status
        * @return bool
        */
-      public function copy_file($old_file, $new_file, $force = false, $status = 'copied'){
-        try{
-          if(!$force && $this->queue_is_exists($new_file, $status)){
+      public function copy_file($old_file, $new_file, $force = false, $status = 'copied') {
+        try {
+          if (!$force && $this->queue_is_exists($new_file, $status)) {
             return false;
           }
 
@@ -371,8 +364,7 @@ namespace wpCloud\StatelessMedia {
 
           $this->queue_add_file($new_file, $status);
           return true;
-        }
-        catch(\Exception $e){
+        } catch (\Exception $e) {
           return false;
         }
       }
@@ -383,16 +375,15 @@ namespace wpCloud\StatelessMedia {
        * @param $new_file
        * @return bool
        */
-      public function move_file($old_file, $new_file){
-        try{
+      public function move_file($old_file, $new_file) {
+        try {
 
           $this->copy_file($old_file, $new_file, true, 'moved');
           $this->delete_file($old_file);
 
           $this->queue_remove_file($old_file);
           return true;
-        }
-        catch(\Exception $e){
+        } catch (\Exception $e) {
           return false;
         }
       }
@@ -401,8 +392,8 @@ namespace wpCloud\StatelessMedia {
        * Get GS Client
        * @return mixed
        */
-      public function get_gs_client(){
-        if(empty($this->client)){
+      public function get_gs_client() {
+        if (empty($this->client)) {
           $this->client = ud_get_stateless_media()->get_client();
         }
 

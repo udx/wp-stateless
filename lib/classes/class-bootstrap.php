@@ -284,7 +284,7 @@ namespace wpCloud\StatelessMedia {
               add_filter('sm:item:cacheControl', array($this, 'override_cache_control'));
             }
 
-            add_filter('wp_stateless_file_name', array($this, 'handle_root_dir'), 10, 5);
+            add_filter('wp_stateless_file_name', array($this, 'handle_root_dir'), 10, 4);
 
             /**
              * Extends metadata by adding GS information.
@@ -867,24 +867,10 @@ namespace wpCloud\StatelessMedia {
        *        false will passed from some compatibilities to use the value as local path.
        * @param $attachment_id
        * @param $size
-       * @param $use_wildcards
        * @return string
        */
-      public function handle_root_dir($current_path, $use_root = true, $attachment_id = '', $size = '', $use_wildcards = false) {
+      public function handle_root_dir($current_path, $use_root = true, $attachment_id = '', $size = '') {
         global $wpdb;
-
-        //for existing media
-        $cloud_meta = get_post_meta($attachment_id, 'sm_cloud', true);
-
-        if (!$use_wildcards && $cloud_meta) {
-          if ((!$size || $size === '__full')  && !empty($cloud_meta['name'])) {
-            return $cloud_meta['name'];
-          } else {
-            if (!empty($cloud_meta['sizes']) && isset($cloud_meta['sizes'][$size])) {
-              return !empty($cloud_meta['sizes'][$size]['name']) ? $cloud_meta['sizes'][$size]['name'] : $current_path;
-            }
-          }
-        }
 
         //non media files
         if ($use_root === 0) {

@@ -82,7 +82,7 @@ class FileSync extends LibrarySync {
       if (false === $fullsizepath || !$local_file_exists) {
 
         // Try get it and save
-        $result_code = ud_get_stateless_media()->get_client()->get_media(apply_filters('wp_stateless_file_name', $fullsizepath, true, "", "", true), true, $fullsizepath);
+        $result_code = ud_get_stateless_media()->get_client()->get_media(apply_filters('wp_stateless_file_name', $fullsizepath, true, "", ""), true, $fullsizepath);
 
         if ($result_code !== 200) {
           if (!Utility::sync_get_attachment_if_exist($file->ID, $fullsizepath)) { // Save file to local from proxy.
@@ -97,7 +97,7 @@ class FileSync extends LibrarySync {
 
       if ($local_file_exists) {
 
-        if (!ud_get_stateless_media()->get_client()->media_exists(apply_filters('wp_stateless_file_name', $fullsizepath, true, "", "", true))) {
+        if (!ud_get_stateless_media()->get_client()->media_exists(apply_filters('wp_stateless_file_name', $fullsizepath, true, "", ""))) {
 
           @set_time_limit(-1);
           if (!function_exists('wp_generate_attachment_metadata')) {

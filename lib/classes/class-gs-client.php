@@ -191,17 +191,11 @@ namespace wpCloud\StatelessMedia {
             return new \WP_Error('sm_error', __('Unable to locate file on disk', ud_get_stateless_media()->domain));
           }
 
-          $use_wildcards = Utility::is_use_wildcards();
-
-          /* Set default name if parameter was not passed. */
-          if (empty($name) || $use_wildcards) {
-            $name = basename($args['name']);
-          }
-
+          $name = basename($args['name']);
           $object_id = isset($args['metadata']['object-id']) ? $args['metadata']['object-id'] : (isset($args['metadata']['child-of']) ? $args['metadata']['child-of'] : "");
           $object_size = isset($args['metadata']['size']) ? $args['metadata']['size'] : "";
 
-          $args['name'] = apply_filters('wp_stateless_file_name', $args['name'], $args['use_root'], $object_id, $object_size, $use_wildcards);
+          $args['name'] = apply_filters('wp_stateless_file_name', $args['name'], $args['use_root'], $object_id, $object_size);
           $args = apply_filters('wp_stateless_add_media_args', $args);
           $name = $args['name'];
 
@@ -385,7 +379,7 @@ namespace wpCloud\StatelessMedia {
        */
       public function remove_media($name, $id = "", $use_root = true, $size = "", $is_webp = false) {
         try {
-          $name = apply_filters('wp_stateless_file_name', $name, $use_root, $id, $size, false);
+          $name = apply_filters('wp_stateless_file_name', $name, $use_root, $id, $size);
           if ($is_webp && substr($name, -4) !=  "webp") $name .= ".webp";
 
           $this->service->objects->delete($this->bucket, $name);

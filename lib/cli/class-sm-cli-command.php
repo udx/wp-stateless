@@ -131,7 +131,7 @@ if( defined( 'WP_CLI' ) && WP_CLI ) {
 
       $sm_mode = ud_get_stateless_media()->get( 'sm.mode' );
       if ( $sm_mode === 'stateless' ) {
-        WP_CLI::error( 'Sync not working on Stateless mode' );
+        WP_CLI::error( 'Sync is not supported in Stateless mode' );
       }
       //** DB Optimization process */
       if( isset( $assoc_args[ 'o' ] ) ) {

@@ -470,8 +470,7 @@ namespace wpCloud\StatelessMedia {
         $full_size_path = get_attached_file($attachment_id);
         $base_dir = dirname($full_size_path);
 
-        $use_wildcards = self::is_use_wildcards();
-        $gs_name = apply_filters('wp_stateless_file_name', $full_size_path, true, $attachment_id, '', $use_wildcards);
+        $gs_name = apply_filters('wp_stateless_file_name', $full_size_path, true, $attachment_id, '');
         $gs_base_dir = dirname($gs_name) == '.' ? '' : trailingslashit(dirname($gs_name));
 
         if (!isset($metadata['width']) && file_exists($full_size_path)) {
@@ -502,7 +501,7 @@ namespace wpCloud\StatelessMedia {
             if (empty($data['file'])) continue;
             $absolutePath = wp_normalize_path($base_dir . '/' . $data['file']);
             $gs_name = $gs_base_dir . $data['file'];
-            $gs_name = apply_filters('wp_stateless_file_name', $gs_name, true, $attachment_id, $image_size, $use_wildcards);
+            $gs_name = apply_filters('wp_stateless_file_name', $gs_name, true, $attachment_id, $image_size);
 
             $gs_name_path[$image_size] = array(
               'gs_name'   => $gs_name,
@@ -746,158 +745,6 @@ namespace wpCloud\StatelessMedia {
       }
 
       /**
-       * Store failed attachment
-       * @param $attachment_id
-       * @param $mode
-       */
-      public static function sync_store_failed_attachment($attachment_id, $mode) {
-        if (!in_array($mode, ['other', 'cli_images', 'cli_other'])) {
-          $mode = 'images';
-        }
-
-        $fails = get_option('wp_stateless_failed_' . $mode);
-        if (!empty($fails) && is_array($fails)) {
-          if (!in_array($attachment_id, $fails)) {
-            $fails[] = $attachment_id;
-          }
-        } else {
-          $fails = array($attachment_id);
-        }
-
-        update_option('wp_stateless_failed_' . $mode, $fails);
-      }
-
-      /**
-       * Checking maybe attachment have already fixed
-       * @param $mode
-       * @param $attachment_id
-       */
-      public static function sync_maybe_fix_failed_attachment($mode, $attachment_id) {
-        $fails = get_option('wp_stateless_failed_' . $mode);
-
-        if (!empty($fails) && is_array($fails)) {
-          if (in_array($attachment_id, $fails)) {
-            foreach (array_keys($fails, $attachment_id) as $key) {
-              unset($fails[$key]);
-            }
-          }
-        }
-
-        update_option('wp_stateless_failed_' . $mode, $fails);
-      }
-
-      /**
-       * Store current synchronization progress
-       * @param $mode
-       * @param $id
-       * @param $cli
-       */
-      public static function sync_store_current_progress($mode, $id, $cli = false) {
-        if (!in_array($mode, ['other', 'cli_images', 'cli_other'])) {
-          $mode = 'images';
-        }
-
-        $first_processed = get_option('wp_stateless_' . $mode . '_first_processed');
-        if (!$first_processed) {
-          update_option('wp_stateless_' . $mode . '_first_processed', $id);
-        }
-        $last_processed = get_option('wp_stateless_' . $mode . '_last_processed');
-        if (!$last_processed || $id < (int) $last_processed || $cli) {
-          update_option('wp_stateless_' . $mode . '_last_processed', $id);
-        }
-      }
-
-      /**
-       * Get synchronization progress
-       * @param $mode
-       * @return array|bool
-       */
-      public static function sync_retrieve_current_progress($mode) {
-        if (!in_array($mode, ['other', 'cli_images', 'cli_other'])) {
-          $mode = 'images';
-        }
-
-        $first_processed = get_option('wp_stateless_' . $mode . '_first_processed');
-        $last_processed = get_option('wp_stateless_' . $mode . '_last_processed');
-
-        if (!$first_processed || !$last_processed) {
-          return false;
-        }
-
-        return array((int) $first_processed, (int) $last_processed);
-      }
-
-      /**
-       * Reset synchronization progress
-       * @param $mode
-       */
-      public static function sync_reset_current_progress($mode) {
-        if (!in_array($mode, ['other', 'cli_images', 'cli_other'])) {
-          $mode = 'images';
-        }
-
-        delete_option('wp_stateless_' . $mode . '_first_processed');
-        delete_option('wp_stateless_' . $mode . '_last_processed');
-      }
-
-      /**
-       * Get fails
-       *
-       * @param $mode
-       * @return mixed|void
-       */
-      public static function sync_get_fails($mode) {
-        if (!in_array($mode, ['other', 'cli_images', 'cli_other'])) {
-          $mode = 'images';
-        }
-
-        return get_option('wp_stateless_failed_' . $mode);
-      }
-
-      /**
-       * Get_non_processed_media_ids
-       *
-       * @param $mode
-       * @param $files
-       * @param bool $continue
-       * @param $start_from
-       * @return array
-       * @throws \Exception
-       */
-      public static function sync_get_non_processed_media_ids($mode, $files, $continue = false, $start_from = 0) {
-        if (ud_get_stateless_media()->is_connected_to_gs() !== true) {
-          throw new \Exception(__('Not connected to GCS', ud_get_stateless_media()->domain));
-        }
-
-        if ($continue) {
-          $progress = self::sync_retrieve_current_progress($mode);
-
-          if (false !== $progress) {
-            if ($start_from && $start_from != 0) {
-              // adding 1 because we subtracted 1 in js code for presentation.
-              $progress[1] = $start_from + 1;
-            }
-            $ids = array();
-            foreach ($files as $file) {
-              $id = (int) $file->ID;
-              // only include IDs that have not been processed yet
-              if ($id > $progress[0] || $id < $progress[1]) {
-                $ids[] = $id;
-              }
-            }
-            return $ids;
-          }
-        }
-
-        self::sync_reset_current_progress($mode);
-
-        $ids = array();
-        foreach ($files as $file) $ids[] = (int) $file->ID;
-
-        return $ids;
-      }
-
-      /**
        * Generate JWT token signed by current site AUTH_SALT
        * If no AUTH_SALT defined - admin email used
        *
@@ -1063,16 +910,6 @@ namespace wpCloud\StatelessMedia {
         $extension = strtolower($extension);
 
         return isset($mimetypes[$extension]) ? $mimetypes[$extension] : false;
-      }
-
-      /**
-       * Check using wildcards
-       * @return bool
-       * 
-       * @todo remove all uses of this function
-       */
-      public static function is_use_wildcards() {
-        return true;
       }
 
       /**

@@ -88,7 +88,7 @@ class ImageSync extends LibrarySync {
       if (false === $fullsizepath || !file_exists($fullsizepath)) {
 
         // Try get it and save
-        $result_code = ud_get_stateless_media()->get_client()->get_media(apply_filters('wp_stateless_file_name', $fullsizepath, true, "", "", true), true, $fullsizepath);
+        $result_code = ud_get_stateless_media()->get_client()->get_media(apply_filters('wp_stateless_file_name', $fullsizepath, true, "", ""), true, $fullsizepath);
 
         if ($result_code !== 200) {
           if (!Utility::sync_get_attachment_if_exist($image->ID, $fullsizepath)) {
