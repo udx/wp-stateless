@@ -52,9 +52,9 @@
                 <strong class="queued"><?php _e('Queued', ud_get_stateless_media()->domain) ?>: {{process.getQueuedTotal()}}</strong>
                 <strong class="processed"><?php _e('Processed', ud_get_stateless_media()->domain) ?>: {{process.processed_items}}</strong>
               </div>
-              <div class="bar total">
-                <div class="bar queued" ng-style="{width: percentage(process.getQueuedTotal(), process.getProgressTotal())}">
-                  <div class="bar processed" ng-style="{width: percentage(process.processed_items, process.getQueuedTotal())}">&nbsp;</div>
+              <div class="bar total" ng-style="{'background-color': process.getProgressTotal() == process.getProcessedTotal() ? '#02ae7a' : false}">
+                <div class="bar queued" ng-style="{width: percentage(process.getQueuedTotal(), process.getProgressTotal()),'background-color': process.getProgressTotal() == process.getProcessedTotal() ? '#02ae7a' : false}">
+                  <div class="bar processed" ng-style="{width: percentage(process.getProcessedTotal(), process.getQueuedTotal()), 'background-color': process.getProgressTotal() == process.getProcessedTotal() ? '#02ae7a' : false}">&nbsp;</div>
                 </div>
               </div>
             </div>

@@ -1257,14 +1257,14 @@ var wpStatelessApp = angular
     $scope.can_run = true
 
     /**
-     *
+     * Block UI to prevent unwanted quick action sequences
      */
     $scope.blockUI = function () {
       $scope.can_run = false
     }
 
     /**
-     *
+     * Unblock UI to allow further actions
      */
     $scope.unblockUI = function () {
       $scope.can_run = true
@@ -1428,7 +1428,7 @@ function ProcessingClass(data) {
   }
 
   /**
-   *
+   * Get processed total
    */
   this.getProcessedTotal = function () {
     return this.processed_items > this.getQueuedTotal()
@@ -1505,8 +1505,15 @@ function ProcessingClass(data) {
         ) {
           if (!response.data.data.is_running) {
             that.stopPolling()
+            that.queued_items = that.total_items
+            that.processed_items = that.total_items
+            setTimeout(function () {
+              Object.assign(that, response.data.data)
+              that.$scope.$apply()
+            }, 3000)
+          } else {
+            Object.assign(that, response.data.data)
           }
-          Object.assign(that, response.data.data)
         }
       })
       .catch(function (error) {
