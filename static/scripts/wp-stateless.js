@@ -529,8 +529,8 @@ function ProcessingClass(data) {
         ) {
           if (!response.data.data.is_running) {
             that.stopPolling()
-            that.queued_items = that.total_items
-            that.processed_items = that.total_items
+            that.queued_items = that.getProgressTotal()
+            that.processed_items = that.getProgressTotal()
             setTimeout(function () {
               Object.assign(that, response.data.data)
               that.$scope.$apply()
