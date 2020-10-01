@@ -369,6 +369,11 @@ var wpStatelessApp = angular
           'disabled',
           is_running
         )
+
+        // maybe remove nag
+        if (is_running)
+          jQuery('#stateless-notice-processing-in-progress').show()
+        else jQuery('#stateless-notice-processing-in-progress').hide()
       }
     )
   })

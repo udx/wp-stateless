@@ -162,6 +162,22 @@ namespace wpCloud\StatelessMedia {
           $this->errors->add(sprintf(__('The plugin requires PHP %s or higher. You current PHP version %s is too old.', ud_get_stateless_media()->domain), '<b>5.5</b>', '<b>' . PHP_VERSION . '</b>'));
         }
 
+        /**
+         * Add the currently processing nag
+         */
+        foreach (Utility::get_available_sync_classes() as $process) {
+          if ($process->is_running()) {
+            $this->errors->add([
+              'title' => __('WP-Stateless Background Processing', ud_get_stateless_media()->domain),
+              'message' => __('WP-Stateless is now processing uploaded media on your server. This may take some time depending on the amount of media data. Note that you cannot change WP-Stateless settings until it is done. You can stop the process in the Settings area.', ud_get_stateless_media()->domain),
+              'button' => __('Processing Settings', ud_get_stateless_media()->domain),
+              'button_link' => admin_url('upload.php?page=stateless-settings#stless_processing_tab'),
+              'key' => 'processing-in-progress'
+            ], 'message');
+            break;
+          }
+        }
+
         /* Initialize plugin only if Mode is not 'disabled'. */
         if (($sm_mode !== 'disabled' && $sm_mode !== 'stateless') || ($sm_mode === 'stateless' && wp_doing_ajax())) {
 

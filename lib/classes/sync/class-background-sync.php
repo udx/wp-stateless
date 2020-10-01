@@ -338,6 +338,13 @@ abstract class BackgroundSync extends UDX_WP_Background_Process implements ISync
   }
 
   /**
+   * Is running?
+   */
+  public function is_running() {
+    return !$this->is_queue_empty() || $this->is_process_running();
+  }
+
+  /**
    * Convert to json
    * 
    * @return array
@@ -347,7 +354,7 @@ abstract class BackgroundSync extends UDX_WP_Background_Process implements ISync
       'id' => get_called_class(),
       'name' => $this->get_name(),
       'helper' => $this->get_helper_window(),
-      'is_running' => !$this->is_queue_empty() || $this->is_process_running(),
+      'is_running' => $this->is_running(),
       'limit' => ($limit = $this->get_process_meta('limit')) ? $limit : 0,
       'order' => ($order = $this->get_process_meta('order')) ? $order : 'desc',
       'total_items' => $this->get_total_items(),
