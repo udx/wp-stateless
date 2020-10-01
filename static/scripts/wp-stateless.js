@@ -457,6 +457,13 @@ function ProcessingClass(data) {
   }
 
   /**
+   * If proccess can be stopped
+   */
+  this.canStop = function () {
+    return this.is_running && !this.is_stopping
+  }
+
+  /**
    * Get Progress bar possible total
    */
   this.getProgressTotal = function () {
