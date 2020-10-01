@@ -352,6 +352,25 @@ var wpStatelessApp = angular
       ProcessingClass.prototype.$scope = $scope
       $scope.processes.load()
     }
+
+    // watch for any running process
+    $scope.$watch(
+      function (scope) {
+        if (!scope.processes.classes.length) return false
+        return Boolean(
+          scope.processes.classes.find(function (process) {
+            return process.is_running
+          })
+        )
+      },
+      function (is_running) {
+        // Disable the ability to save settings if there are running processes
+        jQuery('#save-settings,#save-compatibility').attr(
+          'disabled',
+          is_running
+        )
+      }
+    )
   })
   .controller('noJSWarning', function ($scope, $filter) {
     $scope.jsLoaded = true
