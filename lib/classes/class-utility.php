@@ -394,7 +394,7 @@ namespace wpCloud\StatelessMedia {
             // update_post_meta( $attachment_id, 'sm_cloud', $cloud_meta );
           }
 
-          if ($args['no_thumb'] == true) {
+          if ($args['no_thumb'] != true) {
             $stateless_synced_full_size = $attachment_id;
           }
 
@@ -1027,11 +1027,6 @@ namespace wpCloud\StatelessMedia {
         // trigger processing filters
         wp_update_attachment_metadata($image->ID, $metadata);
         do_action('sm:synced::image', $id, $metadata);
-
-        // Ephemeral and Stateless modes: we don't need the local version.
-        if (ud_get_stateless_media()->get('sm.mode') === 'ephemeral' || ud_get_stateless_media()->get('sm.mode') === 'stateless') {
-          unlink($fullsizepath);
-        }
 
         return $image;
       }
