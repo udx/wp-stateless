@@ -2,10 +2,7 @@
 
 /**
  * AJAX Handler
- *
- * @since 1.0.0
  */
-
 namespace wpCloud\StatelessMedia {
 
   if (!class_exists('wpCloud\StatelessMedia\Ajax')) {

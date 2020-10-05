@@ -107,7 +107,7 @@ class NonLibrarySync extends BackgroundSync {
       $file_path = trim($item, '/');
       $fullsizepath = $upload_dir['basedir'] . '/' . $file_path;
 
-      do_action('sm:sync::syncFile', $file_path, $fullsizepath, true);
+      do_action('sm:sync::syncFile', $file_path, $fullsizepath, true, ['remove_from_queue' => true, 'manual_sync' => true]);
 
       $this->log(sprintf(__('%1$s (ID %2$s) was successfully synchronised in %3$s seconds.', ud_get_stateless_media()->domain), esc_html(get_the_title($file_path)), $file_path, timer_stop()));
 

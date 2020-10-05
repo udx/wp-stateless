@@ -75,7 +75,9 @@ namespace wpCloud\StatelessMedia {
           'ephemeral' => true, // whether to delete local file in ephemeral mode.
           'download'  => false, // whether to delete local file in ephemeral mode.
           'use_root'  => 0,
-          'skip_db'   => false
+          'skip_db'   => false,
+          'manual_sync' => false,
+          'remove_from_queue' => false, // removes entry from queue table if both file is missing.
         ));
 
         if ($this->queue_is_exists($name, 'synced') && !$forced) {
@@ -175,6 +177,13 @@ namespace wpCloud\StatelessMedia {
             $this->queue_add_file($name, 'synced');
           }
           return $media;
+        } elseif (!$local_file_exists && $args['remove_from_queue']) {
+          if (!$this->client->media_exists($name)) {
+            $this->queue_remove_file($name);
+            if ($args['manual_sync']) {
+              throw new \Exception(__("Both local and remote files are missing.", ud_get_stateless_media()->domain));
+            }
+          }
         }
       }
 
