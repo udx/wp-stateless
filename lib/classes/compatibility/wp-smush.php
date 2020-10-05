@@ -54,9 +54,8 @@ namespace wpCloud\StatelessMedia {
        */
       public function skip_add_media( $return, $metadata, $attachment_id, $force = false, $args = array() ) {
         global $doing_manual_sync;
-        $args = wp_parse_args( $args, array( 'no_thumb' => false, ) );
 
-        if( $force || $doing_manual_sync || $args[ 'no_thumb' ] == true ) return false;
+        if( $force || $doing_manual_sync ) return false;
 
         if( class_exists( 'WP_Smush_Modules' ) ) {
           $auto_smush = \WP_Smush::get_instance()->core()->mod->settings->get( 'auto' );

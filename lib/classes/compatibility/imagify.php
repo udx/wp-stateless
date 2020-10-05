@@ -60,9 +60,8 @@ namespace wpCloud\StatelessMedia {
        */
       public function skip_add_media( $return, $metadata, $attachment_id, $force = false, $args = array() ) {
         global $doing_manual_sync;
-        $args = wp_parse_args( $args, array( 'no_thumb' => false, ) );
 
-        if( $force || $doing_manual_sync || !get_imagify_option( 'auto_optimize' ) || $args[ 'no_thumb' ] == true ) return false;
+        if( $force || $doing_manual_sync || !get_imagify_option( 'auto_optimize' ) ) return false;
 
         $imagify = new \Imagify_Attachment( $attachment_id );
         if( is_callable( array( $imagify, 'is_extension_supported' ) ) ) {
@@ -95,9 +94,7 @@ namespace wpCloud\StatelessMedia {
       public function skip_remove_media( $return, $metadata, $attachment_id, $force = false, $args = array() ) {
         global $doing_manual_sync;
 
-        $args = wp_parse_args( $args, array( 'no_thumb' => false ) );
-
-        if( $force || $doing_manual_sync || !get_imagify_option( 'auto_optimize' ) || $args[ 'no_thumb' ] == true ) return false;
+        if( $force || $doing_manual_sync || !get_imagify_option( 'auto_optimize' ) ) return false;
 
         $imagify = new \Imagify\Optimization\File( get_attached_file( $attachment_id ) );
 
