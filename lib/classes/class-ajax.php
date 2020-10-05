@@ -315,7 +315,7 @@ namespace wpCloud\StatelessMedia {
           throw new \Exception( __( "You are not allowed to do this.", ud_get_stateless_media()->domain ) );
 
 
-        do_action( 'sm:sync::syncFile', $file_path, $fullsizepath, true);
+        do_action( 'sm:sync::syncFile', $file_path, $fullsizepath, true, ['remove_from_queue' => true, 'manual_sync' => true]);
 
         // $this->store_current_progress( 'other', $file_path );
         // $this->maybe_fix_failed_attachment( 'other', $file_path );

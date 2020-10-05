@@ -879,8 +879,11 @@ namespace wpCloud\StatelessMedia {
 
         /**
          * Using only filename. Other parts of path included to $root_dir.
+         * excluding compatibility.
          */
-        $current_path = basename($current_path);
+        if($use_root){
+          $current_path = basename($current_path);
+        }
 
         if(!$use_root){
           // removing the root dir if already exists in the begaining.
