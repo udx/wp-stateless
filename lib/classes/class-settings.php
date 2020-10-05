@@ -340,7 +340,7 @@ namespace wpCloud\StatelessMedia {
        */
       public function root_dir_wildcards( $root_dir, $regex = false, $current_values = [] ) {
 
-        $not_allowed_char = '/[^A-Za-z0-9\/_.]/';
+        $not_allowed_char = '/[^A-Za-z0-9\/_.\.\-]/';
         $wildcards = apply_filters('wp_stateless_root_dir_wildcard', $this->wildcards);
 
         if($regex){

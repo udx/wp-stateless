@@ -229,11 +229,11 @@ var wpStatelessApp = angular
       let value_splitted = root_dir.split('/')
       for (let i = 0; i < value_splitted.length; i++) {
         if (
-          !/^[a-zA-Z0-9_.]+$/.test(value_splitted[i]) &&
+          !/^[a-zA-Z0-9_\-.]+$/.test(value_splitted[i]) &&
           value_splitted[i] != '' &&
           jQuery.inArray(value_splitted[i], tags) == -1
         ) {
-          value_splitted[i] = value_splitted[i].replace(/[^a-zA-Z0-9_.]/g, '')
+          value_splitted[i] = value_splitted[i].replace(/[^a-zA-Z0-9_\-.]/g, '')
         }
       }
       root_dir = value_splitted.join('/')
