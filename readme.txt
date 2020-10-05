@@ -6,7 +6,7 @@ License: GPLv2 or later
 Requires PHP: 5.6
 Requires at least: 5.0
 Tested up to: 5.5
-Stable tag: 3.0.3
+Stable tag: 3.0.4
 
 Upload and serve your WordPress media files from Google Cloud Storage.
 
@@ -105,6 +105,10 @@ To ensure new releases cause as little disruption as possible, we rely on a numb
 Before upgrading to WP-Stateless 3.0, please, make sure you tested it on your development environment.
 
 == Changelog ==
+= 3.0.4 =
+* FIX - Fixed inability to use dashes in the upload folder name. GitHub issue [#565](https://github.com/udx/wp-stateless/issues/565).
+* COMPATIBILITY - Elementor - Fixed wrong upload directory. GitHub issue [#560](https://github.com/udx/wp-stateless/issues/560).
+
 = 3.0.3 =
 * FIX - Fixed an incorrect file URL in Stateless mode on Edit Media screen. GitHub issue [#544](https://github.com/udx/wp-stateless/issues/544).
 
