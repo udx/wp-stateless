@@ -21,7 +21,6 @@ namespace wpCloud\StatelessMedia {
     class Utility {
 
       static $can_delete_attachment = [];
-      static $synced_sizes = [];
 
       /**
        * ChromeLogger
@@ -167,11 +166,10 @@ namespace wpCloud\StatelessMedia {
        * @return bool|string
        */
       public static function add_media($metadata, $attachment_id, $force = false, $args = array()) {
-        global $stateless_synced_full_size;
         $sm_mode = ud_get_stateless_media()->get('sm.mode');
         $file = '';
         $upload_dir = wp_upload_dir();
-        $args = wp_parse_args($args, array('no_thumb' => false, 'is_webp' => '', // expected value ".webp";
+        $args = wp_parse_args($args, array('is_webp' => '', // expected value ".webp";
         ));
 
         /* Get metadata in case if method is called directly. */
@@ -281,20 +279,6 @@ namespace wpCloud\StatelessMedia {
           $image_sizes = self::get_path_and_url($metadata, $attachment_id);
           foreach ($image_sizes as $size => $img) {
             if ((isset($_REQUEST['size']) && $_REQUEST['size'] == $size) || empty($_REQUEST['size'])) {
-              // also skips full size image if already uploaded using that feature.
-              // and delete it in ephemeral modes as it already bin uploaded through intermediate_image_sizes_advanced filter.
-              if (!$img['is_thumb'] && $stateless_synced_full_size == $attachment_id) {
-                if ($sm_mode === 'ephemeral' && $args['no_thumb'] != true && \file_exists($img['path']) && !$skip_remove_media) {
-                  unlink($img['path']);
-                }
-                continue;
-              }
-
-              // skips thumbs when it's called from Upload the full size image first, through intermediate_image_sizes_advanced filter.
-              if ($args['no_thumb'] && $img['is_thumb'] || !empty(self::$synced_sizes[$attachment_id][$size]) && $sm_mode !== 'stateless'  && !$args['is_webp']) {
-                continue;
-              }
-
               // GCS metadata
               $_metadata = array(
                 "width"     => $img['width'],
@@ -312,7 +296,7 @@ namespace wpCloud\StatelessMedia {
               }
 
               $media_args = array_filter(array(
-                'force'              => $img['is_thumb'] ? $force : $force && $stateless_synced_full_size != $attachment_id,
+                'force'              => $force,
                 'name'               => $img['gs_name'],
                 'is_webp'            => $args['is_webp'],
                 'mimeType'           => $img['mime_type'],
@@ -378,10 +362,6 @@ namespace wpCloud\StatelessMedia {
                   }
                 }
               }
-              // Setting
-              if (empty(self::$synced_sizes[$attachment_id][$size])) {
-                self::$synced_sizes[$attachment_id][$size] = true;
-              }
             }
           }
           // End of image sync loop
@@ -392,10 +372,6 @@ namespace wpCloud\StatelessMedia {
             // $cloud_meta = get_post_meta( $attachment_id, 'sm_cloud', true);
             // $cloud_meta['is_webp'] = true;
             // update_post_meta( $attachment_id, 'sm_cloud', $cloud_meta );
-          }
-
-          if ($args['no_thumb'] != true) {
-            $stateless_synced_full_size = $attachment_id;
           }
 
           /**
@@ -648,7 +624,7 @@ namespace wpCloud\StatelessMedia {
       public static function can_delete_attachment($attachment_id, $args) {
         $sm_mode = ud_get_stateless_media()->get('sm.mode');
 
-        if (in_array($sm_mode, array('ephemeral', 'stateless')) && $args['no_thumb'] != true) {
+        if (in_array($sm_mode, array('ephemeral', 'stateless'))) {
           // checks whether it's WP 5.3 and 'intermediate_image_sizes_advanced' is passed.
           // To be sure that we don't delete full size image before thumbnails are generated.
           if (
