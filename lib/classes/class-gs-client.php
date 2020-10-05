@@ -191,7 +191,6 @@ namespace wpCloud\StatelessMedia {
             return new \WP_Error('sm_error', __('Unable to locate file on disk', ud_get_stateless_media()->domain));
           }
 
-          $name = basename($args['name']);
           $object_id = isset($args['metadata']['object-id']) ? $args['metadata']['object-id'] : (isset($args['metadata']['child-of']) ? $args['metadata']['child-of'] : "");
           $object_size = isset($args['metadata']['size']) ? $args['metadata']['size'] : "";
 
