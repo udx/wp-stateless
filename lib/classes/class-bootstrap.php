@@ -421,6 +421,14 @@ namespace wpCloud\StatelessMedia {
        */
       public function wp_calculate_image_srcset($sources, $size_array, $image_src, $image_meta, $attachment_id) {
         $sm_mode = $this->get('sm.mode');
+
+        /**
+         * In Backup mode using local URL
+         */
+        if ( "backup" == $sm_mode ) {
+          return $sources;
+        }
+
         if (empty($image_meta['gs_link'])) {
           $image_meta = wp_get_attachment_metadata($attachment_id);
         }
