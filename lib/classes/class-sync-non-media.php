@@ -181,7 +181,7 @@ namespace wpCloud\StatelessMedia {
           if (!$this->client->media_exists($name)) {
             $this->queue_remove_file($name);
             if ($args['manual_sync']) {
-              throw new \Exception(__("Both local and remote files are missing.", ud_get_stateless_media()->domain));
+              throw new UnprocessableException(__("Both local and remote files are missing.", ud_get_stateless_media()->domain));
             }
           }
         }
