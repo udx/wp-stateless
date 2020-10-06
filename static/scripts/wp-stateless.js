@@ -316,7 +316,7 @@ var wpStatelessApp = angular
           method: 'GET',
           url: window.wpApiSettings.root + 'wp-stateless/v1/sync/getProcesses',
           headers: {
-            Authorization: window.wp_stateless_configs.REST_API_TOKEN,
+            'x-wps-auth': window.wp_stateless_configs.REST_API_TOKEN,
           },
         })
           .then(function (response) {
@@ -421,7 +421,7 @@ function ProcessingClass(data) {
       method: 'POST',
       url: window.wpApiSettings.root + 'wp-stateless/v1/sync/run',
       headers: {
-        Authorization: window.wp_stateless_configs.REST_API_TOKEN,
+        'x-wps-auth': window.wp_stateless_configs.REST_API_TOKEN,
       },
       data: {
         id: this.id,
@@ -501,7 +501,7 @@ function ProcessingClass(data) {
       method: 'POST',
       url: window.wpApiSettings.root + 'wp-stateless/v1/sync/stop',
       headers: {
-        Authorization: window.wp_stateless_configs.REST_API_TOKEN,
+        'x-wps-auth': window.wp_stateless_configs.REST_API_TOKEN,
       },
       data: {
         id: this.id,
@@ -548,7 +548,7 @@ function ProcessingClass(data) {
         'wp-stateless/v1/sync/getProcess/' +
         window.btoa(this.id),
       headers: {
-        Authorization: window.wp_stateless_configs.REST_API_TOKEN,
+        'x-wps-auth': window.wp_stateless_configs.REST_API_TOKEN,
       },
     })
       .then(function (response) {

@@ -38,7 +38,11 @@ namespace wpCloud\StatelessMedia {
        */
       static public function authCheck(\WP_REST_Request $request) {
         $auth_token = $request->get_header('authorization');
+        // Allow using custom `x-wps-auth` header if authorization hedaer is disabled
+        if (!$auth_token) $auth_token = $request->get_header('x-wps-auth');
+
         if (!$auth_token) return false;
+
         try {
           self::$tokenData = Utility::verify_jwt_token($auth_token);
         } catch (\Exception $e) {
