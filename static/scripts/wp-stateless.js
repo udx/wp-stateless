@@ -546,7 +546,7 @@ function ProcessingClass(data) {
       url:
         window.wpApiSettings.root +
         'wp-stateless/v1/sync/getProcess/' +
-        window.btoa(this.id),
+        String(window.btoa(this.id)).replace(/=+/, ''),
       headers: {
         'x-wps-auth': window.wp_stateless_configs.REST_API_TOKEN,
       },
