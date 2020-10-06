@@ -51,7 +51,7 @@ class FileSync extends LibrarySync {
   public function get_helper_window() {
     return new HelperWindow(
       __('What are Media Library Files?', ud_get_stateless_media()->domain),
-      __('All non-image files that were uploaded via the media library or via plugins that use standard uploading API.', ud_get_stateless_media()->domain),
+      __('All non-image files that were uploaded via the media library or via plugins that use standard uploading API.', ud_get_stateless_media()->domain)
     );
   }
 
