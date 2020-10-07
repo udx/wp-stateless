@@ -81,6 +81,7 @@ abstract class BackgroundSync extends UDX_WP_Background_Process implements ISync
         foreach ($current_batch->data as $key => $item) {
           unset($current_batch->data[$key]);
           if ($item == $this->currently_processing_item) {
+            call_user_func([get_class(), 'task'], $this->currently_processing_item);
             break;
           }
         }
