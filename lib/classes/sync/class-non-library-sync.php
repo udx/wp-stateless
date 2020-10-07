@@ -46,7 +46,7 @@ class NonLibrarySync extends BackgroundSync {
   public function get_helper_window() {
     return new HelperWindow(
       __('What are Compatibility and Custom Folders?', ud_get_stateless_media()->domain),
-      __('All kind of files that were created by themes and plugins in custom folders out of standard Media Library, and that WP-Statless has a Compatibility Support for. Limit and Sorting is not supported.', ud_get_stateless_media()->domain)
+      __('All kind of files that were created by themes and plugins in custom folders out of standard Media Library, and that WP-Stateless has a Compatibility Support for. Limit and Sorting is not supported.', ud_get_stateless_media()->domain)
     );
   }
 
