@@ -119,7 +119,7 @@ namespace wpCloud\StatelessMedia {
           update_post_meta( $row_img->post_id, 'sm_cloud', $cloud_meta );
 
           add_filter( 'upload_mimes', array( $this, 'add_webp_mime' ), 10, 2 );
-          do_action( 'sm:sync::syncFile', $gs_name, $local_file, 2 );
+          do_action( 'sm:sync::syncFile', $gs_name, $local_file, 2, array( 'use_root' => true ) );
         }
       }
 
