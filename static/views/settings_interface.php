@@ -6,7 +6,7 @@
   </div>
   <h2 class="nav-tab-wrapper">
     <a href="#stless_settings_tab" class="stless_setting_tab nav-tab  nav-tab-active"><?php _e('Settings', ud_get_stateless_media()->domain); ?></a>
-    <?php if (!is_network_admin() && ud_get_stateless_media('sm.mode') !== 'stateless') : ?>
+    <?php if (!is_network_admin() && !in_array(ud_get_stateless_media('sm.mode'), ['stateless', 'disabled'])) : ?>
       <a href="#stless_processing_tab" class="stless_setting_tab nav-tab"><?php _e('Processing', ud_get_stateless_media()->domain); ?></a>
     <?php endif; ?>
     <a href="#stless_compatibility_tab" class="stless_setting_tab nav-tab"><?php _e('Compatibility', ud_get_stateless_media()->domain); ?></a>
@@ -235,7 +235,7 @@
         <?php submit_button(null, 'primary', 'submit', true, array('id' => 'save-settings')); ?>
       </form>
     </div>
-    <?php if (!is_network_admin() && ud_get_stateless_media('sm.mode') !== 'stateless') : ?>
+    <?php if (!is_network_admin() && !in_array(ud_get_stateless_media('sm.mode'), ['stateless', 'disabled'])) : ?>
       <div id="stless_processing_tab" class="stless_settings_content">
         <?php include 'processing_interface.php'; ?>
       </div>
