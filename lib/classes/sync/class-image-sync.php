@@ -71,6 +71,7 @@ class ImageSync extends LibrarySync {
   protected function task($id) {
     try {
       if ($this->is_stopped()) return false;
+      parent::before_task($id);
 
       timer_start();
       @error_reporting(0);

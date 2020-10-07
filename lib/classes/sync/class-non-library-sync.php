@@ -143,18 +143,20 @@ class NonLibrarySync extends BackgroundSync {
    * @return string|false
    */
   public function get_process_notice() {
+    $notices = parent::get_process_notice();
     $last = intval($this->get_process_meta('last_at'));
     if (!$last) {
       $last = intval($this->get_process_meta('starttime'));
-      if (!$last) return false;
+      if (!$last) return $notices;
     }
 
-    if (!property_exists($this, 'cron_interval')) return false;
+    if (!property_exists($this, 'cron_interval')) return $notices;
 
     $waiting = current_time('timestamp') - $last;
-    if ($waiting < MINUTE_IN_SECONDS * $this->cron_interval) return false;
+    if ($waiting < MINUTE_IN_SECONDS * $this->cron_interval) return $notices;
 
-    return sprintf(__('This process takes longer than it should. Please, make sure loopback connections and WP Cron are enabled and working, or try restarting the process.', ud_get_stateless_media()->domain));
+    $notices[] = sprintf(__('This process takes longer than it should. Please, make sure loopback connections and WP Cron are enabled and working, or try restarting the process.', ud_get_stateless_media()->domain));
+    return $notices;
   }
 
   /**

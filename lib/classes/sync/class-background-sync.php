@@ -34,6 +34,16 @@ abstract class BackgroundSync extends UDX_WP_Background_Process implements ISync
   protected $allow_limit = false;
 
   /**
+   * Storage for emergency memory
+   */
+  private $emergency_memory = null;
+
+  /**
+   * Storage for currently processed item
+   */
+  protected $currently_processing_item = null;
+
+  /**
    * Extend the construct
    */
   public function __construct() {
@@ -47,6 +57,52 @@ abstract class BackgroundSync extends UDX_WP_Background_Process implements ISync
     });
 
     $this->cron_interval = $this->get_healthcheck_cron_interval();
+
+    // Reserve 1MB of RAM for the fallback action
+    $this->emergency_memory = new \SplFixedArray(65536);
+
+    // Register the fallback action to be executed on shutdown
+    register_shutdown_function(function () {
+      // Free up reserved memory
+      $this->emergency_memory = null;
+
+      // Check if we should execute the fallback action
+      if (is_null($err = error_get_last())) return;
+      if ($err['type'] != E_ERROR) return;
+      if (strstr($err['message'], 'memory') === false || strstr($err['message'], 'exhausted') === false) return;
+      if (!$this->is_running()) return;
+      if (!$this->currently_processing_item) return;
+
+      // If we are here, then we shutdown because of `memory exhausted` error
+
+      // Remove already processed and problem items from the current batch
+      $current_batch = $this->get_batch();
+      if ($current_batch && $current_batch->data && is_array($current_batch->data)) {
+        foreach ($current_batch->data as $key => $item) {
+          unset($current_batch->data[$key]);
+          if ($item == $this->currently_processing_item) {
+            break;
+          }
+        }
+        $current_batch->data = array_values($current_batch->data);
+      }
+
+      // Update current batch directly to the option
+      // because it needs to be updated even if it is empty
+      update_site_option($current_batch->key, $current_batch->data);
+
+      // Add notice
+      $this->save_process_meta([
+        'notice' => sprintf(
+          __("Not enought memory to process the following item '%s' %s: %s. Item skipped. Please, try to increase memory limit or use uploading by chunks: <a target=\"_blank\" href=\"https://wp-stateless.github.io/docs/constants/#wp_stateless_media_upload_chunk_size\">How to use WP_STATELESS_MEDIA_UPLOAD_CHUNK_SIZE setting.</a>", ud_get_stateless_media()->domain),
+          is_numeric($this->currently_processing_item) ? get_the_title($this->currently_processing_item) : $this->currently_processing_item,
+          is_numeric($this->currently_processing_item) ? "(ID: {$this->currently_processing_item})" : '',
+          $err['message']
+        )
+      ]);
+
+      wp_die();
+    });
 
     parent::__construct();
   }
@@ -300,6 +356,13 @@ abstract class BackgroundSync extends UDX_WP_Background_Process implements ISync
   }
 
   /**
+   * Remember currently processing item
+   */
+  protected function before_task($item) {
+    $this->currently_processing_item = $item;
+  }
+
+  /**
    * Common task that should be executed in the end of each subclass task
    */
   protected function task($_) {
@@ -331,10 +394,12 @@ abstract class BackgroundSync extends UDX_WP_Background_Process implements ISync
   /**
    * Process specific notice
    * 
-   * @return string|bool
+   * @return array|bool
    */
   public function get_process_notice() {
-    return false;
+    $notice = $this->get_process_meta('notice');
+    if (empty($notice)) return [];
+    return [$notice];
   }
 
   /**
