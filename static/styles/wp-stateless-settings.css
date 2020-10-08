@@ -115,6 +115,10 @@
   color: #a5ecd7;
 }
 
+.processing-hint {
+  margin-top: 0;
+}
+
 .wpStateLess-support {
   width: 60%;
   margin: 0 auto;

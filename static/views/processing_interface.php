@@ -13,8 +13,9 @@
 
   <div ng-show="processes.isLoading"><?php _e('Loading available processes...', ud_get_stateless_media()->domain); ?></div>
 
-  <div class="metabox-holder">
-    <div class="postbox-container" ng-show="processes.classes.length">
+  <div class="metabox-holder" ng-show="processes.classes.length">
+    <p class="processing-hint"><strong><?php _e('Hint', ud_get_stateless_media()->domain) ?>:</strong> <?php _e('You can close this page once processing is started.', ud_get_stateless_media()->domain) ?></p>
+    <div class="postbox-container">
 
       <div class="postbox" ng-repeat="process in processes.classes">
         <div class="postbox-header">
