@@ -34,7 +34,7 @@ namespace wpCloud\StatelessMedia {
       public $bootstrap = null;
 
       private $settings = array(
-        'mode'                   => array('WP_STATELESS_MEDIA_MODE', 'cdn'),
+        'mode'                   => array('WP_STATELESS_MEDIA_MODE', 'ephemeral'),
         'body_rewrite'           => array('WP_STATELESS_MEDIA_BODY_REWRITE', 'false'),
         'body_rewrite_types'     => array('WP_STATELESS_MEDIA_BODY_REWRITE_TYPES', 'jpg jpeg png gif pdf'),
         'bucket'                 => array('WP_STATELESS_MEDIA_BUCKET', ''),

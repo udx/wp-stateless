@@ -122,7 +122,7 @@ namespace wpCloud\StatelessMedia {
                   update_site_option('stateless-modules', $modules);
                 }
               } elseif (get_site_option('sm_mode', 'disabled') == 'disabled') {
-                update_site_option('sm_mode', 'cdn');
+                update_site_option('sm_mode', 'ephemeral');
               }
               update_site_option('sm_bucket', $bucketName);
               update_site_option('sm_key_json', $privateKeyData);
@@ -145,7 +145,7 @@ namespace wpCloud\StatelessMedia {
                   update_option('stateless-modules', $modules);
                 }
               } elseif (get_option('sm_mode', 'disabled') == 'disabled') {
-                update_option('sm_mode', 'cdn');
+                update_option('sm_mode', 'ephemeral');
               }
               update_option('sm_bucket', $bucketName);
               update_option('sm_key_json', $privateKeyData);
