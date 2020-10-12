@@ -16,6 +16,7 @@ New to Google Cloud? Google is offering you a [$300 credit](https://cloud.google
 ### Modes
 * Backup - Upload media files to Google Storage and serve local file urls.
 * CDN - Copy media files to Google Storage and serve them directly from there.
+* Ephemeral - Store and serve media files with Google Cloud Storage only. Media files are not stored locally, but local storage is used temporarily for processing and is required for certain compatibilities.
 * Stateless - Store and serve media files with Google Cloud Storage only. Media files are not stored locally.
 
 ### Features
@@ -27,8 +28,9 @@ New to Google Cloud? Google is offering you a [$300 credit](https://cloud.google
 * Batch image thumbnail regeneration.
 * Synchronization tools for uploading existing files and images.
 * All settings supported with wp-config constants and network setting overrides.
-* Multiple modes: Backup, CDN, Stateless.
+* Multiple modes: Backup, CDN, Ephemeral, Stateless.
 * All files served in HTTPS mode.
+* Serverless platform compatible, including Google App Engine.
 * Multisite compatible.
 
 ### Support, Feedback, & Contribute

@@ -15,11 +15,10 @@ jQuery(document).ready(function ($) {
 
     var tab = $(this).attr('href')
     smSelectTab(tab)
-
-    return false
   })
 
-  $(document).on('click', '.pointer', function () {
+  $(document).on('click', '.pointer', function (e) {
+    e.stopPropagation()
     var pointer = $(this)
     pointer
       .pointer({
@@ -32,5 +31,13 @@ jQuery(document).ready(function ($) {
         position: pointer.data('position'),
       })
       .pointer('open')
+  })
+
+  $(document).on('click', function () {
+    $('.wp-pointer').hide()
+  })
+
+  $(document).on('click', '.wp-pointer', function (e) {
+    e.stopPropagation()
   })
 })
