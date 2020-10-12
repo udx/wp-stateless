@@ -66,6 +66,7 @@ namespace wpCloud\StatelessMedia {
           foreach ( $user_meta[0] as $key => &$value ) {
             if ( is_numeric( $key ) ) {
               $value = trailingslashit( $bucketLink ) . apply_filters( 'wp_stateless_file_name', str_replace( $upload['baseurl'], '', $value ), true );
+              $value = apply_filters('wp_stateless_gcs_url', $value);
             }
           }
         }

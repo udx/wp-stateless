@@ -25,6 +25,11 @@ namespace wpCloud\StatelessMedia {
       /**
        * ACF image crop addons compatibility.
        */
+      new PRIVATE_FILE();
+
+      /**
+       * ACF image crop addons compatibility.
+       */
       new CompatibilityAcfImageCrop();
 
       /**

@@ -29,7 +29,7 @@ namespace wpCloud\StatelessMedia {
        * Instance of
        *  - ud_get_stateless_media
        *  - wpCloud\StatelessMedia\Bootstrap
-       * @var false|null|string
+       * @var false|null|string|object
        */
       public $bootstrap = null;
 
@@ -45,6 +45,8 @@ namespace wpCloud\StatelessMedia {
         'custom_domain'          => array('WP_STATELESS_MEDIA_CUSTOM_DOMAIN', ''),
         'organize_media'         => array('', 'true'),
         'hashify_file_name'      => array(['WP_STATELESS_MEDIA_HASH_FILENAME' => 'WP_STATELESS_MEDIA_CACHE_BUSTING'], 'false'),
+        'private_file'           => array('WP_STATELESS_MEDIA_PRIVATE_FILE', 'false'),
+        'private_file_expire'    => array('WP_STATELESS_MEDIA_PRIVATE_FILE_EXPIRE', "300"),
       );
 
       private $network_only_settings = array(

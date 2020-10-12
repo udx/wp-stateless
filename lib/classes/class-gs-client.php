@@ -275,7 +275,9 @@ namespace wpCloud\StatelessMedia {
           $acl->setEntity('allUsers');
           $acl->setRole('READER');
           $acl = apply_filters('wp_stateless_media_acl', $acl, $name, $media, $agrs);
-          $this->service->objectAccessControls->insert($this->bucket, $name, $acl);
+          if($acl){
+            $this->service->objectAccessControls->insert($this->bucket, $name, $acl);
+          }
         }
       }
 

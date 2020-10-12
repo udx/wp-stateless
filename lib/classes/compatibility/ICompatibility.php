@@ -33,6 +33,7 @@ namespace wpCloud\StatelessMedia {
     protected $plugin_file = null;
     protected $theme_name = null;
     protected $first_party = false;
+    protected $hidden = false;
     protected $non_library_sync = false;
     protected $server_constant = false;
     protected $sm_mode_required = '';
@@ -181,6 +182,10 @@ namespace wpCloud\StatelessMedia {
         $this->enabled = 'inactive';
       }
 
+      if($this->first_party && $this->hidden){
+        $this->enabled = true;
+      }
+      
       /**
        * Checking whether to show manual sync option.
        */
@@ -194,6 +199,7 @@ namespace wpCloud\StatelessMedia {
         'self' => $this,
         'title' => $this->title,
         'enabled' => $this->enabled,
+        'hidden' => $this->hidden,
         'description' => $this->description,
         'is_constant' => $is_constant,
         'is_network_override' => $is_network_override,

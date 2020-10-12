@@ -104,6 +104,30 @@
                     </p>
                     <p class="description"><strong ng-bind="sm.showNotice('body_rewrite_types')"></strong> <?php _e('Define the file types you would like supported with File URL Replacement. Separate each type by a space.', ud_get_stateless_media()->domain); ?></p>
                   </div>
+                  <hr>
+
+                  <h4><?php _e('Private Files (Beta)', ud_get_stateless_media()->domain); ?></h4>
+                  <p>
+                    <select name="sm[private_file]" id="gcs_private_file" ng-model="sm.private_file" ng-disabled="sm.readonly.private_file">
+                      <?php if (is_network_admin()) : ?>
+                        <option value=""><?php _e('Don\'t override', ud_get_stateless_media()->domain); ?></option>
+                      <?php endif; ?>
+                      <option value="false"><?php _e('Disable', ud_get_stateless_media()->domain); ?></option>
+                      <option value="true"><?php _e('Enable', ud_get_stateless_media()->domain); ?></option>
+                    </select>
+                  </p>
+                  <p class="description"><strong ng-bind="sm.showNotice('private_file')"></strong> <?php _e('Makes all the media files private. Only the authorized user will have access to the media files. <br /><b>Note:</b> Should be used with Ephemeral or Stateless mode.', ud_get_stateless_media()->domain); ?></p>
+                
+                  <h4 ng-show="sm.private_file == 'true'"><?php _e('Private File Expire', ud_get_stateless_media()->domain); ?></h4>
+                  <div ng-show="sm.private_file == 'true'" class="private_file_expire">
+                    <p>
+                      <label for="private_file_expire">
+                        <input name="sm[private_file_expire]" type="text" id="private_file_expire" class="regular-text ltr" ng-model="sm.private_file_expire" ng-disabled="sm.readonly.private_file_expire">
+                      </label>
+                    </p>
+                    <p class="description"><strong ng-bind="sm.showNotice('private_file_expire')"></strong> <?php _e('Times in second for private files to expire.', ud_get_stateless_media()->domain); ?></p>
+                  </div>
+
                 </fieldset>
               </td>
             </tr>
@@ -249,7 +273,7 @@
           <?php wp_nonce_field('wp-stateless-modules', '_smnonce'); ?>
 
           <table class="form-table">
-            <tr ng-repeat="module in modules">
+            <tr ng-repeat="module in modules" ng-if="module.hidden != true && module.hidden != 'true'">
               <th>
                 <label for="{{module.id}}">{{module.title}}</label>
               </th>
