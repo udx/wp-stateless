@@ -361,6 +361,7 @@ abstract class BackgroundSync extends UDX_WP_Background_Process implements ISync
    * Remember currently processing item
    */
   protected function before_task($item) {
+    define("DOING_AJAX", true);
     $this->currently_processing_item = $item;
   }
 
