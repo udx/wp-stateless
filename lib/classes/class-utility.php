@@ -1050,6 +1050,7 @@ namespace wpCloud\StatelessMedia {
           if (!ud_get_stateless_media()->get_client()->media_exists(apply_filters('wp_stateless_file_name', $fullsizepath, true, "", ""))) {
 
             if (!function_exists('wp_generate_attachment_metadata')) {
+              require_once ABSPATH . '/wp-admin/includes/media.php';
               require_once ABSPATH . '/wp-admin/includes/image.php';
             }
             $metadata = wp_generate_attachment_metadata($file->ID, $fullsizepath);

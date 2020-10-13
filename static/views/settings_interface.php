@@ -7,7 +7,7 @@
   <h2 class="nav-tab-wrapper">
     <a href="#stless_settings_tab" class="stless_setting_tab nav-tab  nav-tab-active"><?php _e('Settings', ud_get_stateless_media()->domain); ?></a>
     <?php if (!is_network_admin() && !isset($_SERVER["GAE_VERSION"]) && ud_get_stateless_media('sm.mode') != 'disabled') : ?>
-      <a href="#stless_processing_tab" class="stless_setting_tab nav-tab"><?php _e('Sync', ud_get_stateless_media()->domain); ?></a>
+      <a href="#stless_sync_tab" class="stless_setting_tab nav-tab"><?php _e('Sync', ud_get_stateless_media()->domain); ?></a>
     <?php endif; ?>
     <a href="#stless_compatibility_tab" class="stless_setting_tab nav-tab"><?php _e('Compatibility', ud_get_stateless_media()->domain); ?></a>
     <a href="#stless_questions_tab" class="stless_setting_tab nav-tab"><?php _e('Support', ud_get_stateless_media()->domain); ?></a>
@@ -236,7 +236,7 @@
       </form>
     </div>
     <?php if (!is_network_admin() && !isset($_SERVER["GAE_VERSION"]) && ud_get_stateless_media('sm.mode') != 'disabled') : ?>
-      <div id="stless_processing_tab" class="stless_settings_content">
+      <div id="stless_sync_tab" class="stless_settings_content">
         <?php include 'processing_interface.php'; ?>
       </div>
     <?php endif; ?>

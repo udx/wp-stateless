@@ -138,7 +138,7 @@ abstract class BackgroundSync extends UDX_WP_Background_Process implements ISync
    * Determine sync healthcheck interval
    */
   protected function get_healthcheck_cron_interval() {
-    return (defined('WP_STATELESS_SYNC_HEALTHCHECK_INTERVAL') && is_int(WP_STATELESS_SYNC_HEALTHCHECK_INTERVAL)) ? WP_STATELESS_SYNC_HEALTHCHECK_INTERVAL : 5;
+    return (defined('WP_STATELESS_SYNC_HEALTHCHECK_INTERVAL') && is_int(WP_STATELESS_SYNC_HEALTHCHECK_INTERVAL)) ? WP_STATELESS_SYNC_HEALTHCHECK_INTERVAL : 1;
   }
 
   /**

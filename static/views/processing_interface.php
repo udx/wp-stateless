@@ -11,7 +11,7 @@
 </noscript>
 
 <div ng-show="errors.length" class="stateless-admin-notice admin-error">
-  <strong><?php _e('Errors encountered', ud_get_stateless_media()->domain); ?></strong>:</strong>
+  <strong><?php _e('Errors encountered. Try reloading the page.', ud_get_stateless_media()->domain); ?></strong>
   <ul>
     <li ng-repeat="error in errors">{{error}}</li>
   </ul>
@@ -26,7 +26,8 @@
     <div class="postbox" ng-repeat="process in processes.classes">
       <div class="postbox-header">
         <h2 class="hndle">
-          {{process.name}}
+          <div class="title-holder" ng-bind-html="process.name">
+          </div>
           <span>
             <span title="<?php _e('Processing in progress...', ud_get_stateless_media()->domain) ?>" ng-show="process.is_running" class="loading dashicons dashicons-update"></span>
             <a ng-show="process.helper" href="javascript:;" data-position='{"edge":"left","align":"center"}' data-title="{{process.helper.title}}" data-text="{{process.helper.content}}" class="pointer dashicons dashicons-info"></a>
