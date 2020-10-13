@@ -96,6 +96,8 @@ class NonLibrarySync extends BackgroundSync {
    */
   protected function task($item) {
     try {
+      parent::before_task($item);
+
       @error_reporting(0);
       timer_start();
 

@@ -361,7 +361,7 @@ abstract class BackgroundSync extends UDX_WP_Background_Process implements ISync
    * Remember currently processing item
    */
   protected function before_task($item) {
-    define("DOING_AJAX", true);
+    if (!defined('DOING_AJAX')) define('DOING_AJAX', true);
     $this->currently_processing_item = $item;
   }
 
@@ -441,7 +441,7 @@ abstract class BackgroundSync extends UDX_WP_Background_Process implements ISync
    * @return bool TRUE on success or FALSE on failure
    */
   public function log($message) {
-    $message = sprintf('Background Sync - %s: %s', $this->get_name(), $message);
+    $message = strip_tags(sprintf('Background Sync - %s: %s', $this->get_name(), $message));
 
     if (is_multisite()) {
       $blog_id = get_current_blog_id();
