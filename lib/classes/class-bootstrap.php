@@ -179,7 +179,7 @@ namespace wpCloud\StatelessMedia {
         }
 
         /* Initialize plugin only if Mode is not 'disabled'. */
-        if (($sm_mode !== 'disabled' && $sm_mode !== 'stateless') || ($sm_mode === 'stateless' && wp_doing_ajax())) {
+        if (($sm_mode !== 'disabled' && $sm_mode !== 'stateless') || ($sm_mode === 'stateless' && (wp_doing_ajax() || wp_doing_cron()))) {
 
           /**
            * Determine if we have issues with connection to Google Storage Bucket
