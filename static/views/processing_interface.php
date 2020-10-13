@@ -1,10 +1,10 @@
 <div class="wrap" ng-controller="wpStatelessProcessing" ng-init="init()">
 
-  <?php /*if (ud_get_stateless_media('sm.mode') === 'stateless') : */?><!--
-    <p><strong><?php /*_e('Currently, WP-Stateless cannot sync media files in Stateless mode. If you need to upload all your local media files to GCS, try syncing in Ephemeral mode instead and then switch back to Stateless.', ud_get_stateless_media()->domain); */?></strong></p>
+  <?php if (ud_get_stateless_media('sm.mode') === 'stateless') : ?>
+    <p><strong><?php _e('Currently, WP-Stateless cannot sync media files in Stateless mode. If you need to upload all your local media files to GCS, try syncing in Ephemeral mode instead and then switch back to Stateless.', ud_get_stateless_media()->domain); ?></strong></p>
 </div>
---><?php /*return;
-  endif; */?>
+<?php return;
+  endif; ?>
 
 <noscript>
   <p><em><?php _e('You must enable Javascript in order to use this feature!', ud_get_stateless_media()->domain); ?></em></p>
