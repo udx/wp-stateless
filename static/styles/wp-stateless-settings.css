@@ -59,6 +59,16 @@
   cursor: default;
 }
 
+.stless_settings_content .postbox .hndle .title-holder .label {
+  font-size: 0.7em;
+  text-transform: uppercase;
+  border: 1px solid darkorange;
+  padding: 2px;
+  line-height: 2;
+  border-radius: 3px;
+  margin-left: 5px;
+}
+
 .stless_settings_content .postbox .hndle a {
   font-size: 20px;
 }
