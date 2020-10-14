@@ -358,7 +358,7 @@ namespace wpCloud\StatelessMedia {
                    * Except when uploading the full size image first.
                    */
                   if (self::can_delete_attachment($attachment_id, $args) && !$skip_remove_media) {
-                    unlink($img['path']);
+                    @unlink($img['path']);
                   }
                 }
               }
