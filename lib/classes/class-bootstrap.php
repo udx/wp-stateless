@@ -179,7 +179,7 @@ namespace wpCloud\StatelessMedia {
         }
 
         /* Initialize plugin only if Mode is not 'disabled'. */
-        if (($sm_mode !== 'disabled' && $sm_mode !== 'stateless') || ($sm_mode === 'stateless' && wp_doing_ajax())) {
+        if (($sm_mode !== 'disabled' && $sm_mode !== 'stateless') || ($sm_mode === 'stateless' && (wp_doing_ajax() || wp_doing_cron()))) {
 
           /**
            * Determine if we have issues with connection to Google Storage Bucket
@@ -927,7 +927,7 @@ namespace wpCloud\StatelessMedia {
         }
 
         if (!$use_root) {
-          // removing the root dir if already exists in the begaining.
+          // removing the root dir if already exists in the beginning.
           return preg_replace($root_dir_regex, '', $current_path);
         }
 
