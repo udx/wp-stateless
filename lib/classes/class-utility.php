@@ -1064,7 +1064,22 @@ namespace wpCloud\StatelessMedia {
           } else {
             // Ephemeral and Stateless modes: we don't need the local version.
             if (ud_get_stateless_media()->get('sm.mode') === 'ephemeral' || ud_get_stateless_media()->get('sm.mode') === 'stateless') {
-              unlink($fullsizepath);
+              @unlink($fullsizepath);
+
+              $metadata = wp_get_attachment_metadata($file->ID);
+              /**
+               * removing thumbnails
+               * https://github.com/udx/wp-stateless/issues/577
+               */
+              if ( !empty($metadata['sizes']) ) {
+                $base_dir = dirname($fullsizepath);
+                foreach($metadata['sizes'] as $image_size => $data) {
+                  $gs_name = $base_dir .'/'. $data['file'];
+                  if (file_exists($gs_name)) {
+                    @unlink($gs_name);
+                  }
+                }
+              }
             }
           }
         }

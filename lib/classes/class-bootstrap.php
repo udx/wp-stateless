@@ -927,7 +927,7 @@ namespace wpCloud\StatelessMedia {
         }
 
         if (!$use_root) {
-          // removing the root dir if already exists in the begaining.
+          // removing the root dir if already exists in the beginning.
           return preg_replace($root_dir_regex, '', $current_path);
         }
 
