@@ -138,7 +138,7 @@ abstract class BackgroundSync extends UDX_WP_Background_Process implements ISync
    * Determine sync healthcheck interval
    */
   protected function get_healthcheck_cron_interval() {
-    return (defined('WP_STATELESS_SYNC_HEALTHCHECK_INTERVAL') && is_int(WP_STATELESS_SYNC_HEALTHCHECK_INTERVAL)) ? WP_STATELESS_SYNC_HEALTHCHECK_INTERVAL : 5;
+    return (defined('WP_STATELESS_SYNC_HEALTHCHECK_INTERVAL') && is_int(WP_STATELESS_SYNC_HEALTHCHECK_INTERVAL)) ? WP_STATELESS_SYNC_HEALTHCHECK_INTERVAL : 1;
   }
 
   /**
@@ -440,7 +440,7 @@ abstract class BackgroundSync extends UDX_WP_Background_Process implements ISync
    * @return bool TRUE on success or FALSE on failure
    */
   public function log($message) {
-    $message = sprintf('Background Sync - %s: %s', $this->get_name(), $message);
+    $message = strip_tags(sprintf('Background Sync - %s: %s', $this->get_name(), $message));
 
     if (is_multisite()) {
       $blog_id = get_current_blog_id();

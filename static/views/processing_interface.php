@@ -1,17 +1,11 @@
 <div class="wrap" ng-controller="wpStatelessProcessing" ng-init="init()">
 
-  <?php if (ud_get_stateless_media('sm.mode') === 'stateless') : ?>
-    <p><strong><?php _e('Currently, WP-Stateless cannot sync media files in Stateless mode. If you need to upload all your local media files to GCS, try syncing in Ephemeral mode instead and then switch back to Stateless.', ud_get_stateless_media()->domain); ?></strong></p>
-</div>
-<?php return;
-  endif; ?>
-
 <noscript>
   <p><em><?php _e('You must enable Javascript in order to use this feature!', ud_get_stateless_media()->domain); ?></em></p>
 </noscript>
 
 <div ng-show="errors.length" class="stateless-admin-notice admin-error">
-  <strong><?php _e('Errors encountered', ud_get_stateless_media()->domain); ?></strong>:</strong>
+  <strong><?php _e('Errors encountered. Try reloading the page.', ud_get_stateless_media()->domain); ?></strong>
   <ul>
     <li ng-repeat="error in errors">{{error}}</li>
   </ul>
@@ -26,7 +20,8 @@
     <div class="postbox" ng-repeat="process in processes.classes">
       <div class="postbox-header">
         <h2 class="hndle">
-          {{process.name}}
+          <div class="title-holder" ng-bind-html="process.name">
+          </div>
           <span>
             <span title="<?php _e('Processing in progress...', ud_get_stateless_media()->domain) ?>" ng-show="process.is_running" class="loading dashicons dashicons-update"></span>
             <a ng-show="process.helper" href="javascript:;" data-position='{"edge":"left","align":"center"}' data-title="{{process.helper.title}}" data-text="{{process.helper.content}}" class="pointer dashicons dashicons-info"></a>

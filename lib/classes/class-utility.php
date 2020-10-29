@@ -306,7 +306,7 @@ namespace wpCloud\StatelessMedia {
                 'contentDisposition' => $_contentDisposition,
               ));
 
-              if ($sm_mode == 'stateless' && !wp_doing_ajax()) {
+              if ($sm_mode == 'stateless' && !wp_doing_ajax()  && !wp_doing_cron()) {
                 global $gs_client;
 
                 $media_args = wp_parse_args($media_args, array(
@@ -358,7 +358,7 @@ namespace wpCloud\StatelessMedia {
                    * Except when uploading the full size image first.
                    */
                   if (self::can_delete_attachment($attachment_id, $args) && !$skip_remove_media) {
-                    unlink($img['path']);
+                    @unlink($img['path']);
                   }
                 }
               }
@@ -1050,6 +1050,7 @@ namespace wpCloud\StatelessMedia {
           if (!ud_get_stateless_media()->get_client()->media_exists(apply_filters('wp_stateless_file_name', $fullsizepath, true, "", ""))) {
 
             if (!function_exists('wp_generate_attachment_metadata')) {
+              require_once ABSPATH . '/wp-admin/includes/media.php';
               require_once ABSPATH . '/wp-admin/includes/image.php';
             }
             $metadata = wp_generate_attachment_metadata($file->ID, $fullsizepath);
@@ -1063,7 +1064,22 @@ namespace wpCloud\StatelessMedia {
           } else {
             // Ephemeral and Stateless modes: we don't need the local version.
             if (ud_get_stateless_media()->get('sm.mode') === 'ephemeral' || ud_get_stateless_media()->get('sm.mode') === 'stateless') {
-              unlink($fullsizepath);
+              @unlink($fullsizepath);
+
+              $metadata = wp_get_attachment_metadata($file->ID);
+              /**
+               * removing thumbnails
+               * https://github.com/udx/wp-stateless/issues/577
+               */
+              if ( !empty($metadata['sizes']) ) {
+                $base_dir = dirname($fullsizepath);
+                foreach($metadata['sizes'] as $image_size => $data) {
+                  $gs_name = $base_dir .'/'. $data['file'];
+                  if (file_exists($gs_name)) {
+                    @unlink($gs_name);
+                  }
+                }
+              }
             }
           }
         }

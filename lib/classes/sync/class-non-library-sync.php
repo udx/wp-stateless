@@ -35,7 +35,7 @@ class NonLibrarySync extends BackgroundSync {
    * @return string
    */
   public function get_name() {
-    return __('Compatibility and Custom Folders', ud_get_stateless_media()->domain);
+    return __('Compatibility Files <span class="label">Beta</span>', ud_get_stateless_media()->domain);
   }
 
   /**
@@ -45,7 +45,7 @@ class NonLibrarySync extends BackgroundSync {
    */
   public function get_helper_window() {
     return new HelperWindow(
-      __('What are Compatibility and Custom Folders?', ud_get_stateless_media()->domain),
+      __('What are Compatibility Files?', ud_get_stateless_media()->domain),
       __('All kind of files that were created by themes and plugins in custom folders out of standard Media Library, and that WP-Stateless has a Compatibility Support for. Limit and Sorting is not supported.', ud_get_stateless_media()->domain)
     );
   }
@@ -96,6 +96,8 @@ class NonLibrarySync extends BackgroundSync {
    */
   protected function task($item) {
     try {
+      parent::before_task($item);
+
       @error_reporting(0);
       timer_start();
 
@@ -153,7 +155,7 @@ class NonLibrarySync extends BackgroundSync {
     if (!property_exists($this, 'cron_interval')) return $notices;
 
     $waiting = current_time('timestamp') - $last;
-    if ($waiting < MINUTE_IN_SECONDS * $this->cron_interval) return $notices;
+    if ($waiting < 5 * MINUTE_IN_SECONDS * $this->cron_interval) return $notices;
 
     $notices[] = sprintf(__('This process takes longer than it should. Please, make sure loopback connections and WP Cron are enabled and working, or try restarting the process.', ud_get_stateless_media()->domain));
     return $notices;

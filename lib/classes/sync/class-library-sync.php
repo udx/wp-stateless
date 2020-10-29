@@ -182,7 +182,7 @@ abstract class LibrarySync extends BackgroundSync {
     if (!property_exists($this, 'cron_interval')) return $notices;
 
     $waiting = current_time('timestamp') - $last;
-    if ($waiting < MINUTE_IN_SECONDS * $this->cron_interval) return $notices;
+    if ($waiting < 5 * MINUTE_IN_SECONDS * $this->cron_interval) return $notices;
 
     $notices[] = sprintf(__('This process takes longer than it should. Please, make sure loopback connections and WP Cron are enabled and working, or try restarting the process.', ud_get_stateless_media()->domain));
     return $notices;

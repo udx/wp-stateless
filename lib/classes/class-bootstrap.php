@@ -168,10 +168,10 @@ namespace wpCloud\StatelessMedia {
         foreach (Utility::get_available_sync_classes() as $process) {
           if ($process->is_running()) {
             $this->errors->add([
-              'title' => __('WP-Stateless Background Processing', ud_get_stateless_media()->domain),
-              'message' => __('WP-Stateless is now processing uploaded media on your server. This may take some time depending on the amount of media data. Note that you cannot change WP-Stateless settings until it is done. You can stop the process in the Settings area.', ud_get_stateless_media()->domain),
-              'button' => __('Processing Settings', ud_get_stateless_media()->domain),
-              'button_link' => admin_url('upload.php?page=stateless-settings#stless_processing_tab'),
+              'title' => __('Media Library Synchronization Underway', ud_get_stateless_media()->domain),
+              'message' => __('WP-Stateless is synchronizing your media library in accordance with the Mode setting. You can view progress or stop the process via the WP-Stateless Sync settings area.', ud_get_stateless_media()->domain),
+              'button' => __('View Synchronization', ud_get_stateless_media()->domain),
+              'button_link' => admin_url('upload.php?page=stateless-settings#stless_sync_tab'),
               'key' => 'processing-in-progress'
             ], 'message');
             break;
@@ -179,7 +179,7 @@ namespace wpCloud\StatelessMedia {
         }
 
         /* Initialize plugin only if Mode is not 'disabled'. */
-        if (($sm_mode !== 'disabled' && $sm_mode !== 'stateless') || ($sm_mode === 'stateless' && wp_doing_ajax())) {
+        if (($sm_mode !== 'disabled' && $sm_mode !== 'stateless') || ($sm_mode === 'stateless' && (wp_doing_ajax() || wp_doing_cron()))) {
 
           /**
            * Determine if we have issues with connection to Google Storage Bucket
@@ -426,7 +426,7 @@ namespace wpCloud\StatelessMedia {
         /**
          * In Backup mode using local URL
          */
-        if ( "backup" == $sm_mode ) {
+        if ("backup" == $sm_mode) {
           return $sources;
         }
 
@@ -941,7 +941,7 @@ namespace wpCloud\StatelessMedia {
         }
 
         if (!$use_root) {
-          // removing the root dir if already exists in the begaining.
+          // removing the root dir if already exists in the beginning.
           return preg_replace($root_dir_regex, '', $current_path);
         }
 
@@ -1179,14 +1179,14 @@ namespace wpCloud\StatelessMedia {
         } else {
           wp_register_script('jquery-ui-progressbar', ud_get_stateless_media()->path('static/scripts/jquery-ui/jquery.ui.progressbar.min.1.7.2.js', 'url'), array('jquery-ui-core'), '1.7.2');
         }
-        wp_register_script('wp-stateless-angular', ud_get_stateless_media()->path('static/scripts/angular.min.js', 'url'), array(), '1.5.0', true);
-        wp_register_script('wp-stateless-angular-sanitize', ud_get_stateless_media()->path('static/scripts/angular-sanitize.min.js', 'url'), array('wp-stateless-angular'), '1.5.0', true);
+        wp_register_script('wp-stateless-angular', ud_get_stateless_media()->path('static/scripts/angular.min.js', 'url'), array(), '1.8.0', true);
+        wp_register_script('wp-stateless-angular-sanitize', ud_get_stateless_media()->path('static/scripts/angular-sanitize.min.js', 'url'), array('wp-stateless-angular'), '1.8.0', true);
         wp_register_script('wp-stateless', ud_get_stateless_media()->path('static/scripts/wp-stateless.js', 'url'), array('jquery-ui-core', 'wp-stateless-settings', 'wp-api-request'), self::$version, true);
 
         wp_localize_script('wp-stateless', 'stateless_l10n', $this->get_l10n_data());
         wp_localize_script('wp-stateless', 'wp_stateless_configs', array(
           'WP_DEBUG' => defined('WP_DEBUG') ? WP_DEBUG : false,
-          'REST_API_TOKEN' => Utility::generate_jwt_token(['user_id' => get_current_user_id()])
+          'REST_API_TOKEN' => Utility::generate_jwt_token(['user_id' => get_current_user_id()], DAY_IN_SECONDS)
         ));
 
         $settings = ud_get_stateless_media()->get('sm');
