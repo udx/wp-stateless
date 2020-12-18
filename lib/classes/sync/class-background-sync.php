@@ -355,6 +355,16 @@ abstract class BackgroundSync extends UDX_WP_Background_Process implements ISync
     $this->clear_process_meta();
     $this->clear_queue_size();
     delete_site_option($this->get_stopped_option_key());
+
+    if ($admin_email = get_option('admin_email')) {
+      $sync_name = strip_tags($this->get_name());
+      $site = site_url();
+      wp_mail(
+        $admin_email,
+        sprintf(__('Stateless Sync for %s is Complete', ud_get_stateless_media()->domain), $sync_name),
+        sprintf(__("This is a simple notification to inform you that the WP-Stateless plugin has finished a %s synchronization process for %s.\n\nIf you have WP_STATELESS_SYNC_LOG or WP_DEBUG_LOG enabled, check those logs to review any errors that may have occurred during the synchronization process.", ud_get_stateless_media()->domain), $sync_name, $site)
+      );
+    }
   }
 
   /**
