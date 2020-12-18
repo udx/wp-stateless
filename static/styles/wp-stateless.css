@@ -20,8 +20,8 @@ td.image-icon img.wp-stateless-media-item {
 }
 
 .sm-mode small.description {
-    display: inline-block;
-    margin-left: 10px;
+    display: block;
+    margin-top: 5px;
 }
 
 .key_type{
