@@ -5,8 +5,8 @@ Tags: google, google cloud, google cloud storage, cdn, uploads, media, stateless
 License: GPLv2 or later
 Requires PHP: 5.6
 Requires at least: 5.0
-Tested up to: 5.5
-Stable tag: 3.1.0
+Tested up to: 5.6
+Stable tag: 3.1.1
 
 Upload and serve your WordPress media files from Google Cloud Storage.
 
@@ -107,6 +107,11 @@ To ensure new releases cause as little disruption as possible, we rely on a numb
 Before upgrading to WP-Stateless 3.0, please, make sure you tested it on your development environment.
 
 == Changelog ==
+= 3.1.1 =
+* ENHANCEMENT - Notification for the administrator about finished synchronization. GitHub issue [#576](https://github.com/udx/wp-stateless/issues/576).
+* FIX - Fixed an issue with PDF thumbnails. GitHub issue [#577](https://github.com/udx/wp-stateless/issues/577).
+* FIX - Fixed an issue with synchronization in `Stateless` mode. GitHub issue [#575](https://github.com/udx/wp-stateless/issues/575).
+
 = 3.1.0 =
 * NEW - Completely rewritten the synchronization tool. GitHub issue [#523](https://github.com/udx/wp-stateless/issues/523).
 * NEW - New configuration constant `WP_STATELESS_SYNC_MAX_BATCH_SIZE`. Sets the maximum size of a background sync batch of items to be saved in a single row in the database. [More details](https://wp-stateless.github.io/docs/constants/#wp_stateless_sync_max_batch_size).
