@@ -105,7 +105,14 @@ class NonLibrarySync extends BackgroundSync {
         throw new FatalException(__('Not connected to GCS', ud_get_stateless_media()->domain));
       }
 
-      $upload_dir = wp_upload_dir();
+      if (is_multisite() && ($blog_id = get_current_blog_id()) != 1) {
+        switch_to_blog(1);
+        $upload_dir = wp_upload_dir();
+        switch_to_blog($blog_id);
+      } else {
+        $upload_dir = wp_upload_dir();
+      }
+
       $file_path = trim($item, '/');
       $fullsizepath = $upload_dir['basedir'] . '/' . $file_path;
 

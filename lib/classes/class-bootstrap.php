@@ -928,7 +928,16 @@ namespace wpCloud\StatelessMedia {
 
         if (!$use_root) {
           // removing the root dir if already exists in the beginning.
-          return preg_replace($root_dir_regex, '', $current_path);
+          $raw_name = preg_replace($root_dir_regex, '', $current_path);
+
+          if ($raw_name && is_multisite() && ($blog_id = get_current_blog_id()) != 1) {
+            $folder = "sites/{$blog_id}/";
+            if (strpos($raw_name, $folder) === 0) return $raw_name;
+
+            return "$folder$raw_name";
+          }
+
+          return $raw_name;
         }
 
         // skip adding root dir if it's already added.

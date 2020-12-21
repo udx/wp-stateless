@@ -31,8 +31,6 @@ namespace wpCloud\StatelessMedia {
         add_action('save_post', array($this, 'delete_css_files'), 10, 3);
         add_action('deleted_post', array($this, 'delete_css_files'));
         add_filter("elementor/settings/general/success_response_data", array($this, 'delete_global_css'), 10, 3);
-        // return file names
-        add_filter('sm:sync::nonMediaFiles', array($this, 'sync_non_media_files'));
         add_action('sm::pre::sync::nonMediaFiles', array($this, 'filter_css_file'), 10, 2);
       }
 
@@ -79,28 +77,13 @@ namespace wpCloud\StatelessMedia {
        * @param null $update
        */
       public function delete_css_files($post_ID, $post = null, $update = null) {
-
         if ($update || current_action() === 'deleted_post') {
-          $wp_uploads_dir = wp_get_upload_dir();
-
           $post_css = new \Elementor\Core\Files\CSS\Post($post_ID);
 
           //      elementor/               css/                           'post-' . $post_id . '.css'
           $name = $post_css::UPLOADS_DIR . $post_css::DEFAULT_FILES_DIR . $post_css->get_file_name();
           $name = apply_filters('wp_stateless_file_name', $name, 0);
           do_action('sm:sync::deleteFile', $name);
-
-          // $meta = $post_css->update();
-
-          // sync_file($name, $absolutePath, $forced = false);
-          // here $forced = 2 mean Force to overwrite on GCS
-          // do_action('sm:sync::syncFile', $name, $wp_uploads_dir['basedir'] . '/' . $name, 2);
-
-          // Removing status so that file will be generated next time.
-          // $meta = $post_css->get_meta();
-          // $meta['status'] = '';
-          // update_post_meta($post_ID, $post_css::META_KEY, $meta);
-
         }
       }
 
@@ -123,25 +106,6 @@ namespace wpCloud\StatelessMedia {
         }
         // We are in filter so need to return the passed value.
         return $success_response_data;
-      }
-
-      /**
-       * @param $files
-       * @return array
-       */
-      public function sync_non_media_files($files) {
-        $wp_uploads_dir = wp_get_upload_dir();
-        $base_dir = wp_normalize_path($wp_uploads_dir['basedir'] . '/');
-        $dir =  $base_dir . \Elementor\Core\Files\CSS\Post::UPLOADS_DIR . \Elementor\Core\Files\CSS\Post::DEFAULT_FILES_DIR;
-        if (!function_exists('list_files')) {
-          require_once ABSPATH . '/wp-admin/includes/file.php';
-        }
-        $file_list = list_files($dir);
-
-        foreach ($file_list as $file) {
-          $files[] = str_replace($base_dir, '', wp_normalize_path($file));
-        }
-        return $files;
       }
 
       /**
