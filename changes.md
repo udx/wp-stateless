@@ -3,6 +3,7 @@
 - ENHANCEMENT - Notification for the administrator about finished synchronization. GitHub issue [#576](https://github.com/udx/wp-stateless/issues/576).
 - FIX - Fixed an issue with PDF thumbnails. GitHub issue [#577](https://github.com/udx/wp-stateless/issues/577).
 - FIX - Fixed an issue with synchronization in `Stateless` mode. GitHub issue [#575](https://github.com/udx/wp-stateless/issues/575).
+- COMPATIBILITY - Changed the way compatibility files are stored on Multisite. GitHub issue [#588](https://github.com/udx/wp-stateless/issues/588).
 
 #### 3.1.0
 
