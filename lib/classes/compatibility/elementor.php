@@ -50,7 +50,10 @@ namespace wpCloud\StatelessMedia {
               $absolutePath = $wp_uploads_dir['basedir'] . '/' . $name;
               $name = apply_filters('wp_stateless_file_name', $name, 0);
               do_action('sm:sync::syncFile', $name, $absolutePath);
-              $url = ud_get_stateless_media()->get_gs_host() . '/' . $name;
+
+              if (!in_array(ud_get_stateless_media()->get('sm.mode'), ['disabled', 'backup'])) {
+                $url = ud_get_stateless_media()->get_gs_host() . '/' . $name;
+              }
             }
           }
         } catch (\Exception $e) {
