@@ -143,8 +143,6 @@ namespace wpCloud\StatelessMedia {
           include_once($this->path('lib/cli/class-sm-cli-command.php', 'dir'));
         }
 
-        $this->is_network_detected();
-
         /**
          * Add scripts
          */
