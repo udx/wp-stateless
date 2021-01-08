@@ -14,7 +14,7 @@ namespace wpCloud\StatelessMedia {
 
   if (!class_exists('wpCloud\StatelessMedia\Elementor')) {
 
-    class Elementor extends ICompatibility {
+    class Elementor extends Compatibility {
       protected $id = 'elementor';
       protected $title = 'Elementor Page Builder';
       protected $constant = 'WP_STATELESS_COMPATIBILITY_ELEMENTOR';
