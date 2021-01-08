@@ -93,7 +93,7 @@ class ComposerStaticInitc59d002476a452800baaf79c430753cb
         'wpCloud\\StatelessMedia\\LSCacheWP' => __DIR__ . '/../..' . '/lib/classes/compatibility/lite-speed-cache.php',
         'wpCloud\\StatelessMedia\\LearnDash' => __DIR__ . '/../..' . '/lib/classes/compatibility/learn-dash.php',
         'wpCloud\\StatelessMedia\\Logger' => __DIR__ . '/../..' . '/lib/classes/class-logger.php',
-        'wpCloud\\StatelessMedia\\Module' => __DIR__ . '/../..' . '/lib/classes/class-compatibility.php',
+        'wpCloud\\StatelessMedia\\Module' => __DIR__ . '/../..' . '/lib/classes/class-module.php',
         'wpCloud\\StatelessMedia\\Polylang' => __DIR__ . '/../..' . '/lib/classes/compatibility/polylang-pro.php',
         'wpCloud\\StatelessMedia\\SOCSS' => __DIR__ . '/../..' . '/lib/classes/compatibility/siteorigin-css.php',
         'wpCloud\\StatelessMedia\\SOWidgetCSS' => __DIR__ . '/../..' . '/lib/classes/compatibility/siteorigin-widget-bundle.php',
