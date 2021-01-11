@@ -54,11 +54,6 @@ namespace wpCloud\StatelessMedia {
       new EDDDownloadMethod();
 
       /**
-       * Support for Elementor
-       */
-      //new Elementor();
-
-      /**
        * EWWW Image Optimizer
        */
       new EWWW();

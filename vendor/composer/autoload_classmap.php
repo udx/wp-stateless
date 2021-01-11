@@ -45,7 +45,6 @@ return array(
     'wpCloud\\StatelessMedia\\DynamicImageSupport' => $baseDir . '/lib/classes/compatibility/dynamic-image-support.php',
     'wpCloud\\StatelessMedia\\EDDDownloadMethod' => $baseDir . '/lib/classes/compatibility/easy-digital-downloads.php',
     'wpCloud\\StatelessMedia\\EWWW' => $baseDir . '/lib/classes/compatibility/ewww.php',
-    'wpCloud\\StatelessMedia\\Elementor' => $baseDir . '/lib/classes/compatibility/elementor.php',
     'wpCloud\\StatelessMedia\\Errors' => $baseDir . '/lib/classes/class-errors.php',
     'wpCloud\\StatelessMedia\\FatalException' => $baseDir . '/lib/classes/exception-fatal.php',
     'wpCloud\\StatelessMedia\\GS_Client' => $baseDir . '/lib/classes/class-gs-client.php',
