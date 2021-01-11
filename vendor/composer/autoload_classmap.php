@@ -39,7 +39,6 @@ return array(
     'wpCloud\\StatelessMedia\\BuddyBoss' => $baseDir . '/lib/classes/compatibility/buddyboss.php',
     'wpCloud\\StatelessMedia\\BuddyPress' => $baseDir . '/lib/classes/compatibility/buddypress.php',
     'wpCloud\\StatelessMedia\\Compatibility' => $baseDir . '/lib/classes/class-compatibility.php',
-    'wpCloud\\StatelessMedia\\CompatibilityAcfImageCrop' => $baseDir . '/lib/classes/compatibility/acf-image-crop.php',
     'wpCloud\\StatelessMedia\\CompatibilityWooExtraProductOptions' => $baseDir . '/lib/classes/compatibility/woo-extra-product-options.php',
     'wpCloud\\StatelessMedia\\Divi' => $baseDir . '/lib/classes/compatibility/divi.php',
     'wpCloud\\StatelessMedia\\DynamicImageSupport' => $baseDir . '/lib/classes/compatibility/dynamic-image-support.php',

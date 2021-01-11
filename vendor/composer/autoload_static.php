@@ -76,7 +76,6 @@ class ComposerStaticInitc59d002476a452800baaf79c430753cb
         'wpCloud\\StatelessMedia\\BuddyBoss' => __DIR__ . '/../..' . '/lib/classes/compatibility/buddyboss.php',
         'wpCloud\\StatelessMedia\\BuddyPress' => __DIR__ . '/../..' . '/lib/classes/compatibility/buddypress.php',
         'wpCloud\\StatelessMedia\\Compatibility' => __DIR__ . '/../..' . '/lib/classes/class-compatibility.php',
-        'wpCloud\\StatelessMedia\\CompatibilityAcfImageCrop' => __DIR__ . '/../..' . '/lib/classes/compatibility/acf-image-crop.php',
         'wpCloud\\StatelessMedia\\CompatibilityWooExtraProductOptions' => __DIR__ . '/../..' . '/lib/classes/compatibility/woo-extra-product-options.php',
         'wpCloud\\StatelessMedia\\Divi' => __DIR__ . '/../..' . '/lib/classes/compatibility/divi.php',
         'wpCloud\\StatelessMedia\\DynamicImageSupport' => __DIR__ . '/../..' . '/lib/classes/compatibility/dynamic-image-support.php',
