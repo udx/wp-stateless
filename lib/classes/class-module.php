@@ -34,11 +34,6 @@ namespace wpCloud\StatelessMedia {
       new BuddyPress();
 
       /**
-       * Support for Divi
-       */
-      new Divi();
-
-      /**
        * Dynamic Image Support
        */
       new DynamicImageSupport();

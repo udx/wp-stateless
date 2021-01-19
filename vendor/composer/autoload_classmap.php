@@ -40,7 +40,6 @@ return array(
     'wpCloud\\StatelessMedia\\BuddyPress' => $baseDir . '/lib/classes/compatibility/buddypress.php',
     'wpCloud\\StatelessMedia\\Compatibility' => $baseDir . '/lib/classes/class-compatibility.php',
     'wpCloud\\StatelessMedia\\CompatibilityWooExtraProductOptions' => $baseDir . '/lib/classes/compatibility/woo-extra-product-options.php',
-    'wpCloud\\StatelessMedia\\Divi' => $baseDir . '/lib/classes/compatibility/divi.php',
     'wpCloud\\StatelessMedia\\DynamicImageSupport' => $baseDir . '/lib/classes/compatibility/dynamic-image-support.php',
     'wpCloud\\StatelessMedia\\EDDDownloadMethod' => $baseDir . '/lib/classes/compatibility/easy-digital-downloads.php',
     'wpCloud\\StatelessMedia\\EWWW' => $baseDir . '/lib/classes/compatibility/ewww.php',
