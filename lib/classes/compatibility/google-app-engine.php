@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Plugin Name: WP Stateless
  * Plugin URI: https://wordpress.org/plugins/wp-stateless/
@@ -9,9 +10,9 @@
 
 namespace wpCloud\StatelessMedia {
 
-  if(!class_exists('wpCloud\StatelessMedia\GoogleAppEngine')) {
+  if (!class_exists('wpCloud\StatelessMedia\GoogleAppEngine')) {
 
-    class GoogleAppEngine extends ICompatibility {
+    class GoogleAppEngine extends Compatibility {
       protected $id = 'google-app-engine';
       protected $title = 'Google App Engine';
       protected $constant = ['WP_STATELESS_COMPATIBILITY_GAE' => 'WP_STATELESS_COMPATIBILITY_GAE'];
@@ -19,7 +20,7 @@ namespace wpCloud\StatelessMedia {
       protected $server_constant = 'GAE_VERSION';
       protected $sm_mode_required = 'stateless';
 
-      public function __construct(){
+      public function __construct() {
         $modules = get_option('stateless-modules', array());
 
         if (empty($modules[$this->id])) {
@@ -30,13 +31,8 @@ namespace wpCloud\StatelessMedia {
         $this->init();
       }
 
-      public function module_init($sm){
-
+      public function module_init($sm) {
       }
-
-
     }
-
   }
-
 }
