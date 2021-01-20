@@ -79,7 +79,6 @@ class ComposerStaticInitc59d002476a452800baaf79c430753cb
         'wpCloud\\StatelessMedia\\CompatibilityWooExtraProductOptions' => __DIR__ . '/../..' . '/lib/classes/compatibility/woo-extra-product-options.php',
         'wpCloud\\StatelessMedia\\DynamicImageSupport' => __DIR__ . '/../..' . '/lib/classes/compatibility/dynamic-image-support.php',
         'wpCloud\\StatelessMedia\\EDDDownloadMethod' => __DIR__ . '/../..' . '/lib/classes/compatibility/easy-digital-downloads.php',
-        'wpCloud\\StatelessMedia\\EWWW' => __DIR__ . '/../..' . '/lib/classes/compatibility/ewww.php',
         'wpCloud\\StatelessMedia\\Errors' => __DIR__ . '/../..' . '/lib/classes/class-errors.php',
         'wpCloud\\StatelessMedia\\FatalException' => __DIR__ . '/../..' . '/lib/classes/exception-fatal.php',
         'wpCloud\\StatelessMedia\\GS_Client' => __DIR__ . '/../..' . '/lib/classes/class-gs-client.php',

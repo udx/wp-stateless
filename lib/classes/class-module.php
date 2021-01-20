@@ -44,11 +44,6 @@ namespace wpCloud\StatelessMedia {
       new EDDDownloadMethod();
 
       /**
-       * EWWW Image Optimizer
-       */
-      new EWWW();
-
-      /**
        * Google App Engine
        */
       new GoogleAppEngine();
