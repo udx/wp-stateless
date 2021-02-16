@@ -73,7 +73,6 @@ class ComposerStaticInitc59d002476a452800baaf79c430753cb
         'wpCloud\\StatelessMedia\\API' => __DIR__ . '/../..' . '/lib/classes/class-api.php',
         'wpCloud\\StatelessMedia\\Ajax' => __DIR__ . '/../..' . '/lib/classes/class-ajax.php',
         'wpCloud\\StatelessMedia\\Bootstrap' => __DIR__ . '/../..' . '/lib/classes/class-bootstrap.php',
-        'wpCloud\\StatelessMedia\\BuddyBoss' => __DIR__ . '/../..' . '/lib/classes/compatibility/buddyboss.php',
         'wpCloud\\StatelessMedia\\BuddyPress' => __DIR__ . '/../..' . '/lib/classes/compatibility/buddypress.php',
         'wpCloud\\StatelessMedia\\Compatibility' => __DIR__ . '/../..' . '/lib/classes/class-compatibility.php',
         'wpCloud\\StatelessMedia\\CompatibilityWooExtraProductOptions' => __DIR__ . '/../..' . '/lib/classes/compatibility/woo-extra-product-options.php',

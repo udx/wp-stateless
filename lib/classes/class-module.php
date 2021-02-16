@@ -24,11 +24,6 @@ namespace wpCloud\StatelessMedia {
       add_action('admin_init', array($this, 'save_modules'), 1);
 
       /**
-       * Support for BuddyBoss
-       */
-      new BuddyBoss();
-
-      /**
        * Support for BuddyPress
        */
       new BuddyPress();
