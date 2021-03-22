@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Plugin Name: Gravity Forms Signature Add-On
  * Plugin URI: https://www.gravityforms.com/add-ons/signature/
@@ -23,10 +22,10 @@ namespace wpCloud\StatelessMedia {
       /**
        * @param $sm
        */
-      public function module_init($sm) {
-        add_filter('gform_save_field_value', array($this, 'gform_save_field_value'), 10, 5);
-        add_filter('site_url', array($this, 'signature_url'), 10, 4);
-        add_filter('gform_signature_delete_file_pre_delete_entry', array($this, 'delete_signature'), 10, 4);
+      public function module_init($sm){
+        add_filter( 'gform_save_field_value', array($this, 'gform_save_field_value'), 10, 5 );
+        add_filter( 'gform_signature_url', array($this, 'signature_url'), 10, 4 );
+        add_filter( 'gform_signature_delete_file_pre_delete_entry', array($this, 'delete_signature'), 10, 4 );
       }
 
       /**
@@ -38,11 +37,11 @@ namespace wpCloud\StatelessMedia {
        * @param $input_id
        * @return array|false|mixed|string
        */
-      public function gform_save_field_value($value, $lead, $field, $form, $input_id) {
-        if (empty($value)) return $value;
+      public function gform_save_field_value( $value, $lead, $field, $form, $input_id ) {
+        if(empty($value)) return $value;
 
         $type = \GFFormsModel::get_input_type($field);
-        if ($type == 'signature') {
+        if($type == 'signature'){
           /**
            * Compatibility for Signature addon.
            */
@@ -50,8 +49,8 @@ namespace wpCloud\StatelessMedia {
             $folder = \GFSignature::get_signatures_folder();
             $file_path = $folder . $value;
 
-            $name = apply_filters('wp_stateless_file_name', $file_path);
-            do_action('sm:sync::syncFile', $name, $file_path, true);
+            $name = apply_filters( 'wp_stateless_file_name', $file_path, 0);
+            do_action( 'sm:sync::syncFile', $name, $file_path, true);
           } catch (\Throwable $th) {
             //throw $th;
           }
@@ -65,20 +64,14 @@ namespace wpCloud\StatelessMedia {
        *
        * Also doing sync on the fly for previous entries.
        */
-      public function signature_url($url, $path, $scheme, $blog_id) {
+      public function signature_url($url, $filename, $form_id, $field_id){
         try {
-          $db = debug_backtrace(false, 7);
-          foreach ($db as $key => $value) {
-            if ($value['function'] == 'get_signature_url' && rgar($value, 'class') == 'GFSignature') {
-              $folder = \GFSignature::get_signatures_folder();
-              $name = $value['args'][0];
-              $file_path = $folder . $name . '.png';
-              $name = apply_filters('wp_stateless_file_name', $file_path);
-              do_action('sm:sync::syncFile', $name, $file_path);
-              $url = ud_get_stateless_media()->get_gs_host() . '/' . $name;
-              break;
-            }
-          }
+          $folder = \GFSignature::get_signatures_folder();
+          $name = $filename;
+          $file_path = $folder . $name . '.png';
+          $name = apply_filters( 'wp_stateless_file_name', $file_path, 0);
+          do_action( 'sm:sync::syncFile', $name, $file_path);
+          $url = ud_get_stateless_media()->get_gs_host() . '/' . $name;
         } catch (\Throwable $th) {
           //throw $th;
         }
@@ -88,16 +81,16 @@ namespace wpCloud\StatelessMedia {
       /**
        * Deleting signature file from GCS.
        */
-      public function delete_signature($return, $form, $lead_id, $field_id) {
+      public function delete_signature($return, $form, $lead_id, $field_id){
         try {
-          $lead = \RGFormsModel::get_lead($lead_id);
+          $lead = \RGFormsModel::get_lead( $lead_id );
           $folder = \GFSignature::get_signatures_folder();
 
-          $name = rgar($lead, $field_id);
+          $name = rgar( $lead, $field_id );
           $file_path = $folder . $name;
 
-          $name = apply_filters('wp_stateless_file_name', $file_path);
-          do_action('sm:sync::deleteFile', $name);
+          $name = apply_filters( 'wp_stateless_file_name', $file_path, 0);
+          do_action( 'sm:sync::deleteFile', $name);
         } catch (\Throwable $th) {
           //throw $th;
         }
