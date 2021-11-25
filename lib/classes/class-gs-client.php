@@ -250,15 +250,22 @@ namespace wpCloud\StatelessMedia {
             // Reset to the client to execute requests immediately in the future.
             $this->client->setDefer(false);
           } else {
-            $media = $this->service->objects->insert($this->bucket, $media, array_filter(array(
+            $mediaOptions = array(
               'data' => file_get_contents($args['absolutePath']),
               'uploadType' => 'media',
               'mimeType' => $args['mimeType'],
-              'predefinedAcl' => 'bucketOwnerFullControl',
-            )));
+            );
+
+            if (defined('WP_STATELESS_SKIP_ACL_SET') && !WP_STATELESS_SKIP_ACL_SET) {
+              $mediaOptions['predefinedAcl'] = 'bucketOwnerFullControl';
+            }
+
+            $media = $this->service->objects->insert($this->bucket, $media, array_filter($mediaOptions));
           }
 
-          $this->mediaInsertACL($name, $media, $args);
+          if (defined('WP_STATELESS_SKIP_ACL_SET') && !WP_STATELESS_SKIP_ACL_SET) {
+            $this->mediaInsertACL($name, $media, $args);
+          }
         } catch (Exception $e) {
           return new WP_Error('sm_error', $e->getMessage());
         }
