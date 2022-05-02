@@ -24,10 +24,21 @@ class RWMB_Media_Modal {
 		// Meta boxes are registered at priority 20, so we use 30 to capture them all.
 		add_action( 'init', array( $this, 'get_fields' ), 30 );
 
+		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue' ) );
+
 		add_filter( 'attachment_fields_to_edit', array( $this, 'add_fields' ), 11, 2 );
 		add_filter( 'attachment_fields_to_save', array( $this, 'save_fields' ), 11, 2 );
 
 		add_filter( 'rwmb_show', array( $this, 'is_in_normal_mode' ), 10, 2 );
+	}
+
+	/**
+	 * Enqueue common scripts and styles.
+	 */
+	public function enqueue() {
+		if ( get_current_screen()->post_type === 'attachment' ) {
+			wp_enqueue_style( 'rwmb', RWMB_CSS_URL . 'media-modal.css', array(), RWMB_VER );
+		}
 	}
 
 	/**
@@ -61,7 +72,12 @@ class RWMB_Media_Modal {
 			$form_field['value'] = $meta;
 
 			$field['field_name'] = 'attachments[' . $post->ID . '][' . $field['field_name'] . ']';
-			$form_field['html']  = RWMB_Field::call( $field, 'html', $meta );
+
+			ob_start();
+			$field['name'] = ''; // Don't show field label as it's already handled by WordPress.
+			
+			RWMB_Field::call( 'show', $field, true, $post->ID );
+			$form_field['html'] = ob_get_clean();
 
 			$form_fields[ $field['id'] ] = $form_field;
 		}
@@ -102,7 +118,18 @@ class RWMB_Media_Modal {
 	 * @return bool
 	 */
 	public function is_in_normal_mode( $show, $meta_box ) {
-		return $show && ! $this->is_in_modal( $meta_box );
+		if ( ! $show ) {
+			return $show;
+		}
+
+		// Show the meta box in the modal on Media screen.
+		global $pagenow;
+		if ( $pagenow === 'upload.php' ) {
+			return $this->is_in_modal( $meta_box );
+		}
+
+		// Show the meta box only if not in the modal on the post edit screen.
+		return ! $this->is_in_modal( $meta_box );
 	}
 
 	/**

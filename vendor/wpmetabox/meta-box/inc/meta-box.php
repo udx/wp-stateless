@@ -312,7 +312,7 @@ class RW_Meta_Box {
 		// Call defined method to save meta value, if there's no methods, call common one.
 		RWMB_Field::call( $field, 'save', $new, $old, $this->object_id );
 
-		RWMB_Field::filter( 'after_save_field', null, $field, $new, $old, $this->object_id, $field );
+		RWMB_Field::filter( 'after_save_field', null, $field, $new, $old, $this->object_id );
 	}
 
 	/**
@@ -324,7 +324,7 @@ class RW_Meta_Box {
 	 * @return bool
 	 */
 	public function validate() {
-		$nonce = rwmb_request()->filter_post( "nonce_{$this->id}", FILTER_SANITIZE_STRING );
+		$nonce = rwmb_request()->filter_post( "nonce_{$this->id}" );
 
 		return ! $this->saved
 			&& ( ! defined( 'DOING_AUTOSAVE' ) || $this->autosave )
@@ -339,11 +339,13 @@ class RW_Meta_Box {
 	 * @return array $meta_box Normalized meta box.
 	 */
 	public static function normalize( $meta_box ) {
+		$default_title = __( 'Meta Box Title', 'meta-box' );
 		// Set default values for meta box.
 		$meta_box = wp_parse_args(
 			$meta_box,
 			array(
-				'id'             => sanitize_title( $meta_box['title'] ),
+				'title'          => $default_title,
+				'id'             => ! empty( $meta_box['title'] ) ? sanitize_title( $meta_box['title'] ) : sanitize_title( $default_title ),
 				'context'        => 'normal',
 				'priority'       => 'high',
 				'post_types'     => 'post',
@@ -409,9 +411,15 @@ class RW_Meta_Box {
 			if ( false === $value ) {
 				continue;
 			}
+
+			$single = ! $field['multiple'];
+			if ( $field['clone'] ) {
+				$single = ! $field['clone_as_multiple'];
+			}
+
 			if (
-				( ! $field['multiple'] && '' !== $value )
-				|| ( $field['multiple'] && is_array( $value ) && array() !== $value )
+				( $single && '' !== $value )
+				|| ( ! $single && is_array( $value ) && array() !== $value )
 			) {
 				return true;
 			}
@@ -432,7 +440,7 @@ class RW_Meta_Box {
 			$screen = get_current_screen();
 		}
 
-		return 'post' === $screen->base && in_array( $screen->post_type, $this->post_types, true );
+		return in_array( $screen->base, array( 'post', 'upload' ), true ) && in_array( $screen->post_type, $this->post_types, true );
 	}
 
 	/**

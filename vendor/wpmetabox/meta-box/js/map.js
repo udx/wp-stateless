@@ -8,7 +8,8 @@
 
 	// Geocoder service.
 	var geocoder = new google.maps.Geocoder();
-
+	// Autocomplete Service.
+	var autocomplete = new google.maps.places.AutocompleteService();
 	// Use prototype for better performance
 	MapField.prototype = {
 		// Initialize everything
@@ -25,7 +26,7 @@
 		initDomElements: function () {
 			this.$canvas = this.$container.find( '.rwmb-map-canvas' );
 			this.canvas = this.$canvas[0];
-			this.$coordinate = this.$container.find( '.rwmb-map-coordinate' );
+			this.$coordinate = this.$container.find( '.rwmb-map' );
 			this.addressField = this.$container.data( 'address-field' );
 		},
 
@@ -97,17 +98,16 @@
 			} );
 
 			/**
-			 * Add a custom event that allows other scripts to refresh the maps when needed
-			 * For example: when maps is in tabs or hidden div.
-			 *
+			 * Custom event to refresh maps when in hidden divs.
 			 * @see https://developers.google.com/maps/documentation/javascript/reference ('resize' Event)
 			 */
-			$( window ).on( 'rwmb_map_refresh', that.refresh );
+			var refresh = that.refresh.bind( this );
+			$( window ).on( 'rwmb_map_refresh', refresh );
 
 			// Refresh on meta box hide and show
-			rwmb.$document.on( 'postbox-toggled', that.refresh );
+			rwmb.$document.on( 'postbox-toggled', refresh );
 			// Refresh on sorting meta boxes
-			$( '.meta-box-sortables' ).on( 'sortstop', that.refresh );
+			$( '.meta-box-sortables' ).on( 'sortstop', refresh );
 		},
 
 		refresh: function () {
@@ -140,12 +140,14 @@
 
 			$address.autocomplete( {
 				source: function ( request, response ) {
+					// if add region only search in that region
 					var options = {
-						'address': request.term,
-						'region': that.$canvas.data( 'region' )
+						'input': request.term,					
+						'componentRestrictions': { country: that.$canvas.data( 'region' ) }
 					};
-					geocoder.geocode( options, function ( results ) {
-						if ( ! results.length ) {
+					// Change Geocode to getPlacePredictions .
+					autocomplete.getPlacePredictions( options, function ( results ) {
+						if ( results == null || ! results.length ) {
 							response( [ {
 								value: '',
 								label: i18n.no_results_string
@@ -154,19 +156,25 @@
 						}
 						response( results.map( function ( item ) {
 							return {
-								label: item.formatted_address,
-								value: item.formatted_address,
-								latitude: item.geometry.location.lat(),
-								longitude: item.geometry.location.lng()
+								label: item.description,
+								value: item.description,
+								placeid: item.place_id,
 							};
 						} ) );
 					} );
 				},
 				select: function ( event, ui ) {
-					var latLng = new google.maps.LatLng( ui.item.latitude, ui.item.longitude );
-					that.map.setCenter( latLng );
-					that.marker.setPosition( latLng );
-					that.updateCoordinate( latLng );
+					geocoder.geocode( { 
+			            'placeId': ui.item.placeid
+			        }, 
+			        function( responses, status ) {
+			            if ( status == 'OK' ) {					            	
+			                var latLng = new google.maps.LatLng( responses[0].geometry.location.lat(), responses[0].geometry.location.lng() );
+							that.map.setCenter( latLng );
+							that.marker.setPosition( latLng );
+							that.updateCoordinate( latLng );
+			            }
+			        } );
 				}
 			} );
 		},
@@ -246,7 +254,7 @@
 		}
 	};
 
-	function initMap() {
+	function createController() {
 		var $this = $( this ),
 			controller = $this.data( 'mapController' );
 		if ( controller ) {
@@ -259,11 +267,11 @@
 	}
 
 	function init( e ) {
-		$( e.target ).find( '.rwmb-map-field' ).each( initMap );
+		$( e.target ).find( '.rwmb-map-field' ).each( createController );
 	}
 
 	function restart() {
-		$( '.rwmb-map-field' ).each( initMap );
+		$( '.rwmb-map-field' ).each( createController );
 	}
 
 	rwmb.$document

@@ -28,7 +28,7 @@
     "udx/lib-ud-api-client": "~1.2",
     "ccampbell/chromephp": "^4.1",
     "firebase/php-jwt": "^5.2",
-    "wpmetabox/meta-box": "5.2.3"
+    "wpmetabox/meta-box": "5.6.3"
   },
   "autoload": {
     "classmap": [

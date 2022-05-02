@@ -56,9 +56,6 @@ abstract class RWMB_Field {
 
 		// Display label and input in DIV and allow user-defined classes to be appended.
 		$classes = "rwmb-field rwmb-{$field['type']}-wrapper " . $field['class'];
-		if ( 'hidden' === $field['type'] ) {
-			$classes .= ' hidden';
-		}
 		if ( ! empty( $field['required'] ) ) {
 			$classes .= ' required';
 		}
@@ -96,21 +93,25 @@ abstract class RWMB_Field {
 	public static function begin_html( $meta, $field ) {
 		$field_label = '';
 		if ( $field['name'] ) {
+			// Change "for" attribute in label
 			$field_label = sprintf(
 				'<div class="rwmb-label">
-					<label for="%s">%s</label>
+					<label for="%s">%s%s</label>
 					%s
 				</div>',
-				esc_attr( $field['id'] ),
+				( isset( $field['attributes']['id'] ) ) ? esc_attr( $field['attributes']['id'] ) : esc_attr( $field['id'] ),
 				$field['name'],
+				$field['required'] || ! empty( $field['attributes']['required'] ) ? '<span class="rwmb-required">*</span>' : '',
 				self::label_description( $field )
 			);
 		}
 
+		$data_min_clone = is_numeric( $field['min_clone'] ) && $field['min_clone'] > 1 ? ' data-min-clone=' . $field['min_clone'] : '';
 		$data_max_clone = is_numeric( $field['max_clone'] ) && $field['max_clone'] > 1 ? ' data-max-clone=' . $field['max_clone'] : '';
 
 		$input_open = sprintf(
-			'<div class="rwmb-input"%s>',
+			'<div class="rwmb-input" %s %s>',
+			$data_min_clone,
 			$data_max_clone
 		);
 
@@ -181,7 +182,9 @@ abstract class RWMB_Field {
 			$args['single'] = false;
 		}
 
-		return $storage->get( $object_id, $field['id'], $args );
+		$value = $storage->get( $object_id, $field['id'], $args );
+		$value = self::filter( 'raw_meta', $value, $field, $object_id, $args );
+		return $value;
 	}
 
 	/**
@@ -208,42 +211,26 @@ abstract class RWMB_Field {
 		// Use $field['std'] only when the meta box hasn't been saved (i.e. the first time we run).
 		$meta = ! $saved || ! $field['save_field'] ? $field['std'] : $meta;
 
-		// Ensure multiple fields are arrays.
-		if ( $field['multiple'] ) {
-			$meta = (array) $meta;
-			if ( $field['clone'] ) {
-				foreach ( $meta as $key => $m ) {
-					$meta[ $key ] = (array) $m;
-				}
-			}
-		}
-		// Escape attributes.
-		$meta = self::call( $field, 'esc_meta', $meta );
+		if ( $field['clone'] ) {
+			$meta = RWMB_Helpers_Array::ensure( $meta );
 
-		// Make sure meta value is an array for clonable and multiple fields.
-		if ( $field['clone'] || $field['multiple'] ) {
-			if ( empty( $meta ) || ! is_array( $meta ) ) {
-				/**
-				 * If field is clonable, $meta must be an array with values so that the foreach loop in self::show() runs properly.
-				 *
-				 * @see self::show()
-				 */
-				$meta = $field['clone'] ? array( '' ) : array();
+			// Ensure $meta is an array with values so that the foreach loop in self::show() runs properly.
+			if ( empty( $meta ) ) {
+				$meta = array( '' );
 			}
+
+			if ( $field['multiple'] ) {
+				$first = reset( $meta );
+
+				// If users set std for a cloneable checkbox list field in the Builder, they can only set [value1, value2]. We need to transform it to [[value1, value2]].
+				// In other cases, make sure each value is an array.
+				$meta = is_array( $first ) ? array_map( 'RWMB_Helpers_Array::ensure', $meta ) : array( $meta );
+			}
+		} elseif ( $field['multiple'] ) {
+			$meta = RWMB_Helpers_Array::ensure( $meta );
 		}
 
 		return $meta;
-	}
-
-	/**
-	 * Escape meta for field output.
-	 *
-	 * @param mixed $meta Meta value.
-	 *
-	 * @return mixed
-	 */
-	public static function esc_meta( $meta ) {
-		return is_array( $meta ) ? array_map( __METHOD__, $meta ) : esc_attr( $meta );
 	}
 
 	/**
@@ -326,11 +313,17 @@ abstract class RWMB_Field {
 	/**
 	 * Normalize parameters for field.
 	 *
-	 * @param array $field Field parameters.
-	 *
+	 * @param array|string $field Field settings.
 	 * @return array
 	 */
 	public static function normalize( $field ) {
+		// Quick define text fields with "name" attribute only.
+		if ( is_string( $field ) ) {
+			$field = array(
+				'name' => $field,
+				'id'   => sanitize_key( $field ),
+			);
+		}
 		$field = wp_parse_args(
 			$field,
 			array(
@@ -349,6 +342,7 @@ abstract class RWMB_Field {
 				'save_field'        => true,
 
 				'clone'             => false,
+				'min_clone'         => 0,
 				'max_clone'         => 0,
 				'sort_clone'        => false,
 				'add_button'        => __( '+ Add more', 'meta-box' ),
@@ -429,7 +423,7 @@ abstract class RWMB_Field {
 				$value = wp_json_encode( $value );
 			}
 
-			$output .= sprintf( true === $value ? ' %s' : ' %s="%s"', $key, esc_attr( $value ) );
+			$output .= sprintf( ' %s="%s"', $key, esc_attr( $value ) );
 		}
 
 		return $output;
@@ -558,9 +552,6 @@ abstract class RWMB_Field {
 
 	/**
 	 * Call a method of a field.
-	 * This should be replaced by static::$method( $args ) in PHP 5.3.
-	 *
-	 * @return mixed
 	 */
 	public static function call() {
 		$args = func_get_args();
@@ -571,7 +562,9 @@ abstract class RWMB_Field {
 		if ( is_string( $check ) ) {
 			$method = array_shift( $args );
 			$field  = reset( $args ); // Keep field as 1st param.
-		} else {
+		}
+		// Params: field, method name, other params.
+		else {
 			$field  = array_shift( $args );
 			$method = array_shift( $args );
 
@@ -583,7 +576,12 @@ abstract class RWMB_Field {
 			}
 		}
 
-		return call_user_func_array( array( RWMB_Helpers_Field::get_class( $field ), $method ), $args );
+		$class = RWMB_Helpers_Field::get_class( $field );
+		if ( method_exists( $class, $method ) ) {
+			return call_user_func_array( array( $class, $method ), $args );
+		} else {
+			_deprecated_function( "$class::$method", '5.4.8' );
+		}
 	}
 
 	/**

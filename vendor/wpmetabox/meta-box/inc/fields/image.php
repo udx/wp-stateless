@@ -36,28 +36,21 @@ class RWMB_Image_Field extends RWMB_File_Field {
 		}
 
 		return sprintf(
-			'<li class="rwmb-image-item attachment %s">
-				<input type="hidden" name="%s[%s]" value="%s">
-				<div class="attachment-preview">
-					<div class="thumbnail">
-						<div class="centered">
-							%s
-						</div>
-					</div>
-				</div>
+			'<li class="rwmb-image-item">
+				<div class="rwmb-file-icon">%s</div>
 				<div class="rwmb-image-overlay"></div>
 				<div class="rwmb-image-actions">
 					%s
 					<a href="#" class="rwmb-image-delete rwmb-file-delete" data-attachment_id="%s"><span class="dashicons dashicons-no-alt"></span></a>
 				</div>
+				<input type="hidden" name="%s[%s]" value="%s">
 			</li>',
-			esc_attr( $field['image_size'] ),
-			$attributes['name'],
-			$index,
-			$file,
 			wp_get_attachment_image( $file, $field['image_size'] ),
 			$edit_link,
-			$file
+			esc_attr( $file ),
+			esc_attr( $attributes['name'] ),
+			esc_attr( $index ),
+			esc_attr( $file )
 		);
 	}
 
@@ -144,12 +137,31 @@ class RWMB_Image_Field extends RWMB_File_Field {
 			$info['srcset'] = wp_get_attachment_image_srcset( $file, $args['size'] );
 		}
 
-		$info = wp_parse_args( $info, wp_get_attachment_metadata( $file ) );
+		$info = wp_parse_args( $info, self::get_image_meta_data( $file ) );
 
 		// Do not overwrite width and height by returned value of image meta.
 		$info['width']  = $image[1];
 		$info['height'] = $image[2];
 
 		return $info;
+	}
+
+	/**
+	 * Get image meta data.
+	 *
+	 * @param  int $attachment_id Attachment ID.
+	 * @return array
+	 */
+	protected static function get_image_meta_data( $attachment_id ) {
+		$metadata = wp_get_attachment_metadata( $attachment_id );
+		if ( empty( $metadata['sizes'] ) ) {
+			return $metadata;
+		}
+
+		$dir_url  = dirname( wp_get_attachment_url( $attachment_id ) );
+		foreach ( $metadata['sizes'] as &$size ) {
+			$size['url'] = "{$dir_url}/{$size['file']}";
+		}
+		return $metadata;
 	}
 }

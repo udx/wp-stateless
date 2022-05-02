@@ -1,0 +1,25 @@
+{
+  "name": "wpmetabox/meta-box",
+  "type": "wordpress-plugin",
+  "keywords": [
+    "wordpress",
+    "ui",
+    "select2",
+    "wp-admin",
+    "meta-box",
+    "wordpress-plugin",
+    "custom-field"
+  ],
+  "description": "A powerful, professional developer toolkit to create custom meta boxes and custom fields for WordPress websites.",
+  "homepage": "https://metabox.io",
+  "license": "GPL-2.0",
+  "minimum-stability": "stable",
+  "authors": [
+    {
+      "name": "Tran Ngoc Tuan Anh",
+      "email": "anhtnt@elightup.com",
+      "homepage": "https://metabox.io",
+      "role": "Developer"
+    }
+  ]
+}

@@ -1,8 +1,8 @@
 /* global google, jQuery */
 
-jQuery( function ( $ ) {
+( function( $, document ) {
 	'use strict';
-
+    
 	/**
 	 * Callback function for Google Maps Lazy Load library to display map
 	 *
@@ -69,9 +69,19 @@ jQuery( function ( $ ) {
 			google.maps.event.addListener( marker, 'click', function () {
 				infoWindow.open( map, marker );
 			} );
+
+			if ( true === mapOptions.openInfoWindow ) {
+				infoWindow.open( map, marker );
+			}
 		}
 	}
 
 	// Loop through all map instances and display them
 	$( '.rwmb-map-canvas' ).each( displayMap );
-} );
+    
+    $( document ).on( 'mb_blocks_preview', function( e ) {
+        $( e.target )
+                .find( ".rwmb-map-canvas" )
+                .each( displayMap );
+    } );    
+} )( jQuery, document );

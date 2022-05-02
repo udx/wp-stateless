@@ -28,7 +28,7 @@
 		initDomElements: function () {
 			this.$canvas = this.$container.find( '.rwmb-osm-canvas' );
 			this.canvas = this.$canvas[0];
-			this.$coordinate = this.$container.find( '.rwmb-osm-coordinate' );
+			this.$coordinate = this.$container.find( '.rwmb-osm' );
 			this.addressField = this.$container.data( 'address-field' );
 		},
 
@@ -44,7 +44,6 @@
 				center: latLng,
 				zoom: 14
 			} );
-
 
 			L.tileLayer( 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 				attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -105,18 +104,14 @@
 				that.updateCoordinate( that.marker.getLatLng() );
 			} );
 
-			/**
-			 * Add a custom event that allows other scripts to refresh the maps when needed
-			 * For example: when maps is in tabs or hidden div (this is known issue of Google Maps)
-			 *
-			 * @see https://developers.google.com/maps/documentation/javascript/reference ('resize' Event)
-			 */
-			$( window ).on( 'rwmb_map_refresh', that.refresh );
+			// Custom event to refresh maps when in hidden divs.
+			var refresh = that.refresh.bind( this );
+			$( window ).on( 'rwmb_map_refresh', refresh );
 
 			// Refresh on meta box hide and show
-			rwmb.$document.on( 'postbox-toggled', that.refresh );
+			rwmb.$document.on( 'postbox-toggled', refresh );
 			// Refresh on sorting meta boxes
-			$( '.meta-box-sortables' ).on( 'sortstop', that.refresh );
+			$( '.meta-box-sortables' ).on( 'sortstop', refresh );
 		},
 
 		refresh: function () {
@@ -136,20 +131,14 @@
 				return;
 			}
 
-			// If Meta Box Geo Location installed. Do not run autocomplete.
-			if ( $( '.rwmb-geo-binding' ).length ) {
-				var geocodeAddress = that.geocodeAddress.bind( that );
-				$address.on( 'selected_address', geocodeAddress );
-				return false;
-			}
-
 			$address.autocomplete( {
 				source: function ( request, response ) {
 					$.get( 'https://nominatim.openstreetmap.org/search', {
 						format: 'json',
 						q: request.term,
 						countrycodes: that.$canvas.data( 'region' ),
-						"accept-language": that.$canvas.data( 'language' )
+						"accept-language": that.$canvas.data( 'language' ),
+						addressdetails: 1
 					}, function( results ) {
 						if ( ! results.length ) {
 							response( [ {
@@ -160,6 +149,7 @@
 						}
 						response( results.map( function ( item ) {
 							return {
+								address: item.address,
 								label: item.display_name,
 								value: item.display_name,
 								latitude: item.lat,
@@ -174,6 +164,8 @@
 					that.map.panTo( latLng );
 					that.marker.setLatLng( latLng );
 					that.updateCoordinate( latLng );
+
+					$address.trigger( 'selected_address', [ui.item] );
 				}
 			} );
 		},
@@ -260,7 +252,7 @@
 		}
 	};
 
-	function initOsmMap() {
+	function createController() {
 		var $this = $( this ),
 			controller = $this.data( 'osmController' );
 		if ( controller ) {
@@ -273,11 +265,11 @@
 	}
 
 	function init( e ) {
-		$( e.target ).find( '.rwmb-osm-field' ).each( initOsmMap );
+		$( e.target ).find( '.rwmb-osm-field' ).each( createController );
 	}
 
 	function restart() {
-		$( '.rwmb-osm-field' ).each( initOsmMap );
+		$( '.rwmb-osm-field' ).each( createController );
 	}
 
 	rwmb.$document
