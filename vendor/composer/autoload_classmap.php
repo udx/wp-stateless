@@ -19,7 +19,7 @@ return array(
     'UsabilityDynamics\\UD_API\\More_Products_Table' => $vendorDir . '/udx/lib-ud-api-client/lib/classes/class-more-products-table.php',
     'UsabilityDynamics\\UD_API\\Scaffold' => $vendorDir . '/udx/lib-ud-api-client/lib/classes/class-scaffold.php',
     'UsabilityDynamics\\UD_API\\UI' => $vendorDir . '/udx/lib-ud-api-client/lib/classes/class-ui.php',
-    'UsabilityDynamics\\UD_API\\Update_Checker' => $vendorDir . '/udx/lib-ud-api-client/lib/classes/class-update-checker.php',
+    'UsabilityDynamics\\UD_API\\License_Checker' => $vendorDir . '/udx/lib-ud-api-client/lib/classes/class-license-checker.php',
     'UsabilityDynamics\\Utility' => $vendorDir . '/udx/lib-utility/lib/class-utility.php',
     'UsabilityDynamics\\Utility\\Guid_Fix' => $vendorDir . '/udx/lib-utility/lib/class-guid-fix.php',
     'UsabilityDynamics\\WP\\Bootstrap' => $vendorDir . '/udx/lib-wp-bootstrap/lib/classes/class-bootstrap.php',

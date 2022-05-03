@@ -1,19 +1,23 @@
 <?php
 /**
- * Update Checker
+ * License Checker
+ * Check current License
+ * Check current Subscription
+ * Check current Activation
+ * depends on Plugin or Theme
  *
  * @namespace UsabilityDynamics
  *
  */
 namespace UsabilityDynamics\UD_API {
 
-  if( !class_exists( 'UsabilityDynamics\UD_API\Update_Checker' ) ) {
+  if( !class_exists( 'UsabilityDynamics\UD_API\License_Checker' ) ) {
 
     /**
      * 
      * @author: peshkov@UD
      */
-    class Update_Checker {
+    class License_Checker {
     
       /**
        *
@@ -21,7 +25,7 @@ namespace UsabilityDynamics\UD_API {
       public static $version = '1.0.0';
       
       /**
-       * URL to access the Update API Manager.
+       * URL to access the License API Manager.
        */
       private $upgrade_url;
       
@@ -156,19 +160,19 @@ namespace UsabilityDynamics\UD_API {
          */
          
         /**
-         * Plugin Updates
+         * Plugin License Updates
          */
         if( $this->type == 'plugin' ) {
-          //** Check For Plugin Updates */
-          add_filter( 'pre_set_site_transient_update_plugins', array( $this, 'update_check' ) );
+          //** Check For Plugin License Updates */
+          add_filter( 'pre_set_site_transient_update_plugins', array( $this, 'license_check' ) );
           //** Check For Plugin/Theme Information to display on the update details page */
           add_filter( 'plugins_api', array( $this, 'request' ), 10, 3 );
         }
         /**
-         * Theme Updates
+         * Check For Theme License Updates
          */
         elseif ( $this->type == 'theme' ) {
-          add_filter( 'pre_set_site_transient_update_themes', array( $this, 'update_check' ) );
+          add_filter( 'pre_set_site_transient_update_themes', array( $this, 'license_check' ) );
         }
 
         add_action( 'wp_ajax_ud_api_dismiss', array( $this, 'dismiss_notices' ) );
@@ -185,14 +189,14 @@ namespace UsabilityDynamics\UD_API {
       }
 
       /**
-       * Check for updates against the remote server.
+       * Check for License updates against the remote server.
        *
        * @access public
        * @since  1.0.0
        * @param  object $transient
        * @return object $transient
        */
-      public function update_check( $transient ) {
+      public function license_check( $transient ) {
         
         //** Check if the transient contains the 'checked' information */
         //** If no, just return its value without hacking it */
@@ -218,38 +222,6 @@ namespace UsabilityDynamics\UD_API {
         $response = $this->plugin_information( $args );
         //** Displays an admin error message in the WordPress dashboard */
         $this->check_response_for_errors( $response );
-
-        //** Set version variables */
-        if ( isset( $response ) && is_object( $response ) && $response !== false ) {
-          //** New plugin version from the API */
-          $new_ver = (string)$response->new_version;
-          //** Current installed plugin version */
-          $curr_ver = (string)$this->software_version;
-          //$curr_ver = (string)$transient->checked[$this->name];
-        }
-
-        //** If there is a new version, modify the transient to reflect an update is available */
-        if ( isset( $new_ver ) && isset( $curr_ver ) ) {
-          if ( $response !== false && version_compare( $new_ver, $curr_ver, '>' ) ) {
-            if( $this->type == 'plugin' ) {
-              if( isset( $response->slug ) ) {
-                $response->slug = sanitize_title( $response->slug );  
-              }
-              $transient->response[$this->file] = $response;
-            } else {
-              $theme = basename( dirname( $this->file ) );
-              $response = (array)$response;
-              if( empty( $response[ 'url' ] ) ) { 
-                $response[ 'url' ] = !empty( $this->changelog ) ? $this->changelog : 'https://www.usabilitydynamics.com';
-              }
-              $transient->response[$theme] = (array)$response;
-            }
-            
-          }
-        }
-        
-        //echo "<pre>"; print_r( $this ); echo "</pre>"; die();
-        //echo "<pre>"; print_r( $transient ); echo "</pre>"; die();
 
         return $transient;
       }
