@@ -1,3 +1,9 @@
+#### 3.1.2
+
+- ENHANCEMENT - Upgraded `wpmetabox` library.
+- ENHANCEMENT - Updated `license` functionality, removed `update checker`.
+- FIX - Fixed vulnerability issues.
+
 #### 3.1.1
 
 - ENHANCEMENT - Notification for the administrator about finished synchronization. GitHub issue [#576](https://github.com/udx/wp-stateless/issues/576).

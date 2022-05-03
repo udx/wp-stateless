@@ -5,8 +5,8 @@ Tags: google, google cloud, google cloud storage, cdn, uploads, media, stateless
 License: GPLv2 or later
 Requires PHP: 5.6
 Requires at least: 5.0
-Tested up to: 5.6
-Stable tag: 3.1.1
+Tested up to: 5.9.3
+Stable tag: 3.1.2
 
 Upload and serve your WordPress media files from Google Cloud Storage.
 
@@ -107,6 +107,11 @@ To ensure new releases cause as little disruption as possible, we rely on a numb
 Before upgrading to WP-Stateless 3.0, please, make sure you tested it on your development environment.
 
 == Changelog ==
+= 3.1.2 =
+* ENHANCEMENT - Upgraded `wpmetabox` library.
+* ENHANCEMENT - Updated `license` functionality, removed `update checker`.
+* FIX - Fixed vulnerability issues.
+
 = 3.1.1 =
 * ENHANCEMENT - Notification for the administrator about finished synchronization. GitHub issue [#576](https://github.com/udx/wp-stateless/issues/576).
 * FIX - Fixed an issue with PDF thumbnails. GitHub issue [#577](https://github.com/udx/wp-stateless/issues/577).
