@@ -10,18 +10,17 @@ class ComposerStaticInit596548c05e44593658ee0f30115abee3
         'ec07570ca5a812141189b1fa81503674' => __DIR__ . '/..' . '/phpunit/phpunit/src/Framework/Assert/Functions.php',
         'a4a119a56e50fbb293281d9a48007e0e' => __DIR__ . '/..' . '/symfony/polyfill-php80/bootstrap.php',
         '6e3fae29631ef280660b3cdad06f25a8' => __DIR__ . '/..' . '/symfony/deprecation-contracts/function.php',
-        '7b11c4dc42b3b3023073cb14e519683c' => __DIR__ . '/..' . '/ralouphie/getallheaders/src/getallheaders.php',
-        'c964ee0ededf28c96ebd9db5099ef910' => __DIR__ . '/..' . '/guzzlehttp/promises/src/functions_include.php',
         '320cde22f66dd4f5d3fd621d3e88b98f' => __DIR__ . '/..' . '/symfony/polyfill-ctype/bootstrap.php',
         '0e6d7bf4a5811bfa5cf40c5ccd6fae6a' => __DIR__ . '/..' . '/symfony/polyfill-mbstring/bootstrap.php',
-        '37a3dc5111fe8f707ab4c132ef1dbc62' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/functions_include.php',
-        'decc78cc4436b1292c6c0d151b19445c' => __DIR__ . '/..' . '/phpseclib/phpseclib/phpseclib/bootstrap.php',
+        '7b11c4dc42b3b3023073cb14e519683c' => __DIR__ . '/..' . '/ralouphie/getallheaders/src/getallheaders.php',
+        'c964ee0ededf28c96ebd9db5099ef910' => __DIR__ . '/..' . '/guzzlehttp/promises/src/functions_include.php',
         '8825ede83f2f289127722d4e842cf7e8' => __DIR__ . '/..' . '/symfony/polyfill-intl-grapheme/bootstrap.php',
         'e69f7f6ee287b969198c3c9d6777bd38' => __DIR__ . '/..' . '/symfony/polyfill-intl-normalizer/bootstrap.php',
         '0d59ee240a4cd96ddbb4ff164fccea4d' => __DIR__ . '/..' . '/symfony/polyfill-php73/bootstrap.php',
         'b6b991a57620e2fb6b2f66f03fe9ddc2' => __DIR__ . '/..' . '/symfony/string/Resources/functions.php',
+        '37a3dc5111fe8f707ab4c132ef1dbc62' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/functions_include.php',
         '6124b4c8570aa390c21fafd04a26c69f' => __DIR__ . '/..' . '/myclabs/deep-copy/src/DeepCopy/deep_copy.php',
-        '1f87db08236948d07391152dccb70f04' => __DIR__ . '/..' . '/google/apiclient-services/autoload.php',
+        'decc78cc4436b1292c6c0d151b19445c' => __DIR__ . '/..' . '/phpseclib/phpseclib/phpseclib/bootstrap.php',
         '7d3b315c4f303f2fc14aca642a738e50' => __DIR__ . '/..' . '/yoast/phpunit-polyfills/phpunitpolyfills-autoload.php',
         'a8d3953fd9959404dd22d3dfcd0a79f0' => __DIR__ . '/../..' . '/src/aliases.php',
     );
@@ -55,10 +54,6 @@ class ComposerStaticInit596548c05e44593658ee0f30115abee3
             'Seld\\PharUtils\\' => 15,
             'Seld\\JsonLint\\' => 14,
         ),
-        'R' => 
-        array (
-            'Rize\\' => 5,
-        ),
         'P' => 
         array (
             'Psr\\SimpleCache\\' => 16,
@@ -90,10 +85,6 @@ class ComposerStaticInit596548c05e44593658ee0f30115abee3
             'GuzzleHttp\\Psr7\\' => 16,
             'GuzzleHttp\\Promise\\' => 19,
             'GuzzleHttp\\' => 11,
-            'Google\\Service\\' => 15,
-            'Google\\Cloud\\Storage\\' => 21,
-            'Google\\Cloud\\Core\\' => 18,
-            'Google\\CRC32\\' => 13,
             'Google\\Auth\\' => 12,
             'Google\\' => 7,
         ),
@@ -198,10 +189,6 @@ class ComposerStaticInit596548c05e44593658ee0f30115abee3
         array (
             0 => __DIR__ . '/..' . '/seld/jsonlint/src/Seld/JsonLint',
         ),
-        'Rize\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/rize/uri-template/src/Rize',
-        ),
         'Psr\\SimpleCache\\' => 
         array (
             0 => __DIR__ . '/..' . '/psr/simple-cache/src',
@@ -270,22 +257,6 @@ class ComposerStaticInit596548c05e44593658ee0f30115abee3
         'GuzzleHttp\\' => 
         array (
             0 => __DIR__ . '/..' . '/guzzlehttp/guzzle/src',
-        ),
-        'Google\\Service\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/google/apiclient-services/src',
-        ),
-        'Google\\Cloud\\Storage\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/google/cloud-storage/src',
-        ),
-        'Google\\Cloud\\Core\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/google/cloud-core/src',
-        ),
-        'Google\\CRC32\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/google/crc32/src',
         ),
         'Google\\Auth\\' => 
         array (
@@ -364,59 +335,6 @@ class ComposerStaticInit596548c05e44593658ee0f30115abee3
         'Google_Task_Retryable' => __DIR__ . '/../..' . '/src/aliases.php',
         'Google_Task_Runner' => __DIR__ . '/../..' . '/src/aliases.php',
         'Google_Utils_UriTemplate' => __DIR__ . '/../..' . '/src/aliases.php',
-        'Google_Service_Storage' => __DIR__ . '/../..' . '/src/Google/Service/Storage.php',
-        'Google_Service_Storage_Bucket' => __DIR__ . '/../..' . '/src/Google/Service/Storage/Bucket.php',
-        'Google_Service_Storage_BucketAccessControl' => __DIR__ . '/../..' . '/src/Google/Service/Storage/BucketAccessControl.php',
-        'Google_Service_Storage_BucketAccessControlProjectTeam' => __DIR__ . '/../..' . '/src/Google/Service/Storage/BucketAccessControlProjectTeam.php',
-        'Google_Service_Storage_BucketAccessControls' => __DIR__ . '/../..' . '/src/Google/Service/Storage/BucketAccessControls.php',
-        'Google_Service_Storage_BucketBilling' => __DIR__ . '/../..' . '/src/Google/Service/Storage/BucketBilling.php',
-        'Google_Service_Storage_BucketCors' => __DIR__ . '/../..' . '/src/Google/Service/Storage/BucketCors.php',
-        'Google_Service_Storage_BucketEncryption' => __DIR__ . '/../..' . '/src/Google/Service/Storage/BucketEncryption.php',
-        'Google_Service_Storage_BucketIamConfiguration' => __DIR__ . '/../..' . '/src/Google/Service/Storage/BucketIamConfiguration.php',
-        'Google_Service_Storage_BucketIamConfigurationBucketPolicyOnly' => __DIR__ . '/../..' . '/src/Google/Service/Storage/BucketIamConfigurationBucketPolicyOnly.php',
-        'Google_Service_Storage_BucketIamConfigurationUniformBucketLevelAccess' => __DIR__ . '/../..' . '/src/Google/Service/Storage/BucketIamConfigurationUniformBucketLevelAccess.php',
-        'Google_Service_Storage_BucketLifecycle' => __DIR__ . '/../..' . '/src/Google/Service/Storage/BucketLifecycle.php',
-        'Google_Service_Storage_BucketLifecycleRule' => __DIR__ . '/../..' . '/src/Google/Service/Storage/BucketLifecycleRule.php',
-        'Google_Service_Storage_BucketLifecycleRuleAction' => __DIR__ . '/../..' . '/src/Google/Service/Storage/BucketLifecycleRuleAction.php',
-        'Google_Service_Storage_BucketLifecycleRuleCondition' => __DIR__ . '/../..' . '/src/Google/Service/Storage/BucketLifecycleRuleCondition.php',
-        'Google_Service_Storage_BucketLogging' => __DIR__ . '/../..' . '/src/Google/Service/Storage/BucketLogging.php',
-        'Google_Service_Storage_BucketOwner' => __DIR__ . '/../..' . '/src/Google/Service/Storage/BucketOwner.php',
-        'Google_Service_Storage_BucketRetentionPolicy' => __DIR__ . '/../..' . '/src/Google/Service/Storage/BucketRetentionPolicy.php',
-        'Google_Service_Storage_BucketVersioning' => __DIR__ . '/../..' . '/src/Google/Service/Storage/BucketVersioning.php',
-        'Google_Service_Storage_BucketWebsite' => __DIR__ . '/../..' . '/src/Google/Service/Storage/BucketWebsite.php',
-        'Google_Service_Storage_Buckets' => __DIR__ . '/../..' . '/src/Google/Service/Storage/Buckets.php',
-        'Google_Service_Storage_Channel' => __DIR__ . '/../..' . '/src/Google/Service/Storage/Channel.php',
-        'Google_Service_Storage_ComposeRequest' => __DIR__ . '/../..' . '/src/Google/Service/Storage/ComposeRequest.php',
-        'Google_Service_Storage_ComposeRequestSourceObjects' => __DIR__ . '/../..' . '/src/Google/Service/Storage/ComposeRequestSourceObjects.php',
-        'Google_Service_Storage_ComposeRequestSourceObjectsObjectPreconditions' => __DIR__ . '/../..' . '/src/Google/Service/Storage/ComposeRequestSourceObjectsObjectPreconditions.php',
-        'Google_Service_Storage_Expr' => __DIR__ . '/../..' . '/src/Google/Service/Storage/Expr.php',
-        'Google_Service_Storage_HmacKey' => __DIR__ . '/../..' . '/src/Google/Service/Storage/HmacKey.php',
-        'Google_Service_Storage_HmacKeyMetadata' => __DIR__ . '/../..' . '/src/Google/Service/Storage/HmacKeyMetadata.php',
-        'Google_Service_Storage_HmacKeysMetadata' => __DIR__ . '/../..' . '/src/Google/Service/Storage/HmacKeysMetadata.php',
-        'Google_Service_Storage_Notification' => __DIR__ . '/../..' . '/src/Google/Service/Storage/Notification.php',
-        'Google_Service_Storage_Notifications' => __DIR__ . '/../..' . '/src/Google/Service/Storage/Notifications.php',
-        'Google_Service_Storage_ObjectAccessControl' => __DIR__ . '/../..' . '/src/Google/Service/Storage/ObjectAccessControl.php',
-        'Google_Service_Storage_ObjectAccessControlProjectTeam' => __DIR__ . '/../..' . '/src/Google/Service/Storage/ObjectAccessControlProjectTeam.php',
-        'Google_Service_Storage_ObjectAccessControls' => __DIR__ . '/../..' . '/src/Google/Service/Storage/ObjectAccessControls.php',
-        'Google_Service_Storage_Objects' => __DIR__ . '/../..' . '/src/Google/Service/Storage/Objects.php',
-        'Google_Service_Storage_Policy' => __DIR__ . '/../..' . '/src/Google/Service/Storage/Policy.php',
-        'Google_Service_Storage_PolicyBindings' => __DIR__ . '/../..' . '/src/Google/Service/Storage/PolicyBindings.php',
-        'Google_Service_Storage_Resource_BucketAccessControls' => __DIR__ . '/../..' . '/src/Google/Service/Storage/Resource/BucketAccessControls.php',
-        'Google_Service_Storage_Resource_Buckets' => __DIR__ . '/../..' . '/src/Google/Service/Storage/Resource/Buckets.php',
-        'Google_Service_Storage_Resource_Channels' => __DIR__ . '/../..' . '/src/Google/Service/Storage/Resource/Channels.php',
-        'Google_Service_Storage_Resource_DefaultObjectAccessControls' => __DIR__ . '/../..' . '/src/Google/Service/Storage/Resource/DefaultObjectAccessControls.php',
-        'Google_Service_Storage_Resource_Notifications' => __DIR__ . '/../..' . '/src/Google/Service/Storage/Resource/Notifications.php',
-        'Google_Service_Storage_Resource_ObjectAccessControls' => __DIR__ . '/../..' . '/src/Google/Service/Storage/Resource/ObjectAccessControls.php',
-        'Google_Service_Storage_Resource_Objects' => __DIR__ . '/../..' . '/src/Google/Service/Storage/Resource/Objects.php',
-        'Google_Service_Storage_Resource_Projects' => __DIR__ . '/../..' . '/src/Google/Service/Storage/Resource/Projects.php',
-        'Google_Service_Storage_Resource_ProjectsHmacKeys' => __DIR__ . '/../..' . '/src/Google/Service/Storage/Resource/ProjectsHmacKeys.php',
-        'Google_Service_Storage_Resource_ProjectsServiceAccount' => __DIR__ . '/../..' . '/src/Google/Service/Storage/Resource/ProjectsServiceAccount.php',
-        'Google_Service_Storage_RewriteResponse' => __DIR__ . '/../..' . '/src/Google/Service/Storage/RewriteResponse.php',
-        'Google_Service_Storage_ServiceAccount' => __DIR__ . '/../..' . '/src/Google/Service/Storage/ServiceAccount.php',
-        'Google_Service_Storage_StorageObject' => __DIR__ . '/../..' . '/src/Google/Service/Storage/StorageObject.php',
-        'Google_Service_Storage_StorageObjectCustomerEncryption' => __DIR__ . '/../..' . '/src/Google/Service/Storage/StorageObjectCustomerEncryption.php',
-        'Google_Service_Storage_StorageObjectOwner' => __DIR__ . '/../..' . '/src/Google/Service/Storage/StorageObjectOwner.php',
-        'Google_Service_Storage_TestIamPermissionsResponse' => __DIR__ . '/../..' . '/src/Google/Service/Storage/TestIamPermissionsResponse.php',
         'JsonException' => __DIR__ . '/..' . '/symfony/polyfill-php73/Resources/stubs/JsonException.php',
         'Normalizer' => __DIR__ . '/..' . '/symfony/polyfill-intl-normalizer/Resources/stubs/Normalizer.php',
         'PHPUnit\\Exception' => __DIR__ . '/..' . '/phpunit/phpunit/src/Exception.php',
