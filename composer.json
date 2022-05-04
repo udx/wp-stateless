@@ -3,11 +3,11 @@
   "description": "WP-Stateless WordPress plugin",
   "type": "wordpress-plugin",
   "minimum-stability": "stable",
-  "homepage": "https://usabilitydynamics.com",
+  "homepage": "https://udx.io",
   "authors": [
     {
-      "name": "UsabilityDynamics, Inc.",
-      "homepage": "https://usabilitydynamics.com"
+      "name": "UDX",
+      "homepage": "https://udx.io"
     }
   ],
   "repositories": [
