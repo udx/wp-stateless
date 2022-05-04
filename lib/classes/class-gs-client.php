@@ -300,7 +300,7 @@ namespace wpCloud\StatelessMedia {
           if (!file_exists($_dir = dirname($save_path))) {
             wp_mkdir_p($_dir);
           }
-          return $this->client->getHttpClient()->get($media->getMediaLink(), ['save_to' => $save_path])->getStatusCode();
+          return $this->client->getHttpClient()->get($media->getMediaLink(), ['sink' => $save_path])->getStatusCode();
         }
 
         return $media;
