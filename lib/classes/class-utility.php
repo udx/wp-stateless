@@ -15,6 +15,8 @@
 namespace wpCloud\StatelessMedia {
 
   use wpCloud\StatelessMedia\Sync\BackgroundSync;
+  use \Firebase\JWT\JWT;
+  use \Firebase\JWT\Key;
 
   if (!class_exists('wpCloud\StatelessMedia\Utility')) {
 
@@ -737,7 +739,7 @@ namespace wpCloud\StatelessMedia {
         ]);
 
         $key = defined('AUTH_SALT') ? AUTH_SALT : get_option('admin_email');
-        return \Firebase\JWT\JWT::encode($payload, $key);
+        return JWT::encode($payload, $key, 'HS256');
       }
 
       /**
@@ -751,7 +753,7 @@ namespace wpCloud\StatelessMedia {
        */
       public static function verify_jwt_token($token) {
         $key = defined('AUTH_SALT') ? AUTH_SALT : get_option('admin_email');
-        return \Firebase\JWT\JWT::decode($token, $key, ['HS256']);
+        return JWT::decode($token, new Key($key, 'HS256'));
       }
 
       /**

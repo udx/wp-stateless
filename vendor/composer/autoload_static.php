@@ -7,10 +7,39 @@ namespace Composer\Autoload;
 class ComposerStaticInitc59d002476a452800baaf79c430753cb
 {
     public static $files = array (
+        '0e6d7bf4a5811bfa5cf40c5ccd6fae6a' => __DIR__ . '/..' . '/symfony/polyfill-mbstring/bootstrap.php',
+        'a4a119a56e50fbb293281d9a48007e0e' => __DIR__ . '/..' . '/symfony/polyfill-php80/bootstrap.php',
+        '320cde22f66dd4f5d3fd621d3e88b98f' => __DIR__ . '/..' . '/symfony/polyfill-ctype/bootstrap.php',
+        '8825ede83f2f289127722d4e842cf7e8' => __DIR__ . '/..' . '/symfony/polyfill-intl-grapheme/bootstrap.php',
+        'e69f7f6ee287b969198c3c9d6777bd38' => __DIR__ . '/..' . '/symfony/polyfill-intl-normalizer/bootstrap.php',
+        '0d59ee240a4cd96ddbb4ff164fccea4d' => __DIR__ . '/..' . '/symfony/polyfill-php73/bootstrap.php',
+        'b6b991a57620e2fb6b2f66f03fe9ddc2' => __DIR__ . '/..' . '/symfony/string/Resources/functions.php',
         '8ca8a91f0a826d6c6c8f274c90ca7d88' => __DIR__ . '/..' . '/wpmetabox/meta-box/meta-box.php',
     );
 
     public static $prefixLengthsPsr4 = array (
+        'S' => 
+        array (
+            'Symfony\\Polyfill\\Php80\\' => 23,
+            'Symfony\\Polyfill\\Php73\\' => 23,
+            'Symfony\\Polyfill\\Mbstring\\' => 26,
+            'Symfony\\Polyfill\\Intl\\Normalizer\\' => 33,
+            'Symfony\\Polyfill\\Intl\\Grapheme\\' => 31,
+            'Symfony\\Polyfill\\Ctype\\' => 23,
+            'Symfony\\Contracts\\Service\\' => 26,
+            'Symfony\\Component\\String\\' => 25,
+            'Symfony\\Component\\Finder\\' => 25,
+            'Symfony\\Component\\Console\\' => 26,
+        ),
+        'P' => 
+        array (
+            'Psr\\Container\\' => 14,
+        ),
+        'L' => 
+        array (
+            'League\\MimeTypeDetection\\' => 25,
+            'League\\Flysystem\\' => 17,
+        ),
         'F' => 
         array (
             'Firebase\\JWT\\' => 13,
@@ -18,10 +47,63 @@ class ComposerStaticInitc59d002476a452800baaf79c430753cb
         'C' => 
         array (
             'Composer\\Installers\\' => 20,
+            'CoenJacobs\\Mozart\\' => 18,
         ),
     );
 
     public static $prefixDirsPsr4 = array (
+        'Symfony\\Polyfill\\Php80\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/symfony/polyfill-php80',
+        ),
+        'Symfony\\Polyfill\\Php73\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/symfony/polyfill-php73',
+        ),
+        'Symfony\\Polyfill\\Mbstring\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/symfony/polyfill-mbstring',
+        ),
+        'Symfony\\Polyfill\\Intl\\Normalizer\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/symfony/polyfill-intl-normalizer',
+        ),
+        'Symfony\\Polyfill\\Intl\\Grapheme\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/symfony/polyfill-intl-grapheme',
+        ),
+        'Symfony\\Polyfill\\Ctype\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/symfony/polyfill-ctype',
+        ),
+        'Symfony\\Contracts\\Service\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/symfony/service-contracts',
+        ),
+        'Symfony\\Component\\String\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/symfony/string',
+        ),
+        'Symfony\\Component\\Finder\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/symfony/finder',
+        ),
+        'Symfony\\Component\\Console\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/symfony/console',
+        ),
+        'Psr\\Container\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/psr/container/src',
+        ),
+        'League\\MimeTypeDetection\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/league/mime-type-detection/src',
+        ),
+        'League\\Flysystem\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/league/flysystem/src',
+        ),
         'Firebase\\JWT\\' => 
         array (
             0 => __DIR__ . '/..' . '/firebase/php-jwt/src',
@@ -29,6 +111,10 @@ class ComposerStaticInitc59d002476a452800baaf79c430753cb
         'Composer\\Installers\\' => 
         array (
             0 => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers',
+        ),
+        'CoenJacobs\\Mozart\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/coenjacobs/mozart/src',
         ),
     );
 
@@ -43,6 +129,10 @@ class ComposerStaticInitc59d002476a452800baaf79c430753cb
     );
 
     public static $classMap = array (
+        'JsonException' => __DIR__ . '/..' . '/symfony/polyfill-php73/Resources/stubs/JsonException.php',
+        'Normalizer' => __DIR__ . '/..' . '/symfony/polyfill-intl-normalizer/Resources/stubs/Normalizer.php',
+        'Stringable' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/Stringable.php',
+        'UnhandledMatchError' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/UnhandledMatchError.php',
         'UsabilityDynamics\\Job' => __DIR__ . '/..' . '/udx/lib-utility/lib/class-job.php',
         'UsabilityDynamics\\Loader' => __DIR__ . '/..' . '/udx/lib-utility/lib/class-loader.php',
         'UsabilityDynamics\\Settings' => __DIR__ . '/..' . '/udx/lib-settings/lib/class-settings.php',
@@ -51,12 +141,12 @@ class ComposerStaticInitc59d002476a452800baaf79c430753cb
         'UsabilityDynamics\\UD_API\\API' => __DIR__ . '/..' . '/udx/lib-ud-api-client/lib/classes/class-api.php',
         'UsabilityDynamics\\UD_API\\Admin' => __DIR__ . '/..' . '/udx/lib-ud-api-client/lib/classes/class-admin.php',
         'UsabilityDynamics\\UD_API\\Bootstrap' => __DIR__ . '/..' . '/udx/lib-ud-api-client/lib/classes/class-bootstrap.php',
+        'UsabilityDynamics\\UD_API\\License_Checker' => __DIR__ . '/..' . '/udx/lib-ud-api-client/lib/classes/class-license-checker.php',
         'UsabilityDynamics\\UD_API\\Licenses_Table' => __DIR__ . '/..' . '/udx/lib-ud-api-client/lib/classes/class-licenses-table.php',
         'UsabilityDynamics\\UD_API\\Manager' => __DIR__ . '/..' . '/udx/lib-ud-api-client/lib/classes/class-manager.php',
         'UsabilityDynamics\\UD_API\\More_Products_Table' => __DIR__ . '/..' . '/udx/lib-ud-api-client/lib/classes/class-more-products-table.php',
         'UsabilityDynamics\\UD_API\\Scaffold' => __DIR__ . '/..' . '/udx/lib-ud-api-client/lib/classes/class-scaffold.php',
         'UsabilityDynamics\\UD_API\\UI' => __DIR__ . '/..' . '/udx/lib-ud-api-client/lib/classes/class-ui.php',
-        'UsabilityDynamics\\UD_API\\License_Checker' => __DIR__ . '/..' . '/udx/lib-ud-api-client/lib/classes/class-license-checker.php',
         'UsabilityDynamics\\Utility' => __DIR__ . '/..' . '/udx/lib-utility/lib/class-utility.php',
         'UsabilityDynamics\\Utility\\Guid_Fix' => __DIR__ . '/..' . '/udx/lib-utility/lib/class-guid-fix.php',
         'UsabilityDynamics\\WP\\Bootstrap' => __DIR__ . '/..' . '/udx/lib-wp-bootstrap/lib/classes/class-bootstrap.php',
@@ -70,6 +160,9 @@ class ComposerStaticInitc59d002476a452800baaf79c430753cb
         'UsabilityDynamics\\WP\\TGM_Bulk_Installer_Skin' => __DIR__ . '/..' . '/udx/lib-wp-bootstrap/lib/classes/class-tgm-bulk-installer.php',
         'UsabilityDynamics\\WP\\TGM_Plugin_Activation' => __DIR__ . '/..' . '/udx/lib-wp-bootstrap/lib/classes/class-tgm-plugin-activation.php',
         'UsabilityDynamics\\WP\\Utility' => __DIR__ . '/..' . '/udx/lib-wp-bootstrap/lib/classes/class-utility.php',
+        'ValueError' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/ValueError.php',
+        'WP_Async_Request' => __DIR__ . '/..' . '/deliciousbrains/wp-background-processing/classes/wp-async-request.php',
+        'WP_Background_Process' => __DIR__ . '/..' . '/deliciousbrains/wp-background-processing/classes/wp-background-process.php',
         'wpCloud\\StatelessMedia\\API' => __DIR__ . '/../..' . '/lib/classes/class-api.php',
         'wpCloud\\StatelessMedia\\Ajax' => __DIR__ . '/../..' . '/lib/classes/class-ajax.php',
         'wpCloud\\StatelessMedia\\Bootstrap' => __DIR__ . '/../..' . '/lib/classes/class-bootstrap.php',
