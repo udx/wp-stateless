@@ -515,11 +515,14 @@ namespace wpCloud\StatelessMedia {
       public function save_media_settings(){
         if(isset($_POST['action']) && $_POST['action'] == 'stateless_settings' && wp_verify_nonce( $_POST['_smnonce'], 'wp-stateless-settings' )){
 
-          $settings = apply_filters('stateless::settings::save', sanitize_text_field($_POST['sm']));
+          $settings = apply_filters('stateless::settings::save', $_POST['sm']);
           $root_dir_value = false;
 
           foreach ( $settings as $name => $value ) {
-
+            /**
+             * Sanitize POST data
+             */
+            $value = sanitize_text_field($value);
             /**
              * root_dir settings
              */
