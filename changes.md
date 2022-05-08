@@ -1,8 +1,12 @@
-#### 3.1.2
+#### 3.2.0
 
 - ENHANCEMENT - Upgraded `wpmetabox` library.
+- ENHANCEMENT - Updated Client library for Google APIs.
+- ENHANCEMENT - Updated Guzzle library to version 7.
+- ENHANCEMENT - Updated JWT library to version 7.
 - ENHANCEMENT - Updated `license` functionality, removed `update checker`.
 - FIX - Fixed vulnerability issues.
+- FIX - Fixed erros and warnings on PHP 8.
 
 #### 3.1.1
 
