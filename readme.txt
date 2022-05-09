@@ -109,8 +109,14 @@ Before upgrading to WP-Stateless 3.0, please, make sure you tested it on your de
 == Changelog ==
 = 3.2.0 =
 * ENHANCEMENT - Upgraded `wpmetabox` library.
+* ENHANCEMENT - Updated Client library for Google APIs.
+* ENHANCEMENT - Updated Guzzle library to version 7.
+* ENHANCEMENT - Updated JWT library.
 * ENHANCEMENT - Updated `license` functionality, removed `update checker`.
 * FIX - Fixed vulnerability issues.
+* FIX - Fixed erros and warnings on PHP 8.
+* FIX - problem after the upgrade [#628](https://github.com/udx/wp-stateless/issues/628).
+* FIX - image_downsize() PHP8 Required parameter $id follows optional parameter $false [#619](https://github.com/udx/wp-stateless/issues/619). 
 
 = 3.1.1 =
 * ENHANCEMENT - Notification for the administrator about finished synchronization. GitHub issue [#576](https://github.com/udx/wp-stateless/issues/576).
