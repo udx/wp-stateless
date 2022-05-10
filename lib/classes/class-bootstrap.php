@@ -317,7 +317,7 @@ namespace wpCloud\StatelessMedia {
              * Delete original in the end of generating metadata
              */
             add_filter('wp_generate_attachment_metadata', function ($metadata, $attachment_id, $state) {
-              if (!in_array(ud_get_stateless_media()->get('sm.mode'), array('ephemeral', 'stateless'))) return $metadata;
+              if (!in_array(ud_get_stateless_media()->get('sm.mode'), array('ephemeral'))) return $metadata;
               @unlink(get_attached_file($attachment_id, true));
               return $metadata;
             }, 99, 3);
