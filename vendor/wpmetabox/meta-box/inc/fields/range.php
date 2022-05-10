@@ -17,9 +17,14 @@ class RWMB_Range_Field extends RWMB_Number_Field {
 	 * @return string
 	 */
 	public static function html( $meta, $field ) {
-		$output  = parent::html( $meta, $field );
-		$output .= sprintf( '<span class="rwmb-output">%s</span>', $meta );
-		return $output;
+		return sprintf(
+			'<div class="rwmb-range-inner">
+				%s
+				<span class="rwmb-range-output">%s</span>
+			</div>',
+			parent::html( $meta, $field ),
+			$meta
+		);
 	}
 
 	/**
@@ -58,9 +63,9 @@ class RWMB_Range_Field extends RWMB_Number_Field {
 	 * @return int
 	 */
 	public static function value( $new, $old, $post_id, $field ) {
-		$new = intval( $new );
-		$min = intval( $field['min'] );
-		$max = intval( $field['max'] );
+		$new = (float) $new;
+		$min = (float) $field['min'];
+		$max = (float) $field['max'];
 
 		if ( $new < $min ) {
 			return $min;

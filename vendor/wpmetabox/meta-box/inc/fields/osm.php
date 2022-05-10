@@ -15,8 +15,8 @@ class RWMB_OSM_Field extends RWMB_Field {
 	 */
 	public static function admin_enqueue_scripts() {
 		// Because map is a hosted service, it's ok to use hosted Leaflet scripts.
-		wp_enqueue_style( 'leaflet', 'https://unpkg.com/leaflet@1.5.1/dist/leaflet.css', array(), '1.5.1' );
-		wp_enqueue_script( 'leaflet', 'https://unpkg.com/leaflet@1.5.1/dist/leaflet.js', array(), '1.5.1', true );
+		wp_enqueue_style( 'leaflet', 'https://unpkg.com/leaflet@1.7.1/dist/leaflet.css', array(), '1.7.1' );
+		wp_enqueue_script( 'leaflet', 'https://unpkg.com/leaflet@1.7.1/dist/leaflet.js', array(), '1.7.1', true );
 
 		wp_enqueue_style( 'rwmb-osm', RWMB_CSS_URL . 'osm.css', array( 'leaflet' ), RWMB_VER );
 		wp_enqueue_script( 'rwmb-osm', RWMB_JS_URL . 'osm.js', array( 'jquery', 'jquery-ui-autocomplete', 'leaflet' ), RWMB_VER, true );
@@ -45,14 +45,17 @@ class RWMB_OSM_Field extends RWMB_Field {
 			esc_attr( $address )
 		);
 
+		$attributes          = self::get_attributes( $field, $meta );
+		$attributes['type']  = 'hidden';
+		$attributes['value'] = $meta;
+
 		$html .= sprintf(
 			'<div class="rwmb-osm-canvas" data-default-loc="%s" data-region="%s" data-language="%s"></div>
-			<input type="hidden" name="%s" class="rwmb-osm-coordinate" value="%s">',
+			<input %s>',
 			esc_attr( $field['std'] ),
 			esc_attr( $field['region'] ),
 			esc_attr( $field['language'] ),
-			esc_attr( $field['field_name'] ),
-			esc_attr( $meta )
+			self::render_attributes( $attributes )
 		);
 
 		$html .= '</div>';
@@ -139,6 +142,7 @@ class RWMB_OSM_Field extends RWMB_Field {
 				'marker_title' => '', // Marker title, when hover.
 				'info_window'  => '', // Content of info window (when click on marker). HTML allowed.
 				'js_options'   => array(),
+				'zoom'         => $zoom,
 			)
 		);
 
@@ -154,7 +158,7 @@ class RWMB_OSM_Field extends RWMB_Field {
 			$args['js_options'],
 			array(
 				// Default to 'zoom' level set in admin, but can be overwritten.
-				'zoom' => $zoom,
+				'zoom' => $args['zoom'],
 			)
 		);
 

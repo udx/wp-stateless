@@ -130,16 +130,14 @@
 				that.controller.destroy();
 			} );
 
+			var collection = this.controller.get( 'items' );
 			this.$input.on( 'media:reset', function() {
-				that.controller.get( 'items' ).reset();
+				collection.reset();
 			} );
 
-			this.controller.get( 'items' ).on( 'add remove reset', _.debounce( function () {
-				that.$input.trigger( 'change', [that.$( '.rwmb-media-input' )] );
-			}, 500 ) );
-
-			this.controller.get( 'items' ).on( 'remove', _.debounce( function () {
-				that.$input.val( '' ).trigger( 'change' );
+			collection.on( 'add remove reset', _.debounce( function () {
+				var ids = collection.pluck( 'id' ).join( ',' );
+				that.$input.val( ids ).trigger( 'change', [that.$( '.rwmb-media-input' )] );
 			}, 500 ) );
 		},
 
@@ -213,6 +211,10 @@
 			// Sort items using helper 'clone' to prevent trigger click on the image, which means reselect.
 			this.$el.sortable( {
 				helper : 'clone',
+				start: function ( event, ui ) {
+					ui.placeholder.height( ui.helper.outerHeight() );
+					ui.placeholder.width( ui.helper.outerWidth() );
+				},
 				update: function( event, ui ) {
 					ui.item.find( rwmb.inputSelectors ).first().trigger( 'mb_change' );
 				}
@@ -300,13 +302,7 @@
 			this._editFrame = new EditMedia( {
 				frame: 'edit-attachments',
 				controller: {
-					// Needed to trick Edit modal to think there is a gridRouter.
-					gridRouter: {
-						navigate: function ( destination ) {
-						},
-						baseUrl: function ( url ) {
-						}
-					}
+					gridRouter: new wp.media.view.MediaFrame.Manage.Router()
 				},
 				library: this.collection,
 				model: item
@@ -381,7 +377,11 @@
 
 				this._frame.on( 'select', function () {
 					var selection = this._frame.state().get( 'selection' );
-					this.collection.add( selection.models );
+					if ( this.controller.get( 'addTo' ) === 'beginning' ) {
+						this.collection.add( selection.models, {at: 0} );
+					} else {
+						this.collection.add( selection.models );
+					}
 				}, this );
 
 				this._frame.open();
@@ -411,7 +411,7 @@
 	 */
 	MediaItem = views.MediaItem = Backbone.View.extend( {
 		tagName: 'li',
-		className: 'rwmb-media-item attachment',
+		className: 'rwmb-file',
 		template: wp.template( 'rwmb-media-item' ),
 		initialize: function ( options ) {
 			this.controller = options.controller;
@@ -423,20 +423,17 @@
 		},
 
 		events: {
-			'click .rwmb-image-overlay': function () {
+			'click .rwmb-image-overlay': function ( e ) {
+				e.preventDefault();
 				this.trigger( 'click:switch', this.model );
-				return false;
 			},
-
-			// Event when remove button clicked
-			'click .rwmb-remove-media': function () {
+			'click .rwmb-remove-media': function ( e ) {
+				e.preventDefault();
 				this.trigger( 'click:remove', this.model );
-				return false;
 			},
-
-			'click .rwmb-edit-media': function () {
+			'click .rwmb-edit-media': function ( e ) {
+				e.preventDefault();
 				this.trigger( 'click:edit', this.model );
-				return false;
 			}
 		},
 
@@ -563,7 +560,8 @@
 				controller: this,
 				model: this.model
 			} ) );
-		}
+		},
+		resetRoute: function() {}
 	} );
 
 	function initMediaField() {

@@ -66,12 +66,12 @@ namespace wpCloud\StatelessMedia {
         $this->key_json = json_decode($args['key_json'], 1);
 
         // May be Loading Google SDK....
-        if (!class_exists('\wpCloud\StatelessMedia\Google_Client\Google_Client')) {
+        if (!class_exists('\Google\Client')) {
           include_once(ud_get_stateless_media()->path('lib/Google/vendor/autoload.php', 'dir'));
         }
 
         /* Initialize our client */
-        $this->client = new \wpCloud\StatelessMedia\Google_Client\Google_Client();
+        $this->client = new \Google\Client();
 
         // We're supporting Google SDK 1.X version since
         // The plugins which also are using Google SDK may have its old version
@@ -113,7 +113,7 @@ namespace wpCloud\StatelessMedia {
         }
 
         /* Now, Initialize our Google Storage Service */
-        $this->service = new \wpCloud\StatelessMedia\Google_Client\Google_Service_Storage($this->client);
+        $this->service = new \Google\Service\Storage($this->client);
       }
 
       /**
@@ -207,7 +207,7 @@ namespace wpCloud\StatelessMedia {
             return get_object_vars($media);
           }
 
-          $media = new Google_Client\Google_Service_Storage_StorageObject();
+          $media = new \Google\Service\Storage\StorageObject();
           $media->setName($name);
           $media->setMetadata($args['metadata']);
 
@@ -231,7 +231,7 @@ namespace wpCloud\StatelessMedia {
             $file_size = filesize($args['absolutePath']);
             $filetoupload = array('name' => $name, 'uploadType' => 'resumable');
             $request = $this->service->objects->insert($this->bucket, $media, $filetoupload);
-            $uploader = new Google_Client\Google_Http_MediaFileUpload($this->client, $request, $args['mimeType'], null, true, WP_STATELESS_MEDIA_UPLOAD_CHUNK_SIZE);
+            $uploader = new \Google\Google_Http_MediaFileUpload($this->client, $request, $args['mimeType'], null, true, WP_STATELESS_MEDIA_UPLOAD_CHUNK_SIZE);
             $uploader->setFileSize($file_size);
             $handle = fopen($args['absolutePath'], "rb");
 
@@ -271,7 +271,7 @@ namespace wpCloud\StatelessMedia {
       public function mediaInsertACL($name, $media = array(), $agrs = array()) {
         /* Make Media Public READ for all on success */
         if (!empty($name)) {
-          $acl = new \wpCloud\StatelessMedia\Google_Client\Google_Service_Storage_ObjectAccessControl();
+          $acl = new \Google\Service\Storage\ObjectAccessControl();
           $acl->setEntity('allUsers');
           $acl->setRole('READER');
           $acl = apply_filters('wp_stateless_media_acl', $acl, $name, $media, $agrs);
@@ -300,7 +300,7 @@ namespace wpCloud\StatelessMedia {
           if (!file_exists($_dir = dirname($save_path))) {
             wp_mkdir_p($_dir);
           }
-          return $this->client->getHttpClient()->get($media->getMediaLink(), ['save_to' => $save_path])->getStatusCode();
+          return $this->client->getHttpClient()->get($media->getMediaLink(), ['sink' => $save_path])->getStatusCode();
         }
 
         return $media;
@@ -475,7 +475,7 @@ namespace wpCloud\StatelessMedia {
           'WP-Stateless',
           "<b>v2.0</b>",
           $pluginName,
-          "<b>v" . \wpCloud\StatelessMedia\Google_Client\Google_Client::LIBVER . "</b>"
+          "<b>v" . \Google\Client::LIBVER . "</b>"
         );
 
         set_transient("wp_stateless_google_sdk_conflict", $error);

@@ -314,6 +314,15 @@ namespace wpCloud\StatelessMedia {
             add_filter('wp_update_attachment_metadata', array('wpCloud\StatelessMedia\Utility', 'add_media'), 999, 2);
 
             /**
+             * Delete original in the end of generating metadata
+             */
+            add_filter('wp_generate_attachment_metadata', function ($metadata, $attachment_id, $state) {
+              if (!in_array(ud_get_stateless_media()->get('sm.mode'), array('ephemeral', 'stateless'))) return $metadata;
+              @unlink(get_attached_file($attachment_id, true));
+              return $metadata;
+            }, 99, 3);
+
+            /**
              * Rewrite Image URLS
              */
             add_filter('image_downsize', array($this, 'image_downsize'), 99, 3);
@@ -1317,7 +1326,7 @@ namespace wpCloud\StatelessMedia {
        * @param string $size
        * @return mixed $false
        */
-      public function image_downsize($false = false, $id, $size) {
+      public function image_downsize($false, $id, $size) {
 
         if ((!isset($this->client) || !$this->client || is_wp_error($this->client)) && $this->get('sm.mode') !== 'stateless') {
           return $false;
@@ -1470,29 +1479,27 @@ namespace wpCloud\StatelessMedia {
        */
       public function get_attached_file($file, $attachment_id) {
         global $default_dir;
-        $sm_cloud = get_post_meta($attachment_id, 'sm_cloud', 1);
+
+        $sm_cloud = get_post_meta($attachment_id, 'sm_cloud', true);
+        $_file = get_post_meta($attachment_id, '_wp_attached_file', true);
+
         /* Determine if the media file has GS data at all. */
-        if (is_multisite()) {
-          $sm_cloud = get_post_meta($attachment_id, 'sm_cloud', true);
-          $_file = get_post_meta($attachment_id, '_wp_attached_file', true);
-          if ($_file) {
-            $blog_id = get_current_blog_id();
-            $uploads = wp_get_upload_dir();
-            $_file = apply_filters('wp_stateless_file_name', $_file, false);
-            $file_path_fix = $uploads['basedir'] . "/sites/$blog_id/$_file";
-            if (file_exists($file_path_fix)) {
-              $file = $file_path_fix;
-            }
+        if (is_multisite() && $_file) {
+          $blog_id = get_current_blog_id();
+          $uploads = wp_get_upload_dir();
+          $_file = apply_filters('wp_stateless_file_name', $_file, false);
+          $file_path_fix = $uploads['basedir'] . "/sites/$blog_id/$_file";
+
+          if (file_exists($file_path_fix)) {
+            return $file_path_fix;
           }
-        } elseif (empty($sm_cloud) && $this->get('sm.mode') == 'stateless') {
-          $_file = get_post_meta($attachment_id, '_wp_attached_file', true);
-          if ($_file) {
-            $default_dir = true;
-            $uploads = wp_get_upload_dir();
-            $default_dir = false;
-            return $uploads['basedir'] . '/' . $_file;
-          }
+        } elseif (empty($sm_cloud) && $this->get('sm.mode') == 'stateless' && $_file) {
+          $default_dir = true;
+          $uploads = wp_get_upload_dir();
+          $default_dir = false;
+          return $uploads['basedir'] . '/' . $_file;
         }
+
         return $file;
       }
 

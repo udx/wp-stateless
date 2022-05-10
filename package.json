@@ -2,11 +2,11 @@
   "name": "wp-stateless",
   "title": "WP-Stateless",
   "description": "wpCloud Stateless Media for GCE",
-  "version": "3.1.1",
-  "homepage": "https://usabilitydynamics.com",
+  "version": "3.2.0",
+  "homepage": "https://udx.io",
   "author": {
-    "name": "UsabilityDynamics, Inc.",
-    "url": "https://usabilitydynamics.com"
+    "name": "UDX",
+    "url": "https://udx.io"
   },
   "repository": {
     "type": "git",

@@ -17,7 +17,7 @@
 
 namespace Google\Auth\Middleware;
 
-use GuzzleHttp\Psr7;
+use GuzzleHttp\Psr7\Query;
 use Psr\Http\Message\RequestInterface;
 
 /**
@@ -29,7 +29,7 @@ use Psr\Http\Message\RequestInterface;
 class SimpleMiddleware
 {
     /**
-     * @var array
+     * @var array<mixed>
      */
     private $config;
 
@@ -39,7 +39,7 @@ class SimpleMiddleware
      * The configuration array expects one option
      * - key: required, otherwise InvalidArgumentException is thrown
      *
-     * @param array $config Configuration array
+     * @param array<mixed> $config Configuration array
      */
     public function __construct(array $config)
     {
@@ -81,9 +81,9 @@ class SimpleMiddleware
                 return $handler($request, $options);
             }
 
-            $query = Psr7\parse_query($request->getUri()->getQuery());
+            $query = Query::parse($request->getUri()->getQuery());
             $params = array_merge($query, $this->config);
-            $uri = $request->getUri()->withQuery(Psr7\build_query($params));
+            $uri = $request->getUri()->withQuery(Query::build($params));
             $request = $request->withUri($uri);
 
             return $handler($request, $options);
