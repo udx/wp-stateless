@@ -27,6 +27,7 @@ class RWMB_Map_Field extends RWMB_Field {
 			array(
 				'key'      => $field['api_key'],
 				'language' => $field['language'],
+				'libraries' => 'places'
 			),
 			'https://maps.google.com/maps/api/js'
 		);
@@ -72,13 +73,16 @@ class RWMB_Map_Field extends RWMB_Field {
 			esc_attr( $address )
 		);
 
+		$attributes          = self::get_attributes( $field, $meta );
+		$attributes['type']  = 'hidden';
+		$attributes['value'] = $meta;
+
 		$html .= sprintf(
 			'<div class="rwmb-map-canvas" data-default-loc="%s" data-region="%s"></div>
-			<input type="hidden" name="%s" class="rwmb-map-coordinate" value="%s">',
+			<input %s>',
 			esc_attr( $field['std'] ),
 			esc_attr( $field['region'] ),
-			esc_attr( $field['field_name'] ),
-			esc_attr( $meta )
+			self::render_attributes( $attributes )
 		);
 
 		$html .= '</div>';
@@ -191,7 +195,7 @@ class RWMB_Map_Field extends RWMB_Field {
 		 */
 		$google_maps_url = apply_filters( 'rwmb_google_maps_url', $google_maps_url );
 		wp_register_script( 'google-maps', esc_url_raw( $google_maps_url ), array(), RWMB_VER, true );
-		wp_enqueue_script( 'rwmb-map-frontend', RWMB_JS_URL . 'map-frontend.js', array( 'google-maps' ), RWMB_VER, true );
+		wp_enqueue_script( 'rwmb-map-frontend', RWMB_JS_URL . 'map-frontend.js', array( 'google-maps', 'jquery' ), RWMB_VER, true );
 
 		/*
 		 * Google Maps options.
@@ -207,6 +211,9 @@ class RWMB_Map_Field extends RWMB_Field {
 
 				// Map type, see https://developers.google.com/maps/documentation/javascript/reference#MapTypeId.
 				'mapTypeId' => 'ROADMAP',
+
+				// Open Info Window
+				'openInfoWindow' => false,
 			)
 		);
 

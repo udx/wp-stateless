@@ -1326,7 +1326,7 @@ namespace wpCloud\StatelessMedia {
        * @param string $size
        * @return mixed $false
        */
-      public function image_downsize($false = false, $id, $size) {
+      public function image_downsize($false, $id, $size) {
 
         if ((!isset($this->client) || !$this->client || is_wp_error($this->client)) && $this->get('sm.mode') !== 'stateless') {
           return $false;

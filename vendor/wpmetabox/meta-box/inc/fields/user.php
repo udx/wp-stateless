@@ -33,14 +33,14 @@ class RWMB_User_Field extends RWMB_Object_Choice_Field {
 		$field['_original_id'] = $field['id'];
 
 		// Search.
-		$term = $request->filter_post( 'term', FILTER_SANITIZE_STRING );
+		$term = (string) $request->filter_post( 'term' );
 		if ( $term ) {
 			$field['query_args']['search'] = "*{$term}*";
 		}
 
 		// Pagination.
 		$limit = isset( $field['query_args']['number'] ) ? (int) $field['query_args']['number'] : 0;
-		if ( $limit && 'query:append' === $request->filter_post( '_type', FILTER_SANITIZE_STRING ) ) {
+		if ( $limit && 'query:append' === $request->filter_post( '_type' ) ) {
 			$field['query_args']['paged'] = $request->filter_post( 'page', FILTER_SANITIZE_NUMBER_INT );
 		}
 
@@ -81,7 +81,7 @@ class RWMB_User_Field extends RWMB_Object_Choice_Field {
 		$field = wp_parse_args(
 			$field,
 			array(
-				'placeholder'   => __( 'Select an user', 'meta-box' ),
+				'placeholder'   => __( 'Select a user', 'meta-box' ),
 				'query_args'    => array(),
 				'display_field' => 'display_name',
 			)
@@ -141,9 +141,11 @@ class RWMB_User_Field extends RWMB_Object_Choice_Field {
 		$users   = get_users( $args );
 		$options = array();
 		foreach ( $users as $user ) {
+			$label = $user->$display_field ? $user->$display_field : __( '(No title)', 'meta-box' );
+			$label = self::filter( 'choice_label', $label, $field, $user );
 			$options[ $user->ID ] = array(
 				'value' => $user->ID,
-				'label' => self::filter( 'choice_label', $user->$display_field, $field, $user ),
+				'label' => $label,
 			);
 		}
 
@@ -164,8 +166,25 @@ class RWMB_User_Field extends RWMB_Object_Choice_Field {
 	 * @return string
 	 */
 	public static function format_single_value( $field, $value, $args, $post_id ) {
-		$display_field = $field['display_field'];
+		if ( empty( $value ) ) {
+			return '';
+		}
+
+		$link          = isset( $args['link'] ) ? $args['link'] : 'view';
 		$user          = get_userdata( $value );
-		return '<a href="' . esc_url( get_author_posts_url( $value ) ) . '">' . esc_html( $user->$display_field ) . '</a>';
+		$display_field = $field['display_field'];
+		$text          = $user->$display_field;
+
+		if ( false === $link ) {
+			return $text;
+		}
+		if ( 'view' === $link ) {
+			$url = get_author_posts_url( $value );
+		}
+		if ( 'edit' === $link ) {
+			$url = get_edit_user_link( $value );
+		}
+
+		return sprintf( '<a href="%s">%s</a>', esc_url( $url ), esc_html( $text ) );
 	}
 }

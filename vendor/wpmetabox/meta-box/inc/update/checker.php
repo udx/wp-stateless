@@ -74,6 +74,7 @@ class RWMB_Update_Checker {
 		$extensions = array(
 			'mb-admin-columns',
 			'mb-blocks',
+			'mb-core',
 			'mb-custom-table',
 			'mb-frontend-submission',
 			'mb-revision',
@@ -81,6 +82,7 @@ class RWMB_Update_Checker {
 			'mb-term-meta',
 			'mb-user-meta',
 			'mb-user-profile',
+			'mb-views',
 			'meta-box-aio',
 			'meta-box-builder',
 			'meta-box-columns',
@@ -91,6 +93,10 @@ class RWMB_Update_Checker {
 			'meta-box-show-hide',
 			'meta-box-tabs',
 			'meta-box-template',
+
+			'mb-favorite-posts',
+			'mb-testimonials',
+			'mb-user-avatar',
 		);
 		$plugins    = get_plugins();
 		$plugins    = array_map( 'dirname', array_keys( $plugins ) );
@@ -124,6 +130,9 @@ class RWMB_Update_Checker {
 			return $data;
 		}
 
+		if ( empty( $data ) ) {
+			$data = new stdClass;
+		}
 		if ( ! isset( $data->response ) ) {
 			$data->response = array();
 		}
@@ -184,19 +193,16 @@ class RWMB_Update_Checker {
 			$args,
 			array(
 				'api_key' => $this->option->get_api_key(),
+				'url'     => home_url(),
 			)
 		);
 		$args = array_filter( $args );
 
-		$request = wp_remote_post(
-			$this->api_url,
-			array(
-				'body' => $args,
-			)
-		);
-
+		$request  = wp_remote_get( add_query_arg( $args, $this->api_url ) );
 		$response = wp_remote_retrieve_body( $request );
-		return $response ? @unserialize( $response ) : false;
+		$response = $response ? @unserialize( $response ) : false;
+
+		return $response;
 	}
 
 	/**

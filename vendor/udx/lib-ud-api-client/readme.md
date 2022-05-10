@@ -80,9 +80,9 @@ $api->deactivate( array(
 ), $product );
 ```
 
-#### Update Checker
+#### License Checker
 
-Update Checker is being initialized only for installed and activated plugins / theme.
+License Checker is being initialized only for installed and activated plugins / theme.
 
 Responses are being cached via transient up to one hour.
 
@@ -92,19 +92,19 @@ Attention, be sure, that temp download link expires more then in one hour ( UD g
 
 Adds the following filters
 ```php
-$update_checker = new UsabilityDynamics\UD_API\Update_Checker($args);
+$license_checker = new UsabilityDynamics\UD_API\License_Checker($args);
 
-//** Check For Plugin Updates */
-add_filter( 'pre_set_site_transient_update_plugins', array( $update_checker, 'update_check' ) );
+//** Check For Plugin License Updates */
+add_filter( 'pre_set_site_transient_update_plugins', array( $license_checker, 'license_check' ) );
 //** Check For Plugin Information to display on the update details page */
-add_filter( 'plugins_api', array( $update_checker, 'request' ), 10, 3 );
+add_filter( 'plugins_api', array( $license_checker, 'request' ), 10, 3 );
 ```
 
 ##### Theme
 
 Adds the following filters
 ```php
-$update_checker = new UsabilityDynamics\UD_API\Update_Checker($args);
+$license_checker = new UsabilityDynamics\UD_API\License_Checker($args);
 
-//** Check For Plugin Updates */
-add_filter( 'pre_set_site_transient_update_themes', array( $update_checker, 'update_check' ) );
+//** Check For Theme License Updates */
+add_filter( 'pre_set_site_transient_update_themes', array( $license_checker, 'license_check' ) );

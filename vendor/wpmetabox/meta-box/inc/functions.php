@@ -33,6 +33,29 @@ if ( ! function_exists( 'rwmb_meta' ) ) {
 	}
 }
 
+if ( ! function_exists( 'rwmb_set_meta' ) ) {
+	/**
+	 * Set meta value.
+	 *
+	 * @param int    $object_id Object ID. Required.
+	 * @param string $key       Meta key. Required.
+	 * @param string $value     Meta value. Required.
+	 * @param array  $args      Array of arguments. Optional.
+	 */
+	function rwmb_set_meta( $object_id, $key, $value, $args = array() ) {
+		$args = wp_parse_args( $args );
+		$field = rwmb_get_field_settings( $key, $args, $object_id );
+
+		if ( false === $field ) {
+			return;
+		}
+
+		$old = RWMB_Field::call( $field, 'raw_meta', $object_id );
+		$new = RWMB_Field::process_value( $value, $object_id, $field );
+		RWMB_Field::call( $field, 'save', $new, $old, $object_id );
+	}
+}
+
 if ( ! function_exists( 'rwmb_get_field_settings' ) ) {
 	/**
 	 * Get field settings.
@@ -48,6 +71,7 @@ if ( ! function_exists( 'rwmb_get_field_settings' ) ) {
 			$args,
 			array(
 				'object_type' => 'post',
+				'type'        => '',
 			)
 		);
 
@@ -58,7 +82,7 @@ if ( ! function_exists( 'rwmb_get_field_settings' ) ) {
 		 * @var string     Object type.
 		 * @var string|int Object id.
 		 */
-		$type = apply_filters( 'rwmb_meta_type', '', $args['object_type'], $object_id );
+		$type = apply_filters( 'rwmb_meta_type', $args['type'], $args['object_type'], $object_id );
 		if ( ! $type ) {
 			$type = get_post_type( $object_id );
 		}
@@ -240,7 +264,7 @@ if ( ! function_exists( 'rwmb_check_meta_box_supports' ) ) {
 				$prop = 'user';
 				break;
 			case 'setting':
-				$type = 'setting';
+				$type = $type_or_id;
 				$prop = 'settings_pages';
 				break;
 		}
@@ -252,58 +276,6 @@ if ( ! function_exists( 'rwmb_check_meta_box_supports' ) ) {
 			$meta_box = false;
 		}
 	}
-}
-
-if ( ! function_exists( 'rwmb_meta_shortcode' ) ) {
-	/**
-	 * Shortcode to display meta value.
-	 *
-	 * @param array $atts Shortcode attributes, same as rwmb_meta() function, but has more "meta_key" parameter.
-	 *
-	 * @return string
-	 */
-	function rwmb_meta_shortcode( $atts ) {
-		$atts = wp_parse_args(
-			$atts,
-			array(
-				'id'        => '',
-				'object_id' => null,
-				'attribute' => '',
-			)
-		);
-		RWMB_Helpers_Array::change_key( $atts, 'post_id', 'object_id' );
-		RWMB_Helpers_Array::change_key( $atts, 'meta_key', 'id' );
-
-		if ( empty( $atts['id'] ) ) {
-			return '';
-		}
-
-		$field_id  = $atts['id'];
-		$object_id = $atts['object_id'];
-		unset( $atts['id'], $atts['object_id'] );
-
-		$attribute = $atts['attribute'];
-		if ( ! $attribute ) {
-			return rwmb_the_value( $field_id, $atts, $object_id, false );
-		}
-
-		$value = rwmb_get_value( $field_id, $atts, $object_id );
-
-		if ( ! is_array( $value ) && ! is_object( $value ) ) {
-			return $value;
-		}
-
-		if ( is_object( $value ) ) {
-			return $value->$attribute;
-		}
-
-		$value = wp_list_pluck( $value, $attribute );
-		$value = implode( ',', $value );
-
-		return $value;
-	}
-
-	add_shortcode( 'rwmb_meta', 'rwmb_meta_shortcode' );
 }
 
 if ( ! function_exists( 'rwmb_get_registry' ) ) {

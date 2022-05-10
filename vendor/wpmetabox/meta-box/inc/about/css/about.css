@@ -1,3 +1,6 @@
+.about-wrap {
+	padding-right: 20px;
+}
 .about-wrap.about-wrap .wp-badge {
 	background-image: url(../images/meta-box.svg);
 	background-color: #fff;
@@ -30,6 +33,10 @@
 
 .gt-tab-pane {
 	display: none;
+	padding-top: 24px;
+}
+.gt-tab-pane .about-description.about-description {
+	margin-top: 0;
 }
 
 .gt-is-active {
@@ -37,18 +44,21 @@
 }
 
 .two {
-	margin-top: 15px;
 	display: flex;
 }
 .two .col + .col {
 	margin-left: 40px;
 }
-.two h3:not(:first-child) {
-	margin-top: 3em;
+.two h3 {
+	margin-top: 2em;
+}
+.two h3:first-child {
+	margin-top: 0;
 }
 .two img {
 	display: block;
 	box-shadow: 0 0 20px rgba(0, 0, 0, .1);
+	border-radius: 4px;
 }
 .screenshot {
 	display: block;
@@ -56,6 +66,7 @@
 }
 .col {
 	flex: 1;
+	max-width: 50%;
 }
 .col ul {
 	font-size: 14px;
@@ -63,12 +74,6 @@
 }
 .col li a {
 	text-decoration: none;
-}
-.col .dashicons {
-	color: #82878c;
-	padding-right: 5px;
-	font-size: 16px;
-	vertical-align: middle;
 }
 
 /* Extensions tab */
@@ -117,7 +122,7 @@
 	}
 }
 /* For large screen: 3 columns */
-@media (min-width: 1440px) {
+@media (min-width: 1600px) {
 	.extension {
 		width: 32%;
 	}
@@ -127,7 +132,7 @@
 #post-body.columns-2 #postbox-container-1 {
 	position: fixed;
 	right: 320px;
-	top: 40px;
+	top: 80px;
 }
 
 @media (max-width: 1279px) {
@@ -137,37 +142,6 @@
 	#poststuff #post-body.columns-2 {
 		margin-right: 0;
 	}
-}
-
-/* Newsletter */
-.newsletter {
-	margin: 40px 0;
-	border: 3px dashed #82878c;
-	padding: 15px;
-	background: #fff;
-}
-.newsletter .dashicons {
-	color: #00b9eb;
-	width: 30px;
-	height: 30px;
-	font-size: 30px;
-	position: relative;
-	top: -5px;
-	left: -2px;
-}
-.newsletter h3 {
-	margin: 0 0 5px;
-}
-.newsletter p {
-	margin-top: 0;
-}
-.newsletter.newsletter input,
-.newsletter.newsletter button {
-	margin-top: 5px;
-}
-.newsletter.newsletter input {
-	width: 145px;
-	padding: 5px;
 }
 
 /* Upgrade */
@@ -199,4 +173,24 @@
 	position: absolute;
 	top: 4px;
 	left: 0;
+}
+
+.youtube-video-container {
+	position: relative;
+	overflow: hidden;
+	width: 100%;
+}
+
+.youtube-video-container::after {
+	display: block;
+	content: "";
+	padding-top: 56.25%;
+}
+
+.youtube-video-container iframe {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
 }

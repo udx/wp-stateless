@@ -32,10 +32,10 @@ class RWMB_Post_Field extends RWMB_Object_Choice_Field {
 		$field['_original_id'] = $field['id'];
 
 		// Search.
-		$field['query_args']['s'] = $request->filter_post( 'term', FILTER_SANITIZE_STRING );
+		$field['query_args']['s'] = $request->filter_post( 'term' );
 
 		// Pagination.
-		if ( 'query:append' === $request->filter_post( '_type', FILTER_SANITIZE_STRING ) ) {
+		if ( 'query:append' === $request->filter_post( '_type' ) ) {
 			$field['query_args']['paged'] = $request->filter_post( 'page', FILTER_SANITIZE_NUMBER_INT );
 		}
 
@@ -150,12 +150,18 @@ class RWMB_Post_Field extends RWMB_Object_Choice_Field {
 			return $options;
 		}
 
-		$query   = new WP_Query( $args );
+		// Only search by title.
+		add_filter( 'posts_search', [ __CLASS__, 'search_by_title' ], 10, 2 );
+		$query = new WP_Query( $args );
+		remove_filter( 'posts_search', [ __CLASS__, 'search_by_title' ] );
+
 		$options = array();
 		foreach ( $query->posts as $post ) {
+			$label                = $post->post_title ? $post->post_title : __( '(No title)', 'meta-box' );
+			$label                = self::filter( 'choice_label', $label, $field, $post );
 			$options[ $post->ID ] = array(
 				'value'  => $post->ID,
-				'label'  => self::filter( 'choice_label', $post->post_title, $field, $post ),
+				'label'  => $label,
 				'parent' => $post->post_parent,
 			);
 		}
@@ -164,6 +170,34 @@ class RWMB_Post_Field extends RWMB_Object_Choice_Field {
 		wp_cache_set( $cache_key, $options, 'meta-box-post-field' );
 
 		return $options;
+	}
+
+	/**
+	 * Only search posts by title.
+	 * WordPress searches by either title or content which is confused when users can't find their posts.
+	 *
+	 * @link https://developer.wordpress.org/reference/hooks/posts_search/
+	 */
+	public static function search_by_title( $search, $wp_query ) {
+		global $wpdb;
+		if ( empty( $search ) ) {
+			return $search;
+		}
+		$q      = $wp_query->query_vars;
+		$n      = ! empty( $q['exact'] ) ? '' : '%';
+		$search = array();
+		foreach ( (array) $q['search_terms'] as $term ) {
+			$term     = esc_sql( $wpdb->esc_like( $term ) );
+			$search[] = "($wpdb->posts.post_title LIKE '{$n}{$term}{$n}')";
+		}
+		if ( empty( $search ) ) {
+			return $search;
+		}
+		$search = ' AND (' . implode( ' AND ', $search ) . ') ';
+		if ( ! is_user_logged_in() ) {
+			$search .= " AND ($wpdb->posts.post_password = '') ";
+		}
+		return $search;
 	}
 
 	/**
@@ -186,24 +220,31 @@ class RWMB_Post_Field extends RWMB_Object_Choice_Field {
 	/**
 	 * Format a single value for the helper functions. Sub-fields should overwrite this method if necessary.
 	 *
-	 * @param array    $field   Field parameters.
-	 * @param string   $value   The value.
-	 * @param array    $args    Additional arguments. Rarely used. See specific fields for details.
-	 * @param int|null $post_id Post ID. null for current post. Optional.
+	 * @param array  $field   Field parameters.
+	 * @param string $value   The value.
+	 * @param array  $args    Additional arguments. Rarely used. See specific fields for details.
+	 * @param ?int   $post_id Post ID. null for current post. Optional.
 	 *
 	 * @return string
 	 */
 	public static function format_single_value( $field, $value, $args, $post_id ) {
-		return ! $value ? '' : sprintf(
-			'<a href="%s" title="%s">%s</a>',
-			esc_url( get_permalink( $value ) ),
-			the_title_attribute(
-				array(
-					'post' => $value,
-					'echo' => false,
-				)
-			),
-			get_the_title( $value )
-		);
+		if ( empty( $value ) ) {
+			return '';
+		}
+
+		$link = isset( $args['link'] ) ? $args['link'] : 'view';
+		$text = get_the_title( $value );
+
+		if ( false === $link ) {
+			return $text;
+		}
+		if ( 'view' === $link ) {
+			$url = get_permalink( $value );
+		}
+		if ( 'edit' === $link ) {
+			$url = get_edit_post_link( $value );
+		}
+
+		return sprintf( '<a href="%s">%s</a>', esc_url( $url ), wp_kses_post( $text ) );
 	}
 }

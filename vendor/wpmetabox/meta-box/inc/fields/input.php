@@ -31,14 +31,14 @@ abstract class RWMB_Input_Field extends RWMB_Field {
 		}
 
 		if ( $field['prepend'] ) {
-			$output .= '<span class="rwmb-input-group-prepend">' . esc_html( $field['prepend'] ) . '</span>';
+			$output .= '<span class="rwmb-input-group-text">' . $field['prepend'] . '</span>';
 		}
 
 		$attributes = self::call( 'get_attributes', $field, $meta );
 		$output    .= sprintf( '<input %s>%s', self::render_attributes( $attributes ), self::datalist( $field ) );
 
 		if ( $field['append'] ) {
-			$output .= '<span class="rwmb-input-group-append">' . esc_html( $field['append'] ) . '</span>';
+			$output .= '<span class="rwmb-input-group-text">' . $field['append']. '</span>';
 		}
 
 		if ( $field['prepend'] || $field['append'] ) {
@@ -60,9 +60,11 @@ abstract class RWMB_Input_Field extends RWMB_Field {
 			$field,
 			array(
 				'autocomplete' => false,
-				'size'         => 30,
 				'datalist'     => false,
 				'readonly'     => false,
+				'maxlength'    => false,
+				'minlength'    => false,
+				'pattern'      => false,
 				'prepend'      => '',
 				'append'       => '',
 			)
@@ -94,12 +96,17 @@ abstract class RWMB_Input_Field extends RWMB_Field {
 				'autocomplete' => $field['autocomplete'],
 				'list'         => $field['datalist'] ? $field['datalist']['id'] : false,
 				'readonly'     => $field['readonly'],
+				'maxlength'    => $field['maxlength'],
+				'minlength'    => $field['minlength'],
+				'pattern'      => $field['pattern'],
 				'value'        => $value,
 				'placeholder'  => $field['placeholder'],
 				'type'         => $field['type'],
-				'size'         => $field['size'],
 			)
 		);
+		if ( isset( $field['size'] ) ) {
+			$attributes['size'] = $field['size'];
+		}
 
 		return $attributes;
 	}
