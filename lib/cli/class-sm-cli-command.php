@@ -27,7 +27,6 @@ if (defined('WP_CLI') && WP_CLI && class_exists('WP_CLI_Command')) {
       set_time_limit(0);
       ini_set('memory_limit', '2G');
       //** Setup error handling */
-      error_reporting(E_ALL);
       ini_set('display_errors', 1);
       ini_set('log_errors', 0);
       ini_set('html_errors', 0);

@@ -182,10 +182,6 @@ namespace wpCloud\StatelessMedia {
         if ( is_multisite() && ! is_super_admin() ) {
           return;
         }
-        //** Ignore messages on TGM Plugin Activation page */
-        if( \UsabilityDynamics\WP\TGM_Plugin_Activation::get_instance()->is_tgmpa_page() ) {
-          return;
-        }
 
         $errors = apply_filters( 'ud:errors:admin_notices', $this->errors, $this->args );
         $notices = apply_filters( 'stateless:notices:admin_notices', $this->notices, $this->args );
@@ -270,7 +266,8 @@ namespace wpCloud\StatelessMedia {
           $response['error'] = __( 'Invalid key', $this->domain );
         }
         else{
-          $compatibility = Module::get_module($_POST['key']);
+          $option_key = sanitize_key($_POST['key']);
+          $compatibility = Module::get_module($option_key);
           if(!empty($compatibility['self']) && is_callable(array($compatibility['self'], 'enable_compatibility'))){
             $response['success'] = $compatibility['self']->enable_compatibility();
           }

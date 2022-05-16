@@ -67,7 +67,6 @@ class FileSync extends LibrarySync {
       parent::before_task($id);
 
       timer_start();
-      @error_reporting(0);
       @set_time_limit(-1);
 
       $file = Utility::process_file_by_id($id);

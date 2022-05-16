@@ -440,37 +440,6 @@ namespace UsabilityDynamics\WP {
         echo apply_filters( 'ud::bootstrap::upgrade_notice::template', $content, $this->slug, $vars );
       }
 
-      /**
-       * Check plugins requirements
-       *
-       * @author peshkov@UD
-       */
-      public function check_plugins_requirements() {
-        //** Determine if we have TGMA Plugin Activation initialized. */
-        $is_tgma = $this->is_tgma;
-        if( $is_tgma ) {
-          $tgma = TGM_Plugin_Activation::get_instance();
-          //** Maybe get TGMPA notices. */
-          $notices = $tgma->notices( get_class( $this ) );
-          if( !empty( $notices[ 'messages' ] ) && is_array( $notices[ 'messages' ] ) ) {
-            $error_links = false;
-            $message_links = false;
-            foreach( $notices[ 'messages' ] as $m ) {
-              if( $m[ 'type' ] == 'error' ) $error_links = true;
-              elseif( $m[ 'type' ] == 'message' ) $message_links = true;
-              $this->errors->add( $m[ 'value' ], $m[ 'type' ] );
-            }
-            //** Maybe add footer action links to errors and|or notices block. */
-            if( !empty( $notices[ 'links' ] ) && is_array( $notices[ 'links' ] ) ) {
-              foreach( $notices[ 'links' ] as $type => $links ) {
-                foreach( $links as $link ) {
-                  $this->errors->add_action_link( $link, $type );
-                }
-              }
-            }
-          }
-        }
-      }
 
       /**
        * Maybe determines if Composer autoloader is included and modules classes are up to date
@@ -514,15 +483,6 @@ namespace UsabilityDynamics\WP {
           return;
         }
         $plugins = $this->get_schema( 'extra.schemas.dependencies.plugins' );
-        if( !empty( $plugins ) && is_array( $plugins ) ) {
-          $tgma = TGM_Plugin_Activation::get_instance();
-          foreach( $plugins as $plugin ) {
-            $plugin[ '_referrer' ] = get_class( $this );
-            $plugin[ '_referrer_name' ] = $this->name;
-            $tgma->register( $plugin );
-          }
-          $this->is_tgma = true;
-        }
       }
       
       
