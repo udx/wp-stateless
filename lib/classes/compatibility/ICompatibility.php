@@ -116,7 +116,7 @@ namespace wpCloud\StatelessMedia {
      * @todo caching.
      */
     public function is_mode_supported () {
-      $sm_mode = isset($_POST['sm']['mode']) ? $_POST['sm']['mode'] : ud_get_stateless_media()->get( 'sm.mode' );
+      $sm_mode = isset($_POST['sm']['mode']) ? sanitize_text_field($_POST['sm']['mode']) : ud_get_stateless_media()->get( 'sm.mode' );
       if ( in_array( $sm_mode, $this->sm_mode_not_supported ) ) {
         return false;
       }

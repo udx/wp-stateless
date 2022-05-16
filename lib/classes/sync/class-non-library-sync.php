@@ -98,7 +98,6 @@ class NonLibrarySync extends BackgroundSync {
     try {
       parent::before_task($item);
 
-      @error_reporting(0);
       timer_start();
 
       if (ud_get_stateless_media()->is_connected_to_gs() !== true) {

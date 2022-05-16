@@ -189,6 +189,7 @@ namespace wpCloud\StatelessMedia {
     public function save_modules() {
       if( isset( $_POST[ 'action' ] ) && $_POST[ 'action' ] == 'stateless_modules' && wp_verify_nonce( $_POST[ '_smnonce' ], 'wp-stateless-modules' ) ) {
         $modules = !empty( $_POST[ 'stateless-modules' ] ) ? $_POST[ 'stateless-modules' ] : array();
+        $modules = array_map( 'esc_attr', $modules);
         $modules = apply_filters( 'stateless::modules::save', $modules );
 
         if( is_network_admin() ) {

@@ -184,7 +184,7 @@
                     <div class="sm-wildcards">
                       <select class=" select-wildcards" multiple="multiple" name="sm[root_dir][]" ng-disabled="sm.readonly.root_dir">
                         <?php foreach ($wildcards as $wildcard => $replace) : ?>
-                          <option <?php echo in_array($wildcard, $root_dir_values) ? 'selected="selected"' : ""; ?> <?php echo ($wildcard == '/') ? 'disabled="disabled"' : ""; ?>><?php echo $wildcard; ?></option>
+                          <option <?php echo in_array($wildcard, $root_dir_values) ? 'selected="selected"' : ""; ?> <?php echo ($wildcard == '/') ? 'disabled="disabled"' : ""; ?>><?php esc_html_e($wildcard); ?></option>
                           <?php if (in_array($wildcard, $root_dir_values) && $wildcard != '/') : ?>
                             <option selected="selected" disabled="disabled">/</option>
                           <?php endif; ?>

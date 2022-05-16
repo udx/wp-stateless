@@ -1176,11 +1176,6 @@ namespace wpCloud\StatelessMedia {
         wp_register_style('wp-stateless-settings', $this->path('static/styles/wp-stateless-settings.css', 'url'), array(), self::$version);
 
         // Sync tab
-        if (wp_script_is('jquery-ui-widget', 'registered')) {
-          wp_register_script('jquery-ui-progressbar', ud_get_stateless_media()->path('static/scripts/jquery-ui/jquery.ui.progressbar.min.js', 'url'), array('jquery-ui-core', 'jquery-ui-widget'), '1.8.6');
-        } else {
-          wp_register_script('jquery-ui-progressbar', ud_get_stateless_media()->path('static/scripts/jquery-ui/jquery.ui.progressbar.min.1.7.2.js', 'url'), array('jquery-ui-core'), '1.7.2');
-        }
         wp_register_script('wp-stateless-angular', ud_get_stateless_media()->path('static/scripts/angular.min.js', 'url'), array(), '1.8.0', true);
         wp_register_script('wp-stateless-angular-sanitize', ud_get_stateless_media()->path('static/scripts/angular-sanitize.min.js', 'url'), array('wp-stateless-angular'), '1.8.0', true);
         wp_register_script('wp-stateless', ud_get_stateless_media()->path('static/scripts/wp-stateless.js', 'url'), array('jquery-ui-core', 'wp-stateless-settings', 'wp-api-request'), self::$version, true);
@@ -1200,7 +1195,6 @@ namespace wpCloud\StatelessMedia {
         }
         wp_localize_script('wp-stateless', 'wp_stateless_settings', $settings);
         wp_localize_script('wp-stateless', 'wp_stateless_compatibility', Module::get_modules());
-        wp_register_style('jquery-ui-regenthumbs', ud_get_stateless_media()->path('static/scripts/jquery-ui/redmond/jquery-ui-1.7.2.custom.css', 'url'), array(), '1.7.2');
       }
 
       /**
@@ -1258,11 +1252,9 @@ namespace wpCloud\StatelessMedia {
             wp_enqueue_style('wp-stateless-settings');
 
             // Sync tab
-            wp_enqueue_script('jquery-ui-progressbar');
             wp_enqueue_script('wp-stateless-angular');
             wp_enqueue_script('wp-stateless-angular-sanitize');
             wp_enqueue_script('wp-stateless');
-            wp_enqueue_style('jquery-ui-regenthumbs');
 
             wp_enqueue_style('wp-pointer');
             wp_enqueue_script('wp-pointer');

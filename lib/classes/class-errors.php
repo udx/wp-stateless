@@ -270,7 +270,8 @@ namespace wpCloud\StatelessMedia {
           $response['error'] = __( 'Invalid key', $this->domain );
         }
         else{
-          $compatibility = Module::get_module($_POST['key']);
+          $option_key = sanitize_key($_POST['key']);
+          $compatibility = Module::get_module($option_key);
           if(!empty($compatibility['self']) && is_callable(array($compatibility['self'], 'enable_compatibility'))){
             $response['success'] = $compatibility['self']->enable_compatibility();
           }

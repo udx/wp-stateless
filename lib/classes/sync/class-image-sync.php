@@ -74,7 +74,6 @@ class ImageSync extends LibrarySync {
       parent::before_task($id);
 
       timer_start();
-      @error_reporting(0);
       @set_time_limit(-1);
 
       $image = Utility::process_image_by_id($id);
