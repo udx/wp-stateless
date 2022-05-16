@@ -148,10 +148,6 @@ namespace UsabilityDynamics\WP {
         if ( is_multisite() && ! is_super_admin() ) {
           return;
         }
-        //** Ignore messages on TGM Plugin Activation page */
-        if( TGM_Plugin_Activation::get_instance()->is_tgmpa_page() ) {
-          return;
-        }
         
         $errors = apply_filters( 'ud:errors:admin_notices', $this->errors, $this->args );
         $messages = apply_filters( 'ud:messages:admin_notices', $this->messages, $this->args );

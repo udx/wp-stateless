@@ -50,8 +50,6 @@ namespace UsabilityDynamics\WP {
         parent::__construct( $args );
         //** Load text domain */
         add_action( 'after_setup_theme', array( $this, 'load_textdomain' ), 1 );
-        //** TGM Plugin activation. */
-        $this->check_plugins_requirements();
         //** May be initialize Licenses Manager. */
         $this->define_license_manager();
         //** Maybe define license client */

@@ -38,8 +38,6 @@ namespace UsabilityDynamics\WP {
         add_action( 'plugins_loaded', array( $this, 'define_license_manager' ), 1 );
         //** Initialize plugin here. All plugin actions must be added on this step */
         add_action( 'plugins_loaded', array( $this, 'pre_init' ), 100 );
-        //** TGM Plugin activation. */
-        add_action( 'plugins_loaded', array( $this, 'check_plugins_requirements' ), 10 );
         $this->boot();
       }
       
