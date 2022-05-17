@@ -36,8 +36,8 @@ if ( ! class_exists( 'MB_Tabs' ) ) {
 
 		public function enqueue() {
 			list( , $url ) = RWMB_Loader::get_path( dirname( __FILE__ ) );
-			wp_enqueue_style( 'rwmb-tabs', $url . 'tabs.css', '', '1.1.5' );
-			wp_enqueue_script( 'rwmb-tabs', $url . 'tabs.js', array( 'jquery' ), '1.1.5', true );
+			wp_enqueue_style( 'rwmb-tabs', $url . 'tabs.css', '', '1.1.12' );
+			wp_enqueue_script( 'rwmb-tabs', $url . 'tabs.js', array( 'jquery' ), '1.1.12', true );
 		}
 
 		/**
@@ -91,7 +91,7 @@ if ( ! class_exists( 'MB_Tabs' ) ) {
 			}
 
 			$tabs           = $obj->meta_box['tabs'];
-			$default_active = $obj->tab_default_active;
+			$default_active = isset( $obj->tab_default_active ) ? $obj->tab_default_active : null;
 
 			echo '<ul class="rwmb-tab-nav">';
 

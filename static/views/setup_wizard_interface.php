@@ -10,7 +10,7 @@
   (function($) {
     $(document).ready(function(){
       $('#consoleStatelessIframeWrapper')
-        .html('<iframe id="console-stateless-wizard" src="<?php echo $consoleUrl ?>?wp_nonce=<?php echo $auth_token ?>&api_root=<?php echo $api_root ?>&is_network=<?php echo $is_network ?>&admin_url=<?php echo $admin_url ?>" />')
+        .html('<iframe id="console-stateless-wizard" src="<?php esc_html_e($consoleUrl) ?>?wp_nonce=<?php esc_html_e($auth_token) ?>&api_root=<?php esc_html_e($api_root) ?>&is_network=<?php esc_html_e($is_network) ?>&admin_url=<?php esc_html_e($admin_url) ?>" />')
     })
   })(jQuery)
 </script>

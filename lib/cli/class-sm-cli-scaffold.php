@@ -39,7 +39,7 @@ class SM_CLI_Scaffold {
   public function output( $msg = '' ) {
     $args = $this->assoc_args;
     if( !isset( $args['log'] ) ) return null;
-    echo date( 'H:i:s', time() ) . ': ' . $msg . ' ' . $this->memory_usage() . PHP_EOL;        
+    esc_html_e(date( 'H:i:s', time() ) . ': ' . $msg . ' ' . $this->memory_usage() . PHP_EOL);        
     @ob_flush();
     flush();
   }
