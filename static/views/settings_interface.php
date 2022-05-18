@@ -10,7 +10,6 @@
       <a href="#stless_sync_tab" class="stless_setting_tab nav-tab"><?php _e('Sync', ud_get_stateless_media()->domain); ?></a>
     <?php endif; ?>
     <a href="#stless_compatibility_tab" class="stless_setting_tab nav-tab"><?php _e('Compatibility', ud_get_stateless_media()->domain); ?></a>
-    <a href="#stless_questions_tab" class="stless_setting_tab nav-tab"><?php _e('Support', ud_get_stateless_media()->domain); ?></a>
   </h2>
 
   <div class="stless_settings">
@@ -243,7 +242,7 @@
     <div id="stless_compatibility_tab" class="stless_settings_content" ng-controller="wpStatelessCompatibility">
       <div class="container-fluid">
         <h2><?php _e("Enable or disable compatibility with other plugins."); ?></h2>
-        <p><?php _e(sprintf("Having an issue with another plugin? <a class='stless_setting_tab' href='%s'>Submit feedback</a> and let us know your issue!", "#stless_questions_tab")); ?></p>
+        <p><?php _e(sprintf("Having an issue with another plugin? <a class='' target='_blank' href='%s' >Submit feedback</a> and let us know your issue!", "https://wordpress.org/support/plugin/wp-stateless/")); ?></p>
         <form method="post" action="">
           <input type="hidden" name="action" value="stateless_modules">
           <?php wp_nonce_field('wp-stateless-modules', '_smnonce'); ?>
@@ -276,19 +275,6 @@
           <?php submit_button(null, 'primary', 'submit', true, array('id' => 'save-compatibility')); ?>
         </form>
       </div>
-    </div>
-    <div id="stless_questions_tab" class="stless_settings_content">
-      <!--[if lte IE 8]>
-            <script charset="utf-8" type="text/javascript" src="//js.hsforms.net/forms/v2-legacy.js"></script>
-            <![endif]-->
-      <script charset="utf-8" type="text/javascript" src="//js.hsforms.net/forms/v2.js"></script>
-      <script>
-        hbspt.forms.create({
-          portalId: '3453418',
-          formId: 'cad1f6e1-7825-4e6d-a3e7-278c91abce7e',
-          submitButtonClass: 'button button-primary',
-        });
-      </script>
     </div>
   </div>
 
