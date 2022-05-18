@@ -112,6 +112,7 @@ Before upgrading to WP-Stateless 3.0, please, make sure you tested it on your de
 == Changelog ==
 = 3.2.1 =
 * FIX - Updated requirments.
+* FIX - WP-Stateless 3.2.0 doesn’t upload docs, only images [#638](https://github.com/udx/wp-stateless/issues/638).
 
 = 3.2.0 =
 * **Before upgrading to WP-Stateless 3.2.0, please, make sure you tested it on your development environment. It may have breaking changes.**
