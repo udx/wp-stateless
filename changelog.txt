@@ -1,4 +1,8 @@
 == Changelog ==
+= 3.2.1 =
+* FIX - Updated requirments.
+
+== Changelog ==
 = 3.2.0 =
 * ENHANCEMENT - Upgraded `wpmetabox` library.
 * ENHANCEMENT - Updated Client library for Google APIs.

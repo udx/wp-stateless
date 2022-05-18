@@ -1,3 +1,7 @@
+#### 3.2.1
+
+- FIX - Updated requirments.
+
 #### 3.2.0
 
 - ENHANCEMENT - Upgraded `wpmetabox` library.
