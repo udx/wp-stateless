@@ -210,7 +210,7 @@ namespace wpCloud\StatelessMedia {
 
           $image_host          = ud_get_stateless_media()->get_gs_host();
           $bucketLink          = apply_filters('wp_stateless_bucket_link', $image_host);
-          $fullsizepath        = wp_normalize_path(wp_get_original_image_path($attachment_id));
+          $fullsizepath        = wp_normalize_path(get_attached_file($attachment_id));
           $_cacheControl       = self::getCacheControl($attachment_id, $metadata, null);
           $_contentDisposition = self::getContentDisposition($attachment_id, $metadata, null);
 
@@ -443,7 +443,7 @@ namespace wpCloud\StatelessMedia {
         }
 
         $gs_name_path = array();
-        $full_size_path = wp_get_original_image_path($attachment_id);
+        $full_size_path = get_attached_file($attachment_id);
         $base_dir = dirname($full_size_path);
 
         $gs_name = apply_filters('wp_stateless_file_name', $full_size_path, true, $attachment_id, '');
@@ -969,7 +969,7 @@ namespace wpCloud\StatelessMedia {
         if (!$image || 'attachment' != $image->post_type || 'image/' != substr($image->post_mime_type, 0, 6))
           throw new UnprocessableException(sprintf(__('Failed to process item: %s is an invalid image ID.', ud_get_stateless_media()->domain), $id));
 
-        $fullsizepath = wp_get_original_image_path($image->ID);
+        $fullsizepath = get_attached_file($image->ID);
 
         // If no file found
         if (false === $fullsizepath || !file_exists($fullsizepath)) {
@@ -1026,7 +1026,7 @@ namespace wpCloud\StatelessMedia {
           throw new UnprocessableException(sprintf(__('Attachment not found: %s is an invalid file ID.', ud_get_stateless_media()->domain), $id));
         }
 
-        $fullsizepath = wp_get_original_image_path($file->ID);
+        $fullsizepath = get_attached_file($file->ID);
         $local_file_exists = file_exists($fullsizepath);
 
         if (false === $fullsizepath || !$local_file_exists) {
