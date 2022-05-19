@@ -1,3 +1,7 @@
+#### 3.2.2
+
+- FIX -  Folder setting can't be saved from the settings page [#639](https://github.com/udx/wp-stateless/issues/639).
+
 #### 3.2.1
 
 - FIX - Updated requirments.

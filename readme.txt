@@ -6,7 +6,7 @@ License: GPLv2 or later
 Requires PHP: 7.2
 Requires at least: 5.0
 Tested up to: 5.9.3
-Stable tag: 3.2.1
+Stable tag: 3.2.2
 
 Upload and serve your WordPress media files from Google Cloud Storage.
 
@@ -110,6 +110,9 @@ Before upgrading to WP-Stateless 3.2.0, please, make sure you use PHP 7.2 or abo
 Before upgrading to WP-Stateless 3.0, please, make sure you tested it on your development environment.
 
 == Changelog ==
+= 3.2.2 =
+* FIX -  Folder setting can't be saved from the settings page [#639](https://github.com/udx/wp-stateless/issues/639).
+
 = 3.2.1 =
 * FIX - Updated requirments.
 * FIX - WP-Stateless 3.2.0 doesn’t upload docs, only images [#638](https://github.com/udx/wp-stateless/issues/638).

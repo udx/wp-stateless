@@ -522,7 +522,9 @@ namespace wpCloud\StatelessMedia {
             /**
              * Sanitize POST data
              */
-            $value = sanitize_text_field($value);
+            if (!is_array($value)) {
+              $value = sanitize_text_field($value);
+            }
             /**
              * root_dir settings
              */
