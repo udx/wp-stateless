@@ -1,7 +1,7 @@
 <div id="stateless-notice-<?php if(!empty($data['key'])) echo $data['key'];?>" class="stateless-admin-notice ud-admin-notice <?php echo $data['class'];?> update-nag fade">
     <div>
-        <div class="title"><?php esc_html_e($data['title']);?></div>
-        <div class="description"><?php esc_html_e($data['message']);?></div>
+        <div class="title"><?php /* The $data is already escaped */ _e($data['title']);?></div>
+        <div class="description"><?php /* The $data is already escaped */ _e($data['message']);?></div>
     </div>
     <?php
     if( !empty( $data['action_links'] ) && is_array( $data['action_links'] ) ):
