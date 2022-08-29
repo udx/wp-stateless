@@ -1,5 +1,9 @@
 {
   "name": "wpcloud/wp-stateless",
+  "license": "MIT",
+  "config": {
+    "allow-plugins": false
+  },
   "description": "WP-Stateless WordPress plugin",
   "type": "wordpress-plugin",
   "minimum-stability": "stable",
@@ -13,7 +17,23 @@
   "repositories": [
     {
       "type": "git",
-      "url": "https://github.com/wpCloud/wp-stateless.git"
+      "url": "https://github.com/picotechllc/wp-stateless.git"
+    },
+    {
+      "type": "git",
+      "url": "https://github.com/udx/lib-settings.git"
+    },
+    {
+      "type": "git",
+      "url": "https://github.com/udx/lib-wp-bootstrap.git"
+    },
+    {
+      "type": "git",
+      "url": "https://github.com/udx/lib-ud-api-client.git"
+    },
+    {
+      "type": "git",
+      "url": "https://github.com/udx/lib-utility.git"
     }
   ],
   "require": {
@@ -24,7 +44,7 @@
     "udx/lib-ud-api-client": "~1.2",
     "ccampbell/chromephp": "^4.1",
     "firebase/php-jwt": "^6.1.2",
-    "wpmetabox/meta-box": "5.6.3"
+    "wpmetabox/meta-box": "^5.6.3"
   },
   "autoload": {
     "classmap": [
@@ -87,6 +107,7 @@
   },
   "require-dev": {
     "coenjacobs/mozart": "0.6.0-beta-3",
-    "deliciousbrains/wp-background-processing": "^1.0"
+    "deliciousbrains/wp-background-processing": "^1.0",
+    "yoast/phpunit-polyfills": "1.0.3"
   }
 }
