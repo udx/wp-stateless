@@ -80,6 +80,7 @@ return array(
     'wpCloud\\StatelessMedia\\Upgrader' => $baseDir . '/lib/classes/class-upgrader.php',
     'wpCloud\\StatelessMedia\\Utility' => $baseDir . '/lib/classes/class-utility.php',
     'wpCloud\\StatelessMedia\\VidoRev' => $baseDir . '/lib/classes/compatibility/vidorev.php',
+    'wpCloud\\StatelessMedia\\WooCommerce' => $baseDir . '/lib/classes/compatibility/woocommerce.php',
     'wpCloud\\StatelessMedia\\WPBakeryPageBuilder' => $baseDir . '/lib/classes/compatibility/wpbakery-page-builder.php',
     'wpCloud\\StatelessMedia\\WPForms' => $baseDir . '/lib/classes/compatibility/wpforms.php',
     'wpCloud\\StatelessMedia\\WPRetina2x' => $baseDir . '/lib/classes/compatibility/wp-retina-2x.php',
