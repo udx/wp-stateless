@@ -735,7 +735,9 @@ namespace wpCloud\StatelessMedia {
           'aud' => $site_url,
           'exp' => $now + $ttl
         ]);
-
+        if (!$key) {
+          return null;
+        }
         $key = defined('AUTH_SALT') ? AUTH_SALT : get_option('admin_email');
         return JWT::encode($payload, $key, 'HS256');
       }
