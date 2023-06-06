@@ -31,12 +31,14 @@ final class PHPSlicedBy4 implements CRCInterface
 {
     use CRCTrait;
 
+    private $polynomial;
+    private $crc;
+    private $table;
+
     public static function supports($algo)
     {
         return true;
     }
-
-    private $table;
 
     public function __construct($polynomial)
     {
@@ -94,9 +96,9 @@ final class PHPSlicedBy4 implements CRCInterface
         $this->crc = $crc;
     }
 
-    public function hash($raw_output = null)
+    public function hash($raw_output = false)
     {
-        return $this->crcHash(~$this->crc, $raw_output === true);
+        return $this->crcHash(~$this->crc, $raw_output);
     }
 
     public function version()

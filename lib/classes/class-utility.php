@@ -345,8 +345,6 @@ namespace wpCloud\StatelessMedia {
                 } catch (\Throwable $th) {
                   //throw $th;
                 }
-
-                $cloud_meta = self::generate_cloud_meta($cloud_meta, $media, $size, $img, $bucketLink);
               } else {
                 /* Add default image */
                 $media = $client->add_media($media_args);
@@ -736,7 +734,7 @@ namespace wpCloud\StatelessMedia {
           'exp' => $now + $ttl
         ]);
 
-        $key = defined('AUTH_SALT') ? AUTH_SALT : get_option('admin_email');
+        $key = defined('AUTH_SALT') && !empty(AUTH_SALT) ? AUTH_SALT : get_option('admin_email');
         return JWT::encode($payload, $key, 'HS256');
       }
 

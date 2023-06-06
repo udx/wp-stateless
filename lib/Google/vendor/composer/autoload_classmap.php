@@ -9,7 +9,6 @@ return array(
     'Google_AccessToken_Revoke' => $baseDir . '/src/aliases.php',
     'Google_AccessToken_Verify' => $baseDir . '/src/aliases.php',
     'Google_AuthHandler_AuthHandlerFactory' => $baseDir . '/src/aliases.php',
-    'Google_AuthHandler_Guzzle5AuthHandler' => $baseDir . '/src/aliases.php',
     'Google_AuthHandler_Guzzle6AuthHandler' => $baseDir . '/src/aliases.php',
     'Google_AuthHandler_Guzzle7AuthHandler' => $baseDir . '/src/aliases.php',
     'Google_Client' => $baseDir . '/src/aliases.php',

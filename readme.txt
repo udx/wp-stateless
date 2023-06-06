@@ -5,8 +5,8 @@ Tags: google, google cloud, google cloud storage, cdn, uploads, media, stateless
 License: GPLv2 or later
 Requires PHP: 7.2
 Requires at least: 5.0
-Tested up to: 5.9.3
-Stable tag: 3.2.2
+Tested up to: 6.2.2
+Stable tag: 3.2.3
 
 Upload and serve your WordPress media files from Google Cloud Storage.
 
@@ -110,6 +110,11 @@ Before upgrading to WP-Stateless 3.2.0, please, make sure you use PHP 7.2 or abo
 Before upgrading to WP-Stateless 3.0, please, make sure you tested it on your development environment.
 
 == Changelog ==
+= 3.2.3 =
+* ENHANCEMENT - Updated Client library for Google APIs.
+* ENHANCEMENT - Updated Monolog library to version 3.
+* ENHANCEMENT - Updated JWT library.
+
 = 3.2.2 =
 * FIX -  Folder setting can't be saved from the settings page [#639](https://github.com/udx/wp-stateless/issues/639).
 

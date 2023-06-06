@@ -12,6 +12,10 @@
   ],
   "repositories": [
     {
+      "type": "composer",
+      "url": "https://repository.usabilitydynamics.com"
+    },
+    {
       "type": "git",
       "url": "https://github.com/wpCloud/wp-stateless.git"
     }

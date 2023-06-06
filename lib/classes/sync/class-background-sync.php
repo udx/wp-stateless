@@ -426,6 +426,7 @@ abstract class BackgroundSync extends UDX_WP_Background_Process implements ISync
    * 
    * @return array
    */
+  #[\ReturnTypeWillChange]
   public function jsonSerialize() {
     return [
       'id' => get_called_class(),

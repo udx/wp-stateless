@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInit596548c05e44593658ee0f30115abee3
+class ComposerStaticInit8a18562d3013519ef85187fe20fc0499
 {
     public static $files = array (
         '7b11c4dc42b3b3023073cb14e519683c' => __DIR__ . '/..' . '/ralouphie/getallheaders/src/getallheaders.php',
@@ -12,6 +12,7 @@ class ComposerStaticInit596548c05e44593658ee0f30115abee3
         '6e3fae29631ef280660b3cdad06f25a8' => __DIR__ . '/..' . '/symfony/deprecation-contracts/function.php',
         '37a3dc5111fe8f707ab4c132ef1dbc62' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/functions_include.php',
         'decc78cc4436b1292c6c0d151b19445c' => __DIR__ . '/..' . '/phpseclib/phpseclib/phpseclib/bootstrap.php',
+        'e39a8b23c42d4e1452234d762b03835a' => __DIR__ . '/..' . '/ramsey/uuid/src/functions.php',
         'a8d3953fd9959404dd22d3dfcd0a79f0' => __DIR__ . '/../..' . '/src/aliases.php',
     );
 
@@ -23,6 +24,8 @@ class ComposerStaticInit596548c05e44593658ee0f30115abee3
         'R' => 
         array (
             'Rize\\' => 5,
+            'Ramsey\\Uuid\\' => 12,
+            'Ramsey\\Collection\\' => 18,
         ),
         'P' => 
         array (
@@ -51,6 +54,10 @@ class ComposerStaticInit596548c05e44593658ee0f30115abee3
         array (
             'Firebase\\JWT\\' => 13,
         ),
+        'B' => 
+        array (
+            'Brick\\Math\\' => 11,
+        ),
     );
 
     public static $prefixDirsPsr4 = array (
@@ -61,6 +68,14 @@ class ComposerStaticInit596548c05e44593658ee0f30115abee3
         'Rize\\' => 
         array (
             0 => __DIR__ . '/..' . '/rize/uri-template/src/Rize',
+        ),
+        'Ramsey\\Uuid\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/ramsey/uuid/src',
+        ),
+        'Ramsey\\Collection\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/ramsey/collection/src',
         ),
         'Psr\\Log\\' => 
         array (
@@ -123,13 +138,16 @@ class ComposerStaticInit596548c05e44593658ee0f30115abee3
         array (
             0 => __DIR__ . '/..' . '/firebase/php-jwt/src',
         ),
+        'Brick\\Math\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/brick/math/src',
+        ),
     );
 
     public static $classMap = array (
         'Google_AccessToken_Revoke' => __DIR__ . '/../..' . '/src/aliases.php',
         'Google_AccessToken_Verify' => __DIR__ . '/../..' . '/src/aliases.php',
         'Google_AuthHandler_AuthHandlerFactory' => __DIR__ . '/../..' . '/src/aliases.php',
-        'Google_AuthHandler_Guzzle5AuthHandler' => __DIR__ . '/../..' . '/src/aliases.php',
         'Google_AuthHandler_Guzzle6AuthHandler' => __DIR__ . '/../..' . '/src/aliases.php',
         'Google_AuthHandler_Guzzle7AuthHandler' => __DIR__ . '/../..' . '/src/aliases.php',
         'Google_Client' => __DIR__ . '/../..' . '/src/aliases.php',
@@ -152,9 +170,9 @@ class ComposerStaticInit596548c05e44593658ee0f30115abee3
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInit596548c05e44593658ee0f30115abee3::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInit596548c05e44593658ee0f30115abee3::$prefixDirsPsr4;
-            $loader->classMap = ComposerStaticInit596548c05e44593658ee0f30115abee3::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInit8a18562d3013519ef85187fe20fc0499::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInit8a18562d3013519ef85187fe20fc0499::$prefixDirsPsr4;
+            $loader->classMap = ComposerStaticInit8a18562d3013519ef85187fe20fc0499::$classMap;
 
         }, null, ClassLoader::class);
     }

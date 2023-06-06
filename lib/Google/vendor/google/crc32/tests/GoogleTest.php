@@ -32,7 +32,7 @@ final class GoogleTest extends TestCase
             return;
         }
 
-        $this->setExpectedException('InvalidArgumentException');
+        $this->expectException('InvalidArgumentException');
 
         new Google();
     }
