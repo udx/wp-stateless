@@ -114,6 +114,9 @@ Before upgrading to WP-Stateless 3.0, please, make sure you tested it on your de
 * ENHANCEMENT - Updated Client library for Google APIs.
 * ENHANCEMENT - Updated Monolog library to version 3.
 * ENHANCEMENT - Updated JWT library.
+* FIX - Fixed vulnerability issues.
+* FIX - Fixed an errors and warnings on PHP 8.1.
+* FIX - Fixed an error that occured when WP_STATELESS_MEDIA_UPLOAD_CHUNK_SIZE is set.
 
 = 3.2.2 =
 * FIX -  Folder setting can't be saved from the settings page [#639](https://github.com/udx/wp-stateless/issues/639).
