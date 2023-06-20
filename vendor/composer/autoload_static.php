@@ -8,13 +8,13 @@ class ComposerStaticInitc59d002476a452800baaf79c430753cb
 {
     public static $files = array (
         '0e6d7bf4a5811bfa5cf40c5ccd6fae6a' => __DIR__ . '/..' . '/symfony/polyfill-mbstring/bootstrap.php',
+        '6e3fae29631ef280660b3cdad06f25a8' => __DIR__ . '/..' . '/symfony/deprecation-contracts/function.php',
         'a4a119a56e50fbb293281d9a48007e0e' => __DIR__ . '/..' . '/symfony/polyfill-php80/bootstrap.php',
         '320cde22f66dd4f5d3fd621d3e88b98f' => __DIR__ . '/..' . '/symfony/polyfill-ctype/bootstrap.php',
         '8825ede83f2f289127722d4e842cf7e8' => __DIR__ . '/..' . '/symfony/polyfill-intl-grapheme/bootstrap.php',
         'e69f7f6ee287b969198c3c9d6777bd38' => __DIR__ . '/..' . '/symfony/polyfill-intl-normalizer/bootstrap.php',
         '0d59ee240a4cd96ddbb4ff164fccea4d' => __DIR__ . '/..' . '/symfony/polyfill-php73/bootstrap.php',
         'b6b991a57620e2fb6b2f66f03fe9ddc2' => __DIR__ . '/..' . '/symfony/string/Resources/functions.php',
-        '8ca8a91f0a826d6c6c8f274c90ca7d88' => __DIR__ . '/..' . '/wpmetabox/meta-box/meta-box.php',
     );
 
     public static $prefixLengthsPsr4 = array (
@@ -129,8 +129,10 @@ class ComposerStaticInitc59d002476a452800baaf79c430753cb
     );
 
     public static $classMap = array (
+        'Attribute' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/Attribute.php',
         'JsonException' => __DIR__ . '/..' . '/symfony/polyfill-php73/Resources/stubs/JsonException.php',
         'Normalizer' => __DIR__ . '/..' . '/symfony/polyfill-intl-normalizer/Resources/stubs/Normalizer.php',
+        'PhpToken' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/PhpToken.php',
         'Stringable' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/Stringable.php',
         'UnhandledMatchError' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/UnhandledMatchError.php',
         'UsabilityDynamics\\Job' => __DIR__ . '/..' . '/udx/lib-utility/lib/class-job.php',
@@ -203,11 +205,11 @@ class ComposerStaticInitc59d002476a452800baaf79c430753cb
         'wpCloud\\StatelessMedia\\Upgrader' => __DIR__ . '/../..' . '/lib/classes/class-upgrader.php',
         'wpCloud\\StatelessMedia\\Utility' => __DIR__ . '/../..' . '/lib/classes/class-utility.php',
         'wpCloud\\StatelessMedia\\VidoRev' => __DIR__ . '/../..' . '/lib/classes/compatibility/vidorev.php',
-        'wpCloud\\StatelessMedia\\WooCommerce' => __DIR__ . '/../..' . '/lib/classes/compatibility/woocommerce.php',
         'wpCloud\\StatelessMedia\\WPBakeryPageBuilder' => __DIR__ . '/../..' . '/lib/classes/compatibility/wpbakery-page-builder.php',
         'wpCloud\\StatelessMedia\\WPForms' => __DIR__ . '/../..' . '/lib/classes/compatibility/wpforms.php',
         'wpCloud\\StatelessMedia\\WPRetina2x' => __DIR__ . '/../..' . '/lib/classes/compatibility/wp-retina-2x.php',
         'wpCloud\\StatelessMedia\\WPSmush' => __DIR__ . '/../..' . '/lib/classes/compatibility/wp-smush.php',
+        'wpCloud\\StatelessMedia\\WooCommerce' => __DIR__ . '/../..' . '/lib/classes/compatibility/woocommerce.php',
     );
 
     public static function getInitializer(ClassLoader $loader)

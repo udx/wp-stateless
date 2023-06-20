@@ -57,7 +57,7 @@ class StreamOutput extends Output
     /**
      * Gets the stream attached to this StreamOutput instance.
      *
-     * @return resource A stream resource
+     * @return resource
      */
     public function getStream()
     {
@@ -70,7 +70,7 @@ class StreamOutput extends Output
     protected function doWrite(string $message, bool $newline)
     {
         if ($newline) {
-            $message .= PHP_EOL;
+            $message .= \PHP_EOL;
         }
 
         @fwrite($this->stream, $message);

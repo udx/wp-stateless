@@ -18,7 +18,7 @@ final class EnglishInflector implements InflectorInterface
      *
      * @see http://english-zone.com/spelling/plurals.html
      */
-    private static $pluralMap = [
+    private const PLURAL_MAP = [
         // First entry: plural suffix, reversed
         // Second entry: length of plural suffix
         // Third entry: Whether the suffix may succeed a vocal
@@ -55,11 +55,23 @@ final class EnglishInflector implements InflectorInterface
         // indices (index), appendices (appendix), prices (price)
         ['seci', 4, false, true, ['ex', 'ix', 'ice']],
 
+        // codes (code)
+        ['sedoc', 5, false, true, 'code'],
+
         // selfies (selfie)
         ['seifles', 7, true, true, 'selfie'],
 
+        // zombies (zombie)
+        ['seibmoz', 7, true, true, 'zombie'],
+
         // movies (movie)
         ['seivom', 6, true, true, 'movie'],
+
+        // names (name)
+        ['seman', 5, true, false, 'name'],
+
+        // conspectuses (conspectus), prospectuses (prospectus)
+        ['sesutcep', 8, true, true, 'pectus'],
 
         // feet (foot)
         ['teef', 4, true, true, 'foot'],
@@ -118,6 +130,9 @@ final class EnglishInflector implements InflectorInterface
         // fees (fee), trees (tree), employees (employee)
         ['see', 3, true, true, 'ee'],
 
+        // edges (edge)
+        ['segd', 4, true, true, 'dge'],
+
         // roses (rose), garages (garage), cassettes (cassette),
         // waltzes (waltz), heroes (hero), bushes (bush), arches (arch),
         // shoes (shoe)
@@ -138,7 +153,7 @@ final class EnglishInflector implements InflectorInterface
      *
      * @see http://english-zone.com/spelling/plurals.html
      */
-    private static $singularMap = [
+    private const SINGULAR_MAP = [
         // First entry: singular suffix, reversed
         // Second entry: length of singular suffix
         // Third entry: Whether the suffix may succeed a vocal
@@ -226,6 +241,9 @@ final class EnglishInflector implements InflectorInterface
         // bacteria (bacterium), criteria (criterion), phenomena (phenomenon)
         ['noi', 3, true, true, 'ions'],
 
+        // coupon (coupons)
+        ['nop', 3, true, true, 'pons'],
+
         // seasons (season), treasons (treason), poisons (poison), lessons (lesson)
         ['nos', 3, true, true, 'sons'],
 
@@ -260,6 +278,9 @@ final class EnglishInflector implements InflectorInterface
 
         // circuses (circus)
         ['suc', 3, true, true, 'cuses'],
+
+        // conspectuses (conspectus), prospectuses (prospectus)
+        ['sutcep', 6, true, true, 'pectuses'],
 
         // fungi (fungus), alumni (alumnus), syllabi (syllabus), radii (radius)
         ['su', 2, true, true, 'i'],
@@ -304,21 +325,37 @@ final class EnglishInflector implements InflectorInterface
     /**
      * A list of words which should not be inflected, reversed.
      */
-    private static $uninflected = [
+    private const UNINFLECTED = [
+        '',
+
+        // data
         'atad',
+
+        // deer
         'reed',
+
+        // feedback
         'kcabdeef',
+
+        // fish
         'hsif',
+
+        // info
         'ofni',
+
+        // moose
         'esoom',
+
+        // series
         'seires',
+
+        // sheep
         'peehs',
+
+        // species
         'seiceps',
     ];
 
-    /**
-     * {@inheritdoc}
-     */
     public function singularize(string $plural): array
     {
         $pluralRev = strrev($plural);
@@ -326,7 +363,7 @@ final class EnglishInflector implements InflectorInterface
         $pluralLength = \strlen($lowerPluralRev);
 
         // Check if the word is one which is not inflected, return early if so
-        if (\in_array($lowerPluralRev, self::$uninflected, true)) {
+        if (\in_array($lowerPluralRev, self::UNINFLECTED, true)) {
             return [$plural];
         }
 
@@ -334,7 +371,7 @@ final class EnglishInflector implements InflectorInterface
         // The inner loop $j iterates over the characters of the plural suffix
         // in the plural table to compare them with the characters of the actual
         // given plural suffix
-        foreach (self::$pluralMap as $map) {
+        foreach (self::PLURAL_MAP as $map) {
             $suffix = $map[0];
             $suffixLength = $map[1];
             $j = 0;
@@ -350,7 +387,7 @@ final class EnglishInflector implements InflectorInterface
                 if ($j === $suffixLength) {
                     // Is there any character preceding the suffix in the plural string?
                     if ($j < $pluralLength) {
-                        $nextIsVocal = false !== strpos('aeiou', $lowerPluralRev[$j]);
+                        $nextIsVocal = str_contains('aeiou', $lowerPluralRev[$j]);
 
                         if (!$map[2] && $nextIsVocal) {
                             // suffix may not succeed a vocal but next char is one
@@ -395,9 +432,6 @@ final class EnglishInflector implements InflectorInterface
         return [$plural];
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function pluralize(string $singular): array
     {
         $singularRev = strrev($singular);
@@ -405,7 +439,7 @@ final class EnglishInflector implements InflectorInterface
         $singularLength = \strlen($lowerSingularRev);
 
         // Check if the word is one which is not inflected, return early if so
-        if (\in_array($lowerSingularRev, self::$uninflected, true)) {
+        if (\in_array($lowerSingularRev, self::UNINFLECTED, true)) {
             return [$singular];
         }
 
@@ -413,7 +447,7 @@ final class EnglishInflector implements InflectorInterface
         // The inner loop $j iterates over the characters of the singular suffix
         // in the singular table to compare them with the characters of the actual
         // given singular suffix
-        foreach (self::$singularMap as $map) {
+        foreach (self::SINGULAR_MAP as $map) {
             $suffix = $map[0];
             $suffixLength = $map[1];
             $j = 0;
@@ -430,7 +464,7 @@ final class EnglishInflector implements InflectorInterface
                 if ($j === $suffixLength) {
                     // Is there any character preceding the suffix in the plural string?
                     if ($j < $singularLength) {
-                        $nextIsVocal = false !== strpos('aeiou', $lowerSingularRev[$j]);
+                        $nextIsVocal = str_contains('aeiou', $lowerSingularRev[$j]);
 
                         if (!$map[2] && $nextIsVocal) {
                             // suffix may not succeed a vocal but next char is one
