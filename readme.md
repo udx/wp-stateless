@@ -4,7 +4,7 @@
 
 Upload and serve your WordPress media from Google Cloud Storage (GCS) with the WP-Stateless plugin. In as little as two minutes, you will be benefitting from serving your media from Google Cloud's distributed servers.
 
-New to Google Cloud? Google is offering you a [$300 credit](https://cloud.google.com/free/) to get you started.
+New to Google Cloud? Google is offering you a [$300 credit](https://console.cloud.google.com/freetrial?referralId=e1c28cf728ff49b38d4eb5add3f5bfc8) to get you started.
 
 ### Benefits
 * Store and deliver media files on Google Cloud Storage instead of your server.

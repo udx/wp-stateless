@@ -175,7 +175,7 @@ abstract class LibrarySync extends BackgroundSync {
     $notices = parent::get_process_notice();
     $last = intval($this->get_process_meta('last_at'));
     if (!$last) {
-      $last = strtotime($this->get_process_meta('datetime'));
+      $last = strtotime( $this->get_process_meta('datetime') ?? '' );
       if (false === $last) return $notices;
     }
 

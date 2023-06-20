@@ -43,7 +43,7 @@ class SnippetTestCase extends TestCase
      * @experimental
      * @internal
      */
-    public static function setUpBeforeClass()
+    public static function setUpBeforeClass(): void
     {
         self::$coverage = Container::$coverage;
         self::$parser = Container::$parser;

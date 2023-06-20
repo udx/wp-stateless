@@ -147,6 +147,11 @@ namespace wpCloud\StatelessMedia {
        */
       new WPForms();
 
+      /**
+       * Support for WooCommerce
+       */
+      new WooCommerce();
+
     }
 
     /**

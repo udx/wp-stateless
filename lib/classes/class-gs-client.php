@@ -231,7 +231,7 @@ namespace wpCloud\StatelessMedia {
             $file_size = filesize($args['absolutePath']);
             $filetoupload = array('name' => $name, 'uploadType' => 'resumable');
             $request = $this->service->objects->insert($this->bucket, $media, $filetoupload);
-            $uploader = new \Google\Google_Http_MediaFileUpload($this->client, $request, $args['mimeType'], null, true, WP_STATELESS_MEDIA_UPLOAD_CHUNK_SIZE);
+            $uploader = new \Google_Http_MediaFileUpload($this->client, $request, $args['mimeType'], null, true, WP_STATELESS_MEDIA_UPLOAD_CHUNK_SIZE);
             $uploader->setFileSize($file_size);
             $handle = fopen($args['absolutePath'], "rb");
 

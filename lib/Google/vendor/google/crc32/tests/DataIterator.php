@@ -20,11 +20,11 @@ use Google\CRC32\CRC32;
 
 class CRCIterator implements Iterator
 {
+    // This assumes all CRC providers are available.
     protected $crcs = [
         'Google\CRC32\PHP',
         'Google\CRC32\PHPSlicedBy4',
         'Google\CRC32\Builtin',
-        'Google\CRC32\Google',
     ];
 
     protected $algos = [
@@ -34,29 +34,38 @@ class CRCIterator implements Iterator
 
     protected $count = 0;
 
-    public function rewind()
+    public function __construct()
+    {
+        if (extension_loaded('crc32c')) {
+            array_push($this->crcs, 'Google\CRC32\Google');
+        }
+    }
+
+    public function rewind(): void
     {
         reset($this->crcs);
         reset($this->algos);
     }
 
-    public function valid()
+    public function valid(): bool
     {
         return current($this->crcs) !== false &&
                current($this->algos) !== false;
     }
 
+    #[\ReturnTypeWillChange]
     public function key()
     {
         return $this->count;
     }
 
+    #[\ReturnTypeWillChange]
     public function current()
     {
         return [current($this->crcs), current($this->algos)];
     }
 
-    public function next()
+    public function next(): void
     {
         $this->count++;
         if (next($this->algos) === false) {
@@ -81,7 +90,6 @@ class DataIterator implements Iterator
         'Google\CRC32\PHP',
         'Google\CRC32\PHPSlicedBy4',
         'Google\CRC32\Builtin',
-        'Google\CRC32\Google',
     ];
 
     protected $algos = [
@@ -140,31 +148,40 @@ class DataIterator implements Iterator
 
     protected $count = 0;
 
-    public function rewind()
+    public function __construct()
+    {
+        if (extension_loaded('crc32c')) {
+            array_push($this->crcs, 'Google\CRC32\Google');
+        }
+    }
+
+    public function rewind(): void
     {
         reset($this->crcs);
         reset($this->algos);
         reset($this->data);
     }
 
-    public function valid()
+    public function valid(): bool
     {
         return current($this->crcs) !== false &&
                current($this->algos) !== false &&
                current($this->data) !== false;
     }
 
+    #[\ReturnTypeWillChange]
     public function key()
     {
         return $this->count;
     }
 
+    #[\ReturnTypeWillChange]
     public function current()
     {
         return [current($this->crcs), current($this->algos), key($this->data), current($this->data)[key($this->algos)]];
     }
 
-    public function next()
+    public function next(): void
     {
         $this->count++;
         if (next($this->data) === false) {

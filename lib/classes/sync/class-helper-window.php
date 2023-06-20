@@ -28,6 +28,7 @@ class HelperWindow {
   /**
    * To JSON
    */
+  #[\ReturnTypeWillChange]
   public function jsonSerialize() {
     return get_object_vars($this);
   }

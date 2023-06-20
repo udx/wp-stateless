@@ -47,24 +47,24 @@ class OAuth2 implements FetchAuthTokenInterface
      *
      * @var array<string>
      */
-    public static $knownSigningAlgorithms = array(
+    public static $knownSigningAlgorithms = [
         'HS256',
         'HS512',
         'HS384',
         'RS256',
-    );
+    ];
 
     /**
      * The well known grant types.
      *
      * @var array<string>
      */
-    public static $knownGrantTypes = array(
+    public static $knownGrantTypes = [
         'authorization_code',
         'refresh_token',
         'password',
         'client_credentials',
-    );
+    ];
 
     /**
      * - authorizationUri
@@ -216,6 +216,13 @@ class OAuth2 implements FetchAuthTokenInterface
     private $idToken;
 
     /**
+     * The scopes granted to the current access token
+     *
+     * @var string
+     */
+    private $grantedScope;
+
+    /**
      * The lifetime in seconds of the current access token.
      *
      * @var ?int
@@ -260,6 +267,16 @@ class OAuth2 implements FetchAuthTokenInterface
      * @var array<mixed>
      */
     private $additionalClaims;
+
+    /**
+     * The code verifier for PKCE for OAuth 2.0. When set, the authorization
+     * URI will contain the Code Challenge and Code Challenge Method querystring
+     * parameters, and the token URI will contain the Code Verifier parameter.
+     *
+     * @see https://datatracker.ietf.org/doc/html/rfc7636
+     * @var ?string
+     */
+    private $codeVerifier;
 
     /**
      * Create a new OAuthCredentials.
@@ -350,6 +367,7 @@ class OAuth2 implements FetchAuthTokenInterface
             'signingAlgorithm' => null,
             'scope' => null,
             'additionalClaims' => [],
+            'codeVerifier' => null,
         ], $config);
 
         $this->setAuthorizationUri($opts['authorizationUri']);
@@ -370,6 +388,7 @@ class OAuth2 implements FetchAuthTokenInterface
         $this->setScope($opts['scope']);
         $this->setExtensionParams($opts['extensionParams']);
         $this->setAdditionalClaims($opts['additionalClaims']);
+        $this->setCodeVerifier($opts['codeVerifier']);
         $this->updateToken($opts);
     }
 
@@ -398,7 +417,7 @@ class OAuth2 implements FetchAuthTokenInterface
      * @throws \Firebase\JWT\ExpiredException If the token has expired.
      * @return null|object
      */
-    public function verifyIdToken($publicKey = null, $allowed_algs = array())
+    public function verifyIdToken($publicKey = null, $allowed_algs = [])
     {
         $idToken = $this->getIdToken();
         if (is_null($idToken)) {
@@ -484,11 +503,14 @@ class OAuth2 implements FetchAuthTokenInterface
         }
 
         $grantType = $this->getGrantType();
-        $params = array('grant_type' => $grantType);
+        $params = ['grant_type' => $grantType];
         switch ($grantType) {
             case 'authorization_code':
                 $params['code'] = $this->getCode();
                 $params['redirect_uri'] = $this->getRedirectUri();
+                if ($this->codeVerifier) {
+                    $params['code_verifier'] = $this->codeVerifier;
+                }
                 $this->addClientCredentials($params);
                 break;
             case 'password':
@@ -544,6 +566,9 @@ class OAuth2 implements FetchAuthTokenInterface
         $response = $httpHandler($this->generateCredentialsRequest());
         $credentials = $this->parseTokenResponse($response);
         $this->updateToken($credentials);
+        if (isset($credentials['scope'])) {
+            $this->setGrantedScope($credentials['scope']);
+        }
 
         return $credentials;
     }
@@ -582,7 +607,7 @@ class OAuth2 implements FetchAuthTokenInterface
         if ($resp->hasHeader('Content-Type') &&
             $resp->getHeaderLine('Content-Type') == 'application/x-www-form-urlencoded'
         ) {
-            $res = array();
+            $res = [];
             parse_str($body, $res);
 
             return $res;
@@ -640,6 +665,7 @@ class OAuth2 implements FetchAuthTokenInterface
             'expires_in' => null,
             'expires_at' => null,
             'issued_at' => null,
+            'scope' => null,
         ], $config);
 
         $this->setExpiresAt($opts['expires_at']);
@@ -652,6 +678,7 @@ class OAuth2 implements FetchAuthTokenInterface
 
         $this->setAccessToken($opts['access_token']);
         $this->setIdToken($opts['id_token']);
+
         // The refresh token should only be updated if a value is explicitly
         // passed in, as some access token responses do not include a refresh
         // token.
@@ -663,7 +690,7 @@ class OAuth2 implements FetchAuthTokenInterface
     /**
      * Builds the authorization Uri that the user should be redirected to.
      *
-     * @param array<mixed> $config configuration options that customize the return url
+     * @param array<mixed> $config configuration options that customize the return url.
      * @return UriInterface the authorization Url.
      * @throws InvalidArgumentException
      */
@@ -698,6 +725,10 @@ class OAuth2 implements FetchAuthTokenInterface
                 'prompt and approval_prompt are mutually exclusive'
             );
         }
+        if ($this->codeVerifier) {
+            $params['code_challenge'] = $this->getCodeChallenge($this->codeVerifier);
+            $params['code_challenge_method'] = $this->getCodeChallengeMethod();
+        }
 
         // Construct the uri object; return it if it is valid.
         $result = clone $this->authorizationUri;
@@ -714,6 +745,68 @@ class OAuth2 implements FetchAuthTokenInterface
         }
 
         return $result;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getCodeVerifier(): ?string
+    {
+        return $this->codeVerifier;
+    }
+
+    /**
+     * A cryptographically random string that is used to correlate the
+     * authorization request to the token request.
+     *
+     * The code verifier for PKCE for OAuth 2.0. When set, the authorization
+     * URI will contain the Code Challenge and Code Challenge Method querystring
+     * parameters, and the token URI will contain the Code Verifier parameter.
+     *
+     * @see https://datatracker.ietf.org/doc/html/rfc7636
+     *
+     * @param string|null $codeVerifier
+     */
+    public function setCodeVerifier(?string $codeVerifier): void
+    {
+        $this->codeVerifier = $codeVerifier;
+    }
+
+    /**
+     * Generates a random 128-character string for the "code_verifier" parameter
+     * in PKCE for OAuth 2.0. This is a cryptographically random string that is
+     * determined using random_int, hashed using "hash" and sha256, and base64
+     * encoded.
+     *
+     * When this method is called, the code verifier is set on the object.
+     *
+     * @return string
+     */
+    public function generateCodeVerifier(): string
+    {
+        return $this->codeVerifier = $this->generateRandomString(128);
+    }
+
+    private function getCodeChallenge(string $randomString): string
+    {
+        return rtrim(strtr(base64_encode(hash('sha256', $randomString, true)), '+/', '-_'), '=');
+    }
+
+    private function getCodeChallengeMethod(): string
+    {
+        return 'S256';
+    }
+
+    private function generateRandomString(int $length): string
+    {
+        $validChars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._~';
+        $validCharsLen = strlen($validChars);
+        $str = '';
+        $i = 0;
+        while ($i++ < $length) {
+            $str .= $validChars[random_int(0, $validCharsLen - 1)];
+        }
+        return $str;
     }
 
     /**
@@ -1333,6 +1426,28 @@ class OAuth2 implements FetchAuthTokenInterface
     public function setIdToken($idToken)
     {
         $this->idToken = $idToken;
+    }
+
+    /**
+     * Get the granted space-separated scopes (if they exist) for the last
+     * fetched token.
+     *
+     * @return string|null
+     */
+    public function getGrantedScope()
+    {
+        return $this->grantedScope;
+    }
+
+    /**
+     * Sets the current ID token.
+     *
+     * @param string $grantedScope
+     * @return void
+     */
+    public function setGrantedScope($grantedScope)
+    {
+        $this->grantedScope = $grantedScope;
     }
 
     /**

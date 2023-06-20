@@ -5,8 +5,8 @@ Tags: google, google cloud, google cloud storage, cdn, uploads, media, stateless
 License: GPLv2 or later
 Requires PHP: 7.2
 Requires at least: 5.0
-Tested up to: 5.9.3
-Stable tag: 3.2.2
+Tested up to: 6.2.2
+Stable tag: 3.2.3
 
 Upload and serve your WordPress media files from Google Cloud Storage.
 
@@ -14,7 +14,7 @@ Upload and serve your WordPress media files from Google Cloud Storage.
 
 Upload and serve your WordPress media from Google Cloud Storage (GCS) with the WP-Stateless plugin. In as little as two minutes, you will be benefitting from serving your media from Google Cloud's distributed servers.
 
-New to Google Cloud? Google is offering you a [$300 credit](https://cloud.google.com/free/) to get you started.
+New to Google Cloud? Google is offering you a [$300 credit](https://console.cloud.google.com/freetrial?referralId=e1c28cf728ff49b38d4eb5add3f5bfc8) to get you started.
 
 = Benefits =
 * Store and deliver media files on Google Cloud Storage instead of your server.
@@ -110,6 +110,14 @@ Before upgrading to WP-Stateless 3.2.0, please, make sure you use PHP 7.2 or abo
 Before upgrading to WP-Stateless 3.0, please, make sure you tested it on your development environment.
 
 == Changelog ==
+= 3.2.3 =
+* ENHANCEMENT - Updated Client library for Google APIs.
+* ENHANCEMENT - Updated Monolog library to version 3.
+* ENHANCEMENT - Updated JWT library.
+* FIX - Fixed vulnerability issues.
+* FIX - Fixed an errors and warnings on PHP 8.1.
+* FIX - Fixed an error that occured when WP_STATELESS_MEDIA_UPLOAD_CHUNK_SIZE is set.
+
 = 3.2.2 =
 * FIX -  Folder setting can't be saved from the settings page [#639](https://github.com/udx/wp-stateless/issues/639).
 

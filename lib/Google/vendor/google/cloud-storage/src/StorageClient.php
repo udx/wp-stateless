@@ -47,11 +47,29 @@ class StorageClient
     use ArrayTrait;
     use ClientTrait;
 
-    const VERSION = '1.26.3';
+    const VERSION = '1.31.2';
 
     const FULL_CONTROL_SCOPE = 'https://www.googleapis.com/auth/devstorage.full_control';
     const READ_ONLY_SCOPE = 'https://www.googleapis.com/auth/devstorage.read_only';
     const READ_WRITE_SCOPE = 'https://www.googleapis.com/auth/devstorage.read_write';
+
+    /**
+     * Retry strategy to signify that we never want to retry an operation
+     * even if the error is retryable.
+     *
+     * We can set $options['retryStrategy'] to one of "always", "never" and
+     * "idempotent".
+     */
+    const RETRY_NEVER = 'never';
+    /**
+     * Retry strategy to signify that we always want to retry an operation.
+     */
+    const RETRY_ALWAYS = 'always';
+    /**
+     * This is the default. This signifies that we want to retry an operation
+     * only if it is retryable and the error is retryable.
+     */
+    const RETRY_IDEMPOTENT = 'idempotent';
 
     /**
      * @var ConnectionInterface Represents a connection to Storage.
@@ -263,11 +281,14 @@ class StorageClient
      *     @type array $defaultObjectAcl Default access controls to apply to new
      *           objects when no ACL is provided.
      *     @type array|Lifecycle $lifecycle The bucket's lifecycle configuration.
-     *     @type string $location The location of the bucket. A dual-region can
-     *           be specified as a string (e.g. "US-CENTRAL1+US-WEST1"). For
-     *           more information, see
+     *     @type string $location The location of the bucket. If specifying
+     *           a dual-region, the `customPlacementConfig` property should be
+     *           set in conjunction. For more information, see
      *           [Bucket Locations](https://cloud.google.com/storage/docs/locations).
      *           **Defaults to** `"US"`.
+     *     @type array $customPlacementConfig The bucket's dual regions. For more
+     *           information, see
+     *           [Bucket Locations](https://cloud.google.com/storage/docs/locations).
      *     @type array $logging The bucket's logging configuration, which
      *           defines the destination bucket and optional name prefix for the
      *           current bucket's logs.
@@ -281,6 +302,10 @@ class StorageClient
      *           more information, refer to the
      *           [Storage Classes](https://cloud.google.com/storage/docs/storage-classes)
      *           documentation. **Defaults to** `"STANDARD"`.
+     *     @type array $autoclass The bucket's autoclass configuration.
+     *           Buckets can have either StorageClass OLM rules or Autoclass,
+     *           but not both. When Autoclass is enabled on a bucket, adding
+     *           StorageClass OLM rules will result in failure.
      *     @type array $versioning The bucket's versioning configuration.
      *     @type array $website The bucket's website configuration.
      *     @type array $billing The bucket's billing configuration.

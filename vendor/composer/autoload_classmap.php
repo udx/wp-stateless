@@ -6,8 +6,10 @@ $vendorDir = dirname(dirname(__FILE__));
 $baseDir = dirname($vendorDir);
 
 return array(
+    'Attribute' => $vendorDir . '/symfony/polyfill-php80/Resources/stubs/Attribute.php',
     'JsonException' => $vendorDir . '/symfony/polyfill-php73/Resources/stubs/JsonException.php',
     'Normalizer' => $vendorDir . '/symfony/polyfill-intl-normalizer/Resources/stubs/Normalizer.php',
+    'PhpToken' => $vendorDir . '/symfony/polyfill-php80/Resources/stubs/PhpToken.php',
     'Stringable' => $vendorDir . '/symfony/polyfill-php80/Resources/stubs/Stringable.php',
     'UnhandledMatchError' => $vendorDir . '/symfony/polyfill-php80/Resources/stubs/UnhandledMatchError.php',
     'UsabilityDynamics\\Job' => $vendorDir . '/udx/lib-utility/lib/class-job.php',
@@ -84,4 +86,5 @@ return array(
     'wpCloud\\StatelessMedia\\WPForms' => $baseDir . '/lib/classes/compatibility/wpforms.php',
     'wpCloud\\StatelessMedia\\WPRetina2x' => $baseDir . '/lib/classes/compatibility/wp-retina-2x.php',
     'wpCloud\\StatelessMedia\\WPSmush' => $baseDir . '/lib/classes/compatibility/wp-smush.php',
+    'wpCloud\\StatelessMedia\\WooCommerce' => $baseDir . '/lib/classes/compatibility/woocommerce.php',
 );

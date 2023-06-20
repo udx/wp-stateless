@@ -106,7 +106,7 @@ namespace wpCloud\StatelessMedia {
           case 'notice':
             if(!is_array($message)){
               $message = array( 
-                'title' => sprintf( __( '<b>%s</b> has the following notice:', $this->domain ), $this->name ),
+                'title' => sprintf( __( '<b>%s</b> has the following notice:', $this->domain ), esc_html($this->name) ),
                 'message' => $message,
                 'button' => null,
               );
@@ -190,7 +190,7 @@ namespace wpCloud\StatelessMedia {
         if( !empty( $errors ) && is_array( $errors ) ) {
           $message = '<ul style="none;"><li>' . implode( '</li><li>', $errors ) . '</li></ul>';
           $data = array(
-            'title' => sprintf( __( '%s is not active due to following errors:', $this->domain ), $this->name ),
+            'title' => sprintf( __( '%s is not active due to following errors:', $this->domain ), esc_html($this->name) ),
             'class' => 'error',
             'message' => $message,
             'action_links' => !empty($this->action_links[ 'errors' ])?$this->action_links[ 'errors' ]:null,

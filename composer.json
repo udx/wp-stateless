@@ -12,6 +12,10 @@
   ],
   "repositories": [
     {
+      "type": "composer",
+      "url": "https://repository.usabilitydynamics.com"
+    },
+    {
       "type": "git",
       "url": "https://github.com/wpCloud/wp-stateless.git"
     }
@@ -86,7 +90,7 @@
     }
   },
   "require-dev": {
-    "coenjacobs/mozart": "0.6.0-beta-3",
+    "coenjacobs/mozart": "0.7.1",
     "deliciousbrains/wp-background-processing": "^1.0"
   }
 }
