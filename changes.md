@@ -1,3 +1,7 @@
+#### 3.2.4
+
+- FIX - Website unresponsive after Upgrade [#669](https://github.com/udx/wp-stateless/issues/669).
+
 #### 3.2.3
 
 - ENHANCEMENT - Updated Client library for Google APIs.

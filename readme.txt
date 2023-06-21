@@ -3,10 +3,10 @@ Contributors: usability_dynamics, andypotanin, ideric, maxim.peshkov, Anton Koro
 Donate link: https://udx.io
 Tags: google, google cloud, google cloud storage, cdn, uploads, media, stateless, backup
 License: GPLv2 or later
-Requires PHP: 7.2
+Requires PHP: 8.0
 Requires at least: 5.0
 Tested up to: 6.2.2
-Stable tag: 3.2.3
+Stable tag: 3.2.4
 
 Upload and serve your WordPress media files from Google Cloud Storage.
 
@@ -72,7 +72,7 @@ For a more detailed installation and setup walkthrough, please see the [manual s
 
 = What are the minimum server requirements for this plugin? =
 
-Beyond the [official WordPress minimum requirements](https://codex.wordpress.org/Template:Server_requirements), WP-Stateless requires a minimum PHP version of 7.2 or higher and OpenSSL to be enabled.
+Beyond the [official WordPress minimum requirements](https://wordpress.org/about/requirements/), WP-Stateless recommends a minimum PHP version of 8.0 or higher and OpenSSL to be enabled.
 
 = What wp-config constants are supported? =
 
@@ -102,6 +102,8 @@ To ensure new releases cause as little disruption as possible, we rely on a numb
 
 
 == Upgrade Notice ==
+= 3.2.3 =
+Before upgrading to WP-Stateless 3.2.3, please, make sure you use PHP 8.0 or above.
 
 = 3.2.0 =
 Before upgrading to WP-Stateless 3.2.0, please, make sure you use PHP 7.2 or above.
@@ -110,7 +112,11 @@ Before upgrading to WP-Stateless 3.2.0, please, make sure you use PHP 7.2 or abo
 Before upgrading to WP-Stateless 3.0, please, make sure you tested it on your development environment.
 
 == Changelog ==
+= 3.2.4 =
+* FIX - Website unresponsive after Upgrade [#669](https://github.com/udx/wp-stateless/issues/669).
+
 = 3.2.3 =
+* **WP-Stateless 3.2.3 requires PHP 8.0+. Recently, Google updated the official Google API PHP Client Library used by WP-Stateless to resolve security issues. This updated library requires PHP 8.0.**
 * ENHANCEMENT - Updated Client library for Google APIs.
 * ENHANCEMENT - Updated Monolog library to version 3.
 * ENHANCEMENT - Updated JWT library.
