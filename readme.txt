@@ -72,7 +72,7 @@ For a more detailed installation and setup walkthrough, please see the [manual s
 
 = What are the minimum server requirements for this plugin? =
 
-Beyond the [official WordPress minimum requirements](https://wordpress.org/about/requirements/), WP-Stateless recommends a minimum PHP version of 8.0 or higher and OpenSSL to be enabled.
+Beyond the [official WordPress minimum requirements](https://wordpress.org/about/requirements/), WP-Stateless requires a minimum PHP version of 8.0 or higher and OpenSSL to be enabled.
 
 = What wp-config constants are supported? =
 
