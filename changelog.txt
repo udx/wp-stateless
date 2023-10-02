@@ -1,4 +1,8 @@
 == Changelog ==
+= 3.2.5 =
+* FIX - Folder setting does not allow custom structure [#608](https://github.com/udx/wp-stateless/issues/608).
+* FIX - Stateless mode Incompatible with Inline Uploader [#675](https://github.com/udx/wp-stateless/issues/675).
+
 = 3.2.4 =
 * FIX - Website unresponsive after Upgrade [#669](https://github.com/udx/wp-stateless/issues/669).
 
@@ -26,7 +30,7 @@
 * FIX - Fixed vulnerability issues.
 * FIX - Fixed erros and warnings on PHP 8.
 * FIX - problem after the upgrade [#628](https://github.com/udx/wp-stateless/issues/628).
-* FIX - image_downsize() PHP8 Required parameter $id follows optional parameter $false [#619](https://github.com/udx/wp-stateless/issues/619). 
+* FIX - image_downsize() PHP8 Required parameter $id follows optional parameter $false [#619](https://github.com/udx/wp-stateless/issues/619).
 
 = 3.1.1 =
 * ENHANCEMENT - Notification for the administrator about finished synchronization. GitHub issue [#576](https://github.com/udx/wp-stateless/issues/576).
@@ -185,11 +189,11 @@
 * FIX - Resolved Google SDK conflict.
 * FIX - ICompatibility.php errors notice.
 * FIX - Undefined index: gs_link in class-bootstrap.php.
-* FIX - Media files with accent characters would not upload correctly to the bucket. 
-* ENHANCEMENT - Force `Cache-Busting` when using `Stateless` mode. 
+* FIX - Media files with accent characters would not upload correctly to the bucket.
+* ENHANCEMENT - Force `Cache-Busting` when using `Stateless` mode.
 * ENHANCEMENT - New admin notice design.
-* ENHANCEMENT - Improved and clear error message. 
-* ENHANCEMENT - Renamed constant `WP_STATELESS_MEDIA_ON_FLY` to `WP_STATELESS_DYNAMIC_IMAGE_SUPPORT`. 
+* ENHANCEMENT - Improved and clear error message.
+* ENHANCEMENT - Renamed constant `WP_STATELESS_MEDIA_ON_FLY` to `WP_STATELESS_DYNAMIC_IMAGE_SUPPORT`.
 * ENHANCEMENT - Update Google Libraries.
 * ENHANCEMENT - Renamed constant `WP_STATELESS_MEDIA_HASH_FILENAME` to `WP_STATELESS_MEDIA_CACHE_BUSTING`.
 * COMPATIBILITY - Renamed constant `WP_STATELESS_COMPATIBILITY_WPSmush` to `WP_STATELESS_COMPATIBILITY_WPSMUSH`.
@@ -239,7 +243,7 @@
 * COMPATIBILITY - Advanced Custom Fields Image Crop Addon.
 
 = 2.1.0 =
-* FIX - Fixed read only for Service Account JSON if constant or environment variable is defined. 
+* FIX - Fixed read only for Service Account JSON if constant or environment variable is defined.
 * FIX - Override default cache control.
 * FIX - Fixed custom domain bucket support with setup assistant.
 * FIX - Improved support for wp_calculate_image_srcset.

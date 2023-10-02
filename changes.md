@@ -1,3 +1,7 @@
+#### 3.2.5
+* FIX - Folder setting does not allow custom structure [#608](https://github.com/udx/wp-stateless/issues/608).
+* FIX - Stateless mode Incompatible with Inline Uploader [#675](https://github.com/udx/wp-stateless/issues/675).
+
 #### 3.2.4
 
 - FIX - Website unresponsive after Upgrade [#669](https://github.com/udx/wp-stateless/issues/669).
@@ -30,7 +34,7 @@
 - FIX - Fixed vulnerability issues.
 - FIX - Fixed erros and warnings on PHP 8.
 - FIX - problem after the upgrade [#628](https://github.com/udx/wp-stateless/issues/628).
-- FIX - image_downsize() PHP8 Required parameter $id follows optional parameter $false [#619](https://github.com/udx/wp-stateless/issues/619). 
+- FIX - image_downsize() PHP8 Required parameter $id follows optional parameter $false [#619](https://github.com/udx/wp-stateless/issues/619).
 
 #### 3.1.1
 
