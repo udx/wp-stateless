@@ -256,14 +256,14 @@ namespace wpCloud\StatelessMedia {
               'mimeType' => $args['mimeType'],
             );
 
-            if (defined('WP_STATELESS_SKIP_ACL_SET') && !WP_STATELESS_SKIP_ACL_SET) {
+            if ( !defined('WP_STATELESS_SKIP_ACL_SET') || !WP_STATELESS_SKIP_ACL_SET) {
               $mediaOptions['predefinedAcl'] = 'bucketOwnerFullControl';
             }
 
             $media = $this->service->objects->insert($this->bucket, $media, array_filter($mediaOptions));
           }
 
-          if (defined('WP_STATELESS_SKIP_ACL_SET') && !WP_STATELESS_SKIP_ACL_SET) {
+          if ( !defined('WP_STATELESS_SKIP_ACL_SET') || !WP_STATELESS_SKIP_ACL_SET) {
             $this->mediaInsertACL($name, $media, $args);
           }
         } catch (Exception $e) {
