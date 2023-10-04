@@ -487,7 +487,7 @@ namespace wpCloud\StatelessMedia {
          * merging user's wildcards with default values
          */
         if (!empty($root_dir_values)) {
-          $wildcards = array_unique( array_merge($root_dir_values, $wildcards) );
+          $wildcards = array_unique( array_merge($root_dir_values, array_keys($wildcards)) );
         }
 
         include $this->bootstrap->path( '/static/views/settings_interface.php', 'dir' );
