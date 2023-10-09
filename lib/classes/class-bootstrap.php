@@ -18,6 +18,8 @@ namespace wpCloud\StatelessMedia {
 
     final class Bootstrap extends \UsabilityDynamics\WP\Bootstrap_Plugin {
 
+      const REQUIRED_PHP_VERSION = '8.0';
+
       /**
        * Google Storage Client
        * Use $this->get_client()
@@ -156,8 +158,8 @@ namespace wpCloud\StatelessMedia {
         /**
          * To prevent fatal errors for users who use PHP 5.5 or less.
          */
-        if (version_compare(PHP_VERSION, '5.5', '<')) {
-          $this->errors->add(sprintf(__('The plugin requires PHP %s or higher. You current PHP version %s is too old.', ud_get_stateless_media()->domain), '<b>5.5</b>', '<b>' . PHP_VERSION . '</b>'));
+        if (version_compare(PHP_VERSION, self::REQUIRED_PHP_VERSION, '<')) {
+          $this->errors->add(sprintf(__('The plugin requires PHP %s or higher. You current PHP version %s is too old.', ud_get_stateless_media()->domain), '<b>' . self::REQUIRED_PHP_VERSION . '</b>', '<b>' . PHP_VERSION . '</b>'));
         }
 
         /**
