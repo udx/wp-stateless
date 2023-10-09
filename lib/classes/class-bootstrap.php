@@ -1548,7 +1548,7 @@ namespace wpCloud\StatelessMedia {
             $connected = $client->is_connected();
             if ($connected !== true) {
               $trnst['success'] = 'false';
-              $trnst['error'] = sprintf(__('Could not connect to Google Storage bucket. Please, be sure that bucket with name <b>%s</b> exists.', $this->domain), esc_html($this->get('sm.bucket')));
+              $trnst['error'] = sprintf(__('Could not connect to Google Storage bucket. Please be sure that bucket with name <b>%s</b> exists.', $this->domain), esc_html($this->get('sm.bucket')));
 
               if (is_callable(array($connected, 'getHandlerContext')) && $handlerContext = $connected->getHandlerContext()) {
                 if (!empty($handlerContext['error'])) {
