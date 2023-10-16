@@ -202,6 +202,7 @@ class ComposerStaticInitc59d002476a452800baaf79c430753cb
         'wpCloud\\StatelessMedia\\Sync\\ImageSync' => __DIR__ . '/../..' . '/lib/classes/sync/class-image-sync.php',
         'wpCloud\\StatelessMedia\\Sync\\LibrarySync' => __DIR__ . '/../..' . '/lib/classes/sync/class-library-sync.php',
         'wpCloud\\StatelessMedia\\Sync\\NonLibrarySync' => __DIR__ . '/../..' . '/lib/classes/sync/class-non-library-sync.php',
+        'wpCloud\\StatelessMedia\\TheEventsCalendar' => __DIR__ . '/../..' . '/lib/classes/compatibility/the-events-calendar.php',
         'wpCloud\\StatelessMedia\\UnprocessableException' => __DIR__ . '/../..' . '/lib/classes/exception-unprocessable.php',
         'wpCloud\\StatelessMedia\\Upgrader' => __DIR__ . '/../..' . '/lib/classes/class-upgrader.php',
         'wpCloud\\StatelessMedia\\Utility' => __DIR__ . '/../..' . '/lib/classes/class-utility.php',
