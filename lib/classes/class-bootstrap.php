@@ -213,6 +213,13 @@ namespace wpCloud\StatelessMedia {
               }
             }
 
+            if ($sm_mode === 'stateless') {
+              /**
+               * Replacing local path to gs:// for using it on StreamWrapper
+               */
+              add_filter('upload_dir', array($this, 'filter_upload_dir'), 99);
+            }
+
             if ($this->get('sm.delete_remote') == 'true') {
               /**
                * On physical file deletion we remove any from GS
@@ -1264,8 +1271,8 @@ namespace wpCloud\StatelessMedia {
               'key' => 'stateless-cache-busting',
               'class' => 'notice',
               'title' => sprintf(__("Stateless and Ephemeral modes enables and requires the Cache-Busting option.", ud_get_stateless_media()->domain)),
-              'message' => sprintf(__("WordPress looks at local files to prevent files with the same filenames. 
-                                          Since Stateless mode bypasses this check, there is a potential for files to be stored with the same file name. We enforce the Cache-Busting option to prevent this. 
+              'message' => sprintf(__("WordPress looks at local files to prevent files with the same filenames.
+                                          Since Stateless mode bypasses this check, there is a potential for files to be stored with the same file name. We enforce the Cache-Busting option to prevent this.
                                           Override with the <a href='%s' target='_blank'>%s</a> constant.", ud_get_stateless_media()->domain), "https://wp-stateless.github.io/docs/constants/#wp_stateless_media_cache_busting", "WP_STATELESS_MEDIA_CACHE_BUSTING"),
             );
             echo "<script id='template-stateless-cache-busting' type='text/html'>";
@@ -1713,8 +1720,8 @@ namespace wpCloud\StatelessMedia {
           'button' => 'View Settings',
           'button_link' => admin_url('upload.php?page=stateless-settings'),
           'title' => sprintf(__("Stateless mode now requires the Cache-Busting option.", ud_get_stateless_media()->domain)),
-          'message' => sprintf(__("WordPress looks at local files to prevent files with the same filenames. 
-                                Since Stateless mode bypasses this check, there is a potential for files to be stored with the same file name. We enforce the Cache-Busting option to prevent this. 
+          'message' => sprintf(__("WordPress looks at local files to prevent files with the same filenames.
+                                Since Stateless mode bypasses this check, there is a potential for files to be stored with the same file name. We enforce the Cache-Busting option to prevent this.
                                 Override with the <a href='%s' target='_blank'>%s</a> constant.", ud_get_stateless_media()->domain), "https://wp-stateless.github.io/docs/constants/#wp_stateless_media_cache_busting", "WP_STATELESS_MEDIA_CACHE_BUSTING"),
         ), 'notice');
       }
