@@ -106,7 +106,7 @@ namespace wpCloud\StatelessMedia {
           case 'notice':
             if(!is_array($message)){
               $message = array( 
-                'title' => sprintf( __( '<b>%s</b> has the following notice:', $this->domain ), esc_html($this->name) ),
+                'title' => sprintf( __( '%s has the following notice:', $this->domain ), esc_html($this->name) ),
                 'message' => $message,
                 'button' => null,
               );

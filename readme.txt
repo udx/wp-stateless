@@ -1,12 +1,12 @@
 === WP-Stateless - Google Cloud Storage ===
-Contributors: usability_dynamics, andypotanin, ideric, maxim.peshkov, Anton Korotkoff, planvova
+Contributors: usability_dynamics, andypotanin, ideric, maxim.peshkov, Anton Korotkoff, planvova, balexey88
 Donate link: https://udx.io
 Tags: google, google cloud, google cloud storage, cdn, uploads, media, stateless, backup
 License: GPLv2 or later
 Requires PHP: 8.0
 Requires at least: 5.0
-Tested up to: 6.2.2
-Stable tag: 3.2.4
+Tested up to: 6.3.1
+Stable tag: 3.2.5
 
 Upload and serve your WordPress media files from Google Cloud Storage.
 
@@ -61,7 +61,7 @@ For a more detailed installation and setup walkthrough, please see the [manual s
 == Screenshots ==
 
 1. Settings Panel: Supports network setting and wp-config constant overrides.
-2. Setup Assistant 
+2. Setup Assistant
 3. Setup Assistant: Google Login
 4. Setup Assistant: Approve Permissions
 5. Setup Assistant: Project & Bucket
@@ -112,6 +112,13 @@ Before upgrading to WP-Stateless 3.2.0, please, make sure you use PHP 7.2 or abo
 Before upgrading to WP-Stateless 3.0, please, make sure you tested it on your development environment.
 
 == Changelog ==
+= 3.2.5 =
+* FIX - Folder setting does not allow custom structure [#608](https://github.com/udx/wp-stateless/issues/608).
+* FIX - Stateless mode Incompatible with Inline Uploader [#675](https://github.com/udx/wp-stateless/issues/675).
+* FIX - html tags incorrectly applied in notice [#680](https://github.com/udx/wp-stateless/issues/680).
+* ENHANCEMENT - Add WP_STATELESS_SKIP_ACL_SET for skip ACL set for GCS [#625](https://github.com/udx/wp-stateless/issues/625).
+* COMPATIBILITY - Add support for The Events Calendar [#599](https://github.com/udx/wp-stateless/issues/599).
+
 = 3.2.4 =
 * FIX - Website unresponsive after Upgrade [#669](https://github.com/udx/wp-stateless/issues/669).
 
@@ -141,7 +148,7 @@ Before upgrading to WP-Stateless 3.0, please, make sure you tested it on your de
 * FIX - Fixed vulnerability issues.
 * FIX - Fixed erros and warnings on PHP 8.
 * FIX - problem after the upgrade [#628](https://github.com/udx/wp-stateless/issues/628).
-* FIX - image_downsize() PHP8 Required parameter $id follows optional parameter $false [#619](https://github.com/udx/wp-stateless/issues/619). 
+* FIX - image_downsize() PHP8 Required parameter $id follows optional parameter $false [#619](https://github.com/udx/wp-stateless/issues/619).
 
 = 3.1.1 =
 * ENHANCEMENT - Notification for the administrator about finished synchronization. GitHub issue [#576](https://github.com/udx/wp-stateless/issues/576).

@@ -4,11 +4,11 @@
  * Plugin URI: https://udx.io
  * Description: Upload and serve your WordPress media files from Google Cloud Storage.
  * Author: UDX
- * Version: 3.2.4
+ * Version: 3.2.5
  * Text Domain: stateless-media
  * Author URI: https://www.udx.io
  *
- * Copyright 2012 - 2022 UDX ( email: info@udx.io )
+ * Copyright 2012 - 2023 UDX ( email: info@udx.io )
  *
  */
 
@@ -88,7 +88,7 @@ if( !function_exists( 'ud_stateless_media_message' ) ) {
     global $_ud_stateless_media_error;
     if( !empty( $_ud_stateless_media_error ) ) {
       $message = sprintf( __( '<p><b>%s</b> can not be initialized. %s</p>', 'stateless-media' ), 'Stateless Media', $_ud_stateless_media_error );
-      echo '<div class="error fade" style="padding:11px;">' . htmlspecialchars($message) . '</div>';
+      echo '<div class="error fade" style="padding:11px;">' . $message . '</div>';
     }
   }
   add_action( 'admin_notices', 'ud_stateless_media_message' );

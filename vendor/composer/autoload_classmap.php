@@ -78,6 +78,7 @@ return array(
     'wpCloud\\StatelessMedia\\Sync\\ImageSync' => $baseDir . '/lib/classes/sync/class-image-sync.php',
     'wpCloud\\StatelessMedia\\Sync\\LibrarySync' => $baseDir . '/lib/classes/sync/class-library-sync.php',
     'wpCloud\\StatelessMedia\\Sync\\NonLibrarySync' => $baseDir . '/lib/classes/sync/class-non-library-sync.php',
+    'wpCloud\\StatelessMedia\\TheEventsCalendar' => $baseDir . '/lib/classes/compatibility/the-events-calendar.php',
     'wpCloud\\StatelessMedia\\UnprocessableException' => $baseDir . '/lib/classes/exception-unprocessable.php',
     'wpCloud\\StatelessMedia\\Upgrader' => $baseDir . '/lib/classes/class-upgrader.php',
     'wpCloud\\StatelessMedia\\Utility' => $baseDir . '/lib/classes/class-utility.php',

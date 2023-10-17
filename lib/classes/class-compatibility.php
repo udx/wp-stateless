@@ -33,6 +33,11 @@ namespace wpCloud\StatelessMedia {
       new BuddyBoss();
 
       /**
+       * Support for The Events Calendar
+       */
+      new TheEventsCalendar();
+
+      /**
        * Support for BuddyPress
        */
       new BuddyPress();
