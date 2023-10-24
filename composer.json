@@ -92,5 +92,10 @@
   "require-dev": {
     "coenjacobs/mozart": "0.7.1",
     "deliciousbrains/wp-background-processing": "^1.0"
+  },
+  "config": {
+    "allow-plugins": {
+      "composer/installers": true
+    }
   }
 }
