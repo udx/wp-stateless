@@ -1,3 +1,20 @@
+#### 4.0.0
+
+* COMPATIBILITY - Removed compatibility with "Advanced Custom Fields: Image Crop Add-on", because plugin is deprecated.
+* COMPATIBILITY - BuddyBoss Platform compatibility moved to a separate plugin [WP-Stateless - BuddyBoss Platform Addon](https://github.com/udx/wp-stateless-buddyboss-addon).
+* COMPATIBILITY - BuddyPress compatibility moved to a separate plugin [WP-Stateless - BuddyPress Addon](https://github.com/udx/wp-stateless-buddypress-addon).
+* COMPATIBILITY - Easy Digital Downloads compatibility moved to a separate plugin [WP-Stateless - Easy Digital Downloads Addon](https://github.com/udx/wp-stateless-easy-digital-downloads-addon).
+* COMPATIBILITY - Divi theme compatibility moved to a separate plugin [WP-Stateless - Divi theme Addon](https://github.com/udx/wp-stateless-divi-addon).
+* COMPATIBILITY - Elementor Website Builder compatibility moved to a separate plugin [WP-Stateless - Elementor Website Builder Addon](https://github.com/udx/wp-stateless-elementor-addon).
+* COMPATIBILITY - Gravity Forms compatibility moved to a separate plugin [WP-Stateless - Gravity Forms Addon](https://github.com/udx/wp-stateless-gravity-forms-addon).
+* COMPATIBILITY - Gravity Forms Signature compatibility moved to a separate plugin [WP-Stateless - Gravity Forms Signature Addon](https://github.com/udx/wp-stateless-gravity-forms-signature-addon).
+* COMPATIBILITY - LearnDash® LMS compatibility moved to a separate plugin [WP-Stateless - LearnDash LMS Plugin Addon](https://github.com/udx/wp-stateless-learndash-addon).
+* COMPATIBILITY - LiteSpeed Cache compatibility moved to a separate plugin [WP-Stateless - LiteSpeed Cache Addon](https://github.com/udx/wp-stateless-litespeed-cache-addon).
+* COMPATIBILITY - Polylang Pro compatibility moved to a separate plugin [WP-Stateless - Polylang Pro Addon](https://github.com/udx/wp-stateless-polylang-pro-addon).
+* COMPATIBILITY - Simple Local Avatar compatibility moved to a separate plugin [WP-Stateless - Simple Local Avatars Addon](https://github.com/udx/wp-stateless-simple-local-avatars-addon).
+* COMPATIBILITY - SiteOrigin CSS compatibility moved to a separate plugin [WP-Stateless - SiteOrigin CSS Addon](https://github.com/udx/wp-stateless-siteorigin-css-addon).
+* COMPATIBILITY - SiteOrigin Widgets Bundle compatibility moved to a separate plugin [WP-Stateless - SiteOrigin Widgets Bundle Addon](https://github.com/udx/wp-stateless-siteorigin-widgets-bundle-addon).
+
 #### 3.2.5
 * FIX - Folder setting does not allow custom structure [#608](https://github.com/udx/wp-stateless/issues/608).
 * FIX - Stateless mode Incompatible with Inline Uploader [#675](https://github.com/udx/wp-stateless/issues/675).
