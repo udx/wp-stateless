@@ -1712,7 +1712,7 @@
                 "wordpress-plugin",
                 "wp-admin"
             ],
-            "install-path": "../../wp-content/plugins/meta-box"
+            "install-path": "../wpmetabox/meta-box"
         }
     ],
     "dev": true,

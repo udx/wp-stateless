@@ -87,6 +87,9 @@
         },
         "product": false
       }
+    },
+    "installer-paths": {
+      "vendor/wpmetabox/meta-box": ["wpmetabox/meta-box"]
     }
   },
   "require-dev": {
