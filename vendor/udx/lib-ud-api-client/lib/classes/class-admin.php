@@ -472,7 +472,7 @@ namespace UsabilityDynamics\UD_API {
               }
               //echo "<pre>"; print_r( $v ); echo "</pre>"; //die();
               if( !empty( $api_key ) ) {
-                new License_Checker( array(
+                new Update_Checker( array(
                   'type' => $this->type,
                   'upgrade_url' => $this->api_url,
                   'name' => $v[ 'product_name' ],

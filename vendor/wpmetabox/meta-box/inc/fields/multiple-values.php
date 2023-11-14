@@ -1,4 +1,6 @@
 <?php
+defined( 'ABSPATH' ) || die;
+
 /**
  * This class implements common methods used in fields which have multiple values
  * like checkbox list, autocomplete, etc.
@@ -7,12 +9,6 @@
  * meta value. Briefly:
  * - If field is cloneable, value is saved as a single entry in the database
  * - Otherwise value is saved as multiple entries
- *
- * @package Meta Box
- */
-
-/**
- * Multiple values field class.
  */
 abstract class RWMB_Multiple_Values_Field extends RWMB_Field {
 	/**

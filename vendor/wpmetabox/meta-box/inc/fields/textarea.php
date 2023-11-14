@@ -1,12 +1,8 @@
 <?php
-/**
- * The textarea field.
- *
- * @package Meta Box
- */
+defined( 'ABSPATH' ) || die;
 
 /**
- * Textarea field class.
+ * The textarea field.
  */
 class RWMB_Textarea_Field extends RWMB_Field {
 	/**
@@ -34,18 +30,15 @@ class RWMB_Textarea_Field extends RWMB_Field {
 	 */
 	public static function normalize( $field ) {
 		$field = parent::normalize( $field );
-		$field = wp_parse_args(
-			$field,
-			array(
-				'autocomplete' => false,
-				'cols'         => false,
-				'rows'         => 3,
-				'maxlength'    => false,
-				'minlength'    => false,
-				'wrap'         => false,
-				'readonly'     => false,
-			)
-		);
+		$field = wp_parse_args( $field, [
+			'autocomplete' => false,
+			'cols'         => false,
+			'rows'         => 3,
+			'maxlength'    => false,
+			'minlength'    => false,
+			'wrap'         => false,
+			'readonly'     => false,
+		] );
 
 		return $field;
 	}
@@ -59,20 +52,17 @@ class RWMB_Textarea_Field extends RWMB_Field {
 	 * @return array
 	 */
 	public static function get_attributes( $field, $value = null ) {
-		$attributes           = parent::get_attributes( $field, $value );
-		$attributes           = wp_parse_args(
-			$attributes,
-			array(
-				'autocomplete' => $field['autocomplete'],
-				'cols'         => $field['cols'],
-				'rows'         => $field['rows'],
-				'maxlength'    => $field['maxlength'],
-				'minlength'    => $field['minlength'],
-				'wrap'         => $field['wrap'],
-				'readonly'     => $field['readonly'],
-				'placeholder'  => $field['placeholder'],
-			)
-		);
+		$attributes = parent::get_attributes( $field, $value );
+		$attributes = wp_parse_args( $attributes, [
+			'autocomplete' => $field['autocomplete'],
+			'cols'         => $field['cols'],
+			'rows'         => $field['rows'],
+			'maxlength'    => $field['maxlength'],
+			'minlength'    => $field['minlength'],
+			'wrap'         => $field['wrap'],
+			'readonly'     => $field['readonly'],
+			'placeholder'  => $field['placeholder'],
+		] );
 
 		return $attributes;
 	}

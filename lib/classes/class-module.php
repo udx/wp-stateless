@@ -22,66 +22,6 @@ namespace wpCloud\StatelessMedia {
      */
     public function __construct() {
       add_action('admin_init', array($this, 'save_modules'), 1);
-
-      /**
-       * Dynamic Image Support
-       */
-      new DynamicImageSupport();
-
-      /**
-       * Google App Engine
-       */
-      new GoogleAppEngine();
-
-      /**
-       * Support for Imagify
-       */
-      new Imagify();
-
-      /**
-       * Support for ShortPixel Image Optimizer
-       */
-      new ShortPixel();
-
-      /**
-       * Support for SiteOrigin CSS files
-       */
-      new SOCSS();
-
-      /**
-       * Support for SiteOrigin widget CSS files
-       */
-      new SOWidgetCSS();
-
-      /**
-       * VidoRev
-       */
-      new VidoRev();
-
-      /**
-       * WP Retina 2x
-       */
-      new WPRetina2x();
-
-      /**
-       * Support for WPForms
-       */
-      new WPSmush();
-
-      /**
-       * Support for WPForms
-       */
-      new CompatibilityWooExtraProductOptions();
-
-      /**
-       * Support for WPBakery Page Builder
-       */
-      new WPBakeryPageBuilder();
-
-      /**
-       * Support for WPForms
-       */
-      new WPForms();
     }
 
     /**

@@ -54,6 +54,13 @@ namespace wpCloud\StatelessMedia {
        * @author peshkov@UD
        */
       protected function __construct($args) {
+        /**
+         * Need to be loaded before plugin initialization.
+         */
+        if ( !(defined('WP_STATELESS_COMPATIBILITY_GAE') && !WP_STATELESS_COMPATIBILITY_GAE) ) {
+          AppEngine::instance();
+        }
+
         parent::__construct($args);
 
         /**
@@ -73,6 +80,7 @@ namespace wpCloud\StatelessMedia {
         // Initialize compatibility modules.
         add_action('plugins_loaded', function () {
           new Module();
+          DynamicImageSupport::instance();
         });
 
         /**
@@ -220,6 +228,19 @@ namespace wpCloud\StatelessMedia {
                * Replacing local path to gs:// for using it on StreamWrapper
                */
               add_filter('upload_dir', array($this, 'filter_upload_dir'), 99);
+
+              /**
+               * Stateless mode working only with GD library
+               */
+              add_filter('wp_image_editors', array($this, 'select_wp_image_editors'));
+
+              /**
+               * Init GS client
+               */
+              global $gs_client;
+              if ($gs_client = $this->init_gs_client()) {
+                StreamWrapper::register($gs_client);
+              }
             }
 
             if ($this->get('sm.delete_remote') == 'true') {
@@ -246,7 +267,9 @@ namespace wpCloud\StatelessMedia {
            */
           add_filter('wp_image_editors', array($this, 'select_wp_image_editors'));
 
-          //init GS client
+          /**
+           * Init GS client
+           */
           global $gs_client;
           if ($gs_client = $this->init_gs_client()) {
             StreamWrapper::register($gs_client);
@@ -723,9 +746,9 @@ namespace wpCloud\StatelessMedia {
        * @return array
        */
       public function attachment_modal_meta_box_callback($form_fields, $post) {
-
-        //do not show on media edit page, only on modal
-        if (isset($_GET['post'])) {
+        // Do not show on media edit page, only on modal
+        // Do not show if we are not in Media Library
+        if ( isset($_GET['post']) || wp_doing_ajax() ) {
           return $form_fields;
         }
 

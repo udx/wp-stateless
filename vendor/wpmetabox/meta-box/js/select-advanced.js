@@ -10,7 +10,7 @@
 	 */
 	function reorderSelected( $select2 ) {
 		var selected = $select2.data( 'selected' );
-		if ( ! selected ) {
+		if ( !selected ) {
 			return;
 		}
 		selected.forEach( function ( value ) {
@@ -34,20 +34,20 @@
 
 		if ( options.ajax_data ) {
 			options.ajax.dataType = 'json';
-			options.ajax.data = function( params ) {
+			options.ajax.data = function ( params ) {
 				return Object.assign( options.ajax_data, params );
 			};
 			options.ajax.processResults = function ( response ) {
-				var items = response.data.items.map( function( item ) {
+				var items = response.data.items.map( function ( item ) {
 					return {
 						id: item.value,
-						text: item.label,
-					}
+						text: _.unescape( item.label ),
+					};
 				} );
 
 				var results = {
 					results: items
-				}
+				};
 				if ( response.data.hasOwnProperty( 'more' ) ) {
 					results.pagination = { more: true };
 				}
@@ -64,35 +64,35 @@
 				var data = $.extend( true, {}, params.data );
 				delete data.field.id;
 				delete data.action;
-				if ( ! data.term ) {
+				if ( !data.term ) {
 					delete data.term;
 				}
 
 				var key = JSON.stringify( data );
-				if ( cache[key] ) {
-					success( cache[key] );
+				if ( cache[ key ] ) {
+					success( cache[ key ] );
 					return;
 				}
 
 				var actions = {
-					'post'             : 'rwmb_get_posts',
-					'taxonomy'         : 'rwmb_get_terms',
+					'post': 'rwmb_get_posts',
+					'taxonomy': 'rwmb_get_terms',
 					'taxonomy_advanced': 'rwmb_get_terms',
-					'user'             : 'rwmb_get_users'
+					'user': 'rwmb_get_users'
 				};
 				params.data.action = actions[ params.data.field.type ];
 				params.method = 'POST';
 
 				return $.ajax( params ).then( function ( data ) {
-					cache[key] = data;
+					cache[ key ] = data;
 					return data;
 				} ).then( success ).fail( failure );
-		   };
+			};
 		}
 
 		$this.show().select2( options );
 
-		if ( ! $this.attr( 'multiple' ) ) {
+		if ( !$this.attr( 'multiple' ) ) {
 			return;
 		}
 
@@ -113,7 +113,21 @@
 		$( e.target ).find( '.rwmb-select_advanced' ).each( transform );
 	}
 
+	function fixDropdownPosition( e ) {
+		if ( $( "#wpadminbar" ).length === 0 ) {
+			return;
+		}
+
+		if ( rwmbSelect2.isAdmin == 1 ) {
+			$( 'body > .select2-container--open .select2-dropdown--above' ).css( 'top', 0 );
+			return;
+		}
+
+		$( 'body > .select2-container:last-child > .select2-dropdown' ).css( 'top', $( document.body ).offset().top );
+	};
+
 	rwmb.$document
 		.on( 'mb_ready', init )
-		.on( 'clone', '.rwmb-select_advanced', transform );
+		.on( 'clone', '.rwmb-select_advanced', transform )
+		.on( 'select2:open', fixDropdownPosition );
 } )( jQuery, rwmb );

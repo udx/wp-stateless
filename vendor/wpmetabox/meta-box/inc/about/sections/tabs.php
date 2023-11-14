@@ -1,11 +1,5 @@
-<?php
-/**
- * Tabs navigation.
- *
- * @package Meta Box
- */
+<?php defined( 'ABSPATH' ) || die ?>
 
-?>
 <h2 class="nav-tab-wrapper">
 	<a href="#getting-started" class="nav-tab nav-tab-active"><?php esc_html_e( 'Getting Started', 'meta-box' ); ?></a>
 	<?php do_action( 'rwmb_about_tabs' ); ?>

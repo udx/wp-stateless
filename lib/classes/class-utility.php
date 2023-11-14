@@ -309,7 +309,8 @@ namespace wpCloud\StatelessMedia {
                 'contentDisposition' => $_contentDisposition,
               ));
 
-              if ($sm_mode == 'stateless' && !wp_doing_ajax() && !wp_doing_cron()) {
+              if ($sm_mode == 'stateless' && !wp_doing_ajax() && !wp_doing_cron() 
+                || ($sm_mode == 'stateless' && wp_doing_ajax()) ) {
                 global $gs_client;
 
                 $media_args = wp_parse_args($media_args, array(

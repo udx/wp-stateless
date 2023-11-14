@@ -78,6 +78,7 @@ class JWT
      *                                                                      Supported algorithms are 'ES384','ES256',
      *                                                                      'HS256', 'HS384', 'HS512', 'RS256', 'RS384'
      *                                                                      and 'RS512'.
+     * @param stdClass               $headers                               Optional. Populates stdClass with headers.
      *
      * @return stdClass The JWT's payload as a PHP object
      *
@@ -94,7 +95,8 @@ class JWT
      */
     public static function decode(
         string $jwt,
-        $keyOrKeyArray
+        $keyOrKeyArray,
+        stdClass &$headers = null
     ): stdClass {
         // Validate JWT
         $timestamp = \is_null(static::$timestamp) ? \time() : static::$timestamp;
@@ -110,6 +112,9 @@ class JWT
         $headerRaw = static::urlsafeB64Decode($headb64);
         if (null === ($header = static::jsonDecode($headerRaw))) {
             throw new UnexpectedValueException('Invalid header encoding');
+        }
+        if ($headers !== null) {
+            $headers = $header;
         }
         $payloadRaw = static::urlsafeB64Decode($bodyb64);
         if (null === ($payload = static::jsonDecode($payloadRaw))) {
@@ -147,24 +152,30 @@ class JWT
 
         // Check the nbf if it is defined. This is the time that the
         // token can actually be used. If it's not yet that time, abort.
-        if (isset($payload->nbf) && $payload->nbf > ($timestamp + static::$leeway)) {
-            throw new BeforeValidException(
-                'Cannot handle token prior to ' . \date(DateTime::ISO8601, $payload->nbf)
+        if (isset($payload->nbf) && floor($payload->nbf) > ($timestamp + static::$leeway)) {
+            $ex = new BeforeValidException(
+                'Cannot handle token with nbf prior to ' . \date(DateTime::ISO8601, (int) $payload->nbf)
             );
+            $ex->setPayload($payload);
+            throw $ex;
         }
 
         // Check that this token has been created before 'now'. This prevents
         // using tokens that have been created for later use (and haven't
         // correctly used the nbf claim).
-        if (isset($payload->iat) && $payload->iat > ($timestamp + static::$leeway)) {
-            throw new BeforeValidException(
-                'Cannot handle token prior to ' . \date(DateTime::ISO8601, $payload->iat)
+        if (!isset($payload->nbf) && isset($payload->iat) && floor($payload->iat) > ($timestamp + static::$leeway)) {
+            $ex = new BeforeValidException(
+                'Cannot handle token with iat prior to ' . \date(DateTime::ISO8601, (int) $payload->iat)
             );
+            $ex->setPayload($payload);
+            throw $ex;
         }
 
         // Check if this token has expired.
         if (isset($payload->exp) && ($timestamp - static::$leeway) >= $payload->exp) {
-            throw new ExpiredException('Expired token');
+            $ex = new ExpiredException('Expired token');
+            $ex->setPayload($payload);
+            throw $ex;
         }
 
         return $payload;
@@ -215,7 +226,7 @@ class JWT
      *
      * @param string $msg  The message to sign
      * @param string|resource|OpenSSLAsymmetricKey|OpenSSLCertificate  $key  The secret key.
-     * @param string $alg  Supported algorithms are 'ES384','ES256', 'ES256K', 'HS256',
+     * @param string $alg  Supported algorithms are 'EdDSA', 'ES384', 'ES256', 'ES256K', 'HS256',
      *                    'HS384', 'HS512', 'RS256', 'RS384', and 'RS512'
      *
      * @return string An encrypted message
@@ -278,7 +289,7 @@ class JWT
      *
      * @param string $msg         The original message (header and body)
      * @param string $signature   The original signature
-     * @param string|resource|OpenSSLAsymmetricKey|OpenSSLCertificate  $keyMaterial For HS*, a string key works. for RS*, must be an instance of OpenSSLAsymmetricKey
+     * @param string|resource|OpenSSLAsymmetricKey|OpenSSLCertificate  $keyMaterial For Ed*, ES*, HS*, a string key works. for RS*, must be an instance of OpenSSLAsymmetricKey
      * @param string $alg         The algorithm
      *
      * @return bool
@@ -400,12 +411,27 @@ class JWT
      */
     public static function urlsafeB64Decode(string $input): string
     {
+        return \base64_decode(self::convertBase64UrlToBase64($input));
+    }
+
+    /**
+     * Convert a string in the base64url (URL-safe Base64) encoding to standard base64.
+     *
+     * @param string $input A Base64 encoded string with URL-safe characters (-_ and no padding)
+     *
+     * @return string A Base64 encoded string with standard characters (+/) and padding (=), when
+     * needed.
+     *
+     * @see https://www.rfc-editor.org/rfc/rfc4648
+     */
+    public static function convertBase64UrlToBase64(string $input): string
+    {
         $remainder = \strlen($input) % 4;
         if ($remainder) {
             $padlen = 4 - $remainder;
             $input .= \str_repeat('=', $padlen);
         }
-        return \base64_decode(\strtr($input, '-_', '+/'));
+        return \strtr($input, '-_', '+/');
     }
 
     /**
