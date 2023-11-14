@@ -30,10 +30,10 @@
 * COMPATIBILITY - Imagify compatibility moved to a separate plugin [WP-Stateless - Imagify Addon](https://github.com/udx/wp-stateless-imagify-addon).
 * COMPATIBILITY - The Events Calendar compatibility moved to a separate plugin [WP-Stateless - The Events Calendar Addon](https://github.com/udx/wp-stateless-the-events-calendar-addon).
 * COMPATIBILITY - any compatibility is enabled by default after installing the addon.
-* ENHANCEMENT - Updated Client library for Google APIs to version 2.15.1.
-* ENHANCEMENT - Updated Meta Box library to version 5.8.2.
+* ENHANCEMENT - Updated Client library for Google APIs from 2.15.0 to 2.15.1.
+* ENHANCEMENT - Updated Meta Box library from 5.6.3 to 5.8.2.
 * ENHANCEMENT - Updated Meta Box Tabs to version 1.1.17.
-* ENHANCEMENT - Updated JWT library.
+* ENHANCEMENT - Updated PHP JWT library from 6.6.0 to 6.9.0.
 
 = 3.2.5 =
 * FIX - Folder setting does not allow custom structure [#608](https://github.com/udx/wp-stateless/issues/608).
