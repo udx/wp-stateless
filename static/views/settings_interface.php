@@ -9,7 +9,7 @@
     <?php if (!is_network_admin() && !apply_filters('wp_stateless_is_app_engine', false) && ud_get_stateless_media('sm.mode') != 'disabled') : ?>
       <a href="#stless_sync_tab" class="stless_setting_tab nav-tab"><?php _e('Sync', ud_get_stateless_media()->domain); ?></a>
     <?php endif; ?>
-    <a href="#stless_compatibility_tab" class="stless_setting_tab nav-tab"><?php _e('Compatibility', ud_get_stateless_media()->domain); ?></a>
+    <a href="#stless_compatibility_tab" class="stless_setting_tab nav-tab"><?php _e('Addons', ud_get_stateless_media()->domain); ?></a>
   </h2>
 
   <div class="stless_settings">
@@ -270,39 +270,13 @@
     <?php endif; ?>
     <div id="stless_compatibility_tab" class="stless_settings_content" ng-controller="wpStatelessCompatibility">
       <div class="container-fluid">
-        <h2><?php _e("Enable or disable compatibility with other plugins."); ?></h2>
-        <p><?php _e(sprintf("Having an issue with another plugin? <a class='' target='_blank' href='%s' >Submit feedback</a> and let us know your issue!", "https://wordpress.org/support/plugin/wp-stateless/")); ?></p>
-        <form method="post" action="">
-          <input type="hidden" name="action" value="stateless_modules">
-          <?php wp_nonce_field('wp-stateless-modules', '_smnonce'); ?>
-
-          <table class="form-table">
-            <tr ng-repeat="module in modules">
-              <th>
-                <label for="{{module.id}}">{{module.title}}</label>
-              </th>
-              <td>
-                <select name="stateless-modules[{{module.id}}]" id="{{module.id}}" ng-model="module.enabled" ng-disabled="module.is_constant || (module.is_network_override ||!module.is_plugin_active ||!module.is_mode_supported) && !module.is_network_admin">
-                  <?php if (is_network_admin()) : ?>
-                    <option value=""><?php _e("Don't override"); ?></option>
-                  <?php endif; ?>
-                  <option value="inactive" ng-show="module.enabled == 'inactive'"><?php _e('Not Available', ud_get_stateless_media()->domain); ?></option>
-                  <option value="false"><?php _e('Disable', ud_get_stateless_media()->domain); ?></option>
-                  <option value="true"><?php _e('Enable', ud_get_stateless_media()->domain); ?></option>
-                </select>
-                <p class="description">
-                  <strong ng-show="!module.is_plugin_active && module.is_plugin && module.is_mode_supported"><?php _e("Please activate the plugin first."); ?></strong>
-                  <strong ng-show="!module.is_plugin_active && module.is_theme && module.is_mode_supported"><?php _e("Please activate the theme first."); ?></strong>
-                  <strong ng-show="!module.is_mode_supported"><?php _e("This compatibility does not support {{module.mode}} mode."); ?></strong>
-                  <strong ng-show="module.is_constant"><?php _e("Currently configured via a constant."); ?></strong>
-                  <strong ng-show="module.is_network_override"><?php _e("Currently configured via network settings."); ?></strong>
-                  <span ng-bind-html="module.description"></span>
-                </p>
-              </td>
-            </tr>
-          </table>
-          <?php submit_button(null, 'primary', 'submit', true, array('id' => 'save-compatibility')); ?>
-        </form>
+        <p><?php _e(
+            sprintf(
+              "Browse <a class='' target='_blank' href='%s' >available addons</a> that provide extended support for other plugins. Are you having an issue with another plugin? <a class='' target='_blank' href='%s' >Submit feedback</a> and let us know your issue!",
+              'https://stateless.udx.io/addons/',
+              'https://github.com/udx/wp-stateless/issues'
+            )); 
+        ?></p>
       </div>
     </div>
   </div>
