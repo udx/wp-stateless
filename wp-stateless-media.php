@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name: WP-Stateless
- * Plugin URI: https://wp-stateless.github.io/
+ * Plugin URI: https://stateless.udx.io/
  * Description: Upload and serve your WordPress media files from Google Cloud Storage.
  * Author: UDX
  * Version: 4.0.0

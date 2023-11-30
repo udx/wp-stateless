@@ -33,6 +33,30 @@ New to Google Cloud? Google is offering you a [$300 credit](https://console.clou
 * Serverless platform compatible, including Google App Engine.
 * Multisite compatible.
 
+### Addons
+* [WP-Stateless - BuddyBoss Platform Addon](https://github.com/udx/wp-stateless-buddyboss-addon)
+* [WP-Stateless - BuddyPress Addon](https://github.com/udx/wp-stateless-buddypress-addon)
+* [WP-Stateless - Contact Form by WPForms Addon](https://github.com/udx/wp-stateless-wp-forms-lite-addon)
+* [WP-Stateless - Divi theme Addon](https://github.com/udx/wp-stateless-divi-addon)
+* [WP-Stateless - Easy Digital Downloads Addon](https://github.com/udx/wp-stateless-easy-digital-downloads-addon)
+* [WP-Stateless - Elementor Website Builder Addon](https://github.com/udx/wp-stateless-elementor-addon)
+* [WP-Stateless - EWWW Image Optimizer Addon](https://github.com/udx/wp-stateless-ewww-addon)
+* [WP-Stateless - Gravity Forms Addon](https://github.com/udx/wp-stateless-gravity-forms-addon)
+* [WP-Stateless - Gravity Forms Signature Addon](https://github.com/udx/wp-stateless-gravity-forms-signature-addon)
+* [WP-Stateless - Imagify Addon](https://github.com/udx/wp-stateless-imagify-addon)
+* [WP-Stateless - LearnDash LMS Plugin Addon](https://github.com/udx/wp-stateless-learndash-addon)
+* [WP-Stateless - LiteSpeed Cache Addon](https://github.com/udx/wp-stateless-litespeed-cache-addon)
+* [WP-Stateless - Polylang Pro Addon](https://github.com/udx/wp-stateless-polylang-pro-addon)
+* [WP-Stateless - Simple Local Avatars Addon](https://github.com/udx/wp-stateless-simple-local-avatars-addon)
+* [WP-Stateless - SiteOrigin CSS Addon](https://github.com/udx/wp-stateless-siteorigin-css-addon).
+* [WP-Stateless - SiteOrigin Widgets Bundle Addon](https://github.com/udx/wp-stateless-siteorigin-widgets-bundle-addon)
+* [WP-Stateless - WPBakery Page Builder Addon](https://github.com/udx/wp-stateless-wpbakery-page-builder-addon)
+* [WP-Stateless - WooCommerce Addon](https://github.com/udx/wp-stateless-woocommerce-addon)
+* [WP-Stateless - WooCommerce Extra Product Options Addon](https://github.com/udx/wp-stateless-woo-extra-product-options-addon)
+* [WP-Stateless - ShortPixel Image Optimizer Addon](https://github.com/udx/wp-stateless-shortpixel-addon)
+* [WP-Stateless - Smush Addon](https://github.com/udx/wp-stateless-wp-smushit-addon)
+* [WP-Stateless - The Events Calendar Addon](https://github.com/udx/wp-stateless-the-events-calendar-addon)
+
 ### Support, Feedback, & Contribute
 We welcome community involvement via the [GitHub repository](https://github.com/udx/wp-stateless).
 
