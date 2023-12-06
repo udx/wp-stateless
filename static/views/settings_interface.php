@@ -263,7 +263,7 @@
         <?php submit_button(null, 'primary', 'submit', true, array('id' => 'save-settings')); ?>
       </form>
     </div>
-    <?php if (!is_network_admin() && !!apply_filters('wp_stateless_is_app_engine', false) && ud_get_stateless_media('sm.mode') != 'disabled') : ?>
+    <?php if (!is_network_admin() && !apply_filters('wp_stateless_is_app_engine', false) && ud_get_stateless_media('sm.mode') != 'disabled') : ?>
       <div id="stless_sync_tab" class="stless_settings_content">
         <?php include 'processing_interface.php'; ?>
       </div>
