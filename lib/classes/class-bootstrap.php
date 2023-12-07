@@ -1762,7 +1762,7 @@ namespace wpCloud\StatelessMedia {
         if (is_array($sm_cloud) && !empty($sm_cloud['fileLink'])) {
           $_url = parse_url($sm_cloud['fileLink']);
           $url = !isset($_url['scheme']) ? ('https:' . $sm_cloud['fileLink']) : $sm_cloud['fileLink'];
-          return apply_filters('wp_stateless_bucket_link', $url);
+          $url = apply_filters('wp_stateless_bucket_link', $url);
         } elseif (is_multisite() && empty($sm_cloud)) {
           $_file = get_post_meta($post_id, '_wp_attached_file', true);
           if ($_file) {
@@ -1770,7 +1770,7 @@ namespace wpCloud\StatelessMedia {
               $default_dir = true;
               $uploads = wp_get_upload_dir();
               $default_dir = false;
-              return $uploads['baseurl'] . '/' . $_file;
+              $url = $uploads['baseurl'] . '/' . $_file;
             } else {
               $uploads = wp_get_upload_dir();
               $default_dir = false;
@@ -1790,10 +1790,11 @@ namespace wpCloud\StatelessMedia {
             $uploads = wp_get_upload_dir();
             $default_dir = false;
 
-            return $uploads['baseurl'] . '/' . $_file;
+            $url = $uploads['baseurl'] . '/' . $_file;
           }
         }
-        return $url;
+
+        return apply_filters('wp_stateless_attachment_url', $url, $post_id);
       }
 
       /**
