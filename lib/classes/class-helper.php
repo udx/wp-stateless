@@ -3,7 +3,7 @@
 /**
  * Helper.
  *
- * @since 4.0.0
+ * @since 3.3.0
  */
 
 namespace wpCloud\StatelessMedia {

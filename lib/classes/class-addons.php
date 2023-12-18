@@ -7,7 +7,7 @@
  * Shows message to the user if addon is recommended.
  * Responsible for showing the list of addons on the settings page.
  *
- * @since 4.0.0
+ * @since 3.3.0
  */
 
 namespace wpCloud\StatelessMedia {
