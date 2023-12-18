@@ -49,17 +49,7 @@ abstract class Compatibility {
    */
   public function is_plugin_active() {
     if (!empty($this->theme_name)) {
-      $theme = wp_get_theme();
-      if ($theme->Name == $this->theme_name) {
-        return true;
-      }
-
-      $parent_theme = $theme->parent();
-      if (is_a($parent_theme, 'WP_Theme') && $parent_theme->Name == $this->theme_name) {
-        return true;
-      }
-
-      return false;
+      return Helper::is_theme_name($this->theme_name);
     }
 
     if (!empty($this->plugin_file)) {

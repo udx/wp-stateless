@@ -491,6 +491,8 @@ namespace wpCloud\StatelessMedia {
           $wildcards = array_unique( array_merge($root_dir_values, array_keys($wildcards)) );
         }
 
+        $tab = isset($_GET['tab']) && !empty($_GET['tab']) ? $_GET['tab'] : 'stless_settings_tab';
+
         include $this->bootstrap->path( '/static/views/settings_interface.php', 'dir' );
       }
 

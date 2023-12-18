@@ -1,0 +1,100 @@
+.addons-filter .subsubsub {
+  float: none;
+}
+
+.addons-list {
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: 20px;
+}
+
+.addons-list .addon-card {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  width: 30%;
+  background-color: #fff;
+  border: 1px solid #e5e5e5;
+  margin: 10px;
+  padding: 30px 20px 20px 20px;
+  box-sizing: border-box;
+}
+
+.addons-list .addon-card .addon-status {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-weight: bold;
+  color: #fff;
+  border-radius: 20px;
+  padding: 5px 10px;
+}
+
+.addons-list .addon-card.addon-card.recommended .addon-status {
+  background-color: #f05323;
+}
+
+.addons-list .addon-card.addon-card.active .addon-status {
+  background-color: #00a32a;
+}
+
+.addons-list .addon-card .addon-head {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.addons-list .addon-card .addon-info {
+  padding-left: 10px;
+}
+
+.addons-list .addon-card .addon-title {
+  text-align: center;
+}
+
+.addons-list .addon-card .addon-title a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.addons-list .addon-card .addon-title a:hover,
+.addons-list .addon-card .addon-title a:active {
+  color: #2271b1;
+  text-decoration: underline;
+}
+
+.addons-list .addon-card .addon-description {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.addons-list .addon-icon {
+  display: flex;
+  align-items: center;
+}
+
+.addons-list .addon-icon img {
+  display: block;
+  height: 80px;
+  width: auto;
+}
+
+.addons-list .addon-actions {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+@media screen and (max-width: 1189px) {
+  .addons-list .addon-card {
+    width: 46%;
+  }
+}
+
+@media screen and (max-width: 756px) {
+  .addons-list .addon-card {
+    width: 100%;
+    margin: 0 0 20px 0;
+  }
+}

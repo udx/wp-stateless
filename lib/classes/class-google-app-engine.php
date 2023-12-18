@@ -3,7 +3,7 @@
 /**
  * Google App Engine Compatibility
  *
- *
+ * Detects is are running on Google App Engine, shows message and automatically enables 'Stateless' mode
  *
  * @since 4.0.0
  */

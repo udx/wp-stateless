@@ -116,6 +116,7 @@ namespace wpCloud\StatelessMedia {
         ImageSync::instance();
         FileSync::instance();
         NonLibrarySync::instance();
+        Addons::instance();
 
         // Invoke REST API
         add_action('rest_api_init', array($this, 'api_init'));
@@ -179,7 +180,7 @@ namespace wpCloud\StatelessMedia {
               'title' => __('Media Library Synchronization Underway', ud_get_stateless_media()->domain),
               'message' => __('WP-Stateless is synchronizing your media library in accordance with the Mode setting. You can view progress or stop the process via the WP-Stateless Sync settings area.', ud_get_stateless_media()->domain),
               'button' => __('View Synchronization', ud_get_stateless_media()->domain),
-              'button_link' => admin_url('upload.php?page=stateless-settings#stless_sync_tab'),
+              'button_link' => admin_url('upload.php?page=stateless-settings&tab=stless_sync_tab'),
               'key' => 'processing-in-progress'
             ], 'message');
             break;
@@ -1207,6 +1208,7 @@ namespace wpCloud\StatelessMedia {
         wp_localize_script('wp-stateless-settings', 'stateless_l10n', $this->get_l10n_data());
 
         wp_register_style('wp-stateless-settings', $this->path('static/styles/wp-stateless-settings.css', 'url'), array(), self::$version);
+        wp_register_style('wp-stateless-addons', $this->path('static/styles/wp-stateless-addons.css', 'url'), array(), self::$version);
 
         // Sync tab
         wp_register_script('wp-stateless-angular', ud_get_stateless_media()->path('static/scripts/angular.min.js', 'url'), array(), '1.8.0', true);
@@ -1282,6 +1284,7 @@ namespace wpCloud\StatelessMedia {
             wp_enqueue_script('wp-stateless-settings');
             wp_enqueue_script('wp-stateless-select2');
             wp_enqueue_style('wp-stateless-settings');
+            wp_enqueue_style('wp-stateless-addons');
 
             // Sync tab
             wp_enqueue_script('wp-stateless-angular');
