@@ -1229,6 +1229,7 @@ namespace wpCloud\StatelessMedia {
           $settings['key_json'] = "Currently configured via a constant.";
         }
         wp_localize_script('wp-stateless', 'wp_stateless_settings', $settings);
+        wp_localize_script('wp-stateless', 'wp_stateless_compatibility', Module::get_modules());
       }
 
       /**

@@ -1,4 +1,4 @@
-#### 4.0.0
+#### 3.3.0
 * NEW - Added new filter `wp_stateless_attachment_url`. Allows to customize attachment URL after WP-Stateless generates it based on it's internal conditions.
 * FIX - Stateless mode Incompatible with Media Uploader in Media Library Grid mode [#675](https://github.com/udx/wp-stateless/issues/675).
 * FIX - Prevent duplicating messages in Admin Panel.
@@ -7,30 +7,6 @@
 * COMPATIBILITY - Removed compatibility with "Advanced Custom Fields: Image Crop Add-on", because plugin is deprecated.
 * COMPATIBILITY - Removed compatibility with "VidoRev" plugin.
 * COMPATIBILITY - Removed compatibility with "WP Retina 2x" plugin.
-* COMPATIBILITY - BuddyBoss Platform compatibility moved to a separate plugin [WP-Stateless - BuddyBoss Platform Addon](https://github.com/udx/wp-stateless-buddyboss-addon).
-* COMPATIBILITY - BuddyPress compatibility moved to a separate plugin [WP-Stateless - BuddyPress Addon](https://github.com/udx/wp-stateless-buddypress-addon).
-* COMPATIBILITY - Easy Digital Downloads compatibility moved to a separate plugin [WP-Stateless - Easy Digital Downloads Addon](https://github.com/udx/wp-stateless-easy-digital-downloads-addon).
-* COMPATIBILITY - Divi theme compatibility moved to a separate plugin [WP-Stateless - Divi theme Addon](https://github.com/udx/wp-stateless-divi-addon).
-* COMPATIBILITY - Elementor Website Builder compatibility moved to a separate plugin [WP-Stateless - Elementor Website Builder Addon](https://github.com/udx/wp-stateless-elementor-addon).
-* COMPATIBILITY - Gravity Forms compatibility moved to a separate plugin [WP-Stateless - Gravity Forms Addon](https://github.com/udx/wp-stateless-gravity-forms-addon).
-* COMPATIBILITY - Gravity Forms Signature compatibility moved to a separate plugin [WP-Stateless - Gravity Forms Signature Addon](https://github.com/udx/wp-stateless-gravity-forms-signature-addon).
-* COMPATIBILITY - LearnDash® LMS compatibility moved to a separate plugin [WP-Stateless - LearnDash LMS Plugin Addon](https://github.com/udx/wp-stateless-learndash-addon).
-* COMPATIBILITY - LiteSpeed Cache compatibility moved to a separate plugin [WP-Stateless - LiteSpeed Cache Addon](https://github.com/udx/wp-stateless-litespeed-cache-addon).
-* COMPATIBILITY - Polylang Pro compatibility moved to a separate plugin [WP-Stateless - Polylang Pro Addon](https://github.com/udx/wp-stateless-polylang-pro-addon).
-* COMPATIBILITY - Simple Local Avatar compatibility moved to a separate plugin [WP-Stateless - Simple Local Avatars Addon](https://github.com/udx/wp-stateless-simple-local-avatars-addon).
-* COMPATIBILITY - SiteOrigin CSS compatibility moved to a separate plugin [WP-Stateless - SiteOrigin CSS Addon](https://github.com/udx/wp-stateless-siteorigin-css-addon).
-* COMPATIBILITY - SiteOrigin Widgets Bundle compatibility moved to a separate plugin [WP-Stateless - SiteOrigin Widgets Bundle Addon](https://github.com/udx/wp-stateless-siteorigin-widgets-bundle-addon).
-* COMPATIBILITY - SiteOrigin Widgets Bundle compatibility moved to a separate plugin [WP-Stateless - SiteOrigin Widgets Bundle Addon](https://github.com/udx/wp-stateless-siteorigin-widgets-bundle-addon).
-* COMPATIBILITY - WPBakery Page Builder compatibility moved to a separate plugin [WP-Stateless - WPBakery Page Builder Addon](https://github.com/udx/wp-stateless-wpbakery-page-builder-addon).
-* COMPATIBILITY - WooCommerce compatibility moved to a separate plugin [WP-Stateless - WooCommerce Addon](https://github.com/udx/wp-stateless-woocommerce-addon).
-* COMPATIBILITY - WooCommerce Extra Product Options compatibility moved to a separate plugin [WP-Stateless - WooCommerce Extra Product Options Addon](https://github.com/udx/wp-stateless-woo-extra-product-options-addon).
-* COMPATIBILITY - Contact Form by WPForms compatibility moved to a separate plugin [WP-Stateless - Contact Form by WPForms Addon](https://github.com/udx/wp-stateless-wp-forms-lite-addon).
-* COMPATIBILITY - Smush compatibility moved to a separate plugin [WP-Stateless - Smush Addon](https://github.com/udx/wp-stateless-wp-smushit-addon).
-* COMPATIBILITY - ShortPixel Image Optimizer compatibility moved to a separate plugin [WP-Stateless - ShortPixel Image Optimizer Addon](https://github.com/udx/wp-stateless-shortpixel-addon).
-* COMPATIBILITY - EWWW Image Optimizer compatibility moved to a separate plugin [WP-Stateless - EWWW Image Optimizer Addon](https://github.com/udx/wp-stateless-ewww-addon).
-* COMPATIBILITY - Imagify compatibility moved to a separate plugin [WP-Stateless - Imagify Addon](https://github.com/udx/wp-stateless-imagify-addon).
-* COMPATIBILITY - The Events Calendar compatibility moved to a separate plugin [WP-Stateless - The Events Calendar Addon](https://github.com/udx/wp-stateless-the-events-calendar-addon).
-* COMPATIBILITY - any compatibility is enabled by default after installing the addon.
 * ENHANCEMENT - Updated Client library for Google APIs from 2.15.0 to 2.15.1.
 * ENHANCEMENT - Updated Meta Box library from 5.6.3 to 5.8.2.
 * ENHANCEMENT - Updated Meta Box Tabs to version 1.1.17.

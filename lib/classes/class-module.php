@@ -22,6 +22,117 @@ namespace wpCloud\StatelessMedia {
      */
     public function __construct() {
       add_action('admin_init', array($this, 'save_modules'), 1);
+
+      /**
+       * Support for BuddyBoss
+       */
+      new BuddyBoss();
+
+      /**
+       * Support for BuddyPress
+       */
+      new BuddyPress();
+
+      /**
+       * Support for Divi theme
+       */
+      new Divi();
+
+      /**
+       * Support for Easy Digital Downloads
+       */
+      new EDDDownloadMethod();
+
+      /**
+       * Support for Elementor
+       */
+      new Elementor();
+
+      /**
+       * Support for Ewww Image Optimizer
+       */
+      new EWWW();
+
+      /**
+       * Support for Imagify
+       */
+      new Imagify();
+
+      /**
+       * Support for Gravity Forms
+       */
+      new GravityForm();
+
+      /**
+       * Support for Gravity Forms Signature
+       */
+      new GravityFormSignature();
+
+      /**
+       * Support for LearnDash
+       */
+      new LearnDash();
+
+      /**
+       * Support for LiteSpeed Cache
+       */
+      new LSCacheWP();
+
+      /**
+       * Support for Polylang Pro
+       */
+      new Polylang();
+
+      /**
+       * Support for ShortPixel
+       */
+      new ShortPixel();
+
+      /**
+       * Support for Simple Local Avatars
+       */
+      new SimpleLocalAvatars();
+
+      /**
+       * Support for SiteOrigin CSS
+       */
+      new SOCSS();
+
+      /**
+       * Support for SiteOrigin Widgets Bundle
+       */
+      new SOWidgetCSS();
+
+      /**
+       * Support for The Events Calendar
+       */
+      new TheEventsCalendar();
+
+      /**
+       * Support for WooCommerce
+       */
+      new WooCommerce();
+
+      /**
+       * Support for WooCommerce Extra Product Options
+       */
+      new CompatibilityWooExtraProductOptions();
+
+      /**
+       * Support for WPBakery Page Builder
+       */
+      new WPBakeryPageBuilder();
+
+      /**
+       * Support for WPForms
+       */
+      new WPForms();
+
+      /**
+       * Support for Smush
+       */
+      new WPSmush();
+
     }
 
     /**

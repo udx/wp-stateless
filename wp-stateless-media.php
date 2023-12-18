@@ -4,11 +4,11 @@
  * Plugin URI: https://stateless.udx.io/
  * Description: Upload and serve your WordPress media files from Google Cloud Storage.
  * Author: UDX
- * Version: 4.0.0
+ * Version: 3.3.0
  * Text Domain: stateless-media
  * Author URI: https://www.udx.io
  *
- * Copyright 2012 - 2023 UDX ( email: info@udx.io )
+ * Copyright 2012 - 2024 UDX ( email: info@udx.io )
  *
  */
 
@@ -95,22 +95,6 @@ if( !function_exists( 'ud_stateless_media_message' ) ) {
     }
   }
   add_action( 'admin_notices', 'ud_stateless_media_message' );
-}
-
-if( !function_exists( 'ud_stateless_media_plugin_actions' ) ) {
-  /**
-   * Add 'Addons' link to plugin actions
-   *
-   * @author Usability Dynamics, Inc.
-   * @since 4.0.0
-   */
-  function ud_stateless_media_plugin_actions($links) {
-    $links['addons'] = '<a href="https://stateless.udx.io/addons/" style="color: #f05323" target="_blank" rel="noopener noreferrer">' . esc_html__( 'Addons', 'stateless-media' ) . '</a>';
-    
-    return $links;
-  }
-
-  add_action( 'plugin_action_links_' . plugin_basename( __FILE__ ), 'ud_stateless_media_plugin_actions' );
 }
 
 if( ud_check_stateless_media() ) {

@@ -276,7 +276,7 @@ var wpStatelessApp = angular
     $scope.sm.generatePreviewUrl()
   })
   .controller('wpStatelessCompatibility', function ($scope, $filter) {
-    $scope.modules = {}
+    $scope.modules = wp_stateless_compatibility || {}
   })
   .controller('wpStatelessProcessing', function ($scope, $http) {
     /**
