@@ -131,6 +131,20 @@ namespace wpCloud\StatelessMedia {
           if ($sm_mode == 'stateless') update_option('sm_mode', 'ephemeral');
         }
 
+        /**
+         * Upgrade to v4.0
+         */
+        if ( $version && version_compare($version, '4.0', '<') ) {
+          $modules = get_option('stateless-modules', []);
+          
+          if ( is_array($modules) && isset($modules['dynamic-image-support']) ) {
+            update_option('sm_dynamic_image_support', $modules['dynamic-image-support']);
+
+            unset($modules['dynamic-image-support']);
+            update_option('stateless-modules', $modules);
+          }
+        }
+
         update_option('wp_sm_version', ud_get_stateless_media()->args['version']);
       }
 
@@ -177,6 +191,20 @@ namespace wpCloud\StatelessMedia {
 
           $sm_mode_site = get_site_option('sm_mode');
           if ($sm_mode_site == 'stateless') update_site_option('sm_mode', 'ephemeral');
+        }
+
+        /**
+         * Upgrade to v4.0
+         */
+        if ( $version && version_compare($version, '4.0', '<') ) {
+          $modules = get_site_option('stateless-modules', []);
+          
+          if ( is_array($modules) && isset($modules['dynamic-image-support']) ) {
+            update_site_option('sm_dynamic_image_support', $modules['dynamic-image-support']);
+
+            unset($modules['dynamic-image-support']);
+            update_site_option('stateless-modules', $modules);
+          }
         }
 
         update_site_option('wp_sm_version', ud_get_stateless_media()->args['version']);

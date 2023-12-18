@@ -1,18 +1,14 @@
 <?php
-/**
- * Select tree walker for cascading select fields.
- *
- * @package Meta Box
- */
+defined( 'ABSPATH' ) || die;
 
 /**
- * The select tree walker class.
+ * Select tree walker for cascading select fields.
  */
 class RWMB_Walker_Select_Tree {
 	/**
 	 * Field settings.
 	 *
-	 * @var string
+	 * @var array
 	 */
 	public $field;
 
@@ -42,10 +38,10 @@ class RWMB_Walker_Select_Tree {
 	 * @return string
 	 */
 	public function walk( $options ) {
-		$children = array();
+		$children = [];
 
 		foreach ( $options as $option ) {
-			$parent                = isset( $option->parent ) ? $option->parent : 0;
+			$parent                = $option->parent ?? 0;
 			$children[ $parent ][] = $option;
 		}
 

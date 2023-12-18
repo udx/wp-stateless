@@ -1,20 +1,13 @@
 <?php
-/**
- * The select field.
- *
- * @package Meta Box
- */
+defined( 'ABSPATH' ) || die;
 
 /**
- * Select field class.
+ * The select field.
  */
 class RWMB_Select_Field extends RWMB_Choice_Field {
-	/**
-	 * Enqueue scripts and styles.
-	 */
 	public static function admin_enqueue_scripts() {
-		wp_enqueue_style( 'rwmb-select', RWMB_CSS_URL . 'select.css', array(), RWMB_VER );
-		wp_enqueue_script( 'rwmb-select', RWMB_JS_URL . 'select.js', array( 'jquery' ), RWMB_VER, true );
+		wp_enqueue_style( 'rwmb-select', RWMB_CSS_URL . 'select.css', [], RWMB_VER );
+		wp_enqueue_script( 'rwmb-select', RWMB_JS_URL . 'select.js', [ 'jquery' ], RWMB_VER, true );
 	}
 
 	/**
@@ -51,12 +44,9 @@ class RWMB_Select_Field extends RWMB_Choice_Field {
 	public static function normalize( $field ) {
 		$field = parent::normalize( $field );
 		$field = $field['multiple'] ? RWMB_Multiple_Values_Field::normalize( $field ) : $field;
-		$field = wp_parse_args(
-			$field,
-			array(
-				'select_all_none' => false,
-			)
-		);
+		$field = wp_parse_args( $field, [
+			'select_all_none' => false,
+		] );
 
 		return $field;
 	}
@@ -71,12 +61,9 @@ class RWMB_Select_Field extends RWMB_Choice_Field {
 	 */
 	public static function get_attributes( $field, $value = null ) {
 		$attributes = parent::get_attributes( $field, $value );
-		$attributes = wp_parse_args(
-			$attributes,
-			array(
-				'multiple' => $field['multiple'],
-			)
-		);
+		$attributes = wp_parse_args( $attributes, [
+			'multiple' => $field['multiple'],
+		] );
 
 		return $attributes;
 	}

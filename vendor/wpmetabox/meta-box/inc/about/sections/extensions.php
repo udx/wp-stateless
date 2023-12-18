@@ -1,11 +1,5 @@
-<?php
-/**
- * Extensions section.
- *
- * @package Meta Box
- */
+<?php defined( 'ABSPATH' ) || die ?>
 
-?>
 <div id="extensions" class="gt-tab-pane">
 	<p class="about-description">
 		<?php esc_html_e( 'Extend custom fields in WordPress well beyond what others would ever consider ordinary!', 'meta-box' ); ?><br>

@@ -310,7 +310,7 @@ class Uuid implements UuidInterface
      * @param string $data The serialized PHP string to unserialize into
      *     a UuidInterface instance
      */
-    public function unserialize($data): void
+    public function unserialize(string $data): void
     {
         if (strlen($data) === 16) {
             /** @var Uuid $uuid */

@@ -135,6 +135,15 @@ var wpStatelessApp = angular
           // $scope.apply();
         }
       }
+
+      if (value == 'stateless' && $scope.sm.readonly.hashify_file_name != 'constant' ) {
+        $scope.backup.dynamic_image_support = $scope.sm.dynamic_image_support
+        $scope.sm.dynamic_image_support = 'false'
+      } else {
+        if ($scope.backup.dynamic_image_support) {
+          $scope.sm.dynamic_image_support = $scope.backup.dynamic_image_support
+        }
+      }
     })
 
     $scope.$watch('sm.bucket_folder_type', function (value) {

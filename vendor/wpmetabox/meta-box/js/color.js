@@ -1,24 +1,34 @@
-( function ( $, rwmb ) {
+( function( $, rwmb ) {
 	'use strict';
 
 	/**
 	 * Transform an input into a color picker.
 	 */
 	function transform() {
-		var $this = $( this );
+		const $this = $( this );
+		const mode = $this.data( 'options' )[ 'mode' ];
+		const alpha = $this.data( 'alpha-enabled' );
+
+		function initChange() {
+			if ( null !== mode && 'hex' !== mode && !alpha ) {
+				const color = new Color( $this.iris( 'option', 'color' ) );
+				$this.val( color.toCSS( mode ) );
+			}
+			triggerChange();
+		}
 
 		function triggerChange() {
 			$this.trigger( 'color:change' ).trigger( 'mb_change' );
 		}
 
-		var $container = $this.closest( '.wp-picker-container' ),
+		const $container = $this.closest( '.wp-picker-container' ),
 			// Hack: the picker needs a small delay (learn from the Kirki plugin).
 			options = $.extend(
 				{
-					change: function () {
-						setTimeout( triggerChange, 20 );
+					change: function() {
+						setTimeout( initChange, 20 );
 					},
-					clear: function () {
+					clear: function() {
 						setTimeout( triggerChange, 20 );
 					}
 				},

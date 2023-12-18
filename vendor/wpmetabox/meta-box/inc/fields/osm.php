@@ -1,33 +1,19 @@
 <?php
+defined( 'ABSPATH' ) || die;
+
 /**
  * The Open Street Map field.
- *
- * @package Meta Box
- * @since   4.15.0
- */
-
-/**
- * Open Street Map field class.
  */
 class RWMB_OSM_Field extends RWMB_Field {
-	/**
-	 * Enqueue scripts and styles.
-	 */
 	public static function admin_enqueue_scripts() {
-		// Because map is a hosted service, it's ok to use hosted Leaflet scripts.
-		wp_enqueue_style( 'leaflet', 'https://unpkg.com/leaflet@1.7.1/dist/leaflet.css', array(), '1.7.1' );
-		wp_enqueue_script( 'leaflet', 'https://unpkg.com/leaflet@1.7.1/dist/leaflet.js', array(), '1.7.1', true );
+		self::enqueue_map_assets();
 
-		wp_enqueue_style( 'rwmb-osm', RWMB_CSS_URL . 'osm.css', array( 'leaflet' ), RWMB_VER );
-		wp_enqueue_script( 'rwmb-osm', RWMB_JS_URL . 'osm.js', array( 'jquery', 'jquery-ui-autocomplete', 'leaflet' ), RWMB_VER, true );
+		wp_enqueue_style( 'rwmb-osm', RWMB_CSS_URL . 'osm.css', [ 'leaflet' ], RWMB_VER );
+		wp_enqueue_script( 'rwmb-osm', RWMB_JS_URL . 'osm.js', [ 'jquery', 'jquery-ui-autocomplete', 'leaflet' ], RWMB_VER, true );
 
-		RWMB_Helpers_Field::localize_script_once(
-			'rwmb-osm',
-			'RWMB_Osm',
-			array(
-				'no_results_string' => __( 'No results found', 'meta-box' ),
-			)
-		);
+		RWMB_Helpers_Field::localize_script_once( 'rwmb-osm', 'RWMB_Osm', [
+			'no_results_string' => __( 'No results found', 'meta-box' ),
+		] );
 	}
 
 	/**
@@ -72,15 +58,12 @@ class RWMB_OSM_Field extends RWMB_Field {
 	 */
 	public static function normalize( $field ) {
 		$field = parent::normalize( $field );
-		$field = wp_parse_args(
-			$field,
-			array(
-				'std'           => '',
-				'address_field' => '',
-				'language'      => '',
-				'region'        => '',
-			)
-		);
+		$field = wp_parse_args( $field, [
+			'std'           => '',
+			'address_field' => '',
+			'language'      => '',
+			'region'        => '',
+		] );
 
 		return $field;
 	}
@@ -96,7 +79,7 @@ class RWMB_OSM_Field extends RWMB_Field {
 	 *
 	 * @return mixed Array(latitude, longitude, zoom)
 	 */
-	public static function get_value( $field, $args = array(), $post_id = null ) {
+	public static function get_value( $field, $args = [], $post_id = null ) {
 		$value                               = parent::get_value( $field, $args, $post_id );
 		list( $latitude, $longitude, $zoom ) = explode( ',', $value . ',,' );
 		return compact( 'latitude', 'longitude', 'zoom' );
@@ -112,7 +95,7 @@ class RWMB_OSM_Field extends RWMB_Field {
 	 *
 	 * @return string HTML output of the field
 	 */
-	public static function the_value( $field, $args = array(), $post_id = null ) {
+	public static function the_value( $field, $args = [], $post_id = null ) {
 		$value = parent::get_value( $field, $args, $post_id );
 		return self::render_map( $value, $args );
 	}
@@ -120,47 +103,41 @@ class RWMB_OSM_Field extends RWMB_Field {
 	/**
 	 * Render a map in the frontend.
 	 *
-	 * @param array $location The [latitude, longitude[, zoom]] location.
-	 * @param array $args     Additional arguments for the map.
+	 * @param string $location The "latitude,longitude[,zoom]" location.
+	 * @param array  $args     Additional arguments for the map.
 	 *
 	 * @return string
 	 */
-	public static function render_map( $location, $args = array() ) {
+	public static function render_map( $location, $args = [] ) {
 		list( $latitude, $longitude, $zoom ) = explode( ',', $location . ',,' );
 		if ( ! $latitude || ! $longitude ) {
 			return '';
 		}
 
-		$args = wp_parse_args(
-			$args,
-			array(
-				'latitude'     => $latitude,
-				'longitude'    => $longitude,
-				'width'        => '100%',
-				'height'       => '480px',
-				'marker'       => true, // Display marker?
-				'marker_title' => '', // Marker title, when hover.
-				'info_window'  => '', // Content of info window (when click on marker). HTML allowed.
-				'js_options'   => array(),
-				'zoom'         => $zoom,
-			)
-		);
+		$args = wp_parse_args( $args, [
+			'latitude'     => $latitude,
+			'longitude'    => $longitude,
+			'width'        => '100%',
+			'height'       => '480px',
+			'marker'       => true, // Display marker?
+			'marker_title' => '', // Marker title, when hover.
+			'info_window'  => '', // Content of info window (when click on marker). HTML allowed.
+			'js_options'   => [],
+			'zoom'         => $zoom,
+		] );
 
-		wp_enqueue_style( 'leaflet', 'https://unpkg.com/leaflet@1.5.1/dist/leaflet.css', array(), '1.5.1' );
-		wp_enqueue_script( 'leaflet', 'https://unpkg.com/leaflet@1.5.1/dist/leaflet.js', array(), '1.5.1', true );
-		wp_enqueue_script( 'rwmb-osm-frontend', RWMB_JS_URL . 'osm-frontend.js', array( 'jquery', 'leaflet' ), RWMB_VER, true );
+		self::enqueue_map_assets();
+		wp_enqueue_script( 'rwmb-osm-frontend', RWMB_JS_URL . 'osm-frontend.js', [ 'jquery', 'leaflet' ], RWMB_VER, true );
+		wp_enqueue_style( 'rwmb-osm-frontend', RWMB_CSS_URL . 'osm-frontend.css', [], RWMB_VER );
 
 		/*
 		 * More Open Street Map options
 		 * @link https://leafletjs.com/reference-1.5.0.html#map-option
 		 */
-		$args['js_options'] = wp_parse_args(
-			$args['js_options'],
-			array(
-				// Default to 'zoom' level set in admin, but can be overwritten.
-				'zoom' => $args['zoom'],
-			)
-		);
+		$args['js_options'] = wp_parse_args( $args['js_options'], [
+			// Default to 'zoom' level set in admin, but can be overwritten.
+			'zoom' => $args['zoom'],
+		] );
 
 		$output = sprintf(
 			'<div class="rwmb-osm-canvas" data-osm_options="%s" style="width:%s;height:%s"></div>',
@@ -169,5 +146,10 @@ class RWMB_OSM_Field extends RWMB_Field {
 			esc_attr( $args['height'] )
 		);
 		return $output;
+	}
+
+	private static function enqueue_map_assets() {
+		wp_enqueue_style( 'leaflet', 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css', [], '1.9.4' );
+		wp_enqueue_script( 'leaflet', 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js', [], '1.9.4', true );
 	}
 }

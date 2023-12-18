@@ -1,12 +1,8 @@
 <?php
-/**
- * The button field. Simply displays a HTML button which might be used for JavaScript actions.
- *
- * @package Meta Box
- */
+defined( 'ABSPATH' ) || die;
 
 /**
- * Button field class.
+ * The button field. Simply displays a HTML button which might be used for JavaScript actions.
  */
 class RWMB_Button_Field extends RWMB_Field {
 	/**
@@ -28,12 +24,9 @@ class RWMB_Button_Field extends RWMB_Field {
 	 * @return array
 	 */
 	public static function normalize( $field ) {
-		$field = wp_parse_args(
-			$field,
-			array(
-				'std' => __( 'Click me', 'meta-box' ),
-			)
-		);
+		$field = wp_parse_args( $field, [
+			'std' => __( 'Click me', 'meta-box' ),
+		] );
 		$field = parent::normalize( $field );
 		return $field;
 	}
@@ -47,12 +40,9 @@ class RWMB_Button_Field extends RWMB_Field {
 	 */
 	public static function get_attributes( $field, $value = null ) {
 		$attributes           = parent::get_attributes( $field, $value );
-		$attributes           = wp_parse_args(
-			$attributes,
-			array(
-				'type' => $field['type'],
-			)
-		);
+		$attributes           = wp_parse_args( $attributes, [
+			'type' => $field['type'],
+		] );
 		$attributes['class'] .= ' button hide-if-no-js';
 
 		return $attributes;

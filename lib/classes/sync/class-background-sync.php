@@ -96,7 +96,7 @@ abstract class BackgroundSync extends UDX_WP_Background_Process implements ISync
       // Add notice
       $this->save_process_meta([
         'notice' => sprintf(
-          __("Not enough memory to process the following item '%s' %s: %s. Item skipped. Please, try to increase memory limit or use uploading by chunks: <a target=\"_blank\" href=\"https://wp-stateless.github.io/docs/constants/#wp_stateless_media_upload_chunk_size\">How to use WP_STATELESS_MEDIA_UPLOAD_CHUNK_SIZE setting.</a>", ud_get_stateless_media()->domain),
+          __("Not enough memory to process the following item '%s' %s: %s. Item skipped. Please, try to increase memory limit or use uploading by chunks: <a target=\"_blank\" href=\"https://stateless.udx.io/docs/constants/#wp_stateless_media_upload_chunk_size\">How to use WP_STATELESS_MEDIA_UPLOAD_CHUNK_SIZE setting.</a>", ud_get_stateless_media()->domain),
           is_numeric($this->currently_processing_item) ? get_the_title($this->currently_processing_item) : $this->currently_processing_item,
           is_numeric($this->currently_processing_item) ? "(ID: {$this->currently_processing_item})" : '',
           $err['message']
