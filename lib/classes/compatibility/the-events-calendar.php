@@ -1,7 +1,7 @@
 <?php
 /**
- * Plugin Name: TheEventsCalendar
- * Plugin URI: https://wordpress.org/plugins/the-events-calendar/
+ * Compatibility Plugin Name: TheEventsCalendar
+ * Compatibility Plugin URI: https://wordpress.org/plugins/the-events-calendar/
  *
  * Compatibility Description: Ensures compatibility with The Events Calendar.
  * Noteably: The Events Calendar does not store media, but it uses a fake file called 'silence'
@@ -12,9 +12,9 @@ namespace wpCloud\StatelessMedia {
 
   if( !class_exists( 'wpCloud\StatelessMedia\TheEventsCalendar' ) ) {
 
-    class TheEventsCalendar extends ICompatibility {
+    class TheEventsCalendar extends Compatibility {
       protected $id = 'theeventscalendar';
-      protected $title = 'TheEventsCalendar';
+      protected $title = 'The Events Calendar';
       protected $constant = 'WP_STATELESS_COMPATIBILITY_THEEVENTSCALENDAR';
       protected $description = 'Ensures compatibility with TheEventsCalendar.';
       protected $plugin_file = [ 'the-events-calendar/the-events-calendar.php' ];
@@ -24,7 +24,7 @@ namespace wpCloud\StatelessMedia {
        * @param $sm
        */
       public function module_init( $sm ) {
-        add_action( 'stateless_skip_cache_busting', array( $this, 'skip_cache_busting' ), 10, 2 );
+        add_filter( 'stateless_skip_cache_busting', array( $this, 'skip_cache_busting' ), 10, 2 );
       }
 
       /**

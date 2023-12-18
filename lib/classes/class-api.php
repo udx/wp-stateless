@@ -85,7 +85,7 @@ namespace wpCloud\StatelessMedia {
         if (self::$tokenData === null || empty(self::$tokenData->user_id)) {
           return new \WP_Error('unauthorized', 'Auth token looks incorrect', ['status' => 401]);
         }
-        $is_gae                 = isset($_SERVER["GAE_VERSION"]) ? true : false;
+        $is_gae                 = apply_filters('wp_stateless_is_app_engine', false);
         $upload_dir             = wp_upload_dir();
         $is_upload_dir_writable = is_writable($upload_dir['basedir']);
 

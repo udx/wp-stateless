@@ -90,6 +90,24 @@ namespace wpCloud\StatelessMedia {
       }
       
       /**
+       * Prevents adding duplicating messages
+       * Some triggers may happen few times during site load (like 'switch_blog' hook) 
+       * adding the same message several times is not necessary
+       *
+       * @param string $collection
+       * @param string $message
+       */
+      private function add_message( &$collection, $message ) {
+        $exiting_keys = array_column($collection, 'key');
+
+        if ( in_array( $message['key'], $exiting_keys ) ) {
+          return;
+        }
+
+        $collection[] = $message;
+      }
+
+      /**
        * Add new message for admin notices
        *
        * @param string $message
@@ -99,7 +117,7 @@ namespace wpCloud\StatelessMedia {
       public function add( $message, $type = 'error' ) {
         switch( $type ) {
           case 'error':
-            $this->errors[] = $message;
+            $this->add_message($this->errors, $message);
             break;
           case 'message':
           case 'warning':
@@ -115,7 +133,7 @@ namespace wpCloud\StatelessMedia {
             if(empty($message['key'])){
               $message['key'] = md5( $message['title'] );
             }
-            $this->notices[] = $message;
+            $this->add_message($this->notices, $message);
             break;
         }
       }

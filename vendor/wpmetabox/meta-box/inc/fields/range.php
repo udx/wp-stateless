@@ -1,12 +1,8 @@
 <?php
-/**
- * The HTML5 range field.
- *
- * @package Meta Box
- */
+defined( 'ABSPATH' ) || die;
 
 /**
- * HTML5 range field class.
+ * The HTML5 range field.
  */
 class RWMB_Range_Field extends RWMB_Number_Field {
 	/**
@@ -27,12 +23,9 @@ class RWMB_Range_Field extends RWMB_Number_Field {
 		);
 	}
 
-	/**
-	 * Enqueue styles.
-	 */
 	public static function admin_enqueue_scripts() {
-		wp_enqueue_style( 'rwmb-range', RWMB_CSS_URL . 'range.css', array(), RWMB_VER );
-		wp_enqueue_script( 'rwmb-range', RWMB_JS_URL . 'range.js', array(), RWMB_VER, true );
+		wp_enqueue_style( 'rwmb-range', RWMB_CSS_URL . 'range.css', [], RWMB_VER );
+		wp_enqueue_script( 'rwmb-range', RWMB_JS_URL . 'range.js', [], RWMB_VER, true );
 	}
 
 	/**
@@ -42,12 +35,9 @@ class RWMB_Range_Field extends RWMB_Number_Field {
 	 * @return array
 	 */
 	public static function normalize( $field ) {
-		$field = wp_parse_args(
-			$field,
-			array(
-				'max' => 10,
-			)
-		);
+		$field = wp_parse_args( $field, [
+			'max' => 10,
+		] );
 		$field = parent::normalize( $field );
 		return $field;
 	}

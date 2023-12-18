@@ -3,24 +3,13 @@
  * Load plugin's files with check for installing it as a standalone plugin or
  * a module of a theme / plugin. If standalone plugin is already installed, it
  * will take higher priority.
- *
- * @package Meta Box
- */
-
-/**
- * Plugin loader class.
- *
- * @package Meta Box
  */
 class RWMB_Loader {
-	/**
-	 * Define plugin constants.
-	 */
 	protected function constants() {
 		// Script version, used to add version for scripts and styles.
-		define( 'RWMB_VER', '5.6.3' );
+		define( 'RWMB_VER', '5.8.2' );
 
-		list( $path, $url ) = self::get_path( dirname( dirname( __FILE__ ) ) );
+		list( $path, $url ) = self::get_path( dirname( __DIR__ ) );
 
 		// Plugin URLs, for fast enqueuing scripts and styles.
 		define( 'RWMB_URL', $url );
@@ -36,11 +25,11 @@ class RWMB_Loader {
 	 * Get plugin base path and URL.
 	 * The method is static and can be used in extensions.
 	 *
-	 * @link http://www.deluxeblogtips.com/2013/07/get-url-of-php-file-in-wordpress.html
+	 * @link https://deluxeblogtips.com/get-url-of-php-file-in-wordpress/
 	 * @param string $path Base folder path.
 	 * @return array Path and URL.
 	 */
-	public static function get_path( $path = '' ) {
+	public static function get_path( string $path = '' ): array {
 		// Plugin base path.
 		$path       = wp_normalize_path( untrailingslashit( $path ) );
 		$themes_dir = wp_normalize_path( untrailingslashit( dirname( get_stylesheet_directory() ) ) );
@@ -50,9 +39,9 @@ class RWMB_Loader {
 
 		// Included into themes.
 		if (
-			0 !== strpos( $path, wp_normalize_path( WP_PLUGIN_DIR ) )
-			&& 0 !== strpos( $path, wp_normalize_path( WPMU_PLUGIN_DIR ) )
-			&& 0 === strpos( $path, $themes_dir )
+			! str_starts_with( $path, wp_normalize_path( WP_PLUGIN_DIR ) )
+			&& ! str_starts_with( $path, wp_normalize_path( WPMU_PLUGIN_DIR ) )
+			&& str_starts_with( $path, $themes_dir )
 		) {
 			$themes_url = untrailingslashit( dirname( get_stylesheet_directory_uri() ) );
 			$url        = str_replace( $themes_dir, $themes_url, $path );
@@ -61,7 +50,7 @@ class RWMB_Loader {
 		$path = trailingslashit( $path );
 		$url  = trailingslashit( $url );
 
-		return array( $path, $url );
+		return [ $path, $url ];
 	}
 
 	/**
@@ -69,6 +58,12 @@ class RWMB_Loader {
 	 */
 	public function init() {
 		$this->constants();
+
+		// PSR-4 autoload.
+		$psr4_autoload = dirname( __DIR__ ) . '/vendor/autoload.php';
+		if ( file_exists( $psr4_autoload ) ) {
+			require $psr4_autoload;
+		}
 
 		// Register autoload for classes.
 		require_once RWMB_INC_DIR . 'autoloader.php';
@@ -105,23 +100,29 @@ class RWMB_Loader {
 		$wpml->init();
 
 		// Update.
-		$update_option  = new RWMB_Update_Option();
-		$update_checker = new RWMB_Update_Checker( $update_option );
+		$update_option  = new \MetaBox\Updater\Option();
+		$update_checker = new \MetaBox\Updater\Checker( $update_option );
 		$update_checker->init();
-		$update_settings = new RWMB_Update_Settings( $update_checker, $update_option );
+		$update_settings = new \MetaBox\Updater\Settings( $update_checker, $update_option );
 		$update_settings->init();
-		$update_notification = new RWMB_Update_Notification( $update_checker, $update_option );
+		$update_notification = new \MetaBox\Updater\Notification( $update_checker, $update_option );
 		$update_notification->init();
+
+		// Register categories for page builders.
+		new \MetaBox\Block\Register();
+		new \MetaBox\Oxygen\Register();
+		new \MetaBox\Elementor\Register();
+		new \MetaBox\Bricks\Register();
 
 		if ( is_admin() ) {
 			$about = new RWMB_About( $update_checker );
 			$about->init();
 
-			new RWMB_Dashboard( 'http://feeds.feedburner.com/metaboxio', 'https://metabox.io/blog/', array(
+			new RWMB_Dashboard( 'http://feeds.feedburner.com/metaboxio', 'https://metabox.io/blog/', [
 				'title'           => 'Meta Box',
 				'dismiss_tooltip' => esc_html__( 'Dismiss all Meta Box news', 'meta-box' ),
 				'dismiss_confirm' => esc_html__( 'Are you sure to dismiss all Meta Box news?', 'meta-box' ),
-			) );
+			] );
 		}
 
 		// Public functions.

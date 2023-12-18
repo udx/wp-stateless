@@ -1,12 +1,8 @@
 <?php
-/**
- * The secured password field.
- *
- * @package Meta Box
- */
+defined( 'ABSPATH' ) || die;
 
 /**
- * Password field class.
+ * The secured password field.
  */
 class RWMB_Password_Field extends RWMB_Input_Field {
 	/**

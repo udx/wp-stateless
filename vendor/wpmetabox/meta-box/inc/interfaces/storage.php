@@ -1,15 +1,8 @@
 <?php
 /**
- * Storage interface
- *
- * @package Meta Box
- */
-
-/**
- * Interface RWMB_Storage_Interface
+ * Storage interface.
  */
 interface RWMB_Storage_Interface {
-
 	/**
 	 * Get value from storage.
 	 *
@@ -18,5 +11,5 @@ interface RWMB_Storage_Interface {
 	 * @param  array  $args      Custom arguments..
 	 * @return mixed
 	 */
-	public function get( $object_id, $name, $args = array() );
+	public function get( $object_id, $name, $args = [] );
 }

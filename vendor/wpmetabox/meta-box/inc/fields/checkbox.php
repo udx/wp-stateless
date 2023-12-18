@@ -1,12 +1,8 @@
 <?php
-/**
- * The checkbox field.
- *
- * @package Meta Box
- */
+defined( 'ABSPATH' ) || die;
 
 /**
- * Checkbox field class.
+ * The checkbox field.
  */
 class RWMB_Checkbox_Field extends RWMB_Input_Field {
 	/**
@@ -29,13 +25,7 @@ class RWMB_Checkbox_Field extends RWMB_Input_Field {
 		return $output;
 	}
 
-	/**
-	 * Do not show field description.
-	 *
-	 * @param array $field Field parameters.
-	 * @return string
-	 */
-	public static function input_description( $field ) {
+	protected static function input_description( array $field ) : string {
 		return '';
 	}
 

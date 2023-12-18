@@ -1,21 +1,14 @@
 <?php
-/**
- * The file upload field which allows users to drag and drop files to upload.
- *
- * @package Meta Box
- */
+defined( 'ABSPATH' ) || die;
 
 /**
- * The file upload field class.
+ * The file upload field which allows users to drag and drop files to upload.
  */
 class RWMB_File_Upload_Field extends RWMB_Media_Field {
-	/**
-	 * Enqueue scripts and styles.
-	 */
 	public static function admin_enqueue_scripts() {
 		parent::admin_enqueue_scripts();
-		wp_enqueue_style( 'rwmb-upload', RWMB_CSS_URL . 'upload.css', array( 'rwmb-media' ), RWMB_VER );
-		wp_enqueue_script( 'rwmb-file-upload', RWMB_JS_URL . 'file-upload.js', array( 'rwmb-media' ), RWMB_VER, true );
+		wp_enqueue_style( 'rwmb-upload', RWMB_CSS_URL . 'upload.css', [ 'rwmb-media' ], RWMB_VER );
+		wp_enqueue_script( 'rwmb-file-upload', RWMB_JS_URL . 'file-upload.js', [ 'rwmb-media' ], RWMB_VER, true );
 	}
 
 	/**
@@ -27,19 +20,13 @@ class RWMB_File_Upload_Field extends RWMB_Media_Field {
 	 */
 	public static function normalize( $field ) {
 		$field = parent::normalize( $field );
-		$field = wp_parse_args(
-			$field,
-			array(
-				'max_file_size' => 0,
-			)
-		);
+		$field = wp_parse_args( $field, [
+			'max_file_size' => 0,
+		] );
 
-		$field['js_options'] = wp_parse_args(
-			$field['js_options'],
-			array(
-				'maxFileSize' => $field['max_file_size'],
-			)
-		);
+		$field['js_options'] = wp_parse_args( $field['js_options'], [
+			'maxFileSize' => $field['max_file_size'],
+		] );
 
 		return $field;
 	}
@@ -49,6 +36,6 @@ class RWMB_File_Upload_Field extends RWMB_Media_Field {
 	 */
 	public static function print_templates() {
 		parent::print_templates();
-		require_once RWMB_INC_DIR . 'templates/upload.php';
+		require RWMB_INC_DIR . 'templates/upload.php';
 	}
 }

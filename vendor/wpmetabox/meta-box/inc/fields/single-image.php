@@ -1,12 +1,8 @@
 <?php
-/**
- * The advanced image upload field which uses WordPress media popup to upload and select images.
- *
- * @package Meta Box
- */
+defined( 'ABSPATH' ) || die;
 
 /**
- * Image advanced field class.
+ * The advanced image upload field which uses WordPress media popup to upload and select images.
  */
 class RWMB_Single_Image_Field extends RWMB_Image_Advanced_Field {
 	/**
@@ -22,13 +18,10 @@ class RWMB_Single_Image_Field extends RWMB_Image_Advanced_Field {
 
 		$field = parent::normalize( $field );
 
-		$field['attributes'] = wp_parse_args(
-			$field['attributes'],
-			array(
-				'class'             => '',
-				'data-single-image' => 1,
-			)
-		);
+		$field['attributes'] = wp_parse_args( $field['attributes'], [
+			'class'             => '',
+			'data-single-image' => 1,
+		] );
 
 		$field['attributes']['class'] .= ' rwmb-image_advanced';
 		$field['multiple']             = false;
@@ -59,14 +52,14 @@ class RWMB_Single_Image_Field extends RWMB_Image_Advanced_Field {
 	 *
 	 * @return mixed Full info of uploaded files
 	 */
-	public static function get_value( $field, $args = array(), $post_id = null ) {
+	public static function get_value( $field, $args = [], $post_id = null ) {
 		$value = RWMB_Field::get_value( $field, $args, $post_id );
 
 		if ( ! is_array( $value ) ) {
 			return RWMB_Image_Field::file_info( $value, $args, $field );
 		}
 
-		$return = array();
+		$return = [];
 		foreach ( $value as $image_id ) {
 			$return[] = RWMB_Image_Field::file_info( $image_id, $args, $field );
 		}

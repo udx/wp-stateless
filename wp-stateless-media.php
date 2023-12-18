@@ -1,14 +1,14 @@
 <?php
 /**
  * Plugin Name: WP-Stateless
- * Plugin URI: https://udx.io
+ * Plugin URI: https://stateless.udx.io/
  * Description: Upload and serve your WordPress media files from Google Cloud Storage.
  * Author: UDX
- * Version: 3.2.5
+ * Version: 3.3.0
  * Text Domain: stateless-media
  * Author URI: https://www.udx.io
  *
- * Copyright 2012 - 2023 UDX ( email: info@udx.io )
+ * Copyright 2012 - 2024 UDX ( email: info@udx.io )
  *
  */
 
@@ -65,6 +65,9 @@ if( !function_exists( 'ud_check_stateless_media' ) ) {
       if( !class_exists( '\wpCloud\StatelessMedia\Bootstrap' ) ) {
         throw new Exception( __( 'Distributive is broken. Plugin loader is not available. Try to remove and upload plugin again.', 'stateless-media' ) );
       }
+
+      // Include metabox plugin
+      require_once(  dirname( __FILE__ ) . '/vendor/wpmetabox/meta-box/meta-box.php' );
 
       // Include metabox tabs addon
       require_once(  dirname( __FILE__ ) . '/lib/meta-box-tabs/meta-box-tabs.php' );

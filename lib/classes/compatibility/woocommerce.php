@@ -1,7 +1,7 @@
 <?php
 /**
- * Plugin Name: WooCommerce
- * Plugin URI: https://woocommerce.com/
+ * Compatibility Plugin Name: WooCommerce
+ * Compatibility Plugin URI: https://woocommerce.com/
  *
  * Compatibility Description: Ensures compatibility with WooCommerce.
  *
@@ -11,7 +11,7 @@ namespace wpCloud\StatelessMedia {
 
   if( !class_exists( 'wpCloud\StatelessMedia\WooCommerce' ) ) {
 
-    class WooCommerce extends ICompatibility {
+    class WooCommerce extends Compatibility {
       protected $id = 'woocommerce';
       protected $title = 'WooCommerce';
       protected $constant = 'WP_STATELESS_COMPATIBILITY_WOOCOMMERCE';

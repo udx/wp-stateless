@@ -5,15 +5,18 @@
     <div class="no-js-error" ng-hide="jsLoaded" ng-controller="noJSWarning">You have a problem with JS.</div>
   </div>
   <h2 class="nav-tab-wrapper">
-    <a href="#stless_settings_tab" class="stless_setting_tab nav-tab  nav-tab-active"><?php _e('Settings', ud_get_stateless_media()->domain); ?></a>
-    <?php if (!is_network_admin() && !isset($_SERVER["GAE_VERSION"]) && ud_get_stateless_media('sm.mode') != 'disabled') : ?>
-      <a href="#stless_sync_tab" class="stless_setting_tab nav-tab"><?php _e('Sync', ud_get_stateless_media()->domain); ?></a>
+    <a href="#stless_settings_tab" class="stless_setting_tab nav-tab <?php if ($tab == 'stless_settings_tab') echo 'nav-tab-active'; ?>"><?php _e('Settings', ud_get_stateless_media()->domain); ?></a>
+    <?php if (!is_network_admin() && !apply_filters('wp_stateless_is_app_engine', false) && ud_get_stateless_media('sm.mode') != 'disabled') : ?>
+      <a href="#stless_sync_tab" class="stless_setting_tab nav-tab <?php if ($tab == 'stless_sync_tab') echo 'nav-tab-active'; ?>"><?php _e('Sync', ud_get_stateless_media()->domain); ?></a>
     <?php endif; ?>
-    <a href="#stless_compatibility_tab" class="stless_setting_tab nav-tab"><?php _e('Compatibility', ud_get_stateless_media()->domain); ?></a>
+    <a href="#stless_compatibility_tab" class="stless_setting_tab nav-tab <?php if ($tab == 'stless_compatibility_tab') echo 'nav-tab-active'; ?>"><?php _e('Compatibility', ud_get_stateless_media()->domain); ?></a>
+    <?php if ( apply_filters('wp_stateless_addons_tab_visible', false) ) : ?>
+      <a href="#stless_addons_tab" class="stless_setting_tab nav-tab <?php if ($tab == 'stless_addons_tab') echo 'nav-tab-active'; ?>"><?php _e('Addons', ud_get_stateless_media()->domain); ?></a>
+    <?php endif; ?>
   </h2>
 
   <div class="stless_settings">
-    <div id="stless_settings_tab" class="stless_settings_content active" ng-controller="wpStatelessSettings">
+    <div id="stless_settings_tab" class="stless_settings_content <?php if ($tab == 'stless_settings_tab') echo 'active'; ?>" ng-controller="wpStatelessSettings">
       <form method="post" action="">
         <input type="hidden" name="action" value="stateless_settings">
         <?php wp_nonce_field('wp-stateless-settings', '_smnonce'); ?>
@@ -76,7 +79,19 @@
                     <label for="sm_mode_ephemeral"><input ng-model="sm.mode" id="sm_mode_ephemeral" type="radio" name="sm[mode]" value="ephemeral" ng-checked="sm.mode == 'ephemeral'" ng-disabled="sm.readonly.mode"><?php _e('Ephemeral', ud_get_stateless_media()->domain); ?><small class="description"><?php _e('Store and serve media files with Google Cloud Storage only. Media files are not stored locally, but local storage is used temporarily for processing and is required for certain compatibilities, generating thumbnails for PDF documents.', ud_get_stateless_media()->domain); ?></small></label>
                   </p>
                   <p class="sm-mode">
-                    <label for="sm_mode_stateless"><input ng-model="sm.mode" id="sm_mode_stateless" type="radio" name="sm[mode]" value="stateless" ng-checked="sm.mode == 'stateless'" ng-disabled="sm.readonly.mode"><?php _e('Stateless', ud_get_stateless_media()->domain); ?><small class="description"><?php _e('Store and serve media files with Google Cloud Storage only. Media files are not stored locally.', ud_get_stateless_media()->domain); ?></small></label>
+                    <label for="sm_mode_stateless">
+                      <input ng-model="sm.mode" id="sm_mode_stateless" type="radio" name="sm[mode]" value="stateless" ng-checked="sm.mode == 'stateless'" ng-disabled="sm.readonly.mode">
+
+                      <?php if ( apply_filters('wp_stateless_is_app_engine', false) ) : ?>
+                        <?php _e('Stateless (Google App Engine Detected)', ud_get_stateless_media()->domain); ?>
+                      <?php else : ?>
+                        <?php _e('Stateless', ud_get_stateless_media()->domain); ?>
+                      <?php endif; ?>
+  
+                      <small class="description">
+                        <?php _e('Store and serve media files with Google Cloud Storage only. Media files are not stored locally.', ud_get_stateless_media()->domain); ?>
+                      </small>
+                  </label>
                   </p>
                   <hr>
 
@@ -222,9 +237,26 @@
                   </p>
                   <p class="description"><strong ng-bind="sm.showNotice('hashify_file_name')"></strong>
                     <span ng-show="sm.mode == 'stateless' && sm.readonly.hashify_file_name != 'constant'">
-                      <?php _e(sprintf("<b>Required by Stateless Mode. Override with the <a href='%s' target='_blank'>WP_STATELESS_MEDIA_CACHE_BUSTING</a> constant.</b>", "https://wp-stateless.github.io/docs/constants/#wp_stateless_media_cache_busting"), ud_get_stateless_media()->domain); ?>
+                      <?php _e(sprintf("<b>Required by Stateless Mode. Override with the <a href='%s' target='_blank'>WP_STATELESS_MEDIA_CACHE_BUSTING</a> constant.</b>", "https://stateless.udx.io/docs/constants/#wp_stateless_media_cache_busting"), ud_get_stateless_media()->domain); ?>
                     </span>
                     <?php _e('Prepends a random set of numbers and letters to the filename. This is useful for preventing caching issues when uploading files that have the same filename.', ud_get_stateless_media()->domain); ?></p>
+
+                  <h4><?php _e('Dynamic Image Support', ud_get_stateless_media()->domain); ?></h4>
+                  <p>
+                    <select id="dynamic_image_support" name="sm[dynamic_image_support]" ng-model="sm.dynamic_image_support" ng-change="sm.generatePreviewUrl()" ng-disabled="sm.readonly.dynamic_image_support || sm.mode == 'stateless'">
+                      <?php if (is_network_admin()) : ?>
+                        <option value=""><?php _e('Don\'t override', ud_get_stateless_media()->domain); ?></option>
+                      <?php endif; ?>
+                      <option value="true"><?php _e('Enable', ud_get_stateless_media()->domain); ?></option>
+                      <option value="false"><?php _e('Disable', ud_get_stateless_media()->domain); ?></option>
+                    </select>
+                  </p>
+                  <p class="description"><strong ng-bind="sm.showNotice('dynamic_image_support')"></strong>
+                    <span ng-show="sm.mode == 'stateless' && sm.readonly.dynamic_image_support != 'constant'">
+                      <?php _e("<b>Not available in Stateless Mode.</b>", ud_get_stateless_media()->domain); ?>
+                    </span>
+                    <?php _e('Upload image thumbnails generated by your theme and plugins that do not register media objects with the media library. This can lead to significant negative performance impact.', ud_get_stateless_media()->domain); ?>
+                  </p>
                 </fieldset>
               </td>
             </tr>
@@ -234,12 +266,13 @@
         <?php submit_button(null, 'primary', 'submit', true, array('id' => 'save-settings')); ?>
       </form>
     </div>
-    <?php if (!is_network_admin() && !isset($_SERVER["GAE_VERSION"]) && ud_get_stateless_media('sm.mode') != 'disabled') : ?>
-      <div id="stless_sync_tab" class="stless_settings_content">
+    <?php if (!is_network_admin() && !apply_filters('wp_stateless_is_app_engine', false) && ud_get_stateless_media('sm.mode') != 'disabled') : ?>
+      <div id="stless_sync_tab" class="stless_settings_content <?php if ($tab == 'stless_sync_tab') echo 'active'; ?>">
         <?php include 'processing_interface.php'; ?>
       </div>
     <?php endif; ?>
-    <div id="stless_compatibility_tab" class="stless_settings_content" ng-controller="wpStatelessCompatibility">
+
+    <div id="stless_compatibility_tab" class="stless_settings_content <?php if ($tab == 'stless_compatibility_tab') echo 'active'; ?>" ng-controller="wpStatelessCompatibility">
       <div class="container-fluid">
         <h2><?php _e("Enable or disable compatibility with other plugins."); ?></h2>
         <p><?php _e(sprintf("Having an issue with another plugin? <a class='' target='_blank' href='%s' >Submit feedback</a> and let us know your issue!", "https://wordpress.org/support/plugin/wp-stateless/")); ?></p>
@@ -276,6 +309,14 @@
         </form>
       </div>
     </div>
+
+    <?php if ( apply_filters('wp_stateless_addons_tab_visible', false) ) : ?>
+      <div id="stless_addons_tab" class="stless_settings_content <?php if ($tab == 'stless_addons_tab') echo 'active'; ?>">
+        <div class="container-fluid">
+          <?php do_action('wp_stateless_addons_tab_content'); ?>
+        </div>
+      </div>
+    <?php endif; ?>
   </div>
 
 </div>

@@ -1,4 +1,17 @@
 <?php
+/**
+ * Plugin Name: Meta Box Tabs
+ * Plugin URI:  https://metabox.io/plugins/meta-box-tabs/
+ * Description: Create tabs for meta boxes easily. Support 3 WordPress-native tab styles.
+ * Version:     1.1.17
+ * Author:      MetaBox.io
+ * Author URI:  https://metabox.io
+ * License:     GPL2+
+ *
+ * @package    Meta Box
+ * @subpackage Meta Box Tabs
+ */
+
 // Prevent loading this file directly.
 defined( 'ABSPATH' ) || die;
 
@@ -19,25 +32,47 @@ if ( ! class_exists( 'MB_Tabs' ) ) {
 		 *
 		 * @var array
 		 */
-		protected $fields_output = array();
+		protected $fields_output = [];
 
 		public function __construct() {
-			add_action( 'rwmb_enqueue_scripts', array( $this, 'enqueue' ) );
+			add_action( 'rwmb_enqueue_scripts', [ $this, 'enqueue' ] );
 
-			add_action( 'rwmb_before', array( $this, 'opening_div' ), 1 ); // 1 = display first, before tab nav.
-			add_action( 'rwmb_after', array( $this, 'closing_div' ), 100 ); // 100 = display last, after tab panels.
+			add_action( 'rwmb_before', [ $this, 'opening_div' ], 1 ); // 1 = display first, before tab nav.
+			add_action( 'rwmb_after', [ $this, 'closing_div' ], 100 ); // 100 = display last, after tab panels.
 
 			// Change the title position of metabox
-			add_action( 'rwmb_after', array( $this, 'show_nav' ), 20 );
-			add_action( 'rwmb_after', array( $this, 'show_panels' ), 30 );
+			add_action( 'rwmb_after', [ $this, 'show_nav' ], 20 );
+			add_action( 'rwmb_after', [ $this, 'show_panels' ], 30 );
 
-			add_filter( 'rwmb_outer_html', array( $this, 'capture_fields' ), 10, 2 );
+			add_filter( 'rwmb_outer_html', [ $this, 'capture_fields' ], 20, 2 );
 		}
 
-		public function enqueue() {
-			list( , $url ) = RWMB_Loader::get_path( dirname( __FILE__ ) );
-			wp_enqueue_style( 'rwmb-tabs', $url . 'tabs.css', '', '1.1.12' );
-			wp_enqueue_script( 'rwmb-tabs', $url . 'tabs.js', array( 'jquery' ), '1.1.12', true );
+		public function enqueue( RW_Meta_Box $obj ) {
+			list( , $url ) = RWMB_Loader::get_path( __DIR__ );
+			wp_enqueue_style( 'rwmb-tabs', $url . 'tabs.css', [], '1.1.17' );
+			wp_enqueue_script( 'rwmb-tabs', $url . 'tabs.js', [ 'jquery' ], '1.1.17', true );
+
+			if ( empty( $obj->meta_box['tabs'] ) ) {
+				return;
+			}
+
+			$tabs = (array) $obj->meta_box['tabs'];
+			foreach ( $tabs as $tab_data ) {
+				if ( is_string( $tab_data ) ) {
+					$tab_data = [ 'label' => $tab_data ];
+				}
+				$tab_data = wp_parse_args( $tab_data, [
+					'icon'  => '',
+					'label' => '',
+				] );
+				$strpos = [ 'fa', 'fas', 'fa-solid', 'fab', 'fa-brand', 'far', 'fa-regular' ];
+				foreach ( $strpos as $value ) {
+					if ( strpos( $tab_data['icon'], $value ) !== false ) {
+						wp_enqueue_style( 'font-awesome', 'https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.2.1/css/all.min.css', [], ' 6.2.1' );
+						return;
+					}
+				}
+			}
 		}
 
 		/**
@@ -77,7 +112,7 @@ if ( ! class_exists( 'MB_Tabs' ) ) {
 
 			// Reset to initial state to be ready for other meta boxes.
 			$this->active        = false;
-			$this->fields_output = array();
+			$this->fields_output = [];
 		}
 
 		/**
@@ -98,7 +133,7 @@ if ( ! class_exists( 'MB_Tabs' ) ) {
 			$i = 0;
 			foreach ( $tabs as $key => $tab_data ) {
 				if ( is_string( $tab_data ) ) {
-					$tab_data = ['label' => $tab_data];
+					$tab_data = [ 'label' => $tab_data ];
 				}
 				$tab_data = wp_parse_args( $tab_data, [
 					'icon'  => '',
@@ -190,7 +225,7 @@ if ( ! class_exists( 'MB_Tabs' ) ) {
 			$tab = $field['tab'];
 
 			if ( ! isset( $this->fields_output[ $tab ] ) ) {
-				$this->fields_output[ $tab ] = array();
+				$this->fields_output[ $tab ] = [];
 			}
 			$this->fields_output[ $tab ][] = $output;
 

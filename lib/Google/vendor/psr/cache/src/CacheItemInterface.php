@@ -86,7 +86,7 @@ interface CacheItemInterface
      * @return static
      *   The called object.
      */
-    public function expiresAt($expiration);
+    public function expiresAt(?\DateTimeInterface $expiration);
 
     /**
      * Sets the expiration time for this cache item.
@@ -101,5 +101,5 @@ interface CacheItemInterface
      * @return static
      *   The called object.
      */
-    public function expiresAfter($time);
+    public function expiresAfter(int|\DateInterval|null $time);
 }
