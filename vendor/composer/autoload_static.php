@@ -48,11 +48,8 @@ class ComposerStaticInitc59d002476a452800baaf79c430753cb
 
     public static $classMap = array (
         'Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
-        'UsabilityDynamics\\Job' => __DIR__ . '/..' . '/udx/lib-utility/lib/class-job.php',
-        'UsabilityDynamics\\Loader' => __DIR__ . '/..' . '/udx/lib-utility/lib/class-loader.php',
-        'UsabilityDynamics\\Settings' => __DIR__ . '/..' . '/udx/lib-settings/lib/class-settings.php',
-        'UsabilityDynamics\\Structure' => __DIR__ . '/..' . '/udx/lib-utility/lib/class-structure.php',
-        'UsabilityDynamics\\Term' => __DIR__ . '/..' . '/udx/lib-utility/lib/class-term.php',
+        'UDX\\Settings' => __DIR__ . '/../..' . '/lib/includes/class-settings.php',
+        'UDX\\Utility' => __DIR__ . '/../..' . '/lib/includes/class-utility.php',
         'UsabilityDynamics\\UD_API\\API' => __DIR__ . '/..' . '/udx/lib-ud-api-client/lib/classes/class-api.php',
         'UsabilityDynamics\\UD_API\\Admin' => __DIR__ . '/..' . '/udx/lib-ud-api-client/lib/classes/class-admin.php',
         'UsabilityDynamics\\UD_API\\Bootstrap' => __DIR__ . '/..' . '/udx/lib-ud-api-client/lib/classes/class-bootstrap.php',
@@ -62,8 +59,7 @@ class ComposerStaticInitc59d002476a452800baaf79c430753cb
         'UsabilityDynamics\\UD_API\\Scaffold' => __DIR__ . '/..' . '/udx/lib-ud-api-client/lib/classes/class-scaffold.php',
         'UsabilityDynamics\\UD_API\\UI' => __DIR__ . '/..' . '/udx/lib-ud-api-client/lib/classes/class-ui.php',
         'UsabilityDynamics\\UD_API\\Update_Checker' => __DIR__ . '/..' . '/udx/lib-ud-api-client/lib/classes/class-update-checker.php',
-        'UsabilityDynamics\\Utility' => __DIR__ . '/..' . '/udx/lib-utility/lib/class-utility.php',
-        'UsabilityDynamics\\Utility\\Guid_Fix' => __DIR__ . '/..' . '/udx/lib-utility/lib/class-guid-fix.php',
+        'UsabilityDynamics\\UD_API\\Utility' => __DIR__ . '/..' . '/udx/lib-ud-api-client/lib/classes/class-utility.php',
         'UsabilityDynamics\\WP\\Bootstrap' => __DIR__ . '/..' . '/udx/lib-wp-bootstrap/lib/classes/class-bootstrap.php',
         'UsabilityDynamics\\WP\\Bootstrap_Plugin' => __DIR__ . '/..' . '/udx/lib-wp-bootstrap/lib/classes/class-bootstrap-plugin.php',
         'UsabilityDynamics\\WP\\Bootstrap_Theme' => __DIR__ . '/..' . '/udx/lib-wp-bootstrap/lib/classes/class-bootstrap-theme.php',

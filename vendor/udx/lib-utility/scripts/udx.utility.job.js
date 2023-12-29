@@ -1,1 +1,0 @@
-define("udx.utility.job",function(a,b,c){console.log(c.id,"loaded")});

@@ -8,7 +8,7 @@ namespace wpCloud\StatelessMedia {
 
   if( !class_exists( 'wpCloud\StatelessMedia\Settings' ) ) {
 
-    final class Settings extends \UsabilityDynamics\Settings {
+    final class Settings extends \UDX\Settings {
 
       /**
        * @var false|null|string
@@ -382,7 +382,7 @@ namespace wpCloud\StatelessMedia {
        * @param $path
        * @return array
        */
-      public function parse_root_dir_wildcards ( $path ) {
+      public function parse_root_dir_wildcards( $path ) {
         $result = [];
 
         /**
@@ -585,7 +585,7 @@ namespace wpCloud\StatelessMedia {
        * @param string $key
        * @param bool $value
        * @param bool $bypass_validation
-       * @return \UsabilityDynamics\Settings
+       * @return \UDX\Settings
        */
       public function set( $key = '', $value = false, $bypass_validation = false ) {
         return parent::set( $key, $value, $bypass_validation );

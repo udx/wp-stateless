@@ -138,7 +138,7 @@ namespace UsabilityDynamics\UD_API {
       public function column_product_status ( $item ) {
         $response = '';
         if ( 'active' == $item['product_status'] ) {
-          $deactivate_url = wp_nonce_url(\UsabilityDynamics\Utility::current_url( array(
+          $deactivate_url = wp_nonce_url(Utility::current_url( array(
             'action' => 'deactivate-product',
             'filepath' => urlencode( $item['product_file_path'] ),
           ) ), 'bulk-licenses' );

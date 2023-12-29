@@ -1,3 +1,7 @@
+#### 4.1.0
+* ENHANCEMENT - remove `udx/lib-settings` package dependency for security reasons 
+* ENHANCEMENT - remove `udx/lib-utility` package dependency for security reasons 
+
 #### 3.3.0
 * NEW - Added new filter `wp_stateless_attachment_url`. Allows to customize attachment URL after WP-Stateless generates it based on it's internal conditions.
 * FIX - Stateless mode Incompatible with Media Uploader in Media Library Grid mode [#675](https://github.com/udx/wp-stateless/issues/675).

@@ -2,16 +2,16 @@
 /**
  * Settings Library
  *
- * @namespace UsabilityDynamics
+ * @namespace UDX
  */
-namespace UsabilityDynamics {
+namespace UDX {
 
-  if( !class_exists( 'UsabilityDynamics\Settings' ) ) {
+  if( !class_exists( 'UDX\Settings' ) ) {
 
     /**
      * Class Settings
      *
-     * @package UsabilityDynamics
+     * @package UDX
      */
     class Settings {
 
@@ -142,10 +142,10 @@ namespace UsabilityDynamics {
        *
        *    $_settings->set( 'my.key', 'my.value' );
        *
-       * @internal param \UsabilityDynamics\type $defaults
-       * @internal param bool|\UsabilityDynamics\type $force_save
-       * @internal param string|\UsabilityDynamics\type $prefix
-       * @internal param bool|\UsabilityDynamics\type $hash_keys
+       * @internal param \UDX\type $defaults
+       * @internal param bool|\UDX\type $force_save
+       * @internal param string|\UDX\type $prefix
+       * @internal param bool|\UDX\type $hash_keys
        */
       public function __construct( $args = false ) {
 
@@ -212,7 +212,7 @@ namespace UsabilityDynamics {
       /**
        * Getter for options
        *
-       * @param bool|\UsabilityDynamics\type $key
+       * @param bool|\UDX\type $key
        *
        * @param bool                         $default
        *
@@ -238,13 +238,13 @@ namespace UsabilityDynamics {
       /**
        * Setter for options
        *
-       * @param string|\UsabilityDynamics\type $key
-       * @param bool|\UsabilityDynamics\type   $value
+       * @param string|\UDX\type $key
+       * @param bool|\UDX\type   $value
        * @param bool                           $bypass_validation
        *
-       * @internal param bool|\UsabilityDynamics\type $force_save
+       * @internal param bool|\UDX\type $force_save
        *
-       * @return \UsabilityDynamics\Settings
+       * @return \UDX\Settings
        */
       public function set( $key = '', $value = false, $bypass_validation = false ) {
 
@@ -533,7 +533,7 @@ namespace UsabilityDynamics {
       /**
        * Load options from DB
        *
-       * @return \UsabilityDynamics\Settings
+       * @return \UDX\Settings
        */
       public function _load() {
 

@@ -101,6 +101,58 @@ namespace UsabilityDynamics\WP {
         return $path;
       }
 
+      /**
+       * Localization Functionality.
+       *
+       * Replaces array's l10n data.
+       * Helpful for localization of data which is stored in JSON files ( see /schemas )
+       *
+       * Usage:
+       *
+       * add_filter( 'ud::schema::localization', function($locals){
+       *    return array_merge( array( 'value_for_translating' => __( 'Blah Blah' ) ), $locals );
+       * });
+       *
+       * $result = self::l10n_localize (array(
+       *  'key' => 'l10n.value_for_translating'
+       * ) );
+       *
+       *
+       * @param array $data
+       * @param array $l10n translated values
+       * @return array
+       * @author peshkov@UD
+       */
+      static public function l10n_localize( $data, $l10n = array() ) {
+
+        if ( !is_array( $data ) && !is_object( $data ) ) {
+          return $data;
+        }
+
+        //** The Localization's list. */
+        $l10n = apply_filters( 'ud::schema::localization', $l10n );
+
+        //** Replace l10n entries */
+        foreach( $data as $k => $v ) {
+          if ( is_array( $v ) ) {
+            $data[ $k ] = self::l10n_localize( $v, $l10n );
+          } elseif ( is_string( $v ) ) {
+            if ( strpos( $v, 'l10n' ) !== false ) {
+              preg_match_all( '/l10n\.([^\s]*)/', $v, $matches );
+              if ( !empty( $matches[ 1 ] ) ) {
+                foreach ( $matches[ 1 ] as $i => $m ) {
+                  if ( array_key_exists( $m, $l10n ) ) {
+                    $data[ $k ] = str_replace( $matches[ 0 ][ $i ], $l10n[ $m ], $data[ $k ] );
+                  }
+                }
+              }
+            }
+          }
+        }
+
+        return $data;
+      }
+
     }
 
   }
