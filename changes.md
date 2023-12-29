@@ -1,7 +1,8 @@
 #### 4.1.0
 * ENHANCEMENT - remove `udx/lib-settings` package dependency for security reasons 
 * ENHANCEMENT - remove `udx/lib-utility` package dependency for security reasons 
-* ENHANCEMENT - refactor `Settings` admin page to remove Angular dependecy.
+* ENHANCEMENT - refactor `Settings` admin page to remove Angular dependency.
+* FIX - update package dependencies for Google Client Library for security reasons.
 * FIX - replace `utf8_encode` with `mb_convert_encoding` to support PHP 8.2 and above.
 
 #### 3.3.0
