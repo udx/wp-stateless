@@ -1,6 +1,8 @@
 #### 4.1.0
 * ENHANCEMENT - remove `udx/lib-settings` package dependency for security reasons 
 * ENHANCEMENT - remove `udx/lib-utility` package dependency for security reasons 
+* ENHANCEMENT - refactor `Settings` admin page to remove Angular dependecy.
+* FIX - replace `utf8_encode` with `mb_convert_encoding` to support PHP 8.2 and above.
 
 #### 3.3.0
 * NEW - Added new filter `wp_stateless_attachment_url`. Allows to customize attachment URL after WP-Stateless generates it based on it's internal conditions.
