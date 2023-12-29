@@ -25,7 +25,7 @@ abstract class Compatibility {
    * ['WP_STATELESS_MEDIA_ON_FLY' => 'WP_STATELESS_DYNAMIC_IMAGE_SUPPORT']
    */
   protected $constant = '';
-  protected $enabled = false;
+  protected $enabled = true;
   protected $description = '';
   protected $plugin_file = null;
   protected $theme_name = null;

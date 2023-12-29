@@ -45,7 +45,7 @@ namespace wpCloud\StatelessMedia {
 
       add_action('sm::module::init', array($this, 'check_addons'));
       add_action('sm::module::messages', array($this, 'show_messages'), 10, 3);
-      add_action('wp_stateless_addons_tab_content', array($this, 'tab_content'), 10, 1);
+      add_action('wp_stateless_addons_tab_content', array($this, 'tab_content'));
       add_filter('wp_stateless_addons_tab_visible', array($this, 'addons_tab_visible'), 10, 1);
     }
 

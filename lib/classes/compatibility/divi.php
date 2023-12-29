@@ -18,6 +18,7 @@ namespace wpCloud\StatelessMedia {
       protected $constant = 'WP_STATELESS_COMPATIBILITY_DIVI';
       protected $description = 'Ensures compatibility with Divi theme.';
       protected $theme_name = 'Divi';
+      protected $enabled = false;
 
       /**
        * Cache Busting call stack conditions to disable.

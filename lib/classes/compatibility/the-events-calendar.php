@@ -19,6 +19,7 @@ namespace wpCloud\StatelessMedia {
       protected $description = 'Ensures compatibility with TheEventsCalendar.';
       protected $plugin_file = [ 'the-events-calendar/the-events-calendar.php' ];
       protected $sm_mode_not_supported = [ ];
+      protected $enabled = false;
 
       /**
        * @param $sm

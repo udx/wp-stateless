@@ -22,6 +22,8 @@ namespace wpCloud\StatelessMedia {
      */
     public function __construct() {
       add_action('admin_init', array($this, 'save_modules'), 1);
+      add_filter('wp_stateless_compatibility_tab_visible', array($this, 'compatibility_tab_visible'), 10, 1);
+      add_action('wp_stateless_compatibility_tab_content', array($this, 'tab_content'));
 
       /**
        * Support for BuddyBoss
@@ -185,5 +187,24 @@ namespace wpCloud\StatelessMedia {
         wp_redirect($_POST['_wp_http_referer']);
       }
     }
+
+    /**
+     * Check if 'Compatibility' tab should be visible.
+     */
+    public function compatibility_tab_visible($visible) {
+      return !empty(self::$modules);
+    }
+
+    /**
+     * Outputs 'Compatibility' tab content on the settings page.
+     * 
+     */
+    public function tab_content() {
+      $modules = Helper::array_of_objects( self::get_modules() );
+
+      include ud_get_stateless_media()->path('static/views/compatibility-tab.php', 'dir');
+    }
+
   }
+  
 }

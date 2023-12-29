@@ -93,6 +93,8 @@ namespace wpCloud\StatelessMedia {
         // Parse root dir by wildcards
         add_filter( 'wp_stateless_unhandle_root_dir', array( $this, 'parse_root_dir_wildcards' ), 10, 3);
 
+        add_action('wp_stateless_settings_tab_content', array($this, 'tab_content'));
+
         $site_url = parse_url( site_url() );
         $site_url['path'] = isset($site_url['path']) ? $site_url['path'] : '';
         $this->wildcards = array(
@@ -441,56 +443,6 @@ namespace wpCloud\StatelessMedia {
        * Draw interface
        */
       public function settings_interface() {
-        $wildcards = apply_filters('wp_stateless_root_dir_wildcard', $this->wildcards);
-        $wildcard_year_month = '%date_year/date_month%';
-        $root_dir = $this->get( 'sm.root_dir' );
-
-        $use_year_month = (strpos($root_dir, $wildcard_year_month) !== false) ?: false;
-
-        /**
-         * removing year/month wildcard
-         */
-        if ($use_year_month) {
-          $root_dir = str_replace($wildcard_year_month, '%YM%', $root_dir);
-        }
-
-        /**
-         * preparing array with wildcards
-         */
-        $root_dir_values = explode('/', $root_dir);
-
-        /**
-         * adding year/month wildcard
-         */
-        if ($use_year_month) {
-          if ( !empty($root_dir_values) ) {
-            foreach( $root_dir_values as $k=>$root_dir_value ) {
-              if ( $root_dir_value == '%YM%' ) {
-                $root_dir_values[$k] = $wildcard_year_month;
-              }
-            }
-          } else {
-            $root_dir_values[] = $wildcard_year_month;
-          }
-        }
-
-        /**
-         * first slash
-         */
-        array_unshift($root_dir_values , '/');
-
-        /**
-         * removing empty values
-         */
-        $root_dir_values = array_filter($root_dir_values);
-
-        /**
-         * merging user's wildcards with default values
-         */
-        if (!empty($root_dir_values)) {
-          $wildcards = array_unique( array_merge($root_dir_values, array_keys($wildcards)) );
-        }
-
         $tab = isset($_GET['tab']) && !empty($_GET['tab']) ? $_GET['tab'] : 'stless_settings_tab';
 
         include $this->bootstrap->path( '/static/views/settings_interface.php', 'dir' );
@@ -590,6 +542,73 @@ namespace wpCloud\StatelessMedia {
       public function set( $key = '', $value = false, $bypass_validation = false ) {
         return parent::set( $key, $value, $bypass_validation );
       }
+
+      /**
+       * Outputs 'Compatibility' tab content on the settings page.
+       * 
+       */
+      public function tab_content() {
+        $wildcards = apply_filters('wp_stateless_root_dir_wildcard', $this->wildcards);
+        $wildcard_year_month = '%date_year/date_month%';
+        $root_dir = $this->get( 'sm.root_dir' );
+
+        $use_year_month = (strpos($root_dir, $wildcard_year_month) !== false) ?: false;
+
+        /**
+         * removing year/month wildcard
+         */
+        if ($use_year_month) {
+          $root_dir = str_replace($wildcard_year_month, '%YM%', $root_dir);
+        }
+
+        /**
+         * preparing array with wildcards
+         */
+        $root_dir_values = explode('/', $root_dir);
+
+        /**
+         * adding year/month wildcard
+         */
+        if ($use_year_month) {
+          if ( !empty($root_dir_values) ) {
+            foreach( $root_dir_values as $k=>$root_dir_value ) {
+              if ( $root_dir_value == '%YM%' ) {
+                $root_dir_values[$k] = $wildcard_year_month;
+              }
+            }
+          } else {
+            $root_dir_values[] = $wildcard_year_month;
+          }
+        }
+
+        /**
+         * first slash
+         */
+        array_unshift($root_dir_values , '/');
+
+        /**
+         * removing empty values
+         */
+        $root_dir_values = array_filter($root_dir_values);
+
+        foreach ($root_dir_values as $k => $v) {
+          $root_dir_values[$k] = trim($v);
+        }
+
+        /**
+         * merging user's wildcards with default values
+         */
+        $wildcards = array_keys($wildcards);
+
+        if (!empty($root_dir_values)) {
+          $wildcards = array_unique( array_merge($root_dir_values, $wildcards) );
+        }
+
+        $sm = (object)$this->get('sm');
+
+        include ud_get_stateless_media()->path('static/views/settings-tab.php', 'dir');
+      }
+      
 
     }
 

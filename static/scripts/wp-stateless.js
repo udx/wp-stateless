@@ -107,53 +107,134 @@ function replace_wildcard_to_the_end(wildcards, remove_slashes = false) {
 }
 
 // Application
-var wpStatelessApp = angular
-  .module('wpStatelessApp', ['ngSanitize'])
+var wpStatelessSettingsApp = {
+  sm: {},
+  backup: {},
+  is_ssl: false,
 
-  // Controllers
-  .controller('wpStatelessSettings', function ($scope, $filter) {
-    $scope.backup = {}
-    $scope.sm = wp_stateless_settings || {}
-    $scope.sm.readonly = $scope.sm.readonly || {}
+  // Show notices for readonly fields
+  showNotice: function (field) {
+    if (this.sm.readonly && this.sm.readonly[field]) {
+      var slug = this.sm.readonly[field]
+     
+      jQuery(`#notice-${field}`).html(this.sm.strings[slug])
+      jQuery(`[name="sm[${field}]"]`).prop('disabled', true)
+    } else {
+      jQuery(`#notice-${field}`).html('')
+      jQuery(`[name="sm[${field}]"]`).prop('disabled', false)
+    }
+  },
 
-    if ($scope.sm.network_admin) {
-      $scope.sm.hashify_file_name = 'true'
-      $scope.sm.readonly.hashify_file_name = true
+  showSupportedTypes: function () {
+    value = jQuery('#sm_body_rewrite').val()
+
+    if ( ['true', 'enable_editor', 'enable_meta'].indexOf(value) > -1 ) {
+      jQuery('.supported-file-types').show()
+    } else {
+      jQuery('.supported-file-types').hide()
+    }
+  },
+
+  setIsSSL: function () {
+    this.is_ssl = jQuery('#custom_domain').val().indexOf('https://') === 0
+
+    if (this.is_ssl) {
+      jQuery('.notice-is-ssl').show()
+    } else {
+      jQuery('.notice-is-ssl').hide()
+    }
+  },
+
+  getRadioValue: function(name) {
+    return jQuery(`input[name="${name}"]:checked`).val()    
+  },
+
+  enableHashifyFileName: function () {
+    var mode = this.getRadioValue('sm[mode]') 
+
+    if ( ['stateless', 'ephemeral'].indexOf(mode) > -1 
+      && this.sm.readonly['hashify_file_name'] != 'constant' ) {
+        this.backup['hashify_file_name'] = jQuery('#cache_busting').val()
+        jQuery('#cache_busting').val('true')
+    } else if ( this.backup['hashify_file_name'] ) {
+      jQuery('#cache_busting').val( this.backup['hashify_file_name'] )
     }
 
-    $scope.$watch('sm.mode', function (value) {
-      if (
-        (value == 'stateless' || value == 'ephemeral') &&
-        $scope.sm.readonly.hashify_file_name != 'constant'
-      ) {
-        $scope.backup.hashify_file_name = $scope.sm.hashify_file_name
-        $scope.sm.hashify_file_name = 'true'
-        // $scope.apply();
-      } else {
-        if ($scope.backup.hashify_file_name) {
-          $scope.sm.hashify_file_name = $scope.backup.hashify_file_name
-          // $scope.apply();
-        }
-      }
+    if (mode == 'stateless') {
+      jQuery('#cache_busting').prop('disabled', true)
+    } else {
+      this.showNotice('hashify_file_name')
+    }
 
-      if (value == 'stateless' && $scope.sm.readonly.hashify_file_name != 'constant' ) {
-        $scope.backup.dynamic_image_support = $scope.sm.dynamic_image_support
-        $scope.sm.dynamic_image_support = 'false'
-      } else {
-        if ($scope.backup.dynamic_image_support) {
-          $scope.sm.dynamic_image_support = $scope.backup.dynamic_image_support
-        }
-      }
-    })
+    if (mode == 'stateless' && this.sm.readonly['hashify_file_name'] != 'constant') {
+      jQuery('#notice-hashify_file_name-mode').show()
+    } else {
+      jQuery('#notice-hashify_file_name-mode').hide()
+    }
+  },
 
-    $scope.$watch('sm.bucket_folder_type', function (value) {
-      if (value == 'single-site') {
+  enableDynamicImageSupport: function () {
+    var mode = this.getRadioValue('sm[mode]') 
+
+    if ( mode == 'stateless' && this.sm.readonly['dynamic_image_support'] != 'constant' ) {
+      this.backup['dynamic_image_support'] = jQuery('#dynamic_image_support').val()
+      jQuery('#dynamic_image_support').val('false')
+    } else if ( this.backup['dynamic_image_support'] ) {
+      jQuery('#dynamic_image_support').val( this.backup['dynamic_image_support'] )
+    }
+
+    if (mode == 'stateless') {
+      jQuery('#dynamic_image_support').prop('disabled', true)
+    } else {
+      this.showNotice('dynamic_image_support')
+    }
+
+    if (mode == 'stateless' && this.sm.readonly['dynamic_image_support'] != 'constant') {
+      jQuery('#notice-dynamic_image_support-mode').show()
+    } else {
+      jQuery('#notice-dynamic_image_support-mode').hide()
+    }
+  },
+
+  switchBucketFolderType: function() {
+    var value = jQuery('#sm_root_dir').val()
+    var folderType = jQuery('#sm_bucket_folder_type').val()
+
+    switch (value) {
+      case '%date_year/date_month%':
+        folderType = 'single-site'
+        break;
+      case 'sites/%site_id%/%date_year/date_month%':
+        folderType = 'multi-site'
+        break;
+      case '':
+        if ( this.sm.network_admin )
+        folderType = ''
+        break;
+      default:
+        folderType = 'custom'
+    }
+
+    if ( jQuery('#sm_bucket_folder_type').val() != folderType ) {
+      jQuery('#sm_bucket_folder_type').val( folderType)
+    }
+
+    setTimeout(function () {
+      jQuery('#permalink_structure').trigger('change')
+    }, 1)
+  },
+
+  switchRootDir: function() {
+    var value = jQuery('#sm_bucket_folder_type').val()
+
+    switch (value) {
+      case 'single-site':
         replace_wildcard_to_the_end(['/', '%date_year/date_month%', '/'], true)
         $wildcards_select
           .val(['/', '%date_year/date_month%', '/'])
           .trigger('change')
-      } else if (value == 'multi-site') {
-        //changins wildcards position
+        break;
+      case 'multi-site':
         replace_wildcard_to_the_end(
           ['/', 'sites', '/', '%site_id%', '/', '%date_year/date_month%', '/'],
           true
@@ -169,115 +250,141 @@ var wpStatelessApp = angular
             '/',
           ])
           .trigger('change')
-      } else if (value == '' && $scope.sm.network_admin) {
-        $wildcards_select.val(null).trigger('change')
-      }
-      prepare_preview_url()
-    })
-
-    $scope.$watch('sm.root_dir', function (value) {
-      if (value == '%date_year/date_month%') {
-        $scope.sm.bucket_folder_type = 'single-site'
-      } else if (value == 'sites/%site_id%/%date_year/date_month%') {
-        $scope.sm.bucket_folder_type = 'multi-site'
-      } else if (value == '' && $scope.sm.network_admin) {
-        $scope.sm.bucket_folder_type = ''
-      } else {
-        $scope.sm.bucket_folder_type = 'custom'
-      }
-
-      setTimeout(function () {
-        jQuery('#permalink_structure').trigger('change')
-      }, 1)
-    })
-
-    var readonlyTag = $scope.sm.readonly.root_dir || false
-    if (readonlyTag) {
-      jQuery('.available-structure-tags .button')
-        .off('click')
-        .css('opacity', '.5')
-    }
-    $scope.tagClicked = function () {
-      if (readonlyTag) return false
-      $scope.sm.bucket_folder_type = 'custom'
-      setTimeout(function () {
-        jQuery('#permalink_structure').trigger('change')
-      }, 1)
-    }
-
-    $scope.sm.showNotice = function (option) {
-      if ($scope.sm.readonly && $scope.sm.readonly[option]) {
-        var slug = $scope.sm.readonly[option]
-        return $scope.sm.strings[slug]
-      }
-    }
-
-    $scope.sm.generatePreviewUrl = function () {
-      $scope.sm.is_custom_domain = false
-      var host = 'https://storage.googleapis.com/'
-      var hash =
-        $scope.sm.hashify_file_name == 'true'
-          ? Date.now().toString(36) + '-'
-          : ''
-      var is_ssl = $scope.sm.custom_domain.indexOf('https://')
-      var custom_domain = $scope.sm.custom_domain.toString()
-      var root_dir = $scope.sm.root_dir ? $scope.sm.root_dir : ''
-
-      jQuery.each($scope.sm.wildcards, function (index, item) {
-        var reg = new RegExp(index, 'g')
-        root_dir = root_dir.replace(reg, item[0])
-      })
-      let tags = [
-        '%date_year%',
-        '%date_month%',
-        '%site_id%',
-        '%site_url%',
-        '%site_url_host%',
-        '%site_url_path%',
-      ]
-      let value_splitted = root_dir.split('/')
-      for (let i = 0; i < value_splitted.length; i++) {
-        if (
-          !/^[a-zA-Z0-9_\-.]+$/.test(value_splitted[i]) &&
-          value_splitted[i] != '' &&
-          jQuery.inArray(value_splitted[i], tags) == -1
-        ) {
-          value_splitted[i] = value_splitted[i].replace(/[^a-zA-Z0-9_\-.]/g, '')
+        break;
+      case '':
+        if ( wp_stateless_settings.network_admin ) {
+          $wildcards_select.val(null).trigger('change')
         }
-      }
-      root_dir = value_splitted.join('/')
-      root_dir = root_dir.replace(/(\/+)/g, '/')
-      root_dir = root_dir.replace(/^\//, '')
-      root_dir = root_dir.replace(/\/$/, '')
-      if (root_dir) {
-        root_dir = root_dir + '/'
-      }
-
-      custom_domain = custom_domain.replace(/\/+$/, '') // removing trailing slashes
-      custom_domain = custom_domain.replace(/https?:\/\//, '') // removing http:// or https:// from the beginning.
-      host += $scope.sm.bucket ? $scope.sm.bucket : '{bucket-name}'
-
-      if (
-        custom_domain !== 'storage.googleapis.com' &&
-        $scope.sm.bucket &&
-        custom_domain &&
-        (is_ssl === 0 || custom_domain == $scope.sm.bucket)
-      ) {
-        $scope.sm.is_custom_domain = true
-        $scope.sm.is_ssl = is_ssl === 0 ? true : false
-        host = is_ssl === 0 ? 'https://' : 'http://' // bucketname will be host
-        host += custom_domain
-      }
-
-      $scope.sm.preview_url =
-        host + '/' + root_dir + hash + 'your-image-name.jpeg'
+        break;
     }
 
-    $scope.sm.generatePreviewUrl()
-  })
-  .controller('wpStatelessCompatibility', function ($scope, $filter) {
-    $scope.modules = wp_stateless_compatibility || {}
-  })
+    prepare_preview_url()
+  },
+
+  generatePreviewUrl: function() {
+    var host = 'https://storage.googleapis.com/'
+    var hash =
+      jQuery('#cache_busting').val() == 'true'
+        ? Date.now().toString(36) + '-'
+        : ''
+    var custom_domain = jQuery('#custom_domain').val().toString()
+    var root_dir = jQuery('#sm_root_dir').val().toString()
+    var bucket = jQuery('#bucket_name').val().toString()
+
+    jQuery.each(this.sm.wildcards, function (index, item) {
+      var reg = new RegExp(index, 'g')
+      root_dir = root_dir.replace(reg, item[0])
+    })
+  
+    var tags = [
+      '%date_year%',
+      '%date_month%',
+      '%site_id%',
+      '%site_url%',
+      '%site_url_host%',
+      '%site_url_path%',
+    ]
+
+    var value_splitted = root_dir.split('/')
+
+    for (var i = 0; i < value_splitted.length; i++) {
+      if (
+        !/^[a-zA-Z0-9_\-.]+$/.test(value_splitted[i]) &&
+        value_splitted[i] != '' &&
+        jQuery.inArray(value_splitted[i], tags) == -1
+      ) {
+        value_splitted[i] = value_splitted[i].replace(/[^a-zA-Z0-9_\-.]/g, '')
+      }
+    }
+    
+    root_dir = value_splitted.join('/')
+    root_dir = root_dir.replace(/(\/+)/g, '/')
+    root_dir = root_dir.replace(/^\//, '')
+    root_dir = root_dir.replace(/\/$/, '')
+
+    if (root_dir) {
+      root_dir = root_dir + '/'
+    }
+
+    custom_domain = custom_domain.replace(/\/+$/, '') // removing trailing slashes
+    custom_domain = custom_domain.replace(/https?:\/\//, '') // removing http:// or https:// from the beginning.
+    host += bucket.length > 0 ? bucket : '{bucket-name}'
+
+    if (
+      custom_domain !== 'storage.googleapis.com' &&
+      bucket.length > 0 &&
+      custom_domain.length > 0 &&
+      (this.is_ssl || custom_domain == bucket)
+    ) {
+      host = this.is_ssl ? 'https://' : 'http://' // bucket name will be host
+      host += custom_domain
+    }
+
+    host += '/' + root_dir + hash + 'your-image-name.jpeg'
+
+    jQuery('#file_url_grp_preview').val(host)
+  },
+
+  // Init application
+  init: function () {
+    this.sm = wp_stateless_settings || {}
+    this.sm.readonly = this.sm.readonly || {}
+
+    var readonly = Object.keys(this.sm.readonly);
+
+    for (var key of readonly) {
+      this.showNotice(key)
+    }
+
+    if (this.sm.network_admin) {
+      jQuery('#cache_busting').val('true')
+      this.sm.readonly.hashify_file_name = true
+    }
+
+    // Disable root dir editing if it's readonly
+    if (this.sm.readonly['root_dir']) {
+      $wildcards_select.prop('disabled', true)
+      jQuery('#sm_bucket_folder_type').prop('disabled', true)
+    }
+
+    // Show supported file types
+    jQuery('#sm_body_rewrite').on('change', this.showSupportedTypes)
+    this.showSupportedTypes()
+
+    // Check if custom domain is SSL
+    jQuery('#custom_domain').on('change', this.setIsSSL.bind(this))
+    this.setIsSSL()
+
+    // Check if hashify file name is enabled
+    jQuery('[name="sm[mode]"').on('change', this.enableHashifyFileName.bind(this))
+    this.enableHashifyFileName()
+
+    // Check if dynamic image support is enabled
+    jQuery('[name="sm[mode]"').on('change', this.enableDynamicImageSupport.bind(this))
+    this.enableDynamicImageSupport()
+
+    // Switch folder type depending on root dir
+    jQuery('#sm_root_dir').on('change', this.switchBucketFolderType.bind(this))
+    this.switchBucketFolderType()
+
+    // Update root dir depending on folder type
+    jQuery('#sm_bucket_folder_type').on('change', this.switchRootDir)
+
+    // Generate preview URL
+    jQuery('#bucket_name').on('change', this.generatePreviewUrl.bind(this))
+    jQuery('#sm_root_dir').on('change', this.generatePreviewUrl.bind(this))
+    jQuery('#custom_domain').on('change', this.generatePreviewUrl.bind(this))
+    this.generatePreviewUrl()
+  }
+};
+
+wpStatelessSettingsApp.init();
+
+
+var wpStatelessApp = angular
+  .module('wpStatelessApp', ['ngSanitize'])
+
+  // Controllers
   .controller('wpStatelessProcessing', function ($scope, $http) {
     /**
      * General Errors

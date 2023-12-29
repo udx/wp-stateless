@@ -21,6 +21,7 @@ namespace wpCloud\StatelessMedia {
       protected $description = 'Enables support for these Imagify Image Optimizer features: auto-optimize images on upload, bulk optimizer, resize larger images, optimization levels (normal, aggressive, ultra).';
       protected $plugin_file = ['imagify/imagify.php', 'imagify-plugin/imagify.php'];
       protected $sm_mode_not_supported = ['stateless'];
+      protected $enabled = false;
 
       public function module_init($sm) {
         // Skip sync on upload when attachment is image, sync will be handled after image is optimized.
