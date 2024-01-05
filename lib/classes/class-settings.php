@@ -93,7 +93,9 @@ namespace wpCloud\StatelessMedia {
         // Parse root dir by wildcards
         add_filter( 'wp_stateless_unhandle_root_dir', array( $this, 'parse_root_dir_wildcards' ), 10, 3);
 
-        add_action('wp_stateless_settings_tab_content', array($this, 'tab_content'));
+        // Settings page content
+        add_action('wp_stateless_settings_tab_content', array($this, 'settings_tab_content'));
+        add_action('wp_stateless_processing_tab_content', array($this, 'processing_tab_content'));
 
         $site_url = parse_url( site_url() );
         $site_url['path'] = isset($site_url['path']) ? $site_url['path'] : '';
@@ -547,7 +549,7 @@ namespace wpCloud\StatelessMedia {
        * Outputs 'Compatibility' tab content on the settings page.
        * 
        */
-      public function tab_content() {
+      public function settings_tab_content() {
         $wildcards = apply_filters('wp_stateless_root_dir_wildcard', $this->wildcards);
         $wildcard_year_month = '%date_year/date_month%';
         $root_dir = $this->get( 'sm.root_dir' );
@@ -609,7 +611,19 @@ namespace wpCloud\StatelessMedia {
         include ud_get_stateless_media()->path('static/views/settings-tab.php', 'dir');
       }
       
+      /**
+       * Outputs 'Sync' tab content on the settings page.
+       * 
+       */
+      public function processing_tab_content() {
+        // Drop non-public properties
+        $processes = json_encode(Utility::get_available_sync_classes());
+        $processes = json_decode($processes, true);
 
+        $processes = Helper::array_of_objects($processes);
+
+        include ud_get_stateless_media()->path('static/views/processing_interface.php', 'dir');
+      }
     }
 
   }

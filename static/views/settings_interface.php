@@ -1,8 +1,7 @@
-<div class="wrap" ng-app="wpStatelessApp">
+<div class="wrap">
   <div id="stateless-settings-page-title">
     <h1><?php _e('WP-Stateless', ud_get_stateless_media()->domain); ?></h1>
     <div class="description"><?php _e('Upload and serve your WordPress media files from Google Cloud Storage.', ud_get_stateless_media()->domain); ?></div>
-    <div class="no-js-error" ng-hide="jsLoaded" ng-controller="noJSWarning">You have a problem with JS.</div>
   </div>
   <h2 class="nav-tab-wrapper">
     <a href="#stless_settings_tab" class="stless_setting_tab nav-tab <?php if ($tab == 'stless_settings_tab') echo 'nav-tab-active'; ?>"><?php _e('Settings', ud_get_stateless_media()->domain); ?></a>
@@ -22,7 +21,7 @@
 
     <?php if (!is_network_admin() && !apply_filters('wp_stateless_is_app_engine', false) && ud_get_stateless_media('sm.mode') != 'disabled') : ?>
       <div id="stless_sync_tab" class="stless_settings_content <?php if ($tab == 'stless_sync_tab') echo 'active'; ?>">
-        <?php include 'processing_interface.php'; ?>
+        <?php do_action('wp_stateless_processing_tab_content'); ?>
       </div>
     <?php endif; ?>
 
