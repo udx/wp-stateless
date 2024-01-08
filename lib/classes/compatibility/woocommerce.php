@@ -35,7 +35,9 @@ namespace wpCloud\StatelessMedia {
        */
       public function skip_cache_busting( $return, $filename ) {
         $backtrace = debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS, 8 );
-        if( strpos( $backtrace[ 7 ][ 'class' ], 'WC_CSV_Exporter' ) !== false ) {
+        $check = $backtrace && isset( $backtrace[7] ) && isset( $backtrace[7]['class'] ) ? $backtrace[7]['class'] : '';
+
+        if( strpos( $check, 'WC_CSV_Exporter' ) !== false ) {
           return $filename;
         }
         return $return;
