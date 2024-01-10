@@ -18,6 +18,6 @@ Security updates are provided for the latest stable release. Please ensure that 
 
 ## Contact Information
 
-For security-related matters, please contact our security team at [security@udx.io](security@udx.io). For general inquiries, feature requests, and other non-security-related discussions, please use our regular [issue tracker](https://github.com/udx/wp-stateless/issues).
+For security-related matters, please contact our security team at [security@udx.io](mailto:security@udx.io). For general inquiries, feature requests, and other non-security-related discussions, please use our regular [issue tracker](https://github.com/udx/wp-stateless/issues).
 
 Thank you for helping us ensure the security of WP-Stateless. Your contributions are greatly appreciated.
