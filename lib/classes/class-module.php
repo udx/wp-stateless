@@ -145,10 +145,24 @@ namespace wpCloud\StatelessMedia {
       if (empty($args['id'])) {
         return;
       }
+      
       if (is_bool($args['enabled'])) {
         $args['enabled'] = $args['enabled'] ? 'true' : 'false';
       }
-      self::$modules[$args['id']] = wp_parse_args($args, array('id' => '', 'self' => '', 'title' => '', 'enabled' => false, 'description' => '', 'is_constant' => false, 'is_network' => false, 'is_plugin_active' => false,));
+
+      $defaults = array(
+        'id' => '', 
+        'self' => '', 
+        'title' => '', 
+        'enabled' => false, 
+        'description' => '', 
+        'is_constant' => false, 
+        'is_network' => false, 
+        'is_plugin_active' => false,
+        'is_internal' => false,
+      );
+      
+      self::$modules[$args['id']] = wp_parse_args($args, $defaults);
     }
 
     /**
@@ -200,7 +214,15 @@ namespace wpCloud\StatelessMedia {
      * 
      */
     public function tab_content() {
-      $modules = Helper::array_of_objects( self::get_modules() );
+      $modules = self::get_modules();
+
+      foreach ($modules as $id => $module) {
+        if ( !$module['is_internal'] ) {
+          unset($modules[$id]);
+        }
+      }
+
+      $modules = Helper::array_of_objects( $modules );
 
       include ud_get_stateless_media()->path('static/views/compatibility-tab.php', 'dir');
     }

@@ -6,6 +6,7 @@
 * FIX - update package dependencies for Google Client Library for security reasons.
 * FIX - replace `utf8_encode` with `mb_convert_encoding` to support PHP 8.2 and above.
 * COMPATIBILITY - prevent PHP warnings while working with WooCommerce version 8.4.0 and above.
+* COMPATIBILITY - avoid conflicts between builtin compatibilities and WP-Stateless Addon plugins.
 
 = 3.3.0 =
 * NEW - Added new filter `wp_stateless_attachment_url`. Allows to customize attachment URL after WP-Stateless generates it based on it's internal conditions.

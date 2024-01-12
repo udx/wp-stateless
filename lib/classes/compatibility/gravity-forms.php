@@ -22,6 +22,7 @@ namespace wpCloud\StatelessMedia {
       protected $plugin_version;
       protected $non_library_sync = true;
       protected $enabled = false;
+      protected $is_internal = true;
 
       /**
        * @param $sm

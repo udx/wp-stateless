@@ -28,6 +28,7 @@ namespace wpCloud\StatelessMedia {
       protected $plugin_file = 'shortpixel-image-optimiser/wp-shortpixel.php';
       protected $sm_mode_not_supported = ['stateless'];
       protected $enabled = false;
+      protected $is_internal = true;
 
       /**
        * @param $sm

@@ -23,6 +23,13 @@ namespace wpCloud\StatelessMedia {
     protected $addons = [];
 
     /**
+     * Addons slugs list.
+     *
+     * @var array
+     */
+    protected $addon_ids = [];
+
+    /**
      * Recommended addons count.
      *
      * @var int
@@ -40,13 +47,15 @@ namespace wpCloud\StatelessMedia {
       $addons_file = ud_get_stateless_media()->path('static/data/addons.php', 'dir');
 
       if ( file_exists($addons_file) ) {
-        $this->addons = require_once($addons_file);
+        $this->addons     = require_once($addons_file);
+        $this->addon_ids  = array_keys($this->addons);
       }
 
       add_action('sm::module::init', array($this, 'check_addons'));
       add_action('sm::module::messages', array($this, 'show_messages'), 10, 3);
       add_action('wp_stateless_addons_tab_content', array($this, 'tab_content'));
       add_filter('wp_stateless_addons_tab_visible', array($this, 'addons_tab_visible'), 10, 1);
+      add_filter('wp_stateless_restrict_compatibility', array($this, 'restrict_compatibility'), 10, 3);
     }
 
     /**
@@ -58,7 +67,7 @@ namespace wpCloud\StatelessMedia {
       $active_plugins = Helper::get_active_plugins();
 
       foreach ($this->addons as $id => $addon) {
-        // Theme addons
+        // Recommended theme addons
         if ( isset($addon['theme_name']) ) {
           if ( Helper::is_theme_name($addon['theme_name']) ) {
             $this->addons[$id]['recommended'] = true;
@@ -66,7 +75,7 @@ namespace wpCloud\StatelessMedia {
           }
         }
 
-        // Plugin addons
+        // Recommended plugin addons
         if ( isset($addon['plugin_files']) && is_array($addon['plugin_files']) ) {
           foreach ($addon['plugin_files'] as $file) {
             if ( in_array($file, $active_plugins) ) {
@@ -83,6 +92,13 @@ namespace wpCloud\StatelessMedia {
           if ( in_array($addon['addon_file'], $active_plugins) ) {
             $this->addons[$id]['active'] = true;
             $this->active++;
+          }
+        }
+
+        // Installed addons
+        if ( isset($addon['addon_file']) ) {
+          if ( file_exists( WP_PLUGIN_DIR . '/' . $addon['addon_file'] ) ) {
+            $this->addons[$id]['installed'] = true;
           }
         }
       }
@@ -171,12 +187,63 @@ namespace wpCloud\StatelessMedia {
       }
 
       $addons = $this->sort_addons($addons);
+      $addons = $this->get_addons_view($addons);
       $addons = Helper::array_of_objects($addons);
 
-      $description = __('Provides compatibility between the %s and the WP-Stateless plugin.', ud_get_stateless_media()->domain);
-      $addon_link = 'https://stateless.udx.io/addons/%s';
-
       include ud_get_stateless_media()->path('static/views/addons-tab.php', 'dir');
+    }
+
+    /**
+     * Prepare addon data for output.
+     * 
+     * @param array $addons
+     * @return array
+     */
+    private function get_addons_view($addons) {
+      $plugin_desc = __('Provides compatibility between the %s and the WP-Stateless plugins.', ud_get_stateless_media()->domain);
+      $theme_desc = __('Provides compatibility between the %s theme and the WP-Stateless plugin.', ud_get_stateless_media()->domain);
+
+      $link = 'https://stateless.udx.io/addons/%s';
+
+      $defaults = [
+        'title'         => '',
+        'icon'          => '',
+        'description'   => '',
+        'recommended'   => false,
+        'active'        => false,
+        'installed'     => false,
+        'hubspot_id'    => '',
+        'hubspot_link'  => '',
+        'repo'          => '',
+        'docs'          => '',
+        'link'          => '',
+        'wp'            => '',
+        'card_class'    => '',
+        'status'        => '',
+      ];
+
+      foreach ($addons as $id => $addon) {
+        if ( isset($addon['theme_name']) ) {
+          $addon['description'] = sprintf($theme_desc, $addon['title']);
+        } else {
+          $addon['description'] = sprintf($plugin_desc, $addon['title']);
+        }
+
+        if ( isset($addon['active']) && $addon['active']) {
+          $addon['card_class'] = 'active';
+          $addon['status'] =  __('active', ud_get_stateless_media()->domain);
+        } elseif ( isset($addon['recommended']) && $addon['recommended']) {
+          $addon['card_class'] = 'recommended';
+          $addon['status'] =  __('recommended', ud_get_stateless_media()->domain);
+        }
+
+        $addon['docs'] = sprintf($link, $id);
+        $addon['link'] = $addon['docs'];
+
+        $addons[$id] = wp_parse_args($addon, $defaults);
+      }
+
+      return $addons;
     }
 
     /**
@@ -211,6 +278,20 @@ namespace wpCloud\StatelessMedia {
      */
     public function addons_tab_visible($visible) {
       return count($this->addons) > 0;
+    }
+
+    /**
+     * Restrict internal compatibility.
+     */
+    public function restrict_compatibility($restrict, $id, $is_internal) {
+      // If we have a plugin with the same ID as internal compatibility then disable internal compatibility
+      if ($is_internal) {
+        if ( in_array($id, $this->addon_ids) ) {
+          return true;
+        }
+      }
+
+      return $restrict;
     }
   }
 }

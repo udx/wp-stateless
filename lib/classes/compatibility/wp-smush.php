@@ -20,6 +20,7 @@ namespace wpCloud\StatelessMedia {
       protected $description = 'Ensures compatibility with WP Smush.';
       protected $plugin_file = ['wp-smushit/wp-smush.php', 'wp-smush-pro/wp-smush.php', 'wp-smushit-pro/wp-smush-pro.php'];
       protected $enabled = false;
+      protected $is_internal = true;
 
       /**
        * @param $sm

@@ -20,6 +20,7 @@ namespace wpCloud\StatelessMedia {
       protected $description = 'Ensures compatibility with Polylang Pro.';
       protected $plugin_file = ['polylang-pro/polylang.php'];
       protected $enabled = false;
+      protected $is_internal = true;
 
       /**
        * @param $sm

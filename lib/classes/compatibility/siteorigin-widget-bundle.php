@@ -20,6 +20,7 @@ namespace wpCloud\StatelessMedia {
       protected $plugin_file = 'so-widgets-bundle/so-widgets-bundle.php';
       protected $non_library_sync = true;
       protected $enabled = false;
+      protected $is_internal = true;
 
       /**
        * @param $sm

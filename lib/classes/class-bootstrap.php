@@ -79,9 +79,10 @@ namespace wpCloud\StatelessMedia {
 
         // Initialize compatibility modules.
         add_action('plugins_loaded', function () {
+          Addons::instance();
           new Module();
           DynamicImageSupport::instance();
-        });
+        }, 20);
 
         /**
          * Define settings and UI.
@@ -116,7 +117,6 @@ namespace wpCloud\StatelessMedia {
         ImageSync::instance();
         FileSync::instance();
         NonLibrarySync::instance();
-        Addons::instance();
 
         // Invoke REST API
         add_action('rest_api_init', array($this, 'api_init'));

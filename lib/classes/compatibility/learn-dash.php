@@ -19,6 +19,7 @@ namespace wpCloud\StatelessMedia {
       protected $description = 'Ensures compatibility with LearnDash.';
       protected $plugin_file = ['sfwd-lms/sfwd_lms.php'];
       protected $enabled = false;
+      protected $is_internal = true;
 
       /**
        * @param $sm

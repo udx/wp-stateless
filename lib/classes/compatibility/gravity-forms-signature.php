@@ -20,6 +20,7 @@ namespace wpCloud\StatelessMedia {
       protected $plugin_file = 'gravityformssignature/signature.php';
       protected $plugin_version;
       protected $enabled = false;
+      protected $is_internal = true;
 
       /**
        * @param $sm

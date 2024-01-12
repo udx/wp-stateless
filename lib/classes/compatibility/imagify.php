@@ -22,6 +22,7 @@ namespace wpCloud\StatelessMedia {
       protected $plugin_file = ['imagify/imagify.php', 'imagify-plugin/imagify.php'];
       protected $sm_mode_not_supported = ['stateless'];
       protected $enabled = false;
+      protected $is_internal = true;
 
       public function module_init($sm) {
         // Skip sync on upload when attachment is image, sync will be handled after image is optimized.

@@ -20,6 +20,7 @@ namespace wpCloud\StatelessMedia {
       protected $description = 'Ensures compatibility with WooCommerce Extra Product Options.';
       protected $plugin_file = 'woocommerce-tm-extra-product-options/tm-woo-extra-product-options.php';
       protected $enabled = false;
+      protected $is_internal = true;
 
       /**
        * @param $sm
