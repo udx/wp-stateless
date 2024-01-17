@@ -38,19 +38,25 @@ namespace wpCloud\StatelessMedia {
        * @return array|bool
        */
       public function url_stat($path, $flags) {
-        $this->_openPath($path);
-        // if root dir
-        if (empty($this->file)) {
-          $stats = [];
-          // equivalent to 40777 and 40444 in octal
-          if ($is_writable = $this->bucket->isWritable()) {
-            $stats['mode'] = $is_writable
-              ? self::DIRECTORY_WRITABLE_MODE
-              : self::DIRECTORY_READABLE_MODE;
-            return $this->makeStatArray($stats);
+        try {
+          $this->_openPath($path);
+
+          // if root dir
+          if (empty($this->file)) {
+            $stats = [];
+            // equivalent to 40777 and 40444 in octal
+            if ($is_writable = $this->bucket->isWritable()) {
+              $stats['mode'] = $is_writable
+                ? self::DIRECTORY_WRITABLE_MODE
+                : self::DIRECTORY_READABLE_MODE;
+              return $this->makeStatArray($stats);
+            }
           }
+
+          return parent::url_stat($path, $flags);
+        } catch (\Exception $e) {
+          return false;
         }
-        return parent::url_stat($path, $flags);
       }
 
       /**

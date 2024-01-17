@@ -1,10 +1,12 @@
 == Changelog ==
-= 4.1.0 =
-* ENHANCEMENT - remove `udx/lib-settings` package dependency for security reasons.
+= 3.4.0 =
+* ENHANCEMENT - remove `udx/lib-settings` package dependency for security reasons. 
 * ENHANCEMENT - remove `udx/lib-utility` package dependency for security reasons.
 * ENHANCEMENT - refactor `Settings` admin page to remove Angular dependency.
+* ENHANCEMENT - include Software Bill of Materials (SBOM) to GitHub release.
 * FIX - update package dependencies for Google Client Library for security reasons.
 * FIX - replace `utf8_encode` with `mb_convert_encoding` to support PHP 8.2 and above.
+* FIX - Fatal Error in `Stateless` mode if GCP access credentials are wrong [#693](https://github.com/udx/wp-stateless/issues/693).
 * COMPATIBILITY - prevent PHP warnings while working with WooCommerce version 8.4.0 and above.
 * COMPATIBILITY - avoid conflicts between builtin compatibilities and WP-Stateless Addon plugins.
 

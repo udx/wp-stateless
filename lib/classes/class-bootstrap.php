@@ -259,32 +259,51 @@ namespace wpCloud\StatelessMedia {
           }
         } elseif ($sm_mode == 'stateless') {
           /**
-           * Replacing local path to gs:// for using it on StreamWrapper
+           * Determine if we have issues with connection to Google Storage Bucket
+           * if SM is not disabled.
            */
-          add_filter('upload_dir', array($this, 'filter_upload_dir'), 99);
+          $is_connected = $this->is_connected_to_gs();
 
-          /**
-           * Stateless mode working only with GD library
-           */
-          add_filter('wp_image_editors', array($this, 'select_wp_image_editors'));
+          if (is_wp_error($is_connected)) {
+            $this->errors->add($is_connected->get_error_message(), 'warning');
+          }
 
-          /**
-           * Init GS client
-           */
-          global $gs_client;
-          if ($gs_client = $this->init_gs_client()) {
-            StreamWrapper::register($gs_client);
+          if ($googleSDKVersionConflictError = get_transient("wp_stateless_google_sdk_conflict")) {
+            $this->errors->add($googleSDKVersionConflictError, 'warning');
           }
 
           /**
-           * init client's filters
+           * Carry on only if we do not have errors.
            */
-          $this->_init_filters('client');
+          if (!$this->has_errors()) {
+            /**
+             * Replacing local path to gs:// for using it on StreamWrapper
+             */
+            add_filter('upload_dir', array($this, 'filter_upload_dir'), 99);
 
-          /**
-           * init main filters
-           */
-          $this->_init_filters('main');
+            /**
+             * Stateless mode working only with GD library
+             */
+            add_filter('wp_image_editors', array($this, 'select_wp_image_editors'));
+
+            /**
+             * Init GS client
+             */
+            global $gs_client;
+            if ($gs_client = $this->init_gs_client()) {
+              StreamWrapper::register($gs_client);
+            }
+
+            /**
+             * init client's filters
+             */
+            $this->_init_filters('client');
+
+            /**
+             * init main filters
+             */
+            $this->_init_filters('main');
+          }
         }
       }
 
@@ -1558,7 +1577,6 @@ namespace wpCloud\StatelessMedia {
        * @author peshkov@UD
        */
       public function is_connected_to_gs() {
-
         $trnst = get_transient('sm::is_connected_to_gs');
 
         if (empty($trnst) || false === $trnst || !isset($trnst['hash']) || $trnst['hash'] != md5(serialize($this->get('sm')))) {
@@ -1576,7 +1594,7 @@ namespace wpCloud\StatelessMedia {
             $connected = $client->is_connected();
             if ($connected !== true) {
               $trnst['success'] = 'false';
-              $trnst['error'] = sprintf(__('Could not connect to Google Storage bucket. Please be sure that bucket with name <b>%s</b> exists.', $this->domain), esc_html($this->get('sm.bucket')));
+              $trnst['error'] = sprintf(__('Could not connect to Google Storage bucket. Please be sure that bucket with name <b>%s</b> exists and the access credentials are correct.', $this->domain), esc_html($this->get('sm.bucket')));
 
               if (is_callable(array($connected, 'getHandlerContext')) && $handlerContext = $connected->getHandlerContext()) {
                 if (!empty($handlerContext['error'])) {

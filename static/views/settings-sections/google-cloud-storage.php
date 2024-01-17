@@ -24,9 +24,15 @@
           
       <p>
         <label for="service_account_json">
-          <textarea name="sm[key_json]" type="text" id="service_account_json" class="regular-text ltr" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
-            <?php echo $sm->key_json; ?>
-          </textarea>
+          <textarea name="sm[key_json]" 
+            type="text" 
+            id="service_account_json" 
+            class="regular-text ltr" 
+            autocomplete="off" 
+            autocorrect="off" 
+            autocapitalize="off" 
+            spellcheck="false"
+          ><?php echo $sm->key_json; ?></textarea>
         </label>
       </p>
         
