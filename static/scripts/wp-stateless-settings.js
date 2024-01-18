@@ -1,22 +1,20 @@
 jQuery(document).ready(function ($) {
-  var smSelectTab = function (tab) {
-    var $tab = $('.nav-tab-wrapper').find("[href='" + tab + "']")
-    if ($tab.size() != 0) {
-      $tab.addClass('nav-tab-active').siblings().removeClass('nav-tab-active')
-      $(tab).addClass('active').siblings().removeClass('active')
-    }
-  }
-
-  var tab = window.location.hash
-  smSelectTab(tab)
-
-  $('.stless_setting_tab').on('click', function (e) {
+  jQuery('.nav-tab-wrapper a').on('click', function (e) {
     e.preventDefault()
 
-    var tab = $(this).attr('href')
-    smSelectTab(tab)
-  })
+    var tab = jQuery(this).attr('href')
+    
+    if ( tab.indexOf('#') === 0 ) {
+      jQuery(this).addClass('nav-tab-active').siblings().removeClass('nav-tab-active')
+      jQuery(`.stless_settings ${tab}`).addClass('active').siblings().removeClass('active')
 
+      var url = new URL(window.location.href)
+      url.searchParams.set('tab', tab.replace('#', ''))
+  
+      window.history.replaceState(null, '', url.toString())
+    }
+  })
+  
   $(document).on('click', '.pointer', function (e) {
     e.stopPropagation()
     var pointer = $(this)

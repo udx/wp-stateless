@@ -283,7 +283,7 @@ namespace UsabilityDynamics\UD_API {
           $status = 'true';
         }
         
-        $redirect_url = \UsabilityDynamics\Utility::current_url( array( 'type' => urlencode( $type ), 'status' => urlencode( $status ) ), array( 'action', 'filepath', '_wpnonce' ) );
+        $redirect_url = Utility::current_url( array( 'type' => urlencode( $type ), 'status' => urlencode( $status ) ), array( 'action', 'filepath', '_wpnonce' ) );
         wp_safe_redirect( $redirect_url );
         exit;
       }

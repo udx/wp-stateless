@@ -79,9 +79,10 @@ namespace wpCloud\StatelessMedia {
 
         // Initialize compatibility modules.
         add_action('plugins_loaded', function () {
+          Addons::instance();
           new Module();
           DynamicImageSupport::instance();
-        });
+        }, 20);
 
         /**
          * Define settings and UI.
@@ -116,7 +117,6 @@ namespace wpCloud\StatelessMedia {
         ImageSync::instance();
         FileSync::instance();
         NonLibrarySync::instance();
-        Addons::instance();
 
         // Invoke REST API
         add_action('rest_api_init', array($this, 'api_init'));
@@ -259,32 +259,51 @@ namespace wpCloud\StatelessMedia {
           }
         } elseif ($sm_mode == 'stateless') {
           /**
-           * Replacing local path to gs:// for using it on StreamWrapper
+           * Determine if we have issues with connection to Google Storage Bucket
+           * if SM is not disabled.
            */
-          add_filter('upload_dir', array($this, 'filter_upload_dir'), 99);
+          $is_connected = $this->is_connected_to_gs();
 
-          /**
-           * Stateless mode working only with GD library
-           */
-          add_filter('wp_image_editors', array($this, 'select_wp_image_editors'));
+          if (is_wp_error($is_connected)) {
+            $this->errors->add($is_connected->get_error_message(), 'warning');
+          }
 
-          /**
-           * Init GS client
-           */
-          global $gs_client;
-          if ($gs_client = $this->init_gs_client()) {
-            StreamWrapper::register($gs_client);
+          if ($googleSDKVersionConflictError = get_transient("wp_stateless_google_sdk_conflict")) {
+            $this->errors->add($googleSDKVersionConflictError, 'warning');
           }
 
           /**
-           * init client's filters
+           * Carry on only if we do not have errors.
            */
-          $this->_init_filters('client');
+          if (!$this->has_errors()) {
+            /**
+             * Replacing local path to gs:// for using it on StreamWrapper
+             */
+            add_filter('upload_dir', array($this, 'filter_upload_dir'), 99);
 
-          /**
-           * init main filters
-           */
-          $this->_init_filters('main');
+            /**
+             * Stateless mode working only with GD library
+             */
+            add_filter('wp_image_editors', array($this, 'select_wp_image_editors'));
+
+            /**
+             * Init GS client
+             */
+            global $gs_client;
+            if ($gs_client = $this->init_gs_client()) {
+              StreamWrapper::register($gs_client);
+            }
+
+            /**
+             * init client's filters
+             */
+            $this->_init_filters('client');
+
+            /**
+             * init main filters
+             */
+            $this->_init_filters('main');
+          }
         }
       }
 
@@ -1211,8 +1230,6 @@ namespace wpCloud\StatelessMedia {
         wp_register_style('wp-stateless-addons', $this->path('static/styles/wp-stateless-addons.css', 'url'), array(), self::$version);
 
         // Sync tab
-        wp_register_script('wp-stateless-angular', ud_get_stateless_media()->path('static/scripts/angular.min.js', 'url'), array(), '1.8.0', true);
-        wp_register_script('wp-stateless-angular-sanitize', ud_get_stateless_media()->path('static/scripts/angular-sanitize.min.js', 'url'), array('wp-stateless-angular'), '1.8.0', true);
         wp_register_script('wp-stateless', ud_get_stateless_media()->path('static/scripts/wp-stateless.js', 'url'), array('jquery-ui-core', 'wp-stateless-settings', 'wp-api-request'), self::$version, true);
 
         wp_localize_script('wp-stateless', 'stateless_l10n', $this->get_l10n_data());
@@ -1229,7 +1246,6 @@ namespace wpCloud\StatelessMedia {
           $settings['key_json'] = "Currently configured via a constant.";
         }
         wp_localize_script('wp-stateless', 'wp_stateless_settings', $settings);
-        wp_localize_script('wp-stateless', 'wp_stateless_compatibility', Module::get_modules());
       }
 
       /**
@@ -1288,8 +1304,6 @@ namespace wpCloud\StatelessMedia {
             wp_enqueue_style('wp-stateless-addons');
 
             // Sync tab
-            wp_enqueue_script('wp-stateless-angular');
-            wp_enqueue_script('wp-stateless-angular-sanitize');
             wp_enqueue_script('wp-stateless');
 
             wp_enqueue_style('wp-pointer');
@@ -1563,7 +1577,6 @@ namespace wpCloud\StatelessMedia {
        * @author peshkov@UD
        */
       public function is_connected_to_gs() {
-
         $trnst = get_transient('sm::is_connected_to_gs');
 
         if (empty($trnst) || false === $trnst || !isset($trnst['hash']) || $trnst['hash'] != md5(serialize($this->get('sm')))) {
@@ -1581,7 +1594,7 @@ namespace wpCloud\StatelessMedia {
             $connected = $client->is_connected();
             if ($connected !== true) {
               $trnst['success'] = 'false';
-              $trnst['error'] = sprintf(__('Could not connect to Google Storage bucket. Please be sure that bucket with name <b>%s</b> exists.', $this->domain), esc_html($this->get('sm.bucket')));
+              $trnst['error'] = sprintf(__('Could not connect to Google Storage bucket. Please be sure that bucket with name <b>%s</b> exists and the access credentials are correct.', $this->domain), esc_html($this->get('sm.bucket')));
 
               if (is_callable(array($connected, 'getHandlerContext')) && $handlerContext = $connected->getHandlerContext()) {
                 if (!empty($handlerContext['error'])) {

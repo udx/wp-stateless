@@ -186,15 +186,16 @@ else
   rm -rf ocular.phar
   rm -rf build
   rm -rf node_modules
-  rm -rf composer.lock
-  rm -rf .scrutinizer.yml
-  rm -rf circle.yml
-  rm -rf build.sh
-  rm -rf gruntfile.js
-  rm -rf makefile
-  rm -rf package.json
+  rm -f composer.lock
+  rm -f .scrutinizer.yml
+  rm -f circle.yml
+  rm -f build.sh
+  rm -f Gruntfile.js
+  rm -f Makefile
+  rm -f package.json
   rm -rf test
-  rm -rf package-lock.json
+  rm -f package-lock.json
+  rm -f .gitignore
   echo "Be sure we do not add .git directories"
   find ./vendor -name .git -exec rm -rf '{}' \;
   echo "Be sure we do not add .svn directories"

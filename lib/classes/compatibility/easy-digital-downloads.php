@@ -21,6 +21,8 @@ namespace wpCloud\StatelessMedia {
       protected $description = 'Ensures compatibility with the forced download method and WP-Stateless.';
       protected $plugin_file = 'easy-digital-downloads/easy-digital-downloads.php';
       protected $sm_mode_not_supported = ['stateless'];
+      protected $enabled = false;
+      protected $is_internal = true;
 
       /**
        * @param $sm

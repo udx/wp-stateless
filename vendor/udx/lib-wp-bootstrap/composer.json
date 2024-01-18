@@ -8,8 +8,7 @@
   "minimum-stability": "dev",
   "license": "MIT",
   "require": {
-    "php": ">=5.3",
-    "udx/lib-utility": "~0.3"
+    "php": ">=5.3"
   },
   "autoload": {
     "classmap": [ "lib/classes" ]

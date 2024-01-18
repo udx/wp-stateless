@@ -25,7 +25,7 @@ abstract class Compatibility {
    * ['WP_STATELESS_MEDIA_ON_FLY' => 'WP_STATELESS_DYNAMIC_IMAGE_SUPPORT']
    */
   protected $constant = '';
-  protected $enabled = false;
+  protected $enabled = true;
   protected $description = '';
   protected $plugin_file = null;
   protected $theme_name = null;
@@ -34,8 +34,21 @@ abstract class Compatibility {
   protected $server_constant = false;
   protected $sm_mode_required = '';
   protected $sm_mode_not_supported = [];
+  protected $is_internal = false;
 
   public function __construct() {
+    // Prevent conflict between internal built-in compatibility modules and addon plugins
+    $restrict = apply_filters('wp_stateless_restrict_compatibility', false, $this->id, $this->is_internal);
+    
+    if ($restrict) {
+      $this->enabled = false;
+      return;
+    }
+
+    if ( !$this->is_internal ) {
+      add_filter('wp_stateless_restrict_compatibility', array($this, 'restrict_compatibility'), 10, 3);
+    }
+
     $this->init();
   }
 
@@ -189,7 +202,8 @@ abstract class Compatibility {
       'is_plugin' => !empty($this->plugin_file),
       'is_theme' => !empty($this->theme_name),
       'is_mode_supported' => $this->is_mode_supported(),
-      'mode' => ucfirst($sm_mode)
+      'mode' => ucfirst($sm_mode),
+      'is_internal' => $this->is_internal,
     ));
 
     if ($this->enabled && $this->is_plugin_active() && $this->is_mode_supported()) {
@@ -250,5 +264,17 @@ abstract class Compatibility {
   public function add_webp_mime($t, $user) {
     $t['webp'] = 'image/webp';
     return $t;
+  }
+
+  /**
+   * Restrict internal compatibility.
+   * @param $restrict   bool
+   * @param $id         string
+   * @param $is_internal bool
+   * @return bool
+   */
+  public function restrict_compatibility($restrict, $id, $is_internal) {
+    // If we have internal compatibility with the same ID - then disable internal compatibility
+    return $is_internal && $this->id == $id ? true : $restrict;
   }
 }

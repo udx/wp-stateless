@@ -148,7 +148,7 @@ namespace UsabilityDynamics\WP {
       public function get_schema( $key = '' ) {
         if( $this->schema === null ) {
           if( !empty( $this->schema_path ) && file_exists( $this->schema_path ) ) {
-            $this->schema = (array)\UsabilityDynamics\Utility::l10n_localize( json_decode( file_get_contents( $this->schema_path ), true ), (array)$this->get_localization() );
+            $this->schema = (array)Utility::l10n_localize( json_decode( file_get_contents( $this->schema_path ), true ), (array)$this->get_localization() );
           }
         }
         //** Break if composer.json does not exist */

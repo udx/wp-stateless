@@ -7,11 +7,8 @@ $baseDir = dirname($vendorDir);
 
 return array(
     'Composer\\InstalledVersions' => $vendorDir . '/composer/InstalledVersions.php',
-    'UsabilityDynamics\\Job' => $vendorDir . '/udx/lib-utility/lib/class-job.php',
-    'UsabilityDynamics\\Loader' => $vendorDir . '/udx/lib-utility/lib/class-loader.php',
-    'UsabilityDynamics\\Settings' => $vendorDir . '/udx/lib-settings/lib/class-settings.php',
-    'UsabilityDynamics\\Structure' => $vendorDir . '/udx/lib-utility/lib/class-structure.php',
-    'UsabilityDynamics\\Term' => $vendorDir . '/udx/lib-utility/lib/class-term.php',
+    'UDX\\Settings' => $baseDir . '/lib/includes/class-settings.php',
+    'UDX\\Utility' => $baseDir . '/lib/includes/class-utility.php',
     'UsabilityDynamics\\UD_API\\API' => $vendorDir . '/udx/lib-ud-api-client/lib/classes/class-api.php',
     'UsabilityDynamics\\UD_API\\Admin' => $vendorDir . '/udx/lib-ud-api-client/lib/classes/class-admin.php',
     'UsabilityDynamics\\UD_API\\Bootstrap' => $vendorDir . '/udx/lib-ud-api-client/lib/classes/class-bootstrap.php',
@@ -21,8 +18,7 @@ return array(
     'UsabilityDynamics\\UD_API\\Scaffold' => $vendorDir . '/udx/lib-ud-api-client/lib/classes/class-scaffold.php',
     'UsabilityDynamics\\UD_API\\UI' => $vendorDir . '/udx/lib-ud-api-client/lib/classes/class-ui.php',
     'UsabilityDynamics\\UD_API\\Update_Checker' => $vendorDir . '/udx/lib-ud-api-client/lib/classes/class-update-checker.php',
-    'UsabilityDynamics\\Utility' => $vendorDir . '/udx/lib-utility/lib/class-utility.php',
-    'UsabilityDynamics\\Utility\\Guid_Fix' => $vendorDir . '/udx/lib-utility/lib/class-guid-fix.php',
+    'UsabilityDynamics\\UD_API\\Utility' => $vendorDir . '/udx/lib-ud-api-client/lib/classes/class-utility.php',
     'UsabilityDynamics\\WP\\Bootstrap' => $vendorDir . '/udx/lib-wp-bootstrap/lib/classes/class-bootstrap.php',
     'UsabilityDynamics\\WP\\Bootstrap_Plugin' => $vendorDir . '/udx/lib-wp-bootstrap/lib/classes/class-bootstrap-plugin.php',
     'UsabilityDynamics\\WP\\Bootstrap_Theme' => $vendorDir . '/udx/lib-wp-bootstrap/lib/classes/class-bootstrap-theme.php',

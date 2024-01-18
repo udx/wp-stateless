@@ -1,3 +1,0 @@
-[submodule "static/wiki"]
-	path = static/wiki
-	url = git@github.com:UsabilityDynamics/lib-utility.wiki.git

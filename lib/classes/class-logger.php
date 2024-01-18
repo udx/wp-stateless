@@ -388,7 +388,19 @@ namespace wpCloud\StatelessMedia {
        * @return string
        */
       protected function _encode( $data ) {
-        return base64_encode( utf8_encode( json_encode( $data ) ) );
+        if ( function_exists('mb_convert_encoding') ) {
+          $encoded = json_encode($data);
+
+          if ( $encoded !== false ) {
+            $utf8 = mb_convert_encoding($encoded, 'UTF-8', 'UTF-8');
+
+            if ($utf8 !== false) {
+              return base64_encode($utf8);
+            }
+          }
+        }
+
+        return false;
       }
 
       /**
