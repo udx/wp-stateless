@@ -6,7 +6,7 @@ License: GPLv2 or later
 Requires PHP: 8.0
 Requires at least: 5.0
 Tested up to: 6.4.2
-Stable tag: 3.3.0
+Stable tag: 3.4.0
 
 Upload and serve your WordPress media files from Google Cloud Storage.
 
@@ -112,6 +112,17 @@ Before upgrading to WP-Stateless 3.2.0, please, make sure you use PHP 7.2 or abo
 Before upgrading to WP-Stateless 3.0, please, make sure you tested it on your development environment.
 
 == Changelog ==
+= 3.4.0 =
+* ENHANCEMENT - removed `udx/lib-settings` package dependency for security reasons. 
+* ENHANCEMENT - removed `udx/lib-utility` package dependency for security reasons.
+* ENHANCEMENT - refactored `Settings` admin page to remove Angular dependency.
+* ENHANCEMENT - including Software Bill of Materials (SBOM) to GitHub release.
+* FIX - updated package dependencies for Google Client Library for security reasons.
+* FIX - replaced `utf8_encode` with `mb_convert_encoding` to support PHP 8.2 and above [#678](https://github.com/udx/wp-stateless/issues/678).
+* FIX - Fatal Error in `Stateless` mode if GCP access credentials are wrong [#693](https://github.com/udx/wp-stateless/issues/693).
+* COMPATIBILITY - preventing PHP warnings while working with WooCommerce version 8.4.0 and above [696](https://github.com/udx/wp-stateless/issues/696).
+* COMPATIBILITY - avoiding conflicts between builtin compatibilities and WP-Stateless Addon plugins.
+
 = 3.3.0 =
 * NEW - Added new filter `wp_stateless_attachment_url`. Allows to customize attachment URL after WP-Stateless generates it based on it's internal conditions.
 * FIX - Stateless mode Incompatible with Media Uploader in Media Library Grid mode [#675](https://github.com/udx/wp-stateless/issues/675).

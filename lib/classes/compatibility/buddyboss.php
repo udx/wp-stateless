@@ -18,6 +18,8 @@ namespace wpCloud\StatelessMedia {
       protected $description = 'Ensures compatibility with BuddyBoss.';
       protected $plugin_file = [ 'buddyboss-platform/bp-loader.php' ];
       protected $sm_mode_not_supported = [ 'stateless' ];
+      protected $enabled = false;
+      protected $is_internal = true;
 
       /**
        * @param $sm

@@ -2,7 +2,7 @@
 /**
  * Admin Notices Handler
  *
- * @namespace UsabilityDynamics
+ * @namespace wpCloud\StatelessMedia
  *
  * This file can be used to bootstrap any of the UD plugins, it essentially requires that you have
  * a core file which will be called after 'plugins_loaded'. In addition, if the core class has

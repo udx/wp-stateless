@@ -23,6 +23,8 @@ namespace wpCloud\StatelessMedia {
       protected $description = 'Ensures compatibility with LiteSpeed Cache plugins.';
       protected $plugin_file = 'litespeed-cache/litespeed-cache.php';
       protected $sm_mode_not_supported = ['stateless'];
+      protected $enabled = false;
+      protected $is_internal = true;
 
       /**
        * @param $sm

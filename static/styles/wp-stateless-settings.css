@@ -152,6 +152,22 @@
   padding: 5px;
 }
 
+#stless_sync_tab #errors,
+#stless_sync_tab .dashicons-update,
+#stless_sync_tab .progress,
+#stless_sync_tab .progress-notice {
+  display: none;
+}
+
+#stless_sync_tab .limit_field input {
+  visibility: hidden;
+}
+
+#stless_sync_tab .processes-holder .postbox-container {
+  float: none;
+}
+
+
 /* Angular styles */
 .ng-hide:not(.ng-hide-animate) {
   display: none !important;

@@ -1,6 +1,7 @@
 <p>
   <?php _e('Some WordPress plugins override or provide additional features for the Media Library, image upload, and processing. These add-ons offer compatibility features to ensure smooth operation and support the behavior of other plugins alongside WP-Stateless.', ud_get_stateless_media()->domain); ?>
 </p>
+
 <p>
   <?php _e(
           sprintf(
@@ -33,43 +34,61 @@
 </div>
 
 <div class="addons-list">
-  <?php
-    foreach ($addons as $id => $addon) {
-      $card_class = $addon->active ? 'active' : ($addon->recommended ? 'recommended' : '');
-      ?>
+  <?php foreach ($addons as $id => $addon) : ?>
 
-      <div class="addon-card <?php echo $card_class;?>">
+      <div class="addon-card <?php echo $addon->card_class;?>">
 
-        <?php if ($addon->active) : ?>
-          <div class="addon-status">
-            <?php _e('active', ud_get_stateless_media()->domain); ?>
-          </div>
-        <?php elseif ($addon->recommended) : ?>
-          <div class="addon-status">
-            <?php _e('recommended', ud_get_stateless_media()->domain); ?>
-          </div>
+        <?php if ($addon->status) : ?>
+          <div class="addon-status"><?php echo $addon->status; ?></div>
         <?php endif; ?>
 
-        <a href="<?php printf($addon_link, $id); ?>" class="addon-icon" target="_blank">
-            <img src="<?php echo $addon->icon; ?>" alt="<?php echo $addon->title; ?>">
-          </a>
-
         <div class="addon-head">
+          <div class="addon-icon">
+            <a href="<?php echo $addon->link ?>" target="_blank">
+              <img src="<?php echo $addon->icon; ?>" alt="<?php echo $addon->title; ?>">
+            </a>
+          </div>
+
           <div class="addon-info">
             <h2 class="addon-title">
-              <a href="<?php printf($addon_link, $id); ?>" target="_blank"><?php echo $addon->title; ?></a>
+              <a href="<?php echo $addon->link; ?>" target="_blank"><?php echo $addon->title; ?></a>
             </h2>
             
-            <div class="addon-description"><?php printf($description, $addon->title) ?></div>
-          </div>
-
-          <div class="addon-actions">
-            <a href="<?php printf($addon_link, $id); ?>" class="button-action button button-primary" target="_blank"><?php _e('Learn More', ud_get_stateless_media()->domain); ?></a>
+            <div class="addon-description"><?php echo $addon->description; ?></div>
           </div>
         </div>
+
+        <div class="addon-actions">
+          <div class="hs-web-interactive-inline hs-wrap" style="" data-hubspot-wrapper-cta-id="<?php echo $addon->hubspot_id?>"> 
+            <?php if ($addon->hubspot_link) : ?>  
+              <a href="<?php echo $addon->hubspot_link?>" 
+                class="hs-inline-web-interactive-<?php echo $addon->hubspot_id?> button-action button button-primary" 
+                data-hubspot-cta-id="<?php echo $addon->hubspot_id?>"
+                target="_blank" rel="noopener" crossorigin="anonymous" onerror="this.style.display='none'"
+              >Download</a> 
+            <?php endif; ?>  
+          </div>
+
+          <div class="addon-secondary-actions">
+            <a href="<?php echo $addon->link?>" class="addon-secondary-link" target="_blank" rel="noopener" crossorigin="anonymous">
+              <span class="dashicons dashicons-book-alt"></span> <?php _e('Docs', ud_get_stateless_media()->domain)?>
+            </a>
+
+            <?php if ($addon->wp) : ?>
+              <a href="<?php echo $addon->wp?>" class="addon-secondary-link" target="_blank" rel="noopener" crossorigin="anonymous">
+                <span class="dashicons dashicons-wordpress"></span> <?php _e('WordPress', ud_get_stateless_media()->domain)?>
+              </a>
+            <?php endif; ?>  
+
+            <?php if ($addon->repo) : ?>
+              <a href="https://github.com/<?php echo $addon->repo?>" class="addon-secondary-link" target="_blank" rel="noopener" crossorigin="anonymous">
+                <img src="https://github.githubassets.com/favicons/favicon.svg" class="gh-icon"></span> <?php _e('GitHub', ud_get_stateless_media()->domain)?>
+              </a>
+            <?php endif; ?>  
+          </div>
+        </div>
+
       </div>
 
-      <?php
-    } 
-  ?>
+  <?php endforeach; ?>
 </div>
