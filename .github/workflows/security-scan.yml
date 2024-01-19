@@ -1,0 +1,25 @@
+name: Security Scan
+run-name: Security Scan
+
+on: 
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  code-scanning:
+    name: Code Scanning (grype)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run Security Check
+        id: test
+        uses: anchore/scan-action@v3
+        with:
+          path: .
+          output-format: table
+
+

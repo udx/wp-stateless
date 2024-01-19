@@ -63,10 +63,6 @@ jobs:
       # but keep the .git folder, because we need it for the next step
       - name: Cleanup files
         run: |
-          rm -f build.sh || true
-          rm -f Gruntfile.js || true
-          rm -f Makefile || true
-          rm -f package.json || true
           rm -f composer.lock || true
           rm -rf vendor/composer/installers || true
           find ./ -name '.git*' -not -path './.git' -type f -delete || true
