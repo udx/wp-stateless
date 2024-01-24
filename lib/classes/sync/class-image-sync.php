@@ -74,7 +74,7 @@ class ImageSync extends LibrarySync {
       parent::before_task($id);
 
       timer_start();
-      set_time_limit(0)
+      set_time_limit(0);
 
       $image = Utility::process_image_by_id($id);
       $this->log(sprintf(__('%1$s (ID %2$s) was successfully synced in %3$s seconds.', ud_get_stateless_media()->domain), esc_html(get_the_title($image->ID)), $image->ID, timer_stop()));

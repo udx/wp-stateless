@@ -174,7 +174,7 @@ namespace wpCloud\StatelessMedia {
       public function add_media($args = array()) {
         try {
 
-          set_time_limit(0)
+          set_time_limit(0);
 
           $args = wp_parse_args($args, array(
             'use_root' => true,
