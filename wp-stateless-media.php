@@ -8,7 +8,7 @@
  * Text Domain: stateless-media
  * Author URI: https://www.udx.io
  *
- * Copyright 2012 - 2022 UDX ( email: info@udx.io )
+ * Copyright 2012 - 2023 UDX ( email: info@udx.io )
  *
  */
 
