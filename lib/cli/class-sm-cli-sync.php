@@ -2,7 +2,7 @@
 
 /**
  * CLI Sync Implementation
- * 
+ *
  * @author palant@UDX
  * @author korotkov@UDX
  */
@@ -94,7 +94,7 @@ class SM_CLI_Sync extends SM_CLI_Scaffold {
 
     WP_CLI::line('Starting extract attachments.');
 
-    @set_time_limit(-1);
+    set_time_limit(0)
 
     for ($this->start; $this->start < $this->end; $this->start += $this->limit) {
 
@@ -184,7 +184,7 @@ class SM_CLI_Sync extends SM_CLI_Scaffold {
 
     WP_CLI::line('Starting extract attachments.');
 
-    @set_time_limit(-1);
+    set_time_limit(0)
 
     for ($this->start; $this->start < $this->end; $this->start += $this->limit) {
 

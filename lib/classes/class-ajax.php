@@ -85,7 +85,7 @@ namespace wpCloud\StatelessMedia {
        * Regenerate image sizes.
        */
       public function action_stateless_process_image() {
-        @set_time_limit(-1);
+        set_time_limit(0)
 
         $image = Utility::process_image_by_id(intval($_REQUEST['id']));
 
@@ -97,7 +97,7 @@ namespace wpCloud\StatelessMedia {
        * @throws \Exception
        */
       public function action_stateless_process_file() {
-        @set_time_limit(-1);
+        set_time_limit(0)
 
         $file = Utility::process_file_by_id(intval($_REQUEST['id']));
 

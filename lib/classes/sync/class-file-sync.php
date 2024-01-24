@@ -38,7 +38,7 @@ class FileSync extends LibrarySync {
 
   /**
    * Get SQL condition to compose the query to get items to process by library sync
-   * 
+   *
    * @return string
    */
   public function get_sql_condition() {
@@ -57,7 +57,7 @@ class FileSync extends LibrarySync {
 
   /**
    * Process one file item
-   * 
+   *
    * @param mixed $id
    * @return bool
    */
@@ -67,7 +67,7 @@ class FileSync extends LibrarySync {
       parent::before_task($id);
 
       timer_start();
-      @set_time_limit(-1);
+      set_time_limit(0)
 
       $file = Utility::process_file_by_id($id);
       $this->log(sprintf(__('%1$s (ID %2$s) was successfully synced in %3$s seconds.', ud_get_stateless_media()->domain), esc_html(get_the_title($file->ID)), $file->ID, timer_stop()));

@@ -164,9 +164,9 @@ namespace wpCloud\StatelessMedia {
 
       /**
        * Add/Update Media Object to Bucket
-       * 
+       *
        * https://stackoverflow.com/questions/26872851/resumable-uploading-to-google-cloud-storage-using-php-api
-       * 
+       *
        * @author peshkov@UD
        * @param array $args
        * @return bool
@@ -174,7 +174,7 @@ namespace wpCloud\StatelessMedia {
       public function add_media($args = array()) {
         try {
 
-          @set_time_limit(-1);
+          set_time_limit(0)
 
           $args = wp_parse_args($args, array(
             'use_root' => true,
@@ -288,7 +288,7 @@ namespace wpCloud\StatelessMedia {
 
       /**
        * Get or save media file
-       * 
+       *
        * @param $path
        * @param bool $save
        * @param bool $save_path
