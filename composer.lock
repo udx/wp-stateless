@@ -454,16 +454,16 @@
         },
         {
             "name": "deliciousbrains/wp-background-processing",
-            "version": "1.1.1",
+            "version": "1.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/deliciousbrains/wp-background-processing.git",
-                "reference": "ebbed762c42e70e76573ffbd36e591378ba5f2ee"
+                "reference": "a0018fea79b8e752f41b6a26d6b9b3397d15c52e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/deliciousbrains/wp-background-processing/zipball/ebbed762c42e70e76573ffbd36e591378ba5f2ee",
-                "reference": "ebbed762c42e70e76573ffbd36e591378ba5f2ee",
+                "url": "https://api.github.com/repos/deliciousbrains/wp-background-processing/zipball/a0018fea79b8e752f41b6a26d6b9b3397d15c52e",
+                "reference": "a0018fea79b8e752f41b6a26d6b9b3397d15c52e",
                 "shasum": ""
             },
             "require": {
@@ -498,9 +498,9 @@
             "description": "WP Background Processing can be used to fire off non-blocking asynchronous requests or as a background processing tool, allowing you to queue tasks.",
             "support": {
                 "issues": "https://github.com/deliciousbrains/wp-background-processing/issues",
-                "source": "https://github.com/deliciousbrains/wp-background-processing/tree/1.1.1"
+                "source": "https://github.com/deliciousbrains/wp-background-processing/tree/1.2"
             },
-            "time": "2023-07-18T10:22:06+00:00"
+            "time": "2023-07-20T15:40:50+00:00"
         },
         {
             "name": "league/flysystem",
@@ -1603,5 +1603,5 @@
         "php": ">=5.6.20"
     },
     "platform-dev": [],
-    "plugin-api-version": "2.3.0"
+    "plugin-api-version": "2.6.0"
 }
