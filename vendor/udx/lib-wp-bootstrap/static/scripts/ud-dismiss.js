@@ -11,6 +11,7 @@ jQuery( document ).ready( function () {
     var data = {
       action: 'ud_dismiss',
       key: _this.data('key'),
+      _ajax_nonce: _this.data('nonce'),
     }
 
     jQuery.post( _ud_vars.ajaxurl, data, function ( result_data ) {

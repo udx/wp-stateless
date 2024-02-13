@@ -1216,6 +1216,9 @@ namespace wpCloud\StatelessMedia {
 
         /* Attachment or upload page */
         wp_register_script('wp-stateless-uploads-js', $this->path('static/scripts/wp-stateless-uploads.js', 'url'), array('jquery'), self::$version);
+        wp_localize_script('wp-stateless-uploads-js', 'stateless_upload', [
+          'inline_sync_nonce' => wp_create_nonce('sm_inline_sync'),
+        ]);
 
         /* Setup wizard styles. */
         wp_register_style('wp-stateless-setup-wizard', $this->path('static/styles/wp-stateless-setup-wizard.css', 'url'), array(), self::$version);

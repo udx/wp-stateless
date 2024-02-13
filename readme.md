@@ -2,19 +2,19 @@
 
 ## Description
 
-Upload and serve your WordPress media from Google Cloud Storage (GCS) with the WP-Stateless plugin. In as little as two minutes, you will be benefitting from serving your media from Google Cloud's distributed servers.
+Upload and serve your WordPress media from Google Cloud Storage (GCS) with the WP-Stateless plugin. In as little as two minutes, you will be benefiting from serving your media from Google Cloud's distributed servers.
 
 New to Google Cloud? Google is offering you a [$300 credit](https://console.cloud.google.com/freetrial?referralId=e1c28cf728ff49b38d4eb5add3f5bfc8) to get you started.
 
 ### Benefits
 * Store and deliver media files on Google Cloud Storage instead of your server.
 * Google Cloud Storage is geo-redundant, meaning your media is delivered by the closest server - reducing latency and improving page speed.
-* Scale your WordPress website across multiple servers without the need of synchronizing media files.
+* Scale your WordPress website across multiple servers without the need for synchronizing media files.
 * Native integration between Google Cloud Storage and WordPress.
 * $300 free trial from Google Cloud. Nice!
 
 ### Modes
-* Backup - Upload media files to Google Storage and serve local file urls.
+* Backup - Upload media files to Google Storage and serve local file URLs.
 * CDN - Copy media files to Google Storage and serve them directly from there.
 * Ephemeral - Store and serve media files with Google Cloud Storage only. Media files are not stored locally, but local storage is used temporarily for processing and is required for certain compatibilities.
 * Stateless - Store and serve media files with Google Cloud Storage only. Media files are not stored locally.
@@ -22,7 +22,7 @@ New to Google Cloud? Google is offering you a [$300 credit](https://console.clou
 ### Features
 * Setup assistant makes getting started fast and easy.
 * No need to manually create service accounts or buckets - handled automatically.
-* Settings panel provides you with further GCS configuration and file url customization.
+* Settings panel provides you with further GCS configuration and file URL customization.
 * Mask the default GCS URL with your own custom domain.
 * Automatically replace hardcoded media URLs with GCS equivalents in post editor and meta.
 * Batch image thumbnail regeneration.
@@ -43,9 +43,9 @@ Looking for a unique feature for your next project? [Hire us!](https://udx.io/)
 
 1. Search, install, and activate the *WP-Stateless* plugin via your WordPress dashboard.
 2. Begin WP-Stateless setup assistant at *Media > Stateless Setup* and click "Get Started Now."
-3. Click "Google Login" and sign-in with your Google account.
+3. Click "Google Login" and sign in with your Google account.
 4. Set a Google Cloud Project, Google Cloud Storage Bucket, and Google Cloud Billing Account and click "Continue."
-5. Installation and setup is now complete. Visit *Media > Stateless Settings* for more options.
+5. Installation and setup are now complete. Visit *Media > Stateless Settings* for more options.
 
 For a more detailed installation and setup walkthrough, please see the [manual setup instructions on Github](https://stateless.udx.io/docs/manual-setup/).
 
@@ -79,4 +79,4 @@ To ensure new releases cause as little disruption as possible, we rely on a numb
 
 ### Who maintains this plugin?
 
-[UDX](https://udx.io/) maintains this plugin by continuing development through it's own staff, reviewing pull requests, testing, and steering the overall release schedule. UDX is located in Durham, North Carolina and provides WordPress engineering and hosting services to clients throughout the United States.
+[UDX](https://udx.io/) maintains this plugin by continuing development through its own staff, reviewing pull requests, testing, and steering the overall release schedule. UDX is located in Durham, North Carolina, and provides WordPress engineering and hosting services to clients throughout the United States.

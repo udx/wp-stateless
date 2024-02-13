@@ -1,3 +1,7 @@
+### 1.3.2
+
+* Improve security while processing AJAX requests in Admin Panel.
+
 ### 1.3.1
 
 * Remove dependency from `udx/lib-utility`.

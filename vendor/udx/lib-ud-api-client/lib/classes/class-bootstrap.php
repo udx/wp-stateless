@@ -18,7 +18,7 @@ namespace UsabilityDynamics\UD_API {
       /**
        *
        */
-      public static $version = '1.2.2';
+      public static $version = '1.2.3';
     
       /**
        *
