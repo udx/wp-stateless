@@ -48,6 +48,8 @@ namespace wpCloud\StatelessMedia {
        * @author peshkov@UD
        */
       public function request() {
+        check_ajax_referer('sm_inline_sync');
+
         global $doing_manual_sync;
 
         $response = array(
