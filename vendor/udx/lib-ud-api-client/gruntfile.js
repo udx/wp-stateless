@@ -2,7 +2,7 @@
  * Build Plugin.
  *
  * @author potanin@UD
- * @version 1.2.2
+ * @version 1.2.3
  * @param grunt
  */
 module.exports = function( grunt ) {
