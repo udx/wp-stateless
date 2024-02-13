@@ -19,7 +19,8 @@ jQuery(document).ready(function(){
         data: {
           action: that.data('type') == 'image' ? "stateless_process_image" : "stateless_process_file",
           id: that.data('id'),
-          size: that.data('size')
+          size: that.data('size'),
+          _ajax_nonce: stateless_upload.inline_sync_nonce ?? '',
         }
       })
       .done(function( response ) {

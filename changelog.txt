@@ -1,4 +1,7 @@
 == Changelog ==
+= 3.4.1 =
+FIX - improve security while processing AJAX requests in Admin Panel
+
 = 3.4.0 =
 * ENHANCEMENT - removed `udx/lib-settings` package dependency for security reasons. 
 * ENHANCEMENT - removed `udx/lib-utility` package dependency for security reasons.

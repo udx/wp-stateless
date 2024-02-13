@@ -5,8 +5,8 @@ Tags: google, google cloud, google cloud storage, cdn, uploads, media, stateless
 License: GPLv2 or later
 Requires PHP: 8.0
 Requires at least: 5.0
-Tested up to: 6.4.2
-Stable tag: 3.4.0
+Tested up to: 6.4.3
+Stable tag: 3.4.1
 
 Upload and serve your WordPress media files from Google Cloud Storage.
 
@@ -112,6 +112,9 @@ Before upgrading to WP-Stateless 3.2.0, please, make sure you use PHP 7.2 or abo
 Before upgrading to WP-Stateless 3.0, please, make sure you tested it on your development environment.
 
 == Changelog ==
+= 3.4.1 =
+FIX - improve security while processing AJAX requests in Admin Panel
+
 = 3.4.0 =
 * ENHANCEMENT - removed `udx/lib-settings` package dependency for security reasons. 
 * ENHANCEMENT - removed `udx/lib-utility` package dependency for security reasons.

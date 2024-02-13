@@ -181,7 +181,10 @@ namespace wpCloud\StatelessMedia {
         wp_localize_script( "ud-dismiss", "_ud_vars", array(
             "ajaxurl" => admin_url( 'admin-ajax.php' ),
         ) );
-
+        wp_localize_script( "sateless-error-notice-js", "stateless_error_notice_vars", array(
+          "dismiss_nonce" => wp_create_nonce( 'stateless_notice_dismiss' ),
+          "enable_action_nonce" => wp_create_nonce( 'stateless_enable_notice_button_action' ),
+        ) );
 
         //** Don't show the message if the user has no enough permissions. */
         if ( ! function_exists( 'wp_get_current_user' ) ) {
@@ -248,20 +251,24 @@ namespace wpCloud\StatelessMedia {
        * dismiss the notice ajax callback
        * @throws \Exception
        */
-      public function dismiss_notices(){
+      public function dismiss_notices() {
+        check_ajax_referer('stateless_notice_dismiss');
+
         $response = array(
           'success' => '0',
           'error' => __( 'There was an error in request.', $this->domain ),
         );
+
         $error = false;
 
-        if( empty($_POST['key']) && strpos($_POST['key'], 'dismissed_notice_') !== false ) {
+        $option_key = isset($_POST['key']) ? sanitize_key($_POST['key']) : '';
+
+        if ( strpos($option_key, 'dismissed_') !== 0 ) {
           $response['error'] = __( 'Invalid key', $this->domain );
           $error = true;
         }
-        else {
-          $option_key = sanitize_key($_POST['key']);
-          update_option( $option_key, time() );
+
+        if ( !$error && update_option( $option_key, time() ) ) {
           $response['success'] = '1';
           $response['error'] = null;
         }
@@ -274,6 +281,8 @@ namespace wpCloud\StatelessMedia {
        * @throws \Exception
        */
       public function stateless_enable_notice_button_action(){
+        check_ajax_referer('stateless_enable_notice_button_action');
+
         $response = array(
           'success' => '1',
         );
