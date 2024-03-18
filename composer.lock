@@ -312,15 +312,15 @@
         },
         {
             "name": "udx/lib-wp-bootstrap",
-            "version": "1.3.2",
+            "version": "1.3.3",
             "source": {
                 "type": "git",
                 "url": "git@github.com:udx/lib-wp-bootstrap",
-                "reference": "1.3.2"
+                "reference": "1.3.3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://github.com/udx/lib-wp-bootstrap/archive/1.3.2.zip"
+                "url": "https://github.com/udx/lib-wp-bootstrap/archive/1.3.3.zip"
             },
             "require": {
                 "php": ">=5.3"
