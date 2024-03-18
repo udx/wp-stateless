@@ -269,15 +269,15 @@
         },
         {
             "name": "udx/lib-ud-api-client",
-            "version": "1.2.3",
+            "version": "1.2.4",
             "source": {
                 "type": "git",
                 "url": "git@github.com:udx/lib-ud-api-client",
-                "reference": "1.2.3"
+                "reference": "1.2.4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://github.com/udx/lib-ud-api-client/archive/1.2.3.zip"
+                "url": "https://github.com/udx/lib-ud-api-client/archive/1.2.4.zip"
             },
             "require": {
                 "php": ">=5.3"
