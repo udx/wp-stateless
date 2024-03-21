@@ -545,6 +545,10 @@ namespace UsabilityDynamics\UD_API {
         public function dismiss_notices(){
           check_ajax_referer('ud_api_dismiss');
 
+          if ( !is_user_logged_in() ) {
+            wp_send_json_error( array( 'error' => __( 'You are not allowed to do this action.', $this->text_domain ) ) );
+          }
+
           $response = array(
               'success' => '0',
               'error' => __( 'There was an error in request.', $this->text_domain ),
