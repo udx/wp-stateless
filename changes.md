@@ -1,5 +1,19 @@
+#### 4.0.0
+* NEW - use custom database tables to store GCS file data. This increases plugin performance and will be used for future improvements.  
+* NEW - added filter `wp_stateless_get_file`, retrieves the GCS file data, should be used instead of getting `sm_cloud` postmeta directly. 
+* NEW - added filter `wp_stateless_get_file_sizes`, retrieves the GCS file data for image sizes, should be used instead of getting `sm_cloud` postmeta directly.
+* NEW - added filter `wp_stateless_get_file_meta`, retrieves the GCS file meta data, should be used instead of getting `sm_cloud` postmeta directly.
+* NEW - configuration constant [`WP_STATELESS_POSTMETA`](https://stateless.udx.io/docs/constants/#wp_stateless_postmeta) allows to read the GCS file data from postmeta instead of the new custom database tables.
+* NEW - added setting allowing to change email for WP-Stateless notifications.
+* NEW - added new Settings tab `Status`, which contains status and health information related to Google Cloud Storage and WP-Stateless.
+* NEW - CLI command `wp stateless migrate` to list and operate data optimizations.
+* ENHANCEMENT - Allow dismissing notices in Admin Panel only for logged in users.
+* ENHANCEMENT - Updated `wp-background-processing` library from from 1.0.2 to 1.1.1.
+* ENHANCEMENT - Updated `phpseclib` 3.0.34 to 3.0.37.
+* FIX - proper use of infinite timeout in `set_time_limit` function to avoid issues with PHP 8.1 and above [#704](https://github.com/udx/wp-stateless/issues/704).
+
 #### 3.4.1
-FIX - improve security while processing AJAX requests in Admin Panel
+* FIX - improve security while processing AJAX requests in Admin Panel
 
 #### 3.4.0
 * ENHANCEMENT - removed `udx/lib-settings` package dependency for security reasons. 
