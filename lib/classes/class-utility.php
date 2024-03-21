@@ -254,7 +254,7 @@ namespace wpCloud\StatelessMedia {
             }
           }
 
-          $cloud_meta = get_post_meta($attachment_id, 'sm_cloud', true);
+          $cloud_meta = apply_filters('wp_stateless_get_file', [], $attachment_id, true);
 
           $cloud_meta = wp_parse_args($cloud_meta, array(
             'name'               => '',
@@ -920,11 +920,15 @@ namespace wpCloud\StatelessMedia {
       public static function get_stateless_media_data_count() {
         global $wpdb;
 
+        if ( !defined('WP_STATELESS_POSTMETA') || !WP_STATELESS_POSTMETA ) {
+          return ud_stateless_db()->get_total_files();
+        }
+
         $stateless_media = $wpdb->get_var($wpdb->prepare("
-            SELECT COUNT(meta_id)
-            FROM " . $wpdb->postmeta . "
-            WHERE meta_key = %s
-          ", 'sm_cloud'));
+          SELECT COUNT(meta_id)
+          FROM " . $wpdb->postmeta . "
+          WHERE meta_key = %s
+        ", 'sm_cloud'));
 
         return $stateless_media;
       }

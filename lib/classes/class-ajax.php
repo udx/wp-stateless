@@ -50,6 +50,10 @@ namespace wpCloud\StatelessMedia {
       public function request() {
         check_ajax_referer('sm_inline_sync');
 
+        if ( !is_user_logged_in() ) {
+          wp_send_json_error( array( 'error' => __( 'You are not allowed to do this action.', ud_get_stateless_media()->domain ) ) );
+        }
+
         global $doing_manual_sync;
 
         $response = array(

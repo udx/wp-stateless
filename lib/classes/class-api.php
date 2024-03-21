@@ -274,6 +274,55 @@ namespace wpCloud\StatelessMedia {
           return new \WP_Error('internal_server_error', $e->getMessage(), ['status' => 500]);
         }
       }
+
+      /**
+       * Batch Status Endpoint.
+       *
+       * @param \WP_REST_Request $request
+       * @return \WP_REST_Response
+       */
+      static public function batchState(\WP_REST_Request $request) {
+        try {
+          return new \WP_REST_Response(array(
+            'ok' => true,
+            'data' => apply_filters('wp_stateless_batch_state', [], $request->get_params()),
+          ));
+        } catch (\Throwable $e) {
+          return new \WP_Error('internal_server_error', $e->getMessage(), ['status' => 500]);
+        }
+      }
+
+      /**
+       * Batch action (start/pause/resume)
+       * 
+       * @param \WP_REST_Request $request
+       * @return \WP_Error|\WP_REST_Response
+       */
+      static public function batchAction(\WP_REST_Request $request) {
+        try {
+          if (!user_can(self::$tokenData->user_id, 'manage_options')) {
+            return new \WP_Error('not_allowed', 'Sorry, you are not allowed to perform this action', ['status' => 403]);
+          }
+
+          wp_set_current_user(self::$tokenData->user_id);
+
+          $params = wp_parse_args($request->get_params(), [
+            'action' => '',
+          ]);
+
+          if ( empty($params['action']) ) {
+            throw new \Exception('Batch action not set');
+          }
+
+          $action = $params['action'];
+
+          return new \WP_REST_Response(array(
+            'data' => apply_filters("wp_stateless_batch_action_$action", [], $params),
+          ));
+        } catch (\Throwable $e) {
+          return new \WP_Error('internal_server_error', $e->getMessage(), ['status' => 500]);
+        }
+      }
     }
   }
 }
