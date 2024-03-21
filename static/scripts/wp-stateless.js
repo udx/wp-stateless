@@ -325,6 +325,14 @@ var wpStatelessSettingsApp = {
     jQuery('#file_url_grp_preview').val(host)
   },
 
+  showCustomEmail: function () {
+    if( jQuery('#sm_status_email_type').val() == 'custom' ) {
+      jQuery('.sm-status-email-address').show()
+    } else {
+      jQuery('.sm-status-email-address').hide()
+    }
+  },
+
   // Init application
   init: function () {
     this.sm = wp_stateless_settings || {}
@@ -375,6 +383,10 @@ var wpStatelessSettingsApp = {
     jQuery('#sm_root_dir').on('change', this.generatePreviewUrl.bind(this))
     jQuery('#custom_domain').on('change', this.generatePreviewUrl.bind(this))
     this.generatePreviewUrl()
+
+    // Update root dir depending on folder type
+    jQuery('#sm_status_email_type').on('change', this.showCustomEmail)
+    this.showCustomEmail()
   }
 };
 

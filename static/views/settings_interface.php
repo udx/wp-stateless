@@ -12,6 +12,7 @@
     <?php if ( apply_filters('wp_stateless_addons_tab_visible', false) ) : ?>
       <a href="#stless_addons_tab" class="stless_setting_tab nav-tab <?php if ($tab == 'stless_addons_tab') echo 'nav-tab-active'; ?>"><?php _e('Addons', ud_get_stateless_media()->domain); ?></a>
     <?php endif; ?>
+    <a href="#stless_status_tab" class="stless_setting_tab stless_status_tab nav-tab <?php if ($tab == 'stless_status_tab') echo 'nav-tab-active'; ?>"><?php _e('Status', ud_get_stateless_media()->domain); ?></a>
   </h2>
 
   <div class="stless_settings">
@@ -40,6 +41,10 @@
         </div>
       </div>
     <?php endif; ?>
+
+    <div id="stless_status_tab" class="stless_settings_content <?php if ($tab == 'stless_status_tab') echo 'active'; ?>">
+      <?php do_action('wp_stateless_status_tab_content'); ?>
+    </div>
   </div>
 
 </div>
