@@ -297,7 +297,7 @@ namespace wpCloud\StatelessMedia {
 
           if (isset($cloud_meta['fileMd5'][$gs_name_old])) unset($cloud_meta['fileMd5'][$gs_name_old]);
 
-          $this->_set_md5_meta($attachment_id, $cloud_meta);
+          $this->_update_md5_meta($attachment_id, $cloud_meta);
 
           return true;
         } catch (\Throwable $th) {
