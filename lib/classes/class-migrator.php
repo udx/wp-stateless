@@ -251,6 +251,8 @@ class Migrator {
         'key' => 'migrations-running',
         'dismiss' => false,
         'classes' => $is_running ? '' : 'hidden',
+        'capability' => 'upload_files',
+        'button_capability' => 'manage_options',
       ], 'warning');
 
       ud_get_stateless_media()->errors->add([

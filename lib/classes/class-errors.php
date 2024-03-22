@@ -191,24 +191,26 @@ namespace wpCloud\StatelessMedia {
           require_once( ABSPATH . 'wp-includes/pluggable.php' );
         }
         
-        if(
+        $default_show = true;
+
+        if (
           empty( $this->args['type'] ) ||
           ( $this->args['type'] == 'plugin' && !current_user_can( 'activate_plugins' ) ) ||
           ( $this->args['type'] == 'theme' && !current_user_can( 'switch_themes' ) )
         ) {
-          return;
+          $default_show = false;
         }
 
         //** Don't show the message if on a multisite and the user isn't a super user. */
         if ( is_multisite() && ! is_super_admin() ) {
-          return;
+          $default_show = false;
         }
 
         $errors = apply_filters( 'ud:errors:admin_notices', $this->errors, $this->args );
         $notices = apply_filters( 'stateless:notices:admin_notices', $this->notices, $this->args );
 
         //** Errors Block */
-        if( !empty( $errors ) && is_array( $errors ) ) {
+        if( $default_show && !empty( $errors ) && is_array( $errors ) ) {
           $message = '<ul style="none;"><li>' . implode( '</li><li>', $errors ) . '</li></ul>';
           $data = array(
             'title' => sprintf( __( '%s is not active due to following errors:', $this->domain ), esc_html($this->name) ),
@@ -224,11 +226,19 @@ namespace wpCloud\StatelessMedia {
         //** Determine if warning has been dismissed */
         if ( ! empty( $notices ) && is_array( $notices ) ) {
           //** Warnings Block */
-          foreach($notices as $notice){
-            if(get_option( 'dismissed_notice_' . $notice['key'] )){
+          foreach ($notices as $notice ) {
+            if ( get_option( 'dismissed_notice_' . $notice['key'] )){
               continue;
             }
 
+            // Check additional capabilities
+            $capability = isset( $notice['capability'] ) && !empty( $notice['capability'] ) ? $notice['capability'] : null;
+
+            if ( ( !$default_show && empty($capability) ) || ( !empty($capability) && !current_user_can($capability) ) ) {
+              continue;
+            }
+
+            // Additional HTML classes
             $classes = [];
 
             if ( isset($notice['classes']) ) {
@@ -252,6 +262,11 @@ namespace wpCloud\StatelessMedia {
               'dismiss' => true,
             ));
             
+            $button_capability = isset( $notice['button_capability'] ) && !empty( $notice['button_capability'] ) ? $notice['button_capability'] : null;
+            if ( !empty($button_capability) && !current_user_can($button_capability) ) {
+              $data['button'] = '';
+            }
+
             include ud_get_stateless_media()->path( '/static/views/error-notice.php', 'dir' );
             
             $has_notice = true;
