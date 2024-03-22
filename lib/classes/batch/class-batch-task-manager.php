@@ -24,7 +24,7 @@ class BatchTaskManager extends \UDX_WP_Background_Process {
   
   const STATE_KEY = '_state';
   const UPDATED_KEY = '_updated';
-  const WAIT_FORCE_INTERVAL = 60 * 5; // 5 minute
+  const HEALTH_CHECK_INTERVAL = 60 * 5; // 5 minute
 
   protected $prefix = 'sm';
   protected $action = 'batch_process';
@@ -54,7 +54,13 @@ class BatchTaskManager extends \UDX_WP_Background_Process {
       return;
     }
 
-    if ( time() - $last_updated <= self::WAIT_FORCE_INTERVAL ) {
+    $check_interval = self::HEALTH_CHECK_INTERVAL;
+
+    if ( defined('WP_STATELESS_BATCH_HEALTHCHECK_INTERVAL') ) {
+      $check_interval = max($check_interval, WP_STATELESS_BATCH_HEALTHCHECK_INTERVAL * 60);
+    }
+
+    if ( time() - $last_updated <= $check_interval ) {
       return;
     }
 
