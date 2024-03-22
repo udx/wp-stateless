@@ -3,10 +3,14 @@
 * NEW - added filter `wp_stateless_get_file`, retrieves the GCS file data, should be used instead of getting `sm_cloud` postmeta directly. 
 * NEW - added filter `wp_stateless_get_file_sizes`, retrieves the GCS file data for image sizes, should be used instead of getting `sm_cloud` postmeta directly.
 * NEW - added filter `wp_stateless_get_file_meta`, retrieves the GCS file meta data, should be used instead of getting `sm_cloud` postmeta directly.
-* NEW - configuration constant [`WP_STATELESS_POSTMETA`](https://stateless.udx.io/docs/constants/#wp_stateless_postmeta) allows to read the GCS file data from postmeta instead of the new custom database tables.
 * NEW - added setting allowing to change email for WP-Stateless notifications.
+* NEW - added new Settings tab `Addons`, which contains the list of WP-Stateless Addons, which replace Compatibilities.
 * NEW - added new Settings tab `Status`, which contains status and health information related to Google Cloud Storage and WP-Stateless.
 * NEW - CLI command `wp stateless migrate` to list and operate data optimizations.
+* NEW - configuration constant [`WP_STATELESS_POSTMETA`](https://stateless.udx.io/docs/constants/#wp_stateless_postmeta) allows to read the GCS file data from postmeta instead of the new custom database tables.
+* NEW - configuration constant [`WP_STATELESS_BATCH_HEALTHCHECK_INTERVAL`](https://stateless.udx.io/docs/constants/#wp_stateless_batch_healthcheck_interval) defines an interval in minutes for periodical health checks of a batch background process (like data optimization).
+* COMPATIBILITY - BuddyBoss Compatibility replaced with [WP-Stateless – BuddyBoss Platform Addon](https://wordpress.org/plugins/wp-stateless-buddyboss-platform-addon/).
+* COMPATIBILITY - Elementor Compatibility replaced with [WP-Stateless – Elementor Website Builder Addon](https://wordpress.org/plugins/wp-stateless-elementor-website-builder-addon/).
 * ENHANCEMENT - Allow dismissing notices in Admin Panel only for logged in users.
 * ENHANCEMENT - Updated `wp-background-processing` library from from 1.0.2 to 1.1.1.
 * ENHANCEMENT - Updated `phpseclib` 3.0.34 to 3.0.37.
