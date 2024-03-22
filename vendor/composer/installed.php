@@ -3,7 +3,7 @@
         'name' => 'wpcloud/wp-stateless',
         'pretty_version' => 'dev-latest',
         'version' => 'dev-latest',
-        'reference' => 'b65c24c6b17df6ed86f227646e91d98a3842020b',
+        'reference' => '15d050d833585ee8566b7bcdd24752cbd00bb5e7',
         'type' => 'wordpress-plugin',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -70,7 +70,7 @@
         'wpcloud/wp-stateless' => array(
             'pretty_version' => 'dev-latest',
             'version' => 'dev-latest',
-            'reference' => 'b65c24c6b17df6ed86f227646e91d98a3842020b',
+            'reference' => '15d050d833585ee8566b7bcdd24752cbd00bb5e7',
             'type' => 'wordpress-plugin',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
