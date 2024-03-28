@@ -8,7 +8,7 @@ namespace wpCloud\StatelessMedia {
 
   if( !class_exists( 'wpCloud\StatelessMedia\Settings' ) ) {
 
-    final class Settings extends \UsabilityDynamics\Settings {
+    final class Settings extends \UDX\Settings {
 
       /**
        * @var false|null|string
@@ -45,6 +45,9 @@ namespace wpCloud\StatelessMedia {
         'custom_domain'          => array('WP_STATELESS_MEDIA_CUSTOM_DOMAIN', ''),
         'organize_media'         => array('', 'true'),
         'hashify_file_name'      => array(['WP_STATELESS_MEDIA_HASH_FILENAME' => 'WP_STATELESS_MEDIA_CACHE_BUSTING'], 'false'),
+        'dynamic_image_support'  => array(['WP_STATELESS_MEDIA_ON_FLY' => 'WP_STATELESS_DYNAMIC_IMAGE_SUPPORT'], 'false'),
+        'status_email_type'      => array('', 'true'),
+        'status_email_address'   => array('', ''),
       );
 
       private $network_only_settings = array(
@@ -91,6 +94,10 @@ namespace wpCloud\StatelessMedia {
 
         // Parse root dir by wildcards
         add_filter( 'wp_stateless_unhandle_root_dir', array( $this, 'parse_root_dir_wildcards' ), 10, 3);
+
+        // Settings page content
+        add_action('wp_stateless_settings_tab_content', array($this, 'settings_tab_content'));
+        add_action('wp_stateless_processing_tab_content', array($this, 'processing_tab_content'));
 
         $site_url = parse_url( site_url() );
         $site_url['path'] = isset($site_url['path']) ? $site_url['path'] : '';
@@ -297,6 +304,8 @@ namespace wpCloud\StatelessMedia {
         }
 
         $this->set( 'sm.strings', $this->strings );
+
+        do_action('wp_stateless_settings_refresh', $this);
       }
 
       /**
@@ -379,7 +388,7 @@ namespace wpCloud\StatelessMedia {
        * @param $path
        * @return array
        */
-      public function parse_root_dir_wildcards ( $path ) {
+      public function parse_root_dir_wildcards( $path ) {
         $result = [];
 
         /**
@@ -411,8 +420,6 @@ namespace wpCloud\StatelessMedia {
         return $result;
       }
 
-
-
       /**
        * Add menu options
        */
@@ -440,55 +447,7 @@ namespace wpCloud\StatelessMedia {
        * Draw interface
        */
       public function settings_interface() {
-        $wildcards = apply_filters('wp_stateless_root_dir_wildcard', $this->wildcards);
-        $wildcard_year_month = '%date_year/date_month%';
-        $root_dir = $this->get( 'sm.root_dir' );
-
-        $use_year_month = (strpos($root_dir, $wildcard_year_month) !== false) ?: false;
-
-        /**
-         * removing year/month wildcard
-         */
-        if ($use_year_month) {
-          $root_dir = str_replace($wildcard_year_month, '%YM%', $root_dir);
-        }
-
-        /**
-         * preparing array with wildcards
-         */
-        $root_dir_values = explode('/', $root_dir);
-
-        /**
-         * adding year/month wildcard
-         */
-        if ($use_year_month) {
-          if ( !empty($root_dir_values) ) {
-            foreach( $root_dir_values as $k=>$root_dir_value ) {
-              if ( $root_dir_value == '%YM%' ) {
-                $root_dir_values[$k] = $wildcard_year_month;
-              }
-            }
-          } else {
-            $root_dir_values[] = $wildcard_year_month;
-          }
-        }
-
-        /**
-         * first slash
-         */
-        array_unshift($root_dir_values , '/');
-
-        /**
-         * removing empty values
-         */
-        $root_dir_values = array_filter($root_dir_values);
-
-        /**
-         * merging user's wildcards with default values
-         */
-        if (!empty($root_dir_values)) {
-          $wildcards = array_unique( array_merge($root_dir_values, array_keys($wildcards)) );
-        }
+        $tab = isset($_GET['tab']) && !empty($_GET['tab']) ? $_GET['tab'] : 'stless_settings_tab';
 
         include $this->bootstrap->path( '/static/views/settings_interface.php', 'dir' );
       }
@@ -582,12 +541,91 @@ namespace wpCloud\StatelessMedia {
        * @param string $key
        * @param bool $value
        * @param bool $bypass_validation
-       * @return \UsabilityDynamics\Settings
+       * @return \UDX\Settings
        */
       public function set( $key = '', $value = false, $bypass_validation = false ) {
         return parent::set( $key, $value, $bypass_validation );
       }
 
+      /**
+       * Outputs 'Compatibility' tab content on the settings page.
+       * 
+       */
+      public function settings_tab_content() {
+        $wildcards = apply_filters('wp_stateless_root_dir_wildcard', $this->wildcards);
+        $wildcard_year_month = '%date_year/date_month%';
+        $root_dir = $this->get( 'sm.root_dir' );
+
+        $use_year_month = (strpos($root_dir, $wildcard_year_month) !== false) ?: false;
+
+        /**
+         * removing year/month wildcard
+         */
+        if ($use_year_month) {
+          $root_dir = str_replace($wildcard_year_month, '%YM%', $root_dir);
+        }
+
+        /**
+         * preparing array with wildcards
+         */
+        $root_dir_values = explode('/', $root_dir);
+
+        /**
+         * adding year/month wildcard
+         */
+        if ($use_year_month) {
+          if ( !empty($root_dir_values) ) {
+            foreach( $root_dir_values as $k=>$root_dir_value ) {
+              if ( $root_dir_value == '%YM%' ) {
+                $root_dir_values[$k] = $wildcard_year_month;
+              }
+            }
+          } else {
+            $root_dir_values[] = $wildcard_year_month;
+          }
+        }
+
+        /**
+         * first slash
+         */
+        array_unshift($root_dir_values , '/');
+
+        /**
+         * removing empty values
+         */
+        $root_dir_values = array_filter($root_dir_values);
+
+        foreach ($root_dir_values as $k => $v) {
+          $root_dir_values[$k] = trim($v);
+        }
+
+        /**
+         * merging user's wildcards with default values
+         */
+        $wildcards = array_keys($wildcards);
+
+        if (!empty($root_dir_values)) {
+          $wildcards = array_unique( array_merge($root_dir_values, $wildcards) );
+        }
+
+        $sm = (object)$this->get('sm');
+
+        include ud_get_stateless_media()->path('static/views/settings-tab.php', 'dir');
+      }
+      
+      /**
+       * Outputs 'Sync' tab content on the settings page.
+       * 
+       */
+      public function processing_tab_content() {
+        // Drop non-public properties
+        $processes = json_encode(Utility::get_available_sync_classes());
+        $processes = json_decode($processes, true);
+
+        $processes = Helper::array_of_objects($processes);
+
+        include ud_get_stateless_media()->path('static/views/processing_interface.php', 'dir');
+      }
     }
 
   }

@@ -61,6 +61,10 @@
   right: 40px;
 }
 
+.stateless-admin-notice.hidden {
+  display: none !important;
+}
+
 /**
     Responisve Design:
 */

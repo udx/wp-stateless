@@ -96,7 +96,7 @@ abstract class BackgroundSync extends UDX_WP_Background_Process implements ISync
       // Add notice
       $this->save_process_meta([
         'notice' => sprintf(
-          __("Not enough memory to process the following item '%s' %s: %s. Item skipped. Please, try to increase memory limit or use uploading by chunks: <a target=\"_blank\" href=\"https://wp-stateless.github.io/docs/constants/#wp_stateless_media_upload_chunk_size\">How to use WP_STATELESS_MEDIA_UPLOAD_CHUNK_SIZE setting.</a>", ud_get_stateless_media()->domain),
+          __("Not enough memory to process the following item '%s' %s: %s. Item skipped. Please, try to increase memory limit or use uploading by chunks: <a target=\"_blank\" href=\"https://stateless.udx.io/docs/constants/#wp_stateless_media_upload_chunk_size\">How to use WP_STATELESS_MEDIA_UPLOAD_CHUNK_SIZE setting.</a>", ud_get_stateless_media()->domain),
           is_numeric($this->currently_processing_item) ? get_the_title($this->currently_processing_item) : $this->currently_processing_item,
           is_numeric($this->currently_processing_item) ? "(ID: {$this->currently_processing_item})" : '',
           $err['message']
@@ -119,7 +119,7 @@ abstract class BackgroundSync extends UDX_WP_Background_Process implements ISync
     // Don't lock up other requests while processing
     session_write_close();
 
-    if ($this->is_process_running()) {
+    if ($this->is_processing()) {
       // Background process already running.
       wp_die();
     }
@@ -356,15 +356,14 @@ abstract class BackgroundSync extends UDX_WP_Background_Process implements ISync
     $this->clear_queue_size();
     delete_site_option($this->get_stopped_option_key());
 
-    if ($admin_email = get_option('admin_email')) {
-      $sync_name = strip_tags($this->get_name());
-      $site = site_url();
-      wp_mail(
-        $admin_email,
-        sprintf(__('Stateless Sync for %s is Complete', ud_get_stateless_media()->domain), $sync_name),
-        sprintf(__("This is a simple notification to inform you that the WP-Stateless plugin has finished a %s synchronization process for %s.\n\nIf you have WP_STATELESS_SYNC_LOG or WP_DEBUG_LOG enabled, check those logs to review any errors that may have occurred during the synchronization process.", ud_get_stateless_media()->domain), $sync_name, $site)
-      );
-    }
+    // Sending notification
+    $sync_name = strip_tags($this->get_name());
+    $site = site_url();
+
+    $subject = sprintf(__('Stateless Sync for %s is Complete', ud_get_stateless_media()->domain), $sync_name);
+    $message = sprintf(__("This is a simple notification to inform you that the WP-Stateless plugin has finished a %s synchronization process for %s.\n\nIf you have WP_STATELESS_SYNC_LOG or WP_DEBUG_LOG enabled, check those logs to review any errors that may have occurred during the synchronization process.", ud_get_stateless_media()->domain), $sync_name, $site);
+
+    do_action('wp_stateless_send_admin_email', $subject, $message);
   }
 
   /**
@@ -418,7 +417,7 @@ abstract class BackgroundSync extends UDX_WP_Background_Process implements ISync
    * Is running?
    */
   public function is_running() {
-    return !$this->is_queue_empty() || $this->is_process_running();
+    return !$this->is_queue_empty() || $this->is_processing();
   }
 
   /**

@@ -48,6 +48,12 @@ namespace wpCloud\StatelessMedia {
        * @author peshkov@UD
        */
       public function request() {
+        check_ajax_referer('sm_inline_sync');
+
+        if ( !is_user_logged_in() ) {
+          wp_send_json_error( array( 'error' => __( 'You are not allowed to do this action.', ud_get_stateless_media()->domain ) ) );
+        }
+
         global $doing_manual_sync;
 
         $response = array(
@@ -85,7 +91,7 @@ namespace wpCloud\StatelessMedia {
        * Regenerate image sizes.
        */
       public function action_stateless_process_image() {
-        @set_time_limit(-1);
+        set_time_limit(0);
 
         $image = Utility::process_image_by_id(intval($_REQUEST['id']));
 
@@ -97,7 +103,7 @@ namespace wpCloud\StatelessMedia {
        * @throws \Exception
        */
       public function action_stateless_process_file() {
-        @set_time_limit(-1);
+        set_time_limit(0);
 
         $file = Utility::process_file_by_id(intval($_REQUEST['id']));
 

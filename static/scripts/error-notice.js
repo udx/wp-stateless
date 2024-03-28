@@ -15,6 +15,7 @@ jQuery( document ).ready( function ($) {
     var data = {
       action: 'stateless_enable_notice_button_action',
       key: _this.data('key'),
+      _ajax_nonce: stateless_error_notice_vars.enable_action_nonce ?? '',
     }
 
     jQuery.post( ajaxurl, data, function ( result_data ) {
@@ -41,6 +42,7 @@ jQuery( document ).ready( function ($) {
     var data = {
       action: 'stateless_notice_dismiss',
       key: _this.data('key'),
+      _ajax_nonce: stateless_error_notice_vars.dismiss_nonce ?? '',
     }
 
     jQuery.post( ajaxurl, data, function ( result_data ) {

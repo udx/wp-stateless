@@ -12,13 +12,15 @@ namespace wpCloud\StatelessMedia {
 
   if( !class_exists( 'wpCloud\StatelessMedia\EWWW' ) ) {
 
-    class EWWW extends ICompatibility {
+    class EWWW extends Compatibility {
       protected $id = 'ewww';
       protected $title = 'EWWW Image Optimizer';
       protected $constant = 'WP_STATELESS_COMPATIBILITY_EWWW';
       protected $description = 'Enables limited support for EWWW Image Optimizer in CDN mode.';
       protected $plugin_file = [ 'ewww-image-optimizer/ewww-image-optimizer.php' ];
       protected $sm_mode_not_supported = [ 'stateless' ];
+      protected $enabled = false;
+      protected $is_internal = true;
 
       public function module_init( $sm ) {
         // add_filter( 'ewww_image_optimizer_pre_optimization', array($this, 'pre_optimization'), 10, 3 );

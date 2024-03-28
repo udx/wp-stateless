@@ -24,7 +24,7 @@
 
 		$this.parent().siblings( '.rwmb-input-list' ).find( 'input' ).prop( 'checked', checked ).trigger( 'change' );
 
-		checked = ! checked;
+		checked = !checked;
 		$this.data( 'checked', checked );
 	}
 

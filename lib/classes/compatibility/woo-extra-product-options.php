@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Plugin Name: WooCommerce Extra Product Options
  * Plugin URI: https://codecanyon.net/item/woocommerce-extra-product-options/7908619
@@ -10,20 +11,22 @@
 
 namespace wpCloud\StatelessMedia {
 
-  if( !class_exists( 'wpCloud\StatelessMedia\CompatibilityWooExtraProductOptions' ) ) {
+  if (!class_exists('wpCloud\StatelessMedia\CompatibilityWooExtraProductOptions')) {
 
-    class CompatibilityWooExtraProductOptions extends ICompatibility {
+    class CompatibilityWooExtraProductOptions extends Compatibility {
       protected $id = 'woo-extra-product-options';
       protected $title = 'WooCommerce Extra Product Options';
       protected $constant = 'WP_STATELESS_COMPATIBILITY_WOO_EXTRA_PRODUCT_OPTION';
       protected $description = 'Ensures compatibility with WooCommerce Extra Product Options.';
       protected $plugin_file = 'woocommerce-tm-extra-product-options/tm-woo-extra-product-options.php';
+      protected $enabled = false;
+      protected $is_internal = true;
 
       /**
        * @param $sm
        */
-      public function module_init( $sm ) {
-        add_filter( 'woocommerce_add_cart_item_data', array( $this, 'add_cart_item_data' ), 1 );
+      public function module_init($sm) {
+        add_filter('woocommerce_add_cart_item_data', array($this, 'add_cart_item_data'), 1);
       }
 
       /**
@@ -31,8 +34,8 @@ namespace wpCloud\StatelessMedia {
        * @param $cart_item_meta
        * @return mixed
        */
-      public function add_cart_item_data( $cart_item_meta ) {
-        add_filter( 'wp_handle_upload', array( $this, 'wp_handle_upload' ) );
+      public function add_cart_item_data($cart_item_meta) {
+        add_filter('wp_handle_upload', array($this, 'wp_handle_upload'));
         return $cart_item_meta;
       }
 
@@ -41,23 +44,23 @@ namespace wpCloud\StatelessMedia {
        * @param $upload
        * @return mixed
        */
-      public function wp_handle_upload( $upload ) {
-        $file = $upload[ 'file' ];
-        $url = $upload[ 'url' ];
-        $type = $upload[ 'type' ];
+      public function wp_handle_upload($upload) {
+        $file = $upload['file'];
+        $url = $upload['url'];
+        $type = $upload['type'];
 
         $client = ud_get_stateless_media()->get_client();
 
-        $file_path = apply_filters( 'wp_stateless_file_name', $file, 0 );
-        $file_info = @getimagesize( $file );
+        $file_path = apply_filters('wp_stateless_file_name', $file, 0);
+        $file_info = @getimagesize($file);
 
         if ($file_info) {
           $_metadata = array(
             'width'  => $file_info[0],
             'height' => $file_info[1],
             'object-id' => 'unknown', // we really don't know it
-            'source-id' => md5( $file . ud_get_stateless_media()->get( 'sm.bucket' ) ),
-            'file-hash' => md5( $file )
+            'source-id' => md5($file . ud_get_stateless_media()->get('sm.bucket')),
+            'file-hash' => md5($file)
           );
         }
 
@@ -75,7 +78,5 @@ namespace wpCloud\StatelessMedia {
         return $upload;
       }
     }
-
   }
-
 }

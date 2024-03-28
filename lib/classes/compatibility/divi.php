@@ -12,12 +12,14 @@ namespace wpCloud\StatelessMedia {
 
   if( !class_exists( 'wpCloud\StatelessMedia\Divi' ) ) {
 
-    class Divi extends ICompatibility {
+    class Divi extends Compatibility {
       protected $id = 'divi';
       protected $title = 'Divi';
       protected $constant = 'WP_STATELESS_COMPATIBILITY_DIVI';
       protected $description = 'Ensures compatibility with Divi theme.';
       protected $theme_name = 'Divi';
+      protected $enabled = false;
+      protected $is_internal = true;
 
       /**
        * Cache Busting call stack conditions to disable.

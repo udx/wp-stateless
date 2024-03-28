@@ -1,12 +1,12 @@
 === WP-Stateless - Google Cloud Storage ===
-Contributors: usability_dynamics, andypotanin, ideric, maxim.peshkov, Anton Korotkoff, planvova, balexey88
+Contributors: usability_dynamics, andypotanin, ideric, maxim.peshkov, planvova, obolgun
 Donate link: https://udx.io
-Tags: google, google cloud, google cloud storage, cdn, uploads, media, stateless, backup
+Tags: google cloud, google cloud storage, cdn, uploads, backup
 License: GPLv2 or later
 Requires PHP: 8.0
 Requires at least: 5.0
-Tested up to: 6.3.1
-Stable tag: 3.2.5
+Tested up to: 6.4.3
+Stable tag: 4.0.0-RC.1
 
 Upload and serve your WordPress media files from Google Cloud Storage.
 
@@ -43,6 +43,10 @@ New to Google Cloud? Google is offering you a [$300 credit](https://console.clou
 * Serverless platform compatible, including Google App Engine.
 * Multisite compatible.
 
+= Addons =
+* [BuddyBoss Platform Addon](https://wordpress.org/plugins/wp-stateless-buddyboss-platform-addon/)
+* [Elementor Website Builder Addon](https://wordpress.org/plugins/wp-stateless-elementor-website-builder-addon/)
+
 = Support, Feedback, & Contribute =
 We welcome community involvement via the [GitHub repository](https://github.com/udx/wp-stateless).
 
@@ -56,7 +60,7 @@ Looking for a unique feature for your next project? [Hire us!](https://udx.io/)
 3. Click "Google Login" and sign-in with your Google account.
 4. Set a Google Cloud Project, Google Cloud Storage Bucket, and Google Cloud Billing Account and click "Continue."
 5. Installation and setup is now complete. Visit *Media > Stateless Settings* for more options.
-For a more detailed installation and setup walkthrough, please see the [manual setup instructions on Github](https://wp-stateless.github.io/docs/manual-setup/).
+For a more detailed installation and setup walkthrough, please see the [manual setup instructions on Github](https://stateless.udx.io/docs/manual-setup/).
 
 == Screenshots ==
 
@@ -76,7 +80,7 @@ Beyond the [official WordPress minimum requirements](https://wordpress.org/about
 
 = What wp-config constants are supported? =
 
-For a complete list of supported wp-config constants, please consult the [GitHub documentation](https://wp-stateless.github.io/docs/constants/).
+For a complete list of supported wp-config constants, please consult the [GitHub documentation](https://stateless.udx.io/docs/constants/).
 
 = How do I manually generate the Service Account JSON? =
 
@@ -102,6 +106,11 @@ To ensure new releases cause as little disruption as possible, we rely on a numb
 
 
 == Upgrade Notice ==
+= 4.0.0 =
+You will be prompted to run data optimization after upgrade. Please make a backup copy of your database.
+If you using BuddyBoss Platform you will be proposed to install [WP-Stateless – BuddyBoss Platform Addon](https://wordpress.org/plugins/wp-stateless-buddyboss-platform-addon/), which replaces BuddyBoss Compatibility.
+If you using Elementor Website Builder you will be proposed to install [WP-Stateless – Elementor Website Builder Addon](https://wordpress.org/plugins/wp-stateless-elementor-website-builder-addon/), which replaces Elementor Compatibility.
+
 = 3.2.3 =
 Before upgrading to WP-Stateless 3.2.3, please, make sure you use PHP 8.0 or above.
 
@@ -112,6 +121,54 @@ Before upgrading to WP-Stateless 3.2.0, please, make sure you use PHP 7.2 or abo
 Before upgrading to WP-Stateless 3.0, please, make sure you tested it on your development environment.
 
 == Changelog ==
+= 4.0.0 =
+* NEW - use custom database tables to store GCS file data. This increases plugin performance and will be used for future improvements.  
+* NEW - added filter `wp_stateless_get_file`, retrieves the GCS file data, should be used instead of getting `sm_cloud` postmeta directly. 
+* NEW - added filter `wp_stateless_get_file_sizes`, retrieves the GCS file data for image sizes, should be used instead of getting `sm_cloud` postmeta directly.
+* NEW - added filter `wp_stateless_get_file_meta`, retrieves all GCS file meta data, should be used instead of getting `sm_cloud` postmeta directly.
+* NEW - added filter `wp_stateless_get_file_meta_value`, retrieves the GCS file meta data by meta_key, should be used instead of getting `sm_cloud` postmeta directly.
+* NEW - added setting allowing to change email for WP-Stateless notifications.
+* NEW - added new Settings tab `Addons`, which contains the list of WP-Stateless Addons, which replace Compatibilities.
+* NEW - added new Settings tab `Status`, which contains status and health information related to Google Cloud Storage and WP-Stateless.
+* NEW - CLI command `wp stateless migrate` to list and operate data optimizations.
+* NEW - configuration constant [`WP_STATELESS_POSTMETA`](https://stateless.udx.io/docs/constants/#wp_stateless_postmeta) allows to read the GCS file data from postmeta instead of the new custom database tables.
+* NEW - configuration constant [`WP_STATELESS_BATCH_HEALTHCHECK_INTERVAL`](https://stateless.udx.io/docs/constants/#wp_stateless_batch_healthcheck_interval) defines an interval in minutes for periodical health checks of a batch background process (like data optimization).
+* COMPATIBILITY - BuddyBoss Compatibility replaced with [WP-Stateless – BuddyBoss Platform Addon](https://wordpress.org/plugins/wp-stateless-buddyboss-platform-addon/).
+* COMPATIBILITY - Elementor Compatibility replaced with [WP-Stateless – Elementor Website Builder Addon](https://wordpress.org/plugins/wp-stateless-elementor-website-builder-addon/).
+* COMPATIBILITY - Gravity Form Compatibility does not support older version of Gravity Forms (< 2.3).
+* ENHANCEMENT - Allow dismissing notices in Admin Panel only for logged in users.
+* ENHANCEMENT - Updated `wp-background-processing` library from from 1.0.2 to 1.1.1.
+* ENHANCEMENT - Updated `phpseclib` 3.0.34 to 3.0.37.
+* FIX - proper use of infinite timeout in `set_time_limit` function to avoid issues with PHP 8.1 and above [#704](https://github.com/udx/wp-stateless/issues/704).
+
+= 3.4.1 =
+* FIX - improve security while processing AJAX requests in Admin Panel
+
+= 3.4.0 =
+* ENHANCEMENT - removed `udx/lib-settings` package dependency for security reasons. 
+* ENHANCEMENT - removed `udx/lib-utility` package dependency for security reasons.
+* ENHANCEMENT - refactored `Settings` admin page to remove Angular dependency.
+* ENHANCEMENT - including Software Bill of Materials (SBOM) to GitHub release.
+* FIX - updated package dependencies for Google Client Library for security reasons.
+* FIX - replaced `utf8_encode` with `mb_convert_encoding` to support PHP 8.2 and above [#678](https://github.com/udx/wp-stateless/issues/678).
+* FIX - Fatal Error in `Stateless` mode if GCP access credentials are wrong [#693](https://github.com/udx/wp-stateless/issues/693).
+* COMPATIBILITY - preventing PHP warnings while working with WooCommerce version 8.4.0 and above [696](https://github.com/udx/wp-stateless/issues/696).
+* COMPATIBILITY - avoiding conflicts between builtin compatibilities and WP-Stateless Addon plugins.
+
+= 3.3.0 =
+* NEW - Added new filter `wp_stateless_attachment_url`. Allows to customize attachment URL after WP-Stateless generates it based on it's internal conditions.
+* FIX - Stateless mode Incompatible with Media Uploader in Media Library Grid mode [#675](https://github.com/udx/wp-stateless/issues/675).
+* FIX - Prevent duplicating messages in Admin Panel.
+* COMPATIBILITY - Dynamic Image Support is now part of the core.
+* COMPATIBILITY - Google App Engine is now part of the core. Automatically enables **Stateless** mode when Google App Engine detected. Can be disabled using `WP_STATELESS_COMPATIBILITY_GAE` constant.
+* COMPATIBILITY - Removed compatibility with "Advanced Custom Fields: Image Crop Add-on", because plugin is deprecated.
+* COMPATIBILITY - Removed compatibility with "VidoRev" plugin.
+* COMPATIBILITY - Removed compatibility with "WP Retina 2x" plugin.
+* ENHANCEMENT - Updated Client library for Google APIs from 2.15.0 to 2.15.1.
+* ENHANCEMENT - Updated Meta Box library from 5.6.3 to 5.8.2.
+* ENHANCEMENT - Updated Meta Box Tabs to version 1.1.17.
+* ENHANCEMENT - Updated PHP JWT library from 6.6.0 to 6.9.0.
+
 = 3.2.5 =
 * FIX - Folder setting does not allow custom structure [#608](https://github.com/udx/wp-stateless/issues/608).
 * FIX - Stateless mode Incompatible with Inline Uploader [#675](https://github.com/udx/wp-stateless/issues/675).
@@ -158,9 +215,9 @@ Before upgrading to WP-Stateless 3.0, please, make sure you tested it on your de
 
 = 3.1.0 =
 * NEW - Completely rewritten the synchronization tool. GitHub issue [#523](https://github.com/udx/wp-stateless/issues/523).
-* NEW - New configuration constant `WP_STATELESS_SYNC_MAX_BATCH_SIZE`. Sets the maximum size of a background sync batch of items to be saved in a single row in the database. [More details](https://wp-stateless.github.io/docs/constants/#wp_stateless_sync_max_batch_size).
-* NEW - New configuration constant `WP_STATELESS_SYNC_LOG`. Sets a path to a log file where to output logging information during the background sync. [More details](https://wp-stateless.github.io/docs/constants/#wp_stateless_sync_log).
-* NEW - New configuration constant `WP_STATELESS_SYNC_HEALTHCHECK_INTERVAL`. Defines an interval in minutes for a cron task that periodically checks the health of a particular background sync process. [More details](https://wp-stateless.github.io/docs/constants/#wp_stateless_sync_healthcheck_interval).
+* NEW - New configuration constant `WP_STATELESS_SYNC_MAX_BATCH_SIZE`. Sets the maximum size of a background sync batch of items to be saved in a single row in the database. [More details](https://stateless.udx.io/docs/constants/#wp_stateless_sync_max_batch_size).
+* NEW - New configuration constant `WP_STATELESS_SYNC_LOG`. Sets a path to a log file where to output logging information during the background sync. [More details](https://stateless.udx.io/docs/constants/#wp_stateless_sync_log).
+* NEW - New configuration constant `WP_STATELESS_SYNC_HEALTHCHECK_INTERVAL`. Defines an interval in minutes for a cron task that periodically checks the health of a particular background sync process. [More details](https://stateless.udx.io/docs/constants/#wp_stateless_sync_healthcheck_interval).
 * FIX - Fixed an issue when original files were not deleted from the server in the Ephemeral mode. GitHub issue [#484](https://github.com/udx/wp-stateless/issues/484).
 * FIX - Fixed an incorrect behavior of image `srcset` attribute in the Backup mode. GitHub issue [#558](https://github.com/udx/wp-stateless/issues/558).
 * COMPATIBILITY - Litespeed Cache - Fixed an incorrect upload folder determination. GitHub issue [#527](https://github.com/udx/wp-stateless/issues/527).
