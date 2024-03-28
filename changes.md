@@ -11,6 +11,7 @@
 * NEW - configuration constant [`WP_STATELESS_BATCH_HEALTHCHECK_INTERVAL`](https://stateless.udx.io/docs/constants/#wp_stateless_batch_healthcheck_interval) defines an interval in minutes for periodical health checks of a batch background process (like data optimization).
 * COMPATIBILITY - BuddyBoss Compatibility replaced with [WP-Stateless – BuddyBoss Platform Addon](https://wordpress.org/plugins/wp-stateless-buddyboss-platform-addon/).
 * COMPATIBILITY - Elementor Compatibility replaced with [WP-Stateless – Elementor Website Builder Addon](https://wordpress.org/plugins/wp-stateless-elementor-website-builder-addon/).
+* COMPATIBILITY - Gravity Form Compatibility does not support older version of Gravity Forms (< 2.3).
 * ENHANCEMENT - Allow dismissing notices in Admin Panel only for logged in users.
 * ENHANCEMENT - Updated `wp-background-processing` library from from 1.0.2 to 1.1.1.
 * ENHANCEMENT - Updated `phpseclib` 3.0.34 to 3.0.37.

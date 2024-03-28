@@ -93,7 +93,7 @@ class BatchTaskManager extends \UDX_WP_Background_Process {
   /**
    * Get last state update of the current task
    * 
-   * @return array
+   * @return int|null
    */
   private function _get_last_updated() {
     return get_site_option( $this->identifier . self::UPDATED_KEY, null );
@@ -204,11 +204,9 @@ class BatchTaskManager extends \UDX_WP_Background_Process {
    */
   public function task($item) {
     $result = false;
-    $description = 'Batch process';
 
     try {
       $object = $this->_get_batch_task_object();
-      $description = $object->get_description();
 
       $result = $object->process_item($item);
       $this->_update_state( $object->get_state() );

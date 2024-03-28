@@ -147,6 +147,10 @@ class Migrations {
   private function _get_migrations_state($state = null) {
     $migrations = [];
     $this->migrations = get_site_option(Migrator::MIGRATIONS_KEY, []);
+
+    if ( !is_array($this->migrations) ) {
+      $this->migrations = [];
+    }
   
     $defaults = [
       'description' => '',

@@ -1,7 +1,7 @@
 === WP-Stateless - Google Cloud Storage ===
 Contributors: usability_dynamics, andypotanin, ideric, maxim.peshkov, planvova, obolgun
 Donate link: https://udx.io
-Tags: google, google cloud, google cloud storage, cdn, uploads, media, stateless, backup
+Tags: google cloud, google cloud storage, cdn, uploads, backup
 License: GPLv2 or later
 Requires PHP: 8.0
 Requires at least: 5.0
@@ -42,6 +42,10 @@ New to Google Cloud? Google is offering you a [$300 credit](https://console.clou
 * All files served in HTTPS mode.
 * Serverless platform compatible, including Google App Engine.
 * Multisite compatible.
+
+= Addons =
+* [BuddyBoss Platform Addon](https://wordpress.org/plugins/wp-stateless-buddyboss-platform-addon/)
+* [Elementor Website Builder Addon](https://wordpress.org/plugins/wp-stateless-elementor-website-builder-addon/)
 
 = Support, Feedback, & Contribute =
 We welcome community involvement via the [GitHub repository](https://github.com/udx/wp-stateless).
@@ -130,6 +134,7 @@ Before upgrading to WP-Stateless 3.0, please, make sure you tested it on your de
 * NEW - configuration constant [`WP_STATELESS_BATCH_HEALTHCHECK_INTERVAL`](https://stateless.udx.io/docs/constants/#wp_stateless_batch_healthcheck_interval) defines an interval in minutes for periodical health checks of a batch background process (like data optimization).
 * COMPATIBILITY - BuddyBoss Compatibility replaced with [WP-Stateless – BuddyBoss Platform Addon](https://wordpress.org/plugins/wp-stateless-buddyboss-platform-addon/).
 * COMPATIBILITY - Elementor Compatibility replaced with [WP-Stateless – Elementor Website Builder Addon](https://wordpress.org/plugins/wp-stateless-elementor-website-builder-addon/).
+* COMPATIBILITY - Gravity Form Compatibility does not support older version of Gravity Forms (< 2.3).
 * ENHANCEMENT - Allow dismissing notices in Admin Panel only for logged in users.
 * ENHANCEMENT - Updated `wp-background-processing` library from from 1.0.2 to 1.1.1.
 * ENHANCEMENT - Updated `phpseclib` 3.0.34 to 3.0.37.

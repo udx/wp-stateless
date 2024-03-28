@@ -1746,13 +1746,7 @@ namespace wpCloud\StatelessMedia {
        * @param $old_site
        */
       public function wp_delete_site($old_site) {
-        global $wpdb;
-
         switch_to_blog($old_site->id);
-        $table_name = $wpdb->prefix . 'sm_sync';
-
-        $sql = "DROP TABLE IF EXISTS $table_name";
-        $wpdb->query($sql);
 
         ud_stateless_db()->clear_db();
         
@@ -2063,7 +2057,7 @@ namespace wpCloud\StatelessMedia {
         switch ($type) {
           case 'true':
             // Emails to Admin 
-            return get_option('admin_email');
+            return get_site_option('admin_email');
           case 'custom':
             // Emails to Custom Email 
             return $this->get( 'sm.status_email_address' );

@@ -6,7 +6,7 @@
  * Author: UDX
  * Version: 4.0.0-RC.1
  * Text Domain: stateless-media
- * Author URI: https://www.udx.io
+ * Author URI: https://udx.io
  * License: GPLv2 or later
  * 
  * Copyright 2012 - 2024 UDX ( email: info@udx.io )

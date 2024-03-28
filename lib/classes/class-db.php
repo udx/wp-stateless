@@ -43,6 +43,11 @@ namespace wpCloud\StatelessMedia {
       private $file_meta = '';
 
       /**
+       * Sync table name
+       */
+      private $sm_sync = '';
+
+      /**
        * Cache group name
        */
       private $cache_group = 'stateless_media';
@@ -91,6 +96,7 @@ namespace wpCloud\StatelessMedia {
         $this->files = $this->wpdb->prefix . 'stateless_files';
         $this->file_sizes = $this->wpdb->prefix . 'stateless_file_sizes';
         $this->file_meta = $this->wpdb->prefix . 'stateless_file_meta';
+        $this->sm_sync = $this->wpdb->prefix . 'sm_sync';
 
         $image_host = ud_get_stateless_media()->get_gs_host();
         $this->bucket_link = apply_filters('wp_stateless_bucket_link', $image_host);
@@ -124,7 +130,7 @@ namespace wpCloud\StatelessMedia {
        * Getters
        */
       public function __get($property) {
-        if ( in_array($property, ['files', 'file_sizes', 'file_meta']) ) {
+        if ( in_array($property, ['files', 'file_sizes', 'file_meta', 'sm_sync']) ) {
           return $this->$property;
         }
       }
@@ -197,8 +203,8 @@ namespace wpCloud\StatelessMedia {
        * Remove custom DB table on plugin uninstall
        */
       public function clear_db() {
-        $sql = "DROP TABLE IF EXISTS $this->files, $this->file_sizes, $this->file_meta;";
-        $wpdb->query($sql);
+        $sql = "DROP TABLE IF EXISTS $this->files, $this->file_sizes, $this->file_meta, $this->sm_sync;";
+        $this->wpdb->query($sql);
       }
 
       /**
@@ -262,7 +268,6 @@ namespace wpCloud\StatelessMedia {
        * @param string $image_size  - image size name
        * @param array $img          - image (or image size) data for upload
        * @param string $bucketLink  - bucket link
-       * @param int $attachment_id  - attachment ID
        * @return mixed
        */
       public function process_cloud_meta($cloud_meta, $media, $image_size, $img, $bucketLink) {
@@ -520,6 +525,7 @@ namespace wpCloud\StatelessMedia {
        * Map requested fields into database query< compatible with the old post meta structure
        * 
        * @param array $fields
+       * @param array $fields_mapping
        * @return string
        */
       private function _map_fields($fields, $fields_mapping) {
@@ -690,7 +696,7 @@ namespace wpCloud\StatelessMedia {
       }
 
       /**
-       * Get file data. If $size_names is set to true, all sizes will be included
+       * Get file data. If $with_sizes is set to true, all sizes will be included
        * 
        * @param array $meta
        * @param int $attachment_id
@@ -699,7 +705,11 @@ namespace wpCloud\StatelessMedia {
        */
       public function get_file($meta, $attachment_id, $with_sizes = false) {
         if ( defined('WP_STATELESS_POSTMETA') && WP_STATELESS_POSTMETA ) {
-          return get_post_meta($attachment_id, 'sm_cloud', true);
+          $meta = get_post_meta($attachment_id, 'sm_cloud', true);
+
+          if ( !empty($meta) ) {
+            return $meta;
+          }
         }
 
         // Get values from the cache
@@ -718,10 +728,10 @@ namespace wpCloud\StatelessMedia {
 
         $meta = $this->wpdb->get_row( $this->wpdb->prepare($sql, $attachment_id), ARRAY_A );
 
-        wp_cache_set($cache_key, $meta, $this->cache_group);
-
         if ( empty($meta) ) {
           return get_post_meta($attachment_id, 'sm_cloud', true);
+        } else {
+          wp_cache_set($cache_key, $meta, $this->cache_group);
         }
 
         // Get file size meta data
@@ -784,7 +794,7 @@ namespace wpCloud\StatelessMedia {
        * @param mixed $default
        * @return mixed
        */
-      public function get_file_meta_value($post_id, $key, $default) {
+      public function get_file_meta_value($post_id, $key, $default = null) {
         if ( defined('WP_STATELESS_POSTMETA') && WP_STATELESS_POSTMETA ) {
           $meta = get_post_meta($post_id, 'sm_cloud', []);
 

@@ -125,10 +125,10 @@ namespace wpCloud\StatelessMedia {
 
         ud_get_stateless_media()->errors->add([
           'key' => $id,
-          'title' => sprintf(__("%s: Addon for %s is recommended.", ud_get_stateless_media()->domain), ud_get_stateless_media()->name, $title),
-          'button' => __("Get Addon", ud_get_stateless_media()->domain),
+          'title' => sprintf(__('WP-Stateless: Install the %s Addon', ud_get_stateless_media()->domain), $title),
+          'button' => __('Download Addon', ud_get_stateless_media()->domain),
           'button_link' => admin_url('upload.php?page=stateless-settings&tab=stless_addons_tab'),
-          'message' => __("Addon is recommended to ensure the functionality will work properly between <b>{$title}</b> and <b>WP-Stateless</b>.", ud_get_stateless_media()->domain),
+          'message' => sprintf(__('Download and activate the WP-Stateless addon for %s to ensure compatibility.', ud_get_stateless_media()->domain), $title),
         ], 'notice');  
       }
     }
