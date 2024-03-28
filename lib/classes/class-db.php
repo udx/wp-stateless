@@ -121,6 +121,7 @@ namespace wpCloud\StatelessMedia {
         add_filter('wp_stateless_get_file', [$this, 'get_file'], 10, 3);
         add_filter('wp_stateless_get_file_sizes', [$this, 'get_file_sizes'], 10, 2);
         add_filter('wp_stateless_get_file_meta', [$this, 'get_file_meta'], 10, 2);
+        add_filter('wp_stateless_get_file_meta_value', [$this, 'get_file_meta_value'], 10, 4);
         add_action('wp_stateless_set_file', [$this, 'set_file'], 10, 2);
         add_action('wp_stateless_set_file_size', [$this, 'set_file_size'], 10, 3);
         add_action('wp_stateless_set_file_meta', [$this, 'update_file_meta'], 10, 3);
@@ -730,9 +731,9 @@ namespace wpCloud\StatelessMedia {
 
         if ( empty($meta) ) {
           return get_post_meta($attachment_id, 'sm_cloud', true);
-        } else {
-          wp_cache_set($cache_key, $meta, $this->cache_group);
         }
+
+        wp_cache_set($cache_key, $meta, $this->cache_group);
 
         // Get file size meta data
         if ( $with_sizes ) {
@@ -794,7 +795,7 @@ namespace wpCloud\StatelessMedia {
        * @param mixed $default
        * @return mixed
        */
-      public function get_file_meta_value($post_id, $key, $default = null) {
+      public function get_file_meta_value($value, $post_id, $key, $default = null) {
         if ( defined('WP_STATELESS_POSTMETA') && WP_STATELESS_POSTMETA ) {
           $meta = get_post_meta($post_id, 'sm_cloud', []);
 

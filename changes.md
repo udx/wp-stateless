@@ -2,7 +2,8 @@
 * NEW - use custom database tables to store GCS file data. This increases plugin performance and will be used for future improvements.  
 * NEW - added filter `wp_stateless_get_file`, retrieves the GCS file data, should be used instead of getting `sm_cloud` postmeta directly. 
 * NEW - added filter `wp_stateless_get_file_sizes`, retrieves the GCS file data for image sizes, should be used instead of getting `sm_cloud` postmeta directly.
-* NEW - added filter `wp_stateless_get_file_meta`, retrieves the GCS file meta data, should be used instead of getting `sm_cloud` postmeta directly.
+* NEW - added filter `wp_stateless_get_file_meta`, retrieves all GCS file meta data, should be used instead of getting `sm_cloud` postmeta directly.
+* NEW - added filter `wp_stateless_get_file_meta_value`, retrieves the GCS file meta data by meta_key, should be used instead of getting `sm_cloud` postmeta directly.
 * NEW - added setting allowing to change email for WP-Stateless notifications.
 * NEW - added new Settings tab `Addons`, which contains the list of WP-Stateless Addons, which replace Compatibilities.
 * NEW - added new Settings tab `Status`, which contains status and health information related to Google Cloud Storage and WP-Stateless.
