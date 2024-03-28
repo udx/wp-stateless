@@ -46,6 +46,8 @@ namespace wpCloud\StatelessMedia {
         'organize_media'         => array('', 'true'),
         'hashify_file_name'      => array(['WP_STATELESS_MEDIA_HASH_FILENAME' => 'WP_STATELESS_MEDIA_CACHE_BUSTING'], 'false'),
         'dynamic_image_support'  => array(['WP_STATELESS_MEDIA_ON_FLY' => 'WP_STATELESS_DYNAMIC_IMAGE_SUPPORT'], 'false'),
+        'status_email_type'      => array('', 'true'),
+        'status_email_address'   => array('', ''),
       );
 
       private $network_only_settings = array(

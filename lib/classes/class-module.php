@@ -26,11 +26,6 @@ namespace wpCloud\StatelessMedia {
       add_action('wp_stateless_compatibility_tab_content', array($this, 'tab_content'));
 
       /**
-       * Support for BuddyBoss
-       */
-      new BuddyBoss();
-
-      /**
        * Support for BuddyPress
        */
       new BuddyPress();
@@ -44,11 +39,6 @@ namespace wpCloud\StatelessMedia {
        * Support for Easy Digital Downloads
        */
       new EDDDownloadMethod();
-
-      /**
-       * Support for Elementor
-       */
-      new Elementor();
 
       /**
        * Support for Ewww Image Optimizer

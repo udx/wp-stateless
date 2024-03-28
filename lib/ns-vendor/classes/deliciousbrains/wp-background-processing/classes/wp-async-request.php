@@ -1,5 +1,4 @@
 <?php
-
 /**
  * WP Async Request
  *
@@ -52,53 +51,53 @@ abstract class UDX_WP_Async_Request {
 	protected $data = array();
 
 	/**
-	 * Initiate new async request
+	 * Initiate new async request.
 	 */
 	public function __construct() {
 		$this->identifier = $this->prefix . '_' . $this->action;
 
-		add_action('wp_ajax_' . $this->identifier, array($this, 'maybe_handle'));
-		add_action('wp_ajax_nopriv_' . $this->identifier, array($this, 'maybe_handle'));
+		add_action( 'wp_ajax_' . $this->identifier, array( $this, 'maybe_handle' ) );
+		add_action( 'wp_ajax_nopriv_' . $this->identifier, array( $this, 'maybe_handle' ) );
 	}
 
 	/**
-	 * Set data used during the request
+	 * Set data used during the request.
 	 *
 	 * @param array $data Data.
 	 *
 	 * @return $this
 	 */
-	public function data($data) {
+	public function data( $data ) {
 		$this->data = $data;
 
 		return $this;
 	}
 
 	/**
-	 * Dispatch the async request
+	 * Dispatch the async request.
 	 *
-	 * @return array|WP_Error
+	 * @return array|WP_Error|false HTTP Response array, WP_Error on failure, or false if not attempted.
 	 */
 	public function dispatch() {
-		$url  = add_query_arg($this->get_query_args(), $this->get_query_url());
+		$url  = add_query_arg( $this->get_query_args(), $this->get_query_url() );
 		$args = $this->get_post_args();
 
-		return wp_remote_post(esc_url_raw($url), $args);
+		return wp_remote_post( esc_url_raw( $url ), $args );
 	}
 
 	/**
-	 * Get query args
+	 * Get query args.
 	 *
 	 * @return array
 	 */
 	protected function get_query_args() {
-		if (property_exists($this, 'query_args')) {
+		if ( property_exists( $this, 'query_args' ) ) {
 			return $this->query_args;
 		}
 
 		$args = array(
 			'action' => $this->identifier,
-			'nonce'  => wp_create_nonce($this->identifier),
+			'nonce'  => wp_create_nonce( $this->identifier ),
 		);
 
 		/**
@@ -106,36 +105,36 @@ abstract class UDX_WP_Async_Request {
 		 *
 		 * @param array $url
 		 */
-		return apply_filters($this->identifier . '_query_args', $args);
+		return apply_filters( $this->identifier . '_query_args', $args );
 	}
 
 	/**
-	 * Get query URL
+	 * Get query URL.
 	 *
 	 * @return string
 	 */
 	protected function get_query_url() {
-		if (property_exists($this, 'query_url')) {
+		if ( property_exists( $this, 'query_url' ) ) {
 			return $this->query_url;
 		}
 
-		$url = admin_url('admin-ajax.php');
+		$url = admin_url( 'admin-ajax.php' );
 
 		/**
 		 * Filters the post arguments used during an async request.
 		 *
 		 * @param string $url
 		 */
-		return apply_filters($this->identifier . '_query_url', $url);
+		return apply_filters( $this->identifier . '_query_url', $url );
 	}
 
 	/**
-	 * Get post args
+	 * Get post args.
 	 *
 	 * @return array
 	 */
 	protected function get_post_args() {
-		if (property_exists($this, 'post_args')) {
+		if ( property_exists( $this, 'post_args' ) ) {
 			return $this->post_args;
 		}
 
@@ -143,8 +142,8 @@ abstract class UDX_WP_Async_Request {
 			'timeout'   => 0.01,
 			'blocking'  => false,
 			'body'      => $this->data,
-			'cookies'   => $_COOKIE,
-			'sslverify' => apply_filters('https_local_ssl_verify', false),
+			'cookies'   => $_COOKIE, // Passing cookies ensures request is performed as initiating user.
+			'sslverify' => apply_filters( 'https_local_ssl_verify', false ), // Local requests, fine to pass false.
 		);
 
 		/**
@@ -152,27 +151,49 @@ abstract class UDX_WP_Async_Request {
 		 *
 		 * @param array $args
 		 */
-		return apply_filters($this->identifier . '_post_args', $args);
+		return apply_filters( $this->identifier . '_post_args', $args );
 	}
 
 	/**
-	 * Maybe handle
+	 * Maybe handle a dispatched request.
 	 *
 	 * Check for correct nonce and pass to handler.
+	 *
+	 * @return void|mixed
 	 */
 	public function maybe_handle() {
-		// Don't lock up other requests while processing
+		// Don't lock up other requests while processing.
 		session_write_close();
 
-		check_ajax_referer($this->identifier, 'nonce');
+		check_ajax_referer( $this->identifier, 'nonce' );
 
 		$this->handle();
 
-		wp_die();
+		return $this->maybe_wp_die();
 	}
 
 	/**
-	 * Handle
+	 * Should the process exit with wp_die?
+	 *
+	 * @param mixed $return What to return if filter says don't die, default is null.
+	 *
+	 * @return void|mixed
+	 */
+	protected function maybe_wp_die( $return = null ) {
+		/**
+		 * Should wp_die be used?
+		 *
+		 * @return bool
+		 */
+		if ( apply_filters( $this->identifier . '_wp_die', true ) ) {
+			wp_die();
+		}
+
+		return $return;
+	}
+
+	/**
+	 * Handle a dispatched request.
 	 *
 	 * Override this method to perform any actions required
 	 * during the async request.

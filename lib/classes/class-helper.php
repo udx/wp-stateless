@@ -64,5 +64,36 @@ namespace wpCloud\StatelessMedia {
       }, $array);
     }
 
+    /**
+     * Writes to error log.
+     * 
+     * @param mixed $data
+     */
+    public static function log($data, $json = false) {
+      if (!WP_DEBUG) {
+        return;
+      }
+
+      if ( is_array($data) || is_object($data) || !is_string($data) ) {
+        if ( $json ) {
+          error_log( json_encode($data) );
+        } else {
+          error_log( print_r($data, true) );
+        }
+
+        return;
+      } 
+      
+      error_log($data);
+    }
+
+    /**
+     * Writes debug to error log.
+     * 
+     * @param mixed $data
+     */
+    public static function debug($data, $json = false) {
+      self::log($data, $json);
+    }
   }
 }

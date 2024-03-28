@@ -33,6 +33,10 @@ New to Google Cloud? Google is offering you a [$300 credit](https://console.clou
 * Serverless platform compatible, including Google App Engine.
 * Multisite compatible.
 
+### Addons
+* [BuddyBoss Platform Addon](https://wordpress.org/plugins/wp-stateless-buddyboss-platform-addon/)
+* [Elementor Website Builder Addon](https://wordpress.org/plugins/wp-stateless-elementor-website-builder-addon/)
+
 ### Support, Feedback, & Contribute
 We welcome community involvement via the [GitHub repository](https://github.com/udx/wp-stateless).
 

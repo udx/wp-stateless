@@ -1,3 +1,7 @@
+### 1.3.3
+
+* Require user to be logged in while dismissing Admin Panel notices.
+
 ### 1.3.2
 
 * Improve security while processing AJAX requests in Admin Panel.

@@ -27,7 +27,7 @@ abstract class LibrarySync extends BackgroundSync {
    */
   public final function start($args = []) {
     try {
-      if ($this->is_process_running()) throw new UnprocessableException(__('Process already running', ud_get_stateless_media()->domain));
+      if ($this->is_processing()) throw new UnprocessableException(__('Process already running', ud_get_stateless_media()->domain));
 
       // Make sure there is no orphaned data and state
       delete_site_option($this->get_stopped_option_key());

@@ -99,6 +99,36 @@
           <?php _e('Define the file types you would like supported with File URL Replacement. Separate each type by a space.', ud_get_stateless_media()->domain); ?>
         </p>
       </div>
+
+      <h4><?php _e('Send Status Emails', ud_get_stateless_media()->domain); ?></h4>
+      
+      <div class="status_email_type">
+        <p class="sm-status-email-type">
+          <select name="sm[status_email_type]" id="sm_status_email_type">
+            <?php if (is_network_admin()) : ?>
+              <option value="" <?php selected( $sm->status_email_type, '' ); ?>><?php _e("Don't override"); ?></option>
+            <?php endif; ?>
+            <option value="false" <?php selected( $sm->status_email_type, 'false' ); ?>><?php _e('Disable', ud_get_stateless_media()->domain); ?></option>
+            <option value="true" <?php selected( $sm->status_email_type, 'true' ); ?>><?php _e('Use Admin Email', ud_get_stateless_media()->domain); ?></option>
+            <option value="custom" <?php selected( $sm->status_email_type, 'custom' ); ?>><?php _e('Use Custom Email', ud_get_stateless_media()->domain); ?></option>
+          </select>  
+        </p>
+
+        <p class="description"><strong id="notice-status_email_type"></strong> 
+          <?php _e('Send status emails for long-term like Background Synchronization or Data Updates.', ud_get_stateless_media()->domain); ?>
+        </p>
+      </div>
+
+      <p class="sm-status-email-address">
+        <label for="status_email_address">
+          <input name="sm[status_email_address]" type="text" id="status_status_email_addressemail" class="regular-text ltr" value="<?php echo $sm->status_email_address; ?>">
+
+          <span class="description">
+            <?php _e('You can specify several emails, separated by comma.', ud_get_stateless_media()->domain); ?>
+          </span>
+        </label>
+      </p>
+
     </fieldset>
   </td>
 </tr>

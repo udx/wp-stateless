@@ -7,19 +7,39 @@ on:
       release:
         description: 'Release version (e.g. 1.2.3)'
         required: true
+      prerelease:
+        description: 'Pre-release version (e.g. RC1, beta, etc...)'
+        required: false
 
 permissions:
   contents: write
 
 env:
   TAG: ${{ github.event.inputs.release }}
+  PRETAG: ${{ github.event.inputs.prerelease }}
   BRANCH: temp-release-${{ github.event.inputs.release }}
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      # ref and repository are required, otherwise repo could appear in detached head state
+      - name: Prepare vars
+        id: vars
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const full_tag = [
+              process.env.TAG,
+              process.env.PRETAG
+            ].filter(Boolean).join('-');
+            const branch = `temp-release-${full_tag}`;
+            const is_prerelease = !!process.env.PRETAG;
+
+            core.setOutput('full_tag', full_tag );
+            core.setOutput('branch', branch );
+            core.setOutput('is_prerelease', is_prerelease );
+        
+      # 'ref' and 'repository' are required, otherwise repo could appear in detached head state
       - name: Checkout
         uses: actions/checkout@v4
         with:
@@ -82,8 +102,8 @@ jobs:
         uses: EndBug/add-and-commit@v9
         with:
           message: Cleanup files for release
-          new_branch: ${{ env.BRANCH }}
-          tag: ${{ env.TAG }}
+          new_branch: ${{ steps.vars.outputs.branch }}
+          tag: ${{ steps.vars.outputs.full_tag }}
 
       # generate SBOM that will be attached to a release as an artifact
       - name: Create SBOM
@@ -99,11 +119,11 @@ jobs:
         id: draft_release
         uses: softprops/action-gh-release@v1
         with:
-          name: "Release ${{ env.TAG }}"
+          name: "Release ${{ steps.vars.outputs.full_tag }}"
           body: "${{ steps.changelog.outputs.description }}"
-          tag_name: ${{ env.TAG }}
+          tag_name: ${{ steps.vars.outputs.full_tag }}
           draft: true
-          prerelease: false
+          prerelease: ${{ steps.vars.outputs.is_prerelease }}
         
       # attach SBOM to release
       - name: Upload SBOM to release
@@ -127,4 +147,4 @@ jobs:
       # delete temporary release branch
       - name: Delete temporary release branch
         run: |
-          git push origin --delete ${{ env.BRANCH }}
+          git push origin --delete ${{ steps.vars.outputs.branch }}

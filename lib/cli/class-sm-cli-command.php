@@ -240,6 +240,168 @@ if (defined('WP_CLI') && WP_CLI && class_exists('WP_CLI_Command')) {
     }
 
     /**
+     * Run migrations
+     *
+     * ## OPTIONS
+     *
+     * [<id>]
+     * : start migration by its ID
+     *
+     * --force
+     * : Force starting migration even if it is not pending
+     * 
+     * --progress=<interval>
+     * : Monitor migration progress every <interval> seconds (minimum 1)
+     * 
+     * --email=<email>
+     * : Send email notification to specified email when migration is finished. By default it uses email from plugin settings. You can also use a list of emails, comma separated.
+     * 
+     * --url
+     * : Blog URL if multisite installation.
+     *
+     * ## EXAMPLES
+     *
+     * wp stateless migrate
+     * : List migrations information.
+     *
+     * wp stateless migrate --url=example.com
+     * : List migrations information for specific blog in multisite network.
+     *
+     * wp stateless migrate --progress=3
+     * : Display current migration progress every 3 seconds.
+     *
+     * wp stateless migrate 20240216150177
+     * : Start migration with ID 20240216150177.
+     *
+     * wp stateless migrate 20240216150177 --progress=2
+     * : Start migration with ID 20240216150177 and display progress every 2 seconds.
+     *
+     * wp stateless migrate 20240216150177 --force --email=mail@example.com,user@domain.com --url=example.com 
+     * : Start migration with ID 20240216150177 for specific blog in multisite network. Start migration even if it was already finished or failed. After finishing send email notification to mail@example.com and user@domain.com.
+     *
+     * @synopsis [<id>] [--force] [--progress=<val>] [--email=<val>] [--url=<val>]
+     * @param $args
+     * @param $assoc_args
+     */
+    public function migrate($args, $assoc_args) {
+      $id = $args[0] ?? '';
+
+      // No migration ID provided, list all migrations and exit
+      if ( empty($id) && !isset($assoc_args['progress']) ) {
+        $this->_list_migrations();
+
+        return;
+      } else if ( !empty($id) ) {
+        // Check if we can run migration
+        $migrations = $this->_get_migrations();
+
+        if ( !isset($migrations[$id]) ) {
+          WP_CLI::error("Invalid migration ID: $id");
+        }
+
+        if ( !$migrations[$id]['can_start'] && !isset($assoc_args['force']) ) {
+          WP_CLI::error( 'Migration ' . $migrations[$id]['description'] . ' is not ready for starting. ' . PHP_EOL . 
+            'Migration status: ' . $migrations[$id]['status_text'] . ', ' . strip_tags($migrations[$id]['message']) . PHP_EOL . 
+            'Please use --force to run it anyway.'
+          );
+        }
+
+        $email = $assoc_args['email'] ?? ud_get_stateless_media()->get_notification_email();
+
+        WP_CLI::confirm( 'Please make a backup copy of your database and try not to upload, change or delete your media while the process continues.' . PHP_EOL . 
+          "After the process finishes an email will be sent to: $email" . PHP_EOL . 
+          "Are you sure you want to run the migration $id?", 
+          $assoc_args 
+        );
+
+        // Run migration
+        \wpCloud\StatelessMedia\Migrator::instance()->start_migration([], [
+          'id' => $id, 
+          'is_migration' => true,
+          'force' => true,
+        ]);
+      }
+
+      if ( isset($assoc_args['progress']) ) {
+        $this->_check_progress($assoc_args['progress']);
+      }
+    }
+
+    /**
+     * Get migrations state
+     * 
+     * @return array
+     */
+    private function _get_migrations() {
+      $migrations = apply_filters('wp_stateless_batch_state', [], ['force_migrations' => true]);
+      return $migrations['migrations'] ?? [];
+    }
+
+    /**
+     * List migrations
+     */
+    private function _list_migrations() {
+      $migrations = $this->_get_migrations();
+
+      if ( empty($migrations) ) {
+        WP_CLI::success('No migrations found');
+      }
+
+      $data = [];
+
+      foreach ($migrations as $id => $migration) {
+        $data[$id] = [
+          'id' => $id,
+          'description' => $migration['description'],
+          'status' => $migration['status_text'],
+          'message' => strip_tags($migration['message']),
+        ];
+      }
+
+      WP_CLI\Utils\format_items('table', $data, ['id', 'description', 'status', 'message']);
+    }
+
+    /**
+     * Check progress
+     */
+    private function _check_progress($progress) {
+      global $wpdb;
+
+      $sleep = max($progress, 1);
+      $key = \wpCloud\StatelessMedia\Batch\BatchTaskManager::instance()->get_state_key(); 
+
+      if ( is_multisite() ) {
+        $sql = "SELECT meta_value FROM $wpdb->sitemeta WHERE meta_key = '%s' AND site_id = %d LIMIT 1";
+        $sql = $wpdb->prepare($sql, $key, get_current_network_id());
+      } else {
+        $sql = "SELECT option_value FROM $wpdb->options WHERE option_name = '%s' LIMIT 1";
+        $sql = $wpdb->prepare($sql, $key);
+      }
+
+      do {
+        // We need to omit the cache and get the data directly from the db
+        $state = $wpdb->get_var($sql);
+        $state = maybe_unserialize($state);
+
+        if ( empty($state) || !isset($state['is_migration']) || !$state['is_migration'] ) {
+          WP_CLI::success('No migration in progress');
+          return;
+        }
+
+        $description = $state['description'] ?? '';
+        $completed = $state['completed'] ?? 0;
+        $total = $state['total'] ?? 0;
+
+        $percent = $total > 0 ? round($completed / $total * 100, 2) : 0;
+
+        $message = sprintf("Migration '%s' compeleted %.2f%%: %d of %d items processed", $description, $percent, $completed, $total);
+        WP_CLI::line($message);
+
+        sleep($sleep);
+      } while (true);
+    }
+
+    /**
      * Runs batches
      */
     private function _run_batches($method, $type, $assoc_args) {

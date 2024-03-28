@@ -1,12 +1,12 @@
 === WP-Stateless - Google Cloud Storage ===
 Contributors: usability_dynamics, andypotanin, ideric, maxim.peshkov, planvova, obolgun
 Donate link: https://udx.io
-Tags: google, google cloud, google cloud storage, cdn, uploads, media, stateless, backup
+Tags: google cloud, google cloud storage, cdn, uploads, backup
 License: GPLv2 or later
 Requires PHP: 8.0
 Requires at least: 5.0
 Tested up to: 6.4.3
-Stable tag: 3.4.1
+Stable tag: 4.0.0-RC.1
 
 Upload and serve your WordPress media files from Google Cloud Storage.
 
@@ -42,6 +42,10 @@ New to Google Cloud? Google is offering you a [$300 credit](https://console.clou
 * All files served in HTTPS mode.
 * Serverless platform compatible, including Google App Engine.
 * Multisite compatible.
+
+= Addons =
+* [BuddyBoss Platform Addon](https://wordpress.org/plugins/wp-stateless-buddyboss-platform-addon/)
+* [Elementor Website Builder Addon](https://wordpress.org/plugins/wp-stateless-elementor-website-builder-addon/)
 
 = Support, Feedback, & Contribute =
 We welcome community involvement via the [GitHub repository](https://github.com/udx/wp-stateless).
@@ -102,6 +106,11 @@ To ensure new releases cause as little disruption as possible, we rely on a numb
 
 
 == Upgrade Notice ==
+= 4.0.0 =
+You will be prompted to run data optimization after upgrade. Please make a backup copy of your database.
+If you using BuddyBoss Platform you will be proposed to install [WP-Stateless – BuddyBoss Platform Addon](https://wordpress.org/plugins/wp-stateless-buddyboss-platform-addon/), which replaces BuddyBoss Compatibility.
+If you using Elementor Website Builder you will be proposed to install [WP-Stateless – Elementor Website Builder Addon](https://wordpress.org/plugins/wp-stateless-elementor-website-builder-addon/), which replaces Elementor Compatibility.
+
 = 3.2.3 =
 Before upgrading to WP-Stateless 3.2.3, please, make sure you use PHP 8.0 or above.
 
@@ -112,8 +121,28 @@ Before upgrading to WP-Stateless 3.2.0, please, make sure you use PHP 7.2 or abo
 Before upgrading to WP-Stateless 3.0, please, make sure you tested it on your development environment.
 
 == Changelog ==
+= 4.0.0 =
+* NEW - use custom database tables to store GCS file data. This increases plugin performance and will be used for future improvements.  
+* NEW - added filter `wp_stateless_get_file`, retrieves the GCS file data, should be used instead of getting `sm_cloud` postmeta directly. 
+* NEW - added filter `wp_stateless_get_file_sizes`, retrieves the GCS file data for image sizes, should be used instead of getting `sm_cloud` postmeta directly.
+* NEW - added filter `wp_stateless_get_file_meta`, retrieves all GCS file meta data, should be used instead of getting `sm_cloud` postmeta directly.
+* NEW - added filter `wp_stateless_get_file_meta_value`, retrieves the GCS file meta data by meta_key, should be used instead of getting `sm_cloud` postmeta directly.
+* NEW - added setting allowing to change email for WP-Stateless notifications.
+* NEW - added new Settings tab `Addons`, which contains the list of WP-Stateless Addons, which replace Compatibilities.
+* NEW - added new Settings tab `Status`, which contains status and health information related to Google Cloud Storage and WP-Stateless.
+* NEW - CLI command `wp stateless migrate` to list and operate data optimizations.
+* NEW - configuration constant [`WP_STATELESS_POSTMETA`](https://stateless.udx.io/docs/constants/#wp_stateless_postmeta) allows to read the GCS file data from postmeta instead of the new custom database tables.
+* NEW - configuration constant [`WP_STATELESS_BATCH_HEALTHCHECK_INTERVAL`](https://stateless.udx.io/docs/constants/#wp_stateless_batch_healthcheck_interval) defines an interval in minutes for periodical health checks of a batch background process (like data optimization).
+* COMPATIBILITY - BuddyBoss Compatibility replaced with [WP-Stateless – BuddyBoss Platform Addon](https://wordpress.org/plugins/wp-stateless-buddyboss-platform-addon/).
+* COMPATIBILITY - Elementor Compatibility replaced with [WP-Stateless – Elementor Website Builder Addon](https://wordpress.org/plugins/wp-stateless-elementor-website-builder-addon/).
+* COMPATIBILITY - Gravity Form Compatibility does not support older version of Gravity Forms (< 2.3).
+* ENHANCEMENT - Allow dismissing notices in Admin Panel only for logged in users.
+* ENHANCEMENT - Updated `wp-background-processing` library from from 1.0.2 to 1.1.1.
+* ENHANCEMENT - Updated `phpseclib` 3.0.34 to 3.0.37.
+* FIX - proper use of infinite timeout in `set_time_limit` function to avoid issues with PHP 8.1 and above [#704](https://github.com/udx/wp-stateless/issues/704).
+
 = 3.4.1 =
-FIX - improve security while processing AJAX requests in Admin Panel
+* FIX - improve security while processing AJAX requests in Admin Panel
 
 = 3.4.0 =
 * ENHANCEMENT - removed `udx/lib-settings` package dependency for security reasons. 

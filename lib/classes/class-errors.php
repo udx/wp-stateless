@@ -180,35 +180,37 @@ namespace wpCloud\StatelessMedia {
         wp_enqueue_script( "ud-dismiss", $script_path, array( 'jquery' ) );
         wp_localize_script( "ud-dismiss", "_ud_vars", array(
             "ajaxurl" => admin_url( 'admin-ajax.php' ),
-        ) );
+        ));
         wp_localize_script( "sateless-error-notice-js", "stateless_error_notice_vars", array(
           "dismiss_nonce" => wp_create_nonce( 'stateless_notice_dismiss' ),
           "enable_action_nonce" => wp_create_nonce( 'stateless_enable_notice_button_action' ),
-        ) );
+        ));
 
         //** Don't show the message if the user has no enough permissions. */
         if ( ! function_exists( 'wp_get_current_user' ) ) {
           require_once( ABSPATH . 'wp-includes/pluggable.php' );
         }
         
-        if(
+        $default_show = true;
+
+        if (
           empty( $this->args['type'] ) ||
           ( $this->args['type'] == 'plugin' && !current_user_can( 'activate_plugins' ) ) ||
           ( $this->args['type'] == 'theme' && !current_user_can( 'switch_themes' ) )
         ) {
-          return;
+          $default_show = false;
         }
 
         //** Don't show the message if on a multisite and the user isn't a super user. */
         if ( is_multisite() && ! is_super_admin() ) {
-          return;
+          $default_show = false;
         }
 
         $errors = apply_filters( 'ud:errors:admin_notices', $this->errors, $this->args );
         $notices = apply_filters( 'stateless:notices:admin_notices', $this->notices, $this->args );
 
         //** Errors Block */
-        if( !empty( $errors ) && is_array( $errors ) ) {
+        if( $default_show && !empty( $errors ) && is_array( $errors ) ) {
           $message = '<ul style="none;"><li>' . implode( '</li><li>', $errors ) . '</li></ul>';
           $data = array(
             'title' => sprintf( __( '%s is not active due to following errors:', $this->domain ), esc_html($this->name) ),
@@ -224,21 +226,47 @@ namespace wpCloud\StatelessMedia {
         //** Determine if warning has been dismissed */
         if ( ! empty( $notices ) && is_array( $notices ) ) {
           //** Warnings Block */
-          foreach($notices as $notice){
-            if(get_option( 'dismissed_notice_' . $notice['key'] )){
+          foreach ($notices as $notice ) {
+            if ( get_option( 'dismissed_notice_' . $notice['key'] )){
               continue;
             }
 
+            // Check additional capabilities
+            $capability = isset( $notice['capability'] ) && !empty( $notice['capability'] ) ? $notice['capability'] : null;
+
+            if ( ( !$default_show && empty($capability) ) || ( !empty($capability) && !current_user_can($capability) ) ) {
+              continue;
+            }
+
+            // Additional HTML classes
+            $classes = [];
+
+            if ( isset($notice['classes']) ) {
+              $classes = $notice['classes'];
+
+              if ( !is_array($classes) ) {
+                $classes = [$classes];
+              }
+            }
+
+            $classes[] = 'notice';
+
             $data = wp_parse_args($notice, array(
               'title' => '',
-              'class' => 'notice',
+              'class' => implode(' ', $classes),
               'message' => '',
               'button' => '',
               'button_link' => '#',
               'key' => '',
               'action_links' => $this->action_links[ 'notices' ],
+              'dismiss' => true,
             ));
             
+            $button_capability = isset( $notice['button_capability'] ) && !empty( $notice['button_capability'] ) ? $notice['button_capability'] : null;
+            if ( !empty($button_capability) && !current_user_can($button_capability) ) {
+              $data['button'] = '';
+            }
+
             include ud_get_stateless_media()->path( '/static/views/error-notice.php', 'dir' );
             
             $has_notice = true;
@@ -253,6 +281,10 @@ namespace wpCloud\StatelessMedia {
        */
       public function dismiss_notices() {
         check_ajax_referer('stateless_notice_dismiss');
+
+        if ( !is_user_logged_in() ) {
+          wp_send_json_error( array( 'error' => __( 'You are not allowed to do this action.', $this->domain ) ) );
+        }
 
         $response = array(
           'success' => '0',
@@ -269,6 +301,8 @@ namespace wpCloud\StatelessMedia {
         }
 
         if ( !$error && update_option( $option_key, time() ) ) {
+          do_action('wp_stateless_notice_dismissed', $option_key);
+
           $response['success'] = '1';
           $response['error'] = null;
         }
@@ -283,9 +317,14 @@ namespace wpCloud\StatelessMedia {
       public function stateless_enable_notice_button_action(){
         check_ajax_referer('stateless_enable_notice_button_action');
 
+        if ( !is_user_logged_in() ) {
+          wp_send_json_error( array( 'error' => __( 'You are not allowed to do this action.', $this->domain ) ) );
+        }
+
         $response = array(
           'success' => '1',
         );
+        
         $error = false;
 
         if( empty($_POST['key']) ) {

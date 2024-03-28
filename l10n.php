@@ -84,6 +84,8 @@ $l10n = array(
   
   'get_non_images_media_id_request_failed'  => __('Get non Images Media ID: Request failed', ud_get_stateless_media()->domain ),
   'regenerate_single_image_request_failed'  => __('Regenerate single image: Request failed', ud_get_stateless_media()->domain ),
-  
+
+  'confirm'                               => __('Confirm', ud_get_stateless_media()->domain ),
+  'cancel'                                => __('Cancel', ud_get_stateless_media()->domain ),
 );
 
