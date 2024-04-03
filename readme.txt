@@ -5,8 +5,8 @@ Tags: google cloud, google cloud storage, cdn, uploads, backup
 License: GPLv2 or later
 Requires PHP: 8.0
 Requires at least: 5.0
-Tested up to: 6.4.3
-Stable tag: 4.0.0-RC.1
+Tested up to: 6.5.0
+Stable tag: 4.0.0-RC.2
 
 Upload and serve your WordPress media files from Google Cloud Storage.
 
@@ -127,7 +127,9 @@ Before upgrading to WP-Stateless 3.0, please, make sure you tested it on your de
 * NEW - added filter `wp_stateless_get_file_sizes`, retrieves the GCS file data for image sizes, should be used instead of getting `sm_cloud` postmeta directly.
 * NEW - added filter `wp_stateless_get_file_meta`, retrieves all GCS file meta data, should be used instead of getting `sm_cloud` postmeta directly.
 * NEW - added filter `wp_stateless_get_file_meta_value`, retrieves the GCS file meta data by meta_key, should be used instead of getting `sm_cloud` postmeta directly.
-* NEW - added setting allowing to change email for WP-Stateless notifications.
+* NEW - added filter `wp_stateless_get_setting_...` which allows to override any WP-Stateless setting. 
+* NEW - added setting "Send Status Emails" allowing to change email for WP-Stateless notifications.
+* NEW - added setting "Use Post Meta" allowing to switch back to using `postmeta` instead of custom DB tables. Can be used in case of issues after upgrading to 4.0.0.
 * NEW - added new Settings tab `Addons`, which contains the list of WP-Stateless Addons, which replace Compatibilities.
 * NEW - added new Settings tab `Status`, which contains status and health information related to Google Cloud Storage and WP-Stateless.
 * NEW - CLI command `wp stateless migrate` to list and operate data optimizations.
