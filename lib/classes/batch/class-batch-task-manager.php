@@ -258,10 +258,9 @@ class BatchTaskManager extends \UDX_WP_Background_Process {
     do_action('wp_stateless_batch_task_finished', $class);
 
     $site = site_url();
-    $subject = sprintf( __('Stateless %s complete successfully', ud_get_stateless_media()->domain), $description );
+    $subject = sprintf( __('WP-Stateless: Data Optimization Complete', ud_get_stateless_media()->domain) );
     $message = sprintf(
-      __("This is a simple notification to inform you that the WP-Stateless plugin has finished a %s process for %s.\n\nIf you have WP_DEBUG_LOG enabled, check those logs to review any errors that may have occurred during the process.", ud_get_stateless_media()->domain), 
-      $description, 
+      __("WP-Stateless data has been optimized for %s.\n\nIf you have WP_STATELESS_SYNC_LOG or WP_DEBUG_LOG enabled, review those logs now to review any errors that may have occurred during the synchronization process.", ud_get_stateless_media()->domain), 
       $site
     );
 

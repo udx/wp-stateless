@@ -206,6 +206,7 @@ function wpMigrations($) {
     autoOpen: false,
     position: { my: "center", at: "center", of: window },
     open: function(event, ui) {
+      $(this).closest('.ui-dialog').find('.ui-button').addClass('button')
       $(this).closest('.ui-dialog').find('.ui-button').last().addClass('button-primary')
       $('body').css('overflow', 'hidden')
     },
@@ -215,7 +216,7 @@ function wpMigrations($) {
     },
     buttons: [
       {
-        text: stateless_l10n.confirm,
+        text: stateless_l10n.start_optimization,
         click: function() {},
       },
       {
@@ -245,11 +246,12 @@ function wpMigrations($) {
     }
 
     if ( action === 'start' ) {
-      var migrationElement = $('#stless_status_tab .migration[data-id="' + id + '"]')
-      var title = migrationElement.find('.title strong').text()
+      // Title
+      // var migrationElement = $('#stless_status_tab .migration[data-id="' + id + '"]')
+      // var title = migrationElement.find('.title strong').text()
 
-      $( '#stateless-migration-confirm' ).dialog('option', 'title', title)
-      $( '#stateless-migration-confirm' ).find('strong').text(title)
+      // $( '#stateless-migration-confirm' ).dialog('option', 'title', title)
+      // $( '#stateless-migration-confirm' ).find('strong').text(title)
 
       $('#stateless-migration-confirm').closest('.ui-dialog').find('.ui-dialog-buttonset .ui-button').first().click(function(e) {
         e.preventDefault()

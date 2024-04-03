@@ -42,11 +42,6 @@
   justify-content: space-between;
 }
 
-#stless_status_tab .title span {
-  font-style: italic;
-  color: #646970;
-}
-
 #stless_status_tab .actions .button {
   display: none;
 }
