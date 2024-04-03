@@ -920,8 +920,11 @@ namespace wpCloud\StatelessMedia {
       public static function get_stateless_media_data_count() {
         global $wpdb;
 
-        if ( !defined('WP_STATELESS_POSTMETA') || !WP_STATELESS_POSTMETA ) {
-          return ud_stateless_db()->get_total_files();
+        if ( !ud_get_stateless_media()->get('sm.use_postmeta') ) {
+          try {
+            return ud_stateless_db()->get_total_files();
+          } catch (\Throwable $th) {
+          }
         }
 
         $stateless_media = $wpdb->get_var($wpdb->prepare("

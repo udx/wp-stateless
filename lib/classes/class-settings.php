@@ -48,6 +48,7 @@ namespace wpCloud\StatelessMedia {
         'dynamic_image_support'  => array(['WP_STATELESS_MEDIA_ON_FLY' => 'WP_STATELESS_DYNAMIC_IMAGE_SUPPORT'], 'false'),
         'status_email_type'      => array('', 'true'),
         'status_email_address'   => array('', ''),
+        'use_postmeta'           => array('WP_STATELESS_POSTMETA', ['false', '']),
       );
 
       private $network_only_settings = array(
@@ -625,6 +626,28 @@ namespace wpCloud\StatelessMedia {
         $processes = Helper::array_of_objects($processes);
 
         include ud_get_stateless_media()->path('static/views/processing_interface.php', 'dir');
+      }
+
+      /**
+       * Getter for settings
+       *
+       * @param string|bool $key
+       * @param mixed $default
+       * @return mixed
+       */
+      public function get( $key = false, $default = false ) {
+        $value = parent::get( $key, $default );
+
+        if ( $key === 'sm' && is_array($value) ) {
+          foreach ( $value as $key => $val ) {
+            $value[$key] = apply_filters("wp_stateless_get_setting_$key", $val, $default);
+          }
+        } else if ( is_string($key) ) {
+          $key = str_replace('sm.', '', $key);
+          $value = apply_filters("wp_stateless_get_setting_$key", $value, $default);
+        }
+
+        return $value;
       }
     }
 

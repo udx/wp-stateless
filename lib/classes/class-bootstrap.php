@@ -64,6 +64,8 @@ namespace wpCloud\StatelessMedia {
 
         parent::__construct($args);
 
+        self::$version = $args['version'] ?? self::$version;
+
         /**
          * Add custom args to api ping request
          */
@@ -1874,7 +1876,7 @@ namespace wpCloud\StatelessMedia {
             // User can use this constant if they change the Bucket Folder (root_dir) after uploading image.
             // This can be little slow at first run.
             if (empty($post_id)) {
-              if ( !defined('WP_STATELESS_POSTMETA') || !WP_STATELESS_POSTMETA ) {
+              if ( !$this->get('sm.use_postmeta') ) {
                 $query = 'SELECT post_id FROM ' . ud_stateless_db()->files . ' WHERE file_link = %s';
                 $post_id = $wpdb->get_var($wpdb->prepare($query, $url));
               }
