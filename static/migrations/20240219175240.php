@@ -330,7 +330,7 @@ class Migration_20240219175240 extends Migration {
       $key = 'fileMd5';
       $md5_data = $meta[$key] ?? null;
 
-      if ( !empty($meta) ) {
+      if ( !empty($md5_data) ) {
         $data = [
           'post_id'               => $item,
           'meta_key'              => sanitize_key($key),
