@@ -39,7 +39,7 @@ class Info {
   }
 
   private function _init_hooks() {
-    add_action('wp_stateless_status_tab_content', [$this, 'tab_content'], 10);
+    // add_action('wp_stateless_status_tab_content', [$this, 'tab_content'], 10);
   }
 
   /**
