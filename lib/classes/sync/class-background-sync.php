@@ -360,8 +360,8 @@ abstract class BackgroundSync extends UDX_WP_Background_Process implements ISync
     $sync_name = strip_tags($this->get_name());
     $site = site_url();
 
-    $subject = sprintf(__('Stateless Sync for %s is Complete', ud_get_stateless_media()->domain), $sync_name);
-    $message = sprintf(__("This is a simple notification to inform you that the WP-Stateless plugin has finished a %s synchronization process for %s.\n\nIf you have WP_STATELESS_SYNC_LOG or WP_DEBUG_LOG enabled, check those logs to review any errors that may have occurred during the synchronization process.", ud_get_stateless_media()->domain), $sync_name, $site);
+    $subject = sprintf(__('WP-Stateless: %s Synchronization Complete', ud_get_stateless_media()->domain), $sync_name);
+    $message = sprintf(__("WP-Stateless has finished synchronizing %s for %s.\n\nIf you have WP_STATELESS_SYNC_LOG or WP_DEBUG_LOG enabled, review those logs now to review any errors that may have occurred during the synchronization process.", ud_get_stateless_media()->domain), $sync_name, $site);
 
     do_action('wp_stateless_send_admin_email', $subject, $message);
   }

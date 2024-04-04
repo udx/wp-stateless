@@ -3,10 +3,12 @@
   <div class="postbox">
 	  <h2 class="hndle"><?php _e('Data Optimization', ud_get_stateless_media()->domain); ?></h2>
     <div class="hndle-notice">
-      <p><?php _e('Please consider the following:', ud_get_stateless_media()->domain); ?></p>
+      <p><?php _e('Beginning with WP-Stateless 4.0, the method used to store and access plugin data has improved significantly. We\'ve detected that your data still needs to be updated using this new method.', ud_get_stateless_media()->domain); ?></p>
+      <p><?php _e('Start your data optimization process below to experience a faster and more performant WP-Stateless. Before you begin, please consider the following:', ud_get_stateless_media()->domain); ?></p>
       <ul>
-        <li><?php _e('Before running any optimizations please make a backup copy of your database', ud_get_stateless_media()->domain); ?></li>
-        <li><?php _e('Please try not to add/update/delete any media while optimization is in progress', ud_get_stateless_media()->domain); ?></li>
+        <li><?php _e('Create a backup copy of your WordPress database.', ud_get_stateless_media()->domain); ?></li>
+        <li><?php _e('Do not upload, edit, or delete media or files while the optimization process is underway.', ud_get_stateless_media()->domain); ?></li>
+        <li><?php _e('Perform this update during a low period in your website traffic.', ud_get_stateless_media()->domain); ?></li>
       </ul>
     </div>
 
@@ -15,11 +17,11 @@
         <?php foreach ($migrations as $id => $migration ) : ?>
           <div class="migration <?php echo $migration->classes; ?>" data-id="<?php echo $id; ?>">
             <p class="title">
-              <strong><?php echo $migration->description; ?></strong> 
+              <!-- <strong><?php echo $migration->description; ?></strong>  -->
               <span class="actions">
-                <a href="#" class="button button-small button-primary start" data-action="start"><?php _e('Optimize', ud_get_stateless_media()->domain); ?></a>
-                <a href="#" class="button button-small button-secondary pause" data-action="pause"><?php _e('Pause', ud_get_stateless_media()->domain); ?></a>
-                <a href="#" class="button button-small button-primary resume" data-action="resume"><?php _e('Resume', ud_get_stateless_media()->domain); ?></a>
+                <a href="#" class="button button-primary start" data-action="start"><?php _e('Start Data Optimization', ud_get_stateless_media()->domain); ?></a>
+                <a href="#" class="button button-secondary pause" data-action="pause"><?php _e('Pause Data Optimization', ud_get_stateless_media()->domain); ?></a>
+                <a href="#" class="button button-primary resume" data-action="resume"><?php _e('Resume Data Optimization', ud_get_stateless_media()->domain); ?></a>
               </span>
             </p>
 
@@ -46,15 +48,15 @@
   $current_email = $current_user->user_email ?? '';
 ?>
 
-<div id="stateless-migration-confirm" title="Migration">
-  <p><?php _e('You are about to start the <strong>Migration</strong>.', ud_get_stateless_media()->domain); ?></p>
-  <p><?php _e('Please make a backup copy of your database and try not to upload, change or delete your media while the process continues.', ud_get_stateless_media()->domain); ?></p>
+<div id="stateless-migration-confirm" title="<?php _e('Optimize WP-Stateless Data', ud_get_stateless_media()->domain); ?>">
+  <p><?php _e('You are about to optimize your WP-Stateless data. This process makes changes to your WordPress database.', ud_get_stateless_media()->domain); ?></p>
+  <p><?php _e('Create a backup copy of your database, and do not upload, edit, or delete media or files during the optimization process.', ud_get_stateless_media()->domain); ?></p>
   <p>
-    <?php _e('Notify when process finishes:', ud_get_stateless_media()->domain); ?>
+    <?php _e('WP-Stateless will send an email notification when the process is complete. Who would you like to receive this notification?', ud_get_stateless_media()->domain); ?>
     
     <label for="stateless-migration-email-default">
       <input type="radio" name="email-notification" id="stateless-migration-email-default" value="<?php echo $default_email;?>" checked="checked" /> 
-      <?php echo $default_email; ?>
+      <?php printf( __('Administration Email Address (%s)', ud_get_stateless_media()->domain), $default_email ); ?>
     </label>
 
     <label for="stateless-migration-email-user">
@@ -62,5 +64,5 @@
       <?php printf( __('Current User (%s)', ud_get_stateless_media()->domain), $current_email ); ?>
     </label>
   </p>
-  <p><?php _e('Are you sure you want to continue?', ud_get_stateless_media()->domain); ?></p>
+  <p><?php _e('Are you ready to continue?', ud_get_stateless_media()->domain); ?></p>
 </div>
