@@ -77,8 +77,8 @@ class BatchTaskManager extends \UDX_WP_Background_Process {
    * @return array
    */
   private function _update_state($state) {
-    update_site_option( $this->identifier . self::STATE_KEY, $state );
-    update_site_option( $this->identifier . self::UPDATED_KEY, time() );
+    update_option( $this->identifier . self::STATE_KEY, $state );
+    update_option( $this->identifier . self::UPDATED_KEY, time() );
   }
 
   /**
@@ -87,7 +87,7 @@ class BatchTaskManager extends \UDX_WP_Background_Process {
    * @return array
    */
   private function _get_state() {
-    return get_site_option( $this->identifier . self::STATE_KEY, [] );
+    return get_option( $this->identifier . self::STATE_KEY, [] );
   }
 
   /**
@@ -96,7 +96,7 @@ class BatchTaskManager extends \UDX_WP_Background_Process {
    * @return int|null
    */
   private function _get_last_updated() {
-    return get_site_option( $this->identifier . self::UPDATED_KEY, null );
+    return get_option( $this->identifier . self::UPDATED_KEY, null );
   }
 
   /**
@@ -105,8 +105,8 @@ class BatchTaskManager extends \UDX_WP_Background_Process {
    * @return array
    */
   private function _delete_state() {
-    delete_site_option( $this->identifier . self::STATE_KEY );
-    delete_site_option( $this->identifier . self::UPDATED_KEY );
+    delete_option( $this->identifier . self::STATE_KEY );
+    delete_option( $this->identifier . self::UPDATED_KEY );
   }
 
   /**
@@ -226,14 +226,12 @@ class BatchTaskManager extends \UDX_WP_Background_Process {
    */
   protected function complete() {
     $class = '';
-    $description = 'Batch process';
 
     // Check if we have more batched to run
     try {
       $object = $this->_get_batch_task_object();
       $class = $object::class;  
       $batch = $object->get_batch();
-      $description = $object->get_description();
 
       if ( !empty($batch) ) {
         $this->_add_batch( $batch );

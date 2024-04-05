@@ -140,7 +140,7 @@ namespace wpCloud\StatelessMedia {
        * Creates or updates DB structure
        */
       public function create_db() {
-        $version = get_site_option('sm_db_version');
+        $version = get_option('sm_db_version');
 
         if ($version === self::DB_VERSION) {
           return;
@@ -197,7 +197,7 @@ namespace wpCloud\StatelessMedia {
         require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
         dbDelta($sql);
 
-        update_site_option('sm_db_version', self::DB_VERSION);
+        update_option('sm_db_version', self::DB_VERSION);
       }
 
       /**

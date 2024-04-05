@@ -146,7 +146,7 @@ class Migrations {
    */
   private function _get_migrations_state($state = null) {
     $migrations = [];
-    $this->migrations = get_site_option(Migrator::MIGRATIONS_KEY, []);
+    $this->migrations = get_option(Migrator::MIGRATIONS_KEY, []);
 
     if ( !is_array($this->migrations) ) {
       $this->migrations = [];
@@ -237,7 +237,7 @@ class Migrations {
     }
 
     $state['migrations'] = $this->_get_migrations_state($state);
-    $state['migrations_notify'] = get_site_option(Migrator::MIGRATIONS_NOTIFY_KEY, false);
+    $state['migrations_notify'] = get_option(Migrator::MIGRATIONS_NOTIFY_KEY, false);
 
     return $state;
   }
