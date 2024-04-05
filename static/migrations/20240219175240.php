@@ -278,6 +278,8 @@ class Migration_20240219175240 extends Migration {
 
     $wp_meta = get_post_meta( $item, '_wp_attachment_metadata', true );
 
+    $old_suppress = $wpdb->suppress_errors();
+
     // Disable autocommit and use transactions to ensure data integrity
     $wpdb->query( 'SET autocommit = 0;' );
     $wpdb->query( 'START TRANSACTION;' );
@@ -351,6 +353,8 @@ class Migration_20240219175240 extends Migration {
     }
 
     $wpdb->query( 'SET autocommit = 1;' );
+
+    $wpdb->suppress_errors($old_suppress);
 
     return false;
   }

@@ -150,7 +150,7 @@ class Migrator {
    */
   private function _check_required_migrations($migrations = null) {
     if ( empty($migrations) ) {
-      $migrations = get_site_option(self::MIGRATIONS_KEY, []);
+      $migrations = get_option(self::MIGRATIONS_KEY, []);
     }
 
     $require_migrations = false;
@@ -163,12 +163,12 @@ class Migrator {
     }
 
     if ( $require_migrations ) {
-      update_site_option(self::MIGRATIONS_NOTIFY_KEY, self::NOTIFY_REQUIRE);
-      delete_site_option(self::MIGRATIONS_NOTIFY_DISMISSED_KEY);
+      update_option(self::MIGRATIONS_NOTIFY_KEY, self::NOTIFY_REQUIRE);
+      delete_option(self::MIGRATIONS_NOTIFY_DISMISSED_KEY);
     } else {
-      $notify = get_site_option(self::MIGRATIONS_NOTIFY_KEY, false);
+      $notify = get_option(self::MIGRATIONS_NOTIFY_KEY, false);
 
-      empty($notify) ? delete_site_option(self::MIGRATIONS_NOTIFY_KEY) : update_site_option(self::MIGRATIONS_NOTIFY_KEY, self::NOTIFY_FINISHED);
+      empty($notify) ? delete_option(self::MIGRATIONS_NOTIFY_KEY) : update_option(self::MIGRATIONS_NOTIFY_KEY, self::NOTIFY_FINISHED);
     }
   }
 
@@ -178,7 +178,7 @@ class Migrator {
    * @param string $option_name
    */
   public function notice_dismissed($option_name) {
-    delete_site_option(self::MIGRATIONS_NOTIFY_KEY);
+    delete_option(self::MIGRATIONS_NOTIFY_KEY);
   }
 
   /**
@@ -192,7 +192,7 @@ class Migrator {
     // Rebuild the migrations list and state according to the new version
     $ids = $this->_get_migration_ids();
 
-    $migrations = get_site_option(self::MIGRATIONS_KEY, []);
+    $migrations = get_option(self::MIGRATIONS_KEY, []);
     $existing = array_keys($migrations);
 
     foreach ($ids as $id) {
@@ -219,7 +219,7 @@ class Migrator {
 
     krsort($migrations);
 
-    update_site_option(self::MIGRATIONS_KEY, $migrations);
+    update_option(self::MIGRATIONS_KEY, $migrations);
 
     // Check if we need to run any migrations
     $this->_check_required_migrations($migrations);
@@ -230,7 +230,7 @@ class Migrator {
    */
   public function show_messages() {
     $is_running = BatchTaskManager::instance()->is_processing() || BatchTaskManager::instance()->is_paused();
-    $notify = get_site_option(self::MIGRATIONS_NOTIFY_KEY, false);
+    $notify = get_option(self::MIGRATIONS_NOTIFY_KEY, false);
 
     if ( $notify ) {
       ud_get_stateless_media()->errors->add([
@@ -271,14 +271,15 @@ class Migrator {
    * @param string $file
    */
   public function migration_started($class, $file) {
-    $migrations = get_site_option(self::MIGRATIONS_KEY, []);
+    $migrations = get_option(self::MIGRATIONS_KEY, []);
     $id = $this->_file_to_id($file);
 
     if ( array_key_exists($id, $migrations) ) {
       $migrations[$id]['status'] = self::STATUS_RUNNING;
       $migrations[$id]['started'] = time();
+      $migrations[$id]['finished'] = '';
 
-      update_site_option(self::MIGRATIONS_KEY, $migrations);
+      update_option(self::MIGRATIONS_KEY, $migrations);
     }
   }
 
@@ -290,14 +291,14 @@ class Migrator {
    * @param string $message 
    */
   public function migration_failed($class, $file, $message) {
-    $migrations = get_site_option(self::MIGRATIONS_KEY, []);
+    $migrations = get_option(self::MIGRATIONS_KEY, []);
     $id = $this->_file_to_id($file);
 
     if ( array_key_exists($id, $migrations) ) {
       $migrations[$id]['status'] = self::STATUS_FAILED;
       $migrations[$id]['message'] = $message;
 
-      update_site_option(self::MIGRATIONS_KEY, $migrations);
+      update_option(self::MIGRATIONS_KEY, $migrations);
       $this->_check_required_migrations($migrations);
     }
   }
@@ -308,14 +309,14 @@ class Migrator {
    * @param string $class
    */
   public function migration_finished($class) {
-    $migrations = get_site_option(self::MIGRATIONS_KEY, []);
+    $migrations = get_option(self::MIGRATIONS_KEY, []);
     $id = $this->_class_to_id($class);
 
     if ( array_key_exists($id, $migrations) ) {
       $migrations[$id]['status'] = self::STATUS_FINISHED;
       $migrations[$id]['finished'] = time();
 
-      update_site_option(self::MIGRATIONS_KEY, $migrations);
+      update_option(self::MIGRATIONS_KEY, $migrations);
       $this->_check_required_migrations($migrations);
     }
   }
@@ -335,7 +336,7 @@ class Migrator {
     }
     
     $id = $params['id'];
-    $migrations = get_site_option(self::MIGRATIONS_KEY, []);
+    $migrations = get_option(self::MIGRATIONS_KEY, []);
 
     // Unknown migration?
     if ( !array_key_exists($id, $migrations) ) {

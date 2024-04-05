@@ -122,8 +122,8 @@ namespace wpCloud\StatelessMedia {
         add_action('wp_stateless_send_admin_email', array($this, 'send_admin_email'), 10, 3);
 
         // Should be created unconditionally and as early as possible to handle batch migration requests
-        BatchTaskManager::instance();
         Migrator::instance();
+        BatchTaskManager::instance();
 
         new SyncNonMedia();
 
