@@ -384,7 +384,7 @@ if (defined('WP_CLI') && WP_CLI && class_exists('WP_CLI_Command')) {
         $state = maybe_unserialize($state);
 
         if ( empty($state) || !isset($state['is_migration']) || !$state['is_migration'] ) {
-          WP_CLI::success('No migration in progress');
+          WP_CLI::success('All migrations finished.');
           return;
         }
 

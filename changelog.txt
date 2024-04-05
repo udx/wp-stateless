@@ -1,4 +1,8 @@
 == Changelog ==
+= 4.0.1 =
+* FIX - improvements to Data Optimization process.
+* FIX - Data Optimization fixed for multisite environment.
+
 = 4.0.0 =
 * NEW - use custom database tables to store GCS file data. This increases plugin performance and will be used for future improvements.  
 * NEW - added filter `wp_stateless_get_file`, retrieves the GCS file data, should be used instead of getting `sm_cloud` postmeta directly. 
