@@ -202,10 +202,25 @@ namespace wpCloud\StatelessMedia {
 
       /**
        * Remove custom DB table on plugin uninstall
+       * 
+       * @param int $site_id
        */
-      public function clear_db() {
-        $sql = "DROP TABLE IF EXISTS $this->files, $this->file_sizes, $this->file_meta, $this->sm_sync;";
+      public function clear_db($site_id) {
+        switch_to_blog($id);
+
+        $tables = array(
+          $this->wpdb->prefix . 'files',
+          $this->wpdb->prefix . 'files_sizes',
+          $this->wpdb->prefix . 'file_meta',
+          $this->wpdb->prefix . 'sm_sync',
+        );
+
+        $tables = implode(', ', $tables);
+
+        $sql = "DROP TABLE IF EXISTS $tables;";
         $this->wpdb->query($sql);
+
+        restore_current_blog();
       }
 
       /**

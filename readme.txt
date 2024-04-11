@@ -5,8 +5,8 @@ Tags: google cloud, google cloud storage, cdn, uploads, backup
 License: GPLv2 or later
 Requires PHP: 8.0
 Requires at least: 5.0
-Tested up to: 6.5.0
-Stable tag: 4.0.1
+Tested up to: 6.5.2
+Stable tag: 4.0.2
 
 Upload and serve your WordPress media files from Google Cloud Storage.
 
@@ -121,6 +121,10 @@ Before upgrading to WP-Stateless 3.2.0, please, make sure you use PHP 7.2 or abo
 Before upgrading to WP-Stateless 3.0, please, make sure you tested it on your development environment.
 
 == Changelog ==
+= 4.0.2 =
+* FIX - in multisite network, deleting site can potentially remove WP-Stateless tables from another site.
+* COMPATIBILITY - Gravity Forms Compatibility updated for the newest Gravity Forms version.
+
 = 4.0.1 =
 * FIX - improvements to Data Optimization process.
 * FIX - Data Optimization fixed for multisite environment.

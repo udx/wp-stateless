@@ -596,6 +596,18 @@ namespace wpCloud\StatelessMedia {
       }
 
       /**
+       * Return gs:// path.
+       *
+       * @param array $sm
+       * @return mixed|void
+       */
+      public function get_gs_path() {
+        $path = 'gs://'  . $this->get('sm.bucket');
+
+        return apply_filters('get_gs_path', $path);
+      }
+
+      /**
        * Filter for wp_stateless_bucket_link if custom domain is set.
        * It's get attachment url and remove "storage.googleapis.com" from url.
        * So that custom url can be used.
@@ -1748,11 +1760,7 @@ namespace wpCloud\StatelessMedia {
        * @param $old_site
        */
       public function wp_delete_site($old_site) {
-        switch_to_blog($old_site->id);
-
-        ud_stateless_db()->clear_db();
-        
-        restore_current_blog();
+        ud_stateless_db()->clear_db($old_site->id);
       }
 
       /**
@@ -2089,6 +2097,20 @@ namespace wpCloud\StatelessMedia {
         }
     
         wp_mail( $admin_email, $subject, $message);
+      }
+
+      /**
+       * Check if we are in specific mode
+       *
+       * @param string|array $mode
+       * @return bool
+       */
+      public function is_mode($mode) {
+        if ( !is_array($mode) ) {
+          $mode = [$mode];
+        }
+
+        return in_array($this->get('sm.mode'), $mode);
       }
     }
   }
