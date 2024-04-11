@@ -34,6 +34,7 @@ namespace wpCloud\StatelessMedia {
         add_action('sm:sync::moveFile', array($this, 'move_file'), 10, 2);
         add_action('sm:sync::deleteFile', array($this, 'delete_file'));
         add_action('sm:sync::deleteFiles', array($this, 'delete_files'));
+        add_action('sm:sync::unregister_file', array($this, 'unregister_file'), 10, 1);
       }
 
       /**
@@ -78,6 +79,7 @@ namespace wpCloud\StatelessMedia {
           'skip_db'   => false,
           'manual_sync' => false,
           'remove_from_queue' => false, // removes entry from queue table if both file is missing.
+          'name_with_root' => true,
         ));
 
         if ($this->queue_is_exists($name, 'synced') && !$forced) {
@@ -113,7 +115,7 @@ namespace wpCloud\StatelessMedia {
           if ($sm_mode == 'stateless' && !wp_doing_ajax()) {
             global $gs_client;
 
-            $gs_name = apply_filters('wp_stateless_file_name', $name, true);
+            $gs_name = apply_filters('wp_stateless_file_name', $name, $args['name_with_root']);
 
             //Bucket
             $bucket = ud_get_stateless_media()->get('sm.bucket');
@@ -132,6 +134,7 @@ namespace wpCloud\StatelessMedia {
               ),
               'is_webp' => '',
             ));
+
             $args = apply_filters('wp_stateless_add_media_args', $args);
 
             /**
@@ -407,6 +410,19 @@ namespace wpCloud\StatelessMedia {
         }
 
         return $this->client;
+      }
+
+      /**
+       * Remove file from DB after file deletion.
+       * @param string $file
+       */
+      public function unregister_file($file) {
+        $file = str_replace( ud_get_stateless_media()->get_gs_path(), '', $file);
+        $file = str_replace( ud_get_stateless_media()->get_gs_host(), '', $file);
+
+        $file = trim($file, '/');
+
+        $this->queue_remove_file($file);
       }
     }
   }

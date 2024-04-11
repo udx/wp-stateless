@@ -1,3 +1,7 @@
+#### 4.0.2
+* FIX - in multisite network, deleting site can potentially remove WP-Stateless tables from another site.
+* COMPATIBILITY - Gravity Forms Compatibility updated for the newest Gravity Forms version.
+
 #### 4.0.1
 * FIX - improvements to Data Optimization process.
 * FIX - Data Optimization fixed for multisite environment.
