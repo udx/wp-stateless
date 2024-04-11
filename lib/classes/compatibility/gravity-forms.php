@@ -32,11 +32,31 @@ namespace wpCloud\StatelessMedia {
           $this->plugin_version = \GFForms::$version;
         }
         add_filter('gform_save_field_value', array($this, 'gform_save_field_value'), 10, 5);
+        add_filter('gform_upload_path', array($this, 'gf_upload_path'), 10, 1);
+
         add_filter('stateless_skip_cache_busting', array($this, 'skip_cache_busting'), 10, 2);
 
         do_action('sm:sync::register_dir', '/gravity_forms/');
         add_action('sm::synced::nonMediaFiles', array($this, 'modify_db'), 10, 3);
         add_action('gform_file_path_pre_delete_file', array($this, 'gform_file_path_pre_delete_file'), 10, 2);
+      }
+
+      /**
+       * For 'stateless' mode we use upload path and URL without wildcards.
+       * @param $upload_path
+       * @return mixed
+       */
+      public function gf_upload_path($upload_path) {
+        if ( !ud_get_stateless_media()->is_mode('stateless') ) {
+          return $upload_path;
+        }
+
+        $dir = wp_upload_dir();
+
+        $upload_path['path'] = ud_get_stateless_media()->get_gs_path() . str_replace($dir['basedir'], '', $upload_path['path']);
+        $upload_path['url'] = ud_get_stateless_media()->get_gs_host() . str_replace($dir['baseurl'], '', $upload_path['url']);
+
+        return $upload_path;
       }
 
       /**
@@ -55,7 +75,9 @@ namespace wpCloud\StatelessMedia {
           $this->plugin_version = \GFForms::$version;
         }
 
+        $is_stateless = ud_get_stateless_media()->is_mode('stateless');
         $type = \GFFormsModel::get_input_type($field);
+
         if ($type == 'fileupload') {
           $dir = wp_upload_dir();
 
@@ -71,10 +93,13 @@ namespace wpCloud\StatelessMedia {
 
             if ($position !== false) {
               $name = substr($v, $position);
-              $absolutePath = $dir['basedir'] . '/' .  $name;
+              $path = $is_stateless ? ud_get_stateless_media()->get_gs_path() : $dir['basedir'];
+              $absolutePath = $path . '/' .  $name;
+
               $name = apply_filters('wp_stateless_file_name', $name, 0);
+
               // doing sync
-              do_action('sm:sync::syncFile', $name, $absolutePath);
+              do_action( 'sm:sync::syncFile', $name, $absolutePath, false, $is_stateless ? array('name_with_root' => false) : array() );
               $value[$k] = ud_get_stateless_media()->get_gs_host() . '/' . $name;
               // Todo add filter.
             }
@@ -86,7 +111,7 @@ namespace wpCloud\StatelessMedia {
             $value = array_pop($value);
           }
         } else if ($type == 'post_image') {
-          add_action('gform_after_create_post', function ($post_id, $lead, $form) use ($value, $field) {
+          add_action('gform_after_create_post', function ($post_id, $lead, $form) use ($value, $field, $is_stateless) {
             global $wpdb;
             $dir = wp_upload_dir();
             $lead_detail_id         = $lead['id'];
@@ -100,9 +125,11 @@ namespace wpCloud\StatelessMedia {
             $name = rgar($arr_name, 0); // Removed |:| from end of the url.
 
             // doing sync
-            $absolutePath = $dir['basedir'] . '/' .  $name;
+            $path = $is_stateless ? ud_get_stateless_media()->get_gs_path() : $dir['basedir'];
+            $absolutePath = $path . '/' .  $name;
             $name = apply_filters('wp_stateless_file_name', $name, 0);
-            do_action('sm:sync::syncFile', $name, $absolutePath);
+  
+            do_action( 'sm:sync::syncFile', $name, $absolutePath, false, $is_stateless ? array('name_with_root' => false) : array() );
 
             $value = ud_get_stateless_media()->get_gs_host() . '/' . $name;
             // Todo add filter.
@@ -240,9 +267,11 @@ namespace wpCloud\StatelessMedia {
 
           $client = ud_get_stateless_media()->get_client();
           if (!is_wp_error($client)) {
-            $client->remove_media(trim($gs_name, '/'));
+            $client->remove_media(trim($gs_name, '/'), '', false);
           }
         }
+
+        do_action('sm:sync::unregister_file', $url);
 
         return $file_path;
       }
