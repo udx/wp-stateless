@@ -356,12 +356,9 @@ namespace wpCloud\StatelessMedia {
             }
 
             /**
-             * Override Cache Control is option is enabled
+             * Override Cache Control if option is enabled
              */
-            $cacheControl = trim($this->get('sm.cache_control'));
-            if (!empty($cacheControl)) {
-              add_filter('sm:item:cacheControl', array($this, 'override_cache_control'));
-            }
+            add_filter('sm:item:cacheControl', array($this->settings, 'override_cache_control'));
 
             add_filter('wp_stateless_file_name', array($this, 'handle_root_dir'), 10, 4);
 
@@ -643,6 +640,18 @@ namespace wpCloud\StatelessMedia {
       public function get_settings_page_url($path = '') {
         $url = get_admin_url(get_current_blog_id(), (is_network_admin() ? 'network/settings.php' : 'upload.php'));
         return $url . $path;
+      }
+
+      /**
+       * Return docs page url.
+       *
+       * @param string $path
+       * @return string
+       */
+      public function get_docs_page_url($path = '') {
+        $path = ltrim($path, '/');
+
+        return 'https://stateless.udx.io/' . $path;
       }
 
       /**
@@ -1191,26 +1200,6 @@ namespace wpCloud\StatelessMedia {
       }
 
       /**
-       * @param $links
-       * @param $file
-       * @return mixed
-       */
-      public function plugin_action_links($links, $file) {
-
-        if ($file == plugin_basename(dirname(__DIR__) . '/wp-stateless-media.php')) {
-          $settings_link = '<a href="' . '' . '">' . __('Settings', 'ssd') . '</a>';
-          array_unshift($links, $settings_link);
-        }
-
-        if ($file == plugin_basename(dirname(__DIR__) . '/wp-stateless.php')) {
-          $settings_link = '<a href="' . '' . '">' . __('Settings', 'ssd') . '</a>';
-          array_unshift($links, $settings_link);
-        }
-
-        return $links;
-      }
-
-      /**
        * Determines if plugin is loaded via mu-plugins
        * or Network Enabled.
        *
@@ -1265,7 +1254,7 @@ namespace wpCloud\StatelessMedia {
         wp_register_script('wp-stateless-select2', ud_get_stateless_media()->path('static/scripts/select2.min.js', 'url'), array('jquery'), self::$version, true);
 
         /* Stateless settings page */
-        wp_register_script('wp-stateless-settings', ud_get_stateless_media()->path('static/scripts/wp-stateless-settings.js', 'url'), array(), self::$version);
+        wp_register_script('wp-stateless-settings', ud_get_stateless_media()->path('static/scripts/wp-stateless-settings.js', 'url'), array('clipboard'), self::$version);
         wp_localize_script('wp-stateless-settings', 'stateless_l10n', $this->get_l10n_data());
 
         wp_register_style('wp-stateless-settings', $this->path('static/styles/wp-stateless-settings.css', 'url'), array(), self::$version);
@@ -1371,7 +1360,7 @@ namespace wpCloud\StatelessMedia {
               'title' => sprintf(__("Stateless and Ephemeral modes enables and requires the Cache-Busting option.", ud_get_stateless_media()->domain)),
               'message' => sprintf(__("WordPress looks at local files to prevent files with the same filenames.
                                           Since Stateless mode bypasses this check, there is a potential for files to be stored with the same file name. We enforce the Cache-Busting option to prevent this.
-                                          Override with the <a href='%s' target='_blank'>%s</a> constant.", ud_get_stateless_media()->domain), "https://stateless.udx.io/docs/constants/#wp_stateless_media_cache_busting", "WP_STATELESS_MEDIA_CACHE_BUSTING"),
+                                          Override with the <a href='%s' target='_blank'>%s</a> constant.", ud_get_stateless_media()->domain), ud_get_stateless_media()->get_docs_page_url('docs/constants/#wpstatelessmediacachebusting'), "WP_STATELESS_MEDIA_CACHE_BUSTING"),
             );
             echo "<script id='template-stateless-cache-busting' type='text/html'>";
             include ud_get_stateless_media()->path('/static/views/error-notice.php', 'dir');
@@ -1555,7 +1544,7 @@ namespace wpCloud\StatelessMedia {
               $metadata['file'] = "sites/$blog_id/{$metadata['file']}";
             }
           }
-        } elseif (empty($sm_cloud) && $this->get('sm.mode') == 'stateless') {
+        } elseif ( empty($sm_cloud) && $this->get('sm.mode') == 'stateless' && isset($metadata['file']) ) {
           $default_dir = true;
           $uploads = wp_get_upload_dir();
           $default_dir = false;
@@ -1816,7 +1805,7 @@ namespace wpCloud\StatelessMedia {
           'title' => sprintf(__("Stateless mode now requires the Cache-Busting option.", ud_get_stateless_media()->domain)),
           'message' => sprintf(__("WordPress looks at local files to prevent files with the same filenames.
                                 Since Stateless mode bypasses this check, there is a potential for files to be stored with the same file name. We enforce the Cache-Busting option to prevent this.
-                                Override with the <a href='%s' target='_blank'>%s</a> constant.", ud_get_stateless_media()->domain), "https://stateless.udx.io/docs/constants/#wp_stateless_media_cache_busting", "WP_STATELESS_MEDIA_CACHE_BUSTING"),
+                                Override with the <a href='%s' target='_blank'>%s</a> constant.", ud_get_stateless_media()->domain), ud_get_stateless_media()->get_docs_page_url('docs/constants/#wpstatelessmediacachebusting'), "WP_STATELESS_MEDIA_CACHE_BUSTING"),
         ), 'notice');
       }
 
@@ -2111,6 +2100,15 @@ namespace wpCloud\StatelessMedia {
         }
 
         return in_array($this->get('sm.mode'), $mode);
+      }
+
+      /**
+       * Get default cache control value
+       *
+       * @return string
+       */
+      public function get_default_cache_control() {
+        return Settings::DEFAULT_CACHE_CONTROL;
       }
     }
   }

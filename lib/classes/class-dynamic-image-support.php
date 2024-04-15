@@ -75,7 +75,7 @@ namespace wpCloud\StatelessMedia {
         $client->add_media(apply_filters('sm:item:on_fly:before_add', array_filter(array(
           'name' => $file_path,
           'absolutePath' => wp_normalize_path($file),
-          'cacheControl' => apply_filters('sm:item:cacheControl', 'public, max-age=36000, must-revalidate', $_metadata),
+          'cacheControl' => apply_filters('sm:item:cacheControl', ud_get_stateless_media()->get_default_cache_control(), $_metadata),
           'contentDisposition' => null,
           'mimeType' => $mimeType['type'],
           'metadata' => $_metadata

@@ -69,6 +69,7 @@ return array(
     'wpCloud\\StatelessMedia\\Status' => $baseDir . '/lib/classes/class-status.php',
     'wpCloud\\StatelessMedia\\Status\\Info' => $baseDir . '/lib/classes/status/class-info.php',
     'wpCloud\\StatelessMedia\\Status\\Migrations' => $baseDir . '/lib/classes/status/class-migrations.php',
+    'wpCloud\\StatelessMedia\\Status\\StatelessInfo' => $baseDir . '/lib/classes/status/class-info-stateless.php',
     'wpCloud\\StatelessMedia\\StreamWrapper' => $baseDir . '/lib/classes/class-gs-stream-wrapper.php',
     'wpCloud\\StatelessMedia\\SyncNonMedia' => $baseDir . '/lib/classes/class-sync-non-media.php',
     'wpCloud\\StatelessMedia\\Sync\\BackgroundSync' => $baseDir . '/lib/classes/sync/class-background-sync.php',

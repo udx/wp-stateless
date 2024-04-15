@@ -229,6 +229,10 @@ class Migrator {
    * Outputs the message that migrations are required
    */
   public function show_messages() {
+    if ( is_network_admin() ) {
+      return;
+    }
+
     $is_running = BatchTaskManager::instance()->is_processing() || BatchTaskManager::instance()->is_paused();
     $notify = get_option(self::MIGRATIONS_NOTIFY_KEY, false);
 

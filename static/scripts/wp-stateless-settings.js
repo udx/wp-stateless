@@ -38,4 +38,22 @@ jQuery(document).ready(function ($) {
   $(document).on('click', '.wp-pointer', function (e) {
     e.stopPropagation()
   })
+
+  $(document).on('click', '.stateless-info-button', function (e) {
+    e.stopPropagation()
+    e.preventDefault()
+
+    var opened = $(this).closest('.stateless-info-heading').hasClass('open')
+    var id = $(this).data('section')
+    
+    if (opened) {
+      $(this).closest('.stateless-info-heading').removeClass('open')
+      $('#' + id).addClass('hidden')
+    } else {
+      $(this).closest('.stateless-info-heading').addClass('open')
+      $('#' + id).removeClass('hidden')
+    }
+  })
+
+  new ClipboardJS('.stateless-info-heading .copy-button');
 })

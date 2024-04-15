@@ -14,6 +14,7 @@ namespace wpCloud\StatelessMedia {
     class DB {
       use Singleton;
 
+      const DB_VERSION_KEY = 'sm_db_version';
       const DB_VERSION = '1.0';
       const FULL_SIZE = '__full';
 
@@ -140,7 +141,7 @@ namespace wpCloud\StatelessMedia {
        * Creates or updates DB structure
        */
       public function create_db() {
-        $version = get_option('sm_db_version');
+        $version = get_option(self::DB_VERSION_KEY, '');
 
         if ($version === self::DB_VERSION) {
           return;
@@ -197,7 +198,7 @@ namespace wpCloud\StatelessMedia {
         require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
         dbDelta($sql);
 
-        update_option('sm_db_version', self::DB_VERSION);
+        update_option(self::DB_VERSION_KEY, self::DB_VERSION);
       }
 
       /**
@@ -703,7 +704,24 @@ namespace wpCloud\StatelessMedia {
         global $wpdb;
 
         try {
-          $query = "SELECT COUNT(post_id) FROM $this->files";
+          $query = "SELECT COUNT(id) FROM $this->files";
+
+          return $wpdb->get_var($query);
+        } catch (\Throwable $e) {
+          return 0;
+        }
+      }
+
+      /**
+       * Get the total file sizes count known to WP-Stateless
+       * 
+       * @return int
+       */
+      public function get_total_file_sizes() {
+        global $wpdb;
+
+        try {
+          $query = "SELECT COUNT(id) FROM $this->file_sizes";
 
           return $wpdb->get_var($query);
         } catch (\Throwable $e) {
