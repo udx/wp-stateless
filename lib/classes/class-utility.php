@@ -46,15 +46,6 @@ namespace wpCloud\StatelessMedia {
       }
 
       /**
-       * Override Cache Control
-       * @param $cacheControl
-       * @return mixed
-       */
-      public static function override_cache_control($cacheControl) {
-        return ud_get_stateless_media()->get('sm.cache_control');
-      }
-
-      /**
        * wp_normalize_path was added in 3.9.0
        *
        * @param $path
@@ -141,7 +132,7 @@ namespace wpCloud\StatelessMedia {
 
         // Treat images as public.
         if (strpos($_mime_type, 'image/') !== false) {
-          return apply_filters('sm:item:cacheControl', 'public, max-age=36000, must-revalidate', array('attachment_id' => $attachment_id, 'mime_type' => null, 'metadata' => $metadata, 'data' => $data));
+          return apply_filters('sm:item:cacheControl', ud_get_stateless_media()->get_default_cache_control(), array('attachment_id' => $attachment_id, 'mime_type' => null, 'metadata' => $metadata, 'data' => $data));
         }
 
         // Treat images as public.

@@ -144,7 +144,7 @@ namespace wpCloud\StatelessMedia {
             try {
               $media = $object->update(array('metadata' => $args['metadata']) +
                 array(
-                  'cacheControl' => apply_filters('sm:item:cacheControl', 'public, max-age=36000, must-revalidate', $absolutePath),
+                  'cacheControl' => apply_filters('sm:item:cacheControl', ud_get_stateless_media()->get_default_cache_control(), $absolutePath),
                   'predefinedAcl' => 'publicRead',
                   'contentDisposition' => apply_filters('sm:item:contentDisposition', null, $absolutePath)
                 ));
@@ -157,7 +157,7 @@ namespace wpCloud\StatelessMedia {
               'name' => $name,
               'force' => ($forced == 2),
               'absolutePath' => $absolutePath,
-              'cacheControl' => apply_filters('sm:item:cacheControl', 'public, max-age=36000, must-revalidate', $absolutePath), //@todo use cacheControl from settings page.
+              'cacheControl' => apply_filters('sm:item:cacheControl', ud_get_stateless_media()->get_default_cache_control(), $absolutePath), //@todo use cacheControl from settings page.
               'contentDisposition' => apply_filters('sm:item:contentDisposition', null, $absolutePath),
               'mimeType' => $file_type,
               'metadata' => array(

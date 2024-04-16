@@ -1,6 +1,10 @@
 <div class="wrap">
   <div id="stateless-settings-page-title">
-    <h1><?php _e('WP-Stateless', ud_get_stateless_media()->domain); ?></h1>
+    <h1>
+      <?php _e('WP-Stateless', ud_get_stateless_media()->domain); ?> 
+      <a href="<?php echo ud_get_stateless_media()->get_docs_page_url(); ?>" title="<?php _e('Documentation', ud_get_stateless_media()->domain); ?>" target="_blank" class="stateless-settings-docs-link"><span class="dashicons dashicons-editor-help"></span></a>
+    </h1>
+    
     <div class="description"><?php _e('Upload and serve your WordPress media files from Google Cloud Storage.', ud_get_stateless_media()->domain); ?></div>
   </div>
   <h2 class="nav-tab-wrapper">

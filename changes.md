@@ -1,3 +1,17 @@
+#### 4.0.3
+* NEW - added `Info` section to the `Status` tab on the Settings page, which contains the system info and the ability to copy report to clipboard.  
+* ENHANCEMENT - added `Documentation` link on the Plugins page.
+* ENHANCEMENT - added `Addons` link on the Plugins page.
+* ENHANCEMENT - added `Documentation` link on the Settings page.
+* FIX - fixed `Settings` shortcut on the Plugins page.
+* FIX - in multisite network, do not show Data Optimization on the Network Admin Page.
+* FIX - properly set `Content Disposition` fields for media objects.
+* FIX - properly use `Cache Control` setting for media objects.
+* FIX - fixed `Creation of dynamic property` PHP deprecation notice.
+* FIX - fixed `Cannot use ::class with dynamic class name` PHP warning.
+* FIX - avoid PHP warning when unable to get file path in `Stateless` mode [728](https://github.com/udx/wp-stateless/issues/728).
+* FIX - fixed links to the constants documentation.
+
 #### 4.0.2
 * FIX - in multisite network, deleting site can potentially remove WP-Stateless tables from another site.
 * COMPATIBILITY - Gravity Forms Compatibility updated for the newest Gravity Forms version.

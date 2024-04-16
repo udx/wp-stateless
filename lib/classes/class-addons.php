@@ -203,7 +203,7 @@ namespace wpCloud\StatelessMedia {
       $plugin_desc = __('Provides compatibility between the %s and the WP-Stateless plugins.', ud_get_stateless_media()->domain);
       $theme_desc = __('Provides compatibility between the %s theme and the WP-Stateless plugin.', ud_get_stateless_media()->domain);
 
-      $link = 'https://stateless.udx.io/addons/%s';
+      $link = ud_get_stateless_media()->get_docs_page_url('addons/%s');
 
       $defaults = [
         'title'         => '',

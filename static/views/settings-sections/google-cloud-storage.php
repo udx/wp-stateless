@@ -47,7 +47,7 @@
         
       <p>
         <label for="gcs_cache_control_text">
-          <input name="sm[cache_control]" type="text" id="gcs_cache_control_text" class="regular-text ltr" placeholder="public, max-age=36000, must-revalidate" value="<?php echo $sm->cache_control; ?>">
+          <input name="sm[cache_control]" type="text" id="gcs_cache_control_text" class="regular-text ltr" placeholder="<?php echo ud_get_stateless_media()->get_default_cache_control(); ?>" value="<?php echo $sm->cache_control; ?>">
         </label>
       </p>
 

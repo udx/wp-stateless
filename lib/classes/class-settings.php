@@ -10,6 +10,8 @@ namespace wpCloud\StatelessMedia {
 
     final class Settings extends \UDX\Settings {
 
+      const DEFAULT_CACHE_CONTROL = 'public, max-age=36000, must-revalidate';
+
       /**
        * @var false|null|string
        */
@@ -24,6 +26,11 @@ namespace wpCloud\StatelessMedia {
        * @var false|null|string
        */
       public $stateless_settings = null;
+
+      /**
+       * @var string
+       */
+      private $plugin_file = '';
 
       /**
        * Instance of
@@ -70,6 +77,9 @@ namespace wpCloud\StatelessMedia {
       public function __construct($bootstrap = null) {
         $this->bootstrap = $bootstrap ? $bootstrap : ud_get_stateless_media();
 
+        // Defile the main plugin file
+        $realpath = realpath( __DIR__ . '/../..');
+        $this->plugin_file = basename( $realpath ) . '/wp-stateless-media.php';
 
         /* Add 'Settings' link for SM plugin on plugins page. */
         $_basename = plugin_basename( $this->bootstrap->boot_file );
@@ -90,6 +100,12 @@ namespace wpCloud\StatelessMedia {
 
         /** Register options */
         add_action( 'init', array( $this, 'init' ), 3 );
+
+        // additional links on plugins page
+        add_filter( 'plugin_action_links', array( $this, 'plugin_action_links' ), 10, 2);
+        add_filter( 'network_admin_plugin_action_links', array( $this, 'plugin_action_links' ), 10, 2);
+        add_filter( 'plugin_row_meta', array( $this, 'plugin_row_meta' ), 10, 2 );
+
         // apply wildcard to root dir.
         add_filter( 'wp_stateless_handle_root_dir', array( $this, 'root_dir_wildcards' ), 10, 3);
 
@@ -649,6 +665,65 @@ namespace wpCloud\StatelessMedia {
 
         return $value;
       }
+
+      /**
+       * Override Cache Control
+       * 
+       * @param $value
+       * @return mixed
+       */
+      public function override_cache_control($value) {
+        if ( !empty($value) && $value !== self::DEFAULT_CACHE_CONTROL ) {
+          return $value;
+        }
+        
+        $cache_control = trim($this->get('sm.cache_control'));
+
+        return empty($cache_control) ? self::DEFAULT_CACHE_CONTROL : $cache_control;
+      }
+
+      /**
+       * Add 'Settings' on Plugins page
+       * 
+       * @param array $actions
+       * @param string $file
+       * 
+       * @return array
+       */
+      public function plugin_action_links($actions, $file) {
+        if ( $file !== $this->plugin_file ) {
+          return $actions;
+        }
+
+        $url = ud_get_stateless_media()->get_settings_page_url('?page=stateless-settings');
+
+        $settings = [
+          'settings' => sprintf( '<a href="%s">%s</a>', $url, __('Settings', ud_get_stateless_media()->domain) ),
+        ];
+
+        $actions['addons'] = sprintf( '<a href="%s" style="color: #f05323" target="_blank">%s</a>', ud_get_stateless_media()->get_docs_page_url('addons'), __('Addons', ud_get_stateless_media()->domain) );
+
+        return $settings + $actions;
+      }
+
+      /**
+       * Add link to docs on Plugins page
+       * 
+       * @param $meta
+       * @param $file
+       * 
+       * @return array
+       */
+      public function plugin_row_meta($meta, $file) {
+        if ( $file !== $this->plugin_file ) {
+          return $meta;
+        }
+
+        $meta['documentation'] = sprintf( '<a href="%s" target="_blank">%s</a>', ud_get_stateless_media()->get_docs_page_url(), __('Documentation', ud_get_stateless_media()->domain) );
+
+        return $meta;
+      }
+
     }
 
   }

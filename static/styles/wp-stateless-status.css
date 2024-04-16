@@ -15,17 +15,87 @@
   padding-left: 20px;
 }
 
+#stless_status_tab .stateless-info-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+#stless_status_tab .stateless-info-heading .copy-button {
+  background-color: #fff;
+  font-weight: 400;
+}
+
 /* Info table */
-#stless_status_tab .stateless-info-table tr {
+#stateless-info {
+  border: 1px solid #c3c4c7;
+}
+
+.stateless-info-heading {
+  margin: 0;
+  font-size: 13px;
+  border-top: 1px solid #c3c4c7;
+}
+
+.stateless-info-heading:first-child {
+  border-top: none;
+}
+
+.stateless-info-button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #fff;
+  border: 0;
+  color: #2c3338;
+  cursor: pointer;
+  padding: 13px 20px;
+  text-align: left;
+  width: 100%;
+  user-select: auto;
+}
+
+.stateless-info-button:hover,
+.stateless-info-button:active {
+  background-color: #f6f7f7;
+}
+
+.stateless-info-heading.open .dashicons {
+  transform: rotate(180deg);
+}
+
+.stateless-info-block {
+  padding: 13px 20px;
+}
+
+.stateless-info-block tr {
   display: table-row;
 }
 
-#stless_status_tab .stateless-info-table tr:after {
+.stateless-info-block tr:after {
   display: none;
 }
 
-#stless_status_tab .stateless-info-table td {
+.stateless-info-block td {
   width: 50%;
+}
+
+.stateless-info-table-extended-value {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.stateless-info-table-extended-value:last-child {
+  cursor: pointer;
+}
+
+.stateless-info-table-extended-value em {
+  display: none;
+}
+
+.stateless-info-table-extended-value .dashicons {
+  margin-right: 5px;
 }
 
 /* Migrations section (Data updates) */

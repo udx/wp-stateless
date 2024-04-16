@@ -54,6 +54,11 @@ namespace wpCloud\StatelessMedia {
       private $temp_objects = array();
 
       /**
+       * @var
+       */
+      private $key_json = '';
+
+      /**
        * Constructor.
        * Must not be called directly.
        *
@@ -220,7 +225,7 @@ namespace wpCloud\StatelessMedia {
           }
 
           if (isset($args['contentDisposition'])) {
-            $media->getContentDisposition($args['contentDisposition']);
+            $media->setContentDisposition($args['contentDisposition']);
           }
 
           // If chunk size is defined, we assume user needs the file to be sent by chunks

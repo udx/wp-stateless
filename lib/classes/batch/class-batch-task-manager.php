@@ -230,7 +230,7 @@ class BatchTaskManager extends \UDX_WP_Background_Process {
     // Check if we have more batched to run
     try {
       $object = $this->_get_batch_task_object();
-      $class = $object::class;  
+      $class = get_class($object);
       $batch = $object->get_batch();
 
       if ( !empty($batch) ) {
@@ -242,7 +242,7 @@ class BatchTaskManager extends \UDX_WP_Background_Process {
         return;
       }
 
-      Helper::log( 'Batch task completed: ' . $object::class );
+      Helper::log( 'Batch task completed: ' . $class );
     } catch (\Throwable $e) {
       Helper::log( "Unable to process next batch: " . $e->getMessage() );
     }

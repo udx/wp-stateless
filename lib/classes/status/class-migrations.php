@@ -212,6 +212,10 @@ class Migrations {
    * Outputs 'Data Updates' section on the Status tab on the Settings page.
    */
   public function tab_content() {
+    if ( is_network_admin() ) {
+      return;
+    }
+
     $migrations = $this->_get_migrations_state();
 
     if ( !empty($migrations) ) {
