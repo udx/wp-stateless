@@ -10,9 +10,28 @@
   padding: 15px;
   border-left: 3px solid #f79191;
 }
+
 #stateless-settings-page-title {
   margin-bottom: 20px;
 }
+
+.stateless-settings-docs-link {
+  display: inline-block;
+  text-decoration: none;
+}
+
+.stateless-settings-docs-link:focus,
+.stateless-settings-docs-link:active {
+  outline: none;
+  box-shadow: none;
+  color: #2271b1;
+}
+
+.stateless-settings-docs-link .dashicons-editor-help:before {
+  font-size: 30px;
+  vertical-align: middle;
+}
+
 #service_account_json {
   height: 20em;
 }

@@ -110,6 +110,7 @@ class ComposerStaticInitc59d002476a452800baaf79c430753cb
         'wpCloud\\StatelessMedia\\Status' => __DIR__ . '/../..' . '/lib/classes/class-status.php',
         'wpCloud\\StatelessMedia\\Status\\Info' => __DIR__ . '/../..' . '/lib/classes/status/class-info.php',
         'wpCloud\\StatelessMedia\\Status\\Migrations' => __DIR__ . '/../..' . '/lib/classes/status/class-migrations.php',
+        'wpCloud\\StatelessMedia\\Status\\StatelessInfo' => __DIR__ . '/../..' . '/lib/classes/status/class-info-stateless.php',
         'wpCloud\\StatelessMedia\\StreamWrapper' => __DIR__ . '/../..' . '/lib/classes/class-gs-stream-wrapper.php',
         'wpCloud\\StatelessMedia\\SyncNonMedia' => __DIR__ . '/../..' . '/lib/classes/class-sync-non-media.php',
         'wpCloud\\StatelessMedia\\Sync\\BackgroundSync' => __DIR__ . '/../..' . '/lib/classes/sync/class-background-sync.php',
