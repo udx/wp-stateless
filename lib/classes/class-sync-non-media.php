@@ -142,12 +142,16 @@ namespace wpCloud\StatelessMedia {
              * @return media object
              */
             try {
-              $media = $object->update(array('metadata' => $args['metadata']) +
-                array(
-                  'cacheControl' => apply_filters('sm:item:cacheControl', ud_get_stateless_media()->get_default_cache_control(), $absolutePath),
-                  'predefinedAcl' => 'publicRead',
-                  'contentDisposition' => apply_filters('sm:item:contentDisposition', null, $absolutePath)
-                ));
+              $mediaOptions = array(
+                'cacheControl' => apply_filters('sm:item:cacheControl', ud_get_stateless_media()->get_default_cache_control(), $absolutePath),
+                'contentDisposition' => apply_filters('sm:item:contentDisposition', null, $absolutePath)
+              );
+
+              if ( !defined('WP_STATELESS_SKIP_ACL_SET') || !WP_STATELESS_SKIP_ACL_SET) {
+                $mediaOptions['predefinedAcl'] = 'publicRead';
+              }
+
+              $media = $object->update(array('metadata' => $args['metadata']) + $mediaOptions);
             } catch (\Throwable $th) {
               //throw $th;
             }

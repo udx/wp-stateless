@@ -2,7 +2,7 @@
 /**
  * System Info class
  *
- * @since 4.1.0
+ * @since 4.0.3
  */
 
 namespace wpCloud\StatelessMedia\Status;
@@ -185,14 +185,9 @@ class Info {
       return $values;
     }
 
-    $query = new \WP_Query([
-      'post_type' => 'attachment',
-      'post_status' => 'any',
-      'posts_per_page' => -1,
-    ]);
-
-    $total = $query->found_posts;
-
+    global $wpdb;
+    $total = $wpdb->get_var("SELECT COUNT(*) FROM $wpdb->posts WHERE post_type = 'attachment'");
+    
     $sizes = get_intermediate_image_sizes();
 
     $rows = [

@@ -55,5 +55,13 @@ jQuery(document).ready(function ($) {
     }
   })
 
-  new ClipboardJS('.stateless-info-heading .copy-button');
+  var clipboard = new ClipboardJS('.stateless-info-heading .copy-button')
+
+  clipboard.on('success', function(e) {
+    $('.stateless-info-copy-success').show();
+
+    setTimeout(function() {
+      $('.stateless-info-copy-success').fadeOut(500);
+    }, 5000);
+  })
 })

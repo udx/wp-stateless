@@ -26,6 +26,14 @@
   font-weight: 400;
 }
 
+.stateless-info-copy-success {
+  line-height: 30px;
+  margin-right: 5px;
+  color: #007017;
+  font-weight: normal;
+  display: none;
+}
+
 /* Info table */
 #stateless-info {
   border: 1px solid #c3c4c7;
