@@ -2,8 +2,12 @@
 <div class="metabox-holder">
   <div class="postbox">
 	  <h2 class="hndle stateless-info-heading">
-      <?php _e('Info', ud_get_stateless_media()->domain); ?> 
-      <button type="button" class="button copy-button" data-clipboard-text="<?php echo $copy_text; ?>"><?php _e('Copy Info to Clipboard', ud_get_stateless_media()->domain); ?></button></h2>
+      <?php _e('Info', ud_get_stateless_media()->domain); ?>
+      <div>
+        <span class="stateless-info-copy-success"><?php _e('Copied!', ud_get_stateless_media()->domain); ?></span>
+        <button type="button" class="button copy-button" data-clipboard-text="<?php echo $copy_text; ?>"><?php _e('Copy Info to Clipboard', ud_get_stateless_media()->domain); ?></button>
+      </div>
+    </h2>
 
     <div class="inside">
       <div class="main">

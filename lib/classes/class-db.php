@@ -207,7 +207,7 @@ namespace wpCloud\StatelessMedia {
        * @param int $site_id
        */
       public function clear_db($site_id) {
-        switch_to_blog($id);
+        switch_to_blog($site_id);
 
         $tables = array(
           $this->wpdb->prefix . 'files',
