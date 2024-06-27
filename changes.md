@@ -1,3 +1,9 @@
+#### 4.0.4
+* ENHANCEMENT - display success message after copying Status Info.
+* FIX - `Settings` page does not open or slow when there is big amount of attachments.
+* FIX - in multisite network, removing custom tables properly when deleting site.
+* FIX - skip setting ACL in Stateless mode and during Sync for the buckets with Uniform access, support WP_STATELESS_SKIP_ACL_SET constant [#712](https://github.com/udx/wp-stateless/issues/712).
+
 #### 4.0.3
 * NEW - added `Info` section to the `Status` tab on the Settings page, which contains the system info and the ability to copy report to clipboard.  
 * ENHANCEMENT - added `Documentation` link on the Plugins page.

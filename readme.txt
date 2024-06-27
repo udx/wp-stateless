@@ -5,8 +5,8 @@ Tags: google cloud, google cloud storage, cdn, uploads, backup
 License: GPLv2 or later
 Requires PHP: 8.0
 Requires at least: 5.0
-Tested up to: 6.5.2
-Stable tag: 4.0.3
+Tested up to: 6.5.4
+Stable tag: 4.0.4
 
 Upload and serve your WordPress media files from Google Cloud Storage.
 
@@ -121,6 +121,12 @@ Before upgrading to WP-Stateless 3.2.0, please, make sure you use PHP 7.2 or abo
 Before upgrading to WP-Stateless 3.0, please, make sure you tested it on your development environment.
 
 == Changelog ==
+= 4.0.4 =
+* ENHANCEMENT - display success message after copying Status Info.
+* FIX - `Settings` page does not open or slow when there is big amount of attachments.
+* FIX - in multisite network, removing custom tables properly when deleting site.
+* FIX - skip setting ACL in Stateless mode and during Sync for the buckets with Uniform access, support WP_STATELESS_SKIP_ACL_SET constant [#712](https://github.com/udx/wp-stateless/issues/712).
+
 = 4.0.3 =
 * NEW - added `Info` section to the `Status` tab on the Settings page, which contains the system info and the ability to copy report to clipboard.  
 * ENHANCEMENT - added `Documentation` link on the Plugins page.

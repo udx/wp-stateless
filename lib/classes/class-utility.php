@@ -326,12 +326,16 @@ namespace wpCloud\StatelessMedia {
                  * @return media object
                  */
                 try {
-                  $media = $object->update(array('metadata' => $media_args['metadata']) +
-                    array(
-                      'cacheControl' => $_cacheControl,
-                      'predefinedAcl' => 'publicRead',
-                      'contentDisposition' => $_contentDisposition
-                    ));
+                  $mediaOptions = array(
+                    'cacheControl' => $_cacheControl,
+                    'contentDisposition' => $_contentDisposition
+                  );
+
+                  if ( !defined('WP_STATELESS_SKIP_ACL_SET') || !WP_STATELESS_SKIP_ACL_SET) {
+                    $mediaOptions['predefinedAcl'] = 'publicRead';
+                  }
+      
+                  $media = $object->update(array('metadata' => $media_args['metadata']) + $mediaOptions);
 
                   $cloud_meta = self::generate_cloud_meta($cloud_meta, $media, $size, $img, $bucketLink);
                 } catch (\Throwable $th) {

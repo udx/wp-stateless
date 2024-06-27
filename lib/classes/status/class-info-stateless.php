@@ -2,7 +2,7 @@
 /**
  * System Info (Stateless section) class
  *
- * @since 4.1.0
+ * @since 4.0.3
  */
 
 namespace wpCloud\StatelessMedia\Status;
