@@ -117,7 +117,7 @@ jobs:
       # create a draft release with the version changelog as a description
       - name: Create Draft Release
         id: draft_release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           name: "Release ${{ steps.vars.outputs.full_tag }}"
           body: "${{ steps.changelog.outputs.description }}"
