@@ -149,6 +149,11 @@ namespace wpCloud\StatelessMedia {
 
         $charset_collate = $this->wpdb->get_charset_collate();
 
+        /**
+         * Based on wp-admin/includes/schema.php
+         */
+        $max_index_length = 150;
+
         $sql = "CREATE TABLE $this->files (
           `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
           `post_id` bigint(20) unsigned NULL DEFAULT NULL,
@@ -182,7 +187,7 @@ namespace wpCloud\StatelessMedia {
           `self_link` text NOT NULL,
           PRIMARY KEY (`id`),
           KEY post_id (post_id),
-          UNIQUE KEY post_id_size (post_id, size_name)
+          UNIQUE KEY post_id_size (post_id, size_name($max_index_length))
         ) $charset_collate;
 
         CREATE TABLE $this->file_meta (
@@ -192,7 +197,7 @@ namespace wpCloud\StatelessMedia {
           `meta_value` longtext NOT NULL,
           PRIMARY KEY (`id`),
           KEY post_id (post_id),
-          UNIQUE KEY post_id_key (post_id, meta_key)
+          UNIQUE KEY post_id_key (post_id, meta_key($max_index_length))
         ) $charset_collate;";
 
         require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
