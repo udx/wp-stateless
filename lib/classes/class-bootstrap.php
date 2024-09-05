@@ -419,29 +419,48 @@ namespace wpCloud\StatelessMedia {
        * @throws \Exception
        */
       public function init_gs_client(callable $httpHandler = null) {
-        // May be Loading Google SDK....
+        // May be Loading Google SDK...
         if (!class_exists('HttpHandlerFactory')) {
-          include_once(ud_get_stateless_media()->path('lib/Google/vendor/autoload.php', 'dir'));
+            include_once(ud_get_stateless_media()->path('lib/Google/vendor/autoload.php', 'dir'));
         }
-
+    
         $httpHandler = $httpHandler ? $httpHandler : HttpHandlerFactory::build();
-
-        $json_key = json_decode($this->settings->get('sm.key_json'), true);
-
-        if (!empty($json_key)) {
-          return new StorageClient(
-            [
-              'keyFile' => $json_key,
-              'httpHandler' => function ($request, $options) use ($httpHandler) {
-                $xGoogApiClientHeader = $request->getHeaderLine('x-goog-api-client');
-                $request = $request->withHeader('x-goog-api-client', $xGoogApiClientHeader);
-
-                return call_user_func_array($httpHandler, [$request, $options]);
-              },
-              'authHttpHandler' => HttpHandlerFactory::build(),
-            ]
-          );
+    
+        // Check if metadata-based authentication is enabled
+        $use_metadata_auth = get_option('sm_use_metadata_auth') == 'true';
+    
+        // If metadata authentication is enabled, use Application Default Credentials
+        if ($use_metadata_auth) {
+            return new StorageClient([
+                'authHttpHandler' => $httpHandler,
+                'httpHandler' => function ($request, $options) use ($httpHandler) {
+                    $xGoogApiClientHeader = $request->getHeaderLine('x-goog-api-client');
+                    $request = $request->withHeader('x-goog-api-client', $xGoogApiClientHeader);
+    
+                    return call_user_func_array($httpHandler, [$request, $options]);
+                },
+                // Ensure default credentials are used
+                'useApplicationDefaultCredentials' => true,
+            ]);
         }
+    
+        // Fallback to using JSON key file for authentication
+        $json_key = json_decode($this->settings->get('sm.key_json'), true);
+    
+        if (!empty($json_key)) {
+            return new StorageClient([
+                'keyFile' => $json_key,
+                'httpHandler' => function ($request, $options) use ($httpHandler) {
+                    $xGoogApiClientHeader = $request->getHeaderLine('x-goog-api-client');
+                    $request = $request->withHeader('x-goog-api-client', $xGoogApiClientHeader);
+    
+                    return call_user_func_array($httpHandler, [$request, $options]);
+                },
+                'authHttpHandler' => HttpHandlerFactory::build(),
+            ]);
+        }
+    
+        throw new \Exception('Failed to initialize Google Storage Client. No valid authentication method found.');
       }
 
       /**
@@ -1613,7 +1632,6 @@ namespace wpCloud\StatelessMedia {
                     $key_json = get_site_option('sm_key_json');
                 }
             }
-            error_log($use_metadata_auth);
             // Try to initialize GS Client
             $this->client = GS_Client::get_instance(array(
                 'bucket' => $this->get('sm.bucket'),
@@ -1660,7 +1678,6 @@ namespace wpCloud\StatelessMedia {
                     if ($this->get('sm.use_metadata_auth') == 'true') {
                         // Check connection using Application Default Credentials
                         $connected = $client->is_connected();
-    
                         if ($connected !== true) {
                             $trnst['success'] = 'false';
                             $trnst['error'] = 'Could not connect using default credentials: ' . print_r($connected, true);
