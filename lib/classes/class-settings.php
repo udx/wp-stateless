@@ -56,6 +56,7 @@ namespace wpCloud\StatelessMedia {
         'status_email_type'      => array('', 'true'),
         'status_email_address'   => array('', ''),
         'use_postmeta'           => array('WP_STATELESS_POSTMETA', ['false', '']),
+        'use_metadata_auth'      => array('WP_STATELESS_MEDIA_USE_METADATA_AUTH', 'false'),
       );
 
       private $network_only_settings = array(
@@ -501,6 +502,12 @@ namespace wpCloud\StatelessMedia {
             if (!is_array($value)) {
               $value = sanitize_text_field($value);
             }
+
+            // metadata auth setting
+            if($name == 'use_metadata_auth'){
+              $value = ($value === '1' || $value === 'true') ? 'true' : 'false';
+            }
+            
             /**
              * root_dir settings
              */

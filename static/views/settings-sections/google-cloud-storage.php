@@ -17,7 +17,16 @@
         <strong id="notice-bucket"></strong> 
         <?php _e('The name of the GCS bucket.', ud_get_stateless_media()->domain); ?>
       </p>
-        
+
+      <hr>
+
+      <p>
+        <label for="use_metadata_auth">
+          <input name="sm[use_metadata_auth]" type="checkbox" id="use_metadata_auth" value="true" <?php checked($sm->use_metadata_auth, 'true'); ?> />
+          <?php _e('Enable metadata server authentication (recommended for running on Google Cloud Platform).', ud_get_stateless_media()->domain); ?>
+        </label>
+      </p>
+      
       <hr>
 
       <h4><?php _e('Service Account JSON', ud_get_stateless_media()->domain); ?></h4>
@@ -32,6 +41,7 @@
             autocorrect="off" 
             autocapitalize="off" 
             spellcheck="false"
+            <?php if ($sm->use_metadata_auth === 'true') echo 'disabled'; ?> 
           ><?php echo $sm->key_json; ?></textarea>
         </label>
       </p>
@@ -78,3 +88,17 @@
     </fieldset>
   </td>
 </tr>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const useMetadataAuthCheckbox = document.getElementById('use_metadata_auth');
+    const serviceAccountJsonField = document.getElementById('service_account_json');
+
+    function toggleServiceAccountField() {
+      serviceAccountJsonField.disabled = useMetadataAuthCheckbox.checked;
+    }
+
+    useMetadataAuthCheckbox.addEventListener('change', toggleServiceAccountField);
+    toggleServiceAccountField(); // Initialize on page load
+  });
+</script>

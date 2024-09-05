@@ -1598,24 +1598,40 @@ namespace wpCloud\StatelessMedia {
        * @return object $this->client. \wpCloud\StatelessMedia\GS_Client or \WP_Error
        */
       public function get_client() {
-
         if (null === $this->client) {
-
-          $key_json = $this->get('sm.key_json');
-          if (empty($key_json)) {
-            $key_json = get_site_option('sm_key_json');
-          }
-
-          /* Try to initialize GS Client */
-          $this->client = GS_Client::get_instance(array(
-            'bucket' => $this->get('sm.bucket'),
-            'key_json' => $key_json
-          ));
+            
+            // Check the option value for metadata authentication first
+            $use_metadata_auth = get_option('sm_use_metadata_auth') == 'true';
+    
+            // If metadata auth is enabled, don't try to load JSON credentials
+            if ($use_metadata_auth) {
+                $key_json = ''; // Clear any JSON credentials since metadata is preferred
+            } else {
+                // Fallback to JSON credentials
+                $key_json = $this->get('sm.key_json');
+                if (empty($key_json)) {
+                    $key_json = get_site_option('sm_key_json');
+                }
+            }
+            error_log($use_metadata_auth);
+            // Try to initialize GS Client
+            $this->client = GS_Client::get_instance(array(
+                'bucket' => $this->get('sm.bucket'),
+                'key_json' => $key_json,
+                'use_metadata_auth' => $use_metadata_auth, // Pass the option to use metadata auth
+            ));
+    
+            // Check if client initialization failed
+            if (is_wp_error($this->client)) {
+                error_log('Failed to initialize Google Storage Client: ' . $this->client->get_error_message());
+            } else {
+                error_log('Google Storage Client initialized successfully.');
+            }
         }
-
+    
         return $this->client;
       }
-
+      
       /**
        * Determines if we can connect to Google Storage Bucket.
        *
@@ -1623,47 +1639,77 @@ namespace wpCloud\StatelessMedia {
        */
       public function is_connected_to_gs() {
         $trnst = get_transient('sm::is_connected_to_gs');
-
+    
         if (empty($trnst) || false === $trnst || !isset($trnst['hash']) || $trnst['hash'] != md5(serialize($this->get('sm')))) {
-          $trnst = array(
-            'success' => 'true',
-            'error' => '',
-            'hash' => md5(serialize($this->get('sm'))),
-          );
-          $client = $this->get_client();
-
-          if (is_wp_error($client)) {
-            $trnst['success'] = 'false';
-            $trnst['error'] = $client->get_error_message();
-          } else {
-            $connected = $client->is_connected();
-            if ($connected !== true) {
-              $trnst['success'] = 'false';
-              $trnst['error'] = sprintf(__('Could not connect to Google Storage bucket. Please be sure that bucket with name <b>%s</b> exists and the access credentials are correct.', $this->domain), esc_html($this->get('sm.bucket')));
-
-              if (is_callable(array($connected, 'getHandlerContext')) && $handlerContext = $connected->getHandlerContext()) {
-                if (!empty($handlerContext['error'])) {
-                  $handlerContext['error'];
-                  $trnst['error'] = "Could not connect to Google Storage bucket. " . make_clickable($handlerContext['error']);
+            $trnst = array(
+                'success' => 'true',
+                'error' => '',
+                'hash' => md5(serialize($this->get('sm'))),
+            );
+    
+            // Initialize the client
+            $client = $this->get_client();
+    
+            // Handle client initialization errors
+            if (is_wp_error($client)) {
+                $trnst['success'] = 'false';
+                $trnst['error'] = $client->get_error_message();
+            } else {
+                try {
+                    // Check if metadata authentication is enabled
+                    if ($this->get('sm.use_metadata_auth') == 'true') {
+                        // Check connection using Application Default Credentials
+                        $connected = $client->is_connected();
+    
+                        if ($connected !== true) {
+                            $trnst['success'] = 'false';
+                            $trnst['error'] = 'Could not connect using default credentials: ' . print_r($connected, true);
+                            error_log('Could not connect using default credentials');
+                        } else {
+                            error_log('Connected successfully using default credentials');
+                        }
+                    } else {
+                        // Fallback to JSON-based authentication
+                        $connected = $client->is_connected();
+    
+                        if ($connected !== true) {
+                            $trnst['success'] = 'false';
+                            $trnst['error'] = sprintf(__('Could not connect to Google Storage bucket. Please be sure that bucket with name <b>%s</b> exists and the access credentials are correct.', $this->domain), esc_html($this->get('sm.bucket')));
+    
+                            // Check for specific error details
+                            if (is_callable(array($connected, 'getHandlerContext')) && $handlerContext = $connected->getHandlerContext()) {
+                                if (!empty($handlerContext['error'])) {
+                                    $trnst['error'] = "Could not connect to Google Storage bucket. " . make_clickable($handlerContext['error']);
+                                }
+                            }
+    
+                            if (is_callable(array($connected, 'getErrors')) && $error = $connected->getErrors()) {
+                                $error = reset($error);
+                                if ($error['reason'] == 'accessNotConfigured') {
+                                    $trnst['error'] = "Could not connect to Google Storage bucket. " . make_clickable($error['message']);
+                                }
+                            }
+                        } else {
+                            error_log('Connected successfully using JSON credentials');
+                        }
+                    }
+                } catch (Exception $e) {
+                    $trnst['success'] = 'false';
+                    $trnst['error'] = 'Exception caught while connecting: ' . $e->getMessage();
                 }
-              }
-
-              if (is_callable(array($connected, 'getErrors')) && $error = $connected->getErrors()) {
-                $error = reset($error);
-                if ($error['reason'] == 'accessNotConfigured')
-                  $trnst['error'] = "Could not connect to Google Storage bucket. " . make_clickable($error['message']);
-              }
             }
-          }
-          set_transient('sm::is_connected_to_gs', $trnst, 4 * HOUR_IN_SECONDS);
+    
+            // Cache the connection status
+            set_transient('sm::is_connected_to_gs', $trnst, 4 * HOUR_IN_SECONDS);
         }
-
+    
         if (isset($trnst['success']) && $trnst['success'] == 'false') {
-          return new \WP_Error('error', (!empty($trnst['error']) ? $trnst['error'] : __('There is an Error on connection to Google Storage.', $this->domain)));
+            return new \WP_Error('error', (!empty($trnst['error']) ? $trnst['error'] : __('There is an error on connection to Google Storage.', $this->domain)));
         }
-
+    
         return true;
       }
+       
 
       /**
        * Flush all plugin transients

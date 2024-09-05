@@ -69,55 +69,46 @@ namespace wpCloud\StatelessMedia {
         global $current_blog;
         $this->bucket = $args['bucket'];
         $this->key_json = json_decode($args['key_json'], 1);
-
-        // May be Loading Google SDK....
+    
+        // Load Google SDK if not already loaded
         if (!class_exists('\Google\Client')) {
-          include_once(ud_get_stateless_media()->path('lib/Google/vendor/autoload.php', 'dir'));
+            include_once(ud_get_stateless_media()->path('lib/Google/vendor/autoload.php', 'dir'));
         }
-
-        /* Initialize our client */
+    
+        /* Initialize Google Client */
         $this->client = new \Google\Client();
-
-        // We're supporting Google SDK 1.X version since
-        // The plugins which also are using Google SDK may have its old version
-        // what may cause conflicts
-        //
+    
+        // Support for Google SDK 1.X version, which may have conflicts with other plugins using older SDK
         if (version_compare($this->client->getLibraryVersion(), '2.0', '<')) {
-          // We should set the warning about potential issue
-          // If Google SDK has different version with already included
-          $this->_setWarning();
-
-          $wp_upload_dir = wp_upload_dir();
-          $dir = $wp_upload_dir['path'];
-          $filename = md5(wp_generate_password()) . '.tmp';
-          $path = wp_normalize_path($dir . '/' . $filename);
-          @file_put_contents($path, json_encode($this->key_json));
-          $cred = $this->client->loadServiceAccountJson($path, ['https://www.googleapis.com/auth/devstorage.full_control']);
-          $this->client->setAssertionCredentials($cred);
-          if ($this->client->getAuth()->isAccessTokenExpired()) {
-            $this->client->getAuth()->refreshTokenWithAssertion($cred);
-          }
-          @unlink($path);
+            // Older SDK version, load credentials the old way.
+            $this->_setWarning();
+            $this->_loadOldVersionCredentials();
         } else {
-          // May be delete warning transient if it was set
-          $this->_deleteWarning();
-          $this->client->setAuthConfig($this->key_json);
+            // New SDK version, handle metadata server authentication.
+            $this->_deleteWarning();
+    
+            if (!empty($args['use_metadata_auth']) && $args['use_metadata_auth'] === true) {
+                // Use Application Default Credentials
+                $this->client->useApplicationDefaultCredentials(true);
+            } else {
+                // Use provided JSON credentials
+                $this->key_json = json_decode($args['key_json'], true);
+                $this->client->setAuthConfig($this->key_json);
+            }
         }
-
+    
+        // Set application name and scopes
         if (isset($current_blog) && isset($current_blog->domain)) {
-          $this->client->setApplicationName($current_blog->domain);
+            $this->client->setApplicationName($current_blog->domain);
         } else {
-          $this->client->setApplicationName(urlencode(str_replace(array('http://', 'https://'), '', get_bloginfo('url'))));
+            $this->client->setApplicationName(urlencode(str_replace(array('http://', 'https://'), '', get_bloginfo('url'))));
         }
-
         $this->client->setScopes(['https://www.googleapis.com/auth/devstorage.full_control']);
-
-        // May be Loading Google SDK. Because some bad plugins may load their Google SDK with not included Google_Service_Storage.
+    
+        // Initialize Google Storage Service
         if (!class_exists('Google_Service_Storage')) {
-          include_once(ud_get_stateless_media()->path('lib/Google/vendor/autoload.php', 'dir'));
+            include_once(ud_get_stateless_media()->path('lib/Google/vendor/autoload.php', 'dir'));
         }
-
-        /* Now, Initialize our Google Storage Service */
         $this->service = new \Google\Service\Storage($this->client);
       }
 
@@ -430,27 +421,34 @@ namespace wpCloud\StatelessMedia {
        */
       public static function get_instance($args) {
         if (null === self::$instance) {
-
-          try {
-
-            if (empty($args['bucket'])) {
-              throw new Exception(__('<b>Bucket</b> parameter must be provided.'));
+    
+            try {
+                if (empty($args['bucket'])) {
+                    throw new Exception(__('<b>Bucket</b> parameter must be provided.'));
+                }
+    
+                // If metadata authentication is enabled, do not validate JSON credentials
+                if (!empty($args['use_metadata_auth']) && $args['use_metadata_auth'] == true) {
+                    // Ensure that metadata authentication is enabled
+                    self::$instance = new self($args);
+                    return self::$instance;
+                }
+    
+                // Validate JSON credentials
+                $json = "{}";
+    
+                if (!empty($args['key_json'])) {
+                    $json = json_decode($args['key_json']);
+                }
+    
+                if (!$json || !property_exists($json, 'private_key')) {
+                    throw new Exception(__('<b>Service Account JSON</b> is invalid.'));
+                }
+    
+                self::$instance = new self($args);
+            } catch (Exception $e) {
+                return new WP_Error('sm_error', $e->getMessage());
             }
-
-            $json = "{}";
-
-            if (!empty($args['key_json'])) {
-              $json = json_decode($args['key_json']);
-            }
-
-            if (!$json || !property_exists($json, 'private_key')) {
-              throw new Exception(__('<b>Service Account JSON</b> is invalid.'));
-            }
-
-            self::$instance = new self($args);
-          } catch (Exception $e) {
-            return new WP_Error('sm_error', $e->getMessage());
-          }
         }
         return self::$instance;
       }
@@ -499,6 +497,29 @@ namespace wpCloud\StatelessMedia {
        */
       private function _deleteWarning() {
         delete_transient("wp_stateless_google_sdk_conflict");
+      }
+
+      /**
+       * Load credentials for older versions of the Google SDK.
+       */
+      private function _loadOldVersionCredentials() {
+        $wp_upload_dir = wp_upload_dir();
+        $dir = $wp_upload_dir['path'];
+        $filename = md5(wp_generate_password()) . '.tmp';
+        $path = wp_normalize_path($dir . '/' . $filename);
+
+        @file_put_contents($path, json_encode($this->key_json));
+
+        // Load service account credentials from JSON file.
+        $cred = $this->client->loadServiceAccountJson($path, ['https://www.googleapis.com/auth/devstorage.full_control']);
+        $this->client->setAssertionCredentials($cred);
+
+        // Refresh the token if it has expired.
+        if ($this->client->getAuth()->isAccessTokenExpired()) {
+            $this->client->getAuth()->refreshTokenWithAssertion($cred);
+        }
+
+        @unlink($path);
       }
     }
   }
