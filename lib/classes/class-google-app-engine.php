@@ -40,11 +40,17 @@ namespace wpCloud\StatelessMedia {
 
       /**
        * Override 'sm_mode' option to 'stateless' if we are running on Google App Engine
+       * Do not override in Disabled mode
        * 
        * @param string $value
        * @return string
        */
       public function override_stateless_mode($value) {
+        // We load too early to use 'ud_get_stateless_media()->is_mode' or 'ud_get_stateless_media()->get'
+        if ( $value === 'disabled' ) {
+          return $value;
+        }
+
         if ( apply_filters('wp_stateless_is_app_engine', false) ) {
           return 'stateless';
         }

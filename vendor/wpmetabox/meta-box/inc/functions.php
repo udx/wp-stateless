@@ -22,12 +22,13 @@ if ( ! function_exists( 'rwmb_meta' ) ) {
 		 * Then fallback to the old method to retrieve meta (which uses get_post_meta() as the latest fallback).
 		 */
 		if ( false === $field ) {
-			return apply_filters( 'rwmb_meta', rwmb_meta_legacy( $key, $args, $post_id ) );
+			$value = rwmb_meta_legacy( $key, $args, $post_id );
+			return apply_filters( 'rwmb_meta', $value, $key, $args, $post_id );
 		}
-		$meta = in_array( $field['type'], [ 'oembed', 'map', 'osm' ], true ) ?
+		$value = in_array( $field['type'], [ 'oembed', 'map', 'osm' ], true ) ?
 			rwmb_the_value( $key, $args, $post_id, false ) :
 			rwmb_get_value( $key, $args, $post_id );
-		return apply_filters( 'rwmb_meta', $meta, $key, $args, $post_id );
+		return apply_filters( 'rwmb_meta', $value, $key, $args, $post_id );
 	}
 }
 
@@ -77,9 +78,9 @@ if ( ! function_exists( 'rwmb_get_field_settings' ) ) {
 		/**
 		 * Filter meta type from object type and object id.
 		 *
-		 * @var string     Meta type, default is post type name.
-		 * @var string     Object type.
-		 * @var string|int Object id.
+		 * @var string       Meta type, default is post type name.
+		 * @var string       Object type.
+		 * @var ?string|?int Object id.
 		 */
 		$type = apply_filters( 'rwmb_meta_type', $args['type'], $args['object_type'], $object_id );
 		if ( ! $type ) {

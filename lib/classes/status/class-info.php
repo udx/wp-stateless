@@ -15,12 +15,15 @@ class Info {
 
   protected function __construct() {
     StatelessInfo::instance();
+    GoogleCloudInfo::instance();
 
     $this->_init_hooks();
   }
 
   private function _init_hooks() {
     add_action('wp_stateless_status_tab_content', [$this, 'tab_content'], 10);
+
+    add_filter('wp_stateless_status_tab_visible', array($this, 'status_tab_visible'), 10, 1);
 
     add_filter('wp_stateless_status_info_values_server', [$this, 'get_server_values'], 10);
     add_filter('wp_stateless_status_info_values_server', [$this, 'get_php_values'], 20);
@@ -67,10 +70,32 @@ class Info {
         'label' => __('MySQL version', ud_get_stateless_media()->domain),
         'value' => $wpdb->db_server_info(),
       ],
-      'php' => [
-        'label' => __('PHP Version', ud_get_stateless_media()->domain),
-        'value' => PHP_VERSION,
-      ],
+    ];
+
+    // Detect the default DB engine
+    try {
+      $default_engine = '';
+      $engines = $wpdb->get_results('SHOW ENGINES', ARRAY_A);
+
+      foreach ($engines as $engine) {
+        if ( $engine['Support'] === 'DEFAULT' ) {
+          $default_engine = $engine['Engine'];
+          break;
+        }
+      }
+
+      if ( !empty($default_engine) ) {
+        $rows['mysql_engine'] = [
+          'label' => __('MySQL default engine', ud_get_stateless_media()->domain),
+          'value' => $default_engine,
+        ];
+      }
+    } catch (\Throwable $e) {
+    }
+
+    $rows['php'] = [
+      'label' => __('PHP Version', ud_get_stateless_media()->domain),
+      'value' => PHP_VERSION,
     ];
 
     return $values + $rows;
@@ -187,8 +212,23 @@ class Info {
 
     global $wpdb;
     $total = $wpdb->get_var("SELECT COUNT(*) FROM $wpdb->posts WHERE post_type = 'attachment'");
-    
-    $sizes = get_intermediate_image_sizes();
+
+    $size_keys = get_intermediate_image_sizes();
+    $sizes = [];
+
+    foreach ($size_keys as $size) {
+      // Check if image size is not a name (e.g. '1536x1536')
+      $parts = explode('x', $size);
+
+      if ( count($parts) === 2 && is_numeric($parts[0]) && is_numeric($parts[1]) ) {
+        $sizes[] = $size;
+        continue;
+      }
+
+      $width = get_option("{$size}_size_w");
+      $height = get_option("{$size}_size_h");
+      $sizes[] = sprintf('(%dx%d) %s', $width, $height, $size);
+    }
 
     $rows = [
       'total_attachments' => [
@@ -196,7 +236,7 @@ class Info {
         'value' => $total,
       ],
       'image_sizes' => [
-        'label' => __('Image Sizes', ud_get_stateless_media()->domain),
+        'label' => sprintf( __('Image Sizes (%d)', ud_get_stateless_media()->domain), count($sizes) ),
         'value' => implode(', ', $sizes)
       ],
     ];
@@ -348,6 +388,9 @@ class Info {
       'stateless' => [
         'title' => __('WP-Stateless', ud_get_stateless_media()->domain),
       ],
+      'google_cloud' => [
+        'title' => __('Google Cloud', ud_get_stateless_media()->domain),
+      ],
     ];
 
     foreach ($sections as $key => $section) {
@@ -364,5 +407,12 @@ class Info {
     $copy_text = $this->_prepare_copy_text($sections);
 
     include ud_get_stateless_media()->path('static/views/status-sections/info.php', 'dir');
+  }
+
+  /**
+   * Load 'Status' tab only in admin area
+   */
+  public function status_tab_visible($visible) {
+    return is_admin();
   }
 }

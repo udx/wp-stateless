@@ -133,6 +133,10 @@ class RWMB_Post_Field extends RWMB_Object_Choice_Field {
 
 		$options = [];
 		foreach ( $query->posts as $post ) {
+			if ( ! current_user_can( 'read_post', $post ) ) {
+				continue;
+			}
+			
 			$label                = $post->post_title ? $post->post_title : __( '(No title)', 'meta-box' );
 			$label                = self::filter( 'choice_label', $label, $field, $post );
 			$options[ $post->ID ] = [

@@ -271,6 +271,7 @@ namespace wpCloud\StatelessMedia {
           }
 
           $image_sizes = self::get_path_and_url($metadata, $attachment_id);
+
           foreach ($image_sizes as $size => $img) {
             if ((isset($_REQUEST['size']) && $_REQUEST['size'] == $size) || empty($_REQUEST['size'])) {
               // GCS metadata
@@ -1086,6 +1087,31 @@ namespace wpCloud\StatelessMedia {
         }
 
         return $file;
+      }
+
+      /**
+       * Return list of files in a dir.
+       * @param string $dir: Directory path
+       * @return array - Lists of files in the directory and subdirectory.
+       */
+      public static function get_files($dir) {
+        $return = array();
+        if (is_dir($dir) && $dh = opendir($dir)) {
+          while ($file = readdir($dh)) {
+            if ($file != '.' && $file != '..') {
+              if (is_dir($dir . $file)) {
+                // since it is a directory we recursively get files.
+                $arr = self::get_files($dir . $file . '/');
+                $return = array_merge($return, $arr);
+              } else {
+                $return[] = $dir . $file;
+              }
+            }
+          }
+          closedir($dh);
+        }
+        
+        return $return;
       }
     }
   }

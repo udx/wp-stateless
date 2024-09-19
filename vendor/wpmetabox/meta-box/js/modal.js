@@ -1,25 +1,27 @@
-( function ( $, rwmb ) {
+( $ => {
 	'use strict';
-
-	const $body = $( 'body' );
+    
+    const $body = $( 'body' );
 
 	const defaultOptions = {
 		wrapper: `<div class="rwmb-modal">
-			<div class="rwmb-modal-title">
+			<header class="rwmb-modal-title">
 				<h2></h2>
 				<button type="button" class="rwmb-modal-close">&times;</button>
-			</div>
+			</header>
 			<div class="rwmb-modal-content"></div>
 		</div>`,
 		markupIframe: '<iframe id="rwmb-modal-iframe" width="100%" height="700" src="{URL}" border="0"></iframe>',
-		markupOverlay: '<div class="rwmb-modal-overlay"></div>',
-		removeElement: '',
-		removeElementDefault: '#adminmenumain, #wpadminbar, #wpfooter, .row-actions, .form-wrap.edit-term-notes, #screen-meta-links, .wp-heading-inline, .wp-header-end',
+        markupOverlay: '<div class="rwmb-modal-overlay"></div>',
+		hideElement: '',
+		hideElementDefault: '#adminmenumain, #wpadminbar, #wpfooter, .row-actions, .form-wrap.edit-term-notes, #screen-meta-links, .wp-heading-inline, .wp-header-end, .page-title-action',
 		callback: null,
 		closeModalCallback: null,
 		isBlockEditor: false,
 		$objectId: null,
-		$objectDisplay: null
+		$objectDisplay: null,
+        isEdit: false,
+        size: 'large',
 	};
 
 	$.fn.rwmbModal = function ( options = {} ) {
@@ -32,6 +34,7 @@
 			return;
 		}
 
+		// $this is the button that opens the modal
 		const $this = $( this ),
 			$modal = $( '.rwmb-modal' );
 
@@ -42,16 +45,15 @@
 
 		$this.click( function ( e ) {
 			e.preventDefault();
-
+            $modal.attr( 'size', options.size );
 			$modal.find( '.rwmb-modal-title h2' ).html( $this.html() );
-			$modal.find( '.rwmb-modal-content' ).html( options.markupIframe.replace( '{URL}', $this.data( 'url' ) ) );
+			$modal.find( '.rwmb-modal-content' ).html( options.markupIframe.replace( '{URL}', $this.attr( 'data-url' ) ) );
+
 			$( '#rwmb-modal-iframe' ).on( 'load', function () {
 				const $contents = $( this ).contents();
 				options.isBlockEditor = $contents.find( 'body' ).hasClass( 'block-editor-page' );
 
-				if ( options.removeElement !== '' ) {
-					$contents.find( options.removeElement ).remove();
-				}
+				$contents.find( options.hideElement ).hide();
 
 				$modal.find( '.rwmb-modal-title' ).css( 'background-color', '' );
 				if ( options.isBlockEditor ) {
@@ -59,8 +61,8 @@
 				}
 
 				$contents
-					.find( options.removeElementDefault ).remove().end()
-					.find( '.rwmb-modal-add-button' ).parent().remove();
+					.find( options.hideElementDefault ).hide().end()
+					.find( '.rwmb-modal-add-button' ).parents('.rwmb-field').hide();
 				$contents.find( 'html' ).css( 'padding-top', 0 ).end()
 					.find( '#wpcontent' ).css( 'margin-left', 0 ).end()
 					.find( 'a' ).on( 'click', e => e.preventDefault() );
@@ -69,9 +71,9 @@
 					options.callback( $modal, $contents );
 				}
 
-				$body.addClass( 'rwmb-modal-show' );
-				$( '.rwmb-modal-overlay' ).fadeIn( 'medium' );
-				$modal.fadeIn( 'medium' );
+                $body.addClass( 'rwmb-modal-show' );
+				$( '.rwmb-modal-overlay' ).fadeIn( 'medium' ).css( 'display', 'flex' );
+				$modal.fadeIn( 'medium' ).css( 'display', 'flex' );
 
 				return false;
 			} );
@@ -81,7 +83,7 @@
 					options.closeModalCallback( $( '#rwmb-modal-iframe' ).contents(), $input );
 				}
 
-				$modal.fadeOut( 'medium' );
+                $modal.fadeOut( 'medium' );
 				$( '.rwmb-modal-overlay' ).fadeOut( 'medium' );
 				$body.removeClass( 'rwmb-modal-show' );
 
@@ -120,7 +122,7 @@
 				options.$objectId = null;
 				options.$objectDisplay = null;
 				$( this ).off( event );
-			} );
+			});
 		} );
 	};
 
@@ -129,4 +131,4 @@
 			.append( defaultOptions.markupOverlay );
 	}
 
-} )( jQuery, rwmb );
+} )( jQuery );

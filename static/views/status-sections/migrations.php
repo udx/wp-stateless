@@ -1,5 +1,5 @@
 
-<div class="metabox-holder">
+<div class="metabox-holder migrations-wrap">
   <div class="postbox">
 	  <h2 class="hndle"><?php _e('Data Optimization', ud_get_stateless_media()->domain); ?></h2>
     <div class="hndle-notice">
@@ -12,31 +12,22 @@
       </ul>
     </div>
 
-    <div class="inside">
+    <div id="migration-action" class="inside <?php echo $migration['classes']; ?>" data-id="<?php echo $migration_id; ?>" data-queue="<?php echo implode(':', $migration_ids); ?>">
       <div class="main">
-        <?php foreach ($migrations as $id => $migration ) : ?>
-          <div class="migration <?php echo $migration->classes; ?>" data-id="<?php echo $id; ?>">
-            <p class="title">
-              <!-- <strong><?php echo $migration->description; ?></strong>  -->
-              <span class="actions">
-                <a href="#" class="button button-primary start" data-action="start"><?php _e('Start Data Optimization', ud_get_stateless_media()->domain); ?></a>
-                <a href="#" class="button button-secondary pause" data-action="pause"><?php _e('Pause Data Optimization', ud_get_stateless_media()->domain); ?></a>
-                <a href="#" class="button button-primary resume" data-action="resume"><?php _e('Resume Data Optimization', ud_get_stateless_media()->domain); ?></a>
-              </span>
-            </p>
+        <div class="actions">
+          <a href="#" class="button button-primary start" data-action="start"><?php _e('Start Data Optimization', ud_get_stateless_media()->domain); ?></a>
+          <a href="#" class="button button-secondary pause" data-action="pause"><?php _e('Pause Data Optimization', ud_get_stateless_media()->domain); ?></a>
+          <a href="#" class="button button-primary resume" data-action="resume"><?php _e('Resume Data Optimization', ud_get_stateless_media()->domain); ?></a>
+        </div>
 
-            <div class="progress-wrap">
-              <p class="description"><?php echo $migration->message; ?></p>
-  
-              <div class="progress">
-                <div class="bar"></div>
-                <span class="percent"></span>
-            </div>
-            </div>
-          </div>
-        <?php endforeach;?>
+        <p class="description"><?php echo $migration->message; ?></p>
+
+        <div class="progress-wrap">
+          <div class="progress"><div class="bar"></div><span class="percent"></span></div>
+        </div>
       </div>
     </div>
+
   </div>
 </div>
 

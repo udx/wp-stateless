@@ -46,9 +46,10 @@ class Migrator {
     add_action( 'init', [$this, 'show_messages'] );
     add_action( 'wp_stateless_batch_task_started', [$this, 'migration_started'], 10, 2 );
     add_action( 'wp_stateless_batch_task_failed', [$this, 'migration_failed'], 10, 3 );
-    add_action( 'wp_stateless_batch_task_finished', [$this, 'migration_finished'], 10, 1 );
+    add_action( 'wp_stateless_batch_task_finished', [$this, 'migration_finished'], 10, 2 );
     add_filter( 'wp_stateless_batch_action_start', [$this, 'start_migration'], 10, 2);
     add_action( 'wp_stateless_notice_dismissed', [$this, 'notice_dismissed'], 10, 1 );
+    add_filter( 'wp_stateless_get_migrations', [$this, 'get_migrations']);
   }
   
   /**
@@ -150,7 +151,7 @@ class Migrator {
    */
   private function _check_required_migrations($migrations = null) {
     if ( empty($migrations) ) {
-      $migrations = get_option(self::MIGRATIONS_KEY, []);
+      $migrations = apply_filters('wp_stateless_get_migrations', []);
     }
 
     $require_migrations = false;
@@ -192,7 +193,7 @@ class Migrator {
     // Rebuild the migrations list and state according to the new version
     $ids = $this->_get_migration_ids();
 
-    $migrations = get_option(self::MIGRATIONS_KEY, []);
+    $migrations = apply_filters('wp_stateless_get_migrations', []);
     $existing = array_keys($migrations);
 
     foreach ($ids as $id) {
@@ -241,7 +242,7 @@ class Migrator {
         'title' => __('WP-Stateless: Data Optimization Required', ud_get_stateless_media()->domain),
         'message' => __('WP-Stateless has been updated! Your WP-Stateless data must now be optimized. <strong>Please backup your database before proceeding with the optimization.</strong>', ud_get_stateless_media()->domain),
         'button' => __('Optimize Data', ud_get_stateless_media()->domain),
-        'button_link' => admin_url('upload.php?page=stateless-settings&tab=stless_status_tab'),
+        'button_link' => admin_url('upload.php?page=stateless-settings&tab=stless_status_tab#migration-action'),
         'key' => 'migrations-required',
         'dismiss' => false,
         'classes' => ($notify == self::NOTIFY_REQUIRE) && !$is_running ? '' : 'hidden',
@@ -251,7 +252,7 @@ class Migrator {
         'title' => __('WP-Stateless: Data Optimization in Progress', ud_get_stateless_media()->domain),
         'message' => __('A background process is optimizing your WP-Stateless data. <strong>Please do not upload, change, or delete your media while this update is underway.</strong>', ud_get_stateless_media()->domain),
         'button' => __('View Progress', ud_get_stateless_media()->domain),
-        'button_link' => admin_url('upload.php?page=stateless-settings&tab=stless_status_tab'),
+        'button_link' => admin_url('upload.php?page=stateless-settings&tab=stless_status_tab#migration-action'),
         'key' => 'migrations-running',
         'dismiss' => false,
         'classes' => $is_running ? '' : 'hidden',
@@ -275,7 +276,7 @@ class Migrator {
    * @param string $file
    */
   public function migration_started($class, $file) {
-    $migrations = get_option(self::MIGRATIONS_KEY, []);
+    $migrations = apply_filters('wp_stateless_get_migrations', []);
     $id = $this->_file_to_id($file);
 
     if ( array_key_exists($id, $migrations) ) {
@@ -295,7 +296,7 @@ class Migrator {
    * @param string $message 
    */
   public function migration_failed($class, $file, $message) {
-    $migrations = get_option(self::MIGRATIONS_KEY, []);
+    $migrations = apply_filters('wp_stateless_get_migrations', []);
     $id = $this->_file_to_id($file);
 
     if ( array_key_exists($id, $migrations) ) {
@@ -312,8 +313,8 @@ class Migrator {
    *
    * @param string $class
    */
-  public function migration_finished($class) {
-    $migrations = get_option(self::MIGRATIONS_KEY, []);
+  public function migration_finished($class, $state) {
+    $migrations = apply_filters('wp_stateless_get_migrations', []);
     $id = $this->_class_to_id($class);
 
     if ( array_key_exists($id, $migrations) ) {
@@ -322,6 +323,30 @@ class Migrator {
 
       update_option(self::MIGRATIONS_KEY, $migrations);
       $this->_check_required_migrations($migrations);
+    }
+
+    // When started from the UI, run next migration if needed
+    if ( !empty($state['queue']) && is_array($state['queue']) ) {
+      $index = array_search($id, $state['queue']);
+      $next_index = false;
+
+      if ( $index !== false && isset($state['queue'][$index + 1]) ) {
+        $next_index = $state['queue'][$index + 1];
+      }
+
+      if ( $next_index === false ) {
+        return;
+      }
+
+      $params = [
+        'is_migration' => true,
+        'id' => $next_index,
+        'email' => $state['email'],
+        'queue' => implode(':', $state['queue']),
+        'action' => 'start',
+      ];
+
+      apply_filters("wp_stateless_batch_action_start", [], $params);
     }
   }
 
@@ -340,7 +365,7 @@ class Migrator {
     }
     
     $id = $params['id'];
-    $migrations = get_option(self::MIGRATIONS_KEY, []);
+    $migrations = apply_filters('wp_stateless_get_migrations', []);
 
     // Unknown migration?
     if ( !array_key_exists($id, $migrations) ) {
@@ -368,9 +393,26 @@ class Migrator {
     }
 
     $email = $params['email'] ?? '';
+    $queue = isset($params['queue']) ? explode(':', $params['queue']) : [];
 
-    BatchTaskManager::instance()->start_task($class, $file, $email);
+    BatchTaskManager::instance()->start_task($class, $file, $email, $queue);
 
     return apply_filters('wp_stateless_batch_state', $state, []);
+  }
+
+  /**
+   * Get the list of migrations
+   * 
+   * @param array $migrations
+   * @return array
+   */
+  public function get_migrations($migrations) {
+    // We need to omit the cache and get the data directly from the db
+    global $wpdb;
+
+    $sql = $wpdb->prepare("SELECT option_value FROM $wpdb->options WHERE option_name = '%s' LIMIT 1", self::MIGRATIONS_KEY);
+    $migrations = $wpdb->get_var($sql);
+
+    return empty($migrations) ? [] : maybe_unserialize($migrations);
   }
 }

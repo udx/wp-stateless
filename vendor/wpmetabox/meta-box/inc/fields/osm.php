@@ -9,6 +9,7 @@ class RWMB_OSM_Field extends RWMB_Field {
 		self::enqueue_map_assets();
 
 		wp_enqueue_style( 'rwmb-osm', RWMB_CSS_URL . 'osm.css', [ 'leaflet' ], RWMB_VER );
+		wp_style_add_data( 'rwmb-osm', 'path', RWMB_CSS_DIR . 'osm.css' );
 		wp_enqueue_script( 'rwmb-osm', RWMB_JS_URL . 'osm.js', [ 'jquery', 'jquery-ui-autocomplete', 'leaflet' ], RWMB_VER, true );
 
 		RWMB_Helpers_Field::localize_script_once( 'rwmb-osm', 'RWMB_Osm', [
@@ -80,39 +81,52 @@ class RWMB_OSM_Field extends RWMB_Field {
 	 * @return mixed Array(latitude, longitude, zoom)
 	 */
 	public static function get_value( $field, $args = [], $post_id = null ) {
-		$value                               = parent::get_value( $field, $args, $post_id );
+		$value = parent::get_value( $field, $args, $post_id );
+
+		if ( is_array( $value ) ) {
+			$location = [];
+			foreach ( $value as $clone ) {
+				list( $latitude, $longitude, $zoom ) = explode( ',', $clone . ',,' );
+				$location[]                            = compact( 'latitude', 'longitude', 'zoom' );
+			}
+			return $location;
+		}
+
 		list( $latitude, $longitude, $zoom ) = explode( ',', $value . ',,' );
 		return compact( 'latitude', 'longitude', 'zoom' );
 	}
 
 	/**
-	 * Output the field value.
-	 * Display Open Street Map using Leaflet
-	 *
-	 * @param  array    $field   Field parameters.
-	 * @param  array    $args    Additional arguments for the map.
-	 * @param  int|null $post_id Post ID. null for current post. Optional.
-	 *
-	 * @return string HTML output of the field
+	 * Format value before render map
+	 * @param mixed $field
+	 * @param mixed $value
+	 * @param mixed $args
+	 * @param mixed $post_id
+	 * @return string
 	 */
-	public static function the_value( $field, $args = [], $post_id = null ) {
-		$value = parent::get_value( $field, $args, $post_id );
+	public static function format_single_value( $field, $value, $args, $post_id ): string {
 		return self::render_map( $value, $args );
 	}
 
 	/**
 	 * Render a map in the frontend.
 	 *
-	 * @param string $location The "latitude,longitude[,zoom]" location.
+	 * @param string|array $location The "latitude,longitude[,zoom]" location.
 	 * @param array  $args     Additional arguments for the map.
 	 *
 	 * @return string
 	 */
 	public static function render_map( $location, $args = [] ) {
-		list( $latitude, $longitude, $zoom ) = explode( ',', $location . ',,' );
-		if ( ! $latitude || ! $longitude ) {
-			return '';
+        // For compatibility with previous version, or within groups.
+		if ( is_string( $location ) ) {
+			list( $latitude, $longitude, $zoom ) = explode( ',', $location . ',,' );
+		} else {
+			extract( $location );
 		}
+
+        if ( ! $latitude || ! $longitude ) {
+            return '';
+        }
 
 		$args = wp_parse_args( $args, [
 			'latitude'     => $latitude,
@@ -129,6 +143,7 @@ class RWMB_OSM_Field extends RWMB_Field {
 		self::enqueue_map_assets();
 		wp_enqueue_script( 'rwmb-osm-frontend', RWMB_JS_URL . 'osm-frontend.js', [ 'jquery', 'leaflet' ], RWMB_VER, true );
 		wp_enqueue_style( 'rwmb-osm-frontend', RWMB_CSS_URL . 'osm-frontend.css', [], RWMB_VER );
+		wp_style_add_data( 'rwmb-osm-frontend', 'path', RWMB_CSS_DIR . 'osm-frontend.css' );
 
 		/*
 		 * More Open Street Map options

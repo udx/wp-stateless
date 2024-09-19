@@ -28,6 +28,7 @@ class StatelessInfo {
     add_filter('wp_stateless_status_info_values_stateless', [$this, 'get_settings_values'], 10);
     add_filter('wp_stateless_status_info_values_stateless', [$this, 'get_settings_constants'], 20);
     add_filter('wp_stateless_status_info_values_stateless', [$this, 'get_media_stats'], 30);
+    add_filter('wp_stateless_status_info_values_stateless', [$this, 'get_migrations'], 40);
     add_filter('wp_stateless_status_info_values_stateless', [$this, 'prepare_values'], 99);
 
     add_filter('wp_stateless_status_info_stateless_value', [$this, 'format_value'], 10, 3);
@@ -360,9 +361,6 @@ class StatelessInfo {
       return $values;
     }
 
-    $compatibility_files = array_filter(array_unique(apply_filters('sm:sync::nonMediaFiles', [])));
-    $compatibility_files = count($compatibility_files);
-
     $rows = [
       'files' => [
         'label' => __('Total Files', ud_get_stateless_media()->domain),
@@ -374,7 +372,7 @@ class StatelessInfo {
       ],
       'compatibility_files' => [
         'label' => __('Compatibility Files', ud_get_stateless_media()->domain),
-        'value' => $compatibility_files,
+        'value' => ud_stateless_db()->get_total_non_media_files(),
       ],
     ];
 
@@ -389,5 +387,32 @@ class StatelessInfo {
     }
 
     return $values;
+  }
+
+  public function get_migrations($values) {
+    if (is_network_admin()) {
+      return $values;
+    }
+
+    $state = apply_filters("wp_stateless_batch_state", [], ['force_migrations' => true]);
+
+    if ( !is_array($state) || !isset( $state['migrations'] ) ) {
+      return $value;
+    }
+
+    $migrations = [];
+
+    foreach ($state['migrations'] as $key => $migration) {
+      $migrations[] = sprintf( '%s: %s', $key, $migration['status_text'] );
+    }
+
+    $rows = [
+      'migrations' => [
+        'label' => __('Data Optimization', ud_get_stateless_media()->domain),
+        'value' => implode(', ', $migrations),
+      ],
+    ];
+
+    return $values + $rows;
   }
 }
