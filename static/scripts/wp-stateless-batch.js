@@ -15,8 +15,13 @@ wpStatelessBatch = {
     clearInterval(this.interval)
   },
 
-  updateState: function(state) {
-    var event = new CustomEvent('wp-stateless-batch-state-updated', { detail: state })
+  updateState: function(state, action = false) {
+    var detail = {
+      state,
+      action,
+    }
+
+    var event = new CustomEvent('wp-stateless-batch-state-updated', { detail })
     
     document.dispatchEvent(event)
 
@@ -54,7 +59,7 @@ wpStatelessBatch = {
       data: JSON.stringify(data),
     })
       .then(function (response) {
-        that.updateState(response.data)
+        that.updateState(response.data, true)
       })
       .fail(function (error) {
         that.processFail(error)
@@ -106,25 +111,25 @@ wpStatelessBatch.init()
  * Manage data updates
  */
 function wpMigrations($) {
-  function getId(element) {
-    return element.closest('.migration').data('id')
-  }
-
   function blockUI() {
-    $('#stless_status_tab .migration .button').addClass('disabled')
+    $('#migration-action .button').addClass('disabled')
   }
 
   function unblockUI() {
-    $('#stless_status_tab .migration .button').removeClass('disabled')
+    $('#migration-action .button').removeClass('disabled')
   }
 
   // Process state
   document.addEventListener('wp-stateless-batch-state-updated', function (e) {
-    var state = e.detail
+    var state = e.detail.state
+    // 'action' indicates that the action was just started. 
+    // If the migration was quick - the state is empty and we need to update the state
+    // Otherwise the state will contain the current running migration ID
+    var forceRefresh = e.detail.action && !state.hasOwnProperty('id')
 
-    if ( !state.is_migration && !state.hasOwnProperty('migrations') ) {
+    if ( (!state.is_migration && !state.hasOwnProperty('migrations')) || forceRefresh ) {
       // If have migrations running on the frontend - we should finalize it
-      if ( $('#stless_status_tab .migration.can-pause').length || $('#stless_status_tab .migration.can-resume').length ) {
+      if ( $('#migration-action.can-pause').length || $('#migration-action.can-resume').length || forceRefresh ) {
         wpStatelessBatch.getState({
           force_migrations: true,
         })
@@ -136,6 +141,68 @@ function wpMigrations($) {
     if ( !state.hasOwnProperty('migrations') ) {
       return
     }
+
+    // Check if we need to wait for other migrations to start
+    // If there are more migrations - wait 5 seconds and check again
+    if ( !state.is_running && !state.is_paused ) {
+      var migrationsCanStart = Object.values(state.migrations).some(function(migration) { return migration.can_start })
+      if ( migrationsCanStart ) {
+        setTimeout(function() {
+          wpStatelessBatch.getState()
+        }, 5000)
+  
+        return
+      } else {
+        $('.metabox-holder.migrations-wrap').remove()
+      }
+    }
+
+    var migrationElement = $('#migration-action')
+
+    if ( state.migrations &&  state.hasOwnProperty('is_migration') && state.hasOwnProperty('id') ) {
+      var migration = state.migrations[ state.id ];
+      migrationElement.attr('data-id', state.id)
+
+      if ( migration.can_start ) {
+        migrationElement.addClass('can-start')
+      } else {
+        migrationElement.removeClass('can-start')
+      }
+
+      if ( migration.can_pause ) {
+        migrationElement.addClass('can-pause')
+      } else {
+        migrationElement.removeClass('can-pause')
+      }
+
+      if ( migration.can_resume ) {
+        migrationElement.addClass('can-resume')
+      } else {
+        migrationElement.removeClass('can-resume')
+      }
+
+      if ( migration.hasOwnProperty('ui_message') && migration.ui_message ) {
+        migrationElement.find('.description').html(migration.ui_message)
+      } else {
+        migrationElement.find('.description').text('')
+      }
+    }
+
+    // Display progress
+    if ( state.is_running || state.is_paused ) {
+      if ( state.hasOwnProperty('total') && state.hasOwnProperty('completed') ) {
+        var migrationElement = $('#migration-action')
+  
+        var percent = state.total > 0 ? Math.floor( (state.completed / state.total) * 100 ) + '%' : ''
+        migrationElement.find('.progress .percent').html(percent)
+        migrationElement.find('.progress .bar').css('width', percent)
+      }
+    }
+  })
+
+  // Process notifications
+  document.addEventListener('wp-stateless-batch-state-updated', function (e) {
+    var state = e.detail.state
 
     var notify = state.hasOwnProperty('migrations_notify') ? state.migrations_notify : false
 
@@ -154,46 +221,6 @@ function wpMigrations($) {
         $('#stateless-notice-migrations-finished').removeClass('hidden')
       }
     }
-
-    if ( state.migrations ) {
-      for (var key of Object.keys(state.migrations)) {
-        var migration = state.migrations[key]
-        var migrationElement = $('#stless_status_tab .migration[data-id="' + key + '"]')
-
-        if ( migration.can_start ) {
-          migrationElement.addClass('can-start')
-        } else {
-          migrationElement.removeClass('can-start')
-        }
-
-        if ( migration.can_pause ) {
-          migrationElement.addClass('can-pause')
-        } else {
-          migrationElement.removeClass('can-pause')
-        }
-
-        if ( migration.can_resume ) {
-          migrationElement.addClass('can-resume')
-        } else {
-          migrationElement.removeClass('can-resume')
-        }
-
-        if (migration.message) {
-          migrationElement.find('.description').html(migration.message)
-        }
-      }
-    }
-
-    // Display progress
-    if ( state.is_running || state.is_paused ) {
-      if ( state.hasOwnProperty('total') && state.hasOwnProperty('completed') ) {
-        var migrationElement = $('#stless_status_tab .migration[data-id="' + state.id + '"]')
-  
-        var percent = state.total > 0 ? Math.floor( (state.completed / state.total) * 100 ) + '%' : ''
-        migrationElement.find('.progress .percent').html(percent)
-        migrationElement.find('.progress .bar').css('width', percent)
-      }
-    }
   })
 
   // Migration confirmation dialog
@@ -206,13 +233,23 @@ function wpMigrations($) {
     autoOpen: false,
     position: { my: "center", at: "center", of: window },
     open: function(event, ui) {
-      $(this).closest('.ui-dialog').find('.ui-button').addClass('button')
-      $(this).closest('.ui-dialog').find('.ui-button').last().addClass('button-primary')
       $('body').css('overflow', 'hidden')
+
+      $('.ui-dialog-buttonset').find('.ui-button').attr('class', 'button')
+      $('.ui-dialog-buttonset').find('.button').last().addClass('button-primary')
+
+      $('.ui-dialog').removeClass('ui-corner-all').addClass('stateless-migration-confirm');
+      $('.ui-dialog-titlebar').removeClass('ui-corner-all');
+
+      // backdrop
+      $('.ui-widget-overlay').attr('class', 'media-modal-backdrop');
     },
     close: function(event, ui) {
       unblockUI()
       $('body').css('overflow', 'auto')
+      $('#migration-action').removeClass('processing-action');
+      $('#migration-action').find('.button.start').removeClass('disabled');
+      $('#migration-action').find('.description').text( '' );
     },
     buttons: [
       {
@@ -229,7 +266,7 @@ function wpMigrations($) {
   })
 
   // Migration actions
-  $('#stless_status_tab .migration .button').click(function (e) {
+  $('#migration-action .button').click(function (e) {
     e.preventDefault()
 
     if ( $(e.target).hasClass('disabled') ) {
@@ -238,7 +275,7 @@ function wpMigrations($) {
     
     blockUI()
     
-    var id = getId( $(e.target) )
+    var id = $('#migration-action').data('id')
     var action = $(e.target).data('action')
 
     if ( !id || !action ) {
@@ -246,23 +283,30 @@ function wpMigrations($) {
     }
 
     if ( action === 'start' ) {
-      // Title
-      // var migrationElement = $('#stless_status_tab .migration[data-id="' + id + '"]')
-      // var title = migrationElement.find('.title strong').text()
-
-      // $( '#stateless-migration-confirm' ).dialog('option', 'title', title)
-      // $( '#stateless-migration-confirm' ).find('strong').text(title)
+      $( '#stateless-migration-confirm' ).attr('data-id', id)
 
       $('#stateless-migration-confirm').closest('.ui-dialog').find('.ui-dialog-buttonset .ui-button').first().click(function(e) {
         e.preventDefault()
 
         $( '#stateless-migration-confirm' ).dialog('close')
+        var id = $( '#stateless-migration-confirm' ).attr('data-id')
+        var migrationElement = $('#migration-action')
+
+        migrationElement.addClass('processing-action');
+        migrationElement.find('.button.start').addClass('disabled');
+        migrationElement.find('.description').text( stateless_l10n.starting );
 
         wpStatelessBatch.processAction(action, {
           id,
           is_migration: true,
           email: $('input[name="email-notification"]:checked').val(),
-        }, unblockUI)
+          queue: migrationElement.data('queue'),
+        }, function() {
+          unblockUI();
+          migrationElement.removeClass('processing-action');
+          migrationElement.find('.button.start').removeClass('disabled');
+          migrationElement.find('.description').text( '' );
+        })
       })
 
       $( "#stateless-migration-confirm" ).dialog('open')

@@ -114,7 +114,8 @@ class NonLibrarySync extends BackgroundSync {
       }
 
       $file_path = trim($item, '/');
-      $fullsizepath = $upload_dir['basedir'] . '/' . $file_path;
+      $basedir = ud_get_stateless_media()->is_mode('stateless') ? ud_get_stateless_media()->get_gs_path() : $upload_dir['basedir'];
+      $fullsizepath = $basedir . '/' . $file_path;
 
       do_action('sm:sync::syncFile', $file_path, $fullsizepath, true, ['remove_from_queue' => true, 'manual_sync' => true]);
 
@@ -174,8 +175,7 @@ class NonLibrarySync extends BackgroundSync {
    * @return int
    */
   public function get_total_items() {
-    $this->items = array_filter(array_unique(apply_filters('sm:sync::nonMediaFiles', [])));
-    return count($this->items);
+    return ud_stateless_db()->get_total_non_media_files();
   }
 
   public function extend_queue() {

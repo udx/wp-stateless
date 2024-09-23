@@ -3,7 +3,7 @@
  * Plugin Name: Meta Box Tabs
  * Plugin URI:  https://metabox.io/plugins/meta-box-tabs/
  * Description: Create tabs for meta boxes easily. Support 3 WordPress-native tab styles.
- * Version:     1.1.17
+ * Version:     1.1.18
  * Author:      MetaBox.io
  * Author URI:  https://metabox.io
  * License:     GPL2+
@@ -13,7 +13,9 @@
  */
 
 // Prevent loading this file directly.
-defined( 'ABSPATH' ) || die;
+if ( ! defined( 'ABSPATH' ) ) {
+	return;
+}
 
 if ( ! class_exists( 'MB_Tabs' ) ) {
 	class MB_Tabs {
@@ -49,8 +51,8 @@ if ( ! class_exists( 'MB_Tabs' ) ) {
 
 		public function enqueue( RW_Meta_Box $obj ) {
 			list( , $url ) = RWMB_Loader::get_path( __DIR__ );
-			wp_enqueue_style( 'rwmb-tabs', $url . 'tabs.css', [], '1.1.17' );
-			wp_enqueue_script( 'rwmb-tabs', $url . 'tabs.js', [ 'jquery' ], '1.1.17', true );
+			wp_enqueue_style( 'rwmb-tabs', $url . 'tabs.css', [], '1.1.18' );
+			wp_enqueue_script( 'rwmb-tabs', $url . 'tabs.js', [ 'jquery' ], '1.1.18', true );
 
 			if ( empty( $obj->meta_box['tabs'] ) ) {
 				return;

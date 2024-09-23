@@ -9,9 +9,6 @@ class Migration_20240219175240 extends Migration {
   const LIMIT = 0;
   const DESC = true;
 
-  // Indicates whether we should stop querying new items
-  private $stop = false;
-
   protected $id = '20240219175240';
 
   public function should_run() {
@@ -97,20 +94,6 @@ class Migration_20240219175240 extends Migration {
     
     return $batch;
   } 
-
-  public function get_state() {
-    $state = parent::get_state();
-    
-    $state['stop'] = $this->stop;
-
-    return $state;
-  }
-
-  public function set_state($state) {
-    parent::set_state($state);
-
-    $this->stop = $state['stop'] ?? false;
-  }
 
   /**
    * Get the 'generation' field from the GCS media link

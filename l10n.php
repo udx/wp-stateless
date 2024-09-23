@@ -88,5 +88,6 @@ $l10n = array(
   'confirm'                               => __('Confirm', ud_get_stateless_media()->domain ),
   'cancel'                                => __('Cancel', ud_get_stateless_media()->domain ),
   'start_optimization'                    => __('Start Data Optimization', ud_get_stateless_media()->domain ),
+  'starting'                              => __('Starting...', ud_get_stateless_media()->domain ),
 );
 

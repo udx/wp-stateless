@@ -1002,12 +1002,10 @@ namespace wpCloud\StatelessMedia {
        * @return string
        */
       public function handle_root_dir($current_path, $use_root = true, $attachment_id = '', $size = '') {
-        global $wpdb;
-
         //non media files
         if ($use_root === 0) {
-          $table_name = $wpdb->prefix . 'sm_sync';
-          $non_media = $wpdb->get_var($wpdb->prepare("SELECT file FROM {$table_name} WHERE file like '%%%s';", $current_path));
+          $non_media = ud_stateless_db()->get_non_library_file_name($current_path);
+
           if ($non_media) {
             return $non_media;
           }
@@ -1342,6 +1340,7 @@ namespace wpCloud\StatelessMedia {
             wp_enqueue_style('wp-stateless-settings');
             wp_enqueue_style('wp-stateless-addons');
             wp_enqueue_style('wp-stateless-status');
+            wp_enqueue_style( 'media-views' );
 
             // Sync tab
             wp_enqueue_script('wp-stateless');
@@ -1703,7 +1702,6 @@ namespace wpCloud\StatelessMedia {
        */
       public function run_upgrade_process() {
         // Creating database on new installation.
-        $this->create_sync_db();
         ud_stateless_db()->create_db();
 
         Migrator::instance()->migrate();
@@ -1712,35 +1710,6 @@ namespace wpCloud\StatelessMedia {
          * Maybe Upgrade current Version
          */
         Upgrader::call($this->args['version']);
-      }
-
-      /**
-       * Create SYNC database on plugin activation.
-       * @param boolean $force - whether to create db even if option exists. For debug purpose only.
-       */
-      public function create_sync_db($force = false) {
-        global $wpdb;
-        $sm_sync_db_version = get_option('sm_sync_db_version');
-
-        if ($sm_sync_db_version && $force == false) {
-          return;
-        }
-
-        $table_name = $wpdb->prefix . 'sm_sync';
-        $charset_collate = $wpdb->get_charset_collate();
-
-        // `expire` timestamp NULL DEFAULT NULL,
-        $sql = "CREATE TABLE $table_name (
-          `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT ,
-          `file` varchar(255) NOT NULL ,
-          `status` varchar(10) NOT NULL ,
-          PRIMARY KEY  (`id`)
-        ) $charset_collate;";
-
-        require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
-        dbDelta($sql);
-
-        add_option('sm_sync_db_version', $this->args['version']);
       }
 
       /**

@@ -1,5 +1,8 @@
 <?php
 
+use wpCloud\StatelessMedia\Migrator;
+use \wpCloud\StatelessMedia\Batch\BatchTaskManager;
+
 /**
  * WP CLI SM Commands
  */
@@ -151,7 +154,7 @@ if (defined('WP_CLI') && WP_CLI && class_exists('WP_CLI_Command')) {
      * ## OPTIONS
      *
      * <type>
-     * : Which data we want to upgrade
+     * : Which data we want to upgrade. Currently only 'meta' type is supported.
      *
      * --start
      * : Indent (sql start). It's ignored on batches.
@@ -244,8 +247,8 @@ if (defined('WP_CLI') && WP_CLI && class_exists('WP_CLI_Command')) {
      *
      * ## OPTIONS
      *
-     * [<id>]
-     * : start migration by its ID
+     * [<id|auto>]
+     * : start migration by its ID, or automatically run all pending migrations (auto). Auto mode does not support '--force' parameter.
      *
      * --force
      * : Force starting migration even if it is not pending
@@ -258,6 +261,10 @@ if (defined('WP_CLI') && WP_CLI && class_exists('WP_CLI_Command')) {
      * 
      * --url
      * : Blog URL if multisite installation.
+     * 
+     * --yes
+     * : Confirm automatically.
+     * 
      *
      * ## EXAMPLES
      *
@@ -273,13 +280,16 @@ if (defined('WP_CLI') && WP_CLI && class_exists('WP_CLI_Command')) {
      * wp stateless migrate 20240216150177
      * : Start migration with ID 20240216150177.
      *
-     * wp stateless migrate 20240216150177 --progress=2
-     * : Start migration with ID 20240216150177 and display progress every 2 seconds.
+     * wp stateless migrate auto --email=mail@example.com --yes
+     * : Automatically run all pending migrations without confirmation and send notifications to mail@example.com.
+     *
+     * wp stateless migrate 20240216150177 --progress=2 --yes
+     * : Start migration with ID 20240216150177 without confirmation and display progress every 2 seconds.
      *
      * wp stateless migrate 20240216150177 --force --email=mail@example.com,user@domain.com --url=example.com 
      * : Start migration with ID 20240216150177 for specific blog in multisite network. Start migration even if it was already finished or failed. After finishing send email notification to mail@example.com and user@domain.com.
      *
-     * @synopsis [<id>] [--force] [--progress=<val>] [--email=<val>] [--url=<val>]
+     * @synopsis [<id|auto>] [--force] [--progress=<val>] [--email=<val>] [--yes] [--url=<val>]
      * @param $args
      * @param $assoc_args
      */
@@ -292,39 +302,116 @@ if (defined('WP_CLI') && WP_CLI && class_exists('WP_CLI_Command')) {
 
         return;
       } else if ( !empty($id) ) {
-        // Check if we can run migration
-        $migrations = $this->_get_migrations();
+        if ( $id === 'auto' ) {
+          if ( isset($assoc_args['force']) ) {
+            WP_CLI::error( 'The parameter --force is not supported for auto mode.' );
 
-        if ( !isset($migrations[$id]) ) {
-          WP_CLI::error("Invalid migration ID: $id");
+            return;
+          }
+
+          $this->_auto_migrate($assoc_args);
+
+          return;
+        } else {
+          $this->_run_migration($id, $assoc_args);
         }
-
-        if ( !$migrations[$id]['can_start'] && !isset($assoc_args['force']) ) {
-          WP_CLI::error( 'Migration ' . $migrations[$id]['description'] . ' is not ready for starting. ' . PHP_EOL . 
-            'Migration status: ' . $migrations[$id]['status_text'] . ', ' . strip_tags($migrations[$id]['message']) . PHP_EOL . 
-            'Please use --force to run it anyway.'
-          );
-        }
-
-        $email = $assoc_args['email'] ?? ud_get_stateless_media()->get_notification_email();
-
-        WP_CLI::confirm( 'Please make a backup copy of your database and try not to upload, change or delete your media while the process continues.' . PHP_EOL . 
-          "After the process finishes an email will be sent to: $email" . PHP_EOL . 
-          "Are you sure you want to run the migration $id?", 
-          $assoc_args 
-        );
-
-        // Run migration
-        \wpCloud\StatelessMedia\Migrator::instance()->start_migration([], [
-          'id' => $id, 
-          'is_migration' => true,
-          'force' => true,
-        ]);
       }
 
-      if ( isset($assoc_args['progress']) ) {
+      if ( $id !== 'auto' && isset($assoc_args['progress']) ) {
         $this->_check_progress($assoc_args['progress']);
       }
+    }
+
+    /**
+     * Run all pending migrations
+     * 
+     * @param array $assoc_args
+     */
+    private function _auto_migrate($assoc_args) {
+      $progress = $assoc_args['progress'] ?? 1;
+
+      do {
+        // We need to omit the cache and get the data directly from the db
+        $migrations = apply_filters('wp_stateless_get_migrations', []);
+
+        $keys = array_reverse( array_keys($migrations) );
+        $id = null;
+
+        // Do we have next pending migration?
+        foreach ($keys as $key) {
+          if ( $migrations[$key]['status'] === Migrator::STATUS_PENDING ) {
+            $id = $key;
+            break;
+          }
+        }
+
+        if ( !empty($id) ) {
+          $command = "wp stateless migrate $id --yes --progress=$progress";
+
+          WP_CLI::line('...');
+          WP_CLI::line("Launching external command '{$command}'");
+          WP_CLI::line('Waiting...');
+  
+          @ob_flush();
+          flush();
+  
+          $r = SM_CLI::launch($command, false, true);
+
+          if ($r->return_code) {
+            WP_CLI::error("Something went wrong. External command process failed.");
+          } else {
+            echo $r->stdout;
+          }
+
+          continue;
+        }
+
+        break;
+
+      } while(true);
+
+      WP_CLI::success('No pending migrations left.');
+    }
+
+    /**
+     * Run the specific migration
+     * 
+     * @param string $id
+     * @param array $assoc_args
+     */
+    private function _run_migration($id, $assoc_args) {
+      $migrations = $this->_get_migrations();
+
+      if ( !isset($migrations[$id]) ) {
+        WP_CLI::error("Invalid migration ID: $id");
+      }
+
+      $migration = $migrations[$id];
+
+      // Check if we can run migration
+      if ( !$migration['can_start'] && !isset($assoc_args['force']) ) {
+        WP_CLI::error( 'Migration ' . $migration['description'] . ' is not ready for starting. ' . PHP_EOL . 
+          'Migration status: ' . $migration['status_text'] . ', ' . strip_tags($migration['message']) . PHP_EOL . 
+          'Please use --force to run it anyway.'
+        );
+      }
+
+      $email = $assoc_args['email'] ?? ud_get_stateless_media()->get_notification_email();
+
+      WP_CLI::line( 'Please make a backup copy of your database and try not to upload, change or delete your media while the process continues.' . PHP_EOL . 
+        "After the process finishes an email will be sent to: $email" . PHP_EOL 
+      );
+
+      WP_CLI::confirm( "Are you sure you want to run the migration $id?", $assoc_args );
+
+      // Run migration
+      Migrator::instance()->start_migration([], [
+        'id' => $id, 
+        'is_migration' => true,
+        'force' => true,
+      ]);
+
+      WP_CLI::success( "Started migration $id" );
     }
 
     /**
@@ -368,15 +455,12 @@ if (defined('WP_CLI') && WP_CLI && class_exists('WP_CLI_Command')) {
       global $wpdb;
 
       $sleep = max($progress, 1);
-      $key = \wpCloud\StatelessMedia\Batch\BatchTaskManager::instance()->get_state_key(); 
+      $key = BatchTaskManager::instance()->get_state_key(); 
 
-      if ( is_multisite() ) {
-        $sql = "SELECT meta_value FROM $wpdb->sitemeta WHERE meta_key = '%s' AND site_id = %d LIMIT 1";
-        $sql = $wpdb->prepare($sql, $key, get_current_network_id());
-      } else {
-        $sql = "SELECT option_value FROM $wpdb->options WHERE option_name = '%s' LIMIT 1";
-        $sql = $wpdb->prepare($sql, $key);
-      }
+      $sql = "SELECT option_value FROM $wpdb->options WHERE option_name = '%s' LIMIT 1";
+      $sql = $wpdb->prepare($sql, $key);
+
+      $description = '';
 
       do {
         // We need to omit the cache and get the data directly from the db
@@ -384,7 +468,9 @@ if (defined('WP_CLI') && WP_CLI && class_exists('WP_CLI_Command')) {
         $state = maybe_unserialize($state);
 
         if ( empty($state) || !isset($state['is_migration']) || !$state['is_migration'] ) {
-          WP_CLI::success('All migrations finished.');
+          $message = empty($description) ? 'Migration finished' : "Migration '$description' finished";
+          WP_CLI::success($message);
+
           return;
         }
 

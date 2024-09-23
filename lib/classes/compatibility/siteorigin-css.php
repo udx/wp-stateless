@@ -14,6 +14,8 @@ namespace wpCloud\StatelessMedia {
   if (!class_exists('wpCloud\StatelessMedia\SOCSS')) {
 
     class SOCSS extends Compatibility {
+      const STORAGE_PATH = 'so-css/';
+
       protected $id = 'so-css';
       protected $title = 'SiteOrigin CSS';
       protected $constant = 'WP_STATELESS_COMPATIBILITY_SOCSS';
@@ -26,24 +28,33 @@ namespace wpCloud\StatelessMedia {
        * @param $sm
        */
       public function module_init($sm) {
+        $this->plugin_version = defined('SOCSS_VERSION') ? SOCSS_VERSION : '';
+
+        add_filter('siteorigin_custom_css_file', array($this, 'get_custom_css_file'), 20, 1);
         add_filter('set_url_scheme', array($this, 'set_url_scheme'), 20, 3);
         add_action('admin_menu', array($this, 'action_admin_menu'), 3);
+        add_filter('sm:sync::syncArgs', array($this, 'sync_args'), 10, 4);
+        add_filter('sm:sync::nonMediaFiles', array($this, 'get_sync_files'), 20);
+      }
+
+      /**
+       * Get the position of 'so-css/' dir in the filename.
+       * 
+       * @param $name
+       * @return bool
+       */
+      protected function get_so_css($name) {
+        return strpos($name, self::STORAGE_PATH);
       }
 
       /**
        * Change Upload BaseURL when CDN Used.
        */
       public function action_admin_menu() {
-        if (current_user_can('edit_theme_options') && isset($_POST['siteorigin_custom_css_save'])) {
+        if ( current_user_can('edit_theme_options') && isset($_POST['siteorigin_custom_css_save']) ) {
           try {
             $prefix = apply_filters('wp_stateless_file_name', 'so-css', 0);
             do_action('sm:sync::deleteFiles', $prefix);
-            // die();
-            // $object_list = ud_get_stateless_media()->get_client()->list_objects("prefix=$prefix");
-            // $files_array = $object_list->getItems();
-            // foreach ($files_array as $file) {
-            //     do_action( 'sm:sync::deleteFile', $file->name );
-            // }
           } catch (Exception $e) {
           }
         }
@@ -57,19 +68,169 @@ namespace wpCloud\StatelessMedia {
        * @return string
        */
       public function set_url_scheme($url, $scheme, $orig_scheme) {
-        $position = strpos($url, 'so-css/');
-        if ($position !== false) {
-          $upload_data = wp_upload_dir();
+        $position = $this->get_so_css($url);
+
+        if ( $position !== false ) {
           $name = substr($url, $position);
+
+          $upload_data = wp_upload_dir();
           // We need to get the absolute path before adding the bucket dir to name.
-          $absolutePath = $upload_data['basedir'] . '/' . $name;
+          $absolutePath = ud_get_stateless_media()->is_mode('stateless') 
+            ? ud_get_stateless_media()->get_gs_path()
+            : $upload_data['basedir'];
+
+          $absolutePath .= '/' . $name;
+
           $name = apply_filters('wp_stateless_file_name', $name, 0);
+
           do_action('sm:sync::syncFile', $name, $absolutePath);
-          // echo "do_action( 'sm:sync::syncFile', $name, $absolutePath);\n";
+
           $url = ud_get_stateless_media()->get_gs_host() . '/' . $name;
         }
         return $url;
       }
+
+      /**
+       * Get custom CSS params.
+       * 'siteorigin_custom_css_file' hook doesn't pass the $theme and $post_id, so we need to get them from the backtrace.
+       */
+      protected function get_custom_css_params() {
+        $theme = null;
+        $post_id = null;
+
+        $functions = [
+          'get_custom_css',
+          'save_custom_css_file',
+          'enqueue_custom_css',
+        ];
+
+        $backtrace = debug_backtrace();
+
+        foreach ( $backtrace as $trace ) {
+          if ( !isset( $trace['function'] ) || !isset( $trace['class'] ) 
+            || $trace['class'] !== 'SiteOrigin_CSS' || !in_array( $trace['function'], $functions ) ) {
+            continue;
+          }
+
+          $args = $trace['args'] ?? [];
+
+          switch( $trace['function'] ) {
+            case 'save_custom_css_file':
+              $theme = $args[1] ?? null;
+              $post_id = $args[2] ?? null;
+              break;
+            default:
+              $theme = $args[0] ?? null;
+              $post_id = $args[1] ?? null;
+          }
+        }
+
+        return [$theme, $post_id];
+      }
+
+      /**
+       * Get custom CSS file name. Create a file if it doesn't exist to make it accessible.
+       * 
+       * @param string $custom_css_file
+       * @return array
+       */
+      public function get_custom_css_file($custom_css_file) {
+        if ( !ud_get_stateless_media()->is_mode('stateless') ) {
+          return $custom_css_file;
+        }
+
+        if ( class_exists('\SiteOrigin_CSS') ) {
+          $so_css = \SiteOrigin_CSS::single();
+
+          if ( $so_css && WP_Filesystem() ) {
+            global $wp_filesystem;
+
+            list($theme, $post_id) = $this->get_custom_css_params();
+
+            $filename = $so_css->get_css_file_name( $theme, $post_id );
+
+            $position = $this->get_so_css($filename);
+
+            if ( $position === false ) {
+              return $custom_css_file;
+            }
+
+            $name = substr($filename, $position);
+
+            $custom_css_file['file'] = ud_get_stateless_media()->get_gs_path() . '/' . $name;
+            $custom_css_file['url'] = ud_get_stateless_media()->get_gs_host() . '/' . $name;
+
+            if ( !$wp_filesystem->exists($custom_css_file['file']) ) {
+              $wp_filesystem->put_contents( $custom_css_file['file'], ' ' );
+            }
+          }
+        }
+
+        return $custom_css_file;
+      }
+
+      /**
+       * Update args when uploading/syncing file to GCS.
+       * 
+       * @param array $args
+       * @param string $name
+       * @param string $file
+       * @param bool $force
+       * 
+       * @return array
+       */
+      public function sync_args($args, $name, $file, $force) {
+        if ( $this->get_so_css($name) !== 0 ) {
+          return $args;
+        }
+
+        if ( ud_get_stateless_media()->is_mode('stateless') ) {
+          $args['name_with_root'] = false;
+        }
+
+        $args['source'] = 'SiteOrigin CSS';
+        $args['source_version'] = defined('SOCSS_VERSION') ? SOCSS_VERSION : '';
+
+        return $args;
+      }
+
+      /**
+       * Get the list of files to sync.
+       * 
+       * @param array $file_list
+       * @return array
+       */
+      public function get_sync_files($file_list) {
+        if ( !method_exists('\wpCloud\StatelessMedia\Utility', 'get_files') ) {
+          Helper::log('WP-Stateless version too old, please update.');
+
+          return $file_list;
+        }
+
+        $dir = apply_filters('wp_stateless_addon_sync_files_path', '', self::STORAGE_PATH); 
+
+        if (is_dir($dir)) {
+          // Getting all the files from dir recursively.
+          $files = Utility::get_files($dir);
+
+          // validating and adding to the $files array.
+          foreach ($files as $file) {
+            if (!file_exists($file)) {
+              continue;
+            }
+
+            $file = self::STORAGE_PATH . str_replace( $dir, '', wp_normalize_path($file) );
+            $file = trim($file, '/');
+
+            if ( !in_array($file, $file_list) ) {
+              $file_list[] = $file;
+            }
+          }
+        }
+          
+        return $file_list;
+      }
+
     }
   }
 }

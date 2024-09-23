@@ -15,7 +15,7 @@ namespace wpCloud\StatelessMedia {
       use Singleton;
 
       const DB_VERSION_KEY = 'sm_db_version';
-      const DB_VERSION = '1.0';
+      const DB_VERSION = '1.1';
       const FULL_SIZE = '__full';
 
       /**
@@ -42,11 +42,6 @@ namespace wpCloud\StatelessMedia {
        * File meta table name
        */
       private $file_meta = '';
-
-      /**
-       * Sync table name
-       */
-      private $sm_sync = '';
 
       /**
        * Cache group name
@@ -97,7 +92,6 @@ namespace wpCloud\StatelessMedia {
         $this->files = $this->wpdb->prefix . 'stateless_files';
         $this->file_sizes = $this->wpdb->prefix . 'stateless_file_sizes';
         $this->file_meta = $this->wpdb->prefix . 'stateless_file_meta';
-        $this->sm_sync = $this->wpdb->prefix . 'sm_sync';
 
         $image_host = ud_get_stateless_media()->get_gs_host();
         $this->bucket_link = apply_filters('wp_stateless_bucket_link', $image_host);
@@ -126,13 +120,14 @@ namespace wpCloud\StatelessMedia {
         add_action('wp_stateless_set_file', [$this, 'set_file'], 10, 2);
         add_action('wp_stateless_set_file_size', [$this, 'set_file_size'], 10, 3);
         add_action('wp_stateless_set_file_meta', [$this, 'update_file_meta'], 10, 3);
+        add_action('wp_stateless_get_non_library_files', [$this, 'get_non_library_files'], 10, 2);
       }
 
       /**
        * Getters
        */
       public function __get($property) {
-        if ( in_array($property, ['files', 'file_sizes', 'file_meta', 'sm_sync']) ) {
+        if ( in_array($property, ['files', 'file_sizes', 'file_meta']) ) {
           return $this->$property;
         }
       }
@@ -147,58 +142,73 @@ namespace wpCloud\StatelessMedia {
           return;
         }
 
-        $charset_collate = $this->wpdb->get_charset_collate();
+        try {
+          Upgrader::upgrade_db(self::DB_VERSION, $version);
 
-        $sql = "CREATE TABLE $this->files (
-          `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-          `post_id` bigint(20) unsigned NULL DEFAULT NULL,
-          `bucket` varchar(255) NOT NULL,
-          `name` varchar(255) NOT NULL,
-          `generation` bigint(16) NOT NULL,
-          `cache_control` varchar(255) NULL DEFAULT NULL,
-          `content_type` varchar(255) NULL DEFAULT NULL,
-          `content_disposition` varchar(100) NULL DEFAULT NULL,
-          `file_size` bigint(20) unsigned NULL DEFAULT NULL,
-          `width` int unsigned NULL DEFAULT NULL,
-          `height` int unsigned NULL DEFAULT NULL,
-          `stateless_version` varchar(20) NOT NULL,
-          `storage_class` varchar(50) NULL DEFAULT NULL,
-          `file_link` text NOT NULL,
-          `self_link` text NOT NULL,
-          PRIMARY KEY (`id`),
-          UNIQUE KEY post_id (post_id)
-        ) $charset_collate;
+          $charset_collate = $this->wpdb->get_charset_collate();
 
-        CREATE TABLE $this->file_sizes (
-          `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-          `post_id` bigint(20) unsigned NULL DEFAULT NULL,
-          `size_name` varchar(255) NOT NULL,
-          `name` varchar(255) NOT NULL,
-          `generation` bigint(16) NOT NULL,
-          `file_size` bigint(20) unsigned NULL DEFAULT NULL,
-          `width` int unsigned NULL DEFAULT NULL,
-          `height` int unsigned NULL DEFAULT NULL,
-          `file_link` text NOT NULL,
-          `self_link` text NOT NULL,
-          PRIMARY KEY (`id`),
-          KEY post_id (post_id),
-          UNIQUE KEY post_id_size (post_id, size_name)
-        ) $charset_collate;
+          /**
+           * Indexes for varchar(255) columns are limited for backward compatibility.
+           * Based on wp-admin/includes/schema.php (wp_get_db_schema function)
+           */
 
-        CREATE TABLE $this->file_meta (
-          `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-          `post_id` bigint(20) unsigned NULL DEFAULT NULL,
-          `meta_key` varchar(255) NOT NULL,
-          `meta_value` longtext NOT NULL,
-          PRIMARY KEY (`id`),
-          KEY post_id (post_id),
-          UNIQUE KEY post_id_key (post_id, meta_key)
-        ) $charset_collate;";
-
-        require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
-        dbDelta($sql);
-
-        update_option(self::DB_VERSION_KEY, self::DB_VERSION);
+          $sql = "CREATE TABLE $this->files (
+            `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+            `post_id` bigint(20) unsigned NULL DEFAULT NULL,
+            `bucket` varchar(255) NOT NULL,
+            `name` varchar(255) NOT NULL,
+            `generation` bigint(16) NOT NULL,
+            `cache_control` varchar(255) NULL DEFAULT NULL,
+            `content_type` varchar(255) NULL DEFAULT NULL,
+            `content_disposition` varchar(100) NULL DEFAULT NULL,
+            `file_size` bigint(20) unsigned NULL DEFAULT NULL,
+            `width` int unsigned NULL DEFAULT NULL,
+            `height` int unsigned NULL DEFAULT NULL,
+            `stateless_version` varchar(20) NOT NULL,
+            `storage_class` varchar(50) NULL DEFAULT NULL,
+            `file_link` text NOT NULL,
+            `self_link` text NOT NULL,
+            `source` varchar(50) NULL DEFAULT NULL,
+            `source_version` varchar(50) NULL DEFAULT NULL,
+            `status` varchar(10) NULL DEFAULT NULL,
+            PRIMARY KEY (`id`),
+            KEY post_id (post_id),
+            UNIQUE KEY `name` (`name`(191))
+          ) $charset_collate;
+  
+          CREATE TABLE $this->file_sizes (
+            `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+            `post_id` bigint(20) unsigned NULL DEFAULT NULL,
+            `size_name` varchar(255) NOT NULL,
+            `name` varchar(255) NOT NULL,
+            `generation` bigint(16) NOT NULL,
+            `file_size` bigint(20) unsigned NULL DEFAULT NULL,
+            `width` int unsigned NULL DEFAULT NULL,
+            `height` int unsigned NULL DEFAULT NULL,
+            `file_link` text NOT NULL,
+            `self_link` text NOT NULL,
+            PRIMARY KEY (`id`),
+            KEY post_id (post_id),
+            UNIQUE KEY post_id_size (post_id, size_name(150))
+          ) $charset_collate;
+  
+          CREATE TABLE $this->file_meta (
+            `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+            `post_id` bigint(20) unsigned NULL DEFAULT NULL,
+            `meta_key` varchar(255) NOT NULL,
+            `meta_value` longtext NOT NULL,
+            PRIMARY KEY (`id`),
+            KEY post_id (post_id),
+            UNIQUE KEY post_id_key (post_id, meta_key(150))
+          ) $charset_collate;";
+  
+          require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+          dbDelta($sql);
+  
+          update_option(self::DB_VERSION_KEY, self::DB_VERSION);
+        } catch (\Throwable $e) {
+          Helper::log($e->getMessage());
+        }
       }
 
       /**
@@ -213,7 +223,6 @@ namespace wpCloud\StatelessMedia {
           $this->wpdb->prefix . 'files',
           $this->wpdb->prefix . 'files_sizes',
           $this->wpdb->prefix . 'file_meta',
-          $this->wpdb->prefix . 'sm_sync',
         );
 
         $tables = implode(', ', $tables);
@@ -241,10 +250,43 @@ namespace wpCloud\StatelessMedia {
        * @return int | null
        */
       public function get_file_id($post_id) {
-        $sql = "SELECT id FROM $this->files WHERE post_id = %d";
+        $sql = "SELECT id FROM $this->files WHERE post_id = %d AND post_id IS NOT NULL";
         $id = $this->wpdb->get_var( $this->wpdb->prepare($sql, $post_id) );
 
         return $id ? (int) $id : null;
+      }
+
+      /**
+       * Get ID of the non-library file by file name and status 
+       * 
+       * @param string $name
+       * @param string $status
+       * @return int | null
+       */
+      public function get_non_library_file_id($name, $status = '') {
+        $sql = "SELECT id FROM $this->files WHERE name = %s AND post_id IS NULL";
+        $args = [$name];
+
+        if ( !empty($status) ) {
+          $sql .= " AND status = %s";
+          $args[] = $status;
+        }
+
+        $id = $this->wpdb->get_var( $this->wpdb->prepare($sql, ...$args) );
+
+        return $id ? (int) $id : null;
+      }
+
+      /**
+       * Get name of the non-library file by part of the name 
+       * 
+       * @param string $name
+       * @return string | null
+       */
+      public function get_non_library_file_name($name) {
+        $sql = "SELECT name FROM $this->files WHERE name like '%%%s' AND post_id IS NULL";
+
+        return $this->wpdb->get_var( $this->wpdb->prepare($sql, $name) );
       }
 
       /**
@@ -292,7 +334,7 @@ namespace wpCloud\StatelessMedia {
 
         return $cloud_meta;
       }
-
+      
       /**
        * Determine which data to update and run updates
        * 
@@ -403,7 +445,7 @@ namespace wpCloud\StatelessMedia {
        * @param array $media
        * @return array
        */
-      private function _get_file_from_media($media) {
+      private function _get_file_from_media($media, $status = '') {
         $name = $media['name'];
 
         $data =[
@@ -420,11 +462,46 @@ namespace wpCloud\StatelessMedia {
           'storage_class' => $media['storageClass'] ?? null,
           'file_link' => $this->get_file_link($name),
           'self_link' => $media['selfLink'] ?? '',
+          'status' => $status,
+          'source' => $media['metadata']['source'] ?? '',
+          'source_version' => $media['metadata']['sourceVersion'] ?? '',
         ];
 
         return $data;
       }
 
+      /**
+       * Update non Media Library file (compatibility files)
+       * 
+       * @param array $media - GCS media object
+       * @param string $source - source of the file
+       * @param string $status - status of the file
+       */
+      public function update_non_library_file($media, $status = '') {
+        if ( !is_array($media) || empty($media) || !isset($media['name']) ) {
+          Helper::log('Media object is not valid or empty. Unable to update non-library file.');
+
+          return;
+        }
+
+        $data = $this->_get_file_from_media($media, $status);
+        $file_id = $this->get_non_library_file_id($data['name'], $status);
+
+        if ( $file_id ) {
+          $this->wpdb->update(
+            $this->files,
+            $data,
+            ['id' => $file_id]
+          );
+        } else {
+          $this->wpdb->insert( $this->files, $data );
+
+          $file_id = $this->wpdb->insert_id;
+        }
+
+        return $file_id;
+      }        
+        
       /**
        * Update file data
        * 
@@ -730,6 +807,23 @@ namespace wpCloud\StatelessMedia {
       }
 
       /**
+       * Get the total non-media file sizes count known to WP-Stateless
+       * 
+       * @return int
+       */
+      public function get_total_non_media_files() {
+        global $wpdb;
+
+        try {
+          $query = "SELECT COUNT(id) FROM $this->files WHERE post_id IS NULL";
+
+          return $wpdb->get_var($query);
+        } catch (\Throwable $e) {
+          return 0;
+        }
+      }
+
+      /**
        * Get file data. If $with_sizes is set to true, all sizes will be included
        * 
        * @param array $meta
@@ -924,6 +1018,39 @@ namespace wpCloud\StatelessMedia {
         }
 
         return $data;
+      }
+
+      /**
+       * Get file row ID by file name 
+       * 
+       * @param string $name
+       * @return int | null
+       */
+      public function remove_non_library_file($name) {
+        return $this->wpdb->delete(
+          $this->files,
+          [
+            'name' => $name, 
+            'post_id' => null,
+          ]
+        );
+      }
+
+      /**
+       * Get all non-library files 
+       * 
+       * @param array $files
+       * @param string $prefix
+       * @return array | null
+       */
+      public function get_non_library_files($files, $prefix = '') {
+        if ( !empty($prefix) ) {
+          $sql = $this->wpdb->prepare("SELECT name FROM $this->files WHERE post_id IS NULL AND name LIKE '%s'", $this->wpdb->esc_like($prefix) . '%');
+        } else {
+          $sql = "SELECT name FROM $this->files WHERE post_id IS NULL";
+        }
+
+        return $this->wpdb->get_col($sql);
       }
     }
   }

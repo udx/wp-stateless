@@ -87,7 +87,14 @@ class BatchTaskManager extends \UDX_WP_Background_Process {
    * @return array
    */
   private function _get_state() {
-    return get_option( $this->identifier . self::STATE_KEY, [] );
+    // We need to omit the cache and get the data directly from the db
+    global $wpdb;
+
+    $sql = "SELECT option_value FROM $wpdb->options WHERE option_name = '%s' LIMIT 1";
+    $sql = $wpdb->prepare($sql, $this->identifier . self::STATE_KEY);
+    $state = $wpdb->get_var($sql);
+
+    return empty($state) ? [] : maybe_unserialize($state);
   }
 
   /**
@@ -160,13 +167,14 @@ class BatchTaskManager extends \UDX_WP_Background_Process {
    * @param string|null $file
    * @param string $email
    */
-  public function start_task($class, $file = null, $email = '') {
+  public function start_task($class, $file = null, $email = '', $queue = []) {
     try {
       // Prepare default state
       $defaults = [
         'class'       => $class,
         'file'        => $file,
         'email'       => $email,
+        'queue'       => $queue,
       ];
 
       $task_object = $this->_get_batch_task_object($defaults);
@@ -253,7 +261,7 @@ class BatchTaskManager extends \UDX_WP_Background_Process {
     parent::complete();
     $this->_delete_state();
 
-    do_action('wp_stateless_batch_task_finished', $class);
+    do_action('wp_stateless_batch_task_finished', $class, $state);
 
     $site = site_url();
     $subject = sprintf( __('WP-Stateless: Data Optimization Complete', ud_get_stateless_media()->domain) );

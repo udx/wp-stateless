@@ -99,31 +99,6 @@ namespace wpCloud\StatelessMedia {
           }
         }
 
-        if (!$version || version_compare($version, '2.2.0', '<')) {
-          $sm_synced_files = get_option('sm_synced_files', array());
-          if (!empty($sm_synced_files) && is_array($sm_synced_files)) {
-            $table_name = $wpdb->prefix . SyncNonMedia::table;
-            // Backing up the old data with autoload false.
-            // @todo delete in future release.
-            add_option('__sm_synced_files', $sm_synced_files, null, false);
-
-            $files = array();
-            $place_holders = array();
-            $query = "INSERT INTO $table_name (file, status) VALUES ";
-
-            $sm_synced_files = array_unique($sm_synced_files);
-            foreach ($sm_synced_files as $key => $file) {
-              array_push($files, $file, 'synced');
-              $place_holders[] = "('%s', '%s')"; /* In my case, i know they will always be integers */
-            }
-            $query .= implode(', ', $place_holders);
-            $query = $wpdb->prepare("$query ", $files);
-            $wpdb->query($query);
-
-            delete_option('sm_synced_files');
-          }
-        }
-
         if (!is_multisite() && $version && version_compare($version, '3.0', '<')) {
           self::migrate_root_dir();
           //updating mode name `stateless` to `ephemeral`
@@ -262,6 +237,26 @@ namespace wpCloud\StatelessMedia {
         }
 
         return $sm_root_dir;
+      }
+
+      /**
+       * Upgrade database, perform tasks that dbDelta can't do
+       * 
+       * @param string $new_version
+       * @param string $old_version
+       */
+      public static function upgrade_db($new_version, $old_version) {
+        global $wpdb;
+
+        if ( !empty($old_version) && version_compare($old_version, '1.1', '<') ) {
+          try {
+            // Remove UNIQUE indexes, which will be recreated later using dbDelta as non-unique
+            $wpdb->query('ALTER TABLE ' .  ud_stateless_db()->files . ' DROP INDEX post_id');
+
+          } catch (\Throwable $e) {
+            Helper::log($e->getMessage());
+          }
+        }
       }
     }
   }

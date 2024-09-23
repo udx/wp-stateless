@@ -88,7 +88,7 @@
       <p class="description">
         <strong id="notice-hashify_file_name"></strong>
         <span id="notice-hashify_file_name-mode">
-          <?php _e(sprintf("<b>Required by Stateless Mode. Override with the <a href='%s' target='_blank'>WP_STATELESS_MEDIA_CACHE_BUSTING</a> constant.</b>", ud_get_stateless_media()->get_docs_page_url('docs/constants/#wpstatelessmediacachebusting')), ud_get_stateless_media()->domain); ?>
+          <?php _e(sprintf("<b>Required by Stateless and Ephemeral modes. Override with the <a href='%s' target='_blank'>WP_STATELESS_MEDIA_CACHE_BUSTING</a> constant.</b>", ud_get_stateless_media()->get_docs_page_url('docs/constants/#wpstatelessmediacachebusting')), ud_get_stateless_media()->domain); ?>
         </span>
 
         <?php _e('Prepends a random set of numbers and letters to the filename. This is useful for preventing caching issues when uploading files that have the same filename.', ud_get_stateless_media()->domain); ?>

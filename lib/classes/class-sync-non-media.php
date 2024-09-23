@@ -11,15 +11,22 @@ namespace wpCloud\StatelessMedia {
 
     class SyncNonMedia {
 
+      /**
+       * Status constants 
+       */
+      const STATUS_SYNCED = 'synced';
+      const STATUS_QUEUED = 'queued';
+      const STATUS_COPIED = 'copied';
+      const STATUS_MOVED = 'moved';
+
+      /**
+       * @var array
+       * 
+       * List of directories to scan for compatibility files.
+       */
       private $registered_dir = array();
-      const table = 'sm_sync';
-      public $table_name;
 
       public function __construct() {
-        global $wpdb;
-        $this->table_name = $wpdb->prefix . self::table;
-        ud_get_stateless_media()->create_sync_db();
-
         // Manual sync using sync tab.
         // Return files to be manually sync from sync tab.
         add_filter('sm:sync::nonMediaFiles', array($this, 'sync_non_media_files'));
@@ -27,7 +34,9 @@ namespace wpCloud\StatelessMedia {
 
         // register a dir to sync from sync tab
         add_action('sm:sync::register_dir', array($this, 'register_dir'));
-        add_action('sm:sync::addFile', array($this, 'add_file'));
+        add_action('sm:sync::addFile', array($this, 'add_file'), 10, 2);
+        add_action('sm:sync::removeFile', array($this, 'remove_file'));
+
         // Sync a file.
         add_action('sm:sync::syncFile', array($this, 'sync_file'), 10, 4);
         add_action('sm:sync::copyFile', array($this, 'copy_file'), 10, 2);
@@ -47,15 +56,14 @@ namespace wpCloud\StatelessMedia {
           $this->registered_dir[] = $dir;
         }
       }
-
       /**
        * Add file to list of files to be sync from Sync tab.
        * Save the file path to database.
-       * @param
-       * $file: The file to register.
+       * @param array $media
+       * @param string $status
        */
-      public function add_file($file) {
-        $this->queue_add_file($file);
+      public function add_file($media, $status = self::STATUS_QUEUED) {
+        ud_stateless_db()->update_non_library_file( (array) $media, $status);
       }
 
       /**
@@ -82,7 +90,9 @@ namespace wpCloud\StatelessMedia {
           'name_with_root' => true,
         ));
 
-        if ($this->queue_is_exists($name, 'synced') && !$forced) {
+        $args = apply_filters('sm:sync::syncArgs', $args, $name, $absolutePath, $forced);
+
+        if ( apply_filters('sm:sync::queue_is_exists', $name, self::STATUS_SYNCED) && !$forced) {
           return false;
         }
 
@@ -131,6 +141,8 @@ namespace wpCloud\StatelessMedia {
               'metadata' => array(
                 'child-of' => dirname($name),
                 'file-hash' => md5($name),
+                'source' => $args['source'] ?? '',
+                'sourceVersion' => $args['source_version'] ?? '',
               ),
               'is_webp' => '',
             ));
@@ -167,6 +179,8 @@ namespace wpCloud\StatelessMedia {
               'metadata' => array(
                 'child-of' => dirname($name),
                 'file-hash' => md5($name),
+                'source' => $args['source'] ?? '',
+                'sourceVersion' => $args['source_version'] ?? '',
               ),
             ));
           }
@@ -181,12 +195,12 @@ namespace wpCloud\StatelessMedia {
 
           if (!$args['skip_db']) {
             // add file_path to the file list.
-            $this->queue_add_file($name, 'synced');
+            do_action('sm:sync::addFile', $media, self::STATUS_SYNCED);
           }
           return $media;
         } elseif (!$local_file_exists && $args['remove_from_queue']) {
           if (!$this->client->media_exists($name)) {
-            $this->queue_remove_file($name);
+            do_action('sm:sync::removeFile', $name);
             if ($args['manual_sync']) {
               throw new UnprocessableException(sprintf(__("Both local and remote files are missing. File: %s ", ud_get_stateless_media()->domain), $name));
             }
@@ -201,12 +215,12 @@ namespace wpCloud\StatelessMedia {
        */
       public function sync_non_media_files($files = array()) {
         $upload_dir = wp_upload_dir();
-        $files = array_merge($files, $this->queue_get_all());
+        $files = array_merge( $files, apply_filters('wp_stateless_get_non_library_files', array(), '') );
         foreach ($this->registered_dir as $key => $dir) {
           $dir = $upload_dir['basedir'] . "/" . trim($dir, '/') . "/";
           if (is_dir($dir)) {
             // Getting all the files from dir recursively.
-            $_files = $this->get_files($dir);
+            $_files = Utility::get_files($dir);
             // validating and adding to the $files array.
             foreach ($_files as $id => $file) {
               if (!file_exists($file)) {
@@ -223,30 +237,6 @@ namespace wpCloud\StatelessMedia {
 
         // $files = array_values(array_unique($files));
         return $files;
-      }
-
-      /**
-       * Return list of files in a dir.
-       * @param string $dir: Directory path
-       * @return array - Lists of files in the directory and subdirectory.
-       */
-      function get_files($dir) {
-        $return = array();
-        if (is_dir($dir) && $dh = opendir($dir)) {
-          while ($file = readdir($dh)) {
-            if ($file != '.' && $file != '..') {
-              if (is_dir($dir . $file)) {
-                // since it is a directory we recursively get files.
-                $arr = $this->get_files($dir . $file . '/');
-                $return = array_merge($return, $arr);
-              } else {
-                $return[] = $dir . $file;
-              }
-            }
-          }
-          closedir($dh);
-        }
-        return $return;
       }
 
       /**
@@ -268,7 +258,7 @@ namespace wpCloud\StatelessMedia {
           }
           // Removing file for GCS
           $this->client->remove_media($file, "", 0);
-          $this->queue_remove_file($file);
+          do_action('sm:sync::removeFile', $file);
           return true;
         } catch (\Exception $e) {
           return false;
@@ -291,31 +281,18 @@ namespace wpCloud\StatelessMedia {
         }
 
         // Removing the files one by one.
-        foreach ($this->queue_get_all($dir) as $key => $file) {
-          if (strpos($file, $dir) !== false) {
-            $this->client->remove_media($file, "", 0);
-            $this->queue_remove_file($file);
+        $files = apply_filters('wp_stateless_get_non_library_files', array(), $dir);
+
+        if ( !empty($files) ) {
+          foreach ($files as $key => $file) {
+            if (strpos($file, $dir) !== false) {
+              $this->client->remove_media($file, "", 0);
+              do_action('sm:sync::removeFile', $file);
+            }
           }
         }
 
         return true;
-      }
-
-      /**
-       * Return all the files from the database.
-       * @param string $prefix
-       * @return array of files
-       */
-      public function queue_get_all($prefix = '') {
-        global $wpdb;
-        if ($prefix) {
-          $files = $wpdb->get_col($wpdb->prepare("SELECT file FROM $this->table_name WHERE file like '%s'", $wpdb->esc_like($prefix) . '%'));
-        } else {
-          $files = $wpdb->get_col("SELECT file FROM $this->table_name");
-        }
-        if (!empty($files) && is_array($files))
-          return $files;
-        return array();
       }
 
       /**
@@ -325,28 +302,7 @@ namespace wpCloud\StatelessMedia {
        * @return mixed: non boolean true. number of item found in db.
        */
       public function queue_is_exists($file, $status = '') {
-        global $wpdb;
-        if (empty($status)) {
-          return $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM {$this->table_name} WHERE file = '%s';", $file));
-        } else {
-          return $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM {$this->table_name} WHERE file = '%s' AND status = '%s';", $file, $status));
-        }
-      }
-
-      /**
-       * Add file to the database.
-       * @param $file: Path of file relative to upload dir.
-       * @param string $status: optional. queued|synced
-       * @return bool
-       */
-      public function queue_add_file($file, $status = 'queued') {
-        global $wpdb;
-        if ($this->queue_is_exists($file)) {
-          return $wpdb->update($this->table_name, array('file' => $file, 'status' => $status), array('file' => $file), array('%s', '%s'), array('%s'));
-        } else {
-          return $wpdb->insert($this->table_name, array('file' => $file, 'status' => $status), array('%s', '%s'));
-        }
-        return false;
+        return ud_stateless_db()->get_non_library_file_id($file, $status);
       }
 
       /**
@@ -354,9 +310,8 @@ namespace wpCloud\StatelessMedia {
        * @param $file: Path of file relative to upload dir.
        * @return mixed
        */
-      public function queue_remove_file($file) {
-        global $wpdb;
-        return $wpdb->delete($this->table_name, array('file' => $file), array('%s'));
+      public function remove_file($file) {
+        ud_stateless_db()->remove_non_library_file($file);
       }
 
       /**
@@ -367,18 +322,19 @@ namespace wpCloud\StatelessMedia {
        * @param string $status
        * @return bool
        */
-      public function copy_file($old_file, $new_file, $force = false, $status = 'copied') {
+      public function copy_file($old_file, $new_file, $force = false, $status = self::STATUS_COPIED) {
         try {
-          if (!$force && $this->queue_is_exists($new_file, $status)) {
+          if ( !$force && apply_filters('sm:sync::queue_is_exists', $new_file, $status) ) {
             return false;
           }
 
           $client = $this->get_gs_client();
 
-          // Removing file for GCS
-          $client->copy_media($old_file, $new_file);
+          // Copying file on GCS
+          $media = $client->copy_media($old_file, $new_file);
 
-          $this->queue_add_file($new_file, $status);
+          do_action('sm:sync::addFile', $media, $status);
+
           return true;
         } catch (\Exception $e) {
           return false;
@@ -394,10 +350,9 @@ namespace wpCloud\StatelessMedia {
       public function move_file($old_file, $new_file) {
         try {
 
-          $this->copy_file($old_file, $new_file, true, 'moved');
+          $this->copy_file($old_file, $new_file, true, self::STATUS_MOVED);
           $this->delete_file($old_file);
 
-          $this->queue_remove_file($old_file);
           return true;
         } catch (\Exception $e) {
           return false;
@@ -426,7 +381,7 @@ namespace wpCloud\StatelessMedia {
 
         $file = trim($file, '/');
 
-        $this->queue_remove_file($file);
+        do_action('sm:sync::removeFile', $file);
       }
     }
   }
