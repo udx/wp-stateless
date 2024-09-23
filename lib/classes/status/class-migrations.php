@@ -119,6 +119,37 @@ class Migrations {
   }
 
   /**
+   * Generate the UI message for the migration, depending on the current state
+   * 
+   * @param string $id
+   * @param array $migration
+   * @return string
+   */
+  private function _get_migration_ui_message($status, $state) {
+    $message = '';
+    $counter = false;
+
+    if ( isset( $state['id'] ) && isset( $state['queue'] ) && is_array( $state['queue'] ) && count( $state['queue'] ) > 1 ) {
+      $counter = sprintf( '%d/%d', array_search($state['id'], $state['queue']) + 1, count($state['queue']) );
+    }
+
+    switch ($status) {
+      case Migrator::STATUS_RUNNING:
+        $message = $counter 
+          ? sprintf( __('In progress %s...', ud_get_stateless_media()->domain), $counter) 
+          : __('In progress...', ud_get_stateless_media()->domain);
+        break;
+      case Migrator::STATUS_PAUSED:
+        $message = $counter 
+          ? sprintf( __('Paused %s...', ud_get_stateless_media()->domain), $counter) 
+          : __('Paused...', ud_get_stateless_media()->domain);
+        break;
+    }
+
+    return $message;
+  }
+
+  /**
    * Returns the status of the migration
    * 
    * @param string $status
@@ -146,7 +177,7 @@ class Migrations {
    */
   private function _get_migrations_state($state = null) {
     $migrations = [];
-    $this->migrations = get_option(Migrator::MIGRATIONS_KEY, []);
+    $this->migrations = apply_filters('wp_stateless_get_migrations', []);
 
     if ( !is_array($this->migrations) ) {
       $this->migrations = [];
@@ -157,6 +188,7 @@ class Migrations {
       'status'      => '',
       'status_text' => '',
       'message'     => '',
+      'ui_message'  => '',
       'can_start'   => false,
       'can_pause'   => false,
       'can_resume'  => false,
@@ -197,6 +229,7 @@ class Migrations {
         'classes'     => implode( ' ', array_filter($classes) ),
         'status_text' => self::get_status_text($status),
         'message'     => $this->_get_migration_message($id, $migration),
+        'ui_message'  => $this->_get_migration_ui_message($status, $batch_state),
         'can_start'   => $can_start,
         'can_pause'   => $can_pause,
         'can_resume'  => $can_resume,
@@ -217,9 +250,20 @@ class Migrations {
     }
 
     $migrations = $this->_get_migrations_state();
+    $migration_ids = [];
 
     if ( !empty($migrations) ) {
-      $migrations = Helper::array_of_objects($migrations);
+      foreach ( $migrations as $migration_id => $migration ) {
+        if ( $migration['status'] != Migrator::STATUS_FINISHED && $migration['status'] != Migrator::STATUS_SKIPPED ) {
+          $migration_ids[] = $migration_id;
+        }
+      }
+    }
+
+    if ( !empty($migration_ids) ) {
+      $migration_ids = array_reverse($migration_ids);
+      $migration_id = $migration_ids[0];
+      $migration = $migrations[ $migration_id ];
 
       include ud_get_stateless_media()->path('static/views/status-sections/migrations.php', 'dir');
     }

@@ -18,6 +18,7 @@
 namespace Google\Service\Storage\Resource;
 
 use Google\Service\Storage\Bucket;
+use Google\Service\Storage\BucketStorageLayout;
 use Google\Service\Storage\Buckets as BucketsModel;
 use Google\Service\Storage\Policy;
 use Google\Service\Storage\TestIamPermissionsResponse;
@@ -44,6 +45,7 @@ class Buckets extends \Google\Service\Resource
    * its metageneration does not match this value.
    * @opt_param string userProject The project to be billed for this request.
    * Required for Requester Pays buckets.
+   * @throws \Google\Service\Exception
    */
   public function delete($bucket, $optParams = [])
   {
@@ -67,6 +69,7 @@ class Buckets extends \Google\Service\Resource
    * @opt_param string userProject The project to be billed for this request.
    * Required for Requester Pays buckets.
    * @return Bucket
+   * @throws \Google\Service\Exception
    */
   public function get($bucket, $optParams = [])
   {
@@ -86,12 +89,33 @@ class Buckets extends \Google\Service\Resource
    * @opt_param string userProject The project to be billed for this request.
    * Required for Requester Pays buckets.
    * @return Policy
+   * @throws \Google\Service\Exception
    */
   public function getIamPolicy($bucket, $optParams = [])
   {
     $params = ['bucket' => $bucket];
     $params = array_merge($params, $optParams);
     return $this->call('getIamPolicy', [$params], Policy::class);
+  }
+  /**
+   * Returns the storage layout configuration for the specified bucket. Note that
+   * this operation requires storage.objects.list permission.
+   * (buckets.getStorageLayout)
+   *
+   * @param string $bucket Name of a bucket.
+   * @param array $optParams Optional parameters.
+   *
+   * @opt_param string prefix An optional prefix used for permission check. It is
+   * useful when the caller only has storage.objects.list permission under a
+   * specific prefix.
+   * @return BucketStorageLayout
+   * @throws \Google\Service\Exception
+   */
+  public function getStorageLayout($bucket, $optParams = [])
+  {
+    $params = ['bucket' => $bucket];
+    $params = array_merge($params, $optParams);
+    return $this->call('getStorageLayout', [$params], BucketStorageLayout::class);
   }
   /**
    * Creates a new bucket. (buckets.insert)
@@ -111,6 +135,7 @@ class Buckets extends \Google\Service\Resource
    * it defaults to full.
    * @opt_param string userProject The project to be billed for this request.
    * @return Bucket
+   * @throws \Google\Service\Exception
    */
   public function insert($project, Bucket $postBody, $optParams = [])
   {
@@ -134,6 +159,7 @@ class Buckets extends \Google\Service\Resource
    * @opt_param string projection Set of properties to return. Defaults to noAcl.
    * @opt_param string userProject The project to be billed for this request.
    * @return BucketsModel
+   * @throws \Google\Service\Exception
    */
   public function listBuckets($project, $optParams = [])
   {
@@ -152,6 +178,7 @@ class Buckets extends \Google\Service\Resource
    * @opt_param string userProject The project to be billed for this request.
    * Required for Requester Pays buckets.
    * @return Bucket
+   * @throws \Google\Service\Exception
    */
   public function lockRetentionPolicy($bucket, $ifMetagenerationMatch, $optParams = [])
   {
@@ -182,6 +209,7 @@ class Buckets extends \Google\Service\Resource
    * @opt_param string userProject The project to be billed for this request.
    * Required for Requester Pays buckets.
    * @return Bucket
+   * @throws \Google\Service\Exception
    */
   public function patch($bucket, Bucket $postBody, $optParams = [])
   {
@@ -199,6 +227,7 @@ class Buckets extends \Google\Service\Resource
    * @opt_param string userProject The project to be billed for this request.
    * Required for Requester Pays buckets.
    * @return Policy
+   * @throws \Google\Service\Exception
    */
   public function setIamPolicy($bucket, Policy $postBody, $optParams = [])
   {
@@ -217,6 +246,7 @@ class Buckets extends \Google\Service\Resource
    * @opt_param string userProject The project to be billed for this request.
    * Required for Requester Pays buckets.
    * @return TestIamPermissionsResponse
+   * @throws \Google\Service\Exception
    */
   public function testIamPermissions($bucket, $permissions, $optParams = [])
   {
@@ -247,6 +277,7 @@ class Buckets extends \Google\Service\Resource
    * @opt_param string userProject The project to be billed for this request.
    * Required for Requester Pays buckets.
    * @return Bucket
+   * @throws \Google\Service\Exception
    */
   public function update($bucket, Bucket $postBody, $optParams = [])
   {

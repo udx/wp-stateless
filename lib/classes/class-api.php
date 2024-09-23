@@ -316,8 +316,15 @@ namespace wpCloud\StatelessMedia {
 
           $action = $params['action'];
 
+          $data = apply_filters("wp_stateless_batch_action_$action", [], $params);
+
+          $data = array_merge(
+            $data,
+            apply_filters("wp_stateless_batch_state", [], ['force_migrations' => true]),
+          );
+
           return new \WP_REST_Response(array(
-            'data' => apply_filters("wp_stateless_batch_action_$action", [], $params),
+            'data' => $data,
           ));
         } catch (\Throwable $e) {
           return new \WP_Error('internal_server_error', $e->getMessage(), ['status' => 500]);

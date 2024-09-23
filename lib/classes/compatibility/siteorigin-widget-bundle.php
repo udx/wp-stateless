@@ -13,6 +13,8 @@ namespace wpCloud\StatelessMedia {
   if (!class_exists('wpCloud\StatelessMedia\SOWidgetCSS')) {
 
     class SOWidgetCSS extends Compatibility {
+      const STORAGE_PATH = 'siteorigin-widgets/';
+
       protected $id = 'so-widget-css';
       protected $title = 'SiteOrigin Widget Bundle';
       protected $constant = 'WP_STATELESS_COMPATIBILITY_SOWB';
@@ -21,37 +23,91 @@ namespace wpCloud\StatelessMedia {
       protected $non_library_sync = true;
       protected $enabled = false;
       protected $is_internal = true;
+      protected $filesystem = null;
 
       /**
        * @param $sm
        */
       public function module_init($sm) {
-        add_filter('set_url_scheme', array($this, 'set_url_scheme'), 20, 3);
+        if ( !class_exists('\WP_Filesystem_Direct') ) {
+          require_once(ABSPATH . 'wp-admin/includes/class-wp-filesystem-base.php');
+          require_once(ABSPATH . 'wp-admin/includes/class-wp-filesystem-direct.php');
+        }
+    
+        $this->filesystem = new \WP_Filesystem_Direct( false );
+
+        add_filter('set_url_scheme', array($this, 'set_url_scheme'), 20);
         add_filter('pre_set_transient_sow:cleared', array($this, 'clear_file_cache'), 20, 3);
-        add_filter('siteorigin_widgets_sanitize_instance', array($this, 'delete_file'), 10, 3);
+        add_filter('siteorigin_widgets_stylesheet_cleared', array($this, 'widgets_stylesheet_cleared'), 20);
         add_filter('stateless_skip_cache_busting', array($this, 'skip_cache_busting'), 10, 2);
-        // Manual sync from Sync tab.
-        do_action('sm:sync::register_dir', '/siteorigin-widgets/');
+        add_filter('sm:sync::syncArgs', array($this, 'sync_args'), 10, 4);
+
+        add_action('siteorigin_widgets_stylesheet_added', array($this, 'widgets_stylesheet_added'), 10, 2);
+        add_action('siteorigin_widgets_stylesheet_deleted', array($this, 'delete_file'), 10, 1);
+
+        do_action('sm:sync::register_dir', '/' . self::STORAGE_PATH);
       }
 
       /**
-       * Change Upload BaseURL when CDN Used.
+       * In Stateless mode move file to proper location.
+       */
+      protected function possibly_move_file($name, $destination) {
+        if ( !ud_get_stateless_media()->is_mode('stateless') ) {
+          return;
+        }
+
+        $upload_dir = wp_upload_dir();
+        $source = $upload_dir['basedir'] . '/' . $name;
+
+        $this->filesystem->move( $source, $destination, true );
+      }
+
+      /**
+       * Change URL for loading CSS files in Stateless Mode.
+       * 
        * @param $url
-       * @param $scheme
-       * @param $orig_scheme
        * @return string
        */
-      public function set_url_scheme($url, $scheme, $orig_scheme) {
-        $position = strpos($url, 'siteorigin-widgets/');
-        if ($position !== false) {
-          $upload_data = wp_upload_dir();
-          $name = substr($url, $position);
-          $absolutePath = $upload_data['basedir'] . '/' . $name;
-          $name = apply_filters('wp_stateless_file_name', $name, 0);
-          do_action('sm:sync::syncFile', $name, $absolutePath);
-          $url = ud_get_stateless_media()->get_gs_host() . '/' . $name;
+      public function set_url_scheme($url) {
+        if ( ud_get_stateless_media()->is_mode( ['disabled', 'backup'] ) ) {
+          return $url;
         }
+  
+        $position = strpos($url, self::STORAGE_PATH);
+
+        if ($position !== false) {
+          $name = substr($url, $position);
+          $name = apply_filters('wp_stateless_addon_files_root', '') . '/' . $name;
+          $url = str_replace( ud_get_stateless_media()->get_gs_path(), ud_get_stateless_media()->get_gs_host(), $name );
+
+          if ( ud_get_stateless_media()->is_mode('stateless') ) {
+            $url = str_replace( ud_get_stateless_media()->get_gs_path(), ud_get_stateless_media()->get_gs_host(), $name );
+          } else {
+            $upload_dir = wp_upload_dir();
+            $url = str_replace( $upload_dir['basedir'], ud_get_stateless_media()->get_gs_host(), $name );
+          }
+        }
+
         return $url;
+      }
+
+      /**
+       * Sync new CSS file to GCS
+       * 
+       * @param $url
+       * @param $instance
+       * @return string
+       */
+      public function widgets_stylesheet_added($name, $instance) {
+        $name = self::STORAGE_PATH . $name;
+        $absolutePath = apply_filters('wp_stateless_addon_files_root', ''); 
+        $absolutePath .= '/' . $name;
+
+        $name = apply_filters('wp_stateless_file_name', $name, 0);
+
+        $this->possibly_move_file($name, $absolutePath);
+
+        do_action('sm:sync::syncFile', $name, $absolutePath);
       }
 
       /**
@@ -62,33 +118,39 @@ namespace wpCloud\StatelessMedia {
        * @return mixed
        */
       public function clear_file_cache($value, $expiration, $transient) {
-        do_action('sm:sync::deleteFiles', 'siteorigin-widgets/');
+        do_action('sm:sync::deleteFiles', self::STORAGE_PATH);
         return $value;
       }
 
       /**
-       * Remove single file from GCS
-       * @param $new_instance
-       * @param $form_options
-       * @param $so_widget
-       * @return mixed
+       * Clear all SO CSS files from GCS after expired. 7 days
        */
-      public function delete_file($new_instance, $form_options, $so_widget) {
-        $new_instance = $so_widget->modify_instance($new_instance);
-        $style = $so_widget->get_style_name($new_instance);
-        $hash = $so_widget->get_style_hash($new_instance);
-        $name = $so_widget->id_base . '-' . $style . '-' . $hash;
+      public function widgets_stylesheet_cleared() {
+        do_action('sm:sync::deleteFiles', self::STORAGE_PATH);
+      }
 
-        $file = 'siteorigin-widgets/' . $name . '.css';
+      /**
+       * Remove single file from GCS. File can be without extension.
+       * 
+       * @param $css_name
+       */
+      public function delete_file($css_name) {
+        $extension = pathinfo($css_name, PATHINFO_EXTENSION);
+
+        if ( $extension !== 'css' ) {
+          $css_name .= '.css';
+        }
+
+        $file = self::STORAGE_PATH . $css_name;
+
         do_action('sm:sync::deleteFile', $file);
-        return $new_instance;
       }
 
       /**
        * Skip cache busting while activating/deactivating SO widget.
-       * @param $new_instance
-       * @param $form_options
-       * @param $so_widget
+       * 
+       * @param $return
+       * @param $filename
        * @return mixed
        */
       public function skip_cache_busting($return, $filename) {
@@ -103,6 +165,31 @@ namespace wpCloud\StatelessMedia {
         }
 
         return $return;
+      }
+
+      /**
+       * Update args when uploading/syncing file to GCS.
+       * 
+       * @param array $args
+       * @param string $name
+       * @param string $file
+       * @param bool $force
+       * 
+       * @return array
+       */
+      public function sync_args($args, $name, $file, $force) {
+        if ( strpos($name, self::STORAGE_PATH) !== 0 ) {
+          return $args;
+        }
+
+        if ( ud_get_stateless_media()->is_mode('stateless') ) {
+          $args['name_with_root'] = false;
+        }
+
+        $args['source'] = 'SiteOrigin Widgets Bundle';
+        $args['source_version'] = defined('SOW_BUNDLE_VERSION') ? SOW_BUNDLE_VERSION : '';
+
+        return $args;
       }
     }
   }

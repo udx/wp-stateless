@@ -247,7 +247,7 @@ namespace wpCloud\StatelessMedia {
         if (file_exists($file)) {
           add_filter('upload_mimes', array($this, 'add_webp_mime'), 10, 2);
           /**
-           * Media already on GCS, so only replacing data on it. For webp format adding path and status to wp_sm_sync table
+           * Media already on GCS, so only replacing data on it. For webp format adding path and status to wp_stateless_files table
            */
           do_action('sm:sync::syncFile', $name, $file, true, array('use_root' => true, 'skip_db' => (substr($name, -4) == "webp" ? false : true)));
           remove_filter('upload_mimes', array($this, 'add_webp_mime'), 10);

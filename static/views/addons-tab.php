@@ -59,13 +59,26 @@
         </div>
 
         <div class="addon-actions">
-          <div class="hs-web-interactive-inline hs-wrap" style="" data-hubspot-wrapper-cta-id="<?php echo $addon->hubspot_id?>"> 
-            <?php if ($addon->hubspot_link) : ?>  
-              <a href="<?php echo $addon->hubspot_link?>" 
-                class="hs-inline-web-interactive-<?php echo $addon->hubspot_id?> button-action button button-primary" 
-                data-hubspot-cta-id="<?php echo $addon->hubspot_id?>"
-                target="_blank" rel="noopener" crossorigin="anonymous" onerror="this.style.display='none'"
-              >Download</a> 
+          <div class="hs-web-interactive-inline hs-wrap" style="" data-hubspot-wrapper-cta-id="<?php echo $addon->hubspot_id?>">
+            <?php if ( !empty($addon->activate_link) ) : ?>
+              <a href="<?php echo $addon->activate_link?>" 
+                class="button-action button button-primary <?php if ( $addon->active ) echo 'disabled'; ?>"
+              >Activate</a> 
+            <?php else : ?>
+
+              <?php if ( !empty($addon->hubspot_link) ) : ?>
+                <a href="<?php echo $addon->hubspot_link?>" 
+                  class="hs-inline-web-interactive-<?php echo $addon->hubspot_id?> button-action button button-primary" 
+                  data-hubspot-cta-id="<?php echo $addon->hubspot_id?>"
+                  target="_blank" rel="noopener" crossorigin="anonymous" onerror="this.style.display='none'"
+                >Download</a> 
+              <?php else : // HubSpot does not work as expected ?>
+                <a href="<?php echo $addon->wp?>" 
+                  class="button-action button button-primary" 
+                  target="_blank" rel="noopener" crossorigin="anonymous"
+                >Download</a> 
+              <?php endif; ?>  
+
             <?php endif; ?>  
           </div>
 
@@ -92,3 +105,4 @@
 
   <?php endforeach; ?>
 </div>
+

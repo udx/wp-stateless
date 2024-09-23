@@ -31,11 +31,6 @@ namespace wpCloud\StatelessMedia {
       new BuddyPress();
 
       /**
-       * Support for Divi theme
-       */
-      new Divi();
-
-      /**
        * Support for Easy Digital Downloads
        */
       new EDDDownloadMethod();
@@ -49,16 +44,6 @@ namespace wpCloud\StatelessMedia {
        * Support for Imagify
        */
       new Imagify();
-
-      /**
-       * Support for Gravity Forms
-       */
-      new GravityForm();
-
-      /**
-       * Support for Gravity Forms Signature
-       */
-      new GravityFormSignature();
 
       /**
        * Support for LearnDash
@@ -86,11 +71,6 @@ namespace wpCloud\StatelessMedia {
       new SimpleLocalAvatars();
 
       /**
-       * Support for SiteOrigin CSS
-       */
-      new SOCSS();
-
-      /**
        * Support for SiteOrigin Widgets Bundle
        */
       new SOWidgetCSS();
@@ -99,11 +79,6 @@ namespace wpCloud\StatelessMedia {
        * Support for The Events Calendar
        */
       new TheEventsCalendar();
-
-      /**
-       * Support for WooCommerce
-       */
-      new WooCommerce();
 
       /**
        * Support for WooCommerce Extra Product Options

@@ -17,7 +17,7 @@ class SM_CLI_Process {
    * @param string $cwd Directory to execute the command in.
    * @return SM_CLI_Process
    */
-	public static function create( $command, $cwd = null ) {
+	public static function create( $command, $cwd = ABSPATH ) {
 		$proc = new self;
 
 		$proc->command = $command;

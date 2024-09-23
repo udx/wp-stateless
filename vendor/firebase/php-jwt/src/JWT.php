@@ -203,12 +203,13 @@ class JWT
         string $keyId = null,
         array $head = null
     ): string {
-        $header = ['typ' => 'JWT', 'alg' => $alg];
+        $header = ['typ' => 'JWT'];
+        if (isset($head) && \is_array($head)) {
+            $header = \array_merge($header, $head);
+        }
+        $header['alg'] = $alg;
         if ($keyId !== null) {
             $header['kid'] = $keyId;
-        }
-        if (isset($head) && \is_array($head)) {
-            $header = \array_merge($head, $header);
         }
         $segments = [];
         $segments[] = static::urlsafeB64Encode((string) static::jsonEncode($header));
@@ -250,6 +251,9 @@ class JWT
                 return \hash_hmac($algorithm, $msg, $key, true);
             case 'openssl':
                 $signature = '';
+                if (!\is_resource($key) && !openssl_pkey_get_private($key)) {
+                    throw new DomainException('OpenSSL unable to validate key');
+                }
                 $success = \openssl_sign($msg, $signature, $key, $algorithm); // @phpstan-ignore-line
                 if (!$success) {
                     throw new DomainException('OpenSSL unable to sign data');

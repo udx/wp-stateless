@@ -56,6 +56,9 @@ namespace wpCloud\StatelessMedia {
       add_action('wp_stateless_addons_tab_content', array($this, 'tab_content'));
       add_filter('wp_stateless_addons_tab_visible', array($this, 'addons_tab_visible'), 10, 1);
       add_filter('wp_stateless_restrict_compatibility', array($this, 'restrict_compatibility'), 10, 3);
+      add_filter('wp_stateless_addon_files_root', array($this, 'get_addon_files_root'), 10);
+      add_filter('wp_stateless_addon_sync_files_path', array($this, 'get_addon_sync_files_path'), 10, 2);
+      add_filter('wp_stateless_addon_files_url', array($this, 'get_addon_files_url'), 10, 2);
     }
 
     /**
@@ -99,6 +102,7 @@ namespace wpCloud\StatelessMedia {
         if ( isset($addon['addon_file']) ) {
           if ( file_exists( WP_PLUGIN_DIR . '/' . $addon['addon_file'] ) ) {
             $this->addons[$id]['installed'] = true;
+            $this->addons[$id]['activate_link'] = wp_nonce_url( 'plugins.php?action=activate&amp;plugin=' . $addon['addon_file'], 'activate-plugin_' . $addon['addon_file'] );
           }
         }
       }
@@ -122,13 +126,24 @@ namespace wpCloud\StatelessMedia {
         }
 
         $title = $addon['title'];
+        $button = __('Download Addon', ud_get_stateless_media()->domain);
+        $button_link = admin_url('upload.php?page=stateless-settings&tab=stless_addons_tab');
+        $message = sprintf(__('Download and activate the WP-Stateless addon for %s to ensure compatibility.', ud_get_stateless_media()->domain), $title);
+
+        if ( isset($addon['activate_link']) ) {
+          $button = __('Activate Addon', ud_get_stateless_media()->domain);
+          $button_link = $addon['activate_link'];
+          $message = sprintf(__('Activate the WP-Stateless addon for %s to ensure compatibility.', ud_get_stateless_media()->domain), $title);
+        }
+
+        $plugin_activate_url = wp_nonce_url( 'plugins.php?action=activate&amp;plugin=classic-widgets/classic-widgets.php', 'activate-plugin_classic-widgets/classic-widgets.php' );
 
         ud_get_stateless_media()->errors->add([
           'key' => $id,
           'title' => sprintf(__('WP-Stateless: Install the %s Addon', ud_get_stateless_media()->domain), $title),
-          'button' => __('Download Addon', ud_get_stateless_media()->domain),
-          'button_link' => admin_url('upload.php?page=stateless-settings&tab=stless_addons_tab'),
-          'message' => sprintf(__('Download and activate the WP-Stateless addon for %s to ensure compatibility.', ud_get_stateless_media()->domain), $title),
+          'button' => $button,
+          'button_link' => $button_link,
+          'message' => $message,
         ], 'notice');  
       }
     }
@@ -212,6 +227,7 @@ namespace wpCloud\StatelessMedia {
         'recommended'   => false,
         'active'        => false,
         'installed'     => false,
+        'activate_link' => '',
         'hubspot_id'    => '',
         'hubspot_link'  => '',
         'repo'          => '',
@@ -292,6 +308,74 @@ namespace wpCloud\StatelessMedia {
       }
 
       return $restrict;
+    }
+
+    /**
+     * Get the root for saving addons files.
+     * In Stateless Mode this will be the root of the bucket.
+     * In other modes this will be the uploads base directory.
+     */
+    public function get_addon_files_root($root_path) {
+      if ( ud_get_stateless_media()->is_mode('stateless') ) {
+        $root_path = ud_get_stateless_media()->get_gs_path();
+      } else {
+        $upload_dir = wp_get_upload_dir();
+        $root_path = $upload_dir['basedir'];
+      }
+      
+      return $root_path;
+    }
+
+    /**
+     * Get the root path for syncing addons files.
+     * In Stateless and Ephemeral Modes this will be the root of the bucket.
+     * In other modes this will be the uploads base directory.
+     */
+    public function get_addon_sync_files_path($root_path, $addon_folder = '') {
+      if ( ud_get_stateless_media()->is_mode( ['stateless', 'ephemeral'] ) ) {
+        $root_path = ud_get_stateless_media()->get_gs_path();
+      } else {
+        $upload_dir = wp_get_upload_dir();
+        $root_path = $upload_dir['basedir'];
+      }
+      
+      if ( !empty($addon_folder) ) {
+        $root_path = [
+          rtrim($root_path, '/'),
+          ltrim($addon_folder, '/'),
+        ];
+
+        $root_path = implode('/', $root_path);
+      }
+
+      return $root_path;
+    }
+
+    /**
+     * Get the root path for syncing addons files.
+     * In Stateless and Ephemeral Modes this will be the root of the bucket.
+     * In other modes this will be the uploads base directory.
+     */
+     public function get_addon_files_url($root_url, $addon_folder = '') {
+      $root_url = '';
+
+      if ( ud_get_stateless_media()->is_mode( ['disabled', 'backup'] ) ) {
+        $upload_dir = wp_get_upload_dir();
+        $root_url = $upload_dir['baseurl'];
+      } else {
+        $root_url = ud_get_stateless_media()->get_gs_host();
+      }
+
+      if ( !empty($addon_folder) ) {
+        $root_url = [
+          rtrim($root_url, '/'),
+          ltrim($addon_folder, '/'),
+        ];
+
+        $root_url = implode('/', $root_url);
+      }
+
+      return $root_url;
     }
   }
 }

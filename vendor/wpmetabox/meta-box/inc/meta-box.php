@@ -110,13 +110,15 @@ class RW_Meta_Box {
 	}
 
 	public function enqueue() {
-		if ( is_admin() && ! $this->is_edit_screen() ) {
+		if ( is_admin() && ! $this->is_edit_screen() && ! $this->is_gutenberg_screen() ) {
 			return;
 		}
 
 		wp_enqueue_style( 'rwmb', RWMB_CSS_URL . 'style.css', [], RWMB_VER );
+		wp_style_add_data( 'rwmb', 'path', RWMB_CSS_DIR . 'style.css' );
 		if ( is_rtl() ) {
 			wp_enqueue_style( 'rwmb-rtl', RWMB_CSS_URL . 'style-rtl.css', [], RWMB_VER );
+			wp_style_add_data( 'rwmb-rtl', 'path', RWMB_CSS_DIR . 'style-rtl.css' );
 		}
 
 		wp_enqueue_script( 'rwmb', RWMB_JS_URL . 'script.js', [ 'jquery' ], RWMB_VER, true );
@@ -145,6 +147,12 @@ class RW_Meta_Box {
 		 * @param RW_Meta_Box $object Meta Box object
 		 */
 		do_action( 'rwmb_enqueue_scripts', $this );
+	}
+
+	private function is_gutenberg_screen() : bool {
+		$screen = get_current_screen();
+
+		return in_array( $screen->base, [ 'site-editor', 'widgets' ] );
 	}
 
 	/**

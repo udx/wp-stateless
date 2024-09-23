@@ -84,6 +84,8 @@ jobs:
       - name: Cleanup files
         run: |
           rm -f composer.lock || true
+          rm -rf tests || true
+          rm -rf vendor/bin || true
           rm -rf vendor/composer/installers || true
           find ./ -name '.git*' -not -path './.git' -type f -delete || true
           find ./ -name '.git*' -not -path './.git' -type d -exec rm -rf {} \; || true
@@ -117,7 +119,7 @@ jobs:
       # create a draft release with the version changelog as a description
       - name: Create Draft Release
         id: draft_release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           name: "Release ${{ steps.vars.outputs.full_tag }}"
           body: "${{ steps.changelog.outputs.description }}"
@@ -127,7 +129,7 @@ jobs:
         
       # attach SBOM to release
       - name: Upload SBOM to release
-        uses: actions/upload-release-asset@v1.0.1
+        uses: actions/upload-release-asset@v1.0.2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:

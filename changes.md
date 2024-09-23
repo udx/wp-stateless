@@ -1,3 +1,30 @@
+#### 4.1.0
+* NEW - move compatibilities files from `wp_sm_sync` to `wp_stateless_files` table with extended information.
+* COMPATIBILITY - WooCommerce Compatibility replaced with [WP-Stateless – WooCommerce Addon](https://wordpress.org/plugins/wp-stateless-woocommerce-addon/).
+* COMPATIBILITY - Gravity Forms Compatibility replaced with [WP-Stateless – Gravity Forms Addon](https://wordpress.org/plugins/wp-stateless-gravity-forms-addon/).
+* COMPATIBILITY - Gravity Forms Signature Compatibility replaced with [WP-Stateless – Gravity Forms Signature Addon](https://wordpress.org/plugins/wp-stateless-gravity-forms-signature-addon/).
+* COMPATIBILITY - Divi Theme Compatibility replaced with [WP-Stateless – Divi Theme Addon](https://wordpress.org/plugins/wp-stateless-divi-theme-addon/).
+* COMPATIBILITY - SiteOrigin CSS Compatibility replaced with [WP-Stateless – SiteOrigin CSS Addon](https://wordpress.org/plugins/wp-stateless-siteorigin-css-addon/).
+* ENHANCEMENT - CLI command `wp stateless migrate` supports `auto` parameter to run all required Data Optimizations automatically.
+* ENHANCEMENT - Updated Client library for Google APIs from 2.15.1 to 2.17.0.
+* ENHANCEMENT - updated `firebase/php-jwt` library from from 6.9.0 to 6.10.1.
+* ENHANCEMENT - updated `wpmetabox/meta-box` library from from 5.8.2 to 5.10.1.
+* ENHANCEMENT - updated `deliciousbrains/wp-background-processing` library from from 1.1.1 to 1.3.1.
+* ENHANCEMENT - updated `composer/installers` library from from 1.12.1 to 2.3.0.
+* ENHANCEMENT - updated `Meta Box Tabs` library from 1.1.17 to 1.1.18.
+* ENHANCEMENT - action `sm:sync::addFile` format changed, now it passes media object instead of file name.
+* ENHANCEMENT - for installed Addons replace Download action with Activate.
+* ENHANCEMENT - count compatibility files from the DB instead of listing actual files to increase performance.
+* FIX - CLI command `wp stateless migrate` supports `--yes` parameter to skip confirmation.
+* FIX - CLI command `wp stateless migrate` correctly works with `--progress` parameter in multisite.
+* FIX - fixed synchronization for Compatibility files in Stateless Mode.
+* FIX - CLI command `wp stateless upgrade` fixed when running with `--b` switch.
+* FIX - fixed SiteOrigin Widgets Bundle Compatibility in `Stateless` mode.
+* FIX - fixed WPForms Compatibility in `Stateless` mode.
+* FIX - limit index size for compatibility with different DB engines [757](https://github.com/udx/wp-stateless/issues/757).
+* FIX - correctly disable `Cache-Busting` setting for Ephemeral Mode [758](https://github.com/udx/wp-stateless/issues/758), credits [@Jessedev1](https://github.com/Jessedev1).
+* FIX - Data Optimization UI adjustments.
+
 #### 4.0.4
 * ENHANCEMENT - display success message after copying Status Info.
 * FIX - `Settings` page does not open or slow when there is big amount of attachments.

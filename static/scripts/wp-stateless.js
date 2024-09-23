@@ -160,13 +160,13 @@ var wpStatelessSettingsApp = {
       jQuery('#cache_busting').val( this.backup['hashify_file_name'] )
     }
 
-    if (mode == 'stateless') {
+    if ( ['stateless', 'ephemeral'].indexOf(mode) > -1 ) {
       jQuery('#cache_busting').prop('disabled', true)
     } else {
       this.showNotice('hashify_file_name')
     }
 
-    if (mode == 'stateless' && this.sm.readonly['hashify_file_name'] != 'constant') {
+    if ( ['stateless', 'ephemeral'].indexOf(mode) > -1 && this.sm.readonly['hashify_file_name'] != 'constant') {
       jQuery('#notice-hashify_file_name-mode').show()
     } else {
       jQuery('#notice-hashify_file_name-mode').hide()

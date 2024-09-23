@@ -13,6 +13,10 @@ namespace wpCloud\StatelessMedia {
   if (!class_exists('wpCloud\StatelessMedia\BuddyPress')) {
 
     class BuddyPress extends Compatibility {
+      const AVATARS = 'avatars/';
+      const BLOG_AVATARS = 'blog-avatars/';
+      const GROUP_AVATARS = 'group-avatars/';
+
       protected $id = 'buddypress';
       protected $title = 'BuddyPress';
       protected $constant = 'WP_STATELESS_COMPATIBILITY_BUDDYPRESS';
@@ -28,9 +32,20 @@ namespace wpCloud\StatelessMedia {
       public function module_init($sm) {
         add_action('xprofile_avatar_uploaded', array($this, 'avatar_uploaded'), 10, 3);
         add_action('groups_avatar_uploaded', array($this, 'avatar_uploaded'), 10, 3);
-        add_filter('bp_core_fetch_avatar', array($this, 'bp_core_fetch_avatar'), 10, 3);
+
+        add_filter('bp_core_avatar_folder_url', array($this, 'bp_core_avatar_folder_url'), 10, 4);
+        add_filter('bp_core_avatar_folder_dir', array($this, 'bp_core_avatar_folder_dir'), 10, 4);
+        add_filter('stateless_skip_cache_busting', array($this, 'skip_cache_busting'), 20, 2);
+        add_filter('sm:sync::syncArgs', array($this, 'sync_args'), 10, 4);
         add_filter('bp_core_pre_delete_existing_avatar', array($this, 'delete_existing_avatar'), 10, 2);
         add_filter('bp_attachments_pre_get_attachment', array($this, 'bp_attachments_pre_get_attachment'), 10, 2);
+      }
+
+      /**
+       * Check if the file is in BP avatar directory.
+       */
+      protected function is_avatar_dir($name) {
+        return strpos($name, self::AVATARS) === 0 || strpos($name, self::BLOG_AVATARS) === 0 || strpos($name, self::GROUP_AVATARS) === 0;
       }
 
       /**
@@ -53,66 +68,13 @@ namespace wpCloud\StatelessMedia {
           'type'    => 'thumb',
         ));
 
-        $wp_uploads_dir = wp_get_upload_dir();
+        foreach ( [$full_avatar, $thumb_avatar] as $url ) {
+          $name = apply_filters('wp_stateless_file_name', $url, 0);
+          $absolutePath = apply_filters('wp_stateless_addon_files_root', ''); 
+          $absolutePath .= '/' . $name;
 
-        $full_avatar_path = $wp_uploads_dir['basedir'] . '/' . apply_filters('wp_stateless_file_name', $full_avatar, false);
-        $full_avatar = apply_filters('wp_stateless_file_name', $full_avatar, 0);
-
-        $thumb_avatar_path = $wp_uploads_dir['basedir'] . '/' . apply_filters('wp_stateless_file_name', $thumb_avatar, false);
-        $thumb_avatar = apply_filters('wp_stateless_file_name', $thumb_avatar, 0);
-
-        do_action('sm:sync::syncFile', $full_avatar, $full_avatar_path, true, array('ephemeral' => false));
-        do_action('sm:sync::syncFile', $thumb_avatar, $thumb_avatar_path, true, array('ephemeral' => false));
-      }
-
-      /**
-       * Convert image url in image html to GCS URL.
-       *
-       * @param [type] $image_html html code for image.
-       * @return void
-       */
-      public function bp_core_fetch_avatar($image_html) {
-        try {
-          preg_match("/src=(?:'|\")(http.*?)(?:'|\")/", $image_html, $image_url);
-          if (!empty($image_url[1])) {
-            $gs_image_url = $this->bp_core_fetch_avatar_url($image_url[1]);
-            $image_html = str_replace($image_url[1], $gs_image_url, $image_html);
-          }
-        } catch (\Throwable $th) {
-          //throw $th;
+          do_action( 'sm:sync::syncFile', $name, $absolutePath );
         }
-        return $image_html;
-      }
-
-      /**
-       * Sync then return GCS url.
-       *
-       * @param [type] $url image url.
-       * @return void
-       */
-      public function bp_core_fetch_avatar_url($url) {
-        $wp_uploads_dir = wp_get_upload_dir();
-        $name = apply_filters('wp_stateless_file_name', $url, 0);
-        $full_avatar_path = $wp_uploads_dir['basedir'] . '/' . $name;
-
-
-        $root_dir = ud_get_stateless_media()->get('sm.root_dir');
-        $root_dir = apply_filters("wp_stateless_handle_root_dir", $root_dir);
-        $root_dir = trim($root_dir, '/ '); // Remove any forward slash and empty space.
-        // Making sure that we only modify url for uploads dir.
-        // @todo support photo in plugins directory.
-
-        if (strpos($name, plugins_url()) === 0) {
-          $name = str_replace(plugins_url() . '/', '', $name);
-          $name = apply_filters('wp_stateless_file_name', $name, 0);
-          $full_avatar_path = WP_PLUGIN_DIR . '/' . $name;
-        }
-
-        if (strpos($name, "$root_dir/http") !== 0 && strpos($name, "http") !== 0 && $root_dir !== $name) {
-          do_action('sm:sync::syncFile', $name, $full_avatar_path, false, array('ephemeral' => false));
-          $url = ud_get_stateless_media()->get_gs_host() . '/' . $name;
-        }
-        return $url;
       }
 
       /**
@@ -132,7 +94,7 @@ namespace wpCloud\StatelessMedia {
         do_action('sm:sync::deleteFile', apply_filters('wp_stateless_file_name', $full_avatar, 0));
         do_action('sm:sync::deleteFile', apply_filters('wp_stateless_file_name', $thumb_avatar, 0));
 
-        if (ud_get_stateless_media()->get('sm.mode') === 'ephemeral') {
+        if ( ud_get_stateless_media()->is_mode( ['ephemeral', 'stateless'] ) ) {
           $return = false;
         }
 
@@ -178,6 +140,97 @@ namespace wpCloud\StatelessMedia {
           //throw $th;
         }
         return $return;
+      }
+
+      /**
+       * Skip cache busting while Buddypress processes images.
+       * 
+       * @param $return
+       * @param $filename
+       * @return mixed
+       */
+      public function skip_cache_busting($return, $filename) {
+        $back_trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
+
+        foreach ($back_trace as $trace) {
+          if ( isset($trace['file']) && strpos($trace['file'], 'buddypress') !== false ) {
+            if ( isset($trace['function']) && $trace['function'] === 'sanitize_file_name' ) {
+              return $filename;
+            }
+          }
+        }
+
+        return $return;
+      }
+
+      /**
+       * Update args when uploading/syncing file to GCS.
+       * 
+       * @param array $args
+       * @param string $name
+       * @param string $file
+       * @param bool $force
+       * 
+       * @return array
+       */
+      public function sync_args($args, $name, $file, $force) {
+        if ( !$this->is_avatar_dir($name) ) {
+          return $args;
+        }
+
+        if ( ud_get_stateless_media()->is_mode('stateless') ) {
+          $args['name_with_root'] = false;
+        }
+
+        $args['source'] = 'BuddyPress';
+        $args['source_version'] = '';
+
+        try {
+          $args['source_version'] = bp_get_version();
+        } catch (\Throwable $th) {
+        }
+
+        return $args;
+      }
+
+      /**
+       * Override BP avatar folder URL.
+       */
+      public function bp_core_avatar_folder_url($folder_url, $item_id, $object, $avatar_dir) {
+        if ( ud_get_stateless_media()->is_mode( ['disabled', 'backup'] ) ) {
+          return $folder_url;
+        }
+
+        $position = strpos($folder_url, $avatar_dir);
+
+        if ( $position === false ) {
+          return $folder_url;
+        }
+
+        $url = substr($folder_url, $position);
+        $url = apply_filters('wp_stateless_addon_files_url', '', $url);
+
+        return $url;
+      }
+
+      /**
+       * Override BP avatar folder.
+       */
+      public function bp_core_avatar_folder_dir($folder_dir, $item_id, $object, $avatar_dir) {
+        if ( !ud_get_stateless_media()->is_mode('stateless') ) {
+          return $folder_dir;
+        } 
+        
+        $position = strpos($folder_dir, $avatar_dir);
+
+        if ( $position === false ) {
+          return $folder_dir;
+        }
+
+        $dir = substr($folder_dir, $position);
+        $dir = apply_filters('wp_stateless_addon_files_url', '', $dir);
+
+        return $dir;
       }
     }
   }

@@ -34,8 +34,13 @@ New to Google Cloud? Google is offering you a [$300 credit](https://console.clou
 * Multisite compatible.
 
 ### Addons
-* [BuddyBoss Platform Addon](https://wordpress.org/plugins/wp-stateless-buddyboss-platform-addon/)
 * [Elementor Website Builder Addon](https://wordpress.org/plugins/wp-stateless-elementor-website-builder-addon/)
+* [Gravity Forms Addon](https://wordpress.org/plugins/wp-stateless-gravity-forms-addon/)
+* [Gravity Forms Signature Addon](https://wordpress.org/plugins/wp-stateless-gravity-forms-signature-addon/)
+* [WooCommerce Addon](https://wordpress.org/plugins/wp-stateless-woocommerce-addon/)
+* [Divi Theme Addon](https://wordpress.org/plugins/wp-stateless-divi-theme-addon/)
+* [SiteOrigin CSS Addon](https://wordpress.org/plugins/wp-stateless-siteorigin-css-addon/)
+* [BuddyBoss Platform Addon](https://wordpress.org/plugins/wp-stateless-buddyboss-platform-addon/)
 
 ### Support, Feedback, & Contribute
 We welcome community involvement via the [GitHub repository](https://github.com/udx/wp-stateless).

@@ -45,6 +45,7 @@ class Objects extends \Google\Service\Resource
    * @param BulkRestoreObjectsRequest $postBody
    * @param array $optParams Optional parameters.
    * @return GoogleLongrunningOperation
+   * @throws \Google\Service\Exception
    */
   public function bulkRestore($bucket, BulkRestoreObjectsRequest $postBody, $optParams = [])
   {
@@ -78,6 +79,7 @@ class Objects extends \Google\Service\Resource
    * @opt_param string userProject The project to be billed for this request.
    * Required for Requester Pays buckets.
    * @return StorageObject
+   * @throws \Google\Service\Exception
    */
   public function compose($destinationBucket, $destinationObject, ComposeRequest $postBody, $optParams = [])
   {
@@ -144,6 +146,7 @@ class Objects extends \Google\Service\Resource
    * @opt_param string userProject The project to be billed for this request.
    * Required for Requester Pays buckets.
    * @return StorageObject
+   * @throws \Google\Service\Exception
    */
   public function copy($sourceBucket, $sourceObject, $destinationBucket, $destinationObject, StorageObject $postBody, $optParams = [])
   {
@@ -177,6 +180,7 @@ class Objects extends \Google\Service\Resource
    * whether the object's current metageneration does not match the given value.
    * @opt_param string userProject The project to be billed for this request.
    * Required for Requester Pays buckets.
+   * @throws \Google\Service\Exception
    */
   public function delete($bucket, $object, $optParams = [])
   {
@@ -212,6 +216,7 @@ class Objects extends \Google\Service\Resource
    * @opt_param string userProject The project to be billed for this request.
    * Required for Requester Pays buckets.
    * @return StorageObject
+   * @throws \Google\Service\Exception
    */
   public function get($bucket, $object, $optParams = [])
   {
@@ -233,6 +238,7 @@ class Objects extends \Google\Service\Resource
    * @opt_param string userProject The project to be billed for this request.
    * Required for Requester Pays buckets.
    * @return Policy
+   * @throws \Google\Service\Exception
    */
   public function getIamPolicy($bucket, $object, $optParams = [])
   {
@@ -281,6 +287,7 @@ class Objects extends \Google\Service\Resource
    * @opt_param string userProject The project to be billed for this request.
    * Required for Requester Pays buckets.
    * @return StorageObject
+   * @throws \Google\Service\Exception
    */
   public function insert($bucket, StorageObject $postBody, $optParams = [])
   {
@@ -331,6 +338,7 @@ class Objects extends \Google\Service\Resource
    * @opt_param bool versions If true, lists all versions of an object as distinct
    * results. The default is false. For more information, see Object Versioning.
    * @return ObjectsModel
+   * @throws \Google\Service\Exception
    */
   public function listObjects($bucket, $optParams = [])
   {
@@ -370,6 +378,7 @@ class Objects extends \Google\Service\Resource
    * @opt_param string userProject The project to be billed for this request, for
    * Requester Pays buckets.
    * @return StorageObject
+   * @throws \Google\Service\Exception
    */
   public function patch($bucket, $object, StorageObject $postBody, $optParams = [])
   {
@@ -384,7 +393,6 @@ class Objects extends \Google\Service\Resource
    * @param string $object Name of the object. For information about how to URL
    * encode object names to be path safe, see Encoding URI Path Parts.
    * @param string $generation Selects a specific revision of this object.
-   * @param StorageObject $postBody
    * @param array $optParams Optional parameters.
    *
    * @opt_param bool copySourceAcl If true, copies the source object's ACL;
@@ -405,10 +413,11 @@ class Objects extends \Google\Service\Resource
    * @opt_param string userProject The project to be billed for this request.
    * Required for Requester Pays buckets.
    * @return StorageObject
+   * @throws \Google\Service\Exception
    */
-  public function restore($bucket, $object, $generation, StorageObject $postBody, $optParams = [])
+  public function restore($bucket, $object, $generation, $optParams = [])
   {
-    $params = ['bucket' => $bucket, 'object' => $object, 'generation' => $generation, 'postBody' => $postBody];
+    $params = ['bucket' => $bucket, 'object' => $object, 'generation' => $generation];
     $params = array_merge($params, $optParams);
     return $this->call('restore', [$params], StorageObject::class);
   }
@@ -481,6 +490,7 @@ class Objects extends \Google\Service\Resource
    * @opt_param string userProject The project to be billed for this request.
    * Required for Requester Pays buckets.
    * @return RewriteResponse
+   * @throws \Google\Service\Exception
    */
   public function rewrite($sourceBucket, $sourceObject, $destinationBucket, $destinationObject, StorageObject $postBody, $optParams = [])
   {
@@ -503,6 +513,7 @@ class Objects extends \Google\Service\Resource
    * @opt_param string userProject The project to be billed for this request.
    * Required for Requester Pays buckets.
    * @return Policy
+   * @throws \Google\Service\Exception
    */
   public function setIamPolicy($bucket, $object, Policy $postBody, $optParams = [])
   {
@@ -526,6 +537,7 @@ class Objects extends \Google\Service\Resource
    * @opt_param string userProject The project to be billed for this request.
    * Required for Requester Pays buckets.
    * @return TestIamPermissionsResponse
+   * @throws \Google\Service\Exception
    */
   public function testIamPermissions($bucket, $object, $permissions, $optParams = [])
   {
@@ -565,6 +577,7 @@ class Objects extends \Google\Service\Resource
    * @opt_param string userProject The project to be billed for this request.
    * Required for Requester Pays buckets.
    * @return StorageObject
+   * @throws \Google\Service\Exception
    */
   public function update($bucket, $object, StorageObject $postBody, $optParams = [])
   {
@@ -609,6 +622,7 @@ class Objects extends \Google\Service\Resource
    * @opt_param bool versions If true, lists all versions of an object as distinct
    * results. The default is false. For more information, see Object Versioning.
    * @return Channel
+   * @throws \Google\Service\Exception
    */
   public function watchAll($bucket, Channel $postBody, $optParams = [])
   {

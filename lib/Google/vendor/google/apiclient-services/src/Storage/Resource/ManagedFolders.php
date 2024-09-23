@@ -39,10 +39,15 @@ class ManagedFolders extends \Google\Service\Resource
    * @param string $managedFolder The managed folder name/path.
    * @param array $optParams Optional parameters.
    *
+   * @opt_param bool allowNonEmpty Allows the deletion of a managed folder even if
+   * it is not empty. A managed folder is empty if there are no objects or managed
+   * folders that it applies to. Callers must have
+   * storage.managedFolders.setIamPolicy permission.
    * @opt_param string ifMetagenerationMatch If set, only deletes the managed
    * folder if its metageneration matches this value.
    * @opt_param string ifMetagenerationNotMatch If set, only deletes the managed
    * folder if its metageneration does not match this value.
+   * @throws \Google\Service\Exception
    */
   public function delete($bucket, $managedFolder, $optParams = [])
   {
@@ -64,6 +69,7 @@ class ManagedFolders extends \Google\Service\Resource
    * folder metadata conditional on whether the managed folder's current
    * metageneration does not match the given value.
    * @return ManagedFolder
+   * @throws \Google\Service\Exception
    */
   public function get($bucket, $managedFolder, $optParams = [])
   {
@@ -85,6 +91,7 @@ class ManagedFolders extends \Google\Service\Resource
    * @opt_param string userProject The project to be billed for this request.
    * Required for Requester Pays buckets.
    * @return Policy
+   * @throws \Google\Service\Exception
    */
   public function getIamPolicy($bucket, $managedFolder, $optParams = [])
   {
@@ -99,6 +106,7 @@ class ManagedFolders extends \Google\Service\Resource
    * @param ManagedFolder $postBody
    * @param array $optParams Optional parameters.
    * @return ManagedFolder
+   * @throws \Google\Service\Exception
    */
   public function insert($bucket, ManagedFolder $postBody, $optParams = [])
   {
@@ -113,13 +121,14 @@ class ManagedFolders extends \Google\Service\Resource
    * @param string $bucket Name of the bucket containing the managed folder.
    * @param array $optParams Optional parameters.
    *
-   * @opt_param int pageSize Maximum number of items return in a single page of
+   * @opt_param int pageSize Maximum number of items to return in a single page of
    * responses.
    * @opt_param string pageToken A previously-returned page token representing
    * part of the larger set of results to view.
    * @opt_param string prefix The managed folder name/path prefix to filter the
    * output list of results.
    * @return ManagedFoldersModel
+   * @throws \Google\Service\Exception
    */
   public function listManagedFolders($bucket, $optParams = [])
   {
@@ -139,6 +148,7 @@ class ManagedFolders extends \Google\Service\Resource
    * @opt_param string userProject The project to be billed for this request.
    * Required for Requester Pays buckets.
    * @return Policy
+   * @throws \Google\Service\Exception
    */
   public function setIamPolicy($bucket, $managedFolder, Policy $postBody, $optParams = [])
   {
@@ -158,6 +168,7 @@ class ManagedFolders extends \Google\Service\Resource
    * @opt_param string userProject The project to be billed for this request.
    * Required for Requester Pays buckets.
    * @return TestIamPermissionsResponse
+   * @throws \Google\Service\Exception
    */
   public function testIamPermissions($bucket, $managedFolder, $permissions, $optParams = [])
   {

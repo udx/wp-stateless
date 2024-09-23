@@ -106,59 +106,121 @@
   margin-right: 5px;
 }
 
-/* Migrations section (Data updates) */
-#stless_status_tab .migration {
-  border-top: 1px solid #dcdcde;
+/* Migrations confirmation dialog */
+#stateless-migration-confirm label {
+  display: block;
+  padding-left: 5px;
+  margin-top: 5px;
 }
 
-#stless_status_tab .migration:last-child {
-  border-bottom: none;
+.stateless-migration-confirm.ui-widget {
+  font-family: inherit;
+  font-size: inherit;
+  padding: 0;
+  border: 0;
 }
 
-#stless_status_tab .title {
+.stateless-migration-confirm .ui-dialog-titlebar {
+  padding: 8px 18px;
+  position: relative;
+}
+
+.stateless-migration-confirm .ui-widget .ui-widget {
+  font-size: inherit;
+  font-family: inherit;
+}
+
+.stateless-migration-confirm.ui-widget .ui-widget-button {
+  font-size: inherit;
+  font-family: inherit;
+}
+
+.stateless-migration-confirm .ui-dialog-buttonpane {
+  padding: 16px;
+}
+
+.stateless-migration-confirm .ui-dialog-buttonset button {
+  margin: .5em .4em .5em 0;
+  font-family: inherit;
+}
+
+.stateless-migration-confirm .ui-widget-content,
+.stateless-migration-confirm .ui-widget-content .ui-widget-content {
+  color: inherit;
+}
+
+.stateless-migration-confirm .ui-widget-header {
+  border-top: none;
+  border-left: none;
+  border-right: none;
+}
+
+.stateless-migration-confirm .ui-icon-closethick {
+  left: -500%;
+}
+
+.stateless-migration-confirm .ui-button.ui-dialog-titlebar-close {
+  margin: 0;
+  height: 100%;
+  width: 53px;
+  border-left: 1px solid #dcdcde;
+}
+
+.stateless-migration-confirm .ui-dialog-titlebar-close:before {
+  line-height: 53px;
+}
+
+/* Migrations section (Data Optimization) */
+#migration-action .main {
+  margin-top: 20px;
   display: flex;
   justify-content: space-between;
 }
 
-#stless_status_tab .actions .button {
+#migration-action .actions {
+  text-align: left;
+}
+
+#migration-action .actions .button {
   display: none;
 }
 
-#stless_status_tab .can-start .actions .button.start {
+#migration-action.can-start .actions .button.start {
   display: inline-block;
 }
 
-#stless_status_tab .can-pause .actions .button.pause {
+#migration-action.can-pause .actions .button.pause {
   display: inline-block;
 }
 
-#stless_status_tab .can-resume .actions .button.resume {
+#migration-action.can-resume .actions .button.resume {
   display: inline-block;
+}
+
+#migration-action .description {
+  flex: 1;
+  white-space: nowrap;
+  margin-right: 20px;
+  text-align: right;
 }
 
 /* Migrations section (Data updates) - progress section */
-
-#stless_status_tab .migration .progress-wrap {
+#migration-action .progress-wrap {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
   min-height: 20px;
+  min-width: 40%;
 }
 
-#stless_status_tab .migration .progress-wrap .description {
-  white-space: nowrap;
-  margin-right: 20px;
-}
-
-#stless_status_tab .migration .progress {
+#migration-action .progress {
   display: none;
   flex: 1;
   margin-bottom: 0;
   position: relative;
   overflow: hidden;
   height: 20px;
-  max-width: 50%;
   background-size: 56px 20px;
   background-color: #dcdcde;
   background-image: repeating-linear-gradient(
@@ -170,7 +232,7 @@
   );
 }
 
-#stless_status_tab .migration .progress .bar {
+#migration-action .progress .bar {
   position: absolute;
   z-index: 20;
   top: 0;
@@ -195,17 +257,18 @@
 		to {background-position: 56px 0; }
 }
 
-#stless_status_tab .migration.can-pause .progress,
-#stless_status_tab .migration.can-resume .progress {
+#migration-action.can-pause .progress,
+#migration-action.can-resume .progress,
+#migration-action.processing-action .progress {
   display: block;
 }
 
-#stless_status_tab .migration.can-pause .progress,
-#stless_status_tab .migration.can-pause .progress .bar{
+#migration-action.can-pause .progress,
+#migration-action.can-pause .progress .bar{
   animation: stateless-progress 3s linear infinite;
 }
 
-#stless_status_tab .migration .progress .percent {
+#migration-action .progress .percent {
   position: absolute;
   width: 100%;
   height: 100%;
@@ -213,10 +276,4 @@
   text-align: center;
   font-weight: bold;
   z-index: 30;
-}
-
-#stateless-migration-confirm label {
-  display: block;
-  padding-left: 5px;
-  margin-top: 5px;
 }
