@@ -87,4 +87,14 @@ return [
     // 'hubspot_link'    => 'https://cta-service-cms2.hubspot.com/web-interactives/public/v1/track/click?encryptedPayload=AVxigLKBdXT3iKKssnyU5oSlJCOfudt7i6nV%2F5ojUf63FZt1MjnlQ%2BEP2JTU9DfhHfCCMUS9eZkfBezgAUKkinw0pOw0yKUWSYGw89SIF9OyVci07g94GTyYx0j17tt3LC7jZ34Nhe4GfQQHXvkad%2FNNTRoumwcNoV5csmLHPEnEwq7XWsYPSN73GTzxEwySOMWBk%2FTt%2BROYZDCM3Ks%3D&amp;portalId=20504491',
   ],
 
+  'siteorigin-css' => [
+    'title'           => 'SiteOrigin CSS',
+    'plugin_files'    => ['so-css/so-css.php'],
+    'addon_file'      => 'wp-stateless-siteorigin-css-addon/wp-stateless-siteorigin-css-addon.php',
+    'icon'            => 'https://ps.w.org/so-css/assets/icon.svg',
+    'repo'            => 'udx/wp-stateless-siteorigin-css-addon',
+    'wp'              => 'https://wordpress.org/plugins/wp-stateless-siteorigin-css-addon/',
+    'hubspot_id'      => '151480507684',
+  ],
+
 ];
