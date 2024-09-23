@@ -57,7 +57,6 @@ return array(
     'wpCloud\\StatelessMedia\\Migrator' => $baseDir . '/lib/classes/class-migrator.php',
     'wpCloud\\StatelessMedia\\Module' => $baseDir . '/lib/classes/class-module.php',
     'wpCloud\\StatelessMedia\\Polylang' => $baseDir . '/lib/classes/compatibility/polylang-pro.php',
-    'wpCloud\\StatelessMedia\\SOCSS' => $baseDir . '/lib/classes/compatibility/siteorigin-css.php',
     'wpCloud\\StatelessMedia\\SOWidgetCSS' => $baseDir . '/lib/classes/compatibility/siteorigin-widget-bundle.php',
     'wpCloud\\StatelessMedia\\Settings' => $baseDir . '/lib/classes/class-settings.php',
     'wpCloud\\StatelessMedia\\ShortPixel' => $baseDir . '/lib/classes/compatibility/shortpixel.php',

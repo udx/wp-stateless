@@ -71,11 +71,6 @@ namespace wpCloud\StatelessMedia {
       new SimpleLocalAvatars();
 
       /**
-       * Support for SiteOrigin CSS
-       */
-      new SOCSS();
-
-      /**
        * Support for SiteOrigin Widgets Bundle
        */
       new SOWidgetCSS();

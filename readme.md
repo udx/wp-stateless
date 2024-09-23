@@ -39,6 +39,7 @@ New to Google Cloud? Google is offering you a [$300 credit](https://console.clou
 * [Gravity Forms Signature Addon](https://wordpress.org/plugins/wp-stateless-gravity-forms-signature-addon/)
 * [WooCommerce Addon](https://wordpress.org/plugins/wp-stateless-woocommerce-addon/)
 * [Divi Theme Addon](https://wordpress.org/plugins/wp-stateless-divi-theme-addon/)
+* [SiteOrigin CSS Addon](https://wordpress.org/plugins/wp-stateless-siteorigin-css-addon/)
 * [BuddyBoss Platform Addon](https://wordpress.org/plugins/wp-stateless-buddyboss-platform-addon/)
 
 ### Support, Feedback, & Contribute
