@@ -1,3 +1,6 @@
+#### 4.1.1
+* FIX - cache issues during Data Optimization.
+
 #### 4.1.0
 * NEW - move compatibilities files from `wp_sm_sync` to `wp_stateless_files` table with extended information.
 * COMPATIBILITY - WooCommerce Compatibility replaced with [WP-Stateless – WooCommerce Addon](https://wordpress.org/plugins/wp-stateless-woocommerce-addon/).

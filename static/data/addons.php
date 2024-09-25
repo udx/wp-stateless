@@ -37,7 +37,7 @@ return [
     'plugin_files'    => ['elementor/elementor.php'],
     'addon_file'      => 'wp-stateless-elementor-addon/wp-stateless-elementor-addon.php',
     'icon'            => 'https://ps.w.org/elementor/assets/icon.svg',
-    'repo'            => 'udx/wp-stateless-elementor-addon', 
+    'repo'            => 'udx/wp-stateless-elementor-website-builder-addon', 
     'wp'              => 'https://wordpress.org/plugins/wp-stateless-elementor-website-builder-addon/', 
     'hubspot_id'      => '151481399819', 
     // 'hubspot_link'    => 'https://cta-service-cms2.hubspot.com/web-interactives/public/v1/track/click?encryptedPayload=AVxigLKR8B2Z9422V%2Fh9SGpptZeq1UWUETejTC8i1C7YoBj8TRWSG2Yij36fQHaj37NIgIU0OgWeZ9SAaTb9lL%2BlPaEKwWJ1WcQNWv%2FLFWh1Y8LTEIUGRvPzShNKyv0yIC5Z3Hu6YWGYp46iXXI6nLLBfbt2fHytn3mHX7Ic3%2ByuAF3Cz2rmMusOMD3XSJGTAYobOOXuyHJzeHzztZAimflHRg%3D%3D&amp;portalId=20504491', 

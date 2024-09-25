@@ -117,7 +117,7 @@ class Migration_20240423174109 extends Migration {
 
         $media = (array) $client->get_media( $sync->file );
 
-        if ( is_array($media) && !empty($media) ) {
+        if ( is_array($media) && !empty($media) && isset($media['metadata']) ) {
           $metadata = $media['metadata'];
 
           if ( !isset($metadata['source']) && !isset($metadata['sourceVersion']) ) {
