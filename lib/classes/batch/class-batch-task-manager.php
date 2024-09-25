@@ -103,7 +103,13 @@ class BatchTaskManager extends \UDX_WP_Background_Process {
    * @return int|null
    */
   private function _get_last_updated() {
-    return get_option( $this->identifier . self::UPDATED_KEY, null );
+    // We need to omit the cache and get the data directly from the db
+    global $wpdb;
+
+    $sql = "SELECT option_value FROM $wpdb->options WHERE option_name = '%s' LIMIT 1";
+    $sql = $wpdb->prepare($sql, $this->identifier . self::UPDATED_KEY);
+
+    return $wpdb->get_var($sql);
   }
 
   /**
