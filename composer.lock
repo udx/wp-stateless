@@ -400,16 +400,16 @@
         },
         {
             "name": "wpmetabox/meta-box",
-            "version": "5.10.1",
+            "version": "5.10.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/wpmetabox/meta-box.git",
-                "reference": "6f571c95c2928703509f60de09be9c3d6df8ce0a"
+                "reference": "c28a96abe84cff63e3cec0e6c9d525602212c998"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/wpmetabox/meta-box/zipball/6f571c95c2928703509f60de09be9c3d6df8ce0a",
-                "reference": "6f571c95c2928703509f60de09be9c3d6df8ce0a",
+                "url": "https://api.github.com/repos/wpmetabox/meta-box/zipball/c28a96abe84cff63e3cec0e6c9d525602212c998",
+                "reference": "c28a96abe84cff63e3cec0e6c9d525602212c998",
                 "shasum": ""
             },
             "require-dev": {
@@ -446,9 +446,9 @@
             ],
             "support": {
                 "issues": "https://github.com/wpmetabox/meta-box/issues",
-                "source": "https://github.com/wpmetabox/meta-box/tree/5.10.1"
+                "source": "https://github.com/wpmetabox/meta-box/tree/5.10.2"
             },
-            "time": "2024-09-07T03:49:09+00:00"
+            "time": "2024-09-26T09:55:59+00:00"
         }
     ],
     "packages-dev": [
