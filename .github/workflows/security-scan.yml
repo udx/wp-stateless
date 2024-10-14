@@ -17,7 +17,7 @@ jobs:
 
       - name: Run Security Check
         id: test
-        uses: anchore/scan-action@v4
+        uses: anchore/scan-action@v5
         with:
           path: .
           output-format: table
