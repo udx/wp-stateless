@@ -1,3 +1,13 @@
+#### 4.1.2
+* ENHANCEMENT - added `REST API Endpoint` setting, which useful when WordPress dashboard and frontend website utilize different domain names.
+* ENHANCEMENT - extended `Status Info` with the information to help diagnose REST API or AJAX issues.
+* COMPATIBILITY - SiteOrigin Widgets Bundle Compatibility replaced with [WP-Stateless - SiteOrigin Widgets Bundle Addon](https://wordpress.org/plugins/wp-stateless-siteorigin-widgets-bundle-addon/).
+* COMPATIBILITY - WPForms Compatibility replaced with [WP-Stateless - WPForms Addon](https://wordpress.org/plugins/wp-stateless-wpforms-addon/).
+* COMPATIBILITY - Easy Digital Downloads Compatibility replaced with [WP-Stateless - Easy Digital Downloads Addon](https://wordpress.org/plugins/wp-stateless-easy-digital-downloads-addon/).
+* COMPATIBILITY - LiteSpeed Cache Compatibility replaced with [WP-Stateless - LiteSpeed Cache Addon](https://wordpress.org/plugins/wp-stateless-litespeed-cache-addon/).
+* FIX: PHP warning on `Status` settings tab.
+
+
 #### 4.1.1
 * FIX - cache issues during Data Optimization.
 
