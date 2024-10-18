@@ -56,6 +56,7 @@ namespace wpCloud\StatelessMedia {
         'status_email_type'      => array('', 'true'),
         'status_email_address'   => array('', ''),
         'use_postmeta'           => array('WP_STATELESS_POSTMETA', ['false', '']),
+        'use_api_siteurl'        => array('WP_STATELESS_API_SITEURL', ['WP_HOME', '']),
       );
 
       private $network_only_settings = array(

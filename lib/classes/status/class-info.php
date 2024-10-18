@@ -21,6 +21,8 @@ class Info {
   }
 
   private function _init_hooks() {
+    add_action('wp_ajax_stateless_check_ajax', [$this, 'check_ajax']);
+
     add_action('wp_stateless_status_tab_content', [$this, 'tab_content'], 10);
 
     add_filter('wp_stateless_status_tab_visible', array($this, 'status_tab_visible'), 10, 1);
@@ -33,6 +35,22 @@ class Info {
     add_filter('wp_stateless_status_info_values_wordpress', [$this, 'get_wordpress_attachments'], 20);
     add_filter('wp_stateless_status_info_values_wordpress', [$this, 'get_wordpress_theme'], 30);
     add_filter('wp_stateless_status_info_values_wordpress', [$this, 'get_wordpress_plugins'], 40);
+  }
+
+  /**
+   * Check AJAX requests are working
+   */
+  public function check_ajax() {
+    if ( !check_ajax_referer('stateless_check_ajax') ) {
+      wp_send_json_error([
+        'status' => 'Error',
+        'message' => __('Invalid nonce', ud_get_stateless_media()->domain),
+      ]);
+    }
+
+    wp_send_json_success([
+      'status' => 'Ok',
+    ]);
   }
 
   /**
@@ -167,6 +185,14 @@ class Info {
    */
   public function get_wordpress_network_values($values = []) {
     $rows = [
+      'home_url' => [
+        'label' => __('Home URL', ud_get_stateless_media()->domain),
+        'value' => get_bloginfo( 'url' ),
+      ],
+      'site_url' => [
+        'label' => __('Site URL', ud_get_stateless_media()->domain),
+        'value' => get_bloginfo( 'wpurl' ),
+      ],
       'version' => [
         'label' => __('Version', ud_get_stateless_media()->domain),
         'value' => get_bloginfo('version'),

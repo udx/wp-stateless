@@ -27,10 +27,10 @@
               <table class="widefat striped" role="presentation">
                 <tbody>
 
-                <?php foreach( $section->rows as $row ) : ?>
-                    <tr>
-                      <td><?php echo $row->label; ?></td>
-                      <td><?php echo $row->value; ?></td>
+                <?php foreach( $section->rows as $key => $row ) : ?>
+                    <tr class="<?php echo $key; ?>">
+                      <td class="label"><?php echo $row->label; ?></td>
+                      <td class="value"><?php echo $row->value; ?></td>
                     </tr>
                   <?php endforeach; ?>
 

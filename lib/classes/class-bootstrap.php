@@ -140,6 +140,9 @@ namespace wpCloud\StatelessMedia {
         // Register meta boxes and fields for media modal page
         add_filter('attachment_fields_to_edit', array($this, 'attachment_modal_meta_box_callback'), 11, 2);
 
+        // Get the REST API root
+        add_filter('wp_stateless_rest_api_root', array($this, 'get_rest_api_root'));
+
         /**
          * Init hook
          */
@@ -1265,7 +1268,12 @@ namespace wpCloud\StatelessMedia {
         wp_localize_script('wp-stateless', 'stateless_l10n', $this->get_l10n_data());
         wp_localize_script('wp-stateless', 'wp_stateless_configs', array(
           'WP_DEBUG' => defined('WP_DEBUG') ? WP_DEBUG : false,
-          'REST_API_TOKEN' => Utility::generate_jwt_token(['user_id' => get_current_user_id()], DAY_IN_SECONDS)
+          'REST_API_TOKEN' => Utility::generate_jwt_token(['user_id' => get_current_user_id()], DAY_IN_SECONDS),
+          'api_root' => apply_filters( 'wp_stateless_rest_api_root', '' ),
+          'ajaxurl' => admin_url( 'admin-ajax.php' ),
+          'stateless_check_ajax_nonce' => wp_create_nonce('stateless_check_ajax'),
+          'text_ok' => __('Ok', ud_get_stateless_media()->domain),
+          'text_fail' => __('Fail', ud_get_stateless_media()->domain),
         ));
 
         $settings = ud_get_stateless_media()->get('sm');
@@ -1282,6 +1290,7 @@ namespace wpCloud\StatelessMedia {
         wp_localize_script('wp-stateless-batch', 'wp_stateless_batch', array(
           'REST_API_TOKEN' => Utility::generate_jwt_token(['user_id' => get_current_user_id()], DAY_IN_SECONDS),
           'is_running' => BatchTaskManager::instance()->is_running(),
+          'api_root' => apply_filters( 'wp_stateless_rest_api_root', '' ),
         ));
       }
 
@@ -2078,6 +2087,26 @@ namespace wpCloud\StatelessMedia {
        */
       public function get_default_cache_control() {
         return Settings::DEFAULT_CACHE_CONTROL;
+      }
+
+      /**
+       * Override REST API root for headless CMS
+       *
+       * @return string
+       */
+      public function get_rest_api_root($rest_api_root) {
+        $rest_api_root = sanitize_url( get_rest_url() );
+        $rest_api_root .= 'wp-stateless/v1/';
+
+        if ( $this->get('sm.use_api_siteurl') == 'WP_SITEURL' ) {
+          $home = get_home_url();
+          $site = get_site_url();
+
+          return str_replace( $home, $site, $rest_api_root );
+        }
+
+
+        return $rest_api_root;
       }
     }
   }
