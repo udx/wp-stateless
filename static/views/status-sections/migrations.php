@@ -20,10 +20,6 @@
           <a href="#" class="button button-primary resume" data-action="resume"><?php _e('Resume Data Optimization', ud_get_stateless_media()->domain); ?></a>
         </div>
 
-        <?php if ( isset( $migration['message'] ) ) : ?>
-          <p class="description"><?php echo $migration['message']; ?></p>
-        <?php endif; ?>
-
         <div class="progress-wrap">
           <div class="progress"><div class="bar"></div><span class="percent"></span></div>
         </div>

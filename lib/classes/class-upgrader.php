@@ -257,6 +257,16 @@ namespace wpCloud\StatelessMedia {
             Helper::log($e->getMessage());
           }
         }
+
+        if ( !empty($old_version) && version_compare($old_version, '1.2', '<') ) {
+          try {
+            // Remove UNIQUE indexes, which will be recreated later using dbDelta as non-unique
+            $wpdb->query('ALTER TABLE ' .  ud_stateless_db()->files . ' DROP INDEX name');
+
+          } catch (\Throwable $e) {
+            Helper::log($e->getMessage());
+          }
+        }
       }
     }
   }

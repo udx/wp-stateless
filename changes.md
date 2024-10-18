@@ -6,7 +6,7 @@
 * COMPATIBILITY - Easy Digital Downloads Compatibility replaced with [WP-Stateless - Easy Digital Downloads Addon](https://wordpress.org/plugins/wp-stateless-easy-digital-downloads-addon/).
 * COMPATIBILITY - LiteSpeed Cache Compatibility replaced with [WP-Stateless - LiteSpeed Cache Addon](https://wordpress.org/plugins/wp-stateless-litespeed-cache-addon/).
 * FIX: PHP warning on `Status` settings tab.
-
+* FIX: database updates to resolve conflicts with Polylang Pro compatibility.
 
 #### 4.1.1
 * FIX - cache issues during Data Optimization.
