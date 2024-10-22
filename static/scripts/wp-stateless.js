@@ -398,8 +398,8 @@ wpStatelessProcessingApp = {
   canRun: true,
   processes: [],
   token: window.wp_stateless_configs.REST_API_TOKEN,
-  apiRoot: window.wpApiSettings.root + 'wp-stateless/v1/sync/',
-  
+  apiRoot: window.wp_stateless_configs.api_root + 'sync/',
+
   blockUI: function () {
     this.canRun = false
 

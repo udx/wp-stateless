@@ -15,7 +15,7 @@ namespace wpCloud\StatelessMedia {
       use Singleton;
 
       const DB_VERSION_KEY = 'sm_db_version';
-      const DB_VERSION = '1.1';
+      const DB_VERSION = '1.2';
       const FULL_SIZE = '__full';
 
       /**
@@ -173,7 +173,8 @@ namespace wpCloud\StatelessMedia {
             `status` varchar(10) NULL DEFAULT NULL,
             PRIMARY KEY (`id`),
             KEY post_id (post_id),
-            UNIQUE KEY `name` (`name`(191))
+            KEY `name` (`name`(191)),
+            UNIQUE KEY post_id_name (post_id, `name`(150))
           ) $charset_collate;
   
           CREATE TABLE $this->file_sizes (

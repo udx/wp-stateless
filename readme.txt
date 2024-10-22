@@ -6,7 +6,7 @@ License: GPLv2 or later
 Requires PHP: 8.0
 Requires at least: 5.0
 Tested up to: 6.6.2
-Stable tag: 4.1.1
+Stable tag: 4.1.2
 
 Upload and serve your WordPress media files from Google Cloud Storage.
 
@@ -47,9 +47,14 @@ New to Google Cloud? Google is offering you a [$300 credit](https://console.clou
 * [Elementor Website Builder Addon](https://wordpress.org/plugins/wp-stateless-elementor-website-builder-addon/)
 * [Gravity Forms Addon](https://wordpress.org/plugins/wp-stateless-gravity-forms-addon/)
 * [Gravity Forms Signature Addon](https://wordpress.org/plugins/wp-stateless-gravity-forms-signature-addon/)
+* [WPForms Addon](https://wordpress.org/plugins/wp-stateless-wpforms-addon/)
 * [WooCommerce Addon](https://wordpress.org/plugins/wp-stateless-woocommerce-addon/)
+* [Easy Digital Downloads Addon](https://wordpress.org/plugins/wp-stateless-easy-digital-downloads-addon/)
+* [LiteSpeed Cache Addon](https://wordpress.org/plugins/wp-stateless-litespeed-cache-addon/)
 * [Divi Theme Addon](https://wordpress.org/plugins/wp-stateless-divi-theme-addon/)
 * [SiteOrigin CSS Addon](https://wordpress.org/plugins/wp-stateless-siteorigin-css-addon/)
+* [SiteOrigin Widgets Bundle Addon](https://wordpress.org/plugins/wp-stateless-siteorigin-widgets-bundle-addon/)
+* [BuddyPress Addon](https://wordpress.org/support/plugin/wp-stateless-buddypress-addon/)
 * [BuddyBoss Platform Addon](https://wordpress.org/plugins/wp-stateless-buddyboss-platform-addon/)
 
 = Support, Feedback, & Contribute =
@@ -129,6 +134,17 @@ Before upgrading to WP-Stateless 3.2.0, please, make sure you use PHP 7.2 or abo
 Before upgrading to WP-Stateless 3.0, please, make sure you tested it on your development environment.
 
 == Changelog ==
+= 4.1.2 =
+* ENHANCEMENT - added `REST API Endpoint` setting, which useful when WordPress dashboard and frontend website utilize different domain names.
+* ENHANCEMENT - extended `Status Info` with the information to help diagnose REST API or AJAX issues.
+* COMPATIBILITY - SiteOrigin Widgets Bundle Compatibility replaced with [WP-Stateless - SiteOrigin Widgets Bundle Addon](https://wordpress.org/plugins/wp-stateless-siteorigin-widgets-bundle-addon/).
+* COMPATIBILITY - WPForms Compatibility replaced with [WP-Stateless - WPForms Addon](https://wordpress.org/plugins/wp-stateless-wpforms-addon/).
+* COMPATIBILITY - Easy Digital Downloads Compatibility replaced with [WP-Stateless - Easy Digital Downloads Addon](https://wordpress.org/plugins/wp-stateless-easy-digital-downloads-addon/).
+* COMPATIBILITY - LiteSpeed Cache Compatibility replaced with [WP-Stateless - LiteSpeed Cache Addon](https://wordpress.org/plugins/wp-stateless-litespeed-cache-addon/).
+* COMPATIBILITY - BuddyPress Compatibility replaced with [WP-Stateless - BuddyPress Addon](https://wordpress.org/support/plugin/wp-stateless-buddypress-addon/).
+* FIX: remove PHP warning on `Status` settings tab.
+* FIX: database updates to resolve conflicts with Polylang Pro compatibility.
+
 = 4.1.1 =
 * FIX - cache issues during Data Optimization.
 
