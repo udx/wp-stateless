@@ -134,19 +134,19 @@
         </p>
 
         <p class="description"><strong id="notice-status_email_type"></strong> 
-          <?php _e('Send status emails for long-term like Background Synchronization or Data Updates.', ud_get_stateless_media()->domain); ?>
+          <?php _e('Send status emails for background synchronization and data optimization processes.', ud_get_stateless_media()->domain); ?>
         </p>
       </div>
 
-      <p class="sm-status-email-address">
+      <div class="sm-status-email-address">
         <label for="status_email_address">
           <input name="sm[status_email_address]" type="text" id="status_status_email_addressemail" class="regular-text ltr" value="<?php echo $sm->status_email_address; ?>">
-
-          <span class="description">
-            <?php _e('You can specify several emails, separated by comma.', ud_get_stateless_media()->domain); ?>
-          </span>
         </label>
-      </p>
+
+        <p class="description">
+            <?php _e('You can specify several emails, separated by comma.', ud_get_stateless_media()->domain); ?>
+        </p>
+      </div>
 
     </fieldset>
   </td>

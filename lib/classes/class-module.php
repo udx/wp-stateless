@@ -26,11 +26,6 @@ namespace wpCloud\StatelessMedia {
       add_action('wp_stateless_compatibility_tab_content', array($this, 'tab_content'));
 
       /**
-       * Support for BuddyPress
-       */
-      new BuddyPress();
-
-      /**
        * Support for Ewww Image Optimizer
        */
       new EWWW();

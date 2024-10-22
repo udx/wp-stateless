@@ -39,7 +39,6 @@ return array(
     'wpCloud\\StatelessMedia\\Batch\\IBatchTask' => $baseDir . '/lib/classes/batch/interface-batch.php',
     'wpCloud\\StatelessMedia\\Batch\\Migration' => $baseDir . '/lib/classes/batch/class-migration.php',
     'wpCloud\\StatelessMedia\\Bootstrap' => $baseDir . '/lib/classes/class-bootstrap.php',
-    'wpCloud\\StatelessMedia\\BuddyPress' => $baseDir . '/lib/classes/compatibility/buddypress.php',
     'wpCloud\\StatelessMedia\\Compatibility' => $baseDir . '/lib/classes/class-compatibility.php',
     'wpCloud\\StatelessMedia\\CompatibilityWooExtraProductOptions' => $baseDir . '/lib/classes/compatibility/woo-extra-product-options.php',
     'wpCloud\\StatelessMedia\\DB' => $baseDir . '/lib/classes/class-db.php',

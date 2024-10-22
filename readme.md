@@ -44,6 +44,7 @@ New to Google Cloud? Google is offering you a [$300 credit](https://console.clou
 * [Divi Theme Addon](https://wordpress.org/plugins/wp-stateless-divi-theme-addon/)
 * [SiteOrigin CSS Addon](https://wordpress.org/plugins/wp-stateless-siteorigin-css-addon/)
 * [SiteOrigin Widgets Bundle Addon](https://wordpress.org/plugins/wp-stateless-siteorigin-widgets-bundle-addon/)
+* [BuddyPress Addon](https://wordpress.org/support/plugin/wp-stateless-buddypress-addon/)
 * [BuddyBoss Platform Addon](https://wordpress.org/plugins/wp-stateless-buddyboss-platform-addon/)
 
 ### Support, Feedback, & Contribute

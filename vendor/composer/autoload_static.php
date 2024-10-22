@@ -80,7 +80,6 @@ class ComposerStaticInitc59d002476a452800baaf79c430753cb
         'wpCloud\\StatelessMedia\\Batch\\IBatchTask' => __DIR__ . '/../..' . '/lib/classes/batch/interface-batch.php',
         'wpCloud\\StatelessMedia\\Batch\\Migration' => __DIR__ . '/../..' . '/lib/classes/batch/class-migration.php',
         'wpCloud\\StatelessMedia\\Bootstrap' => __DIR__ . '/../..' . '/lib/classes/class-bootstrap.php',
-        'wpCloud\\StatelessMedia\\BuddyPress' => __DIR__ . '/../..' . '/lib/classes/compatibility/buddypress.php',
         'wpCloud\\StatelessMedia\\Compatibility' => __DIR__ . '/../..' . '/lib/classes/class-compatibility.php',
         'wpCloud\\StatelessMedia\\CompatibilityWooExtraProductOptions' => __DIR__ . '/../..' . '/lib/classes/compatibility/woo-extra-product-options.php',
         'wpCloud\\StatelessMedia\\DB' => __DIR__ . '/../..' . '/lib/classes/class-db.php',
