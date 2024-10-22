@@ -55,6 +55,7 @@ jQuery(document).ready(function ($) {
     }
   })
 
+  // Copy Status Info to clipboard
   var clipboard = new ClipboardJS('.stateless-info-heading .copy-button')
 
   clipboard.on('success', function(e) {
@@ -64,4 +65,39 @@ jQuery(document).ready(function ($) {
       $('.stateless-info-copy-success').fadeOut(500);
     }, 5000);
   })
+
+  // Check if API and AJAX is available
+  function setServiceStatus(id, status) {
+    var data = $('.stateless-info-heading .button.copy-button').attr('data-clipboard-text');
+    $('.stateless-info-heading .button.copy-button').attr( 'data-clipboard-text', data.replace('%' + id + '%', status));
+
+    $(`#stateless-info-block-stateless .${id} .value`).text(status);
+  }
+
+  $.ajax({
+    method: 'GET',
+    url: window.wp_stateless_configs.api_root + 'status',
+  })
+    .then(function() {
+      setServiceStatus( 'api_status', window.wp_stateless_configs.text_ok );
+    })
+    .fail(function() {
+      setServiceStatus( 'api_status', window.wp_stateless_configs.text_fail );
+    })
+
+  $.ajax({
+    method: 'POST',
+    url: window.wp_stateless_configs.ajaxurl,
+    data: {
+      action: 'stateless_check_ajax',
+      _ajax_nonce: window.wp_stateless_configs.stateless_check_ajax_nonce,
+    }
+  })
+    .then(function() {
+      setServiceStatus( 'ajax_status', window.wp_stateless_configs.text_ok );
+    })
+    .fail(function() {
+      setServiceStatus( 'ajax_status', window.wp_stateless_configs.text_fail );
+    })
+
 })

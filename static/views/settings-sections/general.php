@@ -100,6 +100,25 @@
         </p>
       </div>
 
+      <h4><?php _e('REST API Endpoint', ud_get_stateless_media()->domain); ?></h4>
+
+      <div class="use_api_siteurl">
+        <p>
+          <select id="use_api_siteurl" name="sm[use_api_siteurl]">
+            <?php if (is_network_admin()) : ?>
+              <option value="" <?php selected( $sm->use_api_siteurl, '' ); ?>><?php _e('Don\'t override', ud_get_stateless_media()->domain); ?></option>
+            <?php endif; ?>
+            <option value="WP_HOME" <?php selected( $sm->use_api_siteurl, 'WP_HOME' ); ?>><?php _e('WP_HOME', ud_get_stateless_media()->domain); ?></option>
+            <option value="WP_SITEURL" <?php selected( $sm->use_api_siteurl, 'WP_SITEURL' ); ?>><?php _e('WP_SITEURL', ud_get_stateless_media()->domain); ?></option>
+          </select>
+        </p>
+
+        <p class="description">
+          <strong id="notice-use_api_siteurl"></strong> 
+          <?php _e('By default, we use the <code>WP_HOME</code> endpoint for REST API requests. If you encounter problems with synchronization or data optimization functions, try using the <code>WP_SITEURL</code> option instead. This is useful if your WordPress dashboard and frontend website utilize different domain names, such as with a headless CMS configuration.', ud_get_stateless_media()->domain); ?>
+        </p>
+      </div>
+
       <h4><?php _e('Send Status Emails', ud_get_stateless_media()->domain); ?></h4>
       
       <div class="status_email_type">
@@ -115,19 +134,19 @@
         </p>
 
         <p class="description"><strong id="notice-status_email_type"></strong> 
-          <?php _e('Send status emails for long-term like Background Synchronization or Data Updates.', ud_get_stateless_media()->domain); ?>
+          <?php _e('Send status emails for background synchronization and data optimization processes.', ud_get_stateless_media()->domain); ?>
         </p>
       </div>
 
-      <p class="sm-status-email-address">
+      <div class="sm-status-email-address">
         <label for="status_email_address">
           <input name="sm[status_email_address]" type="text" id="status_status_email_addressemail" class="regular-text ltr" value="<?php echo $sm->status_email_address; ?>">
-
-          <span class="description">
-            <?php _e('You can specify several emails, separated by comma.', ud_get_stateless_media()->domain); ?>
-          </span>
         </label>
-      </p>
+
+        <p class="description">
+            <?php _e('You can specify several emails, separated by comma.', ud_get_stateless_media()->domain); ?>
+        </p>
+      </div>
 
     </fieldset>
   </td>

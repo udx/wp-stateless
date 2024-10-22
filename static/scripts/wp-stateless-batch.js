@@ -1,6 +1,6 @@
 wpStatelessBatch = {
   token: window.wp_stateless_batch.REST_API_TOKEN,
-  apiRoot: window.wpApiSettings.root + 'wp-stateless/v1/batch/',
+  apiRoot: window.wp_stateless_batch.api_root + 'batch/',
   interval: null,
 
   startPolling: function () {
