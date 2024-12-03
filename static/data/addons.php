@@ -97,4 +97,54 @@ return [
     'hubspot_id'      => '151480507684',
   ],
 
+  'siteorigin-widgets-bundle' => [
+    'title'           => 'SiteOrigin Widgets Bundle',
+    'plugin_files'    => ['so-widgets-bundle/so-widgets-bundle.php'],
+    'addon_file'      => 'wp-stateless-siteorigin-widgets-bundle-addon/wp-stateless-siteorigin-widgets-bundle-addon.php',
+    'icon'            => 'https://ps.w.org/so-widgets-bundle/assets/icon.svg',
+    'repo'            => 'udx/wp-stateless-siteorigin-widgets-bundle-addon',
+    'wp'              => 'https://wordpress.org/plugins/wp-stateless-siteorigin-widgets-bundle-addon/',
+    'hubspot_id'      => '151480507657',
+  ],
+
+  'wpforms' => [
+    'title'           => 'WPForms',
+    'plugin_files'    => ['wpforms-lite/wpforms.php', 'wpforms/wpforms.php'],
+    'addon_file'      => 'wp-stateless-wpforms-addon/wp-stateless-wpforms-addon.php',
+    'icon'            => 'https://ps.w.org/wpforms-lite/assets/icon.svg',
+    'repo'            => 'udx/wp-stateless-wpforms-addon',
+    'wp'              => 'https://wordpress.org/plugins/wp-stateless-wpforms-addon/',
+    'hubspot_id'      => '151481399840',
+  ],
+
+  'edd' => [
+    'title'           => 'Easy Digital Downloads',
+    'plugin_files'    => ['easy-digital-downloads/easy-digital-downloads.php'],
+    'addon_file'      => 'wp-stateless-easy-digital-downloads-addon/wp-stateless-easy-digital-downloads-addon.php',
+    'icon'            => 'https://ps.w.org/easy-digital-downloads/assets/icon.svg',
+    'repo'            => 'udx/wp-stateless-easy-digital-downloads-addon',
+    'wp'              => 'https://wordpress.org/plugins/wp-stateless-easy-digital-downloads-addon/',
+    'hubspot_id'      => '151481399833',
+  ],
+
+  'lite-speed-cache' => [
+    'title'           => 'LiteSpeed Cache',
+    'plugin_files'    => ['litespeed-cache/litespeed-cache.php'],
+    'addon_file'      => 'wp-stateless-litespeed-cache-addon/wp-stateless-litespeed-cache-addon.php',
+    'icon'            => 'https://ps.w.org/litespeed-cache/assets/icon-128x128.png',
+    'repo'            => 'udx/wp-stateless-litespeed-cache-addon',
+    'wp'              => 'https://wordpress.org/plugins/wp-stateless-litespeed-cache-addon/',
+    'hubspot_id'      => '151480507763',
+  ],
+
+  'buddypress' => [
+    'title'           => 'BuddyPress',
+    'plugin_files'    => ['buddypress/bp-loader.php'],
+    'addon_file'      => 'wp-stateless-buddypress-addon/wp-stateless-buddypress-addon.php',
+    'icon'            => 'https://ps.w.org/buddypress/assets/icon.svg',
+    'repo'            => 'udx/wp-stateless-buddypress-addon',
+    'wp'              => 'https://wordpress.org/support/plugin/wp-stateless-buddypress-addon/',
+    'hubspot_id'      => '151478250924',
+  ],
+
 ];

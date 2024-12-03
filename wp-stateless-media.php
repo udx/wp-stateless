@@ -4,7 +4,7 @@
  * Plugin URI: https://stateless.udx.io/
  * Description: Upload and serve your WordPress media files from Google Cloud Storage.
  * Author: UDX
- * Version: 4.1.1
+ * Version: 4.1.2
  * Text Domain: stateless-media
  * Author URI: https://udx.io
  * License: GPLv2 or later

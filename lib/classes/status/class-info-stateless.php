@@ -306,6 +306,18 @@ class StatelessInfo {
         'label' => __('Dynamic Image Support', ud_get_stateless_media()->domain),
         'value' => $sm['dynamic_image_support'],
       ],
+      'use_api_siteurl' => [
+        'label' => __('Use Site URL for REST API Requests', ud_get_stateless_media()->domain),
+        'value' => $sm['use_api_siteurl'],
+      ],
+      'api_status' => [
+        'label' => __('REST API Status', ud_get_stateless_media()->domain),
+        'value' => '%api_status%',
+      ],
+      'ajax_status' => [
+        'label' => __('AJAX Status', ud_get_stateless_media()->domain),
+        'value' => '%ajax_status%',
+      ],
       'use_postmeta' => [
         'label' => __('Use Post Meta', ud_get_stateless_media()->domain),
         'value' => $sm['use_postmeta'],

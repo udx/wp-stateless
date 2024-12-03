@@ -26,16 +26,6 @@ namespace wpCloud\StatelessMedia {
       add_action('wp_stateless_compatibility_tab_content', array($this, 'tab_content'));
 
       /**
-       * Support for BuddyPress
-       */
-      new BuddyPress();
-
-      /**
-       * Support for Easy Digital Downloads
-       */
-      new EDDDownloadMethod();
-
-      /**
        * Support for Ewww Image Optimizer
        */
       new EWWW();
@@ -49,11 +39,6 @@ namespace wpCloud\StatelessMedia {
        * Support for LearnDash
        */
       new LearnDash();
-
-      /**
-       * Support for LiteSpeed Cache
-       */
-      new LSCacheWP();
 
       /**
        * Support for Polylang Pro
@@ -71,11 +56,6 @@ namespace wpCloud\StatelessMedia {
       new SimpleLocalAvatars();
 
       /**
-       * Support for SiteOrigin Widgets Bundle
-       */
-      new SOWidgetCSS();
-
-      /**
        * Support for The Events Calendar
        */
       new TheEventsCalendar();
@@ -89,11 +69,6 @@ namespace wpCloud\StatelessMedia {
        * Support for WPBakery Page Builder
        */
       new WPBakeryPageBuilder();
-
-      /**
-       * Support for WPForms
-       */
-      new WPForms();
 
       /**
        * Support for Smush
