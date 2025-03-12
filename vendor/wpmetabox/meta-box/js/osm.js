@@ -240,20 +240,26 @@
 
 		// Find address field based on its name attribute. Auto search inside groups when needed.
 		findAddressField: function ( fieldName ) {
+			let selector = `input[name="${ fieldName }"], select[name="${ fieldName }"]`;
+
 			// Not in a group.
-			var $address = $( 'input[name="' + fieldName + '"]' );
+			let $address = $( selector );
 			if ( $address.length ) {
 				return $address;
 			}
 
-			// If map and address is inside a cloneable group.
-			$address = this.$container.closest( '.rwmb-group-clone' ).find( 'input[name*="[' + fieldName + ']"]' );
-			if ( $address.length ) {
-				return $address;
+			let $groupWrapper = this.$container.closest( '.rwmb-group-clone' );
+			if ( ! $groupWrapper.length ) {
+				$groupWrapper = this.$container.closest( '.rwmb-group-wrapper' );
 			}
 
-			// If map and address is inside a non-cloneable group.
-			$address = this.$container.closest( '.rwmb-group-wrapper' ).find( 'input[name*="[' + fieldName + ']"]' );
+			if ( ! $groupWrapper.length ) {
+				return null;
+			}
+
+			selector = `input[name*="${ fieldName }"], select[name*="${ fieldName }"]`;
+
+			$address = $groupWrapper.find( selector );
 			if ( $address.length ) {
 				return $address;
 			}

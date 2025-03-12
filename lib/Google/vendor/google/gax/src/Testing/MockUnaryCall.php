@@ -32,8 +32,8 @@
 
 namespace Google\ApiCore\Testing;
 
-use Google\Rpc\Code;
 use Google\Protobuf\Internal\Message;
+use Google\Rpc\Code;
 use stdClass;
 
 /**
@@ -59,7 +59,7 @@ class MockUnaryCall extends \Grpc\UnaryCall
      * @param callable|array|null $deserialize An optional deserialize method for the response object.
      * @param stdClass|null $status An optional status object. If set to null, a status of OK is used.
      */
-    public function __construct($response = null, $deserialize = null, stdClass $status = null)
+    public function __construct($response = null, $deserialize = null, ?stdClass $status = null)
     {
         $this->response = $response;
         $this->deserialize = $deserialize;

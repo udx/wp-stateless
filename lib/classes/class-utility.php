@@ -130,17 +130,13 @@ namespace wpCloud\StatelessMedia {
 
         $_mime_type = get_post_mime_type($attachment_id);
 
-        // Treat images as public.
-        if (strpos($_mime_type, 'image/') !== false) {
-          return apply_filters('sm:item:cacheControl', ud_get_stateless_media()->get_default_cache_control(), array('attachment_id' => $attachment_id, 'mime_type' => null, 'metadata' => $metadata, 'data' => $data));
-        }
-
-        // Treat images as public.
+        // Treat SQL as non-public.
         if (strpos($_mime_type, 'sql') !== false) {
           return apply_filters('sm:item:cacheControl', 'private, no-cache, no-store', array('attachment_id' => $attachment_id, 'mime_type' => null, 'metadata' => $metadata, 'data' => $data));
         }
 
-        return apply_filters('sm:item:cacheControl', 'public, max-age=30, no-store, must-revalidate', array('attachment_id' => $attachment_id, 'mime_type' => null, 'metadata' => $metadata, 'data' => $data));
+        // Treat all other files as public.
+        return apply_filters('sm:item:cacheControl', ud_get_stateless_media()->get_default_cache_control(), array('attachment_id' => $attachment_id, 'mime_type' => null, 'metadata' => $metadata, 'data' => $data));
       }
 
       /**

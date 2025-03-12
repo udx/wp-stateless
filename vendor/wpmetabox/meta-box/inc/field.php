@@ -37,19 +37,15 @@ abstract class RWMB_Field {
 			$field_html = self::filter( 'html', $field_html, $field, $meta );
 		}
 
-		$cleanup = '';
-
-		if ( $field['clone'] ) {
-			$cleanup = '<input type="hidden" name="rwmb_cleanup[]" value="' .  $field['id'] .'">';
-		}
-
 		$end = static::end_html( $field );
-		$end = self::filter( 'end_html', $end, $field, $meta );	
-		$html = self::filter( 'wrapper_html', $begin . $field_html . $cleanup . $end, $field, $meta );
+		$end = self::filter( 'end_html', $end, $field, $meta );
+		$html = self::filter( 'wrapper_html', $begin . $field_html . $end, $field, $meta );
 
 		// Display label and input in DIV and allow user-defined classes to be appended.
 		$classes = "rwmb-field rwmb-{$field['type']}-wrapper " . $field['class'];
-		if ( ! empty( $field['required'] ) ) {
+		$required = $field['required'] || ! empty( $field['attributes']['required'] );
+
+		if ( $required ) {
 			$classes .= ' required';
 		}
 
@@ -79,24 +75,19 @@ abstract class RWMB_Field {
 	protected static function begin_html( array $field ): string {
 		$id       = $field['attributes']['id'] ?? $field['id'];
 		$required = $field['required'] || ! empty( $field['attributes']['required'] );
+		$required = $required ? '<span class="rwmb-required">*</span>' : '';
 
 		$label = $field['name'] ? sprintf(
-			'<label for="%s">%s%s</label>',
+			// Translators: %1$s - field ID, %2$s - field label, %3$s - required asterisk, %4$s - label description.
+			'<div class="rwmb-label" id="%1$s-label"><label for="%1$s">%2$s%3$s</label>%4$s</div>',
 			esc_attr( $id ),
 			$field['name'],
-			$required ? '<span class="rwmb-required">*</span>' : ''
+			$required,
+			static::label_description( $field )
 		) : '';
 
-		$label .= static::label_description( $field );
-
-		$label = $label ? sprintf(
-			'<div class="rwmb-label" id="%s-label">%s</div>',
-			esc_attr( $id ),
-			$label
-		) : '';
-
-		$data_min_clone   = is_numeric( $field['min_clone'] ) && $field['min_clone'] > 1 ? ' data-min-clone=' . $field['min_clone'] : '';
-		$data_max_clone   = is_numeric( $field['max_clone'] ) && $field['max_clone'] > 1 ? ' data-max-clone=' . $field['max_clone'] : '';
+		$data_max_clone   = is_numeric( $field['max_clone'] ) && $field['max_clone'] > 0 ? ' data-max-clone=' . $field['max_clone'] : '';
+		$data_min_clone   = is_numeric( $field['min_clone'] ) && $field['min_clone'] > 0 ? ' data-min-clone=' . $field['min_clone'] : '';
 		$data_empty_start = $field['clone_empty_start'] ? ' data-clone-empty-start="1"' : ' data-clone-empty-start="0"';
 
 		$input_open = sprintf(
@@ -188,17 +179,17 @@ abstract class RWMB_Field {
 			return $meta;
 		}
 
+		// When a field is cloneable, it should always return an array.
 		$meta = is_array( $raw_meta ) ? $raw_meta : [];
 
-		// Clone empty start = TRUE, get nothing to display
-		// Clone empty start = FALSE, get all default values to display
-		$std 		= $field['clone_empty_start'] ? [] : $std;
-		$empty_std  = $field['clone_empty_start'] ? [] : Arr::to_depth( $raw_meta, Arr::depth( $std ) );
-
 		if ( empty( $meta ) ) {
+			$empty_meta = empty( $raw_meta ) ? [null] : $raw_meta;
+			$std 		= $field['clone_empty_start'] ? [] : $std;
+			$empty_std  = $field['clone_empty_start'] ? [] : Arr::to_depth( $empty_meta, Arr::depth( $std ) );
+
 			$meta = $saved ? $empty_std : $std;
 		}
-			
+
 		// 2. Always prepend a template
 		array_unshift( $meta, $single_std );
 
@@ -339,10 +330,6 @@ abstract class RWMB_Field {
 				'data-default'       => $field['std'],
 				'data-clone-default' => 'true',
 			] );
-		}
-
-		if ( 1 === $field['max_clone'] ) {
-			$field['clone'] = false;
 		}
 
 		return $field;

@@ -5,8 +5,8 @@ Tags: google cloud, google cloud storage, cdn, uploads, backup
 License: GPLv2 or later
 Requires PHP: 8.0
 Requires at least: 5.0
-Tested up to: 6.6.2
-Stable tag: 4.1.2
+Tested up to: 6.7.2
+Stable tag: 4.1.3
 
 Upload and serve your WordPress media files from Google Cloud Storage.
 
@@ -54,8 +54,9 @@ New to Google Cloud? Google is offering you a [$300 credit](https://console.clou
 * [Divi Theme Addon](https://wordpress.org/plugins/wp-stateless-divi-theme-addon/)
 * [SiteOrigin CSS Addon](https://wordpress.org/plugins/wp-stateless-siteorigin-css-addon/)
 * [SiteOrigin Widgets Bundle Addon](https://wordpress.org/plugins/wp-stateless-siteorigin-widgets-bundle-addon/)
-* [BuddyPress Addon](https://wordpress.org/support/plugin/wp-stateless-buddypress-addon/)
+* [BuddyPress Addon](https://wordpress.org/plugin/wp-stateless-buddypress-addon/)
 * [BuddyBoss Platform Addon](https://wordpress.org/plugins/wp-stateless-buddyboss-platform-addon/)
+* [Polylang Pro Addon](https://wordpress.org/plugins/wp-stateless-polylang-pro-addon/)
 
 = Support, Feedback, & Contribute =
 We welcome community involvement via the [GitHub repository](https://github.com/udx/wp-stateless).
@@ -134,6 +135,15 @@ Before upgrading to WP-Stateless 3.2.0, please, make sure you use PHP 7.2 or abo
 Before upgrading to WP-Stateless 3.0, please, make sure you tested it on your development environment.
 
 == Changelog ==
+= 4.1.3 =
+* COMPATIBILITY - PolyLang Compatibility replaced with [WP-Stateless – Polylang Pro Addon](https://wordpress.org/plugins/wp-stateless-polylang-pro-addon/).
+* ENHANCEMENT - updated `wpmetabox/meta-box` library from from 5.10.1 to 5.10.7.
+* ENHANCEMENT - updated `Meta Box Tabs` library from 1.1.18 to 1.2.0.
+* ENHANCEMENT - updated `firebase/php-jwt` library from from 6.10.1 to 6.10.2.
+* ENHANCEMENT - updated `wpmetabox/meta-box` library from from 5.10.1 to 5.10.2.
+* ENHANCEMENT - Updated Client library for Google APIs from 2.17.0 to 2.18.2.
+* FIX - apply `Cache Control` setting to all files (previously applied only to images).
+
 = 4.1.2 =
 * ENHANCEMENT - added `REST API Endpoint` setting, which useful when WordPress dashboard and frontend website utilize different domain names.
 * ENHANCEMENT - extended `Status Info` with the information to help diagnose REST API or AJAX issues.
@@ -141,7 +151,7 @@ Before upgrading to WP-Stateless 3.0, please, make sure you tested it on your de
 * COMPATIBILITY - WPForms Compatibility replaced with [WP-Stateless - WPForms Addon](https://wordpress.org/plugins/wp-stateless-wpforms-addon/).
 * COMPATIBILITY - Easy Digital Downloads Compatibility replaced with [WP-Stateless - Easy Digital Downloads Addon](https://wordpress.org/plugins/wp-stateless-easy-digital-downloads-addon/).
 * COMPATIBILITY - LiteSpeed Cache Compatibility replaced with [WP-Stateless - LiteSpeed Cache Addon](https://wordpress.org/plugins/wp-stateless-litespeed-cache-addon/).
-* COMPATIBILITY - BuddyPress Compatibility replaced with [WP-Stateless - BuddyPress Addon](https://wordpress.org/support/plugin/wp-stateless-buddypress-addon/).
+* COMPATIBILITY - BuddyPress Compatibility replaced with [WP-Stateless - BuddyPress Addon](https://wordpress.org/plugin/wp-stateless-buddypress-addon/).
 * FIX: remove PHP warning on `Status` settings tab.
 * FIX: database updates to resolve conflicts with Polylang Pro compatibility.
 

@@ -31,32 +31,44 @@
  */
 namespace Google\ApiCore;
 
+use Google\Auth\Logging\LoggingTrait;
+use Google\Auth\Logging\RpcLogEvent;
+use Google\Protobuf\Internal\Message;
 use Google\Rpc\Code;
 use Grpc\BidiStreamingCall;
+use Psr\Log\LoggerInterface;
 
 /**
  * BidiStream is the response object from a gRPC bidirectional streaming API call.
  */
 class BidiStream
 {
+    use LoggingTrait;
+
     private $call;
     private $isComplete = false;
     private $writesClosed = false;
     private $resourcesGetMethod = null;
     private $pendingResources = [];
+    private null|LoggerInterface $logger = null;
 
     /**
      * BidiStream constructor.
      *
      * @param BidiStreamingCall $bidiStreamingCall The gRPC bidirectional streaming call object
      * @param array $streamingDescriptor
+     * @param null|LoggerInterface $logger
      */
-    public function __construct(BidiStreamingCall $bidiStreamingCall, array $streamingDescriptor = [])
-    {
+    public function __construct(
+        BidiStreamingCall $bidiStreamingCall,
+        array $streamingDescriptor = [],
+        null|LoggerInterface $logger = null,
+    ) {
         $this->call = $bidiStreamingCall;
         if (array_key_exists('resourcesGetMethod', $streamingDescriptor)) {
             $this->resourcesGetMethod = $streamingDescriptor['resourcesGetMethod'];
         }
+        $this->logger = $logger;
     }
 
     /**
@@ -68,11 +80,23 @@ class BidiStream
     public function write($request)
     {
         if ($this->isComplete) {
-            throw new ValidationException("Cannot call write() after streaming call is complete.");
+            throw new ValidationException('Cannot call write() after streaming call is complete.');
         }
         if ($this->writesClosed) {
-            throw new ValidationException("Cannot call write() after calling closeWrite().");
+            throw new ValidationException('Cannot call write() after calling closeWrite().');
         }
+
+        if ($this->logger && $request instanceof Message) {
+            $logEvent = new RpcLogEvent();
+
+            $logEvent->headers = null;
+            $logEvent->payload = $request->serializeToJsonString();
+            $logEvent->processId = (int) getmypid();
+            $logEvent->requestId = crc32((string) spl_object_id($this) . getmypid());
+
+            $this->logRequest($logEvent);
+        }
+
         $this->call->write($request);
     }
 
@@ -99,7 +123,7 @@ class BidiStream
     {
         if ($this->isComplete) {
             throw new ValidationException(
-                "Cannot call closeWrite() after streaming call is complete."
+                'Cannot call closeWrite() after streaming call is complete.'
             );
         }
         if (!$this->writesClosed) {
@@ -119,7 +143,7 @@ class BidiStream
     public function read()
     {
         if ($this->isComplete) {
-            throw new ValidationException("Cannot call read() after streaming call is complete.");
+            throw new ValidationException('Cannot call read() after streaming call is complete.');
         }
         $resourcesGetMethod = $this->resourcesGetMethod;
         if (!is_null($resourcesGetMethod)) {
@@ -144,6 +168,22 @@ class BidiStream
                 throw ApiException::createFromStdClass($status);
             }
         }
+
+        if ($this->logger) {
+            $responseEvent = new RpcLogEvent();
+
+            $responseEvent->headers = $this->call->getMetadata();
+            $responseEvent->status = $status->code ?? null;
+            $responseEvent->processId = (int) getmypid();
+            $responseEvent->requestId = crc32((string) spl_object_id($this) . getmypid());
+
+            if ($result instanceof Message) {
+                $responseEvent->payload = $result->serializeToJsonString();
+            }
+
+            $this->logResponse($responseEvent);
+        }
+
         return $result;
     }
 

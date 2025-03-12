@@ -75,7 +75,7 @@ namespace wpCloud\StatelessMedia {
        *                      2 (int): Force to overwrite on GCS
        * @param array $args
        * @return bool|void $media: Media object returned from client->add_media() method.
-       * @throws: Exception File not found@throws: Exception File not found
+       * @throws: Exception File not found
        */
       public function sync_file($name, $absolutePath, $forced = false, $args = array()) {
         $sm_mode = ud_get_stateless_media()->get('sm.mode');

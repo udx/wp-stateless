@@ -323,6 +323,60 @@ if (defined('WP_CLI') && WP_CLI && class_exists('WP_CLI_Command')) {
     }
 
     /**
+     * Sets cacheControl meta for all files on Google Cloud Storage to the default value from WP-Stateless settings.
+     *
+     * ## OPTIONS
+     *
+     * --url
+     * : Blog URL if multisite installation.
+     * 
+     * ## EXAMPLES
+     *
+     * wp stateless reset_cache_control
+     * : Sync cache control for all files on Google Cloud Storage.
+     *
+     * @synopsis [--url=<val>]
+     * @param $args
+     * @param $assoc_args
+     */
+    public function reset_cache_control($args, $assoc_args) {
+      $sm_mode = ud_get_stateless_media()->get('sm.mode');
+      if ( ud_get_stateless_media()->is_mode('stateless') ) {
+        WP_CLI::error('Sync cache control is not supported in Stateless mode');
+      }
+
+      global $wpdb;
+
+      $gs_client = ud_get_stateless_media()->get_client();
+      $cache_control = ud_get_stateless_media()->get_default_cache_control();
+      $cache_control = apply_filters('sm:item:cacheControl', ud_get_stateless_media()->get_default_cache_control() );
+
+      $table_name = ud_stateless_db()->files;
+      $names = $wpdb->get_col("
+        SELECT name
+        FROM {$table_name}
+        WHERE post_id IS NOT NULL
+      ");
+
+      foreach ($names as $name) {
+        if ( !$gs_client->media_exists($name) ) {
+          continue;
+        }
+
+        $args = [
+          'skipLocalCheck' => true,
+          'force' => false,
+          'cacheControl' => $cache_control,
+          'name' => $name,
+        ];
+
+        $gs_client->add_media($args);
+
+        WP_CLI::line("Processed file: '{$name}'");
+      }
+    }
+
+    /**
      * Run all pending migrations
      * 
      * @param array $assoc_args

@@ -24,7 +24,7 @@ return [
   'buddyboss' => [
     'title'           => 'BuddyBoss Platform',
     'plugin_files'    => ['buddyboss-platform/bp-loader.php'],
-    'addon_file'      => 'wp-stateless-buddyboss-addon/wp-stateless-buddyboss-addon.php',
+    'addon_file'      => 'wp-stateless-buddyboss-platform-addon/wp-stateless-buddyboss-addon.php',
     'icon'            => 'https://www.buddyboss.com/wp-content/uploads/2022/04/bb-logo-1.png',
     'repo'            => 'udx/wp-stateless-buddyboss-addon', 
     'wp'              => 'https://wordpress.org/plugins/wp-stateless-buddyboss-platform-addon/', 
@@ -35,8 +35,8 @@ return [
   'elementor' => [
     'title'           => 'Elementor Website Builder',
     'plugin_files'    => ['elementor/elementor.php'],
-    'addon_file'      => 'wp-stateless-elementor-addon/wp-stateless-elementor-addon.php',
-    'icon'            => 'https://ps.w.org/elementor/assets/icon.svg',
+    'addon_file'      => 'wp-stateless-elementor-website-builder-addon/wp-stateless-elementor-addon.php',
+    'icon'            => 'https://ps.w.org/elementor/assets/icon-128x128.gif',
     'repo'            => 'udx/wp-stateless-elementor-website-builder-addon', 
     'wp'              => 'https://wordpress.org/plugins/wp-stateless-elementor-website-builder-addon/', 
     'hubspot_id'      => '151481399819', 
@@ -143,8 +143,18 @@ return [
     'addon_file'      => 'wp-stateless-buddypress-addon/wp-stateless-buddypress-addon.php',
     'icon'            => 'https://ps.w.org/buddypress/assets/icon.svg',
     'repo'            => 'udx/wp-stateless-buddypress-addon',
-    'wp'              => 'https://wordpress.org/support/plugin/wp-stateless-buddypress-addon/',
+    'wp'              => 'https://wordpress.org/plugin/wp-stateless-buddypress-addon/',
     'hubspot_id'      => '151478250924',
+  ],
+
+  'polylang' => [
+    'title'           => 'PolyLang Pro',
+    'plugin_files'    => ['polylang-pro/polylang.php'],
+    'addon_file'      => 'wp-stateless-polylang-pro-addon/wp-stateless-polylang-pro-addon.php',
+    'icon'            => 'https://ps.w.org/buddypress/assets/icon.svg',
+    'repo'            => 'udx/wp-stateless-polylang-pro-addon',
+    'wp'              => 'https://wordpress.org/plugins/wp-stateless-polylang-pro-addon/',
+    'hubspot_id'      => '151478250876',
   ],
 
 ];

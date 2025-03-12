@@ -62,7 +62,7 @@ class MockClientStreamingCall extends Grpc\ClientStreamingCall
      * @param callable|array|null $deserialize An optional deserialize method for the response object.
      * @param stdClass|null $status An optional status object. If set to null, a status of OK is used.
      */
-    public function __construct($response, $deserialize = null, stdClass $status = null)
+    public function __construct($response, $deserialize = null, ?stdClass $status = null)
     {
         $this->mockUnaryCall = new MockUnaryCall($response, $deserialize, $status);
     }
@@ -86,7 +86,7 @@ class MockClientStreamingCall extends Grpc\ClientStreamingCall
     public function write($request, array $options = [])
     {
         if ($this->waitCalled) {
-            throw new ApiException("Cannot call write() after wait()",  Code::INTERNAL, ApiStatus::INTERNAL);
+            throw new ApiException('Cannot call write() after wait()', Code::INTERNAL, ApiStatus::INTERNAL);
         }
         if (is_a($request, '\Google\Protobuf\Internal\Message')) {
             /** @var Message $newRequest */

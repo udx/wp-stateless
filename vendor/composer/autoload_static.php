@@ -7,10 +7,6 @@ namespace Composer\Autoload;
 class ComposerStaticInitc59d002476a452800baaf79c430753cb
 {
     public static $prefixLengthsPsr4 = array (
-        'M' => 
-        array (
-            'MetaBox\\' => 8,
-        ),
         'F' => 
         array (
             'Firebase\\JWT\\' => 13,
@@ -22,10 +18,6 @@ class ComposerStaticInitc59d002476a452800baaf79c430753cb
     );
 
     public static $prefixDirsPsr4 = array (
-        'MetaBox\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/wpmetabox/meta-box/src',
-        ),
         'Firebase\\JWT\\' => 
         array (
             0 => __DIR__ . '/..' . '/firebase/php-jwt/src',
@@ -94,7 +86,6 @@ class ComposerStaticInitc59d002476a452800baaf79c430753cb
         'wpCloud\\StatelessMedia\\Logger' => __DIR__ . '/../..' . '/lib/classes/class-logger.php',
         'wpCloud\\StatelessMedia\\Migrator' => __DIR__ . '/../..' . '/lib/classes/class-migrator.php',
         'wpCloud\\StatelessMedia\\Module' => __DIR__ . '/../..' . '/lib/classes/class-module.php',
-        'wpCloud\\StatelessMedia\\Polylang' => __DIR__ . '/../..' . '/lib/classes/compatibility/polylang-pro.php',
         'wpCloud\\StatelessMedia\\Settings' => __DIR__ . '/../..' . '/lib/classes/class-settings.php',
         'wpCloud\\StatelessMedia\\ShortPixel' => __DIR__ . '/../..' . '/lib/classes/compatibility/shortpixel.php',
         'wpCloud\\StatelessMedia\\SimpleLocalAvatars' => __DIR__ . '/../..' . '/lib/classes/compatibility/simple-local-avatars.php',

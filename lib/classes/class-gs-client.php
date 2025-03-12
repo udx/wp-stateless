@@ -189,10 +189,11 @@ namespace wpCloud\StatelessMedia {
             'mimeType' => 'image/jpeg',
             'metadata' => array(),
             'is_webp' => '',
+            'skipLocalCheck' => false,
           ));
 
           /* Be sure file exists. */
-          if (!file_exists($args['absolutePath'])) {
+          if (!$args['skipLocalCheck'] && !file_exists($args['absolutePath'])) {
             return new \WP_Error('sm_error', __('Unable to locate file on disk', ud_get_stateless_media()->domain));
           }
 

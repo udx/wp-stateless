@@ -33,8 +33,8 @@
 namespace Google\ApiCore\Testing;
 
 use Google\Protobuf\Internal\Message;
-use UnderflowException;
 use stdClass;
+use UnderflowException;
 
 /**
  * The MockStubTrait is used by generated mock stub classes which extent \Grpc\BaseStub
@@ -52,7 +52,7 @@ trait MockStubTrait
     private $callObjects = [];
     private $deserialize;
 
-    public function __construct(callable $deserialize = null)
+    public function __construct(?callable $deserialize = null)
     {
         $this->deserialize = $deserialize;
     }
@@ -77,7 +77,7 @@ trait MockStubTrait
     ) {
         $this->receivedFuncCalls[] = new ReceivedRequest($method, $argument, $deserialize, $metadata, $options);
         if (count($this->responses) < 1) {
-            throw new UnderflowException("ran out of responses");
+            throw new UnderflowException('ran out of responses');
         }
         list($response, $status) = array_shift($this->responses);
         $call = new MockUnaryCall($response, $deserialize, $status);
@@ -106,7 +106,7 @@ trait MockStubTrait
     ) {
         $this->receivedFuncCalls[] = new ReceivedRequest($method, null, $deserialize, $metadata, $options);
         if (count($this->responses) < 1) {
-            throw new UnderflowException("ran out of responses");
+            throw new UnderflowException('ran out of responses');
         }
         list($response, $status) = array_shift($this->responses);
         $call = new MockClientStreamingCall($response, $deserialize, $status);
@@ -196,7 +196,7 @@ trait MockStubTrait
      * @param \Google\Protobuf\Internal\Message $response
      * @param stdClass $status
      */
-    public function addResponse($response, stdClass $status = null)
+    public function addResponse($response, ?stdClass $status = null)
     {
         if (!$this->deserialize && $response) {
             $this->deserialize = [get_class($response), 'decode'];
@@ -263,7 +263,7 @@ trait MockStubTrait
      * @param callable $deserialize
      * @return static An instance of the current class type.
      */
-    public static function create($responseObject, stdClass $status = null, callable $deserialize = null)
+    public static function create($responseObject, ?stdClass $status = null, ?callable $deserialize = null)
     {
         $stub = new static($deserialize); // @phpstan-ignore-line
         $stub->addResponse($responseObject, $status);
@@ -277,7 +277,7 @@ trait MockStubTrait
      * @param stdClass $finalStatus
      * @return static An instance of the current class type.
      */
-    public static function createWithResponseSequence(array $sequence, callable $deserialize = null, stdClass $finalStatus = null)
+    public static function createWithResponseSequence(array $sequence, ?callable $deserialize = null, ?stdClass $finalStatus = null)
     {
         $stub = new static($deserialize); // @phpstan-ignore-line
         foreach ($sequence as $elem) {

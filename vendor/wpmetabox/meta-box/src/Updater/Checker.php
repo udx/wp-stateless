@@ -15,19 +15,19 @@ class Checker {
 		add_action( 'init', [ $this, 'enable_update' ], 1 );
 	}
 
-	public function enable_update() {
-		if ( $this->has_extensions() ) {
+	public function enable_update(): void {
+		if ( $this->has_extensions() || $this->has_free_extensions() ) {
 			add_filter( 'pre_set_site_transient_update_plugins', [ $this, 'check_updates' ] );
 			add_filter( 'plugins_api', [ $this, 'get_info' ], 10, 3 );
 		}
 	}
 
-	public function has_extensions() {
+	public function has_extensions(): bool {
 		$extensions = $this->get_extensions();
 		return ! empty( $extensions );
 	}
 
-	public function get_extensions() {
+	public function get_extensions(): array {
 		if ( ! function_exists( 'get_plugins' ) ) {
 			require_once ABSPATH . 'wp-admin/includes/plugin.php';
 		}
@@ -35,7 +35,6 @@ class Checker {
 		$extensions = [
 			'mb-admin-columns',
 			'mb-blocks',
-			'mb-core',
 			'mb-custom-table',
 			'mb-frontend-submission',
 			'mb-revision',
@@ -44,8 +43,6 @@ class Checker {
 			'mb-user-meta',
 			'mb-user-profile',
 			'mb-views',
-			'meta-box-aio',
-			'meta-box-builder',
 			'meta-box-columns',
 			'meta-box-conditional-logic',
 			'meta-box-geolocation',
@@ -58,6 +55,29 @@ class Checker {
 			'mb-favorite-posts',
 			'mb-testimonials',
 			'mb-user-avatar',
+
+			'mb-core',
+			'meta-box-aio',
+		];
+		$plugins    = get_plugins();
+		$plugins    = array_map( 'dirname', array_keys( $plugins ) );
+
+		return array_intersect( $extensions, $plugins );
+	}
+
+	private function has_free_extensions(): bool {
+		$extensions = $this->get_free_extensions();
+		return ! empty( $extensions );
+	}
+
+	private function get_free_extensions(): array {
+		if ( ! function_exists( 'get_plugins' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/plugin.php';
+		}
+
+		$extensions = [
+			'meta-box-lite',
+			'meta-box-builder',
 		];
 		$plugins    = get_plugins();
 		$plugins    = array_map( 'dirname', array_keys( $plugins ) );

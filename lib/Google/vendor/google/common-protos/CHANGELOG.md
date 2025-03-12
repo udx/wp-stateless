@@ -1,26 +1,5 @@
 # Changelog
 
-## [4.7.0](https://github.com/googleapis/common-protos-php/compare/v4.6.0...v4.7.0) (2024-07-25)
-
-
-### Features
-
-* Add FieldInfo.referenced_types for generics ([246c334](https://github.com/googleapis/common-protos-php/commit/246c334480ce2f307fd1ed60f2712eda0d5da8b4))
-
-
-### Bug Fixes
-
-* Un-deprecate Endpoint.aliases field ([246c334](https://github.com/googleapis/common-protos-php/commit/246c334480ce2f307fd1ed60f2712eda0d5da8b4))
-
-## [4.6.0](https://github.com/googleapis/common-protos-php/compare/v4.5.0...v4.6.0) (2024-04-03)
-
-
-### Features
-
-* Add `api_version` extension to `ServiceOptions`, for collaborative versioning ([#82](https://github.com/googleapis/common-protos-php/issues/82)) ([2ff1de8](https://github.com/googleapis/common-protos-php/commit/2ff1de8c6ffa2b125f502516cbad1315264a9b7b))
-* Add `ErrorReason.LOCATION_POLICY_VIOLATED` enum value ([2ff1de8](https://github.com/googleapis/common-protos-php/commit/2ff1de8c6ffa2b125f502516cbad1315264a9b7b))
-* Add `Publishing.rest_reference_documentation_uri` to aid client library publication ([2ff1de8](https://github.com/googleapis/common-protos-php/commit/2ff1de8c6ffa2b125f502516cbad1315264a9b7b))
-
 ## [4.5.0](https://github.com/googleapis/common-protos-php/compare/v4.4.0...v4.5.0) (2023-11-29)
 
 

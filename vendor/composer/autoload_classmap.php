@@ -53,7 +53,6 @@ return array(
     'wpCloud\\StatelessMedia\\Logger' => $baseDir . '/lib/classes/class-logger.php',
     'wpCloud\\StatelessMedia\\Migrator' => $baseDir . '/lib/classes/class-migrator.php',
     'wpCloud\\StatelessMedia\\Module' => $baseDir . '/lib/classes/class-module.php',
-    'wpCloud\\StatelessMedia\\Polylang' => $baseDir . '/lib/classes/compatibility/polylang-pro.php',
     'wpCloud\\StatelessMedia\\Settings' => $baseDir . '/lib/classes/class-settings.php',
     'wpCloud\\StatelessMedia\\ShortPixel' => $baseDir . '/lib/classes/compatibility/shortpixel.php',
     'wpCloud\\StatelessMedia\\SimpleLocalAvatars' => $baseDir . '/lib/classes/compatibility/simple-local-avatars.php',

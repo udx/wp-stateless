@@ -7,7 +7,7 @@
 class RWMB_Loader {
 	protected function constants() {
 		// Script version, used to add version for scripts and styles.
-		define( 'RWMB_VER', '5.10.1' );
+		define( 'RWMB_VER', '5.10.7' );
 
 		list( $path, $url ) = self::get_path( dirname( __DIR__ ) );
 
@@ -101,13 +101,16 @@ class RWMB_Loader {
 		$wpml->init();
 
 		// Update.
-		$update_option  = new \MetaBox\Updater\Option();
-		$update_checker = new \MetaBox\Updater\Checker( $update_option );
-		$update_checker->init();
-		$update_settings = new \MetaBox\Updater\Settings( $update_checker, $update_option );
-		$update_settings->init();
-		$update_notification = new \MetaBox\Updater\Notification( $update_checker, $update_option );
-		$update_notification->init();
+		$update_checker = null;
+		if ( class_exists( '\MetaBox\Updater\Option' ) ) {
+			$update_option = new \MetaBox\Updater\Option();
+			$update_checker = new \MetaBox\Updater\Checker( $update_option );
+			$update_checker->init();
+			$update_settings = new \MetaBox\Updater\Settings( $update_checker, $update_option );
+			$update_settings->init();
+			$update_notification = new \MetaBox\Updater\Notification( $update_checker, $update_option );
+			$update_notification->init();
+		}
 
 		// Register categories for page builders.
 		new \MetaBox\Integrations\Block();

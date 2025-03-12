@@ -164,7 +164,7 @@ class RWMB_OSM_Field extends RWMB_Field {
 	}
 
 	private static function enqueue_map_assets() {
-		wp_enqueue_style( 'leaflet', 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css', [], '1.9.4' );
-		wp_enqueue_script( 'leaflet', 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js', [], '1.9.4', true );
+		wp_enqueue_style( 'leaflet', RWMB_JS_URL . 'leaflet/leaflet.css', [], '1.9.4' );
+		wp_enqueue_script( 'leaflet', RWMB_JS_URL . 'leaflet/leaflet.js', [], '1.9.4', true );
 	}
 }

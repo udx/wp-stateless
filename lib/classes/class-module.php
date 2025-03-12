@@ -41,11 +41,6 @@ namespace wpCloud\StatelessMedia {
       new LearnDash();
 
       /**
-       * Support for Polylang Pro
-       */
-      new Polylang();
-
-      /**
        * Support for ShortPixel
        */
       new ShortPixel();

@@ -1,5 +1,31 @@
 # Changelog
 
+## [2.18.2](https://github.com/googleapis/google-api-php-client/compare/v2.18.1...v2.18.2) (2024-12-16)
+
+
+### Bug Fixes
+
+* Correct type for jwt constructor arg ([#2648](https://github.com/googleapis/google-api-php-client/issues/2648)) ([31a9861](https://github.com/googleapis/google-api-php-client/commit/31a9861af02a8e9070b395f05caed7ffce0ef8be))
+
+## [2.18.1](https://github.com/googleapis/google-api-php-client/compare/v2.18.0...v2.18.1) (2024-11-24)
+
+
+### Bug Fixes
+
+* Implicitly marking parameter  as nullable is deprecated ([#2638](https://github.com/googleapis/google-api-php-client/issues/2638)) ([de57db2](https://github.com/googleapis/google-api-php-client/commit/de57db2fdc0d56de1abbf778b28b77c3347eb3fd))
+
+## [2.18.0](https://github.com/googleapis/google-api-php-client/compare/v2.17.0...v2.18.0) (2024-10-16)
+
+
+### Features
+
+* **docs:** Use doctum shared workflow for reference docs ([#2618](https://github.com/googleapis/google-api-php-client/issues/2618)) ([242e2cb](https://github.com/googleapis/google-api-php-client/commit/242e2cb09ad5b25b047a862b4d521037e74cae29))
+
+
+### Bug Fixes
+
+* Explicit token caching issue ([#2358](https://github.com/googleapis/google-api-php-client/issues/2358)) ([dc13e5e](https://github.com/googleapis/google-api-php-client/commit/dc13e5e3f517148d3c66d151a5ab133b7840d8fb))
+
 ## [2.17.0](https://github.com/googleapis/google-api-php-client/compare/v2.16.0...v2.17.0) (2024-07-10)
 
 

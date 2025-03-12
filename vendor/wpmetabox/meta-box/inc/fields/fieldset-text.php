@@ -25,9 +25,9 @@ class RWMB_Fieldset_Text_Field extends RWMB_Input_Field {
 		if ( ! is_array( $field['options'] ) ) {
 			return '';
 		}
-		
+
 		foreach ( $field['options'] as $key => $label ) {
-			$value                       = isset( $meta[ $key ] ) ? $meta[ $key ] : '';
+			$value                       = $meta[ $key ] ?? '';
 			$field['attributes']['name'] = $field['field_name'] . "[{$key}]";
 			$html[]                      = sprintf( $tpl, $label, parent::html( $value, $field ) );
 		}
@@ -38,10 +38,6 @@ class RWMB_Fieldset_Text_Field extends RWMB_Input_Field {
 	}
 
 	protected static function input_description( array $field ) : string {
-		return '';
-	}
-
-	protected static function label_description( array $field ) : string {
 		return '';
 	}
 
@@ -105,5 +101,15 @@ class RWMB_Fieldset_Text_Field extends RWMB_Input_Field {
 		}
 		$output .= '</tr>';
 		return $output;
+	}
+
+	/**
+	 * Since we're using an array of text fields, we need to check if all of them are empty.
+	 * Otherwise, there is no way to know if the field is empty or not.
+	 */
+	public static function value( $new, $old, $post_id, $field ) {
+		$all_empty = empty( array_filter( (array) $new ) );
+
+		return $all_empty ? [] : $new;
 	}
 }
