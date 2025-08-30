@@ -11,6 +11,7 @@ namespace wpCloud\StatelessMedia {
     final class Settings extends \UDX\Settings {
 
       const DEFAULT_CACHE_CONTROL = 'public, max-age=36000, must-revalidate';
+      const SETUP_MESSAGE_KEY = 'finish-setup';
 
       /**
        * @var false|null|string
@@ -92,6 +93,9 @@ namespace wpCloud\StatelessMedia {
             'sm' => array()
           )
         ));
+
+        add_action('activated_plugin', array( $this, 'check_setup' ));
+        add_action('admin_notices', array( $this, 'documentation_message' ), 1);
 
         // Setting sm variable
         $this->refresh();
@@ -444,7 +448,8 @@ namespace wpCloud\StatelessMedia {
       public function admin_menu() {
         $key_json = $this->get('sm.key_json');
         if($this->get('sm.hide_setup_assistant') != 'true' && empty($key_json) ){
-          $this->setup_wizard_ui = add_media_page( __( 'Stateless Setup', $this->bootstrap->domain ), __( 'Stateless Setup', $this->bootstrap->domain ), 'manage_options', 'stateless-setup', array($this, 'setup_wizard_interface') );
+          // #152
+          // $this->setup_wizard_ui = add_media_page( __( 'Stateless Setup', $this->bootstrap->domain ), __( 'Stateless Setup', $this->bootstrap->domain ), 'manage_options', 'stateless-setup', array($this, 'setup_wizard_interface') );
         }
 
         if($this->get('sm.hide_settings_panel') != 'true'){
@@ -457,7 +462,8 @@ namespace wpCloud\StatelessMedia {
        * @param $slug
        */
       public function network_admin_menu($slug) {
-        $this->setup_wizard_ui = add_submenu_page( 'settings.php', __( 'Stateless Setup', $this->bootstrap->domain ), __( 'Stateless Setup', $this->bootstrap->domain ), 'manage_options', 'stateless-setup', array($this, 'setup_wizard_interface') );
+        // #152
+        // $this->setup_wizard_ui = add_submenu_page( 'settings.php', __( 'Stateless Setup', $this->bootstrap->domain ), __( 'Stateless Setup', $this->bootstrap->domain ), 'manage_options', 'stateless-setup', array($this, 'setup_wizard_interface') );
         $this->stateless_settings = add_submenu_page( 'settings.php', __( 'Stateless Settings', $this->bootstrap->domain ), __( 'Stateless Settings', $this->bootstrap->domain ), 'manage_options', 'stateless-settings', array($this, 'settings_interface') );
       }
 
@@ -725,6 +731,43 @@ namespace wpCloud\StatelessMedia {
         return $meta;
       }
 
+      /**
+       * Upon plugin activation check if configuration is complete and show setup message if needed
+       */
+      public function check_setup() {
+        if ( json_decode($this->get('sm.key_json')) ) {
+          return;
+        }
+
+        delete_option('dismissed_notice_' . self::SETUP_MESSAGE_KEY);
+      }
+
+      /**
+       * Check if configuration is complete and show setup message if needed
+       */
+      public function documentation_message() {
+        if ( json_decode($this->get('sm.key_json')) ) {
+          return;
+        }
+
+        $documentation_url = sprintf(
+          '<a href="%s" target="_blank">%s</a>',
+          $this->bootstrap->get_docs_page_url('/setup/'),
+          __('Refer to the setup manual', ud_get_stateless_media()->domain),
+        );
+
+        $this->bootstrap->errors->add([
+          'title' => __('WP-Stateless: Finish Setup', ud_get_stateless_media()->domain),
+          'message' => sprintf(
+            __(
+              'WP-Stateless has been successfully activated. %s for guidance on completing the setup.',
+              ud_get_stateless_media()->domain,
+            ),
+            $documentation_url,
+          ),
+          'key' => self::SETUP_MESSAGE_KEY,
+        ], 'message');
+      }
     }
 
   }

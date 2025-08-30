@@ -17,6 +17,7 @@
   </td>
 </tr>
 
+<?php /* #152
 <tr>
   <th scope="row"><?php _e('Setup Assistant Visibility', ud_get_stateless_media()->domain); ?></th>
   
@@ -35,3 +36,4 @@
     </fieldset>
   </td>
 </tr>
+*/ ?>

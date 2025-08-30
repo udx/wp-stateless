@@ -43,7 +43,7 @@ class Info {
   public function check_ajax() {
     if ( !check_ajax_referer('stateless_check_ajax') ) {
       wp_send_json_error([
-        'status' => 'Error',
+        'status' => __('Error', ud_get_stateless_media()->domain),
         'message' => __('Invalid nonce', ud_get_stateless_media()->domain),
       ]);
     }

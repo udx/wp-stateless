@@ -79,6 +79,7 @@ class GoogleCloudInfo {
    * Get the values related to GCS bucket configuration
    */
   public function get_bucket_info($values) {
+    $rows = [];
     $client = ud_get_stateless_media()->get_client();
     $bucket_name = ud_get_stateless_media()->get('sm.bucket');
 
@@ -92,32 +93,41 @@ class GoogleCloudInfo {
 
       return $values + $rows;
     }
-
+    
     // Get bucket info
-    $info = $client->service->buckets->get($bucket_name);
+    try {
+      $info = $client->service->buckets->get($bucket_name);
 
-    $rows = [
-      'storage_class' => [
-        'label' => __('Storage Class', ud_get_stateless_media()->domain),
-        'value' => $info->storageClass,
-      ],
-      'public_access' => [
-        'label' => __('Public Access Prevention', ud_get_stateless_media()->domain),
-        'value' => $info->iamConfiguration->publicAccessPrevention,
-      ],
-      'access_control' => [
-        'label' => __('Access Control', ud_get_stateless_media()->domain),
-        'value' => $info->iamConfiguration->uniformBucketLevelAccess->enabled,
-      ],
-      'versioning' => [
-        'label' => __('Versioning', ud_get_stateless_media()->domain),
-        'value' => isset($info->versioning) && isset($info->versioning->enabled) ? $info->versioning->enabled : false,
-      ],
-      'soft_delete' => [
-        'label' => __('Soft Delete', ud_get_stateless_media()->domain),
-        'value' => isset($info->softDeletePolicy) && isset($info->softDeletePolicy->retentionDurationSeconds) ? $info->softDeletePolicy->retentionDurationSeconds : 0,
-      ],
-    ];
+      $rows = [
+        'storage_class' => [
+          'label' => __('Storage Class', ud_get_stateless_media()->domain),
+          'value' => $info->storageClass,
+        ],
+        'public_access' => [
+          'label' => __('Public Access Prevention', ud_get_stateless_media()->domain),
+          'value' => $info->iamConfiguration->publicAccessPrevention,
+        ],
+        'access_control' => [
+          'label' => __('Access Control', ud_get_stateless_media()->domain),
+          'value' => $info->iamConfiguration->uniformBucketLevelAccess->enabled,
+        ],
+        'versioning' => [
+          'label' => __('Versioning', ud_get_stateless_media()->domain),
+          'value' => isset($info->versioning) && isset($info->versioning->enabled) ? $info->versioning->enabled : false,
+        ],
+        'soft_delete' => [
+          'label' => __('Soft Delete', ud_get_stateless_media()->domain),
+          'value' => isset($info->softDeletePolicy) && isset($info->softDeletePolicy->retentionDurationSeconds) ? $info->softDeletePolicy->retentionDurationSeconds : 0,
+        ],
+      ];
+    } catch ( \Throwable $e ) {
+      $rows = [
+        'gcs_error' => [
+          'label' => __('Error', ud_get_stateless_media()->domain),
+          'value' => __('Google Cloud Storage Bucket info not available', ud_get_stateless_media()->domain),
+        ],
+      ];
+    }
 
     return $values + $rows;
   }

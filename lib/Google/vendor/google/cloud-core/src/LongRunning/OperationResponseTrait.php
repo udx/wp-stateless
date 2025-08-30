@@ -20,6 +20,7 @@ namespace Google\Cloud\Core\LongRunning;
 use Google\ApiCore\OperationResponse;
 use Google\ApiCore\Serializer;
 use Google\GAX\OperationResponse as GaxOperationResponse;
+use Google\GAX\Serializer as GaxSerialzer;
 
 /**
  * Serializes and deserializes ApiCore LRO Response objects.

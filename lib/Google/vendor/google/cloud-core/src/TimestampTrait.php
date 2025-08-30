@@ -18,6 +18,8 @@
 
 namespace Google\Cloud\Core;
 
+use Google\Cloud\Core\Timestamp;
+
 /**
  * Helper methods to work on Google\Cloud\Core\Timestamp.
  * @internal

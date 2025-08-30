@@ -35,7 +35,6 @@ namespace Google\ApiCore\Options\TransportOptions;
 use ArrayAccess;
 use Closure;
 use Google\ApiCore\Options\OptionsTrait;
-use Psr\Log\LoggerInterface;
 
 /**
  * The RestTransportOptions class provides typing to the associative array of options used to
@@ -51,8 +50,6 @@ class RestTransportOptions implements ArrayAccess
 
     private ?string $restClientConfigPath;
 
-    private null|false|LoggerInterface $logger;
-
     /**
      * @param array $options {
      *    Config options used to construct the REST transport.
@@ -63,8 +60,6 @@ class RestTransportOptions implements ArrayAccess
      *          A callable which returns the client cert as a string.
      *    @type string $restClientConfigPath
      *          The path to the REST client config file.
-     *    @typo null|false|LoggerInterface
-     *          A PSR-3 compliant logger instance.
      * }
      */
     public function __construct(array $options)
@@ -82,7 +77,6 @@ class RestTransportOptions implements ArrayAccess
         $this->setHttpHandler($arr['httpHandler'] ?? null);
         $this->setClientCertSource($arr['clientCertSource'] ?? null);
         $this->setRestClientConfigPath($arr['restClientConfigPath'] ?? null);
-        $this->setLogger($arr['logger'] ?? null);
     }
 
     /**
@@ -113,13 +107,5 @@ class RestTransportOptions implements ArrayAccess
     public function setRestClientConfigPath(?string $restClientConfigPath)
     {
         $this->restClientConfigPath = $restClientConfigPath;
-    }
-
-    /**
-     * @param null|false|LoggerInterface $logger
-     */
-    public function setLogger(null|false|LoggerInterface $logger)
-    {
-        $this->logger = $logger;
     }
 }

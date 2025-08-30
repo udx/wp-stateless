@@ -1,10 +1,15 @@
 == Changelog ==
+= 4.2.0 =
+* ENHANCEMENT - Updated Client library for Google APIs from 2.18.2 to 2.18.3.
+* ENHANCEMENT - updated `firebase/php-jwt` library from  6.10.2 to 6.11.1.
+* ENHANCEMENT - updated `wpmetabox/meta-box` library from 5.10.1 to 5.10.11.
+* DEPRECATED - Setup Assistant removed.
+
 = 4.1.3 =
 * COMPATIBILITY - PolyLang Compatibility replaced with [WP-Stateless – Polylang Pro Addon](https://wordpress.org/plugins/wp-stateless-polylang-pro-addon/).
 * ENHANCEMENT - updated `wpmetabox/meta-box` library from from 5.10.1 to 5.10.7.
 * ENHANCEMENT - updated `Meta Box Tabs` library from 1.1.18 to 1.2.0.
 * ENHANCEMENT - updated `firebase/php-jwt` library from from 6.10.1 to 6.10.2.
-* ENHANCEMENT - updated `wpmetabox/meta-box` library from from 5.10.1 to 5.10.2.
 * ENHANCEMENT - Updated Client library for Google APIs from 2.17.0 to 2.18.2.
 * FIX - apply `Cache Control` setting to all files (previously applied only to images).
 

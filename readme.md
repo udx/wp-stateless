@@ -62,7 +62,7 @@ Looking for a unique feature for your next project? [Hire us!](https://udx.io/)
 4. Set a Google Cloud Project, Google Cloud Storage Bucket, and Google Cloud Billing Account and click "Continue."
 5. Installation and setup are now complete. Visit *Media > Stateless Settings* for more options.
 
-For a more detailed installation and setup walkthrough, please see the [manual setup instructions on Github](https://stateless.udx.io/docs/manual-setup/).
+For a more detailed installation and setup walkthrough, please see the [manual setup instructions on Github](https://stateless.udx.io/setup/).
 
 ## Frequently Asked Questions
 

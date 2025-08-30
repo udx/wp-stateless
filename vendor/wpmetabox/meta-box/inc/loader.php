@@ -7,7 +7,7 @@
 class RWMB_Loader {
 	protected function constants() {
 		// Script version, used to add version for scripts and styles.
-		define( 'RWMB_VER', '5.10.7' );
+		define( 'RWMB_VER', '5.10.11' );
 
 		list( $path, $url ) = self::get_path( dirname( __DIR__ ) );
 
@@ -101,6 +101,7 @@ class RWMB_Loader {
 		$wpml->init();
 
 		// Update.
+		$update_option  = null;
 		$update_checker = null;
 		if ( class_exists( '\MetaBox\Updater\Option' ) ) {
 			$update_option = new \MetaBox\Updater\Option();
@@ -119,8 +120,8 @@ class RWMB_Loader {
 		new \MetaBox\Integrations\Oxygen();
 
 		if ( is_admin() ) {
-			$about = new RWMB_About( $update_checker );
-			$about->init();
+			new \MetaBox\Dashboard\Dashboard( $update_checker, $update_option );
+			new \MetaBox\FeaturedPlugins();
 		}
 
 		// Public functions.

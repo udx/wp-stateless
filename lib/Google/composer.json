@@ -14,7 +14,7 @@
         "phpseclib/phpseclib": "^3.0.36",
         "guzzlehttp/guzzle": "^7.4.5",
         "guzzlehttp/psr7": "^2.6",
-        "google/cloud-storage": "^1.45",
+        "google/cloud-storage": "^1.48",
         "google/cloud-core": "^1.60"
     },
     "require-dev": {
@@ -22,7 +22,7 @@
         "symfony/dom-crawler": "~2.1",
         "symfony/css-selector": "~2.1",
         "phpcompatibility/php-compatibility": "^9.2",
-        "composer/composer": "^2.0.0",
+        "composer/composer": "^1.10.23",
         "phpspec/prophecy-phpunit": "^2.1",
         "phpunit/phpunit": "^9.6"
     },

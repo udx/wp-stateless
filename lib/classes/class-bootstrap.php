@@ -1250,7 +1250,8 @@ namespace wpCloud\StatelessMedia {
         ]);
 
         /* Setup wizard styles. */
-        wp_register_style('wp-stateless-setup-wizard', $this->path('static/styles/wp-stateless-setup-wizard.css', 'url'), array(), self::$version);
+        // #152
+        // wp_register_style('wp-stateless-setup-wizard', $this->path('static/styles/wp-stateless-setup-wizard.css', 'url'), array(), self::$version);
 
         wp_register_script('wp-stateless-select2', ud_get_stateless_media()->path('static/scripts/select2.min.js', 'url'), array('jquery'), self::$version, true);
 
@@ -1335,10 +1336,12 @@ namespace wpCloud\StatelessMedia {
 
             break;
 
-          case 'media_page_stateless-setup':
+          // #152
+          // case 'media_page_stateless-setup':
           case 'settings_page_stateless-setup':
             wp_enqueue_style('wp-stateless');
-            wp_enqueue_style('wp-stateless-setup-wizard');
+            // #152
+            // wp_enqueue_style('wp-stateless-setup-wizard');
             break;
           case 'media_page_stateless-settings':
           case 'settings_page_stateless-settings':
@@ -1756,11 +1759,15 @@ namespace wpCloud\StatelessMedia {
         }
 
         if ($plugin == plugin_basename($this->boot_file)) {
-          $url = $this->get_settings_page_url('?page=stateless-setup&step=splash-screen');
+          // #152
+          // $url = $this->get_settings_page_url('?page=stateless-setup&step=splash-screen');
+          $url = $this->get_settings_page_url('?page=stateless-settings');
+
           if (json_decode($this->settings->get('sm.key_json'))) {
             $url = $this->get_settings_page_url('?page=stateless-settings');
           }
-          exit(wp_redirect($url));
+
+          exit( wp_redirect($url) );
         }
       }
 

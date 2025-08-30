@@ -5,8 +5,8 @@ Tags: google cloud, google cloud storage, cdn, uploads, backup
 License: GPLv2 or later
 Requires PHP: 8.0
 Requires at least: 5.0
-Tested up to: 6.7.2
-Stable tag: 4.1.3
+Tested up to: 6.8
+Stable tag: 4.2.0
 
 Upload and serve your WordPress media files from Google Cloud Storage.
 
@@ -71,7 +71,7 @@ Looking for a unique feature for your next project? [Hire us!](https://udx.io/)
 3. Click "Google Login" and sign-in with your Google account.
 4. Set a Google Cloud Project, Google Cloud Storage Bucket, and Google Cloud Billing Account and click "Continue."
 5. Installation and setup is now complete. Visit *Media > Stateless Settings* for more options.
-For a more detailed installation and setup walkthrough, please see the [manual setup instructions on Github](https://stateless.udx.io/docs/manual-setup/).
+For a more detailed installation and setup walkthrough, please see the [manual setup instructions on Github](https://stateless.udx.io/setup/).
 
 == Screenshots ==
 
@@ -135,6 +135,12 @@ Before upgrading to WP-Stateless 3.2.0, please, make sure you use PHP 7.2 or abo
 Before upgrading to WP-Stateless 3.0, please, make sure you tested it on your development environment.
 
 == Changelog ==
+= 4.2 =
+* ENHANCEMENT - Updated Client library for Google APIs from 2.18.2 to 2.18.3.
+* ENHANCEMENT - updated `firebase/php-jwt` library from  6.10.2 to 6.11.1.
+* ENHANCEMENT - updated `wpmetabox/meta-box` library from 5.10.1 to 5.10.11.
+* DEPRECATED - Setup Assistant removed.
+
 = 4.1.3 =
 * COMPATIBILITY - PolyLang Compatibility replaced with [WP-Stateless – Polylang Pro Addon](https://wordpress.org/plugins/wp-stateless-polylang-pro-addon/).
 * ENHANCEMENT - updated `wpmetabox/meta-box` library from from 5.10.1 to 5.10.7.
