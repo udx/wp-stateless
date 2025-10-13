@@ -41,7 +41,7 @@ jobs:
         
       # 'ref' and 'repository' are required, otherwise repo could appear in detached head state
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           ref: ${{ github.head_ref }}
           repository: ${{ github.repository }}
