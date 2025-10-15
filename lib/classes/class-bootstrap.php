@@ -213,11 +213,11 @@ namespace wpCloud\StatelessMedia {
           $is_connected = $this->is_connected_to_gs();
 
           if (is_wp_error($is_connected)) {
-            $this->errors->add($is_connected->get_error_message(), 'warning');
+            $this->errors->add($is_connected->get_error_message(), 'warning', false);
           }
 
           if ($googleSDKVersionConflictError = get_transient("wp_stateless_google_sdk_conflict")) {
-            $this->errors->add($googleSDKVersionConflictError, 'warning');
+            $this->errors->add($googleSDKVersionConflictError, 'warning', false);
           }
 
           /**
@@ -281,11 +281,11 @@ namespace wpCloud\StatelessMedia {
           $is_connected = $this->is_connected_to_gs();
 
           if (is_wp_error($is_connected)) {
-            $this->errors->add($is_connected->get_error_message(), 'warning');
+            $this->errors->add($is_connected->get_error_message(), 'warning', false);
           }
 
           if ($googleSDKVersionConflictError = get_transient("wp_stateless_google_sdk_conflict")) {
-            $this->errors->add($googleSDKVersionConflictError, 'warning');
+            $this->errors->add($googleSDKVersionConflictError, 'warning', false);
           }
 
           /**
@@ -421,7 +421,7 @@ namespace wpCloud\StatelessMedia {
        * @return StorageClient
        * @throws \Exception
        */
-      public function init_gs_client(callable $httpHandler = null) {
+      public function init_gs_client(?callable $httpHandler = null) {
         // May be Loading Google SDK....
         if (!class_exists('HttpHandlerFactory')) {
           include_once(ud_get_stateless_media()->path('lib/Google/vendor/autoload.php', 'dir'));
@@ -1650,7 +1650,7 @@ namespace wpCloud\StatelessMedia {
             $connected = $client->is_connected();
             if ($connected !== true) {
               $trnst['success'] = 'false';
-              $trnst['error'] = sprintf(__('Could not connect to Google Storage bucket. Please be sure that bucket with name <b>%s</b> exists and the access credentials are correct.', $this->domain), esc_html($this->get('sm.bucket')));
+              $trnst['error'] = sprintf('Could not connect to Google Storage bucket. Please be sure that bucket with name <b>%s</b> exists and the access credentials are correct.', esc_html($this->get('sm.bucket')));
 
               if (is_callable(array($connected, 'getHandlerContext')) && $handlerContext = $connected->getHandlerContext()) {
                 if (!empty($handlerContext['error'])) {
@@ -1670,7 +1670,7 @@ namespace wpCloud\StatelessMedia {
         }
 
         if (isset($trnst['success']) && $trnst['success'] == 'false') {
-          return new \WP_Error('error', (!empty($trnst['error']) ? $trnst['error'] : __('There is an Error on connection to Google Storage.', $this->domain)));
+          return new \WP_Error('error', (!empty($trnst['error']) ? $trnst['error'] : 'There is an Error on connection to Google Storage.'));
         }
 
         return true;

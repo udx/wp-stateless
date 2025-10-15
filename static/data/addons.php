@@ -47,7 +47,7 @@ return [
     'title'           => 'WooCommerce',
     'plugin_files'    => ['woocommerce/woocommerce.php'],
     'addon_file'      => 'wp-stateless-woocommerce-addon/wp-stateless-woocommerce-addon.php',
-    'icon'            => 'https://ps.w.org/woocommerce/assets/icon-128x128.gif',
+    'icon'            => 'https://ps.w.org/woocommerce/assets/icon.svg',
     'repo'            => 'udx/wp-stateless-woocommerce-addon',
     'wp'              => 'https://wordpress.org/plugins/wp-stateless-woocommerce-addon/',
     'hubspot_id'      => '151478251047',

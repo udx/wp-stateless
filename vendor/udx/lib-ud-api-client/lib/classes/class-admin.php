@@ -82,25 +82,27 @@ namespace UsabilityDynamics\UD_API {
         ) ) );
         
         //** Set available screens */
-        $screens = array();
-        if( $this->type == 'theme' ) {
-          $screens =array_filter( array(
-            'licenses' => __( 'License', $this->domain ),
-            'more_products' => false,
-          ) );
-        } elseif ( $this->type == 'plugin' ) {
-          $screens =array_filter( array(
-            'licenses' => __( 'Licenses', $this->domain ),
-            'more_products' => __( 'More Products', $this->domain ),
-          ) );
-        }
-        
-        //** UI */
-        $this->ui = new UI( array_merge( $args, array(
-          'token' => $this->token,
-          'screens' => $screens,
-        ) ) );
-        
+        add_action('init', function () use ($args) {
+          $screens = array();
+          if( $this->type == 'theme' ) {
+            $screens =array_filter( array(
+              'licenses' => __( 'License', $this->domain ),
+              'more_products' => false,
+            ) );
+          } elseif ( $this->type == 'plugin' ) {
+            $screens =array_filter( array(
+              'licenses' => __( 'Licenses', $this->domain ),
+              'more_products' => __( 'More Products', $this->domain ),
+            ) );
+          }
+          
+          // Initialize UI
+          $this->ui = new UI( array_merge( $args, array(
+            'token' => $this->token,
+            'screens' => $screens,
+          ) ) );
+        }, 20);
+
         $path = wp_normalize_path( dirname( dirname( __DIR__ ) ) );
         $this->screens_path = trailingslashit( $path . '/static/templates' );
         if( $this->type == 'theme' && strpos( $path, wp_normalize_path( WP_PLUGIN_DIR ) ) === false ) {

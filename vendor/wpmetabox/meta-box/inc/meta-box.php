@@ -79,6 +79,13 @@ class RW_Meta_Box {
 		// Enqueue common styles and scripts.
 		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue' ] );
 
+		// Enqueue assets for the block editor only, just for previewing (submission forms, custom blocks).
+		// Don't enqueue on frontend as front-end forms and blocks already call the enqueue() method.
+		// TODO: Uncomment this when we have a way to enqueue assets for the block/site editor.
+		// if ( is_admin() ) {
+		// 	add_action( 'enqueue_block_assets', [ $this, 'enqueue' ] );
+		// }
+
 		// Add additional actions for fields.
 		foreach ( $this->fields as $field ) {
 			RWMB_Field::call( $field, 'add_actions' );

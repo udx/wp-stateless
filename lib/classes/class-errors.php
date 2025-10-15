@@ -112,9 +112,10 @@ namespace wpCloud\StatelessMedia {
        *
        * @param string $message
        * @param string $type Values: 'error', 'message', 'warning'
+       * @param string $translate Values: true, false
        * @author peshkov@UD
        */
-      public function add( $message, $type = 'error' ) {
+      public function add( $message, $type = 'error', $translate = true ) {
         switch( $type ) {
           case 'error':
             $this->add_message($this->errors, $message);
@@ -123,8 +124,12 @@ namespace wpCloud\StatelessMedia {
           case 'warning':
           case 'notice':
             if(!is_array($message)){
+              $title = $translate
+                ? sprintf( __( '%s has the following notice:', $this->domain ), esc_html($this->name) )
+                : sprintf( '%s has the following notice:', esc_html($this->name) );
+
               $message = array( 
-                'title' => sprintf( __( '%s has the following notice:', $this->domain ), esc_html($this->name) ),
+                'title' => $title,
                 'message' => $message,
                 'button' => null,
               );

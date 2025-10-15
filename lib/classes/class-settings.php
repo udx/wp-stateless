@@ -120,6 +120,22 @@ namespace wpCloud\StatelessMedia {
         // Settings page content
         add_action('wp_stateless_settings_tab_content', array($this, 'settings_tab_content'));
         add_action('wp_stateless_processing_tab_content', array($this, 'processing_tab_content'));
+      }
+
+      /**
+       * Init
+       */
+      public function init(){
+        $this->save_media_settings();
+
+        add_action('admin_menu', array( $this, 'admin_menu' ));
+
+        /**
+         * Manage specific Network Settings
+         */
+        if( is_network_admin() ) {
+          add_action( 'network_admin_menu', array( $this, 'network_admin_menu' ));
+        }
 
         $site_url = parse_url( site_url() );
         $site_url['path'] = isset($site_url['path']) ? $site_url['path'] : '';
@@ -156,22 +172,6 @@ namespace wpCloud\StatelessMedia {
             "\d{4}\/\d{2}"
           ]
         );
-      }
-
-      /**
-       * Init
-       */
-      public function init(){
-        $this->save_media_settings();
-
-        add_action('admin_menu', array( $this, 'admin_menu' ));
-        /**
-         * Manage specific Network Settings
-         */
-        if( is_network_admin() ) {
-          add_action( 'network_admin_menu', array( $this, 'network_admin_menu' ));
-        }
-
       }
 
       /**

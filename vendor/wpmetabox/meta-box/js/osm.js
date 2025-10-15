@@ -21,7 +21,7 @@
 			var map = this.map;
 			setTimeout( function () {
 				map.invalidateSize();
-			}, 200 );
+			}, 100 );
 		},
 
 		// Initialize DOM elements
@@ -40,7 +40,7 @@
 			}
 
 			this.marker = L.marker( location, {
-				draggable: true
+				draggable: this.$canvas.data( 'marker_draggable' ),
 			} ).addTo( this.map );
 		},
 

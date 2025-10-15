@@ -3,7 +3,15 @@ namespace MetaBox\Support;
 
 class Data {
 	public static function get_post_types(): array {
-		$unsupported = [
+		$unsupported = self::unsupported_post_types();
+		$post_types  = get_post_types( [], 'objects' );
+		$post_types  = array_diff_key( $post_types, array_flip( $unsupported ) );
+
+		return $post_types;
+	}
+
+	public static function unsupported_post_types(): array {
+		return [
 			// WordPress built-in post types.
 			'customize_changeset',
 			'custom_css',
@@ -16,10 +24,7 @@ class Data {
 			'wp_template_part',
 			'wp_global_styles',
 			'wp_navigation',
-			'wp_template',
-			'wp_template_part',
-			'wp_global_styles',
-			'wp_font_famlity',
+			'wp_font_family',
 			'wp_font_face',
 
 			// Meta Box post types.
@@ -36,10 +41,6 @@ class Data {
 			'elementor_icons',
 			'elementor_snippet',
 		];
-		$post_types = get_post_types( [], 'objects' );
-		$post_types = array_diff_key( $post_types, array_flip( $unsupported ) );
-
-		return $post_types;
 	}
 
 	public static function get_taxonomies(): array {

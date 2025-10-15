@@ -1,3 +1,8 @@
+#### 4.2.1
+* ENHANCEMENT - updated `wpmetabox/meta-box` library from 5.10.11 to 5.10.15.
+* FIX - correctly loads text domain to prevent PHP notices.
+* FIX - `udx/lib-ud-api-client` package correctly loads text domain to prevent PHP notices.
+
 #### 4.2.0
 * ENHANCEMENT - Updated Client library for Google APIs from 2.18.2 to 2.18.3.
 * ENHANCEMENT - updated `firebase/php-jwt` library from  6.10.2 to 6.11.1.

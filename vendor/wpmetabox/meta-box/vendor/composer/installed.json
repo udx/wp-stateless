@@ -7,15 +7,15 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/wpmetabox/support.git",
-                "reference": "f03f775f4ac3eb99d954e8f06caff97706a78b51"
+                "reference": "6c392347cdb77ed133b8a4227b5ee20db89a5717"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/wpmetabox/support/zipball/f03f775f4ac3eb99d954e8f06caff97706a78b51",
-                "reference": "f03f775f4ac3eb99d954e8f06caff97706a78b51",
+                "url": "https://api.github.com/repos/wpmetabox/support/zipball/6c392347cdb77ed133b8a4227b5ee20db89a5717",
+                "reference": "6c392347cdb77ed133b8a4227b5ee20db89a5717",
                 "shasum": ""
             },
-            "time": "2025-07-12T09:16:27+00:00",
+            "time": "2025-09-12T23:29:48+00:00",
             "default-branch": true,
             "type": "library",
             "installation-source": "dist",
