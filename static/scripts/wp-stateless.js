@@ -1,833 +1,806 @@
-var $wildcards_select = jQuery('.select-wildcards').select2({
-  tags: true,
-  tokenSeparators: ['/'],
-  createTag: function (params) {
-    var term = jQuery.trim(params.term)
-
-    if (term === '') {
-      return null
-    }
-
-    let tags = [
-      '%site_id%',
-      '%site_url%',
-      '%site_url_host%',
-      '%site_url_path%',
-      '%date_year/date_month%',
-    ]
-
-    // Remove special chars from tags
-    if (!/^[a-zA-Z0-9_\-.]+$/.test(term) && jQuery.inArray(term, tags) == -1) {
-      term = term.replace(/[^a-zA-Z0-9_\-.]/g, '')
-    }
-
-    return {
-      id: term,
-      text: term,
-    }
-  },
-  templateSelection: function (state) {
-    // Add slash at the en of the tag
-    return state.text
-  },
-  insertTag: function (data, tag) {
-    // Insert the tag at the end of the results
-    data.push(tag)
-  },
-})
-
-jQuery('.select-wildcards').on('select2:select', function (evt) {
-  var element = evt.params.data.element
-  var $element = jQuery(element)
-  let $element_value = $element.value
-
-  $element.detach()
-  jQuery(this).append($element)
-
-  /**
-   * add slash after tag
-   */
-  if ($element_value !== '/') {
-    // Create the DOM option that is pre-selected by default
-    var newState = new Option('/', '/', true, true)
-    jQuery(newState).prop('disabled', true)
-    // Append it to the select
-    jQuery(this).append(newState)
-  }
-
-  jQuery(this).trigger('change')
-  prepare_preview_url()
-})
-
-jQuery('.select-wildcards').on('select2:unselect', function (evt) {
-  if (evt.params.data.id === '/') {
-    var element = evt.params.data.element
-    var $element = jQuery(element)
-    $element.detach()
-  }
-  prepare_preview_url()
-})
-
-function prepare_preview_url() {
-  let root_dir = ''
-  let selected_wildcards = jQuery('.select-wildcards').val()
-
-  if (selected_wildcards !== null) {
-    root_dir = selected_wildcards.join('/')
-  }
-
-  jQuery('#sm_root_dir').val(root_dir)
-  jQuery('#sm_root_dir').trigger('change')
-}
-
-function replace_wildcard_to_the_end(wildcards, remove_slashes = false) {
-  if (remove_slashes) {
-    jQuery('.select-wildcards > option').each(function () {
-      if (this.value == '/') {
-        jQuery(this).detach()
-      }
-    })
-  }
-  wildcards.forEach(function (wildcard) {
-    wildcard_exist = false
-    jQuery('.select-wildcards > option').each(function () {
-      if (this.value === wildcard && this.value !== '/') {
-        jQuery(this).detach()
-        jQuery('.select-wildcards').append(jQuery(this))
-        wildcard_exist = true
-      }
-    })
-    if (!wildcard_exist) {
-      var newState = new Option('/', '/', true, true)
-      jQuery(newState).prop('disabled', true)
-      // Append it to the select
-      jQuery('.select-wildcards').append(newState)
-    }
-  })
-}
+/**
+ *
+ *
+ */
 
 // Application
-var wpStatelessSettingsApp = {
-  sm: {},
-  backup: {},
-  is_ssl: false,
+var wpStatelessApp = angular.module('wpStatelessApp', ['ngSanitize'])
 
-  // Show notices for readonly fields
-  showNotice: function (field) {
-    if (this.sm.readonly && this.sm.readonly[field]) {
-      var slug = this.sm.readonly[field]
-     
-      jQuery(`#notice-${field}`).html(this.sm.strings[slug])
-      jQuery(`[name="sm[${field}]"]`).prop('disabled', true)
-    } else {
-      jQuery(`#notice-${field}`).html('')
-      jQuery(`[name="sm[${field}]"]`).prop('disabled', false)
-    }
-  },
+// Controller
+.controller('wpStatelessTools', ['$scope', '$http', function ($scope, $http) {
 
-  showSupportedTypes: function () {
-    value = jQuery('#sm_body_rewrite').val()
+  var WP_DEBUG = wp_stateless_configs.WP_DEBUG || false;
+  $scope.action = 'regenerate_images';
+  $scope.method = 'start';
+  $scope.bulk_size = 1;
 
-    if ( ['true', 'enable_editor', 'enable_meta'].indexOf(value) > -1 ) {
-      jQuery('.supported-file-types').show()
-    } else {
-      jQuery('.supported-file-types').hide()
-    }
-  },
+  /**
+   * Counters
+   * @type {number}
+   */
+  $scope.objectsCounter = 0;
+  $scope.objectsTotal   = 0;
 
-  setIsSSL: function () {
-    this.is_ssl = jQuery('#custom_domain').val().indexOf('https://') === 0
+  /**
+   * Error storage
+   * @type {boolean}
+   */
+  $scope.error = false;
 
-    if (this.is_ssl) {
-      jQuery('.notice-is-ssl').show()
-    } else {
-      jQuery('.notice-is-ssl').hide()
-    }
-  },
+  /**
+   * Flags
+   * @type {boolean}
+   */
+  $scope.isRunning = false;
+  $scope.isLoading = false;
+  $scope.continue  = true;
 
-  getRadioValue: function(name) {
-    return jQuery(`input[name="${name}"]:checked`).val()    
-  },
+  /**
+   *
+   * @type {{images: boolean, other: boolean}}
+   */
+  $scope.progresses = {
+    images: false,
+    other: false
+  };
 
-  enableHashifyFileName: function () {
-    var mode = this.getRadioValue('sm[mode]') 
+  /**
+   *
+   * @type {{images: boolean, other: boolean}}
+   */
+  $scope.fails = {
+    images: false,
+    other: false
+  }
 
-    if ( ['stateless', 'ephemeral'].indexOf(mode) > -1 
-      && this.sm.readonly['hashify_file_name'] != 'constant' ) {
-        this.backup['hashify_file_name'] = jQuery('#cache_busting').val()
-        jQuery('#cache_busting').val('true')
-    } else if ( this.backup['hashify_file_name'] ) {
-      jQuery('#cache_busting').val( this.backup['hashify_file_name'] )
-    }
+  /**
+   * IDs storage
+   * @type {Array}
+   */
+  $scope.objectIDs = [];
 
-    if ( ['stateless', 'ephemeral'].indexOf(mode) > -1 ) {
-      jQuery('#cache_busting').prop('disabled', true)
-    } else {
-      this.showNotice('hashify_file_name')
-    }
+  /**
+   *
+   * @type {Array}
+   */
+  $scope.chunkIDs = [];
 
-    if ( ['stateless', 'ephemeral'].indexOf(mode) > -1 && this.sm.readonly['hashify_file_name'] != 'constant') {
-      jQuery('#notice-hashify_file_name-mode').show()
-    } else {
-      jQuery('#notice-hashify_file_name-mode').hide()
-    }
-  },
+  /**
+   * Log
+   * @type {Array}
+   */
+  $scope.log = [];
 
-  enableDynamicImageSupport: function () {
-    var mode = this.getRadioValue('sm[mode]') 
+  /**
+   * Status message
+   * @type {String}
+   */
+  $scope.status = '';
 
-    if ( mode == 'stateless' && this.sm.readonly['dynamic_image_support'] != 'constant' ) {
-      this.backup['dynamic_image_support'] = jQuery('#dynamic_image_support').val()
-      jQuery('#dynamic_image_support').val('false')
-    } else if ( this.backup['dynamic_image_support'] ) {
-      jQuery('#dynamic_image_support').val( this.backup['dynamic_image_support'] )
-    }
+  /**
+   * Status message
+   * @type {String}
+   */
+  $scope.extraStatus = '';
 
-    if (mode == 'stateless') {
-      jQuery('#dynamic_image_support').prop('disabled', true)
-    } else {
-      this.showNotice('dynamic_image_support')
-    }
+  /**
+   * Init
+   */
+  $scope.init = function() {
+    jQuery("#regenthumbs-bar").progressbar();
+  }
 
-    if (mode == 'stateless' && this.sm.readonly['dynamic_image_support'] != 'constant') {
-      jQuery('#notice-dynamic_image_support-mode').show()
-    } else {
-      jQuery('#notice-dynamic_image_support-mode').hide()
-    }
-  },
-
-  switchBucketFolderType: function() {
-    var value = jQuery('#sm_root_dir').val()
-    var folderType = jQuery('#sm_bucket_folder_type').val()
-
-    switch (value) {
-      case '%date_year/date_month%':
-        folderType = 'single-site'
-        break;
-      case 'sites/%site_id%/%date_year/date_month%':
-        folderType = 'multi-site'
-        break;
-      case '':
-        if ( this.sm.network_admin )
-        folderType = ''
-        break;
-      default:
-        folderType = 'custom'
+  /**
+   * Get error message
+   */
+  $scope.getError = function(response, message) {
+    if(response.data && typeof response.data.data !== 'undefined' && typeof response.data.success !== 'undefined' && response.data.success == false){
+      $scope.extraStatus = response.data.data;
+      return message;
     }
 
-    if ( jQuery('#sm_bucket_folder_type').val() != folderType ) {
-      jQuery('#sm_bucket_folder_type').val( folderType)
+    if(response.data && typeof response.data.data !== 'undefined'){
+      return response.data.data;
     }
 
-    setTimeout(function () {
-      jQuery('#permalink_structure').trigger('change')
-    }, 1)
-  },
-
-  switchRootDir: function() {
-    var value = jQuery('#sm_bucket_folder_type').val()
-
-    switch (value) {
-      case 'single-site':
-        replace_wildcard_to_the_end(['/', '%date_year/date_month%', '/'], true)
-        $wildcards_select
-          .val(['/', '%date_year/date_month%', '/'])
-          .trigger('change')
-        break;
-      case 'multi-site':
-        replace_wildcard_to_the_end(
-          ['/', 'sites', '/', '%site_id%', '/', '%date_year/date_month%', '/'],
-          true
-        )
-        $wildcards_select
-          .val([
-            '/',
-            'sites',
-            '/',
-            '%site_id%',
-            '/',
-            '%date_year/date_month%',
-            '/',
-          ])
-          .trigger('change')
-        break;
-      case '':
-        if ( wp_stateless_settings.network_admin ) {
-          $wildcards_select.val(null).trigger('change')
-        }
-        break;
-    }
-
-    prepare_preview_url()
-  },
-
-  generatePreviewUrl: function() {
-    var host = 'https://storage.googleapis.com/'
-    var hash =
-      jQuery('#cache_busting').val() == 'true'
-        ? Date.now().toString(36) + '-'
-        : ''
-    var custom_domain = jQuery('#custom_domain').val().toString()
-    var root_dir = jQuery('#sm_root_dir').val().toString()
-    var bucket = jQuery('#bucket_name').val().toString()
-
-    jQuery.each(this.sm.wildcards, function (index, item) {
-      var reg = new RegExp(index, 'g')
-      root_dir = root_dir.replace(reg, item[0])
-    })
-  
-    var tags = [
-      '%date_year%',
-      '%date_month%',
-      '%site_id%',
-      '%site_url%',
-      '%site_url_host%',
-      '%site_url_path%',
-    ]
-
-    var value_splitted = root_dir.split('/')
-
-    for (var i = 0; i < value_splitted.length; i++) {
-      if (
-        !/^[a-zA-Z0-9_\-.]+$/.test(value_splitted[i]) &&
-        value_splitted[i] != '' &&
-        jQuery.inArray(value_splitted[i], tags) == -1
-      ) {
-        value_splitted[i] = value_splitted[i].replace(/[^a-zA-Z0-9_\-.]/g, '')
-      }
+    if(response.data && typeof response.data == 'string'){
+      $scope.extraStatus = response.data;
+      return message;
     }
     
-    root_dir = value_splitted.join('/')
-    root_dir = root_dir.replace(/(\/+)/g, '/')
-    root_dir = root_dir.replace(/^\//, '')
-    root_dir = root_dir.replace(/\/$/, '')
-
-    if (root_dir) {
-      root_dir = root_dir + '/'
+    if(!response.data && response.statusText){
+      return response.statusText + " (" + stateless_l10n.response_code + response.status + ")";
     }
 
-    custom_domain = custom_domain.replace(/\/+$/, '') // removing trailing slashes
-    custom_domain = custom_domain.replace(/https?:\/\//, '') // removing http:// or https:// from the beginning.
-    host += bucket.length > 0 ? bucket : '{bucket-name}'
-
-    if (
-      custom_domain !== 'storage.googleapis.com' &&
-      bucket.length > 0 &&
-      custom_domain.length > 0 &&
-      (this.is_ssl || custom_domain == bucket)
-    ) {
-      host = this.is_ssl ? 'https://' : 'http://' // bucket name will be host
-      host += custom_domain
+    if(!response.data && response.status == -1){
+      return stateless_l10n.unable_to_connect_to_the_server;
     }
 
-    host += '/' + root_dir + hash + 'your-image-name.jpeg'
-
-    jQuery('#file_url_grp_preview').val(host)
-  },
-
-  showCustomEmail: function () {
-    if( jQuery('#sm_status_email_type').val() == 'custom' ) {
-      jQuery('.sm-status-email-address').show()
-    } else {
-      jQuery('.sm-status-email-address').hide()
-    }
-  },
-
-  // Init application
-  init: function () {
-    this.sm = wp_stateless_settings || {}
-    this.sm.readonly = this.sm.readonly || {}
-
-    var readonly = Object.keys(this.sm.readonly);
-
-    for (var key of readonly) {
-      this.showNotice(key)
-    }
-
-    if (this.sm.network_admin) {
-      jQuery('#cache_busting').val('true')
-      this.sm.readonly.hashify_file_name = true
-    }
-
-    // Disable root dir editing if it's readonly
-    if (this.sm.readonly['root_dir']) {
-      $wildcards_select.prop('disabled', true)
-      jQuery('#sm_bucket_folder_type').prop('disabled', true)
-    }
-
-    // Show supported file types
-    jQuery('#sm_body_rewrite').on('change', this.showSupportedTypes)
-    this.showSupportedTypes()
-
-    // Check if custom domain is SSL
-    jQuery('#custom_domain').on('change', this.setIsSSL.bind(this))
-    this.setIsSSL()
-
-    // Check if hashify file name is enabled
-    jQuery('[name="sm[mode]"').on('change', this.enableHashifyFileName.bind(this))
-    this.enableHashifyFileName()
-
-    // Check if dynamic image support is enabled
-    jQuery('[name="sm[mode]"').on('change', this.enableDynamicImageSupport.bind(this))
-    this.enableDynamicImageSupport()
-
-    // Switch folder type depending on root dir
-    jQuery('#sm_root_dir').on('change', this.switchBucketFolderType.bind(this))
-    this.switchBucketFolderType()
-
-    // Update root dir depending on folder type
-    jQuery('#sm_bucket_folder_type').on('change', this.switchRootDir)
-
-    // Generate preview URL
-    jQuery('#bucket_name').on('change', this.generatePreviewUrl.bind(this))
-    jQuery('#sm_root_dir').on('change', this.generatePreviewUrl.bind(this))
-    jQuery('#custom_domain').on('change', this.generatePreviewUrl.bind(this))
-    this.generatePreviewUrl()
-
-    // Update root dir depending on folder type
-    jQuery('#sm_status_email_type').on('change', this.showCustomEmail)
-    this.showCustomEmail()
+    return message;
   }
-};
-
-wpStatelessSettingsApp.init();
-
-// Processing application
-wpStatelessProcessingApp = {
-  errors: [],
-  canRun: true,
-  processes: [],
-  token: window.wp_stateless_configs.REST_API_TOKEN,
-  apiRoot: window.wp_stateless_configs.api_root + 'sync/',
-
-  blockUI: function () {
-    this.canRun = false
-
-    this.processes.map( function (process) {
-      process.refreshButtons()
-    })
-  },
-
-  unblockUI: function () {
-    this.canRun = true
-
-    this.processes.map( function (process) {
-      process.refreshButtons()
-    })
-  },
 
   /**
-   * Prevent global changes
+   *
+   * @param callback
    */
-  preventChanges: function () {
-    var isRunning = this.processes.find( function (process) {
-      return process.is_running
-    }) ? true : false
+  $scope.getCurrentProgresses = function( callback ) {
+    $scope.isLoading = true;
 
-    jQuery('#save-settings,#save-compatibility').prop('disabled', isRunning)
-  },
-
-  /**
-   * Handle errors display 
-   */
-  addError: function (error) {
-    this.errors.push(error)
-
-    jQuery('#stless_sync_tab #errors').show()
-
-    var html = this.errors.map(function (error) {
-      return '<li>' + error + '</li>'
-    })
-
-    jQuery('#stless_sync_tab #errors ul').html(html)
-  },
-
-  /**
-   * Process response error
-   */
-  processError: function (error) {
-    var message = error && error.responseJSON && error.responseJSON.message 
-      ? error.responseJSON.message 
-      : window.stateless_l10n.something_went_wrong
-  
-    this.addError(message)
-  },
-
-  /**
-   * Load process data
-   */
-  init: function () {
-    var that = this
-    that.blockUI()
-
-    jQuery.ajax({
+    $http({
       method: 'GET',
-      url: that.apiRoot + 'getProcesses',
-      headers: {
-        'x-wps-auth': that.token,
-      },
-    })
-      .done(function (response) {
-        if (response && response.data) {
-          var processes = response.data || {}
-          for (var i in processes) {
-            var process = new ProcessingClass(processes[i], that)
-            process.refreshBox()
-            that.processes.push(process)
+      url: ajaxurl,
+      params: {
+        action: 'stateless_get_current_progresses'
+      }
+    }).then(function(response){
+      var data = response.data || {};
+
+      if ( data.success ) {
+        if ( typeof data.data !== 'undefined' ) {
+          $scope.progresses.images = data.data.images;
+          $scope.progresses.other = data.data.other;
+          $scope.startFrom = null;
+          if($scope.action == 'regenerate_images' && typeof $scope.progresses.images[1]  == "number"){
+            // Subtracting 1 so user get where from the sync will start instead of where it ended. We will add 1 in class-ajax.php.
+            $scope.startFrom = $scope.progresses.images[1] - 1;
+          }
+          else if($scope.action == 'sync_non_images' && typeof $scope.progresses.other[1]  == "number"){
+            // Subtracting 1 so user get where from the sync will start instead of where it ended. We will add 1 in class-ajax.php.
+            $scope.startFrom = $scope.progresses.other[1] - 1;
+          }
+
+          if ( 'function' === typeof callback ) {
+            callback();
           }
         } else {
-          that.addError(window.stateless_l10n.something_went_wrong)
+          console.error( stateless_l10n.could_not_retrieve_progress );
         }
-      })
-      .fail(function (error) {
-        that.processError(error)
-      })
-      .always(function () {
-        that.unblockUI()
-      })
-  },
+      } else {
+        console.error( stateless_l10n.could_not_retrieve_progress );
+      }
+
+      $scope.isLoading = false;
+    }, function(response) {
+      console.error( stateless_l10n.could_not_retrieve_progress );
+
+      $scope.isLoading = false;
+    });
+  };
 
   /**
-   * Refresh the process data
+   *
    */
-  refreshProcess: function (process) {
-    var that = this
+  $scope.getCurrentProgresses();
 
-    jQuery.ajax({
+  /**
+   *
+   * @param callback
+   */
+  function getAllFails( callback ) {
+    $scope.isLoading = true;
+
+    $http({
       method: 'GET',
-      url: that.apiRoot + 'getProcess/' + String(window.btoa(process.id)).replace(/=+/, ''),
-      headers: {
-        'x-wps-auth': that.token,
-      },
-    })
-      .done(function (response) {
-        if ( response && response.data && response.ok ){
-          if (!response.data.is_running) {
-            process.stopPolling()
-            process.queued_items = process.getProgressTotal()
-            process.processed_items = process.getProgressTotal()
+      url: ajaxurl,
+      params: {
+        action: 'stateless_get_all_fails'
+      }
+    }).then(function(response){
+      var data = response.data || {};
 
-            setTimeout(function () {
-              Object.assign(process, response.data)
-            }, 3000)
-    
+      if ( data.success ) {
+        if ( typeof data.data !== 'undefined' ) {
+
+          $scope.fails.images = data.data.images;
+          $scope.fails.other = data.data.other;
+
+          if ( 'function' === typeof callback ) {
+            callback();
+          }
+        } else {
+          console.error( stateless_l10n.could_not_get_fails );
+        }
+      } else {
+        console.error( stateless_l10n.could_not_get_fails );
+      }
+
+      $scope.isLoading = false;
+    }, function(response) {
+      console.error( stateless_l10n.could_not_get_fails );
+
+      $scope.isLoading = false;
+    });
+  };
+
+  getAllFails();
+
+  /**
+   * Form submit handler
+   * @param e
+   * @returns {boolean}
+   */
+  $scope.processStart = function(e) {
+
+    $scope.error = false;
+    $scope.status = '';
+    $scope.extraStatus = '';
+    $scope.objectsCounter = 0;
+    $scope.objectsTotal = 0;
+    $scope.objectIDs = [];
+    $scope.chunkIDs = [];
+
+    if ( $scope.method === 'fix' ) {
+
+      if ( $scope.action ) {
+        switch( $scope.action ) {
+          case 'regenerate_images':
+            $scope.objectIDs = $scope.fails.images;
+            $scope.regenerateImages();
+            break;
+          case 'sync_non_images':
+            $scope.objectIDs = $scope.fails.other;
+            $scope.syncFiles();
+            break;
+          default: break;
+        }
+      }
+
+      return false;
+    }
+
+    var cont = 0;
+    if ( 'continue' === $scope.method ) {
+      cont = 1;
+    }
+
+    if ( $scope.action ) {
+      switch( $scope.action ) {
+        case 'regenerate_images':
+          $scope.getImagesMedia( $scope.regenerateImages, cont );
+          break;
+        case 'sync_non_images':
+          $scope.getOtherMedia( $scope.syncFiles, cont );
+          break;
+        case 'sync_non_library_files':
+          $scope.getNonLibraryFiles( $scope.syncNonLibraryFiles, cont );
+          break;
+        default: break;
+      }
+    }
+
+    return false;
+  };
+
+  /**
+   * Stop process
+   */
+  $scope.processStop = function() {
+    $scope.status = stateless_l10n.stopping;
+    $scope.continue = false;
+  };
+
+  function array_bulk( arr, bulk_size ) {
+    var groups = [];
+    var i;
+
+    for ( i = 0; i < bulk_size; i++ ) {
+      groups[ i ] = [];
+    }
+
+    for ( i = 0; i < arr.length; i ++ ) {
+      groups[ i % bulk_size ].push( arr[ i ] );
+    }
+
+    return groups;
+  }
+
+  $scope.finishProcess = function( chunk_id ) {
+    var mode = 'images';
+    if ( 'sync_non_images' === $scope.action ) {
+      mode = 'other';
+    }
+
+    if ( $scope.objectsCounter >= $scope.objectsTotal ) {
+      // process finished
+
+      $http({
+        method: 'GET',
+        url: ajaxurl,
+        params: {
+          action: 'stateless_reset_progress',
+          mode: mode
+        }
+      }).then(function(response){
+        $scope.progresses[ mode ] = false;
+
+        $scope.status = stateless_l10n.finished;
+        $scope.isLoading = false;
+        $scope.isRunning = false;
+      }, function(response) {
+        console.error( stateless_l10n.could_not_reset_progress );
+      });
+    } else if ( 'undefined' !== typeof chunk_id ) {
+      // process cancelled, but this is only a chunk finishing request
+      
+      $scope.chunkIDs[ chunk_id ] = false;
+      var all_done = true;
+      for ( var i in $scope.chunkIDs ) {
+        if ( false !== $scope.chunkIDs[ i ] ) {
+          all_done = false;
+          break;
+        }
+      }
+      if ( all_done ) {
+        $scope.getCurrentProgresses( function() {
+          $scope.status = stateless_l10n.cancelled;
+          $scope.isRunning = false;
+        });
+      }
+    } else {
+      // process cancelled
+
+      $scope.getCurrentProgresses( function() {
+        $scope.status = stateless_l10n.cancelled;
+        $scope.isRunning = false;
+      });
+    }
+  };
+
+  /**
+   * Load images IDs
+   * @param callback
+   */
+  $scope.getImagesMedia = function( callback, cont ) {
+
+    $scope.continue = true;
+    $scope.isLoading = true;
+    $scope.status = stateless_l10n.loading_images_media_objects;
+
+    $http({
+      method: 'GET',
+      url: ajaxurl,
+      params: {
+        action: 'get_images_media_ids',
+        start_from: $scope.startFrom,
+        continue: cont
+      }
+    }).then(function(response){
+      var data = response.data || {};
+
+      if ( data.success ) {
+        if ( typeof callback === 'function' ) {
+          if ( typeof data.data !== 'undefined' ) {
+            $scope.objectIDs = data.data;
+            callback();
           } else {
-            Object.assign(process, response.data)
+            $scope.status = stateless_l10n.ids_are_malformed;
+            $scope.error = true;
           }
-
-          process.refreshBox()
         }
-      })
-      .fail(function (error) {
-        process.stopPolling()
-        that.processError(error)
-      })
-  },
+      } else {
+        $scope.status = $scope.getError(response, stateless_l10n.unable_to_get_images_media_id);
+        $scope.error = true;
+      }
+
+      $scope.isLoading = false;
+
+      if(WP_DEBUG){
+        console.log(stateless_l10n.wp_stateless_get_images_media_id, response);
+      }
+
+    }, function(response) {
+      $scope.error = true;
+      $scope.status = $scope.getError(response, get_images_media_id + ": " + stateless_l10n.request_failed);
+      $scope.isLoading = false;
+
+      if(WP_DEBUG){
+        console.log(stateless_l10n.wp_stateless_get_images_media_id + ": " + stateless_l10n.request_failed, response, typeof response.headers === 'function'?response.headers() : '');
+      }
+    });
+
+  };
 
   /**
-   * Run the process
+   * Load non-images media files
+   * @param callback
    */
-  runProcess: function (process) {
-    var that = this
-    that.blockUI()
+  $scope.getOtherMedia = function( callback, cont ) {
 
-    var data = {
-      id: process.id,
-      limit: process.limit,
-      order: process.order,
-    }
+    $scope.continue = true;
+    $scope.isLoading = true;
+    $scope.status = stateless_l10n.loading_non_image_media_objects;
 
-    jQuery.ajax({
-      method: 'POST',
-      url: that.apiRoot + 'run',
-      headers: {
-        'x-wps-auth': that.token,
-        'Content-Type': 'application/json',
-      },
-      dataType: 'json',
-      data: JSON.stringify(data),
-    })
-      .then(function (response) {
-        if (response && response.ok) {
-          process.is_running = true
-          process.is_stopping = false
+    $http({
+      method: 'GET',
+      url: ajaxurl,
+      params: {
+        action: 'get_other_media_ids',
+        start_from: $scope.startFrom,
+        continue: cont
+      }
+    }).then(function(response){
+      var data = response.data || {};
 
-          process.refreshBox()
-          process.startPolling()
-        } else {
-          var message = response && response.data && response.data.message
-            ? response.data.message
-            : window.stateless_l10n.something_went_wrong
-
-          that.addError(message)
+      if ( data.success ) {
+        if ( typeof callback === 'function' ) {
+          if ( typeof data.data !== 'undefined' ) {
+            $scope.objectIDs = data.data;
+            callback();
+          } else {
+            $scope.status = $scope.getError(response, stateless_l10n.ids_are_malformed);
+            $scope.error = true;
+          }
         }
-      })
-      .fail(function (error) {
-        process.stopPolling()
-        that.processError(error)
-      })
-      .always(function () {
-        that.unblockUI()
-      })
-  },
+      } else {
+        $scope.status = $scope.getError(response, stateless_l10n.unable_to_get_non_images_media_id);
+        $scope.error = true;
+      }
+
+      $scope.isLoading = false;
+
+      if(WP_DEBUG){
+        console.log("WP-Stateless get non Images Media ID:", response, typeof response.headers === 'function'?response.headers(): "");
+      }
+    }, function(response) {
+      $scope.error = true;
+      $scope.status = $scope.getError(response, stateless_l10n.get_non_images_media_id_request_failed);
+      $scope.isLoading = false;
+      if(WP_DEBUG){
+        console.log("WP-Stateless get non Images Media ID: Request failed", response, typeof response.headers === 'function'?response.headers(): "");
+      }
+    });
+
+  };
 
   /**
-   * Stop the process
+   * Load non-images media files
+   * @param callback
    */
-  stopProcess: function (process) {
-    var that = this
-    process.is_stopping = true
-    var data = {
-      id: process.id,
-    }
+  $scope.getNonLibraryFiles = function( callback, cont ) {
 
-    jQuery.ajax({
-      method: 'POST',
-      url: that.apiRoot + 'stop',
-      headers: {
-        'x-wps-auth': that.token,
-        'Content-Type': 'application/json',
-      },
-      dataType: 'json',
-      data: JSON.stringify(data),
-    })
-      .done(function (response) {
-        if (response && response.ok) {
+    $scope.continue = true;
+    $scope.isLoading = true;
+    $scope.status = stateless_l10n.loading_non_library_objects;
+
+    $http({
+      method: 'GET',
+      url: ajaxurl,
+      params: {
+        action: 'get_non_library_files_id',
+        continue: cont
+      }
+    }).then(function(response){
+      var data = response.data || {};
+
+      if ( data.success ) {
+        if ( typeof callback === 'function' ) {
+          if ( typeof data.data !== 'undefined' ) {
+            $scope.objectIDs = data.data;
+            callback();
+          } else {
+            $scope.status = $scope.getError(response, stateless_l10n.ids_are_malformed);
+            $scope.error = true;
+          }
         }
-      })
-      .fail(function (error) {
-        that.processError(error)
-      })
-  }
-}
+      } else {
+        $scope.error = true;
+        $scope.status = $scope.getError(response, stateless_l10n.non_libraries_files_are_not_found);
+      }
 
-wpStatelessProcessingApp.init()
+      $scope.isLoading = false;
 
-/**
- * ProcessingClass
- *
- * @param {*} data
- */
-function ProcessingClass(data, app) {
-  this.id = ''
-  this.total_items = 0
-  this.queued_items = 0
-  this.processed_items = 0
-  this.is_running = false
-  this.limit = 0
-  this.limitEnabled = false
-  this.order = 'desc'
+      if(WP_DEBUG){
+        console.log("WP-Stateless get non library files:", response, typeof response.headers === 'function'?response.headers(): "");
+      }
+    }, function(response) {
+      $scope.error = true;
+      $scope.status = $scope.getError(response, stateless_l10n.get_non_library_files_request_failed);
+      $scope.isLoading = false;
 
-  // Build an instance
-  Object.assign(this, data)
+      if(WP_DEBUG){
+        console.log("WP-Stateless get non library files: Request failed", response, typeof response.headers === 'function'?response.headers(): "");
+      }
+    });
 
-  this.app = app
-  this.interval = null
-  this.htmlId = this.id.replace(/[^a-zA-Z0-9]/g, '') // remove double backslashes
-  this.htmlBox = jQuery(`[data-id="${this.htmlId}"]`)
-  
-  /**
-   * Start polling for changes
-   */
-  this.startPolling = function () {
-    var that = this
-    this.stopPolling()
-    this.interval = setInterval(function () {
-      that.app.refreshProcess(that)
-    }, 5000)
-  }
+  };
 
   /**
-   * Stop polling for changes
+   * Run sync for files
    */
-  this.stopPolling = function () {
-    clearInterval(this.interval)
-  }
+  $scope.syncNonLibraryFiles = function() {
+    $scope.isRunning = true;
+    $scope.objectsTotal = $scope.objectIDs.length;
+    $scope.objectsCounter = 0;
+    $scope.status = stateless_l10n.processing_files + $scope.objectsTotal + stateless_l10n._total___;
 
-  /**
-   * Get Progress bar possible total
-   */
-  this.getProgressTotal = function () {
-    if (this.limit > 0 && this.limit <= this.total_items) {
-      return this.limit
-    }
-    return this.total_items
-  }
+    jQuery("#regenthumbs-bar").progressbar("value", 0);
+    jQuery("#regenthumbs-bar-percent").html( "0%" );
 
-  /**
-   * Get Total queued count
-   */
-  this.getQueuedTotal = function () {
-    return this.queued_items > this.total_items
-      ? this.total_items
-      : this.queued_items
-  }
-
-  /**
-   * Get processed total
-   */
-  this.getProcessedTotal = function () {
-    return this.processed_items > this.getQueuedTotal()
-      ? this.getQueuedTotal()
-      : this.processed_items
-  }
-
-  /**
-   * Calculate percentage
-   */
-  this.percentage = function (part, base) {
-    return parseInt((100 / base) * part) + '%'
-  }
-
-  /**
-   * Stop the process
-   */
-  this.refreshProgress = function () {
-    this.htmlBox.find('.legend .total span').html( this.getProgressTotal() )
-    this.htmlBox.find('.legend .queued span').html( this.getQueuedTotal() )
-    this.htmlBox.find('.legend .processed span').html( this.processed_items )
-    
-    this.htmlBox.find('.bar.total').css({
-      'background-color': this.getProgressTotal() == this.getProcessedTotal() ? '#02ae7a' : false
-    })
-    this.htmlBox.find('.bar.queued').css({
-      width: this.percentage( this.getQueuedTotal(), this.getProgressTotal() ),
-      'background-color': this.getProgressTotal() == this.getProcessedTotal() ? '#02ae7a' : false
-    })
-    this.htmlBox.find('.bar.processed').css({
-      width: this.percentage( this.getProcessedTotal(), this.getQueuedTotal() ), 
-      'background-color': this.getProgressTotal() == this.getProcessedTotal() ? '#02ae7a' : false
-    })
-
-    if (this.notices && this.notices.length) {
-      this.htmlBox.find('.progress-notice').show()
-
-      for (var i in this.notices) {
-        this.htmlBox.find('.progress-notice').append('<p>' + this.notices[i] + '</p>')
+    if ( $scope.objectIDs.length ) {
+      //$scope.syncSingleNonLibraryFile( $scope.objectIDs.shift() );
+      $scope.chunkIDs = array_bulk( $scope.objectIDs, $scope.bulk_size );
+      for ( var i in $scope.chunkIDs ) {
+        $scope.syncSingleNonLibraryFile( $scope.chunkIDs[ i ].shift(), i );
       }
     }
   }
 
   /**
-   * Check if Run button can be pressed
+   * Run sync for files
    */
-  this.canRun = function () {
-    return this.total_items > 0 && !this.is_running && this.app.canRun
-  }
+  $scope.syncFiles = function() {
+    $scope.isRunning = true;
+    $scope.objectsTotal = $scope.objectIDs.length;
+    $scope.objectsCounter = 0;
+    $scope.status = stateless_l10n.processing_files + $scope.objectsTotal + stateless_l10n._total___;
 
-  /**
-   * Check if Stop button can be pressed
-   */
-  this.canStop = function () {
-    return this.is_running && !this.is_stopping
-  }
+    jQuery("#regenthumbs-bar").progressbar("value", 0);
+    jQuery("#regenthumbs-bar-percent").html( "0%" );
 
-  /**
-   * Refresh buttons state
-   */
-  this.refreshButtons = function () {
-    if ( this.canStop() ) {
-      this.htmlBox.find('.actions .button-secondary').removeClass('disabled')
-    } else {
-      this.htmlBox.find('.actions .button-secondary').addClass('disabled')
-    }
-
-    if ( this.canRun() ) {
-      this.htmlBox.find('.actions .button-primary').removeClass('disabled')
-    } else {
-      this.htmlBox.find('.actions .button-primary').addClass('disabled')
+    if ( $scope.objectIDs.length ) {
+      //$scope.syncSingleFile( $scope.objectIDs.shift() );
+      $scope.chunkIDs = array_bulk( $scope.objectIDs, $scope.bulk_size );
+      for ( var i in $scope.chunkIDs ) {
+        $scope.syncSingleFile( $scope.chunkIDs[ i ].shift(), i );
+      }
     }
   }
 
   /**
-   * Refresh the progress data
+   * Run images regeneration
+   * @param ids
    */
-  this.refreshBox = function () {
-    this.htmlBox.find('.inside ul span').html(this.total_items)
+  $scope.regenerateImages = function() {
+    $scope.isRunning = true;
+    $scope.objectsTotal = $scope.objectIDs.length;
+    $scope.objectsCounter = 0;
+    $scope.status = stateless_l10n.processing_images + $scope.objectsTotal + stateless_l10n._total___;
 
-    if (this.is_running) {
-      this.startPolling()
+    jQuery("#regenthumbs-bar").progressbar("value", 0);
+    jQuery("#regenthumbs-bar-percent").html( "0%" );
 
-      this.htmlBox.find('.dashicons-update').css('display', 'inline-block')
-      this.htmlBox.find('.progress').show()
+    if ( $scope.objectIDs.length ) {
+      //$scope.regenerateSingle( $scope.objectIDs.shift() );
+      $scope.chunkIDs = array_bulk( $scope.objectIDs, $scope.bulk_size );
+      for ( var i in $scope.chunkIDs ) {
+        $scope.regenerateSingle( $scope.chunkIDs[ i ].shift(), i );
+      }
+    }
+  };
 
-      this.htmlBox.find('.limit_enabled').prop('disabled', true)
-      this.htmlBox.find('.limit_field input').prop('disabled', true)
-      this.htmlBox.find('.order_value').prop('disabled', true)
+  /**
+   * Process Single Image
+   * @param id
+   */
+  $scope.regenerateSingle = function( id, chunk_id ) {
 
-      this.refreshProgress()
-    } else {
-      this.stopPolling()
+    $http({
+      method: 'GET',
+      url: ajaxurl,
+      params: {
+        action: "stateless_process_image",
+        id: id
+      }
+    }).then(
+      function(response) {
+        var data = response.data || {};
+        $scope.log.push({message:data.data || stateless_l10n.regenerate_single_image_failed});
 
-      this.htmlBox.find('.dashicons-update').css('display', 'none')
-      this.htmlBox.find('.progress').hide()
-      this.htmlBox.find('.progress-notice').hide()
+        jQuery("#regenthumbs-bar").progressbar( "value", ( ++$scope.objectsCounter / $scope.objectsTotal ) * 100 );
+        jQuery("#regenthumbs-bar-percent").html( Math.round( ( $scope.objectsCounter / $scope.objectsTotal ) * 1000 ) / 10 + "%" );
 
-      this.htmlBox.find('.limit_enabled').prop('disabled', false)
-      this.htmlBox.find('.limit_field input').prop('disabled', !this.limitEnabled)
-      this.htmlBox.find('.order_value').prop('disabled', false)
+        if(typeof response.data.success == 'undefined' || response.data.success == false){
+          $scope.error = true;
+          $scope.status = $scope.getError(response, stateless_l10n.regenerate_single_image_failed);
+          // $scope.isRunning = false;
+        }
+        
+        if ( 'undefined' !== typeof chunk_id ) {
+          if ( $scope.chunkIDs[ chunk_id ].length && $scope.continue ) {
+            $scope.regenerateSingle( $scope.chunkIDs[ chunk_id ].shift(), chunk_id );
+          } else {
+            $scope.finishProcess( chunk_id );
+          }
+        } else {
+          if ( $scope.objectIDs.length && $scope.continue ) {
+            $scope.regenerateSingle( $scope.objectIDs.shift() );
+          } else {
+            $scope.finishProcess();
+          }
+        }
+        if(WP_DEBUG){
+          console.log("WP-Stateless regenerate single image:", response, typeof response.headers === 'function'?response.headers(): "");
+        }
+      },
+      function(response) {
+        $scope.error = true;
+        $scope.status = $scope.getError(response, stateless_l10n.regenerate_single_image_request_failed);
+        $scope.isRunning = false;
+        if(WP_DEBUG){
+          console.log("WP-Stateless regenerate single image: Request failed", response, typeof response.headers === 'function'?response.headers(): "");
+        }
+      }
+    );
+
+  }
+
+  /**
+   * Process single file
+   * @param id
+   */
+  $scope.syncSingleFile = function( id, chunk_id ) {
+
+    $http({
+      method: 'GET',
+      url: ajaxurl,
+      params: {
+        action: "stateless_process_file",
+        id: id
+      }
+    }).then(
+      function(response) {
+        var data = response.data || {};
+        $scope.log.push({message: $scope.getError(response, stateless_l10n.sync_single_file_failed)});
+
+        jQuery("#regenthumbs-bar").progressbar( "value", ( ++$scope.objectsCounter / $scope.objectsTotal ) * 100 );
+        jQuery("#regenthumbs-bar-percent").html( Math.round( ( $scope.objectsCounter / $scope.objectsTotal ) * 1000 ) / 10 + "%" );
+
+        if(typeof response.data.success == 'undefined' || response.data.success == false){
+          $scope.error = true;
+          $scope.status = $scope.getError(response, stateless_l10n.sync_single_file_failed);
+          // $scope.isRunning = false;
+        }
+        
+        if ( 'undefined' !== typeof chunk_id ) {
+          if ( $scope.chunkIDs[ chunk_id ].length && $scope.continue ) {
+            $scope.syncSingleFile( $scope.chunkIDs[ chunk_id ].shift(), chunk_id );
+          } else {
+            $scope.finishProcess( chunk_id );
+          }
+        } else {
+          if ( $scope.objectIDs.length && $scope.continue ) {
+            $scope.syncSingleFile( $scope.objectIDs.shift() );
+          } else {
+            $scope.finishProcess();
+          }
+        }
+
+        if(WP_DEBUG){
+          console.log("WP-Stateless sync single file:", response, typeof response.headers === 'function'?response.headers(): "");
+        }
+      },
+      function(response) {
+        $scope.error = true;
+        $scope.status = $scope.getError(response, stateless_l10n.sync_single_file_request_failed);
+        $scope.isRunning = false;
+
+        if(WP_DEBUG){
+          console.log("WP-Stateless sync single file: Request failed", response, typeof response.headers === 'function'?response.headers(): "");
+        }
+      }
+    );
+
+  }
+
+  /**
+   * Process single file
+   * @param id
+   */
+  $scope.syncSingleNonLibraryFile = function( id, chunk_id ) {
+
+    $http({
+      method: 'GET',
+      url: ajaxurl,
+      params: {
+        action: "stateless_process_non_library_file",
+        file_path: id
+      }
+    }).then(
+      function(response) {
+        var data = response.data || {};
+        $scope.log.push({message: $scope.getError(response, stateless_l10n.failed_to_sync + id)});
+
+        jQuery("#regenthumbs-bar").progressbar( "value", ( ++$scope.objectsCounter / $scope.objectsTotal ) * 100 );
+        jQuery("#regenthumbs-bar-percent").html( Math.round( ( $scope.objectsCounter / $scope.objectsTotal ) * 1000 ) / 10 + "%" );
+
+        if(typeof response.data.success == 'undefined' || response.data.success == false){
+          $scope.error = true;
+          $scope.status = $scope.getError(response, stateless_l10n.sync_non_library_file_failed);
+          // $scope.isRunning = false;
+        }
+        
+        if ( 'undefined' !== typeof chunk_id ) {
+          if ( $scope.chunkIDs[ chunk_id ].length && $scope.continue ) {
+            $scope.syncSingleNonLibraryFile( $scope.chunkIDs[ chunk_id ].shift(), chunk_id );
+          } else {
+            $scope.finishProcess( chunk_id );
+          }
+        } else {
+          if ( $scope.objectIDs.length && $scope.continue ) {
+            $scope.syncSingleNonLibraryFile( $scope.objectIDs.shift() );
+          } else {
+            $scope.finishProcess();
+          }
+        }
+
+        if(WP_DEBUG){
+          console.log("WP-Stateless sync non library file:", response, typeof response.headers === 'function'?response.headers(): "");
+        }
+      },
+      function(response) {
+        $scope.error = true;
+        $scope.status = $scope.getError(response, stateless_l10n.sync_non_library_file_request_failed);
+        $scope.isRunning = false;
+
+        if(WP_DEBUG){
+          console.log("WP-Stateless sync non library file: Request failed", response, typeof response.headers === 'function'?response.headers():{});
+        }
+      }
+    );
+
+  }
+
+}])
+.controller('wpStatelessSettings', function($scope, $filter) {
+  $scope.backup = {};
+  $scope.sm = wp_stateless_settings || {};
+  
+  $scope.$watch('sm.mode', function(value) {
+    if(value == 'stateless' && $scope.sm.readonly.hashify_file_name != 'constant'){
+      $scope.backup.hashify_file_name = $scope.sm.hashify_file_name;
+      $scope.sm.hashify_file_name = 'true';
+      // $scope.apply();
+    }
+    else{
+      if($scope.backup.hashify_file_name){
+        $scope.sm.hashify_file_name = $scope.backup.hashify_file_name;
+        // $scope.apply();
+      }
+    }
+  });
+
+  $scope.sm.showNotice = function(option){
+    if($scope.sm.readonly && $scope.sm.readonly[option]){
+      var slug = $scope.sm.readonly[option];
+      return $scope.sm.strings[slug];
+    }
+  }
+
+  $scope.sm.generatePreviewUrl = function() {
+    $scope.sm.is_custom_domain = false;
+    var host = 'https://storage.googleapis.com/';
+    var rootdir = $scope.sm.root_dir ? $scope.sm.root_dir + '/' : '';
+    var subdir = $scope.sm.organize_media == '1' ? $filter('date')(Date.now(), 'yyyy/MM') + '/' : '';
+    var hash = $scope.sm.hashify_file_name == 'true' ? Date.now().toString(36) + '-' : '';
+    var is_ssl = $scope.sm.custom_domain.indexOf('https://');
+    var custom_domain = $scope.sm.custom_domain.toString();
+    
+    custom_domain = custom_domain.replace(/\/+$/, ''); // removing trailing slashes
+    custom_domain = custom_domain.replace(/https?:\/\//, ''); // removing http:// or https:// from the beginning.
+    host += $scope.sm.bucket ? $scope.sm.bucket : '{bucket-name}';
+
+    if ( custom_domain !== 'storage.googleapis.com' && $scope.sm.bucket && custom_domain && ( is_ssl === 0 || custom_domain == $scope.sm.bucket ) ) {
+      $scope.sm.is_custom_domain = true;
+      $scope.sm.is_ssl = is_ssl === 0 ? true : false;
+      host = is_ssl === 0 ? 'https://' : 'http://';  // bucketname will be host
+      host += custom_domain;
     }
 
-    if (this.limitEnabled || this.limit > 0) {
-      this.htmlBox.find('.limit_field input').css('visibility', 'visible')
-    } else {
-      this.htmlBox.find('.limit_field input').css('visibility', 'hidden')
-    }
-
-    this.refreshButtons()
-    this.app.preventChanges()
+    $scope.sm.preview_url = host + "/" + rootdir + subdir + hash + "your-image-name.jpeg";
   }
 
-  /**
-   * Enable limit handler
-   */
-  this.enableLimit = function (event) {
-    this.limitEnabled = jQuery(event.target).is(':checked')
+  $scope.sm.generatePreviewUrl();
 
-    this.limit = 0
-    this.htmlBox.find('.limit_field input').val(0)
+})
+.controller('wpStatelessCompatibility', function($scope, $filter) {
+  $scope.modules = wp_stateless_compatibility || {};
+})
+.controller('noJSWarning', function($scope, $filter) {
+  $scope.jsLoaded = true;
+});
 
-    this.refreshBox()
+wpStatelessApp.filter("trust", ['$sce', function($sce) {
+  return function(htmlCode){
+    return $sce.trustAsHtml(htmlCode);
   }
-
-  /**
-   * Change limit handler
-   */
-  this.changeLimit = function (event) {
-    this.limit = jQuery(event.target).val()
-  }
-
-  /**
-   * Change sorting handler
-   */
-  this.changeOrder = function (event) {
-    this.order = jQuery(event.target).val()
-  }
-
-  /**
-   * Run the process
-   */
-  this.run = function () {
-    if ( this.canRun() ) {
-      this.app.runProcess(this)
-    }
-  }
-
-  /**
-   * Stop the process
-   */
-  this.stop = function () {
-    if ( this.canStop() ) {
-      this.app.stopProcess(this)
-    }
-  }
-
-  /**
-   * Bind event handlers
-   */
-  jQuery(document).on('change', `[data-id="${this.htmlId}"] .limit_enabled`, this.enableLimit.bind(this))
-  this.htmlBox.find('.limit_field input').change( this.changeLimit.bind(this) )
-  this.htmlBox.find('.order_value').change( this.changeOrder.bind(this) )
-  this.htmlBox.find('.actions .button-primary').click( this.run.bind(this) )
-  this.htmlBox.find('.actions .button-secondary').click( this.stop.bind(this) )
-}
+}]);

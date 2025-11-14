@@ -1,4 +1,4 @@
-<?php declare(strict_types=1);
+<?php
 
 /*
  * This file is part of the Monolog package.
@@ -12,7 +12,6 @@
 namespace Monolog\Handler;
 
 use Monolog\Logger;
-use Monolog\Utils;
 
 /**
  * Logs to syslog service.
@@ -29,17 +28,17 @@ use Monolog\Utils;
  */
 class SyslogHandler extends AbstractSyslogHandler
 {
-    /** @var string */
     protected $ident;
-    /** @var int */
     protected $logopts;
 
     /**
-     * @param string     $ident
-     * @param string|int $facility Either one of the names of the keys in $this->facilities, or a LOG_* facility constant
-     * @param int        $logopts  Option flags for the openlog() call, defaults to LOG_PID
+     * @param string  $ident
+     * @param mixed   $facility
+     * @param int     $level    The minimum logging level at which this handler will be triggered
+     * @param Boolean $bubble   Whether the messages that are handled can bubble up the stack or not
+     * @param int     $logopts  Option flags for the openlog() call, defaults to LOG_PID
      */
-    public function __construct(string $ident, $facility = LOG_USER, $level = Logger::DEBUG, bool $bubble = true, int $logopts = LOG_PID)
+    public function __construct($ident, $facility = LOG_USER, $level = Logger::DEBUG, $bubble = true, $logopts = LOG_PID)
     {
         parent::__construct($facility, $level, $bubble);
 
@@ -48,20 +47,20 @@ class SyslogHandler extends AbstractSyslogHandler
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
-    public function close(): void
+    public function close()
     {
         closelog();
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
-    protected function write(array $record): void
+    protected function write(array $record)
     {
         if (!openlog($this->ident, $this->logopts, $this->facility)) {
-            throw new \LogicException('Can\'t open syslog for ident "'.$this->ident.'" and facility "'.$this->facility.'"' . Utils::getRecordMessageForException($record));
+            throw new \LogicException('Can\'t open syslog for ident "'.$this->ident.'" and facility "'.$this->facility.'"');
         }
         syslog($this->logLevels[$record['level']], (string) $record['formatted']);
     }

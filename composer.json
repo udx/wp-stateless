@@ -1,46 +1,24 @@
 {
-  "name": "wpcloud/wp-stateless",
-  "description": "WP-Stateless WordPress plugin",
+  "name": "robertothais/wp-stateless",
   "type": "wordpress-plugin",
-  "minimum-stability": "stable",
-  "homepage": "https://udx.io",
-  "authors": [
-    {
-      "name": "UDX",
-      "homepage": "https://udx.io"
-    }
-  ],
+  "require": {
+    "php": ">=5.5",
+    "composer/installers": "~1.0",
+    "ccampbell/chromephp": "^4.1"
+  },
   "repositories": [
     {
       "type": "composer",
       "url": "https://repository.usabilitydynamics.com"
-    },
-    {
-      "type": "git",
-      "url": "https://github.com/wpCloud/wp-stateless.git"
-    },
-    {
-      "type":"composer",
-      "url":"https://wpackagist.org",
-      "only": [
-          "wpackagist-plugin/*",
-          "wpackagist-theme/*"
-      ]
     }
   ],
-  "require": {
-    "php": ">=7.4",
-    "composer/installers": "~2.3",
-    "ccampbell/chromephp": "^4.1",
-    "firebase/php-jwt": "^6.1.2",
-    "udx/lib-ud-api-client": "^1.2",
-    "udx/lib-wp-bootstrap": "^1.3",
-    "wpackagist-plugin/meta-box": "^5.10"
+  "require-dev": {
+    "php": ">=5.5",
+    "codeclimate/php-test-reporter": "~0.1"
   },
   "autoload": {
     "classmap": [
-      "lib/classes",
-      "lib/includes"
+      "lib/classes"
     ]
   },
   "archive": {
@@ -55,15 +33,6 @@
     ]
   },
   "extra": {
-    "mozart": {
-      "dep_namespace": "wpCloud\\StatelessMedia\\",
-      "dep_directory": "/lib/ns-vendor/deps",
-      "classmap_directory": "/lib/ns-vendor/classes",
-      "classmap_prefix": "UDX_",
-      "packages": [
-        "deliciousbrains/wp-background-processing"
-      ]
-    },
     "featureFlags": [
       {
         "name": "Google Login",
@@ -84,29 +53,7 @@
       "dependencies": {
         "modules": {},
         "plugins": []
-      },
-      "licenses": {
-        "client": {
-          "slug": "wpcloud/wp-stateless",
-          "screen": {
-            "parent": "upload.php?page=stateless-settings",
-            "hide_menu": true
-          }
-        },
-        "product": false
       }
-    },
-    "installer-paths": {
-      "vendor/wpmetabox/meta-box": ["wpackagist-plugin/meta-box"]
-    }
-  },
-  "require-dev": {
-    "coenjacobs/mozart": "0.7.1",
-    "deliciousbrains/wp-background-processing": "1.3.1"
-  },
-  "config": {
-    "allow-plugins": {
-      "composer/installers": true
     }
   }
 }

@@ -133,8 +133,8 @@ namespace wpCloud\StatelessMedia {
        */
       private function __construct() {
         $this->_php_version = phpversion();
-        $this->_timestamp = $this->_php_version >= 5.1 ? sanitize_text_field($_SERVER[ 'REQUEST_TIME' ]) : time();
-        $this->_json[ 'request_uri' ] = sanitize_text_field($_SERVER[ 'REQUEST_URI' ]);
+        $this->_timestamp = $this->_php_version >= 5.1 ? $_SERVER[ 'REQUEST_TIME' ] : time();
+        $this->_json[ 'request_uri' ] = $_SERVER[ 'REQUEST_URI' ];
       }
 
       /**
@@ -388,19 +388,7 @@ namespace wpCloud\StatelessMedia {
        * @return string
        */
       protected function _encode( $data ) {
-        if ( function_exists('mb_convert_encoding') ) {
-          $encoded = json_encode($data);
-
-          if ( $encoded !== false ) {
-            $utf8 = mb_convert_encoding($encoded, 'UTF-8', 'UTF-8');
-
-            if ($utf8 !== false) {
-              return base64_encode($utf8);
-            }
-          }
-        }
-
-        return false;
+        return base64_encode( utf8_encode( json_encode( $data ) ) );
       }
 
       /**

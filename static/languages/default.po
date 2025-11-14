@@ -1,0 +1,712 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: WP Stateless\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2017-08-16 18:49+0300\n"
+"PO-Revision-Date: 2017-08-16 18:49+0300\n"
+"Last-Translator: rotcod <denys.kostin@usabilitydynamics.com>\n"
+"Language-Team: Usability Dynamics, Inc\n"
+"Language: en_US\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Poedit-KeywordsList: __;_e;_n;_x\n"
+"X-Poedit-Basepath: ../..\n"
+"Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
+"%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
+"X-Poedit-SourceCharset: UTF-8\n"
+"X-Generator: Poedit 1.8.11\n"
+"X-Poedit-SearchPath-0: .\n"
+"X-Poedit-SearchPathExcluded-0: vendor\n"
+
+#: l10n.php:14
+msgid "Something went wrong"
+msgstr ""
+
+#: l10n.php:16
+msgid "Google Cloud Storage JSON API Service Enabled"
+msgstr ""
+
+#: l10n.php:17
+msgid "Google Cloud Storage JSON API Service failed."
+msgstr ""
+
+#: l10n.php:19 l10n.php:41 l10n.php:42 l10n.php:43
+msgid "Project name can't be empty."
+msgstr ""
+
+#: l10n.php:20
+msgid "Project name must be between 5 and 30 characters."
+msgstr ""
+
+#: l10n.php:21
+msgid ""
+"Project name has invalid characters. Enter letters, numbers, quotes, "
+"hyphens, spaces or exclamation points."
+msgstr ""
+
+#: l10n.php:22
+msgid "Project Created"
+msgstr ""
+
+#: l10n.php:23
+msgid "Project Exists"
+msgstr ""
+
+#: l10n.php:24
+msgid "Project creation complete."
+msgstr ""
+
+#: l10n.php:25
+msgid "Project creation failed."
+msgstr ""
+
+#: l10n.php:27
+msgid "Bucket name can't be empty."
+msgstr ""
+
+#: l10n.php:28
+msgid "Bucket name must be between 5 and 30 characters."
+msgstr ""
+
+#: l10n.php:29
+msgid ""
+"A bucket name can contain lowercase alphanumeric characters, hyphens, and "
+"underscores. Bucket names must start and end with an alphanumeric character."
+msgstr ""
+
+#: l10n.php:30
+msgid "Bucket Created"
+msgstr ""
+
+#: l10n.php:31
+msgid "Bucket Exist"
+msgstr ""
+
+#: l10n.php:33
+msgid "Select a billing account."
+msgstr ""
+
+#: l10n.php:34
+msgid "Billing Enabled"
+msgstr ""
+
+#: l10n.php:35
+msgid "Billing Info"
+msgstr ""
+
+#: l10n.php:37
+msgid "Service Account Exists"
+msgstr ""
+
+#: l10n.php:38
+msgid "Service Account Created"
+msgstr ""
+
+#: l10n.php:39
+msgid "Service Account Key Created"
+msgstr ""
+
+#: l10n.php:40
+msgid "Service Account Key Saved"
+msgstr ""
+
+#: lib/classes/class-ajax.php:83
+msgid "Incorrect Request"
+msgstr ""
+
+#: lib/classes/class-ajax.php:151
+#, php-format
+msgid "Failed resize: %s is an invalid image ID."
+msgstr ""
+
+#: lib/classes/class-ajax.php:154
+msgid "Your user account doesn't have permission to resize images"
+msgstr ""
+
+#: lib/classes/class-ajax.php:167
+#, php-format
+msgid "Both local and remote files are missing. Unable to resize. (%s)"
+msgstr ""
+
+#: lib/classes/class-ajax.php:181 lib/classes/class-ajax.php:236
+msgid "Unknown failure reason."
+msgstr ""
+
+#: lib/classes/class-ajax.php:190
+#, php-format
+msgid "%1$s (ID %2$s) was successfully resized in %3$s seconds."
+msgstr ""
+
+#: lib/classes/class-ajax.php:204
+#, php-format
+msgid "Attachment not found: %s is an invalid file ID."
+msgstr ""
+
+#: lib/classes/class-ajax.php:207
+msgid "You are not allowed to do this."
+msgstr ""
+
+#: lib/classes/class-ajax.php:219
+#, php-format
+msgid "File not found (%s)"
+msgstr ""
+
+#: lib/classes/class-ajax.php:248
+#, php-format
+msgid "%1$s (ID %2$s) was successfully synchronised in %3$s seconds."
+msgstr ""
+
+#: lib/classes/class-ajax.php:258
+msgid "No images media objects found."
+msgstr ""
+
+#: lib/classes/class-ajax.php:276
+msgid "No files found."
+msgstr ""
+
+#: lib/classes/class-bootstrap.php:315 lib/classes/class-bootstrap.php:401
+msgid "Regenerate and Sync with GCS"
+msgstr ""
+
+#: lib/classes/class-bootstrap.php:319 lib/classes/class-bootstrap.php:408
+msgid "Sync with GCS"
+msgstr ""
+
+#: lib/classes/class-bootstrap.php:332
+msgid "Google Cloud Storage"
+msgstr ""
+
+#: lib/classes/class-bootstrap.php:373
+msgid "Cache Control:"
+msgstr ""
+
+#: lib/classes/class-bootstrap.php:379
+msgid "Storage Bucket URL:"
+msgstr ""
+
+#: lib/classes/class-bootstrap.php:379
+msgid "[view]"
+msgstr ""
+
+#: lib/classes/class-bootstrap.php:390
+msgid "Storage Bucket:"
+msgstr ""
+
+#: lib/classes/class-bootstrap.php:574 lib/classes/class-bootstrap.php:579
+#: static/views/settings_interface.php:7
+msgid "Settings"
+msgstr ""
+
+#: lib/classes/class-bootstrap.php:753
+msgid "Stateless Media"
+msgstr ""
+
+#: lib/classes/class-bootstrap.php:919
+#, php-format
+msgid ""
+"Could not connect to Google Storage bucket. Please, be sure that bucket with "
+"name <b>%s</b> exists."
+msgstr ""
+
+#: lib/classes/class-bootstrap.php:928
+msgid "There is an Error on connection to Google Storage."
+msgstr ""
+
+#: lib/classes/class-gs-client.php:150
+msgid "Unable to locate file on disk"
+msgstr ""
+
+#: lib/classes/class-gs-client.php:298
+msgid "<b>Bucket</b> parameter must be provided."
+msgstr ""
+
+#: lib/classes/class-gs-client.php:308
+msgid "<b>Service Account JSON</b> is invalid."
+msgstr ""
+
+#: lib/classes/class-settings.php:228 lib/classes/class-settings.php:240
+msgid "Stateless Setup"
+msgstr ""
+
+#: lib/classes/class-settings.php:232 lib/classes/class-settings.php:241
+msgid "Stateless Settings"
+msgstr ""
+
+#: static/views/regenerate_interface.php:13
+msgid "You must enable Javascript in order to proceed!"
+msgstr ""
+
+#: static/views/regenerate_interface.php:22
+msgid ""
+"Regenerate all stateless images and synchronize Google Storage with local "
+"server"
+msgstr ""
+
+#: static/views/regenerate_interface.php:29
+msgid "Synchronize non-images files between Google Storage and local server"
+msgstr ""
+
+#: static/views/regenerate_interface.php:37
+msgid "Method"
+msgstr ""
+
+#: static/views/regenerate_interface.php:42
+msgid "Start a new process"
+msgstr ""
+
+#: static/views/regenerate_interface.php:44
+#: static/views/regenerate_interface.php:67
+msgid ""
+"<strong>Warning:</strong> This will make it impossible to continue the last "
+"process."
+msgstr ""
+
+#: static/views/regenerate_interface.php:52
+msgid "Continue the last process"
+msgstr ""
+
+#: static/views/regenerate_interface.php:60
+msgid "Fix errors"
+msgstr ""
+
+#: static/views/regenerate_interface.php:65
+msgid "Try to fix previously failed items"
+msgstr ""
+
+#: static/views/regenerate_interface.php:76
+msgid "Bulk Size"
+msgstr ""
+
+#: static/views/regenerate_interface.php:81
+msgid "How many items to process at once"
+msgstr ""
+
+#: static/views/regenerate_interface.php:87
+msgid "Status:"
+msgstr ""
+
+#: static/views/regenerate_interface.php:98
+msgid "Run (may take a while)"
+msgstr ""
+
+#: static/views/regenerate_interface.php:99
+msgid "Stop"
+msgstr ""
+
+#: static/views/regenerate_interface.php:100
+msgid "Clear Log"
+msgstr ""
+
+#: static/views/settings_interface.php:3
+#: static/views/stateless_splash_screen.php:8
+msgid "WP-Stateless"
+msgstr ""
+
+#: static/views/settings_interface.php:4
+#: static/views/stateless_splash_screen.php:9
+msgid "Upload and serve your WordPress media files from Google Cloud Storage."
+msgstr ""
+
+#: static/views/settings_interface.php:9
+msgid "Sync"
+msgstr ""
+
+#: static/views/settings_interface.php:11
+msgid "Questions"
+msgstr ""
+
+#: static/views/settings_interface.php:23
+#: static/views/settings_interface.php:26
+msgid "Settings Panel Visibility"
+msgstr ""
+
+#: static/views/settings_interface.php:29
+#: static/views/settings_interface.php:44
+msgid "Visible"
+msgstr ""
+
+#: static/views/settings_interface.php:30
+#: static/views/settings_interface.php:45
+msgid "Hidden"
+msgstr ""
+
+#: static/views/settings_interface.php:38
+#: static/views/settings_interface.php:41
+msgid "Setup Assistant Visibility"
+msgstr ""
+
+#: static/views/settings_interface.php:54
+#: static/views/settings_interface.php:57
+msgid "General"
+msgstr ""
+
+#: static/views/settings_interface.php:58
+msgid "Mode"
+msgstr ""
+
+#: static/views/settings_interface.php:62
+#: static/views/settings_interface.php:96
+#: static/views/settings_interface.php:152
+#: static/views/settings_interface.php:193
+#: static/views/settings_interface.php:209
+msgid "Don't override"
+msgstr ""
+
+#: static/views/settings_interface.php:62
+msgid "Don't override."
+msgstr ""
+
+#: static/views/settings_interface.php:66
+msgid "Disabled"
+msgstr ""
+
+#: static/views/settings_interface.php:66
+msgid "Disable Stateless Media."
+msgstr ""
+
+#: static/views/settings_interface.php:69
+msgid "Backup"
+msgstr ""
+
+#: static/views/settings_interface.php:69
+msgid "Upload media files to Google Storage and serve local file urls."
+msgstr ""
+
+#: static/views/settings_interface.php:72
+msgid "CDN"
+msgstr ""
+
+#: static/views/settings_interface.php:72
+msgid "Copy media files to Google Storage and serve them directly from there."
+msgstr ""
+
+#: static/views/settings_interface.php:75
+msgid "Stateless"
+msgstr ""
+
+#: static/views/settings_interface.php:75
+msgid ""
+"Store and serve media files with Google Cloud Storage only. Media files are "
+"not stored locally."
+msgstr ""
+
+#: static/views/settings_interface.php:79
+msgid "File URL Replacement"
+msgstr ""
+
+#: static/views/settings_interface.php:85
+#: static/views/settings_interface.php:98
+#: static/views/settings_interface.php:154
+#: static/views/settings_interface.php:195
+#: static/views/settings_interface.php:211
+msgid "Enable"
+msgstr ""
+
+#: static/views/settings_interface.php:86
+#: static/views/settings_interface.php:99
+#: static/views/settings_interface.php:155
+#: static/views/settings_interface.php:196
+#: static/views/settings_interface.php:212
+msgid "Disable"
+msgstr ""
+
+#: static/views/settings_interface.php:89
+msgid ""
+"Scans post content and meta during presentation and replaces local media "
+"file urls with GCS urls. This setting does not modify your database."
+msgstr ""
+
+#: static/views/settings_interface.php:92
+msgid "Dynamic Image Support"
+msgstr ""
+
+#: static/views/settings_interface.php:102
+msgid ""
+"Upload image thumbnails generated by your theme and plugins that do not "
+"register media objects with the media library."
+msgstr ""
+
+#: static/views/settings_interface.php:108
+#: static/views/settings_interface.php:111
+msgid "Google Cloud Storage (GCS)"
+msgstr ""
+
+#: static/views/settings_interface.php:112
+msgid "Bucket"
+msgstr ""
+
+#: static/views/settings_interface.php:118
+msgid "The name of the GCS bucket."
+msgstr ""
+
+#: static/views/settings_interface.php:121
+msgid "Bucket Folder"
+msgstr ""
+
+#: static/views/settings_interface.php:127
+msgid ""
+"If you would like files to be uploaded into a particular folder within the "
+"bucket, define that path here."
+msgstr ""
+
+#: static/views/settings_interface.php:130
+msgid "Service Account JSON"
+msgstr ""
+
+#: static/views/settings_interface.php:136
+msgid ""
+"Private key in JSON format for the service account WP-Stateless will use to "
+"connect to your Google Cloud project and bucket."
+msgstr ""
+
+#: static/views/settings_interface.php:139
+msgid "Cache-Control"
+msgstr ""
+
+#: static/views/settings_interface.php:145
+msgid "Override the default cache control assigned by GCS."
+msgstr ""
+
+#: static/views/settings_interface.php:148
+msgid "Delete GCS File"
+msgstr ""
+
+#: static/views/settings_interface.php:158
+msgid "Delete the GCS file when the file is deleted from WordPress."
+msgstr ""
+
+#: static/views/settings_interface.php:163
+#: static/views/settings_interface.php:166
+msgid "File URL"
+msgstr ""
+
+#: static/views/settings_interface.php:167
+msgid "Preview"
+msgstr ""
+
+#: static/views/settings_interface.php:173
+msgid "An example file url utilizing all configured settings."
+msgstr ""
+
+#: static/views/settings_interface.php:176
+msgid "Domain"
+msgstr ""
+
+#: static/views/settings_interface.php:184
+#, php-format
+msgid ""
+"Replace the default GCS domain with your own custom domain. This will "
+"require you to <a href=\"%s\" target=\"_blank\">configure a CNAME</a>. Be "
+"advised that the bucket name and domain name must match exactly and HTTPS is "
+"not supported with a custom domain."
+msgstr ""
+
+#: static/views/settings_interface.php:189
+msgid "Organization"
+msgstr ""
+
+#: static/views/settings_interface.php:200
+#, php-format
+msgid ""
+"Organize uploads into year and month based folders. This will update the <a "
+"href=\"%s\">related WordPress media setting</a>."
+msgstr ""
+
+#: static/views/settings_interface.php:205
+msgid "Cache-Busting"
+msgstr ""
+
+#: static/views/settings_interface.php:215
+msgid ""
+"Prepends a random set of numbers and letters to the filename. This is useful "
+"for preventing caching issues when uploading files that have the same "
+"filename."
+msgstr ""
+
+#: static/views/setup_wizard_interface.php:18
+msgid "WP-Stateless Setup"
+msgstr ""
+
+#: static/views/setup_wizard_interface.php:19
+msgid ""
+"Get up and running in less than 90 seconds! Just follow these three steps."
+msgstr ""
+
+#: static/views/setup_wizard_interface.php:33
+#: static/views/setup_wizard_interface.php:42
+#: static/views/setup_wizard_interface.php:45
+msgid "Google Login"
+msgstr ""
+
+#: static/views/setup_wizard_interface.php:34
+msgid "Project &amp; Bucket"
+msgstr ""
+
+#: static/views/setup_wizard_interface.php:35
+msgid "Complete"
+msgstr ""
+
+#: static/views/setup_wizard_interface.php:43
+msgid "Login with the Google account you want associated with this website."
+msgstr ""
+
+#: static/views/setup_wizard_interface.php:49
+msgid "Set Project &amp; Bucket"
+msgstr ""
+
+#: static/views/setup_wizard_interface.php:50
+msgid ""
+"Create a Google Cloud project and bucket that will store your WordPress "
+"media files."
+msgstr ""
+
+#: static/views/setup_wizard_interface.php:57
+msgid "Logout"
+msgstr ""
+
+#: static/views/setup_wizard_interface.php:68
+msgid "Google Cloud Project"
+msgstr ""
+
+#: static/views/setup_wizard_interface.php:69
+msgid ""
+"By default we create a new project for you, or if you prefer, select an "
+"existing project."
+msgstr ""
+
+#: static/views/setup_wizard_interface.php:79
+msgid "Create New Project"
+msgstr ""
+
+#: static/views/setup_wizard_interface.php:88
+#: static/views/setup_wizard_interface.php:117
+msgid "Existing Projects"
+msgstr ""
+
+#: static/views/setup_wizard_interface.php:97
+msgid "Google Cloud Bucket"
+msgstr ""
+
+#: static/views/setup_wizard_interface.php:98
+msgid ""
+"By default we create a new bucket for you, or if you prefer, select an "
+"existing bucket."
+msgstr ""
+
+#: static/views/setup_wizard_interface.php:107
+msgid "Create New Bucket"
+msgstr ""
+
+#: static/views/setup_wizard_interface.php:126
+msgid "Google Cloud Billing"
+msgstr ""
+
+#: static/views/setup_wizard_interface.php:127
+msgid ""
+"You will need to set a billing account in order to activate your Google "
+"Cloud Storage."
+msgstr ""
+
+#: static/views/setup_wizard_interface.php:129
+#: static/views/setup_wizard_interface.php:140
+msgid "Create New Billing Account"
+msgstr ""
+
+#: static/views/setup_wizard_interface.php:129
+#: static/views/setup_wizard_interface.php:140
+#: static/views/setup_wizard_interface.php:153
+msgid "Checking"
+msgstr ""
+
+#: static/views/setup_wizard_interface.php:138
+msgid "Existing Billing Accounts"
+msgstr ""
+
+#: static/views/setup_wizard_interface.php:146
+msgid "Continue"
+msgstr ""
+
+#: static/views/setup_wizard_interface.php:146
+msgid "Building"
+msgstr ""
+
+#: static/views/setup_wizard_interface.php:151
+msgid "Set Google Cloud Billing Account"
+msgstr ""
+
+#: static/views/setup_wizard_interface.php:152
+msgid ""
+"Click the button below to setup a billing account with Google Cloud. Once "
+"configured, return here and click continue."
+msgstr ""
+
+#: static/views/setup_wizard_interface.php:153
+msgid "Set Google Billing"
+msgstr ""
+
+#: static/views/setup_wizard_interface.php:160
+msgid "Setup is Complete!"
+msgstr ""
+
+#: static/views/setup_wizard_interface.php:161
+msgid ""
+"Any media file you upload to WordPress will now be uploaded to Google Cloud "
+"Storage and served to your users from Google servers!"
+msgstr ""
+
+#: static/views/setup_wizard_interface.php:163
+#, php-format
+msgid ""
+"To further customize your WP-Stateless setup, visit the <a class=\"btn-link"
+"\" href=\"%s\"> WP-Stateless settings panel!</a>"
+msgstr ""
+
+#: static/views/setup_wizard_interface.php:164
+msgid "Upload Something!"
+msgstr ""
+
+#: static/views/stateless_splash_screen.php:10
+msgid "Get Started Now"
+msgstr ""
+
+#: static/views/stateless_splash_screen.php:22
+msgid "Media Uploaded to Google Cloud"
+msgstr ""
+
+#: static/views/stateless_splash_screen.php:28
+msgid "Google Cloud Serves Media"
+msgstr ""
+
+#: static/views/stateless_splash_screen.php:34
+msgid "Managed by WP-Stateless"
+msgstr ""
+
+#: wp-stateless-media.php:46
+msgid ""
+"Distributive is broken. composer.json is missed. Try to remove and upload "
+"plugin again."
+msgstr ""
+
+#: wp-stateless-media.php:54
+#, php-format
+msgid "Plugin requires PHP %s or higher. Your current PHP version is %s"
+msgstr ""
+
+#: wp-stateless-media.php:62
+#, php-format
+msgid ""
+"Distributive is broken. %s file is missed. Try to remove and upload plugin "
+"again."
+msgstr ""
+
+#: wp-stateless-media.php:66
+msgid ""
+"Distributive is broken. Plugin loader is not available. Try to remove and "
+"upload plugin again."
+msgstr ""
+
+#: wp-stateless-media.php:87
+#, php-format
+msgid "<p><b>%s</b> can not be initialized. %s</p>"
+msgstr ""

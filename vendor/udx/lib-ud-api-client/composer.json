@@ -3,12 +3,10 @@
   "description": "UD API Client for WooCommerce API Manager",
   "type": "library",
   "minimum-stability": "dev",
-  "repositories": [
-    {
-      "type": "git",
-      "url": "https://github.com/udx/lib-ud-api-client"
-    }
-  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/udx/lib-ud-api-client"
+  },
   "homepage": "https://github.com/udx/lib-ud-api-client",
   "keywords": [
     "wordpress",
@@ -18,7 +16,7 @@
     "licenses"
   ],
   "license": "GPLv2",
-  "authors": [
+  "author": [
     {
       "name": "UsabilityDynamics, Inc.",
       "homepage": "https://www.usabilitydynamics.com"

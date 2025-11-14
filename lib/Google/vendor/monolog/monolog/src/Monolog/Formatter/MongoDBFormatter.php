@@ -1,4 +1,4 @@
-<?php declare(strict_types=1);
+<?php
 
 /*
  * This file is part of the Monolog package.
@@ -11,10 +11,6 @@
 
 namespace Monolog\Formatter;
 
-use MongoDB\BSON\Type;
-use MongoDB\BSON\UTCDateTime;
-use Monolog\Utils;
-
 /**
  * Formats a record for use with the MongoDBHandler.
  *
@@ -22,101 +18,76 @@ use Monolog\Utils;
  */
 class MongoDBFormatter implements FormatterInterface
 {
-    /** @var bool */
     private $exceptionTraceAsString;
-    /** @var int */
     private $maxNestingLevel;
-    /** @var bool */
-    private $isLegacyMongoExt;
 
     /**
      * @param int  $maxNestingLevel        0 means infinite nesting, the $record itself is level 1, $record['context'] is 2
      * @param bool $exceptionTraceAsString set to false to log exception traces as a sub documents instead of strings
      */
-    public function __construct(int $maxNestingLevel = 3, bool $exceptionTraceAsString = true)
+    public function __construct($maxNestingLevel = 3, $exceptionTraceAsString = true)
     {
         $this->maxNestingLevel = max($maxNestingLevel, 0);
-        $this->exceptionTraceAsString = $exceptionTraceAsString;
-
-        $this->isLegacyMongoExt = extension_loaded('mongodb') && version_compare((string) phpversion('mongodb'), '1.1.9', '<=');
+        $this->exceptionTraceAsString = (bool) $exceptionTraceAsString;
     }
 
     /**
      * {@inheritDoc}
-     *
-     * @return mixed[]
      */
-    public function format(array $record): array
+    public function format(array $record)
     {
-        /** @var mixed[] $res */
-        $res = $this->formatArray($record);
-
-        return $res;
+        return $this->formatArray($record);
     }
 
     /**
      * {@inheritDoc}
-     *
-     * @return array<mixed[]>
      */
-    public function formatBatch(array $records): array
+    public function formatBatch(array $records)
     {
-        $formatted = [];
         foreach ($records as $key => $record) {
-            $formatted[$key] = $this->format($record);
+            $records[$key] = $this->format($record);
         }
 
-        return $formatted;
+        return $records;
     }
 
-    /**
-     * @param  mixed[]        $array
-     * @return mixed[]|string Array except when max nesting level is reached then a string "[...]"
-     */
-    protected function formatArray(array $array, int $nestingLevel = 0)
+    protected function formatArray(array $record, $nestingLevel = 0)
     {
-        if ($this->maxNestingLevel > 0 && $nestingLevel > $this->maxNestingLevel) {
-            return '[...]';
-        }
-
-        foreach ($array as $name => $value) {
-            if ($value instanceof \DateTimeInterface) {
-                $array[$name] = $this->formatDate($value, $nestingLevel + 1);
-            } elseif ($value instanceof \Throwable) {
-                $array[$name] = $this->formatException($value, $nestingLevel + 1);
-            } elseif (is_array($value)) {
-                $array[$name] = $this->formatArray($value, $nestingLevel + 1);
-            } elseif (is_object($value) && !$value instanceof Type) {
-                $array[$name] = $this->formatObject($value, $nestingLevel + 1);
+        if ($this->maxNestingLevel == 0 || $nestingLevel <= $this->maxNestingLevel) {
+            foreach ($record as $name => $value) {
+                if ($value instanceof \DateTime) {
+                    $record[$name] = $this->formatDate($value, $nestingLevel + 1);
+                } elseif ($value instanceof \Exception) {
+                    $record[$name] = $this->formatException($value, $nestingLevel + 1);
+                } elseif (is_array($value)) {
+                    $record[$name] = $this->formatArray($value, $nestingLevel + 1);
+                } elseif (is_object($value)) {
+                    $record[$name] = $this->formatObject($value, $nestingLevel + 1);
+                }
             }
+        } else {
+            $record = '[...]';
         }
 
-        return $array;
+        return $record;
     }
 
-    /**
-     * @param  mixed          $value
-     * @return mixed[]|string
-     */
-    protected function formatObject($value, int $nestingLevel)
+    protected function formatObject($value, $nestingLevel)
     {
         $objectVars = get_object_vars($value);
-        $objectVars['class'] = Utils::getClass($value);
+        $objectVars['class'] = get_class($value);
 
         return $this->formatArray($objectVars, $nestingLevel);
     }
 
-    /**
-     * @return mixed[]|string
-     */
-    protected function formatException(\Throwable $exception, int $nestingLevel)
+    protected function formatException(\Exception $exception, $nestingLevel)
     {
-        $formattedException = [
-            'class' => Utils::getClass($exception),
+        $formattedException = array(
+            'class' => get_class($exception),
             'message' => $exception->getMessage(),
-            'code' => (int) $exception->getCode(),
+            'code' => $exception->getCode(),
             'file' => $exception->getFile() . ':' . $exception->getLine(),
-        ];
+        );
 
         if ($this->exceptionTraceAsString === true) {
             $formattedException['trace'] = $exception->getTraceAsString();
@@ -127,36 +98,8 @@ class MongoDBFormatter implements FormatterInterface
         return $this->formatArray($formattedException, $nestingLevel);
     }
 
-    protected function formatDate(\DateTimeInterface $value, int $nestingLevel): UTCDateTime
+    protected function formatDate(\DateTime $value, $nestingLevel)
     {
-        if ($this->isLegacyMongoExt) {
-            return $this->legacyGetMongoDbDateTime($value);
-        }
-
-        return $this->getMongoDbDateTime($value);
-    }
-
-    private function getMongoDbDateTime(\DateTimeInterface $value): UTCDateTime
-    {
-        return new UTCDateTime((int) floor(((float) $value->format('U.u')) * 1000));
-    }
-
-    /**
-     * This is needed to support MongoDB Driver v1.19 and below
-     *
-     * See https://github.com/mongodb/mongo-php-driver/issues/426
-     *
-     * It can probably be removed in 2.1 or later once MongoDB's 1.2 is released and widely adopted
-     */
-    private function legacyGetMongoDbDateTime(\DateTimeInterface $value): UTCDateTime
-    {
-        $milliseconds = floor(((float) $value->format('U.u')) * 1000);
-
-        $milliseconds = (PHP_INT_SIZE == 8) //64-bit OS?
-            ? (int) $milliseconds
-            : (string) $milliseconds;
-
-        // @phpstan-ignore-next-line
-        return new UTCDateTime($milliseconds);
+        return new \MongoDate($value->getTimestamp());
     }
 }

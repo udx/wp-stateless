@@ -30,16 +30,15 @@ class SM_CLI_Scaffold {
     $this->limit = is_numeric( $this->limit ) && $this->limit > 0 ? $this->limit : 100;
   }
 
-  /**
-   * Forces data printing to command line ignoring buffer.
-   *
-   * @param string $msg
-   * @return null
-   */
+	/**
+	 * Forces data printing to command line ignoring buffer.
+	 *
+	 * @param string $msg
+	 */
   public function output( $msg = '' ) {
     $args = $this->assoc_args;
     if( !isset( $args['log'] ) ) return null;
-    esc_html_e(date( 'H:i:s', time() ) . ': ' . $msg . ' ' . $this->memory_usage() . PHP_EOL);        
+    echo date( 'H:i:s', time() ) . ': ' . $msg . ' ' . $this->memory_usage() . PHP_EOL;        
     @ob_flush();
     flush();
   }

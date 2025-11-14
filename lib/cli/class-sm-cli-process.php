@@ -11,13 +11,12 @@ class SM_CLI_Process {
   private $cwd;
 
   private function __construct() {}
-
+  
   /**
-   * @param string $command Command to execute.
-   * @param string $cwd Directory to execute the command in.
-   * @return SM_CLI_Process
-   */
-	public static function create( $command, $cwd = ABSPATH ) {
+	 * @param string $command Command to execute.
+	 * @param string $cwd Directory to execute the command in.
+	 */
+	public static function create( $command, $cwd = null ) {
 		$proc = new self;
 
 		$proc->command = $command;
@@ -26,11 +25,11 @@ class SM_CLI_Process {
 		return $proc;
 	}
 
-  /**
-   * Run the command.
-   *
-   * @return SM_CLI_ProcessRun
-   */
+	/**
+	 * Run the command.
+	 *
+	 * @return ProcessRun
+	 */
 	public function run() {
 		$cwd = $this->cwd;
 
@@ -60,7 +59,7 @@ class SM_CLI_Process {
 	/**
 	 * Run the command, but throw an Exception on error.
 	 *
-	 * @return SM_CLI_ProcessRun
+	 * @return ProcessRun
 	 */
 	public function run_check() {
 		$r = $this->run();

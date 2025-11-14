@@ -1,4 +1,4 @@
-<?php declare(strict_types=1);
+<?php
 
 /*
  * This file is part of the Monolog package.
@@ -12,54 +12,116 @@
 namespace Monolog\Handler;
 
 use Monolog\Logger;
-use Monolog\ResettableInterface;
-use Psr\Log\LogLevel;
+use Monolog\Formatter\FormatterInterface;
+use Monolog\Formatter\LineFormatter;
 
 /**
- * Base Handler class providing basic level/bubble support
+ * Base Handler class providing the Handler structure
  *
  * @author Jordi Boggiano <j.boggiano@seld.be>
- *
- * @phpstan-import-type Level from \Monolog\Logger
- * @phpstan-import-type LevelName from \Monolog\Logger
  */
-abstract class AbstractHandler extends Handler implements ResettableInterface
+abstract class AbstractHandler implements HandlerInterface
 {
-    /**
-     * @var int
-     * @phpstan-var Level
-     */
     protected $level = Logger::DEBUG;
-    /** @var bool */
     protected $bubble = true;
 
     /**
-     * @param int|string $level  The minimum logging level at which this handler will be triggered
-     * @param bool       $bubble Whether the messages that are handled can bubble up the stack or not
-     *
-     * @phpstan-param Level|LevelName|LogLevel::* $level
+     * @var FormatterInterface
      */
-    public function __construct($level = Logger::DEBUG, bool $bubble = true)
+    protected $formatter;
+    protected $processors = array();
+
+    /**
+     * @param int     $level  The minimum logging level at which this handler will be triggered
+     * @param Boolean $bubble Whether the messages that are handled can bubble up the stack or not
+     */
+    public function __construct($level = Logger::DEBUG, $bubble = true)
     {
         $this->setLevel($level);
         $this->bubble = $bubble;
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
-    public function isHandling(array $record): bool
+    public function isHandling(array $record)
     {
         return $record['level'] >= $this->level;
     }
 
     /**
+     * {@inheritdoc}
+     */
+    public function handleBatch(array $records)
+    {
+        foreach ($records as $record) {
+            $this->handle($record);
+        }
+    }
+
+    /**
+     * Closes the handler.
+     *
+     * This will be called automatically when the object is destroyed
+     */
+    public function close()
+    {
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function pushProcessor($callback)
+    {
+        if (!is_callable($callback)) {
+            throw new \InvalidArgumentException('Processors must be valid callables (callback or object with an __invoke method), '.var_export($callback, true).' given');
+        }
+        array_unshift($this->processors, $callback);
+
+        return $this;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function popProcessor()
+    {
+        if (!$this->processors) {
+            throw new \LogicException('You tried to pop from an empty processor stack.');
+        }
+
+        return array_shift($this->processors);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function setFormatter(FormatterInterface $formatter)
+    {
+        $this->formatter = $formatter;
+
+        return $this;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getFormatter()
+    {
+        if (!$this->formatter) {
+            $this->formatter = $this->getDefaultFormatter();
+        }
+
+        return $this->formatter;
+    }
+
+    /**
      * Sets minimum logging level at which this handler will be triggered.
      *
-     * @param  Level|LevelName|LogLevel::* $level Level or level name
+     * @param  int|string $level Level or level name
      * @return self
      */
-    public function setLevel($level): self
+    public function setLevel($level)
     {
         $this->level = Logger::toMonologLevel($level);
 
@@ -70,10 +132,8 @@ abstract class AbstractHandler extends Handler implements ResettableInterface
      * Gets minimum logging level at which this handler will be triggered.
      *
      * @return int
-     *
-     * @phpstan-return Level
      */
-    public function getLevel(): int
+    public function getLevel()
     {
         return $this->level;
     }
@@ -81,11 +141,11 @@ abstract class AbstractHandler extends Handler implements ResettableInterface
     /**
      * Sets the bubbling behavior.
      *
-     * @param  bool $bubble true means that this handler allows bubbling.
-     *                      false means that bubbling is not permitted.
+     * @param  Boolean $bubble true means that this handler allows bubbling.
+     *                         false means that bubbling is not permitted.
      * @return self
      */
-    public function setBubble(bool $bubble): self
+    public function setBubble($bubble)
     {
         $this->bubble = $bubble;
 
@@ -95,18 +155,32 @@ abstract class AbstractHandler extends Handler implements ResettableInterface
     /**
      * Gets the bubbling behavior.
      *
-     * @return bool true means that this handler allows bubbling.
-     *              false means that bubbling is not permitted.
+     * @return Boolean true means that this handler allows bubbling.
+     *                 false means that bubbling is not permitted.
      */
-    public function getBubble(): bool
+    public function getBubble()
     {
         return $this->bubble;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function reset()
+    public function __destruct()
     {
+        try {
+            $this->close();
+        } catch (\Exception $e) {
+            // do nothing
+        } catch (\Throwable $e) {
+            // do nothing
+        }
+    }
+
+    /**
+     * Gets the default formatter.
+     *
+     * @return FormatterInterface
+     */
+    protected function getDefaultFormatter()
+    {
+        return new LineFormatter();
     }
 }

@@ -1,0 +1,206 @@
+<!DOCTYPE  html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    
+    <title>doc</title>
+    <style>
+      /*github.com style (c) Vasily Polovnyov <vast@whiteants.net>*/
+      pre code {
+        display: block; padding: 0.5em;
+        color: #333;
+        background: #f8f8ff
+      }
+      pre .comment,
+      pre .template_comment,
+      pre .diff .header,
+      pre .javadoc {
+        color: #998;
+        font-style: italic
+      }
+      pre .keyword,
+      pre .css .rule .keyword,
+      pre .winutils,
+      pre .javascript .title,
+      pre .nginx .title,
+      pre .subst,
+      pre .request,
+      pre .status {
+        color: #333;
+        font-weight: bold
+      }
+      pre .number,
+      pre .hexcolor,
+      pre .ruby .constant {
+        color: #099;
+      }
+      pre .string,
+      pre .tag .value,
+      pre .phpdoc,
+      pre .tex .formula {
+        color: #d14
+      }
+      pre .title,
+      pre .id {
+        color: #900;
+        font-weight: bold
+      }
+      pre .javascript .title,
+      pre .lisp .title,
+      pre .clojure .title,
+      pre .subst {
+        font-weight: normal
+      }
+      pre .class .title,
+      pre .haskell .type,
+      pre .vhdl .literal,
+      pre .tex .command {
+        color: #458;
+        font-weight: bold
+      }
+      pre .tag,
+      pre .tag .title,
+      pre .rules .property,
+      pre .django .tag .keyword {
+        color: #000080;
+        font-weight: normal
+      }
+      pre .attribute,
+      pre .variable,
+      pre .lisp .body {
+        color: #008080
+      }
+      pre .regexp {
+        color: #009926
+      }
+      pre .class {
+        color: #458;
+        font-weight: bold
+      }
+      pre .symbol,
+      pre .ruby .symbol .string,
+      pre .lisp .keyword,
+      pre .tex .special,
+      pre .prompt {
+        color: #990073
+      }
+      pre .built_in,
+      pre .lisp .title,
+      pre .clojure .built_in {
+        color: #0086b3
+      }
+      pre .preprocessor,
+      pre .pi,
+      pre .doctype,
+      pre .shebang,
+      pre .cdata {
+        color: #999;
+        font-weight: bold
+      }
+      pre .deletion {
+        background: #fdd
+      }
+      pre .addition {
+        background: #dfd
+      }
+      pre .diff .change {
+        background: #0086b3
+      }
+      pre .chunk {
+        color: #aaa
+      }
+    </style>
+  </head>
+  <body>  
+    <h2 id="storage-usage">Storage Usage</h2>
+<p>Storage module is developed for client-side persistant storing of key &amp; value pairs.</p>
+<pre><code class="lang-javascript">
+ // Initialize Storage.
+ var Storage = require( &#39;udx.storage&#39; ).create();
+
+  // Set some values.
+ Storage.setItem( &#39;name&#39;, &#39;Andy&#39; );
+ Storage.setItem( &#39;latitude&#39;, &#39;34.4239&#39; );
+ Storage.setItem( &#39;longitude&#39;, &#39;-77.5584&#39; );
+
+ // Later...
+ console.log( &#39;Welcome&#39;, Storage.getItem( &#39;name&#39; ), &#39;we have you located at&#39;, Storage.getItem( &#39;latitude&#39; ), &#39;, &#39;, Storage.getItem( &#39;longitude&#39; ) );</code></pre>
+<p>Storage attempts to save data into localStorage, if the browser supports it. Otherwise we fallback to Cookie storage.</p>
+<h2 id="settings-usage">Settings Usage</h2>
+<pre><code class="lang-php">// Instantiate and load Settings.
+$settings  = new Settings(array(
+  &quot;store&quot; =&gt; &quot;options&quot;,
+  &quot;key&quot; =&gt; &quot;settings_test&quot;,
+  &quot;format&quot; =&gt; &quot;object&quot;,
+  &quot;auto_commit&quot; =&gt; true,
+  &quot;data&quot; =&gt; array( &#39;initial data&#39;, &#39;blah&#39; )
+));
+
+$settings-&gt;set( &#39;make&#39;, &#39;Chevy&#39; );
+$settings-&gt;set( &#39;model&#39;, &#39;Tahoe&#39; );
+
+$settings-&gt;set( &#39;features&#39;, array(
+  &#39;ac&#39;,
+  &#39;stuff&#39;
+  &#39;dvd&#39;,
+  &#39;sunroof&#39;
+));
+
+$settings-&gt;set( &#39;options&#39;, array(
+  &quot;gps&quot; =&gt; &#39;standard&#39;,
+  &quot;rims&quot; =&gt; &#39;24&#39;,
+  &quot;towing&quot; =&gt; true,
+  &quot;onstar&quot; =&gt; &#39;active&#39;
+));</code></pre>
+<pre><code class="lang-php">// Initialize Settings.
+$this-&gt;_settings = new Settings(array(
+  &quot;store&quot; =&gt; &quot;options&quot;,
+  &quot;key&quot; =&gt; &quot;ud:veneer&quot;,
+));
+
+// ElasticSearch Service Settings.
+$this-&gt;set( &#39;documents&#39;, array(
+  &quot;host&quot; =&gt; &quot;localhost&quot;,
+  &quot;active&quot; =&gt; true,
+  &quot;token&quot; =&gt; &quot;alsdkjflaksdjsadsdff&quot;,
+  &quot;port&quot; =&gt; 9200
+));
+
+// Varnish Service Settings.
+$this-&gt;set( &#39;varnish&#39;, array(
+  &quot;host&quot; =&gt; &quot;localhost&quot;,
+  &quot;active&quot; =&gt; false
+));
+
+// CDN Service Settings.
+$this-&gt;set( &#39;cdn&#39;, array(
+  &quot;active&quot; =&gt; true,
+  &quot;provider&quot; =&gt; &quot;gcs&quot;,
+  &quot;subdomain&quot; =&gt; &quot;media&quot;,
+  &quot;key&quot; =&gt; &quot;alsdkjflaksdjf&quot;
+));
+
+// Save Settings.
+$this-&gt;_settings-&gt;commit();</code></pre>
+<h2 id="license">License</h2>
+<p>(The MIT License)</p>
+<p>Copyright (c) 2013 Usability Dynamics, Inc. &lt;info@usabilitydynamics.com&gt;</p>
+<p>Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+&#39;Software&#39;), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:</p>
+<p>The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.</p>
+<p>THE SOFTWARE IS PROVIDED &#39;AS IS&#39;, WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.</p>
+
+  </body>
+</html>

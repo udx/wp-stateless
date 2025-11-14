@@ -1,4 +1,4 @@
-<?php declare(strict_types=1);
+<?php
 
 /*
  * This file is part of the Monolog package.
@@ -11,12 +11,11 @@
 
 namespace Monolog\Handler;
 
+use Exception;
 use Monolog\Formatter\LineFormatter;
-use Monolog\Formatter\FormatterInterface;
 use Monolog\Logger;
-use Monolog\Utils;
 use PhpConsole\Connector;
-use PhpConsole\Handler as VendorPhpConsoleHandler;
+use PhpConsole\Handler;
 use PhpConsole\Helper;
 
 /**
@@ -25,7 +24,7 @@ use PhpConsole\Helper;
  * Display PHP error/debug log messages in Google Chrome console and notification popups, executes PHP code remotely
  *
  * Usage:
- * 1. Install Google Chrome extension [now dead and removed from the chrome store]
+ * 1. Install Google Chrome extension https://chrome.google.com/webstore/detail/php-console/nfhmhhlpfleoednkpnnnkolmclajemef
  * 2. See overview https://github.com/barbushin/php-console#overview
  * 3. Install PHP Console library https://github.com/barbushin/php-console#installation
  * 4. Example (result will looks like http://i.hizliresim.com/vg3Pz4.png)
@@ -33,21 +32,17 @@ use PhpConsole\Helper;
  *      $logger = new \Monolog\Logger('all', array(new \Monolog\Handler\PHPConsoleHandler()));
  *      \Monolog\ErrorHandler::register($logger);
  *      echo $undefinedVar;
- *      $logger->debug('SELECT * FROM users', array('db', 'time' => 0.012));
+ *      $logger->addDebug('SELECT * FROM users', array('db', 'time' => 0.012));
  *      PC::debug($_SERVER); // PHP Console debugger for any type of vars
  *
  * @author Sergey Barbushin https://www.linkedin.com/in/barbushin
- *
- * @phpstan-import-type Record from \Monolog\Logger
- * @deprecated Since 2.8.0 and 3.2.0, PHPConsole is abandoned and thus we will drop this handler in Monolog 4
  */
 class PHPConsoleHandler extends AbstractProcessingHandler
 {
-    /** @var array<string, mixed> */
-    private $options = [
+    private $options = array(
         'enabled' => true, // bool Is PHP Console server enabled
-        'classesPartialsTraceIgnore' => ['Monolog\\'], // array Hide calls of classes started with...
-        'debugTagsKeysInContext' => [0, 'tag'], // bool Is PHP Console server enabled
+        'classesPartialsTraceIgnore' => array('Monolog\\'), // array Hide calls of classes started with...
+        'debugTagsKeysInContext' => array(0, 'tag'), // bool Is PHP Console server enabled
         'useOwnErrorsHandler' => false, // bool Enable errors handling
         'useOwnExceptionsHandler' => false, // bool Enable exceptions handling
         'sourcesBasePath' => null, // string Base path of all project sources to strip in errors source paths
@@ -56,7 +51,7 @@ class PHPConsoleHandler extends AbstractProcessingHandler
         'headersLimit' => null, // int|null Set headers size limit for your web-server
         'password' => null, // string|null Protect PHP Console connection by password
         'enableSslOnlyMode' => false, // bool Force connection by SSL for clients with PHP Console installed
-        'ipMasks' => [], // array Set IP masks of clients that will be allowed to connect to PHP Console: array('192.168.*.*', '127.0.0.1')
+        'ipMasks' => array(), // array Set IP masks of clients that will be allowed to connect to PHP Console: array('192.168.*.*', '127.0.0.1')
         'enableEvalListener' => false, // bool Enable eval request to be handled by eval dispatcher(if enabled, 'password' option is also required)
         'dumperDetectCallbacks' => false, // bool Convert callback items in dumper vars to (callback SomeClass::someMethod) strings
         'dumperLevelLimit' => 5, // int Maximum dumped vars array or object nested dump level
@@ -64,43 +59,40 @@ class PHPConsoleHandler extends AbstractProcessingHandler
         'dumperItemSizeLimit' => 5000, // int Maximum length of any string or dumped array item
         'dumperDumpSizeLimit' => 500000, // int Maximum approximate size of dumped vars result formatted in JSON
         'detectDumpTraceAndSource' => false, // bool Autodetect and append trace data to debug
-        'dataStorage' => null, // \PhpConsole\Storage|null Fixes problem with custom $_SESSION handler(see http://goo.gl/Ne8juJ)
-    ];
+        'dataStorage' => null, // PhpConsole\Storage|null Fixes problem with custom $_SESSION handler(see http://goo.gl/Ne8juJ)
+    );
 
     /** @var Connector */
     private $connector;
 
     /**
-     * @param  array<string, mixed> $options   See \Monolog\Handler\PHPConsoleHandler::$options for more details
-     * @param  Connector|null       $connector Instance of \PhpConsole\Connector class (optional)
-     * @throws \RuntimeException
+     * @param  array          $options   See \Monolog\Handler\PHPConsoleHandler::$options for more details
+     * @param  Connector|null $connector Instance of \PhpConsole\Connector class (optional)
+     * @param  int            $level
+     * @param  bool           $bubble
+     * @throws Exception
      */
-    public function __construct(array $options = [], ?Connector $connector = null, $level = Logger::DEBUG, bool $bubble = true)
+    public function __construct(array $options = array(), Connector $connector = null, $level = Logger::DEBUG, $bubble = true)
     {
         if (!class_exists('PhpConsole\Connector')) {
-            throw new \RuntimeException('PHP Console library not found. See https://github.com/barbushin/php-console#installation');
+            throw new Exception('PHP Console library not found. See https://github.com/barbushin/php-console#installation');
         }
         parent::__construct($level, $bubble);
         $this->options = $this->initOptions($options);
         $this->connector = $this->initConnector($connector);
     }
 
-    /**
-     * @param array<string, mixed> $options
-     *
-     * @return array<string, mixed>
-     */
-    private function initOptions(array $options): array
+    private function initOptions(array $options)
     {
         $wrongOptions = array_diff(array_keys($options), array_keys($this->options));
         if ($wrongOptions) {
-            throw new \RuntimeException('Unknown options: ' . implode(', ', $wrongOptions));
+            throw new Exception('Unknown options: ' . implode(', ', $wrongOptions));
         }
 
         return array_replace($this->options, $options);
     }
 
-    private function initConnector(?Connector $connector = null): Connector
+    private function initConnector(Connector $connector = null)
     {
         if (!$connector) {
             if ($this->options['dataStorage']) {
@@ -115,7 +107,7 @@ class PHPConsoleHandler extends AbstractProcessingHandler
 
         if ($this->options['enabled'] && $connector->isActiveClient()) {
             if ($this->options['useOwnErrorsHandler'] || $this->options['useOwnExceptionsHandler']) {
-                $handler = VendorPhpConsoleHandler::getInstance();
+                $handler = Handler::getInstance();
                 $handler->setHandleErrors($this->options['useOwnErrorsHandler']);
                 $handler->setHandleExceptions($this->options['useOwnExceptionsHandler']);
                 $handler->start();
@@ -155,20 +147,17 @@ class PHPConsoleHandler extends AbstractProcessingHandler
         return $connector;
     }
 
-    public function getConnector(): Connector
+    public function getConnector()
     {
         return $this->connector;
     }
 
-    /**
-     * @return array<string, mixed>
-     */
-    public function getOptions(): array
+    public function getOptions()
     {
         return $this->options;
     }
 
-    public function handle(array $record): bool
+    public function handle(array $record)
     {
         if ($this->options['enabled'] && $this->connector->isActiveClient()) {
             return parent::handle($record);
@@ -179,59 +168,49 @@ class PHPConsoleHandler extends AbstractProcessingHandler
 
     /**
      * Writes the record down to the log of the implementing handler
+     *
+     * @param  array $record
+     * @return void
      */
-    protected function write(array $record): void
+    protected function write(array $record)
     {
         if ($record['level'] < Logger::NOTICE) {
             $this->handleDebugRecord($record);
-        } elseif (isset($record['context']['exception']) && $record['context']['exception'] instanceof \Throwable) {
+        } elseif (isset($record['context']['exception']) && $record['context']['exception'] instanceof Exception) {
             $this->handleExceptionRecord($record);
         } else {
             $this->handleErrorRecord($record);
         }
     }
 
-    /**
-     * @phpstan-param Record $record
-     */
-    private function handleDebugRecord(array $record): void
+    private function handleDebugRecord(array $record)
     {
         $tags = $this->getRecordTags($record);
         $message = $record['message'];
         if ($record['context']) {
-            $message .= ' ' . Utils::jsonEncode($this->connector->getDumper()->dump(array_filter($record['context'])), null, true);
+            $message .= ' ' . json_encode($this->connector->getDumper()->dump(array_filter($record['context'])));
         }
         $this->connector->getDebugDispatcher()->dispatchDebug($message, $tags, $this->options['classesPartialsTraceIgnore']);
     }
 
-    /**
-     * @phpstan-param Record $record
-     */
-    private function handleExceptionRecord(array $record): void
+    private function handleExceptionRecord(array $record)
     {
         $this->connector->getErrorsDispatcher()->dispatchException($record['context']['exception']);
     }
 
-    /**
-     * @phpstan-param Record $record
-     */
-    private function handleErrorRecord(array $record): void
+    private function handleErrorRecord(array $record)
     {
         $context = $record['context'];
 
         $this->connector->getErrorsDispatcher()->dispatchError(
-            $context['code'] ?? null,
-            $context['message'] ?? $record['message'],
-            $context['file'] ?? null,
-            $context['line'] ?? null,
+            isset($context['code']) ? $context['code'] : null,
+            isset($context['message']) ? $context['message'] : $record['message'],
+            isset($context['file']) ? $context['file'] : null,
+            isset($context['line']) ? $context['line'] : null,
             $this->options['classesPartialsTraceIgnore']
         );
     }
 
-    /**
-     * @phpstan-param Record $record
-     * @return string
-     */
     private function getRecordTags(array &$record)
     {
         $tags = null;
@@ -256,7 +235,7 @@ class PHPConsoleHandler extends AbstractProcessingHandler
     /**
      * {@inheritDoc}
      */
-    protected function getDefaultFormatter(): FormatterInterface
+    protected function getDefaultFormatter()
     {
         return new LineFormatter('%message%');
     }

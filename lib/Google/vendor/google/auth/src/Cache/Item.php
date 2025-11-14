@@ -17,19 +17,10 @@
 
 namespace Google\Auth\Cache;
 
-use DateTime;
-use DateTimeInterface;
-use DateTimeZone;
 use Psr\Cache\CacheItemInterface;
-use TypeError;
 
 /**
  * A cache item.
- *
- * This class will be used by MemoryCacheItemPool and SysVCacheItemPool
- * on PHP 7.4 and below. It is compatible with psr/cache 1.0 and 2.0 (PSR-6).
- * @deprecated
- * @see TypedItem for compatiblity with psr/cache 3.0.
  */
 final class Item implements CacheItemInterface
 {
@@ -44,7 +35,7 @@ final class Item implements CacheItemInterface
     private $value;
 
     /**
-     * @var DateTimeInterface|null
+     * @var \DateTime
      */
     private $expiration;
 
@@ -90,7 +81,7 @@ final class Item implements CacheItemInterface
             return true;
         }
 
-        return $this->currentTime()->getTimestamp() < $this->expiration->getTimestamp();
+        return new \DateTime() < $this->expiration;
     }
 
     /**
@@ -115,13 +106,18 @@ final class Item implements CacheItemInterface
             return $this;
         }
 
+        $implementationMessage = interface_exists('DateTimeInterface')
+            ? 'implement interface DateTimeInterface'
+            : 'be an instance of DateTime';
+
         $error = sprintf(
-            'Argument 1 passed to %s::expiresAt() must implement interface DateTimeInterface, %s given',
+            'Argument 1 passed to %s::expiresAt() must %s, %s given',
             get_class($this),
+            $implementationMessage,
             gettype($expiration)
         );
 
-        throw new TypeError($error);
+        $this->handleError($error);
     }
 
     /**
@@ -130,9 +126,9 @@ final class Item implements CacheItemInterface
     public function expiresAfter($time)
     {
         if (is_int($time)) {
-            $this->expiration = $this->currentTime()->add(new \DateInterval("PT{$time}S"));
+            $this->expiration = new \DateTime("now + $time seconds");
         } elseif ($time instanceof \DateInterval) {
-            $this->expiration = $this->currentTime()->add($time);
+            $this->expiration = (new \DateTime())->add($time);
         } elseif ($time === null) {
             $this->expiration = $time;
         } else {
@@ -140,10 +136,25 @@ final class Item implements CacheItemInterface
                        'instance of DateInterval or of the type integer, %s given';
             $error = sprintf($message, get_class($this), gettype($time));
 
-            throw new TypeError($error);
+            $this->handleError($error);
         }
 
         return $this;
+    }
+
+    /**
+     * Handles an error.
+     *
+     * @param string $error
+     * @throws \TypeError
+     */
+    private function handleError($error)
+    {
+        if (class_exists('TypeError')) {
+            throw new \TypeError($error);
+        }
+
+        trigger_error($error, E_USER_ERROR);
     }
 
     /**
@@ -158,18 +169,17 @@ final class Item implements CacheItemInterface
             return true;
         }
 
-        if ($expiration instanceof DateTimeInterface) {
+        // We test for two types here due to the fact the DateTimeInterface
+        // was not introduced until PHP 5.5. Checking for the DateTime type as
+        // well allows us to support 5.4.
+        if ($expiration instanceof \DateTimeInterface) {
+            return true;
+        }
+
+        if ($expiration instanceof \DateTime) {
             return true;
         }
 
         return false;
-    }
-
-    /**
-     * @return DateTime
-     */
-    protected function currentTime()
-    {
-        return new DateTime('now', new DateTimeZone('UTC'));
     }
 }

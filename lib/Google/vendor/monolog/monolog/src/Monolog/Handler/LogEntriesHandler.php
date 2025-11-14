@@ -1,4 +1,4 @@
-<?php declare(strict_types=1);
+<?php
 
 /*
  * This file is part of the Monolog package.
@@ -24,46 +24,31 @@ class LogEntriesHandler extends SocketHandler
     protected $logToken;
 
     /**
-     * @param string     $token  Log token supplied by LogEntries
-     * @param bool       $useSSL Whether or not SSL encryption should be used.
-     * @param string     $host   Custom hostname to send the data to if needed
+     * @param string $token  Log token supplied by LogEntries
+     * @param bool   $useSSL Whether or not SSL encryption should be used.
+     * @param int    $level  The minimum logging level to trigger this handler
+     * @param bool   $bubble Whether or not messages that are handled should bubble up the stack.
      *
      * @throws MissingExtensionException If SSL encryption is set to true and OpenSSL is missing
      */
-    public function __construct(
-        string $token,
-        bool $useSSL = true,
-        $level = Logger::DEBUG,
-        bool $bubble = true,
-        string $host = 'data.logentries.com',
-        bool $persistent = false,
-        float $timeout = 0.0,
-        float $writingTimeout = 10.0,
-        ?float $connectionTimeout = null,
-        ?int $chunkSize = null
-    ) {
+    public function __construct($token, $useSSL = true, $level = Logger::DEBUG, $bubble = true)
+    {
         if ($useSSL && !extension_loaded('openssl')) {
             throw new MissingExtensionException('The OpenSSL PHP plugin is required to use SSL encrypted connection for LogEntriesHandler');
         }
 
-        $endpoint = $useSSL ? 'ssl://' . $host . ':443' : $host . ':80';
-        parent::__construct(
-            $endpoint,
-            $level,
-            $bubble,
-            $persistent,
-            $timeout,
-            $writingTimeout,
-            $connectionTimeout,
-            $chunkSize
-        );
+        $endpoint = $useSSL ? 'ssl://data.logentries.com:443' : 'data.logentries.com:80';
+        parent::__construct($endpoint, $level, $bubble);
         $this->logToken = $token;
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
+     *
+     * @param  array  $record
+     * @return string
      */
-    protected function generateDataStream(array $record): string
+    protected function generateDataStream($record)
     {
         return $this->logToken . ' ' . $record['formatted'];
     }

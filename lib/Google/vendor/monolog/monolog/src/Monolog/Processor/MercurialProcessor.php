@@ -1,9 +1,9 @@
-<?php declare(strict_types=1);
+<?php
 
 /*
  * This file is part of the Monolog package.
  *
- * (c) Jordi Boggiano <j.boggiano@seld.be>
+ * (c) Jonathan A. Schweder <jonathanschweder@gmail.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -12,37 +12,27 @@
 namespace Monolog\Processor;
 
 use Monolog\Logger;
-use Psr\Log\LogLevel;
 
 /**
  * Injects Hg branch and Hg revision number in all records
  *
  * @author Jonathan A. Schweder <jonathanschweder@gmail.com>
- *
- * @phpstan-import-type LevelName from \Monolog\Logger
- * @phpstan-import-type Level from \Monolog\Logger
  */
-class MercurialProcessor implements ProcessorInterface
+class MercurialProcessor
 {
-    /** @var Level */
     private $level;
-    /** @var array{branch: string, revision: string}|array<never>|null */
-    private static $cache = null;
+    private static $cache;
 
-    /**
-     * @param int|string $level The minimum logging level at which this Processor will be triggered
-     *
-     * @phpstan-param Level|LevelName|LogLevel::* $level
-     */
     public function __construct($level = Logger::DEBUG)
     {
         $this->level = Logger::toMonologLevel($level);
     }
 
     /**
-     * {@inheritDoc}
+     * @param  array $record
+     * @return array
      */
-    public function __invoke(array $record): array
+    public function __invoke(array $record)
     {
         // return if the level is not high enough
         if ($record['level'] < $this->level) {
@@ -54,24 +44,20 @@ class MercurialProcessor implements ProcessorInterface
         return $record;
     }
 
-    /**
-     * @return array{branch: string, revision: string}|array<never>
-     */
-    private static function getMercurialInfo(): array
+    private static function getMercurialInfo()
     {
         if (self::$cache) {
             return self::$cache;
         }
 
         $result = explode(' ', trim(`hg id -nb`));
-
         if (count($result) >= 3) {
-            return self::$cache = [
+            return self::$cache = array(
                 'branch' => $result[1],
                 'revision' => $result[2],
-            ];
+            );
         }
 
-        return self::$cache = [];
+        return self::$cache = array();
     }
 }

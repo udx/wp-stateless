@@ -17,42 +17,23 @@
 
 namespace Google\Auth;
 
-use Psr\Cache\CacheItemPoolInterface;
-
 trait CacheTrait
 {
-    /**
-     * @var int
-     */
     private $maxKeyLength = 64;
-
-    /**
-     * @var array<mixed>
-     */
-    private $cacheConfig;
-
-    /**
-     * @var ?CacheItemPoolInterface
-     */
-    private $cache;
 
     /**
      * Gets the cached value if it is present in the cache when that is
      * available.
-     *
-     * @param mixed $k
-     *
-     * @return mixed
      */
     private function getCachedValue($k)
     {
         if (is_null($this->cache)) {
-            return null;
+            return;
         }
 
         $key = $this->getFullCacheKey($k);
         if (is_null($key)) {
-            return null;
+            return;
         }
 
         $cacheItem = $this->cache->getItem($key);
@@ -63,20 +44,16 @@ trait CacheTrait
 
     /**
      * Saves the value in the cache when that is available.
-     *
-     * @param mixed $k
-     * @param mixed $v
-     * @return mixed
      */
     private function setCachedValue($k, $v)
     {
         if (is_null($this->cache)) {
-            return null;
+            return;
         }
 
         $key = $this->getFullCacheKey($k);
         if (is_null($key)) {
-            return null;
+            return;
         }
 
         $cacheItem = $this->cache->getItem($key);
@@ -85,14 +62,10 @@ trait CacheTrait
         return $this->cache->save($cacheItem);
     }
 
-    /**
-     * @param null|string $key
-     * @return null|string
-     */
     private function getFullCacheKey($key)
     {
         if (is_null($key)) {
-            return null;
+            return;
         }
 
         $key = $this->cacheConfig['prefix'] . $key;
