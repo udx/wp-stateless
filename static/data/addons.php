@@ -157,4 +157,14 @@ return [
     'hubspot_id'      => '151478250876',
   ],
 
+  'simple-local-avatars' => [
+    'title'           => 'Simple Local Avatars',
+    'plugin_files'    => ['simple-local-avatars/simple-local-avatars.php'],
+    'addon_file'      => 'wp-stateless-simple-local-avatars-addon/wp-stateless-simple-local-avatars-addon.php',
+    'icon'            => 'https://ps.w.org/simple-local-avatars/assets/icon.svg',
+    'repo'            => 'udx/wp-stateless-simple-local-avatars-addon',
+    'wp'              => 'https://wordpress.org/plugins/wp-stateless-simple-local-avatars-addon/',
+    'hubspot_id'      => '151480507697',
+  ],
+
 ];

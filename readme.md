@@ -47,6 +47,7 @@ New to Google Cloud? Google is offering you a [$300 credit](https://console.clou
 * [BuddyPress Addon](https://wordpress.org/plugin/wp-stateless-buddypress-addon/)
 * [BuddyBoss Platform Addon](https://wordpress.org/plugins/wp-stateless-buddyboss-platform-addon/)
 * [Polylang Pro Addon](https://wordpress.org/plugins/wp-stateless-polylang-pro-addon/)
+* [Simple Local Avatars](https://wordpress.org/plugins/wp-stateless-simple-local-avatars-addon/)
 
 ### Support, Feedback, & Contribute
 We welcome community involvement via the [GitHub repository](https://github.com/udx/wp-stateless).

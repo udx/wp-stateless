@@ -1,3 +1,7 @@
+#### 4.3.0
+* ENHANCEMENT - update dependencies for Google APIs Client Library.
+* COMPATIBILITY - Simple Local Avatars Compatibility replaced with [WP-Stateless - Simple Local Avatars Addon](https://wordpress.org/plugins/wp-stateless-simple-local-avatars-addon/).
+
 #### 4.2.1
 * ENHANCEMENT - updated `wpmetabox/meta-box` library from 5.10.11 to 5.10.15.
 * FIX - correctly loads text domain to prevent PHP notices.
