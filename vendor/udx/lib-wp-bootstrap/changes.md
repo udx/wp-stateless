@@ -1,3 +1,7 @@
+### 1.3.4
+
+* Fix notice about translations loaded too soon
+
 ### 1.3.3
 
 * Require user to be logged in while dismissing Admin Panel notices.

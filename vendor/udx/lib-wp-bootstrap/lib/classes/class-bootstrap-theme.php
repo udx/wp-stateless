@@ -49,7 +49,7 @@ namespace UsabilityDynamics\WP {
       protected function __construct( $args ) {
         parent::__construct( $args );
         //** Load text domain */
-        add_action( 'after_setup_theme', array( $this, 'load_textdomain' ), 1 );
+        add_action( 'init', array( $this, 'load_textdomain' ), 1 );
         //** TGM Plugin activation. */
         $this->check_plugins_requirements();
         //** May be initialize Licenses Manager. */

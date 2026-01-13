@@ -21,10 +21,21 @@ class BucketIpFilter extends \Google\Collection
 {
   protected $collection_key = 'vpcNetworkSources';
   /**
+   * Whether to allow all service agents to access the bucket regardless of the
+   * IP filter configuration.
+   *
+   * @var bool
+   */
+  public $allowAllServiceAgentAccess;
+  /**
+   * Whether to allow cross-org VPCs in the bucket's IP filter configuration.
+   *
    * @var bool
    */
   public $allowCrossOrgVpcs;
   /**
+   * The mode of the IP filter. Valid values are 'Enabled' and 'Disabled'.
+   *
    * @var string
    */
   public $mode;
@@ -34,7 +45,26 @@ class BucketIpFilter extends \Google\Collection
   protected $vpcNetworkSourcesDataType = 'array';
 
   /**
-   * @param bool
+   * Whether to allow all service agents to access the bucket regardless of the
+   * IP filter configuration.
+   *
+   * @param bool $allowAllServiceAgentAccess
+   */
+  public function setAllowAllServiceAgentAccess($allowAllServiceAgentAccess)
+  {
+    $this->allowAllServiceAgentAccess = $allowAllServiceAgentAccess;
+  }
+  /**
+   * @return bool
+   */
+  public function getAllowAllServiceAgentAccess()
+  {
+    return $this->allowAllServiceAgentAccess;
+  }
+  /**
+   * Whether to allow cross-org VPCs in the bucket's IP filter configuration.
+   *
+   * @param bool $allowCrossOrgVpcs
    */
   public function setAllowCrossOrgVpcs($allowCrossOrgVpcs)
   {
@@ -48,7 +78,9 @@ class BucketIpFilter extends \Google\Collection
     return $this->allowCrossOrgVpcs;
   }
   /**
-   * @param string
+   * The mode of the IP filter. Valid values are 'Enabled' and 'Disabled'.
+   *
+   * @param string $mode
    */
   public function setMode($mode)
   {
@@ -62,7 +94,9 @@ class BucketIpFilter extends \Google\Collection
     return $this->mode;
   }
   /**
-   * @param BucketIpFilterPublicNetworkSource
+   * The public network source of the bucket's IP filter.
+   *
+   * @param BucketIpFilterPublicNetworkSource $publicNetworkSource
    */
   public function setPublicNetworkSource(BucketIpFilterPublicNetworkSource $publicNetworkSource)
   {
@@ -76,7 +110,10 @@ class BucketIpFilter extends \Google\Collection
     return $this->publicNetworkSource;
   }
   /**
-   * @param BucketIpFilterVpcNetworkSources[]
+   * The list of [VPC network](https://cloud.google.com/vpc/docs/vpc) sources of
+   * the bucket's IP filter.
+   *
+   * @param BucketIpFilterVpcNetworkSources[] $vpcNetworkSources
    */
   public function setVpcNetworkSources($vpcNetworkSources)
   {

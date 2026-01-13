@@ -198,7 +198,7 @@ class SigningHelper
 
         // urlencode parameter values
         foreach ($params as &$value) {
-            $value = rawurlencode($value);
+            $value = rawurlencode($value ?? '');
         }
 
         $params = $this->addCommonParams($generation, $params, $options);
@@ -346,7 +346,7 @@ class SigningHelper
             fn () => $credentials->signBlob($stringToSign, [
                 'forceOpenssl' => $options['forceOpenssl']
             ])
-        )));
+        ) ?? ''));
 
         // Construct the modified resource name. If a custom hostname is provided,
         // this will remove the bucket name from the resource.
@@ -628,6 +628,7 @@ class SigningHelper
             'headers' => [],
             'keyFile' => null,
             'keyFilePath' => null,
+            'credentialsFetcher' => null,
             'method' => 'GET',
             'queryParams' => [],
             'responseDisposition' => null,
@@ -822,6 +823,8 @@ class SigningHelper
             $scopes = $options['scopes'] ?? $rw->scopes();
 
             $credentials = CredentialsLoader::makeCredentials($scopes, $keyFile);
+        } elseif (isset($options['credentialsFetcher'])) {
+            $credentials = $options['credentialsFetcher'];
         } else {
             $credentials = $rw->getCredentialsFetcher();
         }
@@ -838,6 +841,7 @@ class SigningHelper
         unset(
             $options['keyFilePath'],
             $options['keyFile'],
+            $options['credentialsFetcher'],
             $options['scopes']
         );
 

@@ -1,5 +1,58 @@
 # Changelog
 
+## [1.40.0](https://github.com/googleapis/gax-php/compare/v1.39.0...v1.40.0) (2025-12-04)
+
+
+### Features
+
+* Add TransportCallMiddleware ([#640](https://github.com/googleapis/gax-php/issues/640)) ([a0f9d37](https://github.com/googleapis/gax-php/commit/a0f9d3740d62f6a776ac701631aa734046ceeb77))
+
+## [1.39.0](https://github.com/googleapis/gax-php/compare/v1.38.2...v1.39.0) (2025-12-02)
+
+
+### Features
+
+* Add GapicClientTrait::prependMiddleware ([#638](https://github.com/googleapis/gax-php/issues/638)) ([d46c06d](https://github.com/googleapis/gax-php/commit/d46c06d3bb551d9f7848bceebcfd78f80ec7890f))
+
+## [1.38.2](https://github.com/googleapis/gax-php/compare/v1.38.1...v1.38.2) (2025-11-14)
+
+
+### Bug Fixes
+
+* Don't override ApiException::__toString ([#388](https://github.com/googleapis/gax-php/issues/388)) ([db7cd2e](https://github.com/googleapis/gax-php/commit/db7cd2e55219463aa0f7d0bcc989f35d008d174b))
+
+## [1.38.1](https://github.com/googleapis/gax-php/compare/v1.38.0...v1.38.1) (2025-11-06)
+
+
+### Bug Fixes
+
+* Add return type to `offsetGet` ([#633](https://github.com/googleapis/gax-php/issues/633)) ([b77c12d](https://github.com/googleapis/gax-php/commit/b77c12dc959e8434fcd1f7f08cedaa84cdfb00a4))
+
+## [1.38.0](https://github.com/googleapis/gax-php/compare/v1.37.0...v1.38.0) (2025-09-17)
+
+
+### Features
+
+* Add the rpcName to the BIDI stream opening request ([#630](https://github.com/googleapis/gax-php/issues/630)) ([9c61d8f](https://github.com/googleapis/gax-php/commit/9c61d8f2bd09731d5f22c22eb81895eaf4db2031))
+* Make options classes fluid ([#618](https://github.com/googleapis/gax-php/issues/618)) ([427b46e](https://github.com/googleapis/gax-php/commit/427b46e91b3881fd0da361b5b351c6dda47e640a))
+
+
+### Bug Fixes
+
+* Update protobuf RepeatedField to new namespace ([#624](https://github.com/googleapis/gax-php/issues/624)) ([3558cc4](https://github.com/googleapis/gax-php/commit/3558cc49139861fa411c77b33f457467ec8daa97))
+
+## [1.37.0](https://github.com/googleapis/gax-php/compare/v1.36.1...v1.37.0) (2025-09-10)
+
+
+### Features
+
+* Support client options in ClientOptionsTrait::buildClientOptions ([#621](https://github.com/googleapis/gax-php/issues/621)) ([68e2336](https://github.com/googleapis/gax-php/commit/68e23369657b1740fffe480f96d9d7b04e3e38c2))
+
+
+### Bug Fixes
+
+* Ensure compute request build parameters have the operation ID last ([#625](https://github.com/googleapis/gax-php/issues/625)) ([f90ab28](https://github.com/googleapis/gax-php/commit/f90ab28cea6bbbd00f2a652a6d77babb69b2ada8))
+
 ## [1.36.1](https://github.com/googleapis/gax-php/compare/v1.36.0...v1.36.1) (2025-05-20)
 
 

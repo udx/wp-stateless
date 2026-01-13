@@ -3,7 +3,7 @@
  * Plugin Name: MB Tabs
  * Plugin URI:  https://metabox.io/plugins/meta-box-tabs/
  * Description: Create tabs for meta boxes easily. Support 3 WordPress-native tab styles.
- * Version:     1.2.0
+ * Version:     1.2.1
  * Author:      MetaBox.io
  * Author URI:  https://metabox.io
  * License:     GPL2+
@@ -76,7 +76,7 @@ if ( ! class_exists( 'MB_Tabs' ) ) {
 					$tab_data = [ 'label' => $tab_data ];
 				}
 				$tab_data = wp_parse_args( $tab_data, [
-					'icon' => '',
+					'icon'  => '',
 					'label' => '',
 				] );
 				$strpos   = [ 'fa', 'fas', 'fa-solid', 'fab', 'fa-brand', 'far', 'fa-regular' ];
@@ -151,7 +151,7 @@ if ( ! class_exists( 'MB_Tabs' ) ) {
 					$tab_data = [ 'label' => $tab_data ];
 				}
 				$tab_data = wp_parse_args( $tab_data, [
-					'icon' => '',
+					'icon'  => '',
 					'label' => '',
 				] );
 
@@ -181,7 +181,7 @@ if ( ! class_exists( 'MB_Tabs' ) ) {
 					$icon,
 					esc_html( $tab_data['label'] )
 				);
-				$i++;
+				++$i;
 			}
 
 			echo '</ul>';

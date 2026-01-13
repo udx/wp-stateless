@@ -32,7 +32,7 @@
 namespace Google\ApiCore;
 
 use Exception;
-use Google\Protobuf\Internal\RepeatedField;
+use Google\Protobuf\RepeatedField;
 use Google\Rpc\Status;
 use GuzzleHttp\Exception\RequestException;
 use stdClass;
@@ -332,14 +332,5 @@ class ApiException extends Exception
     public function getMetadata()
     {
         return $this->metadata;
-    }
-
-    /**
-     * String representation of ApiException
-     * @return string
-     */
-    public function __toString()
-    {
-        return __CLASS__ . ": $this->message\n";
     }
 }

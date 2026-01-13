@@ -1,3 +1,11 @@
+#### 4.4.0
+* NEW - plugin requires PHP 8.1+.
+* ENHANCEMENT - updated `firebase/php-jwt` library from  6.11.1 to 7.0.2.
+* ENHANCEMENT - Updated Client library for Google APIs from 2.18.3 to 2.19.0.
+* ENHANCEMENT - updated `wpmetabox/meta-box` library from 5.10.15 to 5.10.19.
+* ENHANCEMENT - updated `Meta Box Tabs` library from 1.1.18 to 1.2.0.
+* FIX - `udx/lib-wp-bootstrap` package correctly loads text domain to prevent PHP notices.
+
 #### 4.3.0
 * ENHANCEMENT - update dependencies for Google APIs Client Library.
 * COMPATIBILITY - Simple Local Avatars Compatibility replaced with [WP-Stateless - Simple Local Avatars Addon](https://wordpress.org/plugins/wp-stateless-simple-local-avatars-addon/).

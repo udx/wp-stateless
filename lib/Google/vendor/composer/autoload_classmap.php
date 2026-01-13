@@ -6,7 +6,6 @@ $vendorDir = dirname(__DIR__);
 $baseDir = dirname($vendorDir);
 
 return array(
-    'CURLStringFile' => $vendorDir . '/symfony/polyfill-php81/Resources/stubs/CURLStringFile.php',
     'Composer\\InstalledVersions' => $vendorDir . '/composer/InstalledVersions.php',
     'GPBMetadata\\GrpcGcp' => $vendorDir . '/google/grpc-gcp/src/generated/GPBMetadata/GrpcGcp.php',
     'Google_AccessToken_Revoke' => $baseDir . '/src/aliases.php',
@@ -34,5 +33,4 @@ return array(
     'Grpc\\Gcp\\ApiConfig' => $vendorDir . '/google/grpc-gcp/src/generated/Grpc/Gcp/ApiConfig.php',
     'Grpc\\Gcp\\ChannelPoolConfig' => $vendorDir . '/google/grpc-gcp/src/generated/Grpc/Gcp/ChannelPoolConfig.php',
     'Grpc\\Gcp\\MethodConfig' => $vendorDir . '/google/grpc-gcp/src/generated/Grpc/Gcp/MethodConfig.php',
-    'ReturnTypeWillChange' => $vendorDir . '/symfony/polyfill-php81/Resources/stubs/ReturnTypeWillChange.php',
 );

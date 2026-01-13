@@ -20,9 +20,17 @@ namespace Google\Service\Storage;
 class ComposeRequest extends \Google\Collection
 {
   protected $collection_key = 'sourceObjects';
+  /**
+   * If true, the source objects will be deleted.
+   *
+   * @var bool
+   */
+  public $deleteSourceObjects;
   protected $destinationType = StorageObject::class;
   protected $destinationDataType = '';
   /**
+   * The kind of item this is.
+   *
    * @var string
    */
   public $kind;
@@ -30,7 +38,25 @@ class ComposeRequest extends \Google\Collection
   protected $sourceObjectsDataType = 'array';
 
   /**
-   * @param StorageObject
+   * If true, the source objects will be deleted.
+   *
+   * @param bool $deleteSourceObjects
+   */
+  public function setDeleteSourceObjects($deleteSourceObjects)
+  {
+    $this->deleteSourceObjects = $deleteSourceObjects;
+  }
+  /**
+   * @return bool
+   */
+  public function getDeleteSourceObjects()
+  {
+    return $this->deleteSourceObjects;
+  }
+  /**
+   * Properties of the resulting object.
+   *
+   * @param StorageObject $destination
    */
   public function setDestination(StorageObject $destination)
   {
@@ -44,7 +70,9 @@ class ComposeRequest extends \Google\Collection
     return $this->destination;
   }
   /**
-   * @param string
+   * The kind of item this is.
+   *
+   * @param string $kind
    */
   public function setKind($kind)
   {
@@ -58,7 +86,9 @@ class ComposeRequest extends \Google\Collection
     return $this->kind;
   }
   /**
-   * @param ComposeRequestSourceObjects[]
+   * The list of source objects that will be concatenated into a single object.
+   *
+   * @param ComposeRequestSourceObjects[] $sourceObjects
    */
   public function setSourceObjects($sourceObjects)
   {
