@@ -712,8 +712,54 @@ namespace wpCloud\StatelessMedia {
       }
 
       /**
-       * Generate JWT token signed by current site AUTH_SALT
-       * If no AUTH_SALT defined - admin email used
+       * Get a secure JWT signing key
+       * Priority: AUTH_SALT (if valid length) > Plugin-specific stored key > Generated key
+       *
+       * @return string A key suitable for HS256 (minimum 32 bytes)
+       */
+      public static function get_jwt_signing_key() {
+        // Minimum key length for HS256 (256 bits = 32 bytes)
+        $min_key_length = 32;
+        
+        // Try AUTH_SALT first if it's long enough
+        if (defined('AUTH_SALT') && !empty(AUTH_SALT) && strlen(AUTH_SALT) >= $min_key_length) {
+          return AUTH_SALT;
+        }
+        
+        // Try to get stored plugin-specific key
+        $stored_key = get_option('wp_stateless_jwt_key');
+        
+        if ($stored_key && strlen($stored_key) >= $min_key_length) {
+          return $stored_key;
+        }
+        
+        // Generate a new secure key
+        $new_key = self::generate_secure_key($min_key_length);
+        update_option('wp_stateless_jwt_key', $new_key, false);
+        
+        return $new_key;
+      }
+      
+      /**
+       * Generate a cryptographically secure random key
+       *
+       * @param int $length Key length in bytes
+       * @return string Base64-encoded key
+       */
+      private static function generate_secure_key($length = 32) {
+        try {
+          // Use random_bytes for PHP 7+
+          $random_bytes = random_bytes($length);
+          return base64_encode($random_bytes);
+        } catch (\Exception $e) {
+          // Fallback: use wp_generate_password
+          return wp_generate_password($length * 2, true, true);
+        }
+      }
+
+      /**
+       * Generate JWT token signed by secure key
+       * Uses AUTH_SALT if valid, otherwise uses plugin-specific stored key
        *
        * @param $payload
        * @param int $ttl
@@ -727,13 +773,13 @@ namespace wpCloud\StatelessMedia {
           'exp' => $now + $ttl
         ]);
 
-        $key = defined('AUTH_SALT') && !empty(AUTH_SALT) ? AUTH_SALT : get_option('admin_email');
+        $key = self::get_jwt_signing_key();
         return JWT::encode($payload, $key, 'HS256');
       }
 
       /**
        * Verify and decode token
-       * If no AUTH_SALT defined - admin email used
+       * Uses the same secure key retrieval as generation
        * Throws exceptions if cannot decode
        *
        * @param $token
@@ -741,7 +787,7 @@ namespace wpCloud\StatelessMedia {
        * @throws \Exception
        */
       public static function verify_jwt_token($token) {
-        $key = defined('AUTH_SALT') ? AUTH_SALT : get_option('admin_email');
+        $key = self::get_jwt_signing_key();
         return JWT::decode($token, new Key($key, 'HS256'));
       }
 

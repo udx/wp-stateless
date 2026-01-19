@@ -167,4 +167,14 @@ return [
     'hubspot_id'      => '151480507697',
   ],
 
+  'woo-extra-product-options' => [
+    'title'           => 'WooCommerce Extra Product Options Addon',
+    'plugin_files'    => ['woocommerce-tm-extra-product-options/tm-woo-extra-product-options.php'],
+    'addon_file'      => 'wp-stateless-woocommerce-extra-product-options-addon/wp-stateless-woo-extra-product-options-addon.php.php',
+    'icon'            => 'https://ps.w.org/woocommerce/assets/icon.svg',
+    'repo'            => 'udx/wp-stateless-woo-extra-product-options-addon',
+    'wp'              => 'https://wordpress.org/plugins/wp-stateless-woocommerce-extra-product-options-addon/',
+    'hubspot_id'      => '151478251017',
+  ],
+
 ];

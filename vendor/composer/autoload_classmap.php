@@ -40,7 +40,6 @@ return array(
     'wpCloud\\StatelessMedia\\Batch\\Migration' => $baseDir . '/lib/classes/batch/class-migration.php',
     'wpCloud\\StatelessMedia\\Bootstrap' => $baseDir . '/lib/classes/class-bootstrap.php',
     'wpCloud\\StatelessMedia\\Compatibility' => $baseDir . '/lib/classes/class-compatibility.php',
-    'wpCloud\\StatelessMedia\\CompatibilityWooExtraProductOptions' => $baseDir . '/lib/classes/compatibility/woo-extra-product-options.php',
     'wpCloud\\StatelessMedia\\DB' => $baseDir . '/lib/classes/class-db.php',
     'wpCloud\\StatelessMedia\\DynamicImageSupport' => $baseDir . '/lib/classes/class-dynamic-image-support.php',
     'wpCloud\\StatelessMedia\\EWWW' => $baseDir . '/lib/classes/compatibility/ewww.php',

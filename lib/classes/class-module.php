@@ -51,11 +51,6 @@ namespace wpCloud\StatelessMedia {
       new TheEventsCalendar();
 
       /**
-       * Support for WooCommerce Extra Product Options
-       */
-      new CompatibilityWooExtraProductOptions();
-
-      /**
        * Support for WPBakery Page Builder
        */
       new WPBakeryPageBuilder();
