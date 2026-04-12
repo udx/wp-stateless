@@ -1,0 +1,36 @@
+#!/usr/bin/env php
+<?php
+call_user_func(function ($version) {
+    $autoloaders = Phar::running() === ''
+        ? [
+            __DIR__ . '/../../autoload.php',     // Relative path from vendor/brianhenryie/strauss/bin/strauss to vendor/autoload.php.
+            __DIR__ . '/../autoload.php',        // Relative path from vendor/bin/strauss to vendor/autoload.php.
+            __DIR__ . '/../vendor/autoload.php', // Relative path from bin/strauss to vendor/autoload.php.
+            getcwd() . '/vendor/autoload.php',
+            getcwd() . '/../../autoload.php',
+            __DIR__ . '/../../../autoload.php',  // I don't know if these last three are necessary.
+        ]
+        : [
+            __DIR__ . '/../vendor/autoload.php', // Inside phar.
+        ];
+
+    foreach ($autoloaders as $autoloader) {
+        if (!is_file($autoloader)) {
+            continue;
+        }
+        require $autoloader;
+        break;
+    }
+
+    if (!class_exists(BrianHenryIE\Strauss\Console\Application::class)) {
+        fwrite(STDERR,
+            'You must set up the project dependencies, run the following commands:' . PHP_EOL
+            . 'curl -s https://getcomposer.org/installer | php' . PHP_EOL
+            . 'php composer.phar install' . PHP_EOL
+        );
+        exit(1);
+    }
+
+    $app = new BrianHenryIE\Strauss\Console\Application($version);
+    $app->run();
+}, '0.19.5');

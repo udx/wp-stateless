@@ -1,0 +1,73 @@
+{
+    "name": "brianhenryie/strauss",
+    "description": "Composes all dependencies as a package inside a WordPress plugin",
+    "authors": [
+        {
+            "name": "Brian Henry",
+            "email": "BrianHenryIE@gmail.com"
+        },
+        {
+            "name": "Coen Jacobs",
+            "email": "coenjacobs@gmail.com"
+        }
+    ],
+    "bin": ["bin/strauss"],
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "license": "MIT",
+    "require": {
+        "composer/composer": "*",
+        "json-mapper/json-mapper": "^2.2",
+        "symfony/console": "^4|^5|^6|^7",
+        "symfony/finder": "^4|^5|^6|^7",
+        "league/flysystem": "^2.1|^3.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "BrianHenryIE\\Strauss\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "BrianHenryIE\\Strauss\\Tests\\": "tests/",
+            "BrianHenryIE\\Strauss\\": "tests/"
+        }
+    },
+    "require-dev": {
+        "brianhenryie/php-diff-test": "dev-master",
+        "clue/phar-composer": "^1.2",
+        "ext-json": "*",
+        "jaschilz/php-coverage-badger": "^2.0",
+        "mheap/phpunit-github-actions-printer": "^1.4",
+        "php": "^7.4|^8.0",
+        "phpunit/phpunit": "^9|^10",
+        "squizlabs/php_codesniffer": "^3.5",
+        "phpstan/phpstan": "^1.10",
+        "mockery/mockery": "^1.6"
+    },
+    "scripts": {
+        "cs": [
+            "phpcs",
+            "phpstan"
+        ],
+        "cs-fix": [
+            "phpcbf || true",
+            "@cs"
+        ],
+        "test": [
+            "phpunit"
+        ],
+        "test-coverage": [
+            "phpunit --coverage-text --coverage-php tests/reports/phpunit.cov"
+        ]
+    },
+    "replace":{
+        "coenjacobs/mozart": "*"
+    },
+    "repositories": {
+        "brianhenryie/php-diff-test": {
+            "type": "git",
+            "url": "https://github.com/brianhenryie/php-diff-test"
+        }
+    }
+}

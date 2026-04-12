@@ -3,9 +3,9 @@ Contributors: elightup, metabox, rilwis, f-j-kaiser, funkatronic, PerWiklander, 
 Donate link: https://metabox.io/pricing/
 Tags: custom fields, custom post types, post type, custom taxonomies, meta box
 Requires at least: 6.5
-Requires PHP: 7.1
-Tested up to: 6.8.3
-Stable tag: 5.10.19
+Requires PHP: 7.4
+Tested up to: 6.9.4
+Stable tag: 5.11.4
 License: GPLv2 or later
 
 Meta Box plugin is a powerful, professional developer toolkit to create custom meta boxes and custom fields for your custom post types in WordPress.
@@ -117,6 +117,7 @@ Here are a few guides to quickly get you started with Meta Box and creating your
 If you like this plugin, you might also like our other WordPress products:
 
 - [Slim SEO](https://wpslimseo.com) - A fast, lightweight and full-featured SEO plugin for WordPress with minimal configuration.
+- [Falcon](https://wpfalcon.pro) - A lightweight companion for making WordPress faster, cleaner, and more secure.
 - [GretaThemes](https://gretathemes.com) - Free and premium WordPress themes that clean, simple and just work.
 - [Auto Listings](https://wpautolistings.com) - A car sale and dealership plugin for WordPress.
 
@@ -146,6 +147,57 @@ If you want to use Meta Box, please follow these steps:
 1. Post Taxonomy Fields
 
 == Changelog ==
+
+= 5.11.4 - 2026-03-30 =
+
+- Add an internal hook for enqueuing custom blocks' assets for `block_editor` field
+
+= 5.11.3 - 2026-03-24 =
+
+- Add `toolbar_position` option for the block editor field, which accepts value `top` (default) or `contextual`. This option is for where to display editing toolbar for blocks.
+- Fix saving an empty paragraph in the block editor field
+- Fix validation error persisting after removing duplicate blocks
+- Fix extra empty clone saved when calling `set_post_data()` during validation
+
+= 5.11.2 - 2026-03-05 =
+
+**Improvements for the block editor field:**
+
+- Add breadcrumbs
+- Fix compatibility with Block Visibility plugin
+- Fix not loading 3rd-party blocks
+- Improve the CSS
+
+**Other changes:**
+
+- Fix save time format for the datetime field
+- Fix icon field dropdown broken display when SVG contains double quotes
+- Fix path traversal in `ajax_delete_file` for security
+- Fix timestamp should not be set for the time picker field
+
+= 5.11.1 - 2026-02-02 =
+
+**Improvements for the block editor field:**
+
+- Add block inspector sidebar
+- Add structure panel to show the list view of blocks
+- Add fullscreen mode
+- Add `height` settings (default is `300px`) and allow resizing the editor
+
+**Fixes for the block editor field:**
+
+- Fix cannot upload images for the image block
+- Fix blank site editor when using the block editor field
+- Fix custom rich text formats not working
+- Fix conflicts with `image_advanced` and `file_advanced` fields
+
+**Other changes:**
+
+- Fix cannot create new terms with required date/time fields
+
+= 5.11.0 - 2026-01-15 =
+
+- Add new field type: `block_editor`. See more details on our [blog post](https://metabox.io/block-editor-field-type/) and [documentation](https://docs.metabox.io/fields/block-editor/).
 
 = 5.10.19 - 2025-11-24 =
 

@@ -2,8 +2,8 @@
     "packages": [
         {
             "name": "wpmetabox/support",
-            "version": "dev-master",
-            "version_normalized": "dev-master",
+            "version": "1.0.0",
+            "version_normalized": "1.0.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/wpmetabox/support.git",
@@ -16,7 +16,6 @@
                 "shasum": ""
             },
             "time": "2025-09-12T23:29:48+00:00",
-            "default-branch": true,
             "type": "library",
             "installation-source": "dist",
             "autoload": {
@@ -32,7 +31,7 @@
             "homepage": "https://metabox.io",
             "support": {
                 "issues": "https://github.com/wpmetabox/support/issues",
-                "source": "https://github.com/wpmetabox/support/tree/master"
+                "source": "https://github.com/wpmetabox/support/tree/1.0.0"
             },
             "install-path": "../wpmetabox/support"
         }
