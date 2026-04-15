@@ -26,3 +26,4 @@ package-lock.json
 *.pid
 *.gz
 wp-stateless.wiki
+.agents/loop-state/

@@ -7,8 +7,8 @@ $baseDir   = dirname($vendorDir);
 
 return array(
 	'phpDocumentor\\Reflection\\' => array(
-		'version' => '5.6.7.0',
-		'path'    => array( $vendorDir . '/phpdocumentor/reflection-common/src', $vendorDir . '/phpdocumentor/type-resolver/src', $vendorDir . '/phpdocumentor/reflection-docblock/src' )
+		'version' => '1.12.0.0',
+		'path'    => array( $vendorDir . '/phpdocumentor/reflection-common/src', $vendorDir . '/phpdocumentor/reflection-docblock/src', $vendorDir . '/phpdocumentor/type-resolver/src' )
 	),
 	'Webmozart\\Assert\\' => array(
 		'version' => '2.3.0.0',
@@ -99,7 +99,7 @@ return array(
 		'path'    => array( $vendorDir . '/react/promise/src' )
 	),
 	'Psr\\SimpleCache\\' => array(
-		'version' => '3.0.0.0',
+		'version' => '1.0.1.0',
 		'path'    => array( $vendorDir . '/psr/simple-cache/src' )
 	),
 	'Psr\\Log\\' => array(
