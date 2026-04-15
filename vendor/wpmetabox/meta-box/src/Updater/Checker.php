@@ -155,10 +155,16 @@ class Checker {
 	}
 
 	public function request( $endpoint, $args = [] ) {
+		global $wp_version;
+
 		$args = wp_parse_args( $args, [
-			'key'   => $this->option->get_api_key(),
-			'url'   => home_url(),
-			'force' => false,
+			'key'         => $this->option->get_api_key(),
+			'url'         => home_url(),
+			'force'       => false,
+			'wp_version'  => $wp_version,
+			'language'    => get_locale(),
+			'php_version' => PHP_VERSION,
+			'product'     => defined( 'META_BOX_LITE_DIR' ) ? 'meta-box-lite' : ( defined( 'META_BOX_AIO_DIR' ) ? 'meta-box-aio' : 'meta-box' ),
 		] );
 
 		// Get from cache first.

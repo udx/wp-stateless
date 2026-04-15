@@ -6,7 +6,7 @@ License: GPLv2 or later
 Requires PHP: 8.1
 Requires at least: 5.0
 Tested up to: 6.9
-Stable tag: 4.4.0
+Stable tag: 4.4.1
 
 Upload and serve your WordPress media files from Google Cloud Storage.
 
@@ -136,7 +136,11 @@ Before upgrading to WP-Stateless 3.2.0, please, make sure you use PHP 7.2 or abo
 Before upgrading to WP-Stateless 3.0, please, make sure you tested it on your development environment.
 
 == Changelog ==
-= 4.4.0 =
+= 4.4.1 - 2026-01-16 =
+* COMPATIBILITY - WooCommerce Extra Product Options Compatibility replaced with [WP-Stateless – WooCommerce Extra Product Options Addon](https://wordpress.org/plugins/wp-stateless-woocommerce-extra-product-options-addon/).
+* FIX - resolve critical errors with `firebase/php-jwt` library if `AUTH_SALT` WordPress constant is not set or too short.
+
+= 4.4.0 - 2026-01-10 =
 * NEW - plugin requires PHP 8.1+.
 * ENHANCEMENT - updated `firebase/php-jwt` library from  6.11.1 to 7.0.2.
 * ENHANCEMENT - Updated Client library for Google APIs from 2.18.3 to 2.19.0.

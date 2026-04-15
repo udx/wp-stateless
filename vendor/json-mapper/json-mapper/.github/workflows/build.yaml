@@ -1,0 +1,120 @@
+name: Build
+
+on:
+  push:
+    branches: [ develop, main ]
+  pull_request:
+    branches: [ develop, main ]
+
+jobs:
+  build:
+    name: PHP ${{ matrix.name }}
+    strategy:
+      matrix:
+        include:
+          - php: 7.4
+            allow_fail: false
+            name: 'PHP 7.4 with latest deps'
+          - php: 7.4
+            allow_fail: false
+            composer_update_flags: '--prefer-lowest --prefer-stable'
+            name: 'PHP 7.4 with lowest stable deps'
+          - php: 8.0
+            allow_fail: false
+            php_ini: 'xdebug.coverage_enable=On'
+            name: 'PHP 8.0 with latest deps'
+          - php: 8.0
+            allow_fail: false
+            composer_update_flags: '--prefer-lowest --prefer-stable'
+            php_ini: 'xdebug.coverage_enable=On'
+            name: 'PHP 8.0 with lowest stable deps'
+          - php: 8.1
+            allow_fail: false
+            php_ini: 'xdebug.coverage_enable=On'
+            name: 'PHP 8.1 with latest deps'
+          - php: 8.1
+            allow_fail: false
+            composer_update_flags: '--prefer-lowest --prefer-stable'
+            php_ini: 'xdebug.coverage_enable=On'
+            name: 'PHP 8.1 with lowest stable deps'
+          - php: 8.2
+            allow_fail: false
+            php_ini: 'xdebug.coverage_enable=On'
+            name: 'PHP 8.2 with latest deps'
+          - php: 8.2
+            allow_fail: false
+            composer_update_flags: '--prefer-lowest --prefer-stable'
+            php_ini: 'xdebug.coverage_enable=On'
+            name: 'PHP 8.2 with lowest stable deps'
+          - php: 8.3
+            allow_fail: false
+            php_ini: 'xdebug.coverage_enable=On'
+            name: 'PHP 8.3 with latest deps'
+          - php: 8.3
+            allow_fail: false
+            composer_update_flags: '--prefer-lowest --prefer-stable'
+            php_ini: 'xdebug.coverage_enable=On'
+            name: 'PHP 8.3 with lowest stable deps'
+          - php: 8.4
+            allow_fail: false
+            php_ini: 'xdebug.coverage_enable=On'
+            name: 'PHP 8.4 with latest deps'
+          - php: 8.4
+            allow_fail: false
+            composer_update_flags: '--prefer-lowest --prefer-stable'
+            php_ini: 'xdebug.coverage_enable=On'
+            name: 'PHP 8.4 with lowest stable deps'
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Validate composer.json and composer.lock
+      run: composer validate
+
+    - name: Setup PHP ${{ matrix.php }}
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: ${{ matrix.php }}
+        coverage: xdebug
+        ini-values: ${{ matrix.php_ini }}
+
+    - name: Install dependencies
+      run: composer install ${{ matrix.composer_flags }}
+      continue-on-error: ${{ matrix.allow_fail }}
+
+    - name: Update dependencies
+      if: matrix.composer_update_flags
+      run: composer update ${{ matrix.composer_update_flags }} && composer update phpunit/phpunit --with-dependencies
+      continue-on-error: ${{ matrix.allow_fail }}
+      
+    - name: Create log folder
+      run: mkdir -p build/logs;
+
+    - name: Run unit tests
+      run: composer unit-tests
+      continue-on-error: ${{ matrix.allow_fail }}
+
+    - name: Run integration tests
+      run: composer integration-tests
+      continue-on-error: ${{ matrix.allow_fail }}
+
+    - name: Upload test coverage
+      run: php vendor/bin/php-coveralls -vvv
+      env:
+        COVERALLS_REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        COVERALLS_PARALLEL: true
+        COVERALLS_FLAG_NAME: ${{ matrix.name }}
+      continue-on-error: ${{ matrix.allow_fail }}
+
+  finish:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Coveralls Finished
+        run: |
+          curl --header "Content-Type: application/json" \
+            --request POST \
+            --data '{"repo_token":"${{ secrets.GITHUB_TOKEN }}","repo_name":"JsonMapper/JsonMapper", "payload": {"build_num": "${{ github.sha }}", "status": "done"}}' \
+            https://coveralls.io/webhook

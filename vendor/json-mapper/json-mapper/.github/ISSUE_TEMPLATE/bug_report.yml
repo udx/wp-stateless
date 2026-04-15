@@ -1,0 +1,43 @@
+name: Bug Report
+description: "Create a report to help us improve"
+title: "[Bug]: "
+labels: ["bug", "triage"]
+assignees:
+  - DannyvdSluijs
+body:
+- type: input
+  attributes:
+    label: JsonMapper Version
+    description: Provide the Laravel version that you are using.
+    placeholder: 2.21.0
+  validations:
+    required: true
+
+- type: input
+  attributes:
+    label: PHP Version
+    description: Provide the PHP version that you are using.
+    placeholder: 8.1.4
+  validations:
+    required: true
+
+- type: textarea
+  attributes:
+    label: Description
+    description: Provide a detailed description of the issue you are facing.
+  validations:
+    required: true
+
+- type: textarea
+  attributes:
+    label: Steps To Reproduce
+    description: Provide detailed steps to reproduce your issue.
+  validations:
+    required: true
+
+- type: textarea
+  attributes:
+    label: Stacktrace
+    description: If applicable, add the stack trace to help explain your problem.
+  validations:
+    required: false

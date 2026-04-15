@@ -1,5 +1,9 @@
 == Changelog ==
-= 4.4.0 =
+= 4.4.1 - 2026-01-16 =
+* COMPATIBILITY - WooCommerce Extra Product Options Compatibility replaced with [WP-Stateless – WooCommerce Extra Product Options Addon](https://wordpress.org/plugins/wp-stateless-woocommerce-extra-product-options-addon/).
+* FIX - resolve critical errors with `firebase/php-jwt` library if `AUTH_SALT` WordPress constant is not set or too short.
+
+= 4.4.0 - 2026-01-10 =
 * NEW - plugin requires PHP 8.1+.
 * ENHANCEMENT - updated `firebase/php-jwt` library from  6.11.1 to 7.0.2.
 * ENHANCEMENT - Updated Client library for Google APIs from 2.18.3 to 2.19.0.

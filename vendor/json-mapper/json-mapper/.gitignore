@@ -1,0 +1,11 @@
+/composer.lock
+/vendor/
+/.phpunit.result.cache
+/build/
+/.idea/
+
+# Ignore files from the gh-pages
+/node_modules/
+/.DS_Store
+/.jekyll-cache
+/_site
