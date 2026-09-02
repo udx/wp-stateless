@@ -7,8 +7,9 @@ namespace Composer\Autoload;
 class ComposerStaticInitc1ba3d113640ecbb1bd5645a9bacb037
 {
     public static $files = array (
-        '7b11c4dc42b3b3023073cb14e519683c' => __DIR__ . '/..' . '/ralouphie/getallheaders/src/getallheaders.php',
         '6e3fae29631ef280660b3cdad06f25a8' => __DIR__ . '/..' . '/symfony/deprecation-contracts/function.php',
+        'a4a119a56e50fbb293281d9a48007e0e' => __DIR__ . '/..' . '/symfony/polyfill-php80/bootstrap.php',
+        '7b11c4dc42b3b3023073cb14e519683c' => __DIR__ . '/..' . '/ralouphie/getallheaders/src/getallheaders.php',
         '37a3dc5111fe8f707ab4c132ef1dbc62' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/functions_include.php',
         'e39a8b23c42d4e1452234d762b03835a' => __DIR__ . '/..' . '/ramsey/uuid/src/functions.php',
         '1f87db08236948d07391152dccb70f04' => __DIR__ . '/..' . '/google/apiclient-services/autoload.php',
@@ -20,6 +21,10 @@ class ComposerStaticInitc1ba3d113640ecbb1bd5645a9bacb037
         'p' =>
         array (
             'phpseclib3\\' => 11,
+        ),
+        'S' =>
+        array (
+            'Symfony\\Polyfill\\Php80\\' => 23,
         ),
         'R' =>
         array (
@@ -68,7 +73,6 @@ class ComposerStaticInitc1ba3d113640ecbb1bd5645a9bacb037
             'GPBMetadata\\Google\\Iam\\' => 23,
             'GPBMetadata\\Google\\Cloud\\' => 25,
             'GPBMetadata\\Google\\Api\\' => 23,
-            'GPBMetadata\\ApiCore\\' => 20,
         ),
         'F' =>
         array (
@@ -84,6 +88,10 @@ class ComposerStaticInitc1ba3d113640ecbb1bd5645a9bacb037
         'phpseclib3\\' =>
         array (
             0 => __DIR__ . '/..' . '/phpseclib/phpseclib/phpseclib',
+        ),
+        'Symfony\\Polyfill\\Php80\\' =>
+        array (
+            0 => __DIR__ . '/..' . '/symfony/polyfill-php80',
         ),
         'Rize\\' =>
         array (
@@ -230,10 +238,6 @@ class ComposerStaticInitc1ba3d113640ecbb1bd5645a9bacb037
         array (
             0 => __DIR__ . '/..' . '/google/common-protos/metadata/Api',
         ),
-        'GPBMetadata\\ApiCore\\' =>
-        array (
-            0 => __DIR__ . '/..' . '/google/gax/metadata/ApiCore',
-        ),
         'Firebase\\JWT\\' =>
         array (
             0 => __DIR__ . '/..' . '/firebase/php-jwt/src',
@@ -245,6 +249,7 @@ class ComposerStaticInitc1ba3d113640ecbb1bd5645a9bacb037
     );
 
     public static $classMap = array (
+        'Attribute' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/Attribute.php',
         'Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
         'GPBMetadata\\GrpcGcp' => __DIR__ . '/..' . '/google/grpc-gcp/src/generated/GPBMetadata/GrpcGcp.php',
         'Google_AccessToken_Revoke' => __DIR__ . '/../..' . '/src/aliases.php',
@@ -272,6 +277,10 @@ class ComposerStaticInitc1ba3d113640ecbb1bd5645a9bacb037
         'Grpc\\Gcp\\ApiConfig' => __DIR__ . '/..' . '/google/grpc-gcp/src/generated/Grpc/Gcp/ApiConfig.php',
         'Grpc\\Gcp\\ChannelPoolConfig' => __DIR__ . '/..' . '/google/grpc-gcp/src/generated/Grpc/Gcp/ChannelPoolConfig.php',
         'Grpc\\Gcp\\MethodConfig' => __DIR__ . '/..' . '/google/grpc-gcp/src/generated/Grpc/Gcp/MethodConfig.php',
+        'PhpToken' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/PhpToken.php',
+        'Stringable' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/Stringable.php',
+        'UnhandledMatchError' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/UnhandledMatchError.php',
+        'ValueError' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/ValueError.php',
     );
 
     public static function getInitializer(ClassLoader $loader)

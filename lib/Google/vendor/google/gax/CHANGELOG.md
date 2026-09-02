@@ -1,5 +1,76 @@
 # Changelog
 
+## [1.43.1](https://github.com/googleapis/gax-php/compare/v1.43.0...v1.43.1) (2026-06-09)
+
+
+### Bug Fixes
+
+* RetryMiddleware should sleep on retry ([#676](https://github.com/googleapis/gax-php/issues/676)) ([5d3d6da](https://github.com/googleapis/gax-php/commit/5d3d6da4b3eb3f1146b13b67f4e05569855f543f))
+
+## [1.43.0](https://github.com/googleapis/gax-php/compare/v1.42.5...v1.43.0) (2026-06-04)
+
+
+### Features
+
+* Add a new filter option to the OptionsFilterMiddleware ([#674](https://github.com/googleapis/gax-php/issues/674)) ([c5d8de6](https://github.com/googleapis/gax-php/commit/c5d8de6ead18cabea2d8eac634a5b9063bee9326))
+
+## [1.42.5](https://github.com/googleapis/gax-php/compare/v1.42.4...v1.42.5) (2026-06-01)
+
+
+### Bug Fixes
+
+* Normalize generated REST HTTP methods ([#671](https://github.com/googleapis/gax-php/issues/671)) ([dac5fe9](https://github.com/googleapis/gax-php/commit/dac5fe905b64991e49daa704d639e10a90724ae1))
+
+## [1.42.4](https://github.com/googleapis/gax-php/compare/v1.42.3...v1.42.4) (2026-05-11)
+
+
+### Bug Fixes
+
+* Docs for phpdoc for middleware interface ([5330ee7](https://github.com/googleapis/gax-php/commit/5330ee7fc0349f7076afe1c26a189328978aacfb))
+
+## [1.42.3](https://github.com/googleapis/gax-php/compare/v1.42.2...v1.42.3) (2026-04-29)
+
+
+### Bug Fixes
+
+* **serializer:** Catch Throwable to handle PHP 7+ Errors ([#664](https://github.com/googleapis/gax-php/issues/664)) ([250acdb](https://github.com/googleapis/gax-php/commit/250acdb2178afdfa0347947e52b242404a8e0faa))
+
+## [1.42.2](https://github.com/googleapis/gax-php/compare/v1.42.1...v1.42.2) (2026-04-02)
+
+
+### Bug Fixes
+
+* Ensure safe minimum for protobuf v5 ([#661](https://github.com/googleapis/gax-php/issues/661)) ([e10a8c9](https://github.com/googleapis/gax-php/commit/e10a8c993b5d4861d80f2c702ae77373d8817622))
+
+## [1.42.1](https://github.com/googleapis/gax-php/compare/v1.42.0...v1.42.1) (2026-03-12)
+
+
+### Bug Fixes
+
+* **deps:** Update dependency google/protobuf to v5 ([#655](https://github.com/googleapis/gax-php/issues/655)) ([1d89f50](https://github.com/googleapis/gax-php/commit/1d89f50510794e220fb036042612336717e8fedd))
+* Suppress unpack exceptions ([#656](https://github.com/googleapis/gax-php/issues/656)) ([989cf37](https://github.com/googleapis/gax-php/commit/989cf3710c6285b3eb71b6fc0c83d2b50508f456))
+
+## [1.42.0](https://github.com/googleapis/gax-php/compare/v1.41.0...v1.42.0) (2026-01-22)
+
+
+### Features
+
+* Support grpc-status-details-bin for ApiException::getErrorDetails ([#614](https://github.com/googleapis/gax-php/issues/614)) ([c44ad0c](https://github.com/googleapis/gax-php/commit/c44ad0c068586b635a3f6b325e157c116f68065e))
+
+## [1.41.0](https://github.com/googleapis/gax-php/compare/v1.40.1...v1.41.0) (2026-01-16)
+
+
+### Features
+
+* Add ApiException::getErrorDetails() for retrieval of additional exception info ([#611](https://github.com/googleapis/gax-php/issues/611)) ([be7402a](https://github.com/googleapis/gax-php/commit/be7402a94d1c4201e1ca03cdd3bab6c01adb0c24))
+
+## [1.40.1](https://github.com/googleapis/gax-php/compare/v1.40.0...v1.40.1) (2026-01-16)
+
+
+### Bug Fixes
+
+* Use self:: instead of $this-&gt; for static validation methods in GapicClientTrait validation  ([#643](https://github.com/googleapis/gax-php/issues/643)) ([5ba2b20](https://github.com/googleapis/gax-php/commit/5ba2b200c16b78b10e3dddf5ac6a2c5cd7eb8641))
+
 ## [1.40.0](https://github.com/googleapis/gax-php/compare/v1.39.0...v1.40.0) (2025-12-04)
 
 

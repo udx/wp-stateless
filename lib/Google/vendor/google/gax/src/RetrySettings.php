@@ -269,7 +269,7 @@ class RetrySettings
      */
     public function __construct(array $settings)
     {
-        $this->validateNotNull($settings, [
+        self::validateNotNull($settings, [
             'initialRetryDelayMillis',
             'retryDelayMultiplier',
             'maxRetryDelayMillis',
@@ -376,7 +376,8 @@ class RetrySettings
             'totalTimeoutMillis' => 600000,
             'retryableCodes' => [],
             'maxRetries' => self::DEFAULT_MAX_RETRIES,
-            'retryFunction' => null]);
+            'retryFunction' => null
+        ]);
     }
 
     /**

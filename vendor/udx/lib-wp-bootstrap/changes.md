@@ -1,3 +1,7 @@
+### 1.3.5
+
+* Security hardening of the admin notice dismissal AJAX handler: require a valid nonce, require the `manage_options` capability, and restrict writable option keys to the `dismiss_*_notice` pattern.
+
 ### 1.3.4
 
 * Fix notice about translations loaded too soon

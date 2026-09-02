@@ -176,6 +176,28 @@ class ManagedFolders extends \Google\Service\Resource
     $params = array_merge($params, $optParams);
     return $this->call('testIamPermissions', [$params], TestIamPermissionsResponse::class);
   }
+  /**
+   * Updates a managed folder using patch semantics. (managedFolders.update)
+   *
+   * @param string $bucket The name of the bucket containing the managed folder.
+   * @param string $managedFolder The name of the managed folder.
+   * @param ManagedFolder $postBody
+   * @param array $optParams Optional parameters.
+   *
+   * @opt_param string ifMetagenerationMatch Makes the operation conditional on
+   * whether the metageneration of the managed folder matches the specified value.
+   * @opt_param string ifMetagenerationNotMatch Makes the operation conditional on
+   * whether the metageneration of the managed folder doesn't match the specified
+   * value.
+   * @return ManagedFolder
+   * @throws \Google\Service\Exception
+   */
+  public function update($bucket, $managedFolder, ManagedFolder $postBody, $optParams = [])
+  {
+    $params = ['bucket' => $bucket, 'managedFolder' => $managedFolder, 'postBody' => $postBody];
+    $params = array_merge($params, $optParams);
+    return $this->call('update', [$params], ManagedFolder::class);
+  }
 }
 
 // Adding a class alias for backwards compatibility with the previous class name.

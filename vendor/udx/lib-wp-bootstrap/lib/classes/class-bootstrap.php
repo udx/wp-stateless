@@ -595,25 +595,43 @@ namespace UsabilityDynamics\WP {
       }
 
       public function ud_bootstrap_dismiss_notice() {
+        check_ajax_referer( 'ud_bootstrap_dismiss_notice', 'nonce' );
+
         $response = array(
             'success' => '0',
             'error' => __( 'There was an error in request.', $this->domain ),
         );
         $error = false;
 
-        if( empty( $_POST['key'] ) ||
+        //** Dismissing a notice writes global state, so it requires the same
+        //** capability as managing the product itself. */
+        if( ! current_user_can( 'manage_options' ) ) {
+          $response['error'] = __( 'You are not allowed to do this action.', $this->domain );
+          $error = true;
+        }
+
+        //** Only the notice-dismissal options this instance actually reads back
+        //** (dismiss_<slug>_<version>_notice) may be written - never an arbitrary key. */
+        $option_key = isset( $_POST['key'] ) ? sanitize_key( $_POST['key'] ) : '';
+
+        if( ! $error && ( strpos( $option_key, 'dismiss_' ) !== 0 || substr( $option_key, -7 ) !== '_notice' ) ) {
+          $response['error'] = __( 'Invalid key', $this->domain );
+          $error = true;
+        }
+
+        if( ! $error && (
             empty( $_POST['slug'] ) ||
             empty( $_POST['type'] ) ||
             empty( $_POST['version'] )
-        ) {
+        ) ) {
           $response['error'] = __( 'Invalid values', $this->domain );
           $error = true;
         }
 
-        if ( ! $error && update_option( ( $_POST['key'] ), array(
-                'slug' => $_POST['slug'],
-                'type' => $_POST['type'],
-                'version' => $_POST['version'],
+        if ( ! $error && update_option( $option_key, array(
+                'slug' => sanitize_key( $_POST['slug'] ),
+                'type' => sanitize_key( $_POST['type'] ),
+                'version' => sanitize_text_field( $_POST['version'] ),
             ) ) ) {
           $response['success'] = '1';
         }

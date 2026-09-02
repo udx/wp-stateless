@@ -44,6 +44,10 @@
     "scripts": {
         "pre-autoload-dump": "Google\\Task\\Composer::cleanup"
     },
+    "conflict": {
+        "google/protobuf": ">=5.0",
+        "brick/math": ">=0.13"
+    },
     "extra": {
         "google/apiclient-services": [
             "Storage"

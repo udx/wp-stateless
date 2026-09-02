@@ -58,6 +58,8 @@ class ManagedFolder extends \Google\Model
    * @var string
    */
   public $name;
+  protected $rapidCacheConfigType = RapidCacheConfig::class;
+  protected $rapidCacheConfigDataType = '';
   /**
    * The link to this managed folder.
    *
@@ -169,6 +171,22 @@ class ManagedFolder extends \Google\Model
   public function getName()
   {
     return $this->name;
+  }
+  /**
+   * The rapid cache configuration for the managed folder.
+   *
+   * @param RapidCacheConfig $rapidCacheConfig
+   */
+  public function setRapidCacheConfig(RapidCacheConfig $rapidCacheConfig)
+  {
+    $this->rapidCacheConfig = $rapidCacheConfig;
+  }
+  /**
+   * @return RapidCacheConfig
+   */
+  public function getRapidCacheConfig()
+  {
+    return $this->rapidCacheConfig;
   }
   /**
    * The link to this managed folder.
