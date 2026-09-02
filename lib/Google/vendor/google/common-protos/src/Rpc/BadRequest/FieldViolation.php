@@ -5,8 +5,8 @@
 namespace Google\Rpc\BadRequest;
 
 use Google\Protobuf\Internal\GPBType;
-use Google\Protobuf\Internal\RepeatedField;
 use Google\Protobuf\Internal\GPBUtil;
+use Google\Protobuf\RepeatedField;
 
 /**
  * A message type used to describe a single bad request field.
@@ -35,15 +35,15 @@ class FieldViolation extends \Google\Protobuf\Internal\Message
      *     }
      * In this example, in proto `field` could take one of the following values:
      * * `full_name` for a violation in the `full_name` value
-     * * `email_addresses[1].email` for a violation in the `email` field of the
+     * * `email_addresses[0].email` for a violation in the `email` field of the
      *   first `email_addresses` message
-     * * `email_addresses[3].type[2]` for a violation in the second `type`
+     * * `email_addresses[2].type[1]` for a violation in the second `type`
      *   value in the third `email_addresses` message.
      * In JSON, the same values are represented as:
      * * `fullName` for a violation in the `fullName` value
-     * * `emailAddresses[1].email` for a violation in the `email` field of the
+     * * `emailAddresses[0].email` for a violation in the `email` field of the
      *   first `emailAddresses` message
-     * * `emailAddresses[3].type[2]` for a violation in the second `type`
+     * * `emailAddresses[2].type[1]` for a violation in the second `type`
      *   value in the third `emailAddresses` message.
      *
      * Generated from protobuf field <code>string field = 1;</code>
@@ -100,15 +100,15 @@ class FieldViolation extends \Google\Protobuf\Internal\Message
      *               }
      *           In this example, in proto `field` could take one of the following values:
      *           * `full_name` for a violation in the `full_name` value
-     *           * `email_addresses[1].email` for a violation in the `email` field of the
+     *           * `email_addresses[0].email` for a violation in the `email` field of the
      *             first `email_addresses` message
-     *           * `email_addresses[3].type[2]` for a violation in the second `type`
+     *           * `email_addresses[2].type[1]` for a violation in the second `type`
      *             value in the third `email_addresses` message.
      *           In JSON, the same values are represented as:
      *           * `fullName` for a violation in the `fullName` value
-     *           * `emailAddresses[1].email` for a violation in the `email` field of the
+     *           * `emailAddresses[0].email` for a violation in the `email` field of the
      *             first `emailAddresses` message
-     *           * `emailAddresses[3].type[2]` for a violation in the second `type`
+     *           * `emailAddresses[2].type[1]` for a violation in the second `type`
      *             value in the third `emailAddresses` message.
      *     @type string $description
      *           A description of why the request element is bad.
@@ -149,15 +149,15 @@ class FieldViolation extends \Google\Protobuf\Internal\Message
      *     }
      * In this example, in proto `field` could take one of the following values:
      * * `full_name` for a violation in the `full_name` value
-     * * `email_addresses[1].email` for a violation in the `email` field of the
+     * * `email_addresses[0].email` for a violation in the `email` field of the
      *   first `email_addresses` message
-     * * `email_addresses[3].type[2]` for a violation in the second `type`
+     * * `email_addresses[2].type[1]` for a violation in the second `type`
      *   value in the third `email_addresses` message.
      * In JSON, the same values are represented as:
      * * `fullName` for a violation in the `fullName` value
-     * * `emailAddresses[1].email` for a violation in the `email` field of the
+     * * `emailAddresses[0].email` for a violation in the `email` field of the
      *   first `emailAddresses` message
-     * * `emailAddresses[3].type[2]` for a violation in the second `type`
+     * * `emailAddresses[2].type[1]` for a violation in the second `type`
      *   value in the third `emailAddresses` message.
      *
      * Generated from protobuf field <code>string field = 1;</code>
@@ -188,15 +188,15 @@ class FieldViolation extends \Google\Protobuf\Internal\Message
      *     }
      * In this example, in proto `field` could take one of the following values:
      * * `full_name` for a violation in the `full_name` value
-     * * `email_addresses[1].email` for a violation in the `email` field of the
+     * * `email_addresses[0].email` for a violation in the `email` field of the
      *   first `email_addresses` message
-     * * `email_addresses[3].type[2]` for a violation in the second `type`
+     * * `email_addresses[2].type[1]` for a violation in the second `type`
      *   value in the third `email_addresses` message.
      * In JSON, the same values are represented as:
      * * `fullName` for a violation in the `fullName` value
-     * * `emailAddresses[1].email` for a violation in the `email` field of the
+     * * `emailAddresses[0].email` for a violation in the `email` field of the
      *   first `emailAddresses` message
-     * * `emailAddresses[3].type[2]` for a violation in the second `type`
+     * * `emailAddresses[2].type[1]` for a violation in the second `type`
      *   value in the third `emailAddresses` message.
      *
      * Generated from protobuf field <code>string field = 1;</code>
@@ -312,5 +312,4 @@ class FieldViolation extends \Google\Protobuf\Internal\Message
     }
 
 }
-
 

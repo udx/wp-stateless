@@ -51,6 +51,12 @@ class AnywhereCache extends \Google\Model
    */
   public $id;
   /**
+   * Specifies whether objects are ingested into the cache upon write.
+   *
+   * @var bool
+   */
+  public $ingestOnWrite;
+  /**
    * The kind of item this is. For Anywhere Cache, this is always
    * storage#anywhereCache.
    *
@@ -175,6 +181,22 @@ class AnywhereCache extends \Google\Model
   public function getId()
   {
     return $this->id;
+  }
+  /**
+   * Specifies whether objects are ingested into the cache upon write.
+   *
+   * @param bool $ingestOnWrite
+   */
+  public function setIngestOnWrite($ingestOnWrite)
+  {
+    $this->ingestOnWrite = $ingestOnWrite;
+  }
+  /**
+   * @return bool
+   */
+  public function getIngestOnWrite()
+  {
+    return $this->ingestOnWrite;
   }
   /**
    * The kind of item this is. For Anywhere Cache, this is always

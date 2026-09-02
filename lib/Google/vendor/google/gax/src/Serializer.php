@@ -31,11 +31,23 @@
  */
 namespace Google\ApiCore;
 
+use Exception;
 use Google\Protobuf\Any;
 use Google\Protobuf\Descriptor;
 use Google\Protobuf\DescriptorPool;
 use Google\Protobuf\FieldDescriptor;
 use Google\Protobuf\Internal\Message;
+use Google\Rpc\BadRequest;
+use Google\Rpc\DebugInfo;
+use Google\Rpc\ErrorInfo;
+use Google\Rpc\Help;
+use Google\Rpc\LocalizedMessage;
+use Google\Rpc\PreconditionFailure;
+use Google\Rpc\QuotaFailure;
+use Google\Rpc\RequestInfo;
+use Google\Rpc\ResourceInfo;
+use Google\Rpc\RetryInfo;
+use Google\Rpc\Status;
 use RuntimeException;
 
 /**
@@ -52,18 +64,6 @@ class Serializer
     private static array $setterMap = [];
     private static array $snakeCaseMap = [];
     private static array $camelCaseMap = [];
-
-    private static $metadataKnownTypes = [
-        'google.rpc.retryinfo-bin' => \Google\Rpc\RetryInfo::class,
-        'google.rpc.debuginfo-bin' => \Google\Rpc\DebugInfo::class,
-        'google.rpc.quotafailure-bin' => \Google\Rpc\QuotaFailure::class,
-        'google.rpc.badrequest-bin' => \Google\Rpc\BadRequest::class,
-        'google.rpc.requestinfo-bin' => \Google\Rpc\RequestInfo::class,
-        'google.rpc.resourceinfo-bin' => \Google\Rpc\ResourceInfo::class,
-        'google.rpc.errorinfo-bin' => \Google\Rpc\ErrorInfo::class,
-        'google.rpc.help-bin' => \Google\Rpc\Help::class,
-        'google.rpc.localizedmessage-bin' => \Google\Rpc\LocalizedMessage::class,
-    ];
 
     private $fieldTransformers;
     private $messageTypeTransformers;
@@ -178,43 +178,80 @@ class Serializer
      * Decode metadata received from gRPC status object
      *
      * @param array $metadata
+     * @param null|array $errors
      * @return array
      */
-    public static function decodeMetadata(array $metadata)
+    public static function decodeMetadata(array $metadata, ?array &$errors = null)
     {
         if (count($metadata) == 0) {
             return [];
         }
+        // ensure known types are available from the descriptor pool
+        KnownTypes::addKnownTypesToDescriptorPool();
         $result = [];
+        // If metadata contains a "status" bin, use that instead
+        if (isset($metadata['grpc-status-details-bin'])) {
+            $status = new Status();
+            $status->mergeFromString($metadata['grpc-status-details-bin'][0]);
+            foreach ($status->getDetails() as $any) {
+                if (isset(KnownTypes::TYPE_URLS[$any->getTypeUrl()])) {
+                    $class = KnownTypes::TYPE_URLS[$any->getTypeUrl()];
+                    new $class(); // add known types to descriptor pool
+                }
+                try {
+                    $error = $any->unpack();
+                } catch (Exception $ex) {
+                    // failed to unpack the $any object - keep the object as-is instead
+                    $error = $any;
+                }
+                if (!is_null($errors)) {
+                    $errors[] = $error;
+                }
+                $result[] = [
+                    '@type' => $any->getTypeUrl(),
+                ] + self::serializeToPhpArray($error);
+            }
+            return $result;
+        }
+
+        // look for individual error detail bins and decode those
+        // NOTE: This method SHOULD be superceeded by 'grpc-status-details-bin' in every case, but
+        // we are keeping it for now to be safe
         foreach ($metadata as $key => $values) {
             foreach ($values as $value) {
-                $decodedValue = [
-                    '@type' => $key,
-                ];
+                $decodedValue = ['@type' => $key];
                 if (self::hasBinaryHeaderSuffix($key)) {
-                    if (isset(self::$metadataKnownTypes[$key])) {
-                        $class = self::$metadataKnownTypes[$key];
-                        /** @var Message $message */
+                    if (isset(KnownTypes::BIN_TYPES[$key])) {
+                        $class = KnownTypes::BIN_TYPES[$key];
+                        /**
+                         * @var BadRequest
+                         *    | DebugInfo
+                         *    | ErrorInfo
+                         *    | Help
+                         *    | LocalizedMessage
+                         *    | PreconditionFailure
+                         *    | QuotaFailure
+                         *    | RequestInfo
+                         *    | ResourceInfo
+                         *    | RetryInfo $message
+                         */
                         $message = new $class();
                         try {
                             $message->mergeFromString($value);
                             $decodedValue += self::serializeToPhpArray($message);
+                            if (!is_null($errors)) {
+                                $errors[] = $message;
+                            }
                         } catch (\Exception $e) {
                             // We encountered an error trying to deserialize the data
-                            $decodedValue += [
-                                'data' => '<Unable to deserialize data>',
-                            ];
+                            $decodedValue['data'] = '<Unable to deserialize data>';
                         }
                     } else {
                         // The metadata contains an unexpected binary type
-                        $decodedValue += [
-                            'data' => '<Unknown Binary Data>',
-                        ];
+                        $decodedValue['data'] = '<Unknown Binary Data>';
                     }
                 } else {
-                    $decodedValue += [
-                        'data' => $value,
-                    ];
+                    $decodedValue['data'] = $value;
                 }
                 $result[] = $decodedValue;
             }
@@ -237,8 +274,7 @@ class Serializer
                 /** @var Message $unpacked */
                 $unpacked = $any->unpack();
                 $results[] = self::serializeToPhpArray($unpacked);
-            } catch (\Exception $ex) {
-                echo "$ex\n";
+            } catch (\Throwable $ex) {
                 // failed to unpack the $any object - show as unknown binary data
                 $results[] = [
                     'typeUrl' => $any->getTypeUrl(),
@@ -319,7 +355,7 @@ class Serializer
         list($fields, $fieldsToOneof) = $this->getDescriptorMaps($messageType);
         foreach ($fields as $field) {
             $key = $field->getName();
-            $getter = $this->getGetter($key);
+            $getter = self::getGetter($key);
             $v = $message->$getter();
 
             if (is_null($v)) {
@@ -329,7 +365,7 @@ class Serializer
             // Check and skip unset fields inside oneofs
             if (isset($fieldsToOneof[$key])) {
                 $oneofName = $fieldsToOneof[$key];
-                $oneofGetter =  $this->getGetter($oneofName);
+                $oneofGetter =  self::getGetter($oneofName);
                 if ($message->$oneofGetter() !== $key) {
                     continue;
                 }
@@ -437,7 +473,7 @@ class Serializer
                 $value = $this->decodeElement($field, $v);
             }
 
-            $setter = $this->getSetter($field->getName());
+            $setter = self::getSetter($field->getName());
             $message->$setter($value);
 
             // We must unset $value here, otherwise the protobuf c extension will mix up the references
@@ -453,9 +489,14 @@ class Serializer
      */
     private function checkFieldRepeated(FieldDescriptor $field): bool
     {
-        return method_exists($field, 'isRepeated')
-            ? $field->isRepeated()
-            : $field->getLabel() === GPBLabel::REPEATED;
+        /** @phpstan-ignore-next-line **/
+        if (method_exists($field, 'isRepeated')) {
+            return $field->isRepeated();
+        }
+        if (method_exists($field, 'getLabel')) {
+            return $field->getLabel() === GPBLabel::REPEATED;
+        }
+        throw new \Exception('No field repeated method avaialble');
     }
 
     /**
@@ -527,7 +568,7 @@ class Serializer
 
     public static function loadKnownMetadataTypes()
     {
-        foreach (self::$metadataKnownTypes as $key => $class) {
+        foreach (KnownTypes::allKnownTypes() as $key => $class) {
             new $class();
         }
     }

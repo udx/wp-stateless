@@ -6,6 +6,7 @@ $vendorDir = dirname(__DIR__);
 $baseDir = dirname($vendorDir);
 
 return array(
+    'Attribute' => $vendorDir . '/symfony/polyfill-php80/Resources/stubs/Attribute.php',
     'Composer\\InstalledVersions' => $vendorDir . '/composer/InstalledVersions.php',
     'GPBMetadata\\GrpcGcp' => $vendorDir . '/google/grpc-gcp/src/generated/GPBMetadata/GrpcGcp.php',
     'Google_AccessToken_Revoke' => $baseDir . '/src/aliases.php',
@@ -33,4 +34,8 @@ return array(
     'Grpc\\Gcp\\ApiConfig' => $vendorDir . '/google/grpc-gcp/src/generated/Grpc/Gcp/ApiConfig.php',
     'Grpc\\Gcp\\ChannelPoolConfig' => $vendorDir . '/google/grpc-gcp/src/generated/Grpc/Gcp/ChannelPoolConfig.php',
     'Grpc\\Gcp\\MethodConfig' => $vendorDir . '/google/grpc-gcp/src/generated/Grpc/Gcp/MethodConfig.php',
+    'PhpToken' => $vendorDir . '/symfony/polyfill-php80/Resources/stubs/PhpToken.php',
+    'Stringable' => $vendorDir . '/symfony/polyfill-php80/Resources/stubs/Stringable.php',
+    'UnhandledMatchError' => $vendorDir . '/symfony/polyfill-php80/Resources/stubs/UnhandledMatchError.php',
+    'ValueError' => $vendorDir . '/symfony/polyfill-php80/Resources/stubs/ValueError.php',
 );

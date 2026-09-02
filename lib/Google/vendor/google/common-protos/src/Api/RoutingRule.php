@@ -5,8 +5,8 @@
 namespace Google\Api;
 
 use Google\Protobuf\Internal\GPBType;
-use Google\Protobuf\Internal\RepeatedField;
 use Google\Protobuf\Internal\GPBUtil;
+use Google\Protobuf\RepeatedField;
 
 /**
  * Specifies the routing information that should be sent along with the request
@@ -32,9 +32,12 @@ use Google\Protobuf\Internal\GPBUtil;
  *       table_name: projects/proj_foo/instances/instance_bar/table/table_baz,
  *       app_profile_id: profiles/prof_qux
  *     }
- * The routing header consists of one or multiple key-value pairs. Every key
- * and value must be percent-encoded, and joined together in the format of
- * `key1=value1&key2=value2`.
+ * The routing header consists of one or multiple key-value pairs. The order of
+ * the key-value pairs is undefined, the order of the `routing_parameters` in
+ * the `RoutingRule` only matters for the evaluation order of the path
+ * templates when `field` is the same. See the examples below for more details.
+ * Every key and value in the routing header must be percent-encoded,
+ * and joined together in the following format: `key1=value1&key2=value2`.
  * The examples below skip the percent-encoding for readability.
  * Example 1
  * Extracting a field from the request to put into the routing header
@@ -74,7 +77,7 @@ use Google\Protobuf\Internal\GPBUtil;
  *       // syntax).
  *       routing_parameters {
  *         field: "table_name"
- *         path_template: "{table_name=projects/&#42;&#47;instances/&#42;&#47;&#42;*}"
+ *         path_template: "{table_name=projects/{@*}instances/{@*}**}"
  *       }
  *     };
  * result:
@@ -88,7 +91,7 @@ use Google\Protobuf\Internal\GPBUtil;
  *       // syntax).
  *       routing_parameters {
  *         field: "table_name"
- *         path_template: "{table_name=regions/&#42;&#47;zones/&#42;&#47;&#42;*}"
+ *         path_template: "{table_name=regions/{@*}zones/{@*}**}"
  *       }
  *     };
  * result:
@@ -102,11 +105,11 @@ use Google\Protobuf\Internal\GPBUtil;
  *       // using the region- or projects-based syntax.
  *       routing_parameters {
  *         field: "table_name"
- *         path_template: "{table_name=regions/&#42;&#47;zones/&#42;&#47;&#42;*}"
+ *         path_template: "{table_name=regions/{@*}zones/{@*}**}"
  *       }
  *       routing_parameters {
  *         field: "table_name"
- *         path_template: "{table_name=projects/&#42;&#47;instances/&#42;&#47;&#42;*}"
+ *         path_template: "{table_name=projects/{@*}instances/{@*}**}"
  *       }
  *     };
  * result:
@@ -120,7 +123,7 @@ use Google\Protobuf\Internal\GPBUtil;
  *       // Take just the project id from the `table_name` field.
  *       routing_parameters {
  *         field: "table_name"
- *         path_template: "{routing_id=projects/&#42;}/&#42;*"
+ *         path_template: "{routing_id=projects/*}/**"
  *       }
  *     };
  * result:
@@ -136,11 +139,11 @@ use Google\Protobuf\Internal\GPBUtil;
  *       // Otherwise take project + instance.
  *       routing_parameters {
  *         field: "table_name"
- *         path_template: "{routing_id=projects/&#42;}/&#42;*"
+ *         path_template: "{routing_id=projects/*}/**"
  *       }
  *       routing_parameters {
  *         field: "table_name"
- *         path_template: "{routing_id=projects/&#42;&#47;instances/&#42;}/&#42;*"
+ *         path_template: "{routing_id=projects/{@*}instances/*}/**"
  *       }
  *     };
  * result:
@@ -159,11 +162,11 @@ use Google\Protobuf\Internal\GPBUtil;
  *       // syntax.
  *       routing_parameters {
  *         field: "table_name"
- *         path_template: "{project_id=projects/&#42;}/instances/&#42;&#47;&#42;*"
+ *         path_template: "{project_id=projects/*}/instances/{@*}**"
  *       }
  *       routing_parameters {
  *         field: "table_name"
- *         path_template: "projects/&#42;&#47;{instance_id=instances/&#42;}/&#42;*"
+ *         path_template: "projects/{@*}{instance_id=instances/*}/**"
  *       }
  *     };
  * result:
@@ -179,11 +182,11 @@ use Google\Protobuf\Internal\GPBUtil;
  *       // an instance in the `table_name`.
  *       routing_parameters {
  *         field: "table_name"
- *         path_template: "{project_id=projects/&#42;}/&#42;*"
+ *         path_template: "{project_id=projects/*}/**"
  *       }
  *       routing_parameters {
  *         field: "table_name"
- *         path_template: "projects/&#42;&#47;{instance_id=instances/&#42;}/&#42;*"
+ *         path_template: "projects/{@*}{instance_id=instances/*}/**"
  *       }
  *     };
  * result (is the same as 6a for our example message because it has the instance
@@ -204,7 +207,7 @@ use Google\Protobuf\Internal\GPBUtil;
  *       // (from the `app_profile_id` field) for routing.
  *       routing_parameters {
  *         field: "table_name"
- *         path_template: "{project_id=projects/&#42;}/&#42;*"
+ *         path_template: "{project_id=projects/*}/**"
  *       }
  *       routing_parameters {
  *         field: "app_profile_id"
@@ -225,11 +228,11 @@ use Google\Protobuf\Internal\GPBUtil;
  *       // If `app_profile_id` is set it should be used instead.
  *       routing_parameters {
  *         field: "table_name"
- *         path_template: "{routing_id=projects/&#42;}/&#42;*"
+ *         path_template: "{routing_id=projects/*}/**"
  *       }
  *       routing_parameters {
  *          field: "table_name"
- *          path_template: "{routing_id=regions/&#42;}/&#42;*"
+ *          path_template: "{routing_id=regions/*}/**"
  *       }
  *       routing_parameters {
  *         field: "app_profile_id"
@@ -254,15 +257,15 @@ use Google\Protobuf\Internal\GPBUtil;
  *       // the project_id, send that instead.
  *       routing_parameters {
  *         field: "table_name"
- *         path_template: "projects/&#42;&#47;{table_location=instances/&#42;}/tables/&#42;"
+ *         path_template: "projects/{@*}{table_location=instances/*}/tables/*"
  *       }
  *       routing_parameters {
  *         field: "table_name"
- *         path_template: "{table_location=regions/&#42;&#47;zones/&#42;}/tables/&#42;"
+ *         path_template: "{table_location=regions/{@*}zones/*}/tables/*"
  *       }
  *       routing_parameters {
  *         field: "table_name"
- *         path_template: "{routing_id=projects/&#42;}/&#42;*"
+ *         path_template: "{routing_id=projects/*}/**"
  *       }
  *       routing_parameters {
  *         field: "app_profile_id"
@@ -299,7 +302,7 @@ class RoutingRule extends \Google\Protobuf\Internal\Message
      * @param array $data {
      *     Optional. Data for populating the Message object.
      *
-     *     @type array<\Google\Api\RoutingParameter>|\Google\Protobuf\Internal\RepeatedField $routing_parameters
+     *     @type \Google\Api\RoutingParameter[] $routing_parameters
      *           A collection of Routing Parameter specifications.
      *           **NOTE:** If multiple Routing Parameters describe the same key
      *           (via the `path_template` field or via the `field` field when
@@ -322,7 +325,7 @@ class RoutingRule extends \Google\Protobuf\Internal\Message
      * See the examples for more details.
      *
      * Generated from protobuf field <code>repeated .google.api.RoutingParameter routing_parameters = 2;</code>
-     * @return \Google\Protobuf\Internal\RepeatedField
+     * @return RepeatedField<\Google\Api\RoutingParameter>
      */
     public function getRoutingParameters()
     {
@@ -338,7 +341,7 @@ class RoutingRule extends \Google\Protobuf\Internal\Message
      * See the examples for more details.
      *
      * Generated from protobuf field <code>repeated .google.api.RoutingParameter routing_parameters = 2;</code>
-     * @param array<\Google\Api\RoutingParameter>|\Google\Protobuf\Internal\RepeatedField $var
+     * @param \Google\Api\RoutingParameter[] $var
      * @return $this
      */
     public function setRoutingParameters($var)
