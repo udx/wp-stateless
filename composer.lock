@@ -307,23 +307,20 @@
         },
         {
             "name": "udx/lib-wp-bootstrap",
-            "version": "1.3.4",
+            "version": "1.3.5",
             "source": {
                 "type": "git",
                 "url": "git@github.com:udx/lib-wp-bootstrap",
-                "reference": "1.3.4"
+                "reference": "1.3.5"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://github.com/udx/lib-wp-bootstrap/archive/1.3.4.zip"
+                "url": "https://github.com/udx/lib-wp-bootstrap/archive/1.3.5.zip"
             },
             "require": {
                 "php": ">=5.3"
             },
             "type": "library",
-            "extra": {
-                "installer-name": "lib-wp-bootstrap"
-            },
             "autoload": {
                 "classmap": [
                     "lib/classes"
@@ -336,7 +333,12 @@
             "homepage": "https://github.com/udx/lib-wp-bootstrap",
             "keywords": [
                 "wordpress"
-            ]
+            ],
+            "support": {
+                "source": "https://github.com/udx/lib-wp-bootstrap/tree/1.3.5",
+                "issues": "https://github.com/udx/lib-wp-bootstrap/issues"
+            },
+            "time": "2026-09-02T03:33:07+00:00"
         },
         {
             "name": "wpackagist-plugin/meta-box",
