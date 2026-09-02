@@ -13,6 +13,11 @@ on:
       prerelease:
         description: 'Pre-release version (e.g. RC1, beta, etc...)'
         required: false
+      deploy_wporg:
+        description: 'Deploy to WordPress.org after release (skipped for pre-releases)'
+        required: false
+        default: true
+        type: boolean
 
 permissions:
   contents: write
@@ -24,3 +29,13 @@ jobs:
       tag: ${{ github.event.inputs.tag }}
       version: ${{ github.event.inputs.version }}
       prerelease: ${{ github.event.inputs.prerelease }}
+
+  deploy-wporg:
+    if: ${{ inputs.deploy_wporg && !inputs.prerelease }}
+    needs: release
+    uses: udx/reusable-workflows/.github/workflows/wp-org-svn-deploy.yml@master
+    with:
+      tag: ${{ github.event.inputs.tag }}
+    secrets:
+      svn_username: ${{ secrets.SVN_USERNAME }}
+      svn_password: ${{ secrets.SVN_PASSWORD }}
