@@ -170,7 +170,7 @@ return [
   'woo-extra-product-options' => [
     'title'           => 'WooCommerce Extra Product Options Addon',
     'plugin_files'    => ['woocommerce-tm-extra-product-options/tm-woo-extra-product-options.php'],
-    'addon_file'      => 'wp-stateless-woocommerce-extra-product-options-addon/wp-stateless-woo-extra-product-options-addon.php.php',
+    'addon_file'      => 'wp-stateless-woocommerce-extra-product-options-addon/wp-stateless-woo-extra-product-options-addon.php',
     'icon'            => 'https://ps.w.org/woocommerce/assets/icon.svg',
     'repo'            => 'udx/wp-stateless-woo-extra-product-options-addon',
     'wp'              => 'https://wordpress.org/plugins/wp-stateless-woocommerce-extra-product-options-addon/',
