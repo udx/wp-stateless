@@ -6,7 +6,7 @@ License: GPLv2 or later
 Requires PHP: 8.1
 Requires at least: 5.0
 Tested up to: 6.9
-Stable tag: 4.4.2
+Stable tag: 4.4.3
 
 Upload and serve your WordPress media files from Google Cloud Storage.
 
@@ -136,6 +136,10 @@ Before upgrading to WP-Stateless 3.2.0, please, make sure you use PHP 7.2 or abo
 Before upgrading to WP-Stateless 3.0, please, make sure you tested it on your development environment.
 
 == Changelog ==
+= 4.4.3 - 2026-09-05 =
+* FIX - corrected add-on file path for the WooCommerce Extra Product Options add-on: duplicate `.php` extension caused the add-on to always appear uninstalled/inactive on the Stateless Addons screen with an invalid activation link.
+* FIX - resolved PHP warnings in non-media file synchronization: undefined `$media` variable after a failed object metadata update and deprecated dynamic `$client` property creation on PHP 8.2+.
+
 = 4.4.2 - 2026-09-02 =
 * FIX - `udx/lib-wp-bootstrap` package updated to 1.3.5: security hardening of the admin notice dismissal AJAX handler (nonce verification, capability check, and option key restriction).
 * ENHANCEMENT - updated `guzzlehttp/guzzle` library from 7.10.0 to 7.15.5.

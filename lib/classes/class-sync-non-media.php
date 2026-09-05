@@ -26,6 +26,13 @@ namespace wpCloud\StatelessMedia {
        */
       private $registered_dir = array();
 
+      /**
+       * @var object|null
+       *
+       * Google Cloud client instance.
+       */
+      private $client = null;
+
       public function __construct() {
         // Manual sync using sync tab.
         // Return files to be manually sync from sync tab.
@@ -119,6 +126,8 @@ namespace wpCloud\StatelessMedia {
             $file_copied_from_gcs = true;
           }
         }
+
+        $media = null;
 
         if ($local_file_exists && !$file_copied_from_gcs && !$args['download']) {
 
