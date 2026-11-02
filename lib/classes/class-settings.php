@@ -755,9 +755,9 @@ namespace wpCloud\StatelessMedia {
         }
 
         $connect_url = sprintf(
-          '<a href="%s">%s</a>',
+          '<a class="button button-primary" style="margin:0 8px 0 4px;vertical-align:baseline" href="%s">%s</a>',
           esc_url(admin_url('upload.php?page=stateless-connect')),
-          __('Open Stateless Connect', ud_get_stateless_media()->domain),
+          __('Connect Google Cloud', ud_get_stateless_media()->domain),
         );
 
         $documentation_url = sprintf(
@@ -770,7 +770,7 @@ namespace wpCloud\StatelessMedia {
           'title' => __('WP-Stateless: Finish Setup', ud_get_stateless_media()->domain),
           'message' => sprintf(
             __(
-              'WP-Stateless has been successfully activated. %1$s to sign in with Google and create a bucket from here, or follow %2$s to configure it by hand.',
+              'WP-Stateless is active but not connected to Google Cloud yet. %1$s to sign in with Google and have the bucket created for you, or follow %2$s to configure it by hand.',
               ud_get_stateless_media()->domain,
             ),
             $connect_url,

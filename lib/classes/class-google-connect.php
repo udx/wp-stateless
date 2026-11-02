@@ -44,7 +44,6 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
       add_action('rest_api_init', array($this, 'rest_routes'));
       if (!is_admin()) return;
       add_action('admin_menu', array($this, 'admin_menu'), 20);
-      add_action('admin_notices', array($this, 'admin_notice'));
       add_action('admin_post_sm_gc_client', array($this, 'handle_client'));
       add_action('admin_post_sm_gc_finish', array($this, 'handle_finish'));
       add_action('admin_post_sm_gc_provision', array($this, 'handle_provision'));
@@ -70,23 +69,6 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
 
     public function page_url($args = array()) {
       return add_query_arg(array_merge(array('page' => self::PAGE), $args), admin_url('upload.php'));
-    }
-
-    public function admin_notice() {
-      if (!current_user_can('manage_options')) return;
-      $screen = function_exists('get_current_screen') ? get_current_screen() : null;
-      if ($screen && strpos($screen->id, self::PAGE) !== false) return;
-      if (ud_get_stateless_media()->get('sm.key_json')) return;
-      // Only where an admin is dealing with media or plugins, not on every screen.
-      $relevant = $screen && (in_array($screen->base, array('upload', 'media', 'plugins', 'dashboard'), true) || strpos($screen->id, 'stateless') !== false);
-      if (!$relevant) return;
-      printf(
-        '<div class="notice notice-info"><p><strong>%s</strong> %s <a class="button button-primary" style="margin-left:8px" href="%s">%s</a></p></div>',
-        esc_html__('WP-Stateless is not connected to Google Cloud yet.', ud_get_stateless_media()->domain),
-        esc_html__('Sign in with your Google account and the plugin will create the bucket for you.', ud_get_stateless_media()->domain),
-        esc_url($this->page_url()),
-        esc_html__('Connect Google Cloud', ud_get_stateless_media()->domain)
-      );
     }
 
     public function render_page() {
