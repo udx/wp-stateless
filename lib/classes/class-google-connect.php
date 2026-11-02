@@ -24,8 +24,9 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
     const PAGE            = 'stateless-connect';
     const OPTION          = 'sm_google_connect';
     const CLIENT_OPTION   = 'sm_google_connect_client';
-    const REDIRECT_URI    = 'https://stateless.ci/connect/google/callback';
     const LOOPBACK_URI    = 'http://127.0.0.1:19190/';
+    const PROOFS_OPTION   = 'sm_gc_proofs';
+    const LAST_OPTION     = 'sm_gc_last';
     const BROKER          = 'https://stateless.ci';
     const SCOPES          = 'openid email https://www.googleapis.com/auth/cloud-platform';
     const AUTH_ENDPOINT   = 'https://accounts.google.com/o/oauth2/v2/auth';
@@ -36,7 +37,12 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
     /** @var string|null */
     private $page_hook = null;
 
+    /** @var string Why the hosted sign-in could not be prepared, for the page to show. */
+    public $start_error = '';
+
     protected function __construct() {
+      add_action('rest_api_init', array($this, 'rest_routes'));
+      if (!is_admin()) return;
       add_action('admin_menu', array($this, 'admin_menu'), 20);
       add_action('admin_notices', array($this, 'admin_notice'));
       add_action('admin_post_sm_gc_client', array($this, 'handle_client'));
@@ -131,6 +137,13 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
       $suggested_bucket = 'wp-stateless-' . preg_replace('/[^a-z0-9-]/', '-', strtolower($host)) . '-' . substr(md5(wp_salt() . $host), 0, 4);
       $suggested_bucket = substr(trim($suggested_bucket, '-'), 0, 63);
 
+      // What this site used last time, so a different Google account starts from the same project and
+      // bucket and only has to change what it wants to change.
+      $last = get_option(self::LAST_OPTION, array());
+      if (!is_array($last)) $last = array();
+      $default_project = !empty($connection['project']) ? $connection['project'] : (!empty($last['project']) ? $last['project'] : '');
+      $default_bucket  = !empty($connection['bucket']) ? $connection['bucket'] : (!empty($last['bucket']) ? $last['bucket'] : '');
+
       $settings = (object) ud_get_stateless_media()->get('sm');
 
       include ud_get_stateless_media()->path('static/views/connect.php', 'dir');
@@ -145,7 +158,7 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
         return array(
           'id'           => WP_STATELESS_GOOGLE_CLIENT_ID,
           'secret'       => WP_STATELESS_GOOGLE_CLIENT_SECRET,
-          'redirect_uri' => defined('WP_STATELESS_GOOGLE_REDIRECT_URI') ? WP_STATELESS_GOOGLE_REDIRECT_URI : self::REDIRECT_URI,
+          'redirect_uri' => defined('WP_STATELESS_GOOGLE_REDIRECT_URI') ? WP_STATELESS_GOOGLE_REDIRECT_URI : self::LOOPBACK_URI,
           'source'       => 'constant',
         );
       }
@@ -154,8 +167,7 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
         return array(
           'id'           => $opt['id'],
           'secret'       => $opt['secret'],
-          // Clients saved before the hosted page existed were Desktop clients on the loopback address.
-          'redirect_uri' => !empty($opt['redirect_uri']) ? $opt['redirect_uri'] : self::LOOPBACK_URI,
+          'redirect_uri' => self::LOOPBACK_URI,
           'source'       => 'option',
         );
       }
@@ -219,16 +231,11 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
       $this->guard();
       $id     = isset($_POST['client_id']) ? trim(sanitize_text_field($_POST['client_id'])) : '';
       $secret = isset($_POST['client_secret']) ? trim(sanitize_text_field($_POST['client_secret'])) : '';
-      $uri    = isset($_POST['redirect_uri']) ? trim(esc_url_raw(wp_unslash($_POST['redirect_uri']))) : '';
       if (!$id || !$secret) {
         $this->fail(__('Both the client ID and client secret are required.', ud_get_stateless_media()->domain));
       }
-      if (!$uri) $uri = self::REDIRECT_URI;
-      // Google only accepts https redirect URIs on web clients and loopback http on desktop clients.
-      if (strpos($uri, 'https://') !== 0 && self::is_hosted_redirect($uri)) {
-        $this->fail(__('The redirect URI must start with https:// or be the loopback address http://127.0.0.1:19190/.', ud_get_stateless_media()->domain));
-      }
-      update_option(self::CLIENT_OPTION, array('id' => $id, 'secret' => $secret, 'redirect_uri' => $uri), false);
+      // Own clients are Desktop clients: Google sends the browser to the loopback address and the admin pastes it.
+      update_option(self::CLIENT_OPTION, array('id' => $id, 'secret' => $secret, 'redirect_uri' => self::LOOPBACK_URI), false);
       $this->done(array('sm_gc' => 'client-saved'));
     }
 
@@ -237,32 +244,18 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
     /* ------------------------------------------------------------------ */
 
     private function build_auth_url($client, $uid) {
+      if ($client['source'] === 'broker') {
+        return $this->broker_auth_url($uid);
+      }
       $pkce = $this->state_get('pkce', $uid);
       if (empty($pkce['verifier']) || empty($pkce['state'])) {
         $pkce = array(
-          'verifier' => rtrim(strtr(base64_encode(random_bytes(48)), '+/', '-_'), '='),
-          'state'    => rtrim(strtr(base64_encode(random_bytes(18)), '+/', '-_'), '='),
-          'rt'       => rtrim(strtr(base64_encode(random_bytes(18)), '+/', '-_'), '='),
+          'verifier' => self::b64url(random_bytes(48)),
+          'state'    => self::b64url(random_bytes(18)),
         );
         $this->state_set('pkce', $pkce, 20 * MINUTE_IN_SECONDS, $uid);
       }
-      $challenge = rtrim(strtr(base64_encode(hash('sha256', $pkce['verifier'], true)), '+/', '-_'), '=');
-
-      // Hosted flow: tell the broker where to send the browser afterwards so the admin never copies a code.
-      // The return address carries a token only this attempt knows, so a crafted link cannot trigger the
-      // finish step. Registered once per attempt and refreshed before the broker's record expires.
-      if ($client['source'] === 'broker' && !empty($pkce['rt']) && strpos(admin_url(), 'https://') === 0) {
-        if (empty($pkce['registered']) || $pkce['registered'] < time() - 15 * MINUTE_IN_SECONDS) {
-          $r = $this->broker_request('/connect/google/start', array(
-            'state'      => $pkce['state'],
-            'return_url' => admin_url('upload.php?page=' . self::PAGE . '&sm_gc_rt=' . rawurlencode($pkce['rt'])),
-          ));
-          if (!is_wp_error($r) && !empty($r['ok'])) {
-            $pkce['registered'] = time();
-            $this->state_set('pkce', $pkce, 20 * MINUTE_IN_SECONDS, $uid);
-          }
-        }
-      }
+      $challenge = self::b64url(hash('sha256', $pkce['verifier'], true));
 
       return self::AUTH_ENDPOINT . '?' . http_build_query(array(
         'client_id'             => $client['id'],
@@ -275,6 +268,87 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
         'access_type'           => 'offline',
         'prompt'                => 'consent',
       ), '', '&', PHP_QUERY_RFC3986);
+    }
+
+    /**
+     * Opens a transaction with the broker. The broker owns the Google PKCE pair and the state; this site
+     * keeps a verifier whose S256 goes along as the delivery binding, a verify token it serves back on a
+     * public REST route so the broker can confirm the site opened the attempt, and a return token that
+     * must come back in the return address before the finish step runs. One transaction per attempt,
+     * reopened before the broker's record expires.
+     */
+    private function broker_auth_url($uid) {
+      $att = $this->state_get('pkce', $uid);
+      if (!empty($att['auth_url']) && !empty($att['site_verifier']) && !empty($att['rt']) && $att['registered'] > time() - 15 * MINUTE_IN_SECONDS) {
+        return $att['auth_url'];
+      }
+      if (strpos(admin_url(), 'https://') !== 0) {
+        $this->start_error = __('The hosted sign-in needs this admin to be served over https.', ud_get_stateless_media()->domain);
+        return '';
+      }
+      $verifier = self::b64url(random_bytes(32));
+      $rt       = self::b64url(random_bytes(18));
+      $r = $this->broker_request('/connect/google/start', array(
+        'return_url'     => admin_url('upload.php?page=' . self::PAGE . '&sm_gc_rt=' . rawurlencode($rt)),
+        'site_challenge' => self::b64url(hash('sha256', $verifier, true)),
+      ));
+      if (is_wp_error($r)) {
+        $this->start_error = $r->get_error_message();
+        return '';
+      }
+      if (empty($r['txn']) || empty($r['verify_token']) || empty($r['auth_url']) || strpos($r['auth_url'], self::AUTH_ENDPOINT . '?') !== 0) {
+        $this->start_error = sprintf(__('%1$s did not open a sign-in (%2$s).', ud_get_stateless_media()->domain), wp_parse_url(self::broker_url(), PHP_URL_HOST), isset($r['error']) ? $r['error'] : 'HTTP ' . $r['_status']);
+        return '';
+      }
+      $this->proof_add($r['txn'], $r['verify_token']);
+      $this->state_set('pkce', array(
+        'state'         => $r['txn'],
+        'site_verifier' => $verifier,
+        'rt'            => $rt,
+        'auth_url'      => $r['auth_url'],
+        'registered'    => time(),
+      ), 20 * MINUTE_IN_SECONDS, $uid);
+      return $r['auth_url'];
+    }
+
+    /* ------------------------------------------------------------------ */
+    /* Proof of possession for the broker                                   */
+    /* GET /wp-json/wp-stateless/v1/connect-proof?txn=... returns the verify  */
+    /* token the broker handed out when this site opened the transaction.   */
+    /* ------------------------------------------------------------------ */
+
+    public function rest_routes() {
+      register_rest_route('wp-stateless/v1', '/connect-proof', array(
+        'methods'             => 'GET',
+        'permission_callback' => '__return_true',
+        'args'                => array('txn' => array('required' => true, 'type' => 'string')),
+        'callback'            => array($this, 'rest_proof'),
+      ));
+    }
+
+    public function rest_proof($request) {
+      $txn = (string) $request['txn'];
+      $all = $this->proofs();
+      if (!preg_match('/^[A-Za-z0-9_-]{32}$/', $txn) || empty($all[$txn])) {
+        return new WP_Error('unknown_transaction', 'Unknown transaction', array('status' => 404));
+      }
+      $res = rest_ensure_response(array('txn' => $txn, 'verify_token' => $all[$txn]['token']));
+      $res->header('Cache-Control', 'no-store');
+      return $res;
+    }
+
+    private function proofs() {
+      $all = get_option(self::PROOFS_OPTION, array());
+      if (!is_array($all)) $all = array();
+      $live = array_filter($all, function ($p) { return is_array($p) && isset($p['exp'], $p['token']) && $p['exp'] > time(); });
+      if (count($live) !== count($all)) update_option(self::PROOFS_OPTION, $live, false);
+      return $live;
+    }
+
+    private function proof_add($txn, $token) {
+      $all       = $this->proofs();
+      $all[$txn] = array('token' => $token, 'exp' => time() + 20 * MINUTE_IN_SECONDS);
+      update_option(self::PROOFS_OPTION, $all, false);
     }
 
     public function handle_finish() {
@@ -303,24 +377,34 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
 
       $uid  = get_current_user_id();
       $pkce = $this->state_get('pkce', $uid);
-      if (empty($pkce['verifier'])) {
+      // A hosted attempt holds the site verifier; an own-client attempt holds the PKCE verifier.
+      if (empty($pkce) || (empty($pkce['verifier']) && empty($pkce['site_verifier']))) {
         $this->fail(__('The sign-in attempt expired. Start again.', ud_get_stateless_media()->domain));
       }
 
       $params = $this->parse_redirect($pasted);
-
-      if (!empty($params['pair'])) {
-        if (!self::is_hosted_redirect($client['redirect_uri'])) {
-          $this->fail(__('Pairing codes come from the hosted sign-in page. With the loopback address, paste the full address Google sent you to instead.', ud_get_stateless_media()->domain));
-        }
-        $r = $this->broker_request('/connect/google/redeem', array('pair' => $params['pair'], 'state' => $pkce['state']));
-        if (is_wp_error($r)) $this->fail($r->get_error_message());
-        if (empty($r['code'])) {
-          $this->fail(__('That code was not recognized or has expired. Click Sign in with Google again and type the new code.', ud_get_stateless_media()->domain));
-        }
-        $params = array('code' => $r['code'], 'state' => $pkce['state']);
+      if (!empty($params['sm_gc_pair']) && preg_match('/^[A-Za-z0-9]{4}-?[A-Za-z0-9]{4}$/', $params['sm_gc_pair'])) {
+        $params['pair'] = strtoupper(str_replace('-', '', $params['sm_gc_pair']));
       }
 
+      if ($client['source'] === 'broker') {
+        if (empty($pkce['site_verifier'])) {
+          $this->fail(__('The sign-in attempt expired. Start again.', ud_get_stateless_media()->domain));
+        }
+        if (empty($params['pair'])) {
+          $this->fail(__('Type the eight character code shown after you confirmed the connection, or let that page bring you back here.', ud_get_stateless_media()->domain));
+        }
+        $r = $this->broker_request('/connect/google/redeem', array('pair' => $params['pair'], 'site_verifier' => $pkce['site_verifier']));
+        if (is_wp_error($r)) $this->fail($r->get_error_message());
+        if (empty($r['refresh_token']) || empty($r['access_token']) || empty($r['connection_id']) || empty($r['connection_secret'])) {
+          $this->fail(__('That code was not recognized, was already used, or has expired. Click Sign in with Google again.', ud_get_stateless_media()->domain));
+        }
+        $this->store_connection($client, $r, isset($r['email']) ? $r['email'] : '', array('id' => $r['connection_id'], 'secret' => $r['connection_secret']), $uid);
+      }
+
+      if (!empty($params['pair'])) {
+        $this->fail(__('Pairing codes come from the hosted sign-in page. With your own client, paste the full address Google sent you to instead.', ud_get_stateless_media()->domain));
+      }
       if (!empty($params['error'])) {
         $this->fail(sprintf(__('Google returned an error: %s', ud_get_stateless_media()->domain), esc_html($params['error'])));
       }
@@ -342,20 +426,24 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
       if (empty($token['refresh_token'])) {
         $this->fail(__('Google did not return a refresh token. Remove WP-Stateless from your Google account permissions and try again.', ud_get_stateless_media()->domain));
       }
+      $this->store_connection($client, $token, '', null, $uid);
+    }
 
-      $email = '';
-      $info  = wp_remote_get('https://openidconnect.googleapis.com/v1/userinfo', array(
-        'headers' => array('Authorization' => 'Bearer ' . $token['access_token']),
-        'timeout' => 20,
-      ));
-      if (!is_wp_error($info)) {
-        $body  = json_decode(wp_remote_retrieve_body($info), true);
-        $email = isset($body['email']) ? $body['email'] : '';
+    private function store_connection($client, $token, $email, $broker_conn, $uid) {
+      if ($email === '') {
+        $info = wp_remote_get('https://openidconnect.googleapis.com/v1/userinfo', array(
+          'headers' => array('Authorization' => 'Bearer ' . $token['access_token']),
+          'timeout' => 20,
+        ));
+        if (!is_wp_error($info)) {
+          $body  = json_decode(wp_remote_retrieve_body($info), true);
+          $email = isset($body['email']) && is_string($body['email']) ? sanitize_email($body['email']) : '';
+        }
       }
-
       $connection = array(
         'email'         => $email,
         'client_id'     => $client['id'],
+        'source'        => $client['source'],
         'refresh_token' => $this->encrypt($token['refresh_token']),
         'access_token'  => $this->encrypt($token['access_token']),
         'expires'       => time() + intval($token['expires_in']) - 60,
@@ -363,9 +451,19 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
         'connected_at'  => time(),
         'connected_by'  => $uid,
       );
+      if ($broker_conn) {
+        $connection['broker']      = self::broker_url();
+        $connection['broker_conn'] = $this->encrypt(wp_json_encode($broker_conn));
+      }
       update_option(self::OPTION, $connection, false);
       $this->state_delete('pkce', $uid);
       $this->done(array('sm_gc' => 'connected'));
+    }
+
+    private function broker_conn($connection) {
+      if (empty($connection['broker_conn'])) return null;
+      $c = json_decode($this->decrypt($connection['broker_conn']), true);
+      return (is_array($c) && !empty($c['id']) && !empty($c['secret'])) ? $c : null;
     }
 
     public function handle_disconnect() {
@@ -375,6 +473,10 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
         $refresh = $this->decrypt($connection['refresh_token']);
         if ($refresh) {
           wp_remote_post(self::REVOKE_ENDPOINT, array('body' => array('token' => $refresh), 'timeout' => 20));
+        }
+        $conn = $this->broker_conn($connection);
+        if ($conn) {
+          $this->broker_request('/connect/google/disconnect', array('connection_id' => $conn['id'], 'connection_secret' => $conn['secret']));
         }
       }
       delete_option(self::OPTION);
@@ -437,13 +539,19 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
     }
 
     private function token_request($fields, $client) {
-      if (!empty($client['source']) && $client['source'] === 'broker') {
-        // The broker adds the client secret and relays Google's reply without keeping it.
-        $body = $this->broker_request('/connect/google/token', $fields);
+      if (!empty($fields['broker_conn'])) {
+        // Hosted connection: the broker checks the connection credential and adds the client secret.
+        $conn = $fields['broker_conn'];
+        $body = $this->broker_request('/connect/google/refresh', array(
+          'connection_id'     => $conn['id'],
+          'connection_secret' => $conn['secret'],
+          'refresh_token'     => $fields['refresh_token'],
+        ));
         if (is_wp_error($body)) return $body;
         $code = $body['_status'];
         unset($body['_status']);
       } else {
+        unset($fields['broker_conn']);
         $fields['client_id']     = $client['id'];
         $fields['client_secret'] = $client['secret'];
         $res = wp_remote_post(self::TOKEN_ENDPOINT, array('body' => $fields, 'timeout' => 30));
@@ -470,11 +578,17 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
         $plain = $this->decrypt($connection['access_token']);
         if ($plain !== '') return $plain;
       }
-      $client = $this->get_client();
-      if (!$client) return new WP_Error('no_client', __('OAuth client is not configured.', ud_get_stateless_media()->domain));
+      $conn = $this->broker_conn($connection);
+      if ($conn) {
+        $client = array('id' => $connection['client_id'], 'secret' => '', 'source' => 'broker');
+      } else {
+        $client = $this->get_client();
+        if (!$client) return new WP_Error('no_client', __('OAuth client is not configured.', ud_get_stateless_media()->domain));
+      }
       $token = $this->token_request(array(
         'grant_type'    => 'refresh_token',
         'refresh_token' => $this->decrypt($connection['refresh_token']),
+        'broker_conn'   => $conn,
       ), $client);
       if (is_wp_error($token)) return $token;
       $connection['access_token'] = $this->encrypt($token['access_token']);
@@ -693,6 +807,7 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
         $connection['bucket']   = $bucket;
         $connection['sa_email'] = $sa_email;
         update_option(self::OPTION, $connection, false);
+        update_option(self::LAST_OPTION, array('project' => $project_id, 'bucket' => $bucket), false);
         $log[] = sprintf('Plugin configured: mode %s, bucket %s', $mode, $bucket);
 
         /* 8. Verify with the new key itself (IAM can lag a few seconds) */
@@ -753,6 +868,10 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
     private function fail($message) {
       $this->state_set('error', wp_strip_all_tags((string) $message), 10 * MINUTE_IN_SECONDS);
       $this->done(array('sm_gc' => 'error'));
+    }
+
+    private static function b64url($bin) {
+      return rtrim(strtr(base64_encode($bin), '+/', '-_'), '=');
     }
 
     private function crypto_key() {

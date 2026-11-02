@@ -101,11 +101,11 @@ namespace wpCloud\StatelessMedia {
         $this->settings = new Settings($this);
         Status::instance();
 
-        /* Google Connect: sign in with Google and provision from wp-admin. Admin only. */
-        if (is_admin()) {
-          require_once(dirname(__FILE__) . '/class-google-connect.php');
-          GoogleConnect::instance();
-        }
+        /* Google Connect: sign in with Google and provision from wp-admin. The class hooks admin screens
+         * only in admin requests and registers one public REST route the hosted sign-in uses to confirm
+         * that this site opened a transaction. */
+        require_once(dirname(__FILE__) . '/class-google-connect.php');
+        GoogleConnect::instance();
       }
 
       /**

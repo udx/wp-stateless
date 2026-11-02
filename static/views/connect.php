@@ -4,15 +4,17 @@
  *
  * Variables provided by GoogleConnect::render_page():
  * $client, $connection, $auth_url, $projects, $billing, $proj_err, $log, $error,
- * $suggested_bucket, $settings
+ * $suggested_bucket, $default_project, $default_bucket, $settings
  */
 $domain  = ud_get_stateless_media()->domain;
 $msg     = isset($_GET['sm_gc']) ? sanitize_text_field($_GET['sm_gc']) : '';
 $post    = admin_url('admin-post.php');
 $configured = !empty($settings->key_json) && !empty($settings->bucket);
-$redirect_uri = $client ? $client['redirect_uri'] : wpCloud\StatelessMedia\GoogleConnect::REDIRECT_URI;
-$hosted       = wpCloud\StatelessMedia\GoogleConnect::is_hosted_redirect($redirect_uri);
-$redirect_host = wp_parse_url($redirect_uri, PHP_URL_HOST);
+$redirect_uri  = $client ? $client['redirect_uri'] : wpCloud\StatelessMedia\GoogleConnect::LOOPBACK_URI;
+$hosted        = $client && $client['source'] === 'broker';
+$broker_host   = wp_parse_url(wpCloud\StatelessMedia\GoogleConnect::broker_url(), PHP_URL_HOST);
+$site_host     = wp_parse_url(home_url(), PHP_URL_HOST);
+$start_error   = wpCloud\StatelessMedia\GoogleConnect::instance()->start_error;
 ?>
 <div class="wrap">
   <h1><?php _e('Stateless Connect', $domain); ?></h1>
@@ -55,7 +57,7 @@ $redirect_host = wp_parse_url($redirect_uri, PHP_URL_HOST);
     <div class="card" style="max-width:720px">
       <h2 class="title"><?php _e('Your own OAuth client (optional)', $domain); ?></h2>
       <p><?php printf(esc_html__('By default the sign-in goes through %s, which holds the WP-Stateless client. Paste your own client here to bypass it.', $domain), '<code>' . esc_html(wp_parse_url(wpCloud\StatelessMedia\GoogleConnect::broker_url(), PHP_URL_HOST)) . '</code>'); ?></p>
-      <p class="description"><?php printf(esc_html__('Create it in the Google Cloud console under Clients as a Web application with %s in its authorized redirect URIs. A Desktop client with the loopback address works too.', $domain), '<code>' . esc_html(wpCloud\StatelessMedia\GoogleConnect::REDIRECT_URI) . '</code>'); ?></p>
+      <p class="description"><?php printf(esc_html__('Create it in the Google Cloud console under Clients as a Desktop app. Google then sends the browser to the loopback address %s, which never loads; you copy the whole address from the address bar.', $domain), '<code>' . esc_html(wpCloud\StatelessMedia\GoogleConnect::LOOPBACK_URI) . '</code>'); ?></p>
       <form method="post" action="<?php echo esc_url($post); ?>">
         <?php wp_nonce_field(wpCloud\StatelessMedia\GoogleConnect::NONCE); ?>
         <input type="hidden" name="action" value="sm_gc_client">
@@ -71,13 +73,6 @@ $redirect_host = wp_parse_url($redirect_uri, PHP_URL_HOST);
               <p class="description"><?php _e('Stored on this site only and never shown again.', $domain); ?></p>
             </td>
           </tr>
-          <tr>
-            <th scope="row"><label for="redirect_uri"><?php _e('Redirect URI', $domain); ?></label></th>
-            <td>
-              <input name="redirect_uri" id="redirect_uri" type="text" class="large-text code" value="<?php echo esc_attr($redirect_uri); ?>" autocomplete="off" spellcheck="false">
-              <p class="description"><?php printf(esc_html__('Where Google sends the browser after approval. %1$s shows an eight character code to type here. %2$s is the gcloud-style loopback address that never loads; you copy the whole address instead.', $domain), '<code>' . esc_html(wpCloud\StatelessMedia\GoogleConnect::REDIRECT_URI) . '</code>', '<code>' . esc_html(wpCloud\StatelessMedia\GoogleConnect::LOOPBACK_URI) . '</code>'); ?></p>
-            </td>
-          </tr>
         </table>
         <?php submit_button(__('Save client', $domain)); ?>
       </form>
@@ -88,14 +83,19 @@ $redirect_host = wp_parse_url($redirect_uri, PHP_URL_HOST);
   <?php if ($client && !$connection) : ?>
     <div class="card" style="max-width:720px">
       <h2 class="title"><?php _e('Step 1 of 2: sign in with Google', $domain); ?></h2>
+      <?php if ($hosted && !$auth_url) : ?>
+        <div class="notice notice-error inline"><p><?php printf(esc_html__('Could not prepare the sign-in with %1$s: %2$s', $domain), '<code>' . esc_html($broker_host) . '</code>', esc_html($start_error ?: __('no reply', $domain))); ?> <a href="<?php echo esc_url(remove_query_arg(array('sm_gc', 'sm_gc_pair', 'sm_gc_rt'))); ?>"><?php _e('Try again', $domain); ?></a></p></div>
+      <?php endif; ?>
       <ol>
         <li>
           <?php _e('Open the sign-in link and approve access. Use the Google account that owns, or should own, the Cloud project.', $domain); ?><br>
-          <a class="button button-primary" style="margin-top:8px" target="_blank" rel="noopener" href="<?php echo esc_url($auth_url); ?>"><?php _e('Sign in with Google', $domain); ?></a>
+          <?php if ($auth_url) : ?>
+            <a class="button button-primary" style="margin-top:8px" target="_blank" rel="noopener" href="<?php echo esc_url($auth_url); ?>"><?php _e('Sign in with Google', $domain); ?></a>
+          <?php endif; ?>
         </li>
         <li style="margin-top:12px">
           <?php if ($hosted) : ?>
-            <?php printf(esc_html__('After you approve, you come straight back to this page and the sign-in finishes by itself. If you approved on another device, %s shows a short code like ABCD-EFGH instead.', $domain), '<strong>' . esc_html($redirect_host) . '</strong>'); ?>
+            <?php printf(esc_html__('%1$s then asks you to confirm connecting %2$s. Check that it names this site before you click Connect. After that you come straight back here and the sign-in finishes by itself. If you confirmed on another device, that page shows a short code like ABCD-EFGH instead.', $domain), '<strong>' . esc_html($broker_host) . '</strong>', '<strong>' . esc_html($site_host) . '</strong>'); ?>
           <?php else : ?>
             <?php printf(esc_html__('After you approve, Google sends your browser to an address starting with %s that will not load. That is expected. Copy the complete address from the address bar.', $domain), '<code>' . esc_html($redirect_uri) . '</code>'); ?>
           <?php endif; ?>
@@ -111,8 +111,11 @@ $redirect_host = wp_parse_url($redirect_uri, PHP_URL_HOST);
         </li>
       </ol>
       <p class="description">
-        <?php _e('This is the same flow the gcloud command line uses on a machine without a browser. The code only works together with a secret this site generated, and it expires in minutes.', $domain); ?>
-        <?php if ($hosted) printf(esc_html__('%s keeps the pairing record for ten minutes, signs the token request, and stores nothing else.', $domain), esc_html($redirect_host)); ?>
+        <?php if ($hosted) : ?>
+          <?php printf(esc_html__('%s only releases the sign-in to the site you confirmed, and only to this site, which holds a secret it generated for this attempt. It keeps the record for ten minutes and stores nothing else about you.', $domain), esc_html($broker_host)); ?>
+        <?php else : ?>
+          <?php _e('This is the same flow the gcloud command line uses on a machine without a browser. The code only works together with a secret this site generated, and it expires in minutes.', $domain); ?>
+        <?php endif; ?>
       </p>
     </div>
   <?php endif; ?>
@@ -148,7 +151,7 @@ $redirect_host = wp_parse_url($redirect_uri, PHP_URL_HOST);
             <td>
               <select name="project" id="sm_gc_project" class="regular-text">
                 <?php foreach ($projects as $p) : ?>
-                  <option value="<?php echo esc_attr($p['projectId']); ?>" <?php selected(!empty($connection['project']) && $connection['project'] === $p['projectId']); ?>><?php echo esc_html($p['name']); ?> (<?php echo esc_html($p['projectId']); ?>)</option>
+                  <option value="<?php echo esc_attr($p['projectId']); ?>" <?php selected($default_project !== '' && $default_project === $p['projectId']); ?>><?php echo esc_html($p['name']); ?> (<?php echo esc_html($p['projectId']); ?>)</option>
                 <?php endforeach; ?>
                 <option value="__new__" <?php selected(empty($projects)); ?>><?php _e('Create a new project', $domain); ?></option>
               </select>
@@ -179,10 +182,11 @@ $redirect_host = wp_parse_url($redirect_uri, PHP_URL_HOST);
             <th scope="row"><?php _e('Bucket', $domain); ?></th>
             <td>
               <fieldset>
-                <label><input type="radio" name="bucket_choice" value="new" checked> <?php _e('Create a new bucket named', $domain); ?></label>
-                <input name="bucket_name" type="text" class="regular-text code" value="<?php echo esc_attr($suggested_bucket); ?>" style="margin-left:4px">
+                <label><input type="radio" name="bucket_choice" value="new" <?php checked($default_bucket === ''); ?>> <?php _e('Create a new bucket named', $domain); ?></label>
+                <input name="bucket_name" type="text" class="regular-text code" value="<?php echo esc_attr($default_bucket !== '' ? $default_bucket : $suggested_bucket); ?>" style="margin-left:4px">
                 <p class="description" style="margin-top:4px"><?php _e('Or type the name of a bucket that already exists in that project and choose:', $domain); ?></p>
-                <label><input type="radio" name="bucket_choice" value="existing"> <?php _e('Use the existing bucket with that name', $domain); ?></label>
+                <label><input type="radio" name="bucket_choice" value="existing" <?php checked($default_bucket !== ''); ?>> <?php _e('Use the existing bucket with that name', $domain); ?></label>
+                <?php if ($default_bucket !== '') : ?><p class="description" style="margin-top:4px"><?php printf(esc_html__('Preselected from this site\'s last setup: %s. Change either field to use something else.', $domain), '<code>' . esc_html($default_bucket) . '</code>'); ?></p><?php endif; ?>
               </fieldset>
             </td>
           </tr>
