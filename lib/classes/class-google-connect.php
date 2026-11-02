@@ -24,7 +24,9 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
     const PAGE            = 'stateless-connect';
     const OPTION          = 'sm_google_connect';
     const CLIENT_OPTION   = 'sm_google_connect_client';
-    const REDIRECT_URI    = 'http://127.0.0.1:19190/';
+    const REDIRECT_URI    = 'https://stateless.ci/connect';
+    const LOOPBACK_URI    = 'http://127.0.0.1:19190/';
+    const BROKER          = 'https://stateless.ci';
     const SCOPES          = 'openid email https://www.googleapis.com/auth/cloud-platform';
     const AUTH_ENDPOINT   = 'https://accounts.google.com/o/oauth2/v2/auth';
     const TOKEN_ENDPOINT  = 'https://oauth2.googleapis.com/token';
@@ -124,28 +126,98 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
     }
 
     /* ------------------------------------------------------------------ */
-    /* Client configuration (Desktop OAuth client, public by design)        */
+    /* Client configuration (installed-app OAuth client, public by design)  */
     /* ------------------------------------------------------------------ */
 
     public function get_client() {
       if (defined('WP_STATELESS_GOOGLE_CLIENT_ID') && defined('WP_STATELESS_GOOGLE_CLIENT_SECRET')) {
-        return array('id' => WP_STATELESS_GOOGLE_CLIENT_ID, 'secret' => WP_STATELESS_GOOGLE_CLIENT_SECRET, 'source' => 'constant');
+        return array(
+          'id'           => WP_STATELESS_GOOGLE_CLIENT_ID,
+          'secret'       => WP_STATELESS_GOOGLE_CLIENT_SECRET,
+          'redirect_uri' => defined('WP_STATELESS_GOOGLE_REDIRECT_URI') ? WP_STATELESS_GOOGLE_REDIRECT_URI : self::REDIRECT_URI,
+          'source'       => 'constant',
+        );
       }
       $opt = get_option(self::CLIENT_OPTION);
       if (!empty($opt['id']) && !empty($opt['secret'])) {
-        return array('id' => $opt['id'], 'secret' => $opt['secret'], 'source' => 'option');
+        return array(
+          'id'           => $opt['id'],
+          'secret'       => $opt['secret'],
+          // Clients saved before the hosted page existed were Desktop clients on the loopback address.
+          'redirect_uri' => !empty($opt['redirect_uri']) ? $opt['redirect_uri'] : self::LOOPBACK_URI,
+          'source'       => 'option',
+        );
       }
-      return null;
+      return $this->broker_client();
+    }
+
+    /* ------------------------------------------------------------------ */
+    /* Broker: stateless.ci holds the web client secret and the callback    */
+    /* ------------------------------------------------------------------ */
+
+    public static function broker_url() {
+      return untrailingslashit(defined('WP_STATELESS_CONNECT_BROKER') ? WP_STATELESS_CONNECT_BROKER : self::BROKER);
+    }
+
+    private function broker_request($path, $body = null) {
+      $args = array(
+        'timeout'    => 25,
+        'user-agent' => defined('WP_STATELESS_CONNECT_BROKER_UA') ? WP_STATELESS_CONNECT_BROKER_UA : 'WP-Stateless (' . home_url() . ')',
+      );
+      if ($body !== null) {
+        $args['body'] = $body;
+        $res = wp_remote_post(self::broker_url() . $path, $args);
+      } else {
+        $res = wp_remote_get(self::broker_url() . $path, $args);
+      }
+      if (is_wp_error($res)) return $res;
+      $data = json_decode(wp_remote_retrieve_body($res), true);
+      $code = (int) wp_remote_retrieve_response_code($res);
+      if (!is_array($data)) {
+        return new WP_Error('broker', sprintf(__('Unexpected reply from %1$s (HTTP %2$d).', ud_get_stateless_media()->domain), wp_parse_url(self::broker_url(), PHP_URL_HOST), $code));
+      }
+      $data['_status'] = $code;
+      return $data;
+    }
+
+    private function broker_client() {
+      $cached = get_transient('sm_gc_broker_client');
+      if (is_array($cached) && !empty($cached['id']) && $cached['broker'] === self::broker_url()) return $cached;
+      $data = $this->broker_request('/connect/google/client');
+      if (is_wp_error($data) || empty($data['client_id']) || empty($data['redirect_uri'])) return null;
+      $client = array(
+        'id'           => $data['client_id'],
+        'secret'       => '',
+        'redirect_uri' => $data['redirect_uri'],
+        'source'       => 'broker',
+        'broker'       => self::broker_url(),
+      );
+      set_transient('sm_gc_broker_client', $client, HOUR_IN_SECONDS);
+      return $client;
+    }
+
+    /**
+     * True when Google will land the browser on a page that shows the code (stateless.ci/connect),
+     * false when it lands on the loopback address and the admin copies the whole URL.
+     */
+    public static function is_hosted_redirect($uri) {
+      return strpos($uri, 'http://127.0.0.1') !== 0 && strpos($uri, 'http://localhost') !== 0 && strpos($uri, 'http://[::1]') !== 0;
     }
 
     public function handle_client() {
       $this->guard();
       $id     = isset($_POST['client_id']) ? trim(sanitize_text_field($_POST['client_id'])) : '';
       $secret = isset($_POST['client_secret']) ? trim(sanitize_text_field($_POST['client_secret'])) : '';
+      $uri    = isset($_POST['redirect_uri']) ? trim(esc_url_raw(wp_unslash($_POST['redirect_uri']))) : '';
       if (!$id || !$secret) {
         $this->fail(__('Both the client ID and client secret are required.', ud_get_stateless_media()->domain));
       }
-      update_option(self::CLIENT_OPTION, array('id' => $id, 'secret' => $secret), false);
+      if (!$uri) $uri = self::REDIRECT_URI;
+      // Google only accepts https redirect URIs on web clients and loopback http on desktop clients.
+      if (strpos($uri, 'https://') !== 0 && self::is_hosted_redirect($uri)) {
+        $this->fail(__('The redirect URI must start with https:// or be the loopback address http://127.0.0.1:19190/.', ud_get_stateless_media()->domain));
+      }
+      update_option(self::CLIENT_OPTION, array('id' => $id, 'secret' => $secret, 'redirect_uri' => $uri), false);
       $this->done(array('sm_gc' => 'client-saved'));
     }
 
@@ -166,7 +238,7 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
 
       return self::AUTH_ENDPOINT . '?' . http_build_query(array(
         'client_id'             => $client['id'],
-        'redirect_uri'          => self::REDIRECT_URI,
+        'redirect_uri'          => $client['redirect_uri'],
         'response_type'         => 'code',
         'scope'                 => self::SCOPES,
         'code_challenge'        => $challenge,
@@ -191,13 +263,26 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
       $pasted = isset($_POST['redirect_url']) ? trim(wp_unslash($_POST['redirect_url'])) : '';
       $params = $this->parse_redirect($pasted);
 
+      if (!empty($params['pair'])) {
+        if ($client['source'] !== 'broker') {
+          $this->fail(__('Pairing codes only work with the hosted sign-in page. Paste the full address Google sent you to instead.', ud_get_stateless_media()->domain));
+        }
+        $r = $this->broker_request('/connect/google/redeem', array('pair' => $params['pair'], 'state' => $pkce['state']));
+        if (is_wp_error($r)) $this->fail($r->get_error_message());
+        if (empty($r['code'])) {
+          $this->fail(__('That code was not recognized or has expired. Click Sign in with Google again and type the new code.', ud_get_stateless_media()->domain));
+        }
+        $params = array('code' => $r['code'], 'state' => $pkce['state']);
+      }
+
       if (!empty($params['error'])) {
         $this->fail(sprintf(__('Google returned an error: %s', ud_get_stateless_media()->domain), esc_html($params['error'])));
       }
       if (empty($params['code'])) {
-        $this->fail(__('No authorization code found in what you pasted. Paste the full address of the page Google sent you to.', ud_get_stateless_media()->domain));
+        $this->fail(__('No authorization code found in what you pasted. Paste the code Google showed you, or the full address of the page it sent you to.', ud_get_stateless_media()->domain));
       }
-      if (empty($params['state']) || !hash_equals($pkce['state'], $params['state'])) {
+      // A pasted bare code carries no state. The code is still bound to this attempt by PKCE.
+      if (!empty($params['state']) && !hash_equals($pkce['state'], $params['state'])) {
         $this->fail(__('State mismatch. The pasted address does not belong to this sign-in attempt. Start again.', ud_get_stateless_media()->domain));
       }
 
@@ -205,7 +290,7 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
         'grant_type'    => 'authorization_code',
         'code'          => $params['code'],
         'code_verifier' => $pkce['verifier'],
-        'redirect_uri'  => self::REDIRECT_URI,
+        'redirect_uri'  => $client['redirect_uri'],
       ), $client);
       if (is_wp_error($token)) $this->fail($token->get_error_message());
       if (empty($token['refresh_token'])) {
@@ -269,16 +354,28 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
         parse_str($pasted, $out);
         return $out;
       }
+      // An eight character pairing code from the hosted page, with or without the dash.
+      if (preg_match('/^[A-Za-z0-9]{4}-?[A-Za-z0-9]{4}$/', $pasted)) {
+        return array('pair' => strtoupper(str_replace('-', '', $pasted)));
+      }
       return array('code' => $pasted);
     }
 
     private function token_request($fields, $client) {
-      $fields['client_id']     = $client['id'];
-      $fields['client_secret'] = $client['secret'];
-      $res = wp_remote_post(self::TOKEN_ENDPOINT, array('body' => $fields, 'timeout' => 30));
-      if (is_wp_error($res)) return $res;
-      $body = json_decode(wp_remote_retrieve_body($res), true);
-      $code = wp_remote_retrieve_response_code($res);
+      if (!empty($client['source']) && $client['source'] === 'broker') {
+        // The broker adds the client secret and relays Google's reply without keeping it.
+        $body = $this->broker_request('/connect/google/token', $fields);
+        if (is_wp_error($body)) return $body;
+        $code = $body['_status'];
+        unset($body['_status']);
+      } else {
+        $fields['client_id']     = $client['id'];
+        $fields['client_secret'] = $client['secret'];
+        $res = wp_remote_post(self::TOKEN_ENDPOINT, array('body' => $fields, 'timeout' => 30));
+        if (is_wp_error($res)) return $res;
+        $body = json_decode(wp_remote_retrieve_body($res), true);
+        $code = (int) wp_remote_retrieve_response_code($res);
+      }
       if ($code !== 200 || empty($body['access_token'])) {
         $msg = isset($body['error_description']) ? $body['error_description'] : (isset($body['error']) ? $body['error'] : 'HTTP ' . $code);
         return new WP_Error('token', sprintf(__('Token exchange failed: %s', ud_get_stateless_media()->domain), $msg));

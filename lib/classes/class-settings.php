@@ -750,19 +750,26 @@ namespace wpCloud\StatelessMedia {
           return;
         }
 
+        $connect_url = sprintf(
+          '<a href="%s">%s</a>',
+          esc_url(admin_url('upload.php?page=stateless-connect')),
+          __('Open Stateless Connect', ud_get_stateless_media()->domain),
+        );
+
         $documentation_url = sprintf(
           '<a href="%s" target="_blank">%s</a>',
           $this->bootstrap->get_docs_page_url('/setup/'),
-          __('Refer to the setup manual', ud_get_stateless_media()->domain),
+          __('the setup manual', ud_get_stateless_media()->domain),
         );
 
         $this->bootstrap->errors->add([
           'title' => __('WP-Stateless: Finish Setup', ud_get_stateless_media()->domain),
           'message' => sprintf(
             __(
-              'WP-Stateless has been successfully activated. %s for guidance on completing the setup.',
+              'WP-Stateless has been successfully activated. %1$s to sign in with Google and create a bucket from here, or follow %2$s to configure it by hand.',
               ud_get_stateless_media()->domain,
             ),
+            $connect_url,
             $documentation_url,
           ),
           'key' => self::SETUP_MESSAGE_KEY,

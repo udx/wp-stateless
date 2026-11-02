@@ -10,6 +10,9 @@ $domain  = ud_get_stateless_media()->domain;
 $msg     = isset($_GET['sm_gc']) ? sanitize_text_field($_GET['sm_gc']) : '';
 $post    = admin_url('admin-post.php');
 $configured = !empty($settings->key_json) && !empty($settings->bucket);
+$redirect_uri = $client ? $client['redirect_uri'] : wpCloud\StatelessMedia\GoogleConnect::REDIRECT_URI;
+$hosted       = wpCloud\StatelessMedia\GoogleConnect::is_hosted_redirect($redirect_uri);
+$redirect_host = wp_parse_url($redirect_uri, PHP_URL_HOST);
 ?>
 <div class="wrap">
   <h1><?php _e('Stateless Connect', $domain); ?></h1>
@@ -45,23 +48,34 @@ $configured = !empty($settings->key_json) && !empty($settings->bucket);
   <?php endif; ?>
 
   <?php /* ---------------- Step 0: OAuth client (dev only until the UDX client ships in the plugin) ---------------- */ ?>
-  <?php if (!$client || (isset($_GET['edit_client']) && $client['source'] === 'option')) : ?>
+  <?php if (!$client) : ?>
+    <div class="notice notice-warning inline"><p><?php printf(esc_html__('Could not reach %s to start the sign-in. Check that this site can make outbound HTTPS requests, or paste your own OAuth client below.', $domain), '<code>' . esc_html(wpCloud\StatelessMedia\GoogleConnect::broker_url()) . '</code>'); ?></p></div>
+  <?php endif; ?>
+  <?php if (!$client || isset($_GET['edit_client'])) : ?>
     <div class="card" style="max-width:720px">
-      <h2 class="title"><?php _e('OAuth client', $domain); ?></h2>
-      <p><?php _e('Development build: paste the Desktop OAuth client that identifies WP-Stateless to Google. Released builds ship this inside the plugin.', $domain); ?></p>
+      <h2 class="title"><?php _e('Your own OAuth client (optional)', $domain); ?></h2>
+      <p><?php printf(esc_html__('By default the sign-in goes through %s, which holds the WP-Stateless client. Paste your own client here to bypass it.', $domain), '<code>' . esc_html(wp_parse_url(wpCloud\StatelessMedia\GoogleConnect::broker_url(), PHP_URL_HOST)) . '</code>'); ?></p>
+      <p class="description"><?php printf(esc_html__('Create it in the Google Cloud console under Clients as a Web application with %s in its authorized redirect URIs. A Desktop client with the loopback address works too.', $domain), '<code>' . esc_html(wpCloud\StatelessMedia\GoogleConnect::REDIRECT_URI) . '</code>'); ?></p>
       <form method="post" action="<?php echo esc_url($post); ?>">
         <?php wp_nonce_field(wpCloud\StatelessMedia\GoogleConnect::NONCE); ?>
         <input type="hidden" name="action" value="sm_gc_client">
         <table class="form-table" role="presentation">
           <tr>
             <th scope="row"><label for="client_id"><?php _e('Client ID', $domain); ?></label></th>
-            <td><input name="client_id" id="client_id" type="text" class="large-text code" value="<?php echo $client ? esc_attr($client['id']) : ''; ?>" autocomplete="off"></td>
+            <td><input name="client_id" id="client_id" type="text" class="large-text code" value="<?php echo ($client && $client['source'] === 'option') ? esc_attr($client['id']) : ''; ?>" autocomplete="off"></td>
           </tr>
           <tr>
             <th scope="row"><label for="client_secret"><?php _e('Client secret', $domain); ?></label></th>
             <td>
-              <input name="client_secret" id="client_secret" type="password" class="large-text code" value="<?php echo $client ? esc_attr($client['secret']) : ''; ?>" autocomplete="off">
-              <p class="description"><?php _e('Desktop clients are public clients. Google documents that this value cannot be kept secret.', $domain); ?></p>
+              <input name="client_secret" id="client_secret" type="password" class="large-text code" value="<?php echo ($client && $client['source'] === 'option') ? esc_attr($client['secret']) : ''; ?>" autocomplete="off">
+              <p class="description"><?php _e('Installed-app clients are public clients. Google documents that this value cannot be kept secret.', $domain); ?></p>
+            </td>
+          </tr>
+          <tr>
+            <th scope="row"><label for="redirect_uri"><?php _e('Redirect URI', $domain); ?></label></th>
+            <td>
+              <input name="redirect_uri" id="redirect_uri" type="text" class="large-text code" value="<?php echo esc_attr($redirect_uri); ?>" autocomplete="off" spellcheck="false">
+              <p class="description"><?php printf(esc_html__('Where Google sends the browser after approval. %1$s shows a code to copy. %2$s is the gcloud-style loopback address that never loads; you copy the whole address instead.', $domain), '<code>' . esc_html(wpCloud\StatelessMedia\GoogleConnect::REDIRECT_URI) . '</code>', '<code>' . esc_html(wpCloud\StatelessMedia\GoogleConnect::LOOPBACK_URI) . '</code>'); ?></p>
             </td>
           </tr>
         </table>
@@ -80,19 +94,26 @@ $configured = !empty($settings->key_json) && !empty($settings->bucket);
           <a class="button button-primary" style="margin-top:8px" target="_blank" rel="noopener" href="<?php echo esc_url($auth_url); ?>"><?php _e('Sign in with Google', $domain); ?></a>
         </li>
         <li style="margin-top:12px">
-          <?php _e('After you approve, Google sends your browser to an address starting with http://127.0.0.1:19190/ that will not load. That is expected. Copy the complete address from the address bar.', $domain); ?>
+          <?php if ($hosted) : ?>
+            <?php printf(esc_html__('After you approve, Google sends your browser to %s, which shows a short code like ABCD-EFGH. Copy it.', $domain), '<strong>' . esc_html($redirect_host) . '</strong>'); ?>
+          <?php else : ?>
+            <?php printf(esc_html__('After you approve, Google sends your browser to an address starting with %s that will not load. That is expected. Copy the complete address from the address bar.', $domain), '<code>' . esc_html($redirect_uri) . '</code>'); ?>
+          <?php endif; ?>
         </li>
         <li style="margin-top:12px">
           <?php _e('Paste it here.', $domain); ?>
           <form method="post" action="<?php echo esc_url($post); ?>" style="margin-top:8px">
             <?php wp_nonce_field(wpCloud\StatelessMedia\GoogleConnect::NONCE); ?>
             <input type="hidden" name="action" value="sm_gc_finish">
-            <input name="redirect_url" type="text" class="large-text code" placeholder="http://127.0.0.1:19190/?state=...&code=...&scope=..." autocomplete="off" spellcheck="false">
+            <input name="redirect_url" type="text" class="large-text code" placeholder="<?php echo $hosted ? 'ABCD-EFGH' : esc_attr($redirect_uri . '?state=...&code=...&scope=...'); ?>" autocomplete="off" spellcheck="false">
             <?php submit_button(__('Finish sign-in', $domain), 'primary', 'submit', true); ?>
           </form>
         </li>
       </ol>
-      <p class="description"><?php _e('This is the same flow the gcloud command line uses on a machine without a browser. The code in that address only works together with a secret this site generated, and it expires in minutes.', $domain); ?></p>
+      <p class="description">
+        <?php _e('This is the same flow the gcloud command line uses on a machine without a browser. The code only works together with a secret this site generated, and it expires in minutes.', $domain); ?>
+        <?php if ($hosted) printf(esc_html__('%s keeps the pairing record for ten minutes, signs the token request, and stores nothing else.', $domain), esc_html($redirect_host)); ?>
+      </p>
     </div>
   <?php endif; ?>
 
