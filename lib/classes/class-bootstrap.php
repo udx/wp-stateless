@@ -100,6 +100,12 @@ namespace wpCloud\StatelessMedia {
          */
         $this->settings = new Settings($this);
         Status::instance();
+
+        /* Google Connect: sign in with Google and provision from wp-admin. Admin only. */
+        if (is_admin()) {
+          require_once(dirname(__FILE__) . '/class-google-connect.php');
+          GoogleConnect::instance();
+        }
       }
 
       /**
