@@ -276,15 +276,22 @@ $start_error   = wpCloud\StatelessMedia\GoogleConnect::instance()->start_error;
           <tr>
             <th scope="row" id="sm-mode-label"><?php _e('Media storage', $domain); ?></th>
             <td>
+              <?php
+              $mode_options = array(
+                'cdn' => array(__('CDN', $domain), __('Serve media from Google Cloud and keep a copy on this server. A good starting point for most sites.', $domain)),
+                'ephemeral' => array(__('Ephemeral', $domain), __('Serve media from Google Cloud. Use this server temporarily to process uploads, then remove the local files.', $domain)),
+                'stateless' => array(__('Stateless', $domain), __('Store and serve media entirely in Google Cloud, without local storage. Check that your other plugins support this mode.', $domain)),
+                'backup' => array(__('Backup', $domain), __('Keep serving media from this server and save an additional copy in Google Cloud.', $domain)),
+              );
+              $locked_mode = $connect->locked_mode();
+              if ($locked_mode) : ?>
+              <p><strong><?php echo esc_html($mode_options[$locked_mode['mode']][0]); ?></strong><br><span class="description"><?php echo esc_html($mode_options[$locked_mode['mode']][1]); ?></span></p>
+              <p class="description"><?php printf(esc_html__('The storage mode is set by %s and applies to this site. Change it there to use a different mode.', $domain), esc_html($locked_mode['source'])); ?></p>
+              <input type="hidden" name="mode" value="<?php echo esc_attr($locked_mode['mode']); ?>">
+              <?php else : ?>
               <?php if ($requires_stateless) : ?><p class="description"><?php _e('This environment requires Stateless mode because it uses App Engine or cannot write to the uploads directory.', $domain); ?></p><?php endif; ?>
               <fieldset class="sm-mode-options" aria-labelledby="sm-mode-label">
                 <?php
-                $mode_options = array(
-                  'cdn' => array(__('CDN', $domain), __('Serve media from Google Cloud and keep a copy on this server. A good starting point for most sites.', $domain)),
-                  'ephemeral' => array(__('Ephemeral', $domain), __('Serve media from Google Cloud. Use this server temporarily to process uploads, then remove the local files.', $domain)),
-                  'stateless' => array(__('Stateless', $domain), __('Store and serve media entirely in Google Cloud, without local storage. Check that your other plugins support this mode.', $domain)),
-                  'backup' => array(__('Backup', $domain), __('Keep serving media from this server and save an additional copy in Google Cloud.', $domain)),
-                );
                 $selected_mode = isset($settings->mode) && isset($mode_options[$settings->mode]) ? $settings->mode : 'ephemeral';
                 if ($requires_stateless) $selected_mode = 'stateless';
                 foreach ($mode_options as $value => $option) : ?>
@@ -295,6 +302,7 @@ $start_error   = wpCloud\StatelessMedia\GoogleConnect::instance()->start_error;
                 <?php endforeach; ?>
               </fieldset>
               <p class="description"><?php _e('You can change this later in Stateless Settings.', $domain); ?></p>
+              <?php endif; ?>
             </td>
           </tr>
         </table>

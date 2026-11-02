@@ -437,8 +437,13 @@ namespace wpCloud\StatelessMedia {
        */
       public static function missing_cloud_object($attachment_id, $metadata = null) {
         $client = ud_get_stateless_media()->get_client();
+        // While the plugin manages ACLs (fine-grained buckets) an object without its public-read entry is not
+        // complete either: it would be unreachable at its media URL. Buckets configured with
+        // WP_STATELESS_SKIP_ACL_SET have no per-object ACLs, so only existence can be checked there.
+        $manages_acl = !defined('WP_STATELESS_SKIP_ACL_SET') || !WP_STATELESS_SKIP_ACL_SET;
         foreach (self::get_path_and_url($metadata, $attachment_id) as $size => $media) {
-          if (!$client->get_media($media['gs_name'])) {
+          $found = $manages_acl ? $client->media_exists($media['gs_name']) : $client->get_media($media['gs_name']);
+          if (!$found) {
             return $size === '__full' ? __('original file', ud_get_stateless_media()->domain) : $size;
           }
         }

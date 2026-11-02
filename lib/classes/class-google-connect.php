@@ -256,24 +256,45 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
       $domain   = ud_get_stateless_media()->domain;
       $readonly = ud_get_stateless_media()->get('sm.readonly');
       if (!is_array($readonly)) return '';
-      $labels  = array('bucket' => __('bucket', $domain), 'key_json' => __('service account key', $domain), 'mode' => __('storage mode', $domain));
+      // Only the credentials decide whether setup can take effect. The storage mode is shown locked instead (see locked_mode()).
+      $labels = array('bucket' => __('bucket', $domain), 'key_json' => __('service account key', $domain));
+      foreach ($labels as $key => $label) {
+        if (empty($readonly[$key])) continue;
+        $source = $readonly[$key];
+        if ($source === 'network' && $this->network_scope()) continue; // network setup writes network settings itself
+        $next = $source === 'network'
+          ? __('Run Stateless Connect from the Network Admin to change it for the whole network.', $domain)
+          : __('Remove that override to let setup manage it, or finish the configuration there instead.', $domain);
+        return sprintf(__('The %1$s is set by %2$s, so setup cannot change it. %3$s', $domain), $label, self::readonly_source_label($source), $next);
+      }
+      return '';
+    }
+
+    /**
+     * The storage mode this site will actually run with when something other than its own setting decides it:
+     * a constant, App Engine, or (for a site inside a network) the network. Settings::refresh() applies the
+     * network's value whenever it is non-empty, which on a multisite includes the network default, so the
+     * mode is presented as fixed rather than offered as a choice that would not take effect.
+     * Returns array('mode' => ..., 'source' => label) or null when the site chooses freely.
+     */
+    public function locked_mode() {
+      $readonly = ud_get_stateless_media()->get('sm.readonly');
+      if (!is_array($readonly) || empty($readonly['mode'])) return null;
+      if ($readonly['mode'] === 'network' && $this->network_scope()) return null;
+      $mode = ud_get_stateless_media()->get('sm.mode');
+      if (!in_array($mode, array('backup', 'cdn', 'ephemeral', 'stateless'), true)) return null;
+      return array('mode' => $mode, 'source' => self::readonly_source_label($readonly['mode']));
+    }
+
+    private static function readonly_source_label($source) {
+      $domain  = ud_get_stateless_media()->domain;
       $sources = array(
         'constant'    => __('a constant in wp-config.php', $domain),
         'environment' => __('the GOOGLE_APPLICATION_CREDENTIALS environment variable', $domain),
         'network'     => __('network settings', $domain),
         'app_engine'  => __('the App Engine environment', $domain),
       );
-      foreach ($labels as $key => $label) {
-        if (empty($readonly[$key])) continue;
-        $source = $readonly[$key];
-        if ($source === 'network' && $this->network_scope()) continue; // network setup writes network settings itself
-        if ($source === 'app_engine') continue; // mode is forced to stateless and requires_stateless_mode() already enforces it
-        $next = $source === 'network'
-          ? __('Run Stateless Connect from the Network Admin to change it for the whole network.', $domain)
-          : __('Remove that override to let setup manage it, or finish the configuration there instead.', $domain);
-        return sprintf(__('The %1$s is set by %2$s, so setup cannot change it. %3$s', $domain), $label, isset($sources[$source]) ? $sources[$source] : $source, $next);
-      }
-      return '';
+      return isset($sources[$source]) ? $sources[$source] : $source;
     }
 
     /** Preserve conditional bindings; grant this site a separate unconditional bucket role. */
@@ -287,6 +308,16 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
       unset($binding);
       $bindings[] = array('role' => 'roles/storage.admin', 'members' => array($member));
       return $bindings;
+    }
+
+    /** True when an unconditional binding lets allUsers read objects. */
+    public static function bucket_is_public($bindings) {
+      $readers = array('roles/storage.objectViewer', 'roles/storage.legacyObjectReader', 'roles/storage.objectUser', 'roles/storage.objectAdmin', 'roles/storage.admin');
+      foreach ((array) $bindings as $binding) {
+        if (!empty($binding['condition']) || empty($binding['role']) || empty($binding['members'])) continue;
+        if (in_array($binding['role'], $readers, true) && in_array('allUsers', (array) $binding['members'], true)) return true;
+      }
+      return false;
     }
 
     public static function bucket_name_error($bucket) {
@@ -649,14 +680,32 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
     public function handle_disconnect() {
       $this->guard();
       $connection = $this->get_connection();
+      $domain = ud_get_stateless_media()->domain;
       if ($connection) {
-        $refresh = $this->decrypt($connection['refresh_token']);
+        $problems = array();
+        $refresh  = $this->decrypt($connection['refresh_token']);
         if ($refresh) {
-          wp_remote_post(self::REVOKE_ENDPOINT, array('body' => array('token' => $refresh), 'timeout' => 20));
+          // 200 means revoked. Google answers 400 invalid_token for a grant that is already gone, which is the same outcome.
+          $res  = wp_remote_post(self::REVOKE_ENDPOINT, array('body' => array('token' => $refresh), 'timeout' => 20));
+          $code = is_wp_error($res) ? 0 : (int) wp_remote_retrieve_response_code($res);
+          $gone = $code === 400 && strpos((string) wp_remote_retrieve_body($res), 'invalid_token') !== false;
+          if ($code !== 200 && !$gone) {
+            $problems[] = sprintf(__('Google did not confirm the revocation (%s)', $domain), is_wp_error($res) ? $res->get_error_message() : 'HTTP ' . $code);
+          }
         }
         $conn = $this->broker_conn($connection);
         if ($conn) {
-          $this->broker_request('/connect/google/disconnect', array('connection_id' => $conn['id'], 'connection_secret' => $conn['secret']));
+          $r = $this->broker_request('/connect/google/disconnect', array('connection_id' => $conn['id'], 'connection_secret' => $conn['secret']));
+          // ok, or 401 invalid_connection when the broker already forgot this connection.
+          if (is_wp_error($r)) {
+            $problems[] = sprintf(__('%1$s did not confirm the disconnect (%2$s)', $domain), wp_parse_url(self::broker_url(), PHP_URL_HOST), $r->get_error_message());
+          } elseif (empty($r['ok']) && (int) $r['_status'] !== 401) {
+            $problems[] = sprintf(__('%1$s did not confirm the disconnect (HTTP %2$d)', $domain), wp_parse_url(self::broker_url(), PHP_URL_HOST), (int) $r['_status']);
+          }
+        }
+        if ($problems) {
+          // Keep the connection so the revocation can be retried instead of reporting success while access remains.
+          $this->fail(sprintf(__('Access could not be revoked yet: %s. The connection was kept so you can try again.', $domain), implode('; ', $problems)));
         }
       }
       $this->remove_option(self::OPTION);
@@ -837,18 +886,25 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
       $log = array();
       $uid = get_current_user_id();
 
-      $project_choice = isset($_POST['project']) ? sanitize_text_field($_POST['project']) : '';
-      $new_project    = isset($_POST['new_project_name']) ? sanitize_text_field($_POST['new_project_name']) : '';
-      $billing_choice = isset($_POST['billing_account']) ? sanitize_text_field($_POST['billing_account']) : '';
-      $bucket_choice  = isset($_POST['bucket_choice']) ? sanitize_text_field($_POST['bucket_choice']) : 'new';
-      $bucket         = isset($_POST['bucket_name']) ? strtolower(trim(sanitize_text_field($_POST['bucket_name']))) : '';
-      $location       = isset($_POST['location']) ? sanitize_text_field($_POST['location']) : 'US';
-      $mode           = isset($_POST['mode']) ? sanitize_text_field($_POST['mode']) : 'ephemeral';
+      $post           = wp_unslash($_POST); // WordPress slashes request data; a name like John's website must reach Google unescaped
+      $project_choice = isset($post['project']) ? sanitize_text_field($post['project']) : '';
+      $new_project    = isset($post['new_project_name']) ? sanitize_text_field($post['new_project_name']) : '';
+      $billing_choice = isset($post['billing_account']) ? sanitize_text_field($post['billing_account']) : '';
+      $bucket_choice  = isset($post['bucket_choice']) ? sanitize_text_field($post['bucket_choice']) : 'new';
+      $bucket         = isset($post['bucket_name']) ? strtolower(trim(sanitize_text_field($post['bucket_name']))) : '';
+      $location       = isset($post['location']) ? sanitize_text_field($post['location']) : 'US';
+      $mode           = isset($post['mode']) ? sanitize_text_field($post['mode']) : 'ephemeral';
       if (!in_array($mode, array('backup', 'cdn', 'ephemeral', 'stateless'), true)) $mode = 'ephemeral';
+      $locked_mode    = $this->locked_mode();
+      if ($locked_mode) $mode = $locked_mode['mode']; // the form shows the locked mode; never trust a posted one
 
       $draft = array('project' => $project_choice, 'new_project_name' => $new_project, 'billing_account' => $billing_choice, 'bucket_choice' => $bucket_choice, 'bucket_name' => $bucket, 'location' => $location, 'mode' => $mode);
       $this->state_set('draft', $draft, HOUR_IN_SECONDS, $uid);
-      if ($this->requires_stateless_mode() && $mode !== 'stateless') $this->fail(__('This environment requires Stateless mode. Select it before continuing.', ud_get_stateless_media()->domain));
+      if ($this->requires_stateless_mode() && $mode !== 'stateless') {
+        $this->fail($locked_mode
+          ? sprintf(__('This environment requires Stateless mode, but the storage mode is set to %1$s by %2$s. Change it there before continuing.', ud_get_stateless_media()->domain), $mode, $locked_mode['source'])
+          : __('This environment requires Stateless mode. Select it before continuing.', ud_get_stateless_media()->domain));
+      }
       $name_error = self::bucket_name_error($bucket);
       if ($name_error) $this->fail($name_error);
       if ($project_choice === '__new__' && !$billing_choice) $this->fail(__('Choose an open billing account before creating a project.', ud_get_stateless_media()->domain));
@@ -899,8 +955,24 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
           if (empty($existing_bucket['projectNumber']) || empty($project_info['projectNumber']) || (string) $existing_bucket['projectNumber'] !== (string) $project_info['projectNumber']) {
             throw new Exception(__('This bucket belongs to a different project. Select its project before continuing.', ud_get_stateless_media()->domain));
           }
-          if (!empty($existing_bucket['iamConfiguration']['uniformBucketLevelAccess']['enabled']) && (!defined('WP_STATELESS_SKIP_ACL_SET') || !WP_STATELESS_SKIP_ACL_SET)) {
+          $uniform = !empty($existing_bucket['iamConfiguration']['uniformBucketLevelAccess']['enabled']);
+          if ($uniform && (!defined('WP_STATELESS_SKIP_ACL_SET') || !WP_STATELESS_SKIP_ACL_SET)) {
             throw new Exception(__('This bucket uses uniform access. Configure WP_STATELESS_SKIP_ACL_SET before connecting it, or choose a bucket with fine-grained access.', ud_get_stateless_media()->domain));
+          }
+          // CDN, Ephemeral and Stateless serve media through unsigned public URLs. The plugin sets a public-read
+          // ACL per object on fine-grained buckets, but it cannot do that on a uniform-access bucket, and no ACL
+          // helps when public access prevention is enforced, so those buckets must already be readable by allUsers.
+          if ($mode !== 'backup') {
+            if (isset($existing_bucket['iamConfiguration']['publicAccessPrevention']) && $existing_bucket['iamConfiguration']['publicAccessPrevention'] === 'enforced') {
+              throw new Exception(__('This bucket enforces public access prevention, so media URLs would be refused in CDN, Ephemeral or Stateless mode. Turn it off for this bucket, or choose Backup mode.', ud_get_stateless_media()->domain));
+            }
+            if ($uniform) {
+              $policy = $this->api('GET', 'https://storage.googleapis.com/storage/v1/b/' . rawurlencode($bucket) . '/iam?optionsRequestedPolicyVersion=3');
+              $this->check($policy, 'Read bucket permissions');
+              if (!self::bucket_is_public(isset($policy['bindings']) ? $policy['bindings'] : array())) {
+                throw new Exception(__('This bucket uses uniform access but is not publicly readable, so media URLs would return 403 in CDN, Ephemeral or Stateless mode. Grant allUsers the Storage Object Viewer role on the bucket, or choose Backup mode.', ud_get_stateless_media()->domain));
+              }
+            }
           }
         }
 
