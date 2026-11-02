@@ -6,7 +6,7 @@ License: GPLv2 or later
 Requires PHP: 8.1
 Requires at least: 5.0
 Tested up to: 6.9
-Stable tag: 4.4.3
+Stable tag: 4.5.0
 
 Upload and serve your WordPress media files from Google Cloud Storage.
 
@@ -136,6 +136,16 @@ Before upgrading to WP-Stateless 3.2.0, please, make sure you use PHP 7.2 or abo
 Before upgrading to WP-Stateless 3.0, please, make sure you tested it on your development environment.
 
 == Changelog ==
+= 4.5.0 - 2026-11-02 =
+* NEW - Stateless Connect replaces the setup wizard: sign in with Google from wp-admin, confirm your site on stateless.ci, and WP-Stateless creates the project, bucket, service account and key inside your own Google Cloud account. No iframe, no copying of keys.
+* NEW - setup works from Network Admin on multisite, with network and per-site connections kept separate.
+* NEW - setup lets you choose an existing project, billing account and bucket from searchable lists, pick single, dual or multi-region locations, and select the storage mode with explanations.
+* NEW - a pairing code completes sign-in when the browser cannot return to the site, and sign-in works for localhost installs.
+* FIX - synchronization no longer reports success when an upload or a thumbnail failed to reach Google Cloud; the failure stays visible and the retry works.
+* FIX - media Trash Undo link now works from the grid view of the Media Library.
+* ENHANCEMENT - repeated setups revoke the site's previous service account key instead of piling keys onto the account.
+* ENHANCEMENT - plugin header and composer now state the PHP 8.1 minimum that the bundled Google libraries already require.
+
 = 4.4.3 - 2026-09-05 =
 * FIX - corrected add-on file path for the WooCommerce Extra Product Options add-on: duplicate `.php` extension caused the add-on to always appear uninstalled/inactive on the Stateless Addons screen with an invalid activation link.
 * FIX - resolved PHP warnings in non-media file synchronization: undefined `$media` variable after a failed object metadata update and deprecated dynamic `$client` property creation on PHP 8.2+.
