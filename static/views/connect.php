@@ -91,6 +91,13 @@ $start_error   = wpCloud\StatelessMedia\GoogleConnect::instance()->start_error;
           <?php _e('Open the sign-in link and approve access. Use the Google account that owns, or should own, the Cloud project.', $domain); ?><br>
           <?php if ($auth_url) : ?>
             <a class="button button-primary" style="margin-top:8px" target="_blank" rel="noopener" href="<?php echo esc_url($auth_url); ?>"><?php _e('Sign in with Google', $domain); ?></a>
+            <?php if ($hosted) : ?>
+              <form method="post" action="<?php echo esc_url($post); ?>" style="display:inline;margin-left:8px">
+                <?php wp_nonce_field(wpCloud\StatelessMedia\GoogleConnect::NONCE); ?>
+                <input type="hidden" name="action" value="sm_gc_restart">
+                <button type="submit" class="button-link"><?php _e('Start over', $domain); ?></button>
+              </form>
+            <?php endif; ?>
           <?php endif; ?>
         </li>
         <li style="margin-top:12px">

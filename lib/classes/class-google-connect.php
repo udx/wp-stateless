@@ -49,6 +49,7 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
       add_action('admin_post_sm_gc_finish', array($this, 'handle_finish'));
       add_action('admin_post_sm_gc_provision', array($this, 'handle_provision'));
       add_action('admin_post_sm_gc_disconnect', array($this, 'handle_disconnect'));
+      add_action('admin_post_sm_gc_restart', array($this, 'handle_restart'));
     }
 
     /* ------------------------------------------------------------------ */
@@ -279,8 +280,14 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
      */
     private function broker_auth_url($uid) {
       $att = $this->state_get('pkce', $uid);
-      if (!empty($att['auth_url']) && !empty($att['site_verifier']) && !empty($att['rt']) && $att['registered'] > time() - 15 * MINUTE_IN_SECONDS) {
-        return $att['auth_url'];
+      if (!empty($att['auth_url']) && !empty($att['site_verifier']) && !empty($att['rt']) && !empty($att['state']) && $att['registered'] > time() - 15 * MINUTE_IN_SECONDS) {
+        // Still open at the broker? An attempt it has forgotten (expired, cancelled, failed) would send
+        // the admin through Google only to be refused, so reopen instead.
+        $probe = $this->broker_request('/connect/google/status?txn=' . rawurlencode($att['state']));
+        if (!is_array($probe) || empty($probe['error']) || $probe['error'] !== 'unknown_transaction') {
+          return $att['auth_url']; // open, unreachable, or a broker without the probe: keep the attempt
+        }
+        $this->state_delete('pkce', $uid);
       }
       if (strpos(admin_url(), 'https://') !== 0) {
         $this->start_error = __('The hosted sign-in needs this admin to be served over https.', ud_get_stateless_media()->domain);
@@ -349,6 +356,14 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
       $all       = $this->proofs();
       $all[$txn] = array('token' => $token, 'exp' => time() + 20 * MINUTE_IN_SECONDS);
       update_option(self::PROOFS_OPTION, $all, false);
+    }
+
+    /** Drops the pending attempt so the next page view opens a fresh one. */
+    public function handle_restart() {
+      $this->guard();
+      $this->state_delete('pkce');
+      $this->state_delete('error');
+      $this->done(array());
     }
 
     public function handle_finish() {
