@@ -19,14 +19,14 @@ $start_error   = wpCloud\StatelessMedia\GoogleConnect::instance()->start_error;
 <div class="wrap">
   <h1><?php _e('Stateless Connect', $domain); ?></h1>
   <p class="description" style="max-width:720px">
-    <?php _e('Sign in with your own Google account and WP-Stateless creates everything it needs inside your Google Cloud project: a bucket, a service account that can reach only that bucket, and a key for this site. Nothing is stored anywhere except your Google account and this site.', $domain); ?>
+    <?php _e('Connect this site to your own Google Cloud in two steps. WP-Stateless creates a storage bucket for your media, plus a key that can reach only that bucket. Everything lives in your Google Cloud project and on this site.', $domain); ?>
   </p>
 
   <?php if ($error) : ?>
     <div class="notice notice-error"><p><?php echo wp_kses_post($error); ?></p></div>
   <?php elseif ($msg === 'client-saved') : ?>
     <div class="notice notice-success"><p><?php _e('OAuth client saved.', $domain); ?></p></div>
-  <?php elseif ($msg === 'connected') : ?>
+  <?php elseif ($msg === 'connected' && $connection) : ?>
     <div class="notice notice-success"><p><?php _e('Google account connected.', $domain); ?></p></div>
   <?php elseif ($msg === 'disconnected') : ?>
     <div class="notice notice-success"><p><?php _e('Google account disconnected and access revoked.', $domain); ?></p></div>
@@ -82,48 +82,59 @@ $start_error   = wpCloud\StatelessMedia\GoogleConnect::instance()->start_error;
   <?php /* ---------------- Step 1: sign in ---------------- */ ?>
   <?php if ($client && !$connection) : ?>
     <div class="card" style="max-width:720px">
-      <h2 class="title"><?php _e('Step 1 of 2: sign in with Google', $domain); ?></h2>
+      <h2 class="title"><?php _e('Step 1 of 2: connect your Google account', $domain); ?></h2>
       <?php if ($hosted && !$auth_url) : ?>
-        <div class="notice notice-error inline"><p><?php printf(esc_html__('Could not prepare the sign-in with %1$s: %2$s', $domain), '<code>' . esc_html($broker_host) . '</code>', esc_html($start_error ?: __('no reply', $domain))); ?> <a href="<?php echo esc_url(remove_query_arg(array('sm_gc', 'sm_gc_pair', 'sm_gc_rt'))); ?>"><?php _e('Try again', $domain); ?></a></p></div>
+        <div class="notice notice-error inline"><p><?php printf(esc_html__('The sign-in could not be prepared right now (%s).', $domain), esc_html($start_error ?: __('no reply from the sign-in service', $domain))); ?> <a href="<?php echo esc_url(remove_query_arg(array('sm_gc', 'sm_gc_pair', 'sm_gc_rt'))); ?>"><?php _e('Try again', $domain); ?></a></p></div>
       <?php endif; ?>
-      <ol>
-        <li>
-          <?php _e('Open the sign-in link and approve access. Use the Google account that owns, or should own, the Cloud project.', $domain); ?><br>
-          <?php if ($auth_url) : ?>
-            <a class="button button-primary" style="margin-top:8px" target="_blank" rel="noopener" href="<?php echo esc_url($auth_url); ?>"><?php _e('Sign in with Google', $domain); ?></a>
-            <?php if ($hosted) : ?>
-              <form method="post" action="<?php echo esc_url($post); ?>" style="display:inline;margin-left:8px">
-                <?php wp_nonce_field(wpCloud\StatelessMedia\GoogleConnect::NONCE); ?>
-                <input type="hidden" name="action" value="sm_gc_restart">
-                <button type="submit" class="button-link"><?php _e('Start over', $domain); ?></button>
-              </form>
-            <?php endif; ?>
-          <?php endif; ?>
-        </li>
-        <li style="margin-top:12px">
-          <?php if ($hosted) : ?>
-            <?php printf(esc_html__('%1$s then asks you to confirm connecting %2$s. Check that it names this site before you click Connect. After that you come straight back here and the sign-in finishes by itself. If you confirmed on another device, that page shows a short code like ABCD-EFGH instead.', $domain), '<strong>' . esc_html($broker_host) . '</strong>', '<strong>' . esc_html($site_host) . '</strong>'); ?>
-          <?php else : ?>
-            <?php printf(esc_html__('After you approve, Google sends your browser to an address starting with %s that will not load. That is expected. Copy the complete address from the address bar.', $domain), '<code>' . esc_html($redirect_uri) . '</code>'); ?>
-          <?php endif; ?>
-        </li>
-        <li style="margin-top:12px">
-          <?php echo $hosted ? esc_html__('Only if you were shown a code, type it here.', $domain) : esc_html__('Paste it here.', $domain); ?>
-          <form method="post" action="<?php echo esc_url($post); ?>" style="margin-top:8px">
+      <p><?php _e('Use the Google account that owns your Google Cloud project, or the one you want a new project created in.', $domain); ?></p>
+      <?php if ($auth_url) : ?>
+        <p style="margin:16px 0">
+          <a class="button button-primary button-hero" target="_blank" rel="noopener" href="<?php echo esc_url($auth_url); ?>"><?php _e('Sign in with Google', $domain); ?></a>
+        </p>
+      <?php endif; ?>
+
+      <?php if ($hosted) : ?>
+        <h3 style="margin-bottom:6px"><?php _e('What happens next', $domain); ?></h3>
+        <ol style="margin:0 0 16px 1.4em">
+          <li><?php _e('Google asks you to allow WP-Stateless to manage storage in your Google Cloud.', $domain); ?></li>
+          <li><?php printf(esc_html__('%1$s asks you to confirm that the site being connected is %2$s. Click Connect.', $domain), '<strong>' . esc_html($broker_host) . '</strong>', '<strong>' . esc_html($site_host) . '</strong>'); ?></li>
+          <li><?php _e('You land back on this page, signed in, ready to pick a project and create the bucket.', $domain); ?></li>
+        </ol>
+        <details style="margin:0 0 12px">
+          <summary style="cursor:pointer"><?php _e('Signed in on another device, or shown a code?', $domain); ?></summary>
+          <p style="margin:10px 0 6px"><?php _e('Type the code from that page here and the sign-in finishes on this site.', $domain); ?></p>
+          <form method="post" action="<?php echo esc_url($post); ?>">
             <?php wp_nonce_field(wpCloud\StatelessMedia\GoogleConnect::NONCE); ?>
             <input type="hidden" name="action" value="sm_gc_finish">
-            <input name="redirect_url" type="text" class="large-text code" placeholder="<?php echo $hosted ? 'ABCD-EFGH' : esc_attr($redirect_uri . '?state=...&code=...&scope=...'); ?>" autocomplete="off" spellcheck="false">
-            <?php submit_button(__('Finish sign-in', $domain), 'primary', 'submit', true); ?>
+            <input name="redirect_url" type="text" class="regular-text code" placeholder="ABCD-EFGH" autocomplete="off" spellcheck="false" style="vertical-align:middle">
+            <?php submit_button(__('Finish sign-in', $domain), 'secondary', 'submit', false, array('style' => 'vertical-align:middle;margin-left:4px')); ?>
           </form>
-        </li>
-      </ol>
-      <p class="description">
-        <?php if ($hosted) : ?>
-          <?php printf(esc_html__('%s only releases the sign-in to the site you confirmed, and only to this site, which holds a secret it generated for this attempt. It keeps the record for ten minutes and stores nothing else about you.', $domain), esc_html($broker_host)); ?>
-        <?php else : ?>
-          <?php _e('This is the same flow the gcloud command line uses on a machine without a browser. The code only works together with a secret this site generated, and it expires in minutes.', $domain); ?>
-        <?php endif; ?>
-      </p>
+        </details>
+        <p class="description" style="display:flex;justify-content:space-between;gap:16px;align-items:baseline">
+          <span><?php printf(esc_html__('%s hands the sign-in to this site and keeps nothing afterwards. You can revoke access any time from your Google account.', $domain), esc_html($broker_host)); ?></span>
+          <?php if ($auth_url) : ?>
+            <form method="post" action="<?php echo esc_url($post); ?>" style="display:inline;white-space:nowrap">
+              <?php wp_nonce_field(wpCloud\StatelessMedia\GoogleConnect::NONCE); ?>
+              <input type="hidden" name="action" value="sm_gc_restart">
+              <button type="submit" class="button-link"><?php _e('Start over', $domain); ?></button>
+            </form>
+          <?php endif; ?>
+        </p>
+      <?php else : ?>
+        <h3 style="margin-bottom:6px"><?php _e('What happens next', $domain); ?></h3>
+        <ol style="margin:0 0 16px 1.4em">
+          <li><?php _e('Google asks you to allow WP-Stateless to manage storage in your Google Cloud.', $domain); ?></li>
+          <li><?php printf(esc_html__('Google then sends your browser to an address starting with %s that will not load. That is expected.', $domain), '<code>' . esc_html($redirect_uri) . '</code>'); ?></li>
+          <li><?php _e('Copy the complete address from the address bar and paste it below.', $domain); ?></li>
+        </ol>
+        <form method="post" action="<?php echo esc_url($post); ?>">
+          <?php wp_nonce_field(wpCloud\StatelessMedia\GoogleConnect::NONCE); ?>
+          <input type="hidden" name="action" value="sm_gc_finish">
+          <input name="redirect_url" type="text" class="large-text code" placeholder="<?php echo esc_attr($redirect_uri . '?state=...&code=...&scope=...'); ?>" autocomplete="off" spellcheck="false">
+          <?php submit_button(__('Finish sign-in', $domain), 'primary', 'submit', true); ?>
+        </form>
+        <p class="description"><?php _e('This is the same flow the gcloud command line uses on a machine without a browser. The address only works together with a secret this site generated, and it expires in minutes.', $domain); ?></p>
+      <?php endif; ?>
     </div>
   <?php endif; ?>
 
