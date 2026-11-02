@@ -140,6 +140,19 @@ namespace wpCloud\StatelessMedia {
         // Invoke REST API
         add_action('rest_api_init', array($this, 'api_init'));
 
+        // Core's grid view exits before processing its own Trash notice's Undo link.
+        // Use the list action handler for that request only; core still checks the nonce
+        // and delete_post capability. Do not persist a change to the user's view preference.
+        add_filter('get_user_option_media_library_mode', function ($mode) {
+          global $pagenow;
+          if (is_admin() && $pagenow === 'upload.php' && defined('MEDIA_TRASH') && MEDIA_TRASH
+              && isset($_GET['doaction'], $_GET['action'])
+              && $_GET['doaction'] === 'undo' && $_GET['action'] === 'untrash') {
+            return 'list';
+          }
+          return $mode;
+        });
+
         // Register meta boxes and fields for media edit page
         add_filter('rwmb_meta_boxes', array($this, 'attachment_meta_box_callback'));
 
@@ -1270,7 +1283,9 @@ namespace wpCloud\StatelessMedia {
         wp_register_style('wp-stateless-status', $this->path('static/styles/wp-stateless-status.css', 'url'), array(), self::$version);
 
         // Sync tab
-        wp_register_script('wp-stateless', ud_get_stateless_media()->path('static/scripts/wp-stateless.js', 'url'), array('jquery-ui-core', 'wp-stateless-settings', 'wp-api-request'), self::$version, true);
+        $sync_script = $this->path('static/scripts/wp-stateless.js', 'dir');
+        $sync_version = self::$version . '-' . substr(hash_file('sha256', $sync_script), 0, 12);
+        wp_register_script('wp-stateless', ud_get_stateless_media()->path('static/scripts/wp-stateless.js', 'url'), array('jquery-ui-core', 'wp-stateless-settings', 'wp-api-request'), $sync_version, true);
 
         wp_localize_script('wp-stateless', 'stateless_l10n', $this->get_l10n_data());
         wp_localize_script('wp-stateless', 'wp_stateless_configs', array(

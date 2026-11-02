@@ -5,6 +5,7 @@
  * Description: Upload and serve your WordPress media files from Google Cloud Storage.
  * Author: UDX
  * Version: 4.4.3
+ * Requires PHP: 8.1
  * Text Domain: stateless-media
  * Author URI: https://udx.io
  * License: GPLv2 or later

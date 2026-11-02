@@ -100,7 +100,7 @@ namespace wpCloud\StatelessMedia {
         // Setting sm variable
         $this->refresh();
 
-        $this->set('page_url.stateless_setup', $this->bootstrap->get_settings_page_url('?page=stateless-setup'));
+        $this->set('page_url.stateless_setup', $this->bootstrap->get_settings_page_url('?page=stateless-connect'));
         $this->set('page_url.stateless_settings', $this->bootstrap->get_settings_page_url('?page=stateless-settings'));
 
         /** Register options */

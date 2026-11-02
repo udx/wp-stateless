@@ -1046,6 +1046,11 @@ namespace wpCloud\StatelessMedia {
 
         // trigger processing filters
         wp_update_attachment_metadata($image->ID, $metadata);
+        foreach (self::get_path_and_url($metadata, $image->ID) as $size => $media) {
+          if (!ud_get_stateless_media()->get_client()->media_exists($media['gs_name'])) {
+            throw new FatalException(sprintf(__('Upload could not be verified for "%1$s" (%2$s). Check Google Cloud access and retry.', ud_get_stateless_media()->domain), get_the_title($image->ID), $size));
+          }
+        }
         do_action('sm:synced::image', $id, $metadata);
 
         return $image;
@@ -1104,6 +1109,11 @@ namespace wpCloud\StatelessMedia {
             }
 
             wp_update_attachment_metadata($file->ID, $metadata);
+            // Upload hooks can return metadata even when the storage client failed.
+            // Do not report successful synchronization without a cloud object.
+            if (!ud_get_stateless_media()->get_client()->media_exists(apply_filters('wp_stateless_file_name', $fullsizepath, true, "", ""))) {
+              throw new FatalException(sprintf(__('Upload could not be verified for "%s". Check Google Cloud access and retry.', ud_get_stateless_media()->domain), get_the_title($file->ID)));
+            }
             do_action('sm:synced::nonImage', $id, $metadata);
           } else {
             // Ephemeral and Stateless modes: we don't need the local version.
