@@ -88,10 +88,10 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
       $client     = $this->get_client();
       $connection = $this->get_connection();
       $uid        = get_current_user_id();
-      $log        = get_transient('sm_gc_log_' . $uid);
-      $error      = get_transient('sm_gc_error_' . $uid);
-      delete_transient('sm_gc_log_' . $uid);
-      delete_transient('sm_gc_error_' . $uid);
+      $log        = $this->state_get('log', $uid);
+      $error      = $this->state_get('error', $uid);
+      $this->state_delete('log', $uid);
+      $this->state_delete('error', $uid);
 
       $auth_url  = '';
       $projects  = array();
@@ -103,13 +103,19 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
       }
 
       if ($client && $connection) {
-        $res = $this->api('GET', 'https://cloudresourcemanager.googleapis.com/v1/projects?filter=lifecycleState%3AACTIVE&pageSize=200');
-        if (is_wp_error($res)) {
-          $proj_err = $res->get_error_message();
-        } else {
-          $projects = isset($res['projects']) ? $res['projects'] : array();
-          usort($projects, function ($a, $b) { return strcasecmp($a['name'], $b['name']); });
-        }
+        $page_token = '';
+        do {
+          $url = 'https://cloudresourcemanager.googleapis.com/v1/projects?filter=lifecycleState%3AACTIVE&pageSize=200';
+          if ($page_token !== '') $url .= '&pageToken=' . rawurlencode($page_token);
+          $res = $this->api('GET', $url);
+          if (is_wp_error($res)) {
+            $proj_err = $res->get_error_message();
+            break;
+          }
+          $projects = array_merge($projects, isset($res['projects']) ? $res['projects'] : array());
+          $page_token = isset($res['nextPageToken']) ? $res['nextPageToken'] : '';
+        } while ($page_token !== '');
+        usort($projects, function ($a, $b) { return strcasecmp($a['name'], $b['name']); });
         $res = $this->api('GET', 'https://cloudbilling.googleapis.com/v1/billingAccounts');
         if (!is_wp_error($res) && !empty($res['billingAccounts'])) {
           foreach ($res['billingAccounts'] as $b) {
@@ -228,26 +234,23 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
     /* ------------------------------------------------------------------ */
 
     private function build_auth_url($client, $uid) {
-      $pkce = get_transient('sm_gc_pkce_' . $uid);
+      $pkce = $this->state_get('pkce', $uid);
       if (empty($pkce['verifier']) || empty($pkce['state'])) {
         $pkce = array(
           'verifier' => rtrim(strtr(base64_encode(random_bytes(48)), '+/', '-_'), '='),
           'state'    => rtrim(strtr(base64_encode(random_bytes(18)), '+/', '-_'), '='),
         );
-        set_transient('sm_gc_pkce_' . $uid, $pkce, 20 * MINUTE_IN_SECONDS);
+        $this->state_set('pkce', $pkce, 20 * MINUTE_IN_SECONDS, $uid);
       }
       $challenge = rtrim(strtr(base64_encode(hash('sha256', $pkce['verifier'], true)), '+/', '-_'), '=');
 
       // Hosted flow: tell the broker where to send the browser afterwards so the admin never copies a code.
-      if ($client['source'] === 'broker' && empty($pkce['registered']) && strpos(admin_url(), 'https://') === 0) {
-        $r = $this->broker_request('/connect/google/start', array(
+      // Re-registered on every view of the page, so it is fresh whenever the admin clicks the button.
+      if ($client['source'] === 'broker' && strpos(admin_url(), 'https://') === 0) {
+        $this->broker_request('/connect/google/start', array(
           'state'      => $pkce['state'],
           'return_url' => admin_url('upload.php?page=' . self::PAGE),
         ));
-        if (!is_wp_error($r) && !empty($r['ok'])) {
-          $pkce['registered'] = true;
-          set_transient('sm_gc_pkce_' . $uid, $pkce, 20 * MINUTE_IN_SECONDS);
-        }
       }
 
       return self::AUTH_ENDPOINT . '?' . http_build_query(array(
@@ -277,7 +280,7 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
     public function maybe_finish_from_return() {
       if (empty($_GET['sm_gc_pair']) || !current_user_can('manage_options') || $this->get_connection()) return;
       $pair = sanitize_text_field(wp_unslash($_GET['sm_gc_pair']));
-      if (!get_transient('sm_gc_pkce_' . get_current_user_id())) return; // nothing pending; show the page as usual
+      if (!$this->state_get('pkce')) return; // nothing pending; show the page as usual
       $this->finish($pair);
     }
 
@@ -286,7 +289,7 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
       if (!$client) $this->fail(__('OAuth client is not configured.', ud_get_stateless_media()->domain));
 
       $uid  = get_current_user_id();
-      $pkce = get_transient('sm_gc_pkce_' . $uid);
+      $pkce = $this->state_get('pkce', $uid);
       if (empty($pkce['verifier'])) {
         $this->fail(__('The sign-in attempt expired. Start again.', ud_get_stateless_media()->domain));
       }
@@ -348,7 +351,7 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
         'connected_by'  => $uid,
       );
       update_option(self::OPTION, $connection, false);
-      delete_transient('sm_gc_pkce_' . $uid);
+      $this->state_delete('pkce', $uid);
       $this->done(array('sm_gc' => 'connected'));
     }
 
@@ -363,6 +366,35 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
       }
       delete_option(self::OPTION);
       $this->done(array('sm_gc' => 'disconnected'));
+    }
+
+    /* ------------------------------------------------------------------ */
+    /* Per-user attempt state                                               */
+    /* Lives in user meta, not transients: a misconfigured object cache     */
+    /* drops transients between requests (seen on a dev pod whose memcached */
+    /* was unreachable), and the PKCE verifier must survive from the        */
+    /* sign-in click to the return. The error and log are read once.        */
+    /* ------------------------------------------------------------------ */
+
+    private function state_get($key, $uid = null) {
+      $uid = $uid ? $uid : get_current_user_id();
+      $rec = get_user_meta($uid, 'sm_gc_' . $key, true);
+      if (!is_array($rec) || !isset($rec['exp'], $rec['v'])) return false;
+      if ($rec['exp'] < time()) {
+        delete_user_meta($uid, 'sm_gc_' . $key);
+        return false;
+      }
+      return $rec['v'];
+    }
+
+    private function state_set($key, $value, $ttl, $uid = null) {
+      $uid = $uid ? $uid : get_current_user_id();
+      update_user_meta($uid, 'sm_gc_' . $key, array('v' => $value, 'exp' => time() + $ttl));
+    }
+
+    private function state_delete($key, $uid = null) {
+      $uid = $uid ? $uid : get_current_user_id();
+      delete_user_meta($uid, 'sm_gc_' . $key);
     }
 
     private function parse_redirect($pasted) {
@@ -654,11 +686,11 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
           ? 'Verified: the site reached the bucket with its own credentials'
           : 'Saved, but the first connection check did not pass yet: ' . $verified . ' (IAM changes can take a minute to apply; reload Stateless Settings in a moment)';
 
-        set_transient('sm_gc_log_' . $uid, $log, 10 * MINUTE_IN_SECONDS);
+        $this->state_set('log', $log, 10 * MINUTE_IN_SECONDS, $uid);
         $this->done(array('sm_gc' => 'provisioned'));
       } catch (Exception $e) {
         $log[] = 'Stopped: ' . $e->getMessage();
-        set_transient('sm_gc_log_' . $uid, $log, 10 * MINUTE_IN_SECONDS);
+        $this->state_set('log', $log, 10 * MINUTE_IN_SECONDS, $uid);
         $this->fail($e->getMessage());
       }
     }
@@ -704,7 +736,7 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
     }
 
     private function fail($message) {
-      set_transient('sm_gc_error_' . get_current_user_id(), $message, 10 * MINUTE_IN_SECONDS);
+      $this->state_set('error', $message, 10 * MINUTE_IN_SECONDS);
       $this->done(array('sm_gc' => 'error'));
     }
 
