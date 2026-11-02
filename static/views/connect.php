@@ -67,15 +67,15 @@ $redirect_host = wp_parse_url($redirect_uri, PHP_URL_HOST);
           <tr>
             <th scope="row"><label for="client_secret"><?php _e('Client secret', $domain); ?></label></th>
             <td>
-              <input name="client_secret" id="client_secret" type="password" class="large-text code" value="<?php echo ($client && $client['source'] === 'option') ? esc_attr($client['secret']) : ''; ?>" autocomplete="off">
-              <p class="description"><?php _e('Installed-app clients are public clients. Google documents that this value cannot be kept secret.', $domain); ?></p>
+              <input name="client_secret" id="client_secret" type="password" class="large-text code" value="" autocomplete="new-password" placeholder="<?php echo ($client && $client['source'] === 'option') ? esc_attr__('Saved. Enter again to change it.', $domain) : ''; ?>">
+              <p class="description"><?php _e('Stored on this site only and never shown again.', $domain); ?></p>
             </td>
           </tr>
           <tr>
             <th scope="row"><label for="redirect_uri"><?php _e('Redirect URI', $domain); ?></label></th>
             <td>
               <input name="redirect_uri" id="redirect_uri" type="text" class="large-text code" value="<?php echo esc_attr($redirect_uri); ?>" autocomplete="off" spellcheck="false">
-              <p class="description"><?php printf(esc_html__('Where Google sends the browser after approval. %1$s shows a code to copy. %2$s is the gcloud-style loopback address that never loads; you copy the whole address instead.', $domain), '<code>' . esc_html(wpCloud\StatelessMedia\GoogleConnect::REDIRECT_URI) . '</code>', '<code>' . esc_html(wpCloud\StatelessMedia\GoogleConnect::LOOPBACK_URI) . '</code>'); ?></p>
+              <p class="description"><?php printf(esc_html__('Where Google sends the browser after approval. %1$s shows an eight character code to type here. %2$s is the gcloud-style loopback address that never loads; you copy the whole address instead.', $domain), '<code>' . esc_html(wpCloud\StatelessMedia\GoogleConnect::REDIRECT_URI) . '</code>', '<code>' . esc_html(wpCloud\StatelessMedia\GoogleConnect::LOOPBACK_URI) . '</code>'); ?></p>
             </td>
           </tr>
         </table>
