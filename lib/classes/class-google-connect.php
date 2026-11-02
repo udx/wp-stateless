@@ -57,6 +57,8 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
         self::PAGE,
         array($this, 'render_page')
       );
+      // Runs before any output, so a return from the broker can finish and redirect.
+      add_action('load-' . $this->page_hook, array($this, 'maybe_finish_from_return'));
     }
 
     public function page_url($args = array()) {
@@ -236,6 +238,18 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
       }
       $challenge = rtrim(strtr(base64_encode(hash('sha256', $pkce['verifier'], true)), '+/', '-_'), '=');
 
+      // Hosted flow: tell the broker where to send the browser afterwards so the admin never copies a code.
+      if ($client['source'] === 'broker' && empty($pkce['registered']) && strpos(admin_url(), 'https://') === 0) {
+        $r = $this->broker_request('/connect/google/start', array(
+          'state'      => $pkce['state'],
+          'return_url' => admin_url('upload.php?page=' . self::PAGE),
+        ));
+        if (!is_wp_error($r) && !empty($r['ok'])) {
+          $pkce['registered'] = true;
+          set_transient('sm_gc_pkce_' . $uid, $pkce, 20 * MINUTE_IN_SECONDS);
+        }
+      }
+
       return self::AUTH_ENDPOINT . '?' . http_build_query(array(
         'client_id'             => $client['id'],
         'redirect_uri'          => $client['redirect_uri'],
@@ -251,6 +265,23 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
 
     public function handle_finish() {
       $this->guard();
+      $pasted = isset($_POST['redirect_url']) ? trim(wp_unslash($_POST['redirect_url'])) : '';
+      $this->finish($pasted);
+    }
+
+    /**
+     * The broker sent the browser back here with ?sm_gc_pair=XXXX-XXXX. Finish the attempt the current
+     * admin started. The pair only redeems together with this attempt's state, so a stray or forged
+     * link cannot complete anything but the admin's own pending sign-in.
+     */
+    public function maybe_finish_from_return() {
+      if (empty($_GET['sm_gc_pair']) || !current_user_can('manage_options') || $this->get_connection()) return;
+      $pair = sanitize_text_field(wp_unslash($_GET['sm_gc_pair']));
+      if (!get_transient('sm_gc_pkce_' . get_current_user_id())) return; // nothing pending; show the page as usual
+      $this->finish($pair);
+    }
+
+    private function finish($pasted) {
       $client = $this->get_client();
       if (!$client) $this->fail(__('OAuth client is not configured.', ud_get_stateless_media()->domain));
 
@@ -260,7 +291,6 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
         $this->fail(__('The sign-in attempt expired. Start again.', ud_get_stateless_media()->domain));
       }
 
-      $pasted = isset($_POST['redirect_url']) ? trim(wp_unslash($_POST['redirect_url'])) : '';
       $params = $this->parse_redirect($pasted);
 
       if (!empty($params['pair'])) {

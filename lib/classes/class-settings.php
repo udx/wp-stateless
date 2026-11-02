@@ -749,6 +749,10 @@ namespace wpCloud\StatelessMedia {
         if ( json_decode($this->get('sm.key_json')) ) {
           return;
         }
+        // Stateless Connect is where the notice sends people; do not show it there.
+        if ( isset($_GET['page']) && $_GET['page'] === 'stateless-connect' ) {
+          return;
+        }
 
         $connect_url = sprintf(
           '<a href="%s">%s</a>',

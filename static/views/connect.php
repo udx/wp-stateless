@@ -95,13 +95,13 @@ $redirect_host = wp_parse_url($redirect_uri, PHP_URL_HOST);
         </li>
         <li style="margin-top:12px">
           <?php if ($hosted) : ?>
-            <?php printf(esc_html__('After you approve, Google sends your browser to %s, which shows a short code like ABCD-EFGH. Copy it.', $domain), '<strong>' . esc_html($redirect_host) . '</strong>'); ?>
+            <?php printf(esc_html__('After you approve, you come straight back to this page and the sign-in finishes by itself. If you approved on another device, %s shows a short code like ABCD-EFGH instead.', $domain), '<strong>' . esc_html($redirect_host) . '</strong>'); ?>
           <?php else : ?>
             <?php printf(esc_html__('After you approve, Google sends your browser to an address starting with %s that will not load. That is expected. Copy the complete address from the address bar.', $domain), '<code>' . esc_html($redirect_uri) . '</code>'); ?>
           <?php endif; ?>
         </li>
         <li style="margin-top:12px">
-          <?php _e('Paste it here.', $domain); ?>
+          <?php echo $hosted ? esc_html__('Only if you were shown a code, type it here.', $domain) : esc_html__('Paste it here.', $domain); ?>
           <form method="post" action="<?php echo esc_url($post); ?>" style="margin-top:8px">
             <?php wp_nonce_field(wpCloud\StatelessMedia\GoogleConnect::NONCE); ?>
             <input type="hidden" name="action" value="sm_gc_finish">
