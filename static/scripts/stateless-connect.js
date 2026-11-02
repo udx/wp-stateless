@@ -5,7 +5,14 @@
   const draft = window.smConnectPicker.draft;
   if (draft) Object.entries(draft).forEach(([key,value]) => {
     const field = form.elements.namedItem(key);
-    if (field && !(key === 'mode' && form.querySelector('[name=mode][value=cdn]').disabled)) field.value = value;
+    if (!field) return;
+    if (key === 'mode') {
+      // Restore the mode only when it is an editable radio group. A locked mode is a hidden input and a
+      // required mode leaves the other radios disabled; both must keep what the server rendered.
+      const radios = Array.from(form.querySelectorAll('[name=mode][type=radio]'));
+      if (!radios.length || radios.some(r => r.disabled)) return;
+    }
+    field.value = value;
   });
   const project = document.getElementById('sm_gc_project');
   const regionSelect = document.getElementById('location');
