@@ -247,6 +247,35 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
       return (bool) apply_filters('wp_stateless_is_app_engine', false) || !is_writable($uploads['basedir']);
     }
 
+    /**
+     * Settings pinned by a constant, a key file, the environment or network settings win over anything
+     * setup saves, so provisioning would report success while uploads kept the old configuration.
+     * Returns an explanation when that is the case, or an empty string when setup may proceed.
+     */
+    public function overridden_settings() {
+      $domain   = ud_get_stateless_media()->domain;
+      $readonly = ud_get_stateless_media()->get('sm.readonly');
+      if (!is_array($readonly)) return '';
+      $labels  = array('bucket' => __('bucket', $domain), 'key_json' => __('service account key', $domain), 'mode' => __('storage mode', $domain));
+      $sources = array(
+        'constant'    => __('a constant in wp-config.php', $domain),
+        'environment' => __('the GOOGLE_APPLICATION_CREDENTIALS environment variable', $domain),
+        'network'     => __('network settings', $domain),
+        'app_engine'  => __('the App Engine environment', $domain),
+      );
+      foreach ($labels as $key => $label) {
+        if (empty($readonly[$key])) continue;
+        $source = $readonly[$key];
+        if ($source === 'network' && $this->network_scope()) continue; // network setup writes network settings itself
+        if ($source === 'app_engine') continue; // mode is forced to stateless and requires_stateless_mode() already enforces it
+        $next = $source === 'network'
+          ? __('Run Stateless Connect from the Network Admin to change it for the whole network.', $domain)
+          : __('Remove that override to let setup manage it, or finish the configuration there instead.', $domain);
+        return sprintf(__('The %1$s is set by %2$s, so setup cannot change it. %3$s', $domain), $label, isset($sources[$source]) ? $sources[$source] : $source, $next);
+      }
+      return '';
+    }
+
     /** Preserve conditional bindings; grant this site a separate unconditional bucket role. */
     public static function bucket_bindings($bindings, $member) {
       foreach ($bindings as &$binding) {
@@ -801,6 +830,8 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
     public function handle_provision() {
       $this->guard();
       if (!$this->get_connection()) $this->fail(__('Not connected to Google.', ud_get_stateless_media()->domain));
+      $overridden = $this->overridden_settings();
+      if ($overridden) $this->fail($overridden);
       @set_time_limit(300);
 
       $log = array();
@@ -815,7 +846,8 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
       $mode           = isset($_POST['mode']) ? sanitize_text_field($_POST['mode']) : 'ephemeral';
       if (!in_array($mode, array('backup', 'cdn', 'ephemeral', 'stateless'), true)) $mode = 'ephemeral';
 
-      $this->state_set('draft', array('project' => $project_choice, 'new_project_name' => $new_project, 'billing_account' => $billing_choice, 'bucket_choice' => $bucket_choice, 'bucket_name' => $bucket, 'location' => $location, 'mode' => $mode), HOUR_IN_SECONDS, $uid);
+      $draft = array('project' => $project_choice, 'new_project_name' => $new_project, 'billing_account' => $billing_choice, 'bucket_choice' => $bucket_choice, 'bucket_name' => $bucket, 'location' => $location, 'mode' => $mode);
+      $this->state_set('draft', $draft, HOUR_IN_SECONDS, $uid);
       if ($this->requires_stateless_mode() && $mode !== 'stateless') $this->fail(__('This environment requires Stateless mode. Select it before continuing.', ud_get_stateless_media()->domain));
       $name_error = self::bucket_name_error($bucket);
       if ($name_error) $this->fail($name_error);
@@ -847,6 +879,11 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
           } else {
             $log[] = 'No billing account linked. Google requires one before a bucket can be created.';
           }
+          // Checkpoint: a retry after a later failure reuses this project instead of creating another one.
+          $draft['project'] = $project_id;
+          $draft['new_project_name'] = '';
+          $draft['billing_account'] = '';
+          $this->state_set('draft', $draft, HOUR_IN_SECONDS, $uid);
         } else {
           $project_id = $project_choice;
           if (!preg_match('/^[a-z][a-z0-9-]{4,29}$/', $project_id)) throw new Exception(__('Pick a project.', ud_get_stateless_media()->domain));
@@ -893,6 +930,9 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
           }
           $this->check($r, 'Create bucket');
           $log[] = sprintf('Bucket %s created in %s, new objects public by default', $bucket, $location);
+          // Checkpoint: the name is taken now, so a retry must reuse the bucket rather than create it again.
+          $draft['bucket_choice'] = 'existing';
+          $this->state_set('draft', $draft, HOUR_IN_SECONDS, $uid);
         } else {
           $r = $this->api('GET', 'https://storage.googleapis.com/storage/v1/b/' . rawurlencode($bucket));
           $this->check($r, 'Find bucket');

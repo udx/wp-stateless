@@ -427,6 +427,24 @@ namespace wpCloud\StatelessMedia {
        * @param $attachment_id
        * @return mixed
        */
+      /**
+       * Name of the first expected object (the original or a generated size or preview) that is not in the bucket,
+       * or an empty string when every object is there. Uses an ACL-independent lookup so uniform-access buckets verify too.
+       *
+       * @param int $attachment_id
+       * @param array|null $metadata Attachment metadata; loaded from the database when omitted.
+       * @return string
+       */
+      public static function missing_cloud_object($attachment_id, $metadata = null) {
+        $client = ud_get_stateless_media()->get_client();
+        foreach (self::get_path_and_url($metadata, $attachment_id) as $size => $media) {
+          if (!$client->get_media($media['gs_name'])) {
+            return $size === '__full' ? __('original file', ud_get_stateless_media()->domain) : $size;
+          }
+        }
+        return '';
+      }
+
       public static function get_path_and_url($metadata, $attachment_id) {
         /* Get metadata in case if method is called directly. */
         if (empty($metadata) && current_filter() !== 'wp_generate_attachment_metadata' && current_filter() !== 'wp_update_attachment_metadata') {
@@ -1046,10 +1064,9 @@ namespace wpCloud\StatelessMedia {
 
         // trigger processing filters
         wp_update_attachment_metadata($image->ID, $metadata);
-        foreach (self::get_path_and_url($metadata, $image->ID) as $size => $media) {
-          if (!ud_get_stateless_media()->get_client()->media_exists($media['gs_name'])) {
-            throw new FatalException(sprintf(__('Upload could not be verified for "%1$s" (%2$s). Check Google Cloud access and retry.', ud_get_stateless_media()->domain), get_the_title($image->ID), $size));
-          }
+        $missing = self::missing_cloud_object($image->ID, $metadata);
+        if ($missing !== '') {
+          throw new FatalException(sprintf(__('Upload could not be verified for "%1$s" (%2$s). Check Google Cloud access and retry.', ud_get_stateless_media()->domain), get_the_title($image->ID), $missing));
         }
         do_action('sm:synced::image', $id, $metadata);
 
@@ -1096,7 +1113,8 @@ namespace wpCloud\StatelessMedia {
 
         if ($local_file_exists) {
 
-          if (!ud_get_stateless_media()->get_client()->media_exists(apply_filters('wp_stateless_file_name', $fullsizepath, true, "", ""))) {
+          // Upload when the original or any generated preview (PDF pages, for example) is missing from the bucket.
+          if (self::missing_cloud_object($file->ID) !== '') {
 
             if (!function_exists('wp_generate_attachment_metadata')) {
               require_once ABSPATH . '/wp-admin/includes/media.php';
@@ -1111,8 +1129,9 @@ namespace wpCloud\StatelessMedia {
             wp_update_attachment_metadata($file->ID, $metadata);
             // Upload hooks can return metadata even when the storage client failed.
             // Do not report successful synchronization without a cloud object.
-            if (!ud_get_stateless_media()->get_client()->media_exists(apply_filters('wp_stateless_file_name', $fullsizepath, true, "", ""))) {
-              throw new FatalException(sprintf(__('Upload could not be verified for "%s". Check Google Cloud access and retry.', ud_get_stateless_media()->domain), get_the_title($file->ID)));
+            $missing = self::missing_cloud_object($file->ID, $metadata);
+            if ($missing !== '') {
+              throw new FatalException(sprintf(__('Upload could not be verified for "%1$s" (%2$s). Check Google Cloud access and retry.', ud_get_stateless_media()->domain), get_the_title($file->ID), $missing));
             }
             do_action('sm:synced::nonImage', $id, $metadata);
           } else {

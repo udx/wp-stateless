@@ -185,6 +185,9 @@ $start_error   = wpCloud\StatelessMedia\GoogleConnect::instance()->start_error;
       <?php if ($proj_err) : ?>
         <div class="notice notice-error inline"><p><?php echo esc_html($proj_err); ?></p></div>
       <?php endif; ?>
+      <?php $overridden = $connect->overridden_settings(); if ($overridden) : ?>
+        <div class="notice notice-warning inline"><p><?php echo esc_html($overridden); ?></p></div>
+      <?php else : ?>
       <form method="post" action="<?php echo esc_url($post); ?>" id="sm-gc-provision">
         <?php wp_nonce_field($connect->nonce_action()); ?>
         <input type="hidden" name="action" value="sm_gc_provision">
@@ -298,6 +301,7 @@ $start_error   = wpCloud\StatelessMedia\GoogleConnect::instance()->start_error;
         <p class="description"><?php _e('Takes 15 to 60 seconds. The page will wait.', $domain); ?></p>
         <?php submit_button(__('Create bucket and connect this site', $domain), 'primary', 'submit', true, array('id' => 'sm-gc-go')); ?>
       </form>
+      <?php endif; ?>
     </div>
   <?php endif; ?>
 </div>
