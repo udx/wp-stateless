@@ -110,6 +110,7 @@
     form.querySelectorAll('select[name=billing_account]').forEach(b => b.disabled = !isNew);
     form.querySelectorAll('.sm-gc-new-bucket').forEach(r => r.hidden = !newBucket);
     document.getElementById('new_project_name').required = isNew;
+    document.getElementById('new_project_name').disabled = !isNew;
     picker.hidden = newBucket;
     billing.hidden = isNew || !project.value; billingLink.hidden = isNew || !project.value;
     const currentChoice = newBucket ? 'new' : 'existing';

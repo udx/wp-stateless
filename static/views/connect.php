@@ -25,7 +25,7 @@ $start_error   = wpCloud\StatelessMedia\GoogleConnect::instance()->start_error;
   <ol class="sm-connect-steps" aria-label="<?php esc_attr_e('Setup progress', $domain); ?>">
     <?php foreach (array('account' => __('Connect Google', $domain), 'storage' => __('Choose storage', $domain), 'ready' => __('Ready to upload', $domain)) as $step => $label) :
       $available = $step === 'account' || ($step === 'storage' && $connection) || ($step === 'ready' && $client && $connection && $configured);
-      $current = !$connection ? 'account' : ($configured ? 'ready' : 'storage');
+      $current = !$connection ? 'account' : (($error && !empty($draft)) ? 'storage' : ($configured ? 'ready' : 'storage'));
       $number = array('account' => '01', 'storage' => '02', 'ready' => '03'); ?>
       <li data-step="<?php echo esc_attr($step); ?>" class="<?php echo $step === $current ? 'is-current' : ($available ? 'is-done' : ''); ?>" <?php if ($step === $current) echo 'aria-current="step"'; ?>>
         <?php if ($available) : ?><a href="#sm-step-<?php echo esc_attr($step); ?>" data-wizard-step="<?php echo esc_attr($step); ?>"><?php endif; ?>
@@ -234,7 +234,7 @@ $start_error   = wpCloud\StatelessMedia\GoogleConnect::instance()->start_error;
           </tr>
           <tr class="sm-gc-new-project">
             <th scope="row"><label for="new_project_name"><?php _e('New project name', $domain); ?></label></th>
-            <td><input name="new_project_name" id="new_project_name" type="text" class="regular-text" value="<?php echo esc_attr(get_bloginfo('name')); ?>"></td>
+            <td><input name="new_project_name" id="new_project_name" type="text" minlength="4" maxlength="30" pattern="[a-zA-Z0-9\x20\x21\x22\x27\x2d]{4,30}" title="<?php esc_attr_e('Use 4 to 30 letters, numbers, spaces, hyphens, quotes or exclamation marks. Periods are not allowed.', $domain); ?>" class="regular-text" value="<?php echo esc_attr(get_bloginfo('name')); ?>"></td>
           </tr>
           <tr class="sm-gc-new-project">
             <th scope="row"><label for="billing_account"><?php _e('Billing account', $domain); ?></label></th>
@@ -362,6 +362,6 @@ $start_error   = wpCloud\StatelessMedia\GoogleConnect::instance()->start_error;
   root.querySelectorAll('[data-wizard-step]').forEach(function (link) {
     link.addEventListener('click', function (event) { event.preventDefault(); show(link.dataset.wizardStep, true); });
   });
-  show(<?php echo wp_json_encode(!$connection ? 'account' : ($configured ? 'ready' : 'storage')); ?>, false);
+  show(<?php echo wp_json_encode(!$connection ? 'account' : (($error && !empty($draft)) ? 'storage' : ($configured ? 'ready' : 'storage'))); ?>, false);
 })();
 </script>

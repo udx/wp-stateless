@@ -990,6 +990,9 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
       }
       $name_error = self::bucket_name_error($bucket);
       if ($name_error) $this->fail($name_error);
+      if ($project_choice === '__new__' && !preg_match('/^[a-zA-Z0-9\x20\x21\x22\x27-]{4,30}$/D', $new_project)) {
+        $this->fail(__('Use 4 to 30 characters for the project name: letters, numbers, spaces, hyphens, quotes or exclamation marks. Periods are not allowed.', ud_get_stateless_media()->domain));
+      }
       if ($project_choice === '__new__' && !$billing_choice) $this->fail(__('Choose an open billing account before creating a project.', ud_get_stateless_media()->domain));
       if (!in_array($bucket_choice, array('new', 'existing'), true)) $this->fail(__('Choose whether to create or reuse a bucket.', ud_get_stateless_media()->domain));
 
