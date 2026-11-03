@@ -1034,7 +1034,8 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
           // the form's billing selector is hidden for them and its submitted value is not a choice.
           if (!empty($draft['created_project']) && $draft['created_project'] === $project_id && !empty($draft['pending_billing'])) {
             $info = $this->api('GET', 'https://cloudbilling.googleapis.com/v1/projects/' . rawurlencode($project_id) . '/billingInfo');
-            if (!is_wp_error($info) && empty($info['billingEnabled'])) {
+            $this->check($info, 'Check billing'); // a failed lookup stops here and keeps the pending link for the next retry
+            if (empty($info['billingEnabled'])) {
               $this->link_billing($project_id, $draft['pending_billing']);
               $log[] = 'Billing account linked';
             }
