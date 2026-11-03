@@ -976,6 +976,12 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
       if ($locked_mode) $mode = $locked_mode['mode']; // the form shows the locked mode; never trust a posted one
 
       $draft = array('project' => $project_choice, 'new_project_name' => $new_project, 'billing_account' => $billing_choice, 'bucket_choice' => $bucket_choice, 'bucket_name' => $bucket, 'location' => $location, 'mode' => $mode);
+      // A project this attempt created earlier carries its explicit billing choice until the link succeeds.
+      $previous = $this->state_get('draft', $uid);
+      if (is_array($previous) && !empty($previous['created_project']) && $previous['created_project'] === $project_choice) {
+        $draft['created_project'] = $previous['created_project'];
+        $draft['pending_billing'] = isset($previous['pending_billing']) ? (string) $previous['pending_billing'] : '';
+      }
       $this->state_set('draft', $draft, HOUR_IN_SECONDS, $uid);
       if ($this->requires_stateless_mode() && $mode !== 'stateless') {
         $this->fail($locked_mode
@@ -1006,12 +1012,15 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
           // resume it (and link the chosen billing account below) instead of creating a second project.
           $draft['project'] = $project_id;
           $draft['new_project_name'] = '';
+          $draft['created_project'] = $project_id;
+          $draft['pending_billing'] = $billing_choice;
           $this->state_set('draft', $draft, HOUR_IN_SECONDS, $uid);
 
           if ($billing_choice) {
             $this->link_billing($project_id, $billing_choice);
             $log[] = 'Billing account linked';
             $draft['billing_account'] = '';
+            $draft['pending_billing'] = '';
             $this->state_set('draft', $draft, HOUR_IN_SECONDS, $uid);
           } else {
             $log[] = 'No billing account linked. Google requires one before a bucket can be created.';
@@ -1020,15 +1029,17 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
           $project_id = $project_choice;
           if (!preg_match('/^[a-z][a-z0-9-]{4,29}$/', $project_id)) throw new Exception(__('Pick a project.', ud_get_stateless_media()->domain));
           $log[] = sprintf('Using project %s', $project_id);
-          // A project checkpointed by an earlier attempt may still be waiting for its billing account.
-          if ($billing_choice) {
+          // Only a project this attempt created, whose billing link failed, gets billing linked here, and only
+          // to the account the administrator chose for it then. Billing of other existing projects is never changed:
+          // the form's billing selector is hidden for them and its submitted value is not a choice.
+          if (!empty($draft['created_project']) && $draft['created_project'] === $project_id && !empty($draft['pending_billing'])) {
             $info = $this->api('GET', 'https://cloudbilling.googleapis.com/v1/projects/' . rawurlencode($project_id) . '/billingInfo');
             if (!is_wp_error($info) && empty($info['billingEnabled'])) {
-              $this->link_billing($project_id, $billing_choice);
+              $this->link_billing($project_id, $draft['pending_billing']);
               $log[] = 'Billing account linked';
-              $draft['billing_account'] = '';
-              $this->state_set('draft', $draft, HOUR_IN_SECONDS, $uid);
             }
+            $draft['pending_billing'] = '';
+            $this->state_set('draft', $draft, HOUR_IN_SECONDS, $uid);
           }
         }
 
