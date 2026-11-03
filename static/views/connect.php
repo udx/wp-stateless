@@ -57,6 +57,8 @@ $start_error   = wpCloud\StatelessMedia\GoogleConnect::instance()->start_error;
     <div class="notice notice-success"><p><?php _e('Google account connected.', $domain); ?></p></div>
   <?php elseif ($msg === 'disconnected') : ?>
     <div class="notice notice-success"><p><?php _e('Google account disconnected and access revoked.', $domain); ?></p></div>
+  <?php elseif ($msg === 'disconnected-unrevoked') : ?>
+    <div class="notice notice-warning"><p><?php _e('Connection removed. Access was not revoked from here because the stored credentials could not be read; review Third-party apps and services in your Google Account to make sure it is gone.', $domain); ?></p></div>
   <?php endif; ?>
 
   <?php if (is_array($log) && $log) : ?>
@@ -175,10 +177,18 @@ $start_error   = wpCloud\StatelessMedia\GoogleConnect::instance()->start_error;
           <?php printf(esc_html__('Provisioned bucket %1$s in project %2$s.', $domain), '<code>' . esc_html($connection['bucket']) . '</code>', '<code>' . esc_html($connection['project']) . '</code>'); ?>
         <?php endif; ?>
       </p>
+      <?php $unreadable = $connect->connection_unreadable($connection); if ($unreadable) : ?>
+        <div class="notice notice-warning inline"><p><?php _e('The stored Google credentials cannot be read, usually because the WordPress authentication salts changed. This site cannot revoke its own access: restore the previous salts, or revoke access under Third-party apps in your Google Account first.', $domain); ?></p></div>
+      <?php endif; ?>
       <form method="post" action="<?php echo esc_url($post); ?>" style="display:inline">
         <?php wp_nonce_field($connect->nonce_action()); ?>
         <input type="hidden" name="action" value="sm_gc_disconnect">
-        <button type="submit" class="button-link-delete" onclick="return confirm('<?php echo esc_js(__('Revoke this site\'s access to your Google account? Buckets and keys already created stay in your project.', $domain)); ?>')"><?php _e('Disconnect', $domain); ?></button>
+        <?php if ($unreadable) : ?>
+          <input type="hidden" name="sm_gc_force" value="1">
+          <button type="submit" class="button-link-delete" onclick="return confirm('<?php echo esc_js(__('Remove the connection without revoking access? Only do this after revoking it in your Google Account.', $domain)); ?>')"><?php _e('Remove connection without revoking', $domain); ?></button>
+        <?php else : ?>
+          <button type="submit" class="button-link-delete" onclick="return confirm('<?php echo esc_js(__('Revoke this site\'s access to your Google account? Buckets and keys already created stay in your project.', $domain)); ?>')"><?php _e('Disconnect', $domain); ?></button>
+        <?php endif; ?>
       </form>
       <p><a class="button button-primary" href="#sm-step-storage" data-wizard-step="storage"><?php _e('Continue to storage', $domain); ?></a></p>
     </div>
@@ -199,7 +209,7 @@ $start_error   = wpCloud\StatelessMedia\GoogleConnect::instance()->start_error;
       <?php if ($proj_err) : ?>
         <div class="notice notice-error inline"><p><?php echo esc_html($proj_err); ?></p></div>
       <?php endif; ?>
-      <?php $overridden = $connect->overridden_settings(); if ($overridden) : ?>
+      <?php $overridden = $connect->storage_blocked(); if ($overridden) : ?>
         <div class="notice notice-warning inline"><p><?php echo esc_html($overridden); ?></p></div>
       <?php else : ?>
       <form method="post" action="<?php echo esc_url($post); ?>" id="sm-gc-provision">

@@ -6,6 +6,7 @@
 * FIX - synchronization no longer reports success when an upload or a thumbnail failed to reach Google Cloud; the failure stays visible and the retry works.
 * FIX - media Trash Undo link now works from the grid view of the Media Library.
 * ENHANCEMENT - repeated setups revoke the site's previous service account key instead of piling keys onto the account.
+* ENHANCEMENT - setup verifies the new credentials before it replaces a working configuration, remembers keys it could not revoke and retries them on the next setup, refuses existing buckets that would serve 403s under WP_STATELESS_SKIP_ACL_SET, and stops when the storage mode is pinned to Disabled.
 * ENHANCEMENT - plugin header and composer now state the PHP 8.1 minimum that the bundled Google libraries already require.
 * ENHANCEMENT - documentation links now point to stateless.ci, and the setup wizard links to the guides on Google permissions, storage modes and synchronization.
 * SECURITY - the Google client secret never ships in the plugin: sign-in runs through stateless.ci with PKCE, single-use transactions bound to your site, and an explicit confirmation step before any token reaches WordPress.

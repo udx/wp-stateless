@@ -23,6 +23,7 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
     const LOOPBACK_URI    = 'http://127.0.0.1:19190/';
     const PROOFS_OPTION   = 'sm_gc_proofs';
     const LAST_OPTION     = 'sm_gc_last';
+    const PENDING_KEYS_OPTION = 'sm_gc_pending_key_revocations';
     const BROKER          = 'https://stateless.ci';
     const SCOPES          = 'openid email https://www.googleapis.com/auth/cloud-platform';
     const AUTH_ENDPOINT   = 'https://accounts.google.com/o/oauth2/v2/auth';
@@ -67,14 +68,14 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
     /**
      * The network "Setup Assistant: Hidden" setting (WP_STATELESS_MEDIA_HIDE_SETUP_ASSISTANT) hid the
      * former setup wizard from site admins; keep honoring it for Connect so an already configured
-     * site sees nothing new. The network admin page stays available to network administrators.
+     * site sees nothing new. The page itself stays registered: a network sign-in returns to this
+     * site's upload.php and must be able to finish, so only the menu entry and site-scope views go.
      */
     public static function hidden_for_site() {
       return ud_get_stateless_media()->get('sm.hide_setup_assistant') === 'true';
     }
 
     public function admin_menu() {
-      if (self::hidden_for_site()) return;
       $this->legacy_menu_alias('upload.php');
       $this->page_hook = add_media_page(
         __('Stateless Connect', ud_get_stateless_media()->domain),
@@ -85,6 +86,7 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
       );
       // Runs before any output, so a return from the broker can finish and redirect.
       add_action('load-' . $this->page_hook, array($this, 'maybe_finish_from_return'));
+      if (self::hidden_for_site()) remove_submenu_page('upload.php', self::PAGE);
     }
 
     private function legacy_menu_alias($parent) {
@@ -154,6 +156,9 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
 
     public function render_page() {
       if (!current_user_can($this->capability())) wp_die(__('Insufficient permissions.'));
+      if (self::hidden_for_site() && !$this->network_scope()) {
+        wp_die(__('The network administrator has hidden the setup assistant for this site; media storage is managed from the network.', ud_get_stateless_media()->domain), 403);
+      }
 
       $client     = $this->get_client();
       $connection = $this->get_connection();
@@ -292,8 +297,22 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
       if (!is_array($readonly) || empty($readonly['mode'])) return null;
       if ($readonly['mode'] === 'network' && $this->network_scope()) return null;
       $mode = ud_get_stateless_media()->get('sm.mode');
-      if (!in_array($mode, array('backup', 'cdn', 'ephemeral', 'stateless'), true)) return null;
+      if (!in_array($mode, array('disabled', 'backup', 'cdn', 'ephemeral', 'stateless'), true)) return null;
       return array('mode' => $mode, 'source' => self::readonly_source_label($readonly['mode']));
+    }
+
+    /**
+     * Why the storage step cannot run right now: the bucket or key is pinned elsewhere, or the storage
+     * mode is pinned to Disabled, in which case provisioning would report readiness while uploads stay off.
+     */
+    public function storage_blocked() {
+      $overridden = $this->overridden_settings();
+      if ($overridden) return $overridden;
+      $locked = $this->locked_mode();
+      if ($locked && $locked['mode'] === 'disabled') {
+        return sprintf(__('The storage mode is set to Disabled by %s, so WP-Stateless would not process uploads after setup. Change it there first, then come back to choose storage.', ud_get_stateless_media()->domain), $locked['source']);
+      }
+      return '';
     }
 
     private static function readonly_source_label($source) {
@@ -321,6 +340,14 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
     }
 
     /** True when an unconditional binding lets allUsers read objects. */
+    /** A default object ACL that grants allUsers read makes new objects public without per-object ACL writes. */
+    public static function default_acl_is_public($items) {
+      foreach ((array) $items as $item) {
+        if (isset($item['entity'], $item['role']) && $item['entity'] === 'allUsers' && in_array($item['role'], array('READER', 'OWNER'), true)) return true;
+      }
+      return false;
+    }
+
     public static function bucket_is_public($bindings) {
       $readers = array('roles/storage.objectViewer', 'roles/storage.legacyObjectReader', 'roles/storage.objectUser', 'roles/storage.objectAdmin', 'roles/storage.admin');
       foreach ((array) $bindings as $binding) {
@@ -687,11 +714,24 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
       return (is_array($c) && !empty($c['id']) && !empty($c['secret'])) ? $c : null;
     }
 
+    /** True when a stored connection exists but its secrets no longer decrypt (salts changed, sodium gone). */
+    public function connection_unreadable($connection = null) {
+      $connection = $connection ? $connection : $this->get_connection();
+      if (!$connection) return false;
+      if ($this->decrypt($connection['refresh_token']) === '') return true;
+      return !empty($connection['broker_conn']) && $this->broker_conn($connection) === null;
+    }
+
     public function handle_disconnect() {
       $this->guard();
       $connection = $this->get_connection();
       $domain = ud_get_stateless_media()->domain;
-      if ($connection) {
+      $unreadable = $connection && $this->connection_unreadable($connection);
+      if ($unreadable && empty($_POST['sm_gc_force'])) {
+        // Nothing can be revoked from here, so do not report that it was.
+        $this->fail(__('The stored Google credentials cannot be read, usually because the WordPress authentication salts changed or the sodium extension is gone, so this site cannot revoke its own access. Restore the previous salts and disconnect again, or revoke access under Third-party apps in your Google Account and then remove the connection without revoking.', $domain));
+      }
+      if ($connection && !$unreadable) {
         $problems = array();
         $refresh  = $this->decrypt($connection['refresh_token']);
         if ($refresh) {
@@ -719,7 +759,7 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
         }
       }
       $this->remove_option(self::OPTION);
-      $this->done(array('sm_gc' => 'disconnected'));
+      $this->done(array('sm_gc' => $unreadable ? 'disconnected-unrevoked' : 'disconnected'));
     }
 
     /* ------------------------------------------------------------------ */
@@ -889,8 +929,8 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
     public function handle_provision() {
       $this->guard();
       if (!$this->get_connection()) $this->fail(__('Not connected to Google.', ud_get_stateless_media()->domain));
-      $overridden = $this->overridden_settings();
-      if ($overridden) $this->fail($overridden);
+      $blocked = $this->storage_blocked();
+      if ($blocked) $this->fail($blocked);
       @set_time_limit(300);
 
       $log = array();
@@ -976,11 +1016,21 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
             if (isset($existing_bucket['iamConfiguration']['publicAccessPrevention']) && $existing_bucket['iamConfiguration']['publicAccessPrevention'] === 'enforced') {
               throw new Exception(__('This bucket enforces public access prevention, so media URLs would be refused in CDN, Ephemeral or Stateless mode. Turn it off for this bucket, or choose Backup mode.', ud_get_stateless_media()->domain));
             }
-            if ($uniform) {
+            // With WP_STATELESS_SKIP_ACL_SET the plugin writes no object ACLs on fine-grained buckets either,
+            // so readability must already come from the bucket: an allUsers IAM binding or a public default object ACL.
+            $skip_acl = defined('WP_STATELESS_SKIP_ACL_SET') && WP_STATELESS_SKIP_ACL_SET;
+            if ($uniform || $skip_acl) {
               $policy = $this->api('GET', 'https://storage.googleapis.com/storage/v1/b/' . rawurlencode($bucket) . '/iam?optionsRequestedPolicyVersion=3');
               $this->check($policy, 'Read bucket permissions');
-              if (!self::bucket_is_public(isset($policy['bindings']) ? $policy['bindings'] : array())) {
-                throw new Exception(__('This bucket uses uniform access but is not publicly readable, so media URLs would return 403 in CDN, Ephemeral or Stateless mode. Grant allUsers the Storage Object Viewer role on the bucket, or choose Backup mode.', ud_get_stateless_media()->domain));
+              $public = self::bucket_is_public(isset($policy['bindings']) ? $policy['bindings'] : array());
+              if (!$public && !$uniform) {
+                $default_acl = $this->api('GET', 'https://storage.googleapis.com/storage/v1/b/' . rawurlencode($bucket) . '/defaultObjectAcl');
+                $public = !is_wp_error($default_acl) && self::default_acl_is_public(isset($default_acl['items']) ? $default_acl['items'] : array());
+              }
+              if (!$public) {
+                throw new Exception($uniform
+                  ? __('This bucket uses uniform access but is not publicly readable, so media URLs would return 403 in CDN, Ephemeral or Stateless mode. Grant allUsers the Storage Object Viewer role on the bucket, or choose Backup mode.', ud_get_stateless_media()->domain)
+                  : __('WP_STATELESS_SKIP_ACL_SET is enabled, so the plugin will not make uploads public itself, and this bucket is not publicly readable: media URLs would return 403 in CDN, Ephemeral or Stateless mode. Grant allUsers the Storage Object Viewer role on the bucket, give it a public default object ACL, or choose Backup mode.', ud_get_stateless_media()->domain));
               }
             }
           }
@@ -1080,7 +1130,19 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
         if (!json_decode($key_json)) throw new Exception(__('Google returned an unreadable key.', ud_get_stateless_media()->domain));
         $log[] = 'Key issued to this site';
 
-        /* 7. Save plugin settings */
+        /* 7. Verify with the new key itself before anything is replaced (IAM can lag a few seconds). A site that
+         * already works keeps its configuration when the check fails; a first setup is saved with a warning
+         * because there is nothing to lose and the check usually passes a moment later. */
+        $verified      = $this->verify_key($key_json, $bucket, 10);
+        $new_key       = json_decode($key_json, true);
+        $reconfiguring = is_array($previous_key) && !empty($previous_key['private_key_id']) && (string) $this->read_option('sm_bucket', '') !== '';
+        if ($verified !== true && $reconfiguring) {
+          $removed = $this->revoke_key($sa_email, $new_key['private_key_id']);
+          $log[] = $removed === true ? 'New key removed again' : 'New key could not be removed yet; it will be retried on the next setup';
+          throw new Exception(sprintf(__('The new credentials could not reach the bucket (%s), so the current configuration was left unchanged. IAM changes can take a minute to apply; try again shortly.', ud_get_stateless_media()->domain), $verified));
+        }
+
+        /* 8. Save plugin settings */
         $this->write_option('sm_bucket', $bucket);
         $this->write_option('sm_key_json', $key_json);
         $this->write_option('sm_mode', $mode);
@@ -1098,18 +1160,16 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
         $this->write_option(self::LAST_OPTION, array('project' => $project_id, 'bucket' => $bucket), false);
         $log[] = sprintf('Plugin configured: mode %s, bucket %s', $mode, $bucket);
 
-        /* 7b. Revoke the key this site held before, so repeated setups do not pile up keys on the account. */
-        $new_key = json_decode($key_json, true);
+        /* 8b. Revoke the key this site held before, so repeated setups do not pile up keys on the account. */
         if (is_array($previous_key) && !empty($previous_key['private_key_id']) && !empty($previous_key['client_email'])
             && $previous_key['client_email'] === $sa_email && $previous_key['private_key_id'] !== $new_key['private_key_id']) {
-          $revoked = $this->api('DELETE', 'https://iam.googleapis.com/v1/projects/-/serviceAccounts/' . rawurlencode($sa_email) . '/keys/' . rawurlencode($previous_key['private_key_id']));
-          $log[] = is_wp_error($revoked)
-            ? 'Previous key for this site could not be revoked: ' . $revoked->get_error_message()
-            : 'Previous key for this site revoked';
+          $revoked = $this->revoke_key($sa_email, $previous_key['private_key_id']);
+          $log[] = $revoked === true
+            ? 'Previous key for this site revoked'
+            : 'Previous key for this site could not be revoked yet (' . $revoked->get_error_message() . '); it will be retried on the next setup';
         }
+        $this->retry_pending_revocations($log);
 
-        /* 8. Verify with the new key itself (IAM can lag a few seconds) */
-        $verified = $this->verify_key($key_json, $bucket, 10);
         $log[] = $verified === true
           ? 'Verified: the site reached the bucket with its own credentials'
           : 'Saved, but the first connection check did not pass yet: ' . $verified . ' (IAM changes can take a minute to apply; reload Stateless Settings in a moment)';
@@ -1121,6 +1181,39 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
         $log[] = 'Stopped: ' . $e->getMessage();
         $this->state_set('log', $log, 10 * MINUTE_IN_SECONDS, $uid);
         $this->fail($e->getMessage());
+      }
+    }
+
+    /**
+     * Deletes a service account key. A failure is remembered in an option so a later setup retries it,
+     * instead of leaving active keys behind until someone cleans them up by hand.
+     * Returns true, or the WP_Error of the failed request.
+     */
+    private function revoke_key($sa_email, $key_id) {
+      $r = $this->api('DELETE', 'https://iam.googleapis.com/v1/projects/-/serviceAccounts/' . rawurlencode($sa_email) . '/keys/' . rawurlencode($key_id));
+      $pending = $this->read_option(self::PENDING_KEYS_OPTION, array());
+      if (!is_array($pending)) $pending = array();
+      $name = $sa_email . '/' . $key_id;
+      if (is_wp_error($r) && $r->get_error_code() !== 'google_404') {
+        $pending[$name] = time();
+        $this->write_option(self::PENDING_KEYS_OPTION, $pending, false);
+        return $r;
+      }
+      if (isset($pending[$name])) {
+        unset($pending[$name]);
+        $pending ? $this->write_option(self::PENDING_KEYS_OPTION, $pending, false) : $this->remove_option(self::PENDING_KEYS_OPTION);
+      }
+      return true;
+    }
+
+    private function retry_pending_revocations(&$log) {
+      $pending = $this->read_option(self::PENDING_KEYS_OPTION, array());
+      if (!is_array($pending) || !$pending) return;
+      foreach (array_keys($pending) as $name) {
+        list($email, $key_id) = array_pad(explode('/', $name, 2), 2, '');
+        if ($email === '' || $key_id === '') continue;
+        $r = $this->revoke_key($email, $key_id);
+        $log[] = $r === true ? 'Earlier key ' . $key_id . ' revoked' : 'Earlier key ' . $key_id . ' still pending revocation: ' . $r->get_error_message();
       }
     }
 
