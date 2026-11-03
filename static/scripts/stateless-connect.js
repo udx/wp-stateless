@@ -106,6 +106,8 @@
     if (isNew) form.querySelector('[name=bucket_choice][value=new]').checked = true;
     const newBucket = form.querySelector('[name=bucket_choice]:checked').value === 'new';
     form.querySelectorAll('.sm-gc-new-project').forEach(r => r.hidden = !isNew);
+    // A hidden billing selector must not submit a value: billing is only chosen for a project created here.
+    form.querySelectorAll('select[name=billing_account]').forEach(b => b.disabled = !isNew);
     form.querySelectorAll('.sm-gc-new-bucket').forEach(r => r.hidden = !newBucket);
     document.getElementById('new_project_name').required = isNew;
     picker.hidden = newBucket;
