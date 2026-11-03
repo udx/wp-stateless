@@ -708,7 +708,7 @@ namespace wpCloud\StatelessMedia {
           'settings' => sprintf( '<a href="%s">%s</a>', $url, __('Settings', ud_get_stateless_media()->domain) ),
         ];
 
-        $actions['addons'] = sprintf( '<a href="%s" style="color: #f05323" target="_blank">%s</a>', ud_get_stateless_media()->get_docs_page_url('addons'), __('Addons', ud_get_stateless_media()->domain) );
+        $actions['addons'] = sprintf( '<a href="%s" style="color: #f05323" target="_blank">%s</a>', ud_get_stateless_media()->get_docs_page_url('addons/'), __('Addons', ud_get_stateless_media()->domain) );
 
         return $settings + $actions;
       }
