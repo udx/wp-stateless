@@ -26,10 +26,28 @@ namespace wpCloud\StatelessMedia {
        * Upload errors from the last add_media() run, per attachment. An object that failed to upload can
        * still exist in the bucket from an earlier sync, so an existence check alone would call the run a success.
        */
+      /**
+       * Upload failures of the current request, keyed by attachment id and image size.
+       * A sync resets them once per attachment; a size's failure stays recorded until a
+       * later upload of that same size succeeds, so a repeated metadata callback that
+       * finds the previous object in the bucket cannot hide a failed replacement.
+       */
       private static $upload_errors = array();
 
       public static function upload_errors($attachment_id) {
-        return isset(self::$upload_errors[$attachment_id]) ? self::$upload_errors[$attachment_id] : array();
+        return isset(self::$upload_errors[$attachment_id]) ? array_values(self::$upload_errors[$attachment_id]) : array();
+      }
+
+      public static function reset_upload_errors($attachment_id) {
+        unset(self::$upload_errors[$attachment_id]);
+      }
+
+      private static function record_upload_error($attachment_id, $size, $message) {
+        self::$upload_errors[$attachment_id][$size] = $size . ': ' . $message;
+      }
+
+      private static function resolve_upload_error($attachment_id, $size) {
+        unset(self::$upload_errors[$attachment_id][$size]);
       }
 
       static $can_delete_attachment = [];
@@ -181,10 +199,6 @@ namespace wpCloud\StatelessMedia {
         if (empty($metadata)) {
           $metadata = array();
         }
-        if (empty($args['is_webp'])) {
-          unset(self::$upload_errors[$attachment_id]);
-        }
-
         /**
          * To skip the sync process.
          *
@@ -348,8 +362,9 @@ namespace wpCloud\StatelessMedia {
                   $media = $object->update(array('metadata' => $media_args['metadata']) + $mediaOptions);
 
                   $cloud_meta = self::generate_cloud_meta($cloud_meta, $media, $size, $img, $bucketLink);
+                  self::resolve_upload_error($attachment_id, $size . $args['is_webp']);
                 } catch (\Throwable $th) {
-                  self::$upload_errors[$attachment_id][] = $size . ': ' . $th->getMessage();
+                  self::record_upload_error($attachment_id, $size . $args['is_webp'], $th->getMessage());
                 }
               } else {
                 /* Add default image */
@@ -362,11 +377,12 @@ namespace wpCloud\StatelessMedia {
                   $manages_acl   = !defined('WP_STATELESS_SKIP_ACL_SET') || !WP_STATELESS_SKIP_ACL_SET;
                   $already_there = !file_exists($img['path']) && ($manages_acl ? $client->media_exists($img['gs_name']) : $client->get_media($img['gs_name']));
                   if (!$already_there) {
-                    self::$upload_errors[$attachment_id][] = $size . ': ' . $media->get_error_message();
+                    self::record_upload_error($attachment_id, $size . $args['is_webp'], $media->get_error_message());
                   }
                 } else {
                   // @note We don't add storageClass because it's same as parent...
                   $cloud_meta = self::generate_cloud_meta($cloud_meta, $media, $size, $img, $bucketLink);
+                  self::resolve_upload_error($attachment_id, $size . $args['is_webp']);
 
                   /**
                    * Ephemeral and stateless mode: we don't need the local version.
@@ -1076,6 +1092,8 @@ namespace wpCloud\StatelessMedia {
         if (!function_exists('wp_generate_attachment_metadata')) {
           require_once ABSPATH . '/wp-admin/includes/image.php';
         }
+        // The metadata hooks below call add_media several times for this attachment; collect their failures as one sync.
+        self::reset_upload_errors($image->ID);
         $metadata = wp_generate_attachment_metadata($image->ID, $fullsizepath);
 
         if (get_post_mime_type($image->ID) !== 'image/svg+xml') {
@@ -1151,6 +1169,7 @@ namespace wpCloud\StatelessMedia {
               require_once ABSPATH . '/wp-admin/includes/media.php';
               require_once ABSPATH . '/wp-admin/includes/image.php';
             }
+            self::reset_upload_errors($file->ID);
             $metadata = wp_generate_attachment_metadata($file->ID, $fullsizepath);
 
             if (is_wp_error($metadata)) {
