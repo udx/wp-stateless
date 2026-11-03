@@ -100,7 +100,7 @@ abstract class BackgroundSync extends UDX_WP_Background_Process implements ISync
           is_numeric($this->currently_processing_item) ? get_the_title($this->currently_processing_item) : $this->currently_processing_item,
           is_numeric($this->currently_processing_item) ? "(ID: {$this->currently_processing_item})" : '',
           $err['message'],
-          ud_get_stateless_media()->get_docs_page_url('docs/constants/#wpstatelessmediauploadchunksize'),
+          ud_get_stateless_media()->get_docs_page_url('docs/constants/#wp_stateless_media_upload_chunk_size'),
         )
       ]);
 

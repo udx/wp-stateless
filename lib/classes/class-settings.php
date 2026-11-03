@@ -726,7 +726,7 @@ namespace wpCloud\StatelessMedia {
           return $meta;
         }
 
-        $meta['documentation'] = sprintf( '<a href="%s" target="_blank">%s</a>', ud_get_stateless_media()->get_docs_page_url(), __('Documentation', ud_get_stateless_media()->domain) );
+        $meta['documentation'] = sprintf( '<a href="%s" target="_blank">%s</a>', ud_get_stateless_media()->get_docs_page_url('docs/'), __('Documentation', ud_get_stateless_media()->domain) );
 
         return $meta;
       }

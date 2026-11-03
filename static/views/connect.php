@@ -119,7 +119,7 @@ $start_error   = wpCloud\StatelessMedia\GoogleConnect::instance()->start_error;
           </form>
         </details>
         <div class="sm-connect-help">
-          <span><?php _e('Use your Google Cloud account. You can disconnect anytime.', $domain); ?></span>
+          <span><?php _e('Use your Google Cloud account. You can disconnect anytime.', $domain); ?> <a href="<?php echo esc_url(ud_get_stateless_media()->get_docs_page_url('docs/google-permission-request/')); ?>" target="_blank" rel="noopener"><?php _e('Why Google asks for this access', $domain); ?></a></span>
           <?php if ($auth_url) : ?>
             <form method="post" action="<?php echo esc_url($post); ?>">
               <?php wp_nonce_field($connect->nonce_action()); ?>
@@ -175,7 +175,7 @@ $start_error   = wpCloud\StatelessMedia\GoogleConnect::instance()->start_error;
       <p><?php echo isset($settings->mode) && $settings->mode === 'backup' ? esc_html__('New uploads will be backed up to Google Cloud while this site continues serving the files.', $domain) : esc_html__('New uploads will be served from Google Cloud using your chosen storage mode.', $domain); ?></p>
       <p><?php printf(esc_html__('This site is configured to use %s. Upload an image to try it out.', $domain), '<strong>' . esc_html($settings->bucket) . '</strong>'); ?></p>
       <p><a class="button button-primary" href="<?php echo esc_url(admin_url('media-new.php')); ?>"><?php _e('Upload an image', $domain); ?></a> <a class="button" href="#sm-step-storage" data-wizard-step="storage"><?php _e('Review storage', $domain); ?></a> <a href="<?php echo esc_url($settings_url); ?>"><?php _e('Stateless Settings', $domain); ?></a></p>
-      <p class="description"><?php _e('Already have a media library? Use the synchronization tools in Stateless Settings to copy existing uploads.', $domain); ?></p>
+      <p class="description"><?php _e('Already have a media library? Use the synchronization tools in Stateless Settings to copy existing uploads.', $domain); ?> <a href="<?php echo esc_url(ud_get_stateless_media()->get_docs_page_url('docs/synchronization/')); ?>" target="_blank" rel="noopener"><?php _e('Read the synchronization guide', $domain); ?></a></p>
       </div><img src="<?php echo esc_url(plugins_url('static/images/connect/image-woman-machine-learning.svg', dirname(__DIR__, 2) . '/wp-stateless.php')); ?>" alt="" width="280">
     </div>
     <?php endif; ?>
@@ -301,7 +301,7 @@ $start_error   = wpCloud\StatelessMedia\GoogleConnect::instance()->start_error;
                   </label>
                 <?php endforeach; ?>
               </fieldset>
-              <p class="description"><?php _e('You can change this later in Stateless Settings.', $domain); ?></p>
+              <p class="description"><?php _e('You can change this later in Stateless Settings.', $domain); ?> <a href="<?php echo esc_url(ud_get_stateless_media()->get_docs_page_url('docs/modes/')); ?>" target="_blank" rel="noopener"><?php _e('Compare storage modes', $domain); ?></a></p>
               <?php endif; ?>
             </td>
           </tr>

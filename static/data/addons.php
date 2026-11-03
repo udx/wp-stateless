@@ -4,7 +4,7 @@
  * Returns the list of addons plugins.
  * 
  * Sample structure:
- *  'buddypress' => [ // ID of the addon is a slug for Addon page on https://stateless.udx.io/addons/
+ *  'buddypress' => [ // ID of the addon is a slug for Addon page on https://stateless.ci/addons/
  *    'title'         => 'BuddyPress',
  *    'plugin_files'  => ['buddypress/bp-loader.php'], // if this is a plugin Addon
  *    'theme_name'    => 'Divi', // if this is a theme Addon
@@ -16,7 +16,7 @@
  *    'hubspot_link'  => 'https://cta-service-cms2.hubspot.com/web-interactives/...', // (optional) HubSpot link for Download button
  *  ],
  *
- * ID of the addon is a slug for Addon page on https://stateless.udx.io/addons/  
+ * ID of the addon is a slug for Addon page on https://stateless.ci/addons/  
  */
 
 return [

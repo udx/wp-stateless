@@ -63,7 +63,7 @@ Looking for a unique feature for your next project? [Hire us!](https://udx.io/)
 4. Set a Google Cloud Project, Google Cloud Storage Bucket, and Google Cloud Billing Account and click "Continue."
 5. Installation and setup are now complete. Visit *Media > Stateless Settings* for more options.
 
-For a more detailed installation and setup walkthrough, please see the [manual setup instructions on Github](https://stateless.udx.io/setup/).
+For a more detailed installation and setup walkthrough, please see the [setup guide](https://stateless.ci/setup/) and the [manual setup instructions](https://stateless.ci/docs/manual-setup/).
 
 ## Frequently Asked Questions
 
@@ -73,7 +73,7 @@ Beyond the [official WordPress minimum requirements](https://codex.wordpress.org
 
 ### What wp-config constants are supported?
 
-For a complete list of supported wp-config constants, please consult the [GitHub documentation](https://stateless.udx.io/docs/constants/).
+For a complete list of supported wp-config constants, please consult the [configuration constants reference](https://stateless.ci/docs/constants/).
 
 ### How do I manually generate the Service Account JSON?
 
