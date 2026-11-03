@@ -356,7 +356,14 @@ namespace wpCloud\StatelessMedia {
                 $media = $client->add_media($media_args);
 
                 if (is_wp_error($media)) {
-                  self::$upload_errors[$attachment_id][] = $size . ': ' . $media->get_error_message();
+                  // Ephemeral and Stateless remove a local copy once its size is uploaded, and the metadata hooks run
+                  // more than once per attachment, so a later pass can find the file gone while the object is already
+                  // in the bucket. That is not a failed upload; a missing object or a failure with the file present is.
+                  $manages_acl   = !defined('WP_STATELESS_SKIP_ACL_SET') || !WP_STATELESS_SKIP_ACL_SET;
+                  $already_there = !file_exists($img['path']) && ($manages_acl ? $client->media_exists($img['gs_name']) : $client->get_media($img['gs_name']));
+                  if (!$already_there) {
+                    self::$upload_errors[$attachment_id][] = $size . ': ' . $media->get_error_message();
+                  }
                 } else {
                   // @note We don't add storageClass because it's same as parent...
                   $cloud_meta = self::generate_cloud_meta($cloud_meta, $media, $size, $img, $bucketLink);
