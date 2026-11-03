@@ -132,6 +132,8 @@
   }
   project.addEventListener('change', () => changeProject(true));
   form.querySelectorAll('[name=bucket_choice]').forEach(c => c.addEventListener('change',sync));
+  // The Create button depends on a billing account for new projects; re-evaluate when one is picked.
+  form.querySelectorAll('[name=billing_account]').forEach(b => b.addEventListener('change',sync));
   select.addEventListener('change', () => { if (select.value) name.value = select.value; renderBuckets(); });
   name.addEventListener('input',renderBuckets);
   search.addEventListener('input',renderBuckets);
