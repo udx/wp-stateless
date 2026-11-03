@@ -35,13 +35,15 @@ $start_error   = wpCloud\StatelessMedia\GoogleConnect::instance()->start_error;
     <?php endforeach; ?>
   </ol>
 
-  <?php if ($configured && !$connection) : ?>
+  <?php if ($configured && !$connection) :
+    $mode_labels = array('backup' => __('Backup', $domain), 'cdn' => __('CDN', $domain), 'ephemeral' => __('Ephemeral', $domain), 'stateless' => __('Stateless', $domain), 'disabled' => __('Disabled', $domain));
+    $mode_label  = isset($mode_labels[$settings->mode]) ? $mode_labels[$settings->mode] : $settings->mode; ?>
     <div class="notice notice-info inline"><p>
       <?php printf(
         /* translators: 1: bucket name, 2: storage mode, 3: settings link */
         __('This site already serves media from the bucket %1$s in %2$s mode with credentials configured by hand. Nothing changes until you choose storage in step 02; use %3$s to adjust the current configuration.', $domain),
         '<code>' . esc_html($settings->bucket) . '</code>',
-        '<strong>' . esc_html(ucfirst($settings->mode)) . '</strong>',
+        '<strong>' . esc_html($mode_label) . '</strong>',
         '<a href="' . esc_url($settings_url) . '">' . esc_html__('Stateless Settings', $domain) . '</a>'
       ); ?>
     </p></div>
