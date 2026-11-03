@@ -46,6 +46,7 @@ return array(
     'wpCloud\\StatelessMedia\\Errors' => $baseDir . '/lib/classes/class-errors.php',
     'wpCloud\\StatelessMedia\\FatalException' => $baseDir . '/lib/classes/exception-fatal.php',
     'wpCloud\\StatelessMedia\\GS_Client' => $baseDir . '/lib/classes/class-gs-client.php',
+    'wpCloud\\StatelessMedia\\GoogleConnect' => $baseDir . '/lib/classes/class-google-connect.php',
     'wpCloud\\StatelessMedia\\Helper' => $baseDir . '/lib/classes/class-helper.php',
     'wpCloud\\StatelessMedia\\Imagify' => $baseDir . '/lib/classes/compatibility/imagify.php',
     'wpCloud\\StatelessMedia\\LearnDash' => $baseDir . '/lib/classes/compatibility/learn-dash.php',

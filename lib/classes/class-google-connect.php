@@ -64,7 +64,17 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
       }
     }
 
+    /**
+     * The network "Setup Assistant: Hidden" setting (WP_STATELESS_MEDIA_HIDE_SETUP_ASSISTANT) hid the
+     * former setup wizard from site admins; keep honoring it for Connect so an already configured
+     * site sees nothing new. The network admin page stays available to network administrators.
+     */
+    public static function hidden_for_site() {
+      return ud_get_stateless_media()->get('sm.hide_setup_assistant') === 'true';
+    }
+
     public function admin_menu() {
+      if (self::hidden_for_site()) return;
       $this->legacy_menu_alias('upload.php');
       $this->page_hook = add_media_page(
         __('Stateless Connect', ud_get_stateless_media()->domain),

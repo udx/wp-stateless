@@ -35,6 +35,18 @@ $start_error   = wpCloud\StatelessMedia\GoogleConnect::instance()->start_error;
     <?php endforeach; ?>
   </ol>
 
+  <?php if ($configured && !$connection) : ?>
+    <div class="notice notice-info inline"><p>
+      <?php printf(
+        /* translators: 1: bucket name, 2: storage mode, 3: settings link */
+        __('This site already serves media from the bucket %1$s in %2$s mode with credentials configured by hand. Nothing changes until you choose storage in step 02; use %3$s to adjust the current configuration.', $domain),
+        '<code>' . esc_html($settings->bucket) . '</code>',
+        '<strong>' . esc_html(ucfirst($settings->mode)) . '</strong>',
+        '<a href="' . esc_url($settings_url) . '">' . esc_html__('Stateless Settings', $domain) . '</a>'
+      ); ?>
+    </p></div>
+  <?php endif; ?>
+
   <?php if ($error) : ?>
     <div class="notice notice-error"><p><?php echo wp_kses_post($error); ?></p></div>
   <?php elseif ($msg === 'client-saved') : ?>

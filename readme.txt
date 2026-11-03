@@ -146,6 +146,10 @@ Before upgrading to WP-Stateless 3.0, please, make sure you tested it on your de
 * ENHANCEMENT - repeated setups revoke the site's previous service account key instead of piling keys onto the account.
 * ENHANCEMENT - plugin header and composer now state the PHP 8.1 minimum that the bundled Google libraries already require.
 * ENHANCEMENT - documentation links now point to stateless.ci, and the setup wizard links to the guides on Google permissions, storage modes and synchronization.
+* SECURITY - the Google client secret never ships in the plugin: sign-in runs through stateless.ci with PKCE, single-use transactions bound to your site, and an explicit confirmation step before any token reaches WordPress.
+* SECURITY - setup mints a service account key inside your own project with Storage Admin on the one bucket only, never a project-wide role; the key is written straight into the site and never passes through stateless.ci.
+* SECURITY - disconnecting verifies that Google and stateless.ci revoked the access before the connection is removed, and setup refuses private or uniform-access buckets for serving modes and refuses to overwrite credentials pinned by constants or environment variables.
+* SECURITY - updated the bundled firebase/php-jwt library to 7.x (CVE-2025-45769), render synchronization counters as text instead of HTML, and restrict the GitHub Actions token used by the security scan workflow to read-only.
 
 = 4.4.3 - 2026-09-05 =
 * FIX - corrected add-on file path for the WooCommerce Extra Product Options add-on: duplicate `.php` extension caused the add-on to always appear uninstalled/inactive on the Stateless Addons screen with an invalid activation link.

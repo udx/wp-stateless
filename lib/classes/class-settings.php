@@ -766,16 +766,26 @@ namespace wpCloud\StatelessMedia {
           __('the setup manual', ud_get_stateless_media()->domain),
         );
 
-        $this->bootstrap->errors->add([
-          'title' => __('WP-Stateless: Finish Setup', ud_get_stateless_media()->domain),
-          'message' => sprintf(
+        if ( GoogleConnect::hidden_for_site() ) {
+          // The network hid the setup assistant from site admins; point at the manual only.
+          $message = sprintf(
+            __('WP-Stateless is active but not connected to Google Cloud yet. Follow %s to configure it.', ud_get_stateless_media()->domain),
+            $documentation_url,
+          );
+        } else {
+          $message = sprintf(
             __(
               'WP-Stateless is active but not connected to Google Cloud yet. %1$s to sign in with Google and have the bucket created for you, or follow %2$s to configure it by hand.',
               ud_get_stateless_media()->domain,
             ),
             $connect_url,
             $documentation_url,
-          ),
+          );
+        }
+
+        $this->bootstrap->errors->add([
+          'title' => __('WP-Stateless: Finish Setup', ud_get_stateless_media()->domain),
+          'message' => $message,
           'key' => self::SETUP_MESSAGE_KEY,
         ], 'message');
       }

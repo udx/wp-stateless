@@ -674,9 +674,9 @@ function ProcessingClass(data, app) {
    * Stop the process
    */
   this.refreshProgress = function () {
-    this.htmlBox.find('.legend .total span').html( this.getProgressTotal() )
-    this.htmlBox.find('.legend .queued span').html( this.getQueuedTotal() )
-    this.htmlBox.find('.legend .processed span').html( this.processed_items )
+    this.htmlBox.find('.legend .total span').text( this.getProgressTotal() )
+    this.htmlBox.find('.legend .queued span').text( this.getQueuedTotal() )
+    this.htmlBox.find('.legend .processed span').text( this.processed_items )
     
     this.htmlBox.find('.bar.total').css({
       'background-color': this.getProgressTotal() == this.getProcessedTotal() ? '#02ae7a' : false
@@ -727,7 +727,7 @@ function ProcessingClass(data, app) {
    * Refresh the progress data
    */
   this.refreshBox = function () {
-    this.htmlBox.find('.inside ul span').html(this.total_items)
+    this.htmlBox.find('.inside ul span').text(this.total_items)
 
     if (this.is_running) {
       this.startPolling()
