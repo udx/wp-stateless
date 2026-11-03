@@ -143,6 +143,7 @@ Before upgrading to WP-Stateless 3.0, please, make sure you tested it on your de
 * NEW - a pairing code completes sign-in when the browser cannot return to the site, and sign-in works for localhost installs.
 * FIX - synchronization no longer reports success when an upload or a thumbnail failed to reach Google Cloud; the failure stays visible and the retry works.
 * FIX - media Trash Undo link now works from the grid view of the Media Library.
+* FIX - upgrading straight from a 2.x install no longer logs database errors for the 3.x sync table that never existed there; the data optimization step checks for the table first.
 * ENHANCEMENT - repeated setups revoke the site's previous service account key instead of piling keys onto the account.
 * ENHANCEMENT - setup verifies the new credentials before it replaces a working configuration, remembers keys it could not revoke and retries them on the next setup, refuses existing buckets that would serve 403s under WP_STATELESS_SKIP_ACL_SET, and stops when the storage mode is pinned to Disabled.
 * ENHANCEMENT - plugin header and composer now state the PHP 8.1 minimum that the bundled Google libraries already require.
