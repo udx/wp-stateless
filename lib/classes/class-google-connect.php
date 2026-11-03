@@ -172,6 +172,7 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
       $projects  = array();
       $billing   = array();
       $proj_err  = null;
+      $proj_note = '';
       $billing_err = '';
 
       if ($client && !$connection) {
@@ -191,7 +192,10 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
           }
           $projects = array_merge($projects, isset($res['projects']) ? $res['projects'] : array());
           $page_token = isset($res['nextPageToken']) ? $res['nextPageToken'] : '';
-        } while ($page_token !== '' && ++$pages < 10);
+        } while ($page_token !== '' && ++$pages < 50);
+        if ($page_token !== '' && !$proj_err) {
+          $proj_note = sprintf(__('Only the first %d projects are listed. If yours is missing, create a new project here or ask your Google Cloud administrator to move the bucket into one of the listed projects.', ud_get_stateless_media()->domain), count($projects));
+        }
         usort($projects, function ($a, $b) {
           return strcasecmp(isset($a['name']) ? $a['name'] : $a['projectId'], isset($b['name']) ? $b['name'] : $b['projectId']);
         });
@@ -451,6 +455,12 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
       if (!$id || !$secret) {
         $this->fail(__('Both the client ID and client secret are required.', ud_get_stateless_media()->domain));
       }
+      // A refresh token belongs to the client that issued it, so the client cannot change under a live connection.
+      $connection = $this->get_connection();
+      $current    = $this->read_option(self::CLIENT_OPTION);
+      if ($connection && !$this->broker_conn($connection) && (!is_array($current) || $current['id'] !== $id || $current['secret'] !== $secret)) {
+        $this->fail(__('This site is connected to Google through the current OAuth client. Disconnect first, then save the new client and sign in again.', ud_get_stateless_media()->domain));
+      }
       // Own clients are Desktop clients: Google sends the browser to the loopback address and the admin pastes it.
       $this->write_option(self::CLIENT_OPTION, array('id' => $id, 'secret' => $secret, 'redirect_uri' => self::LOOPBACK_URI), false);
       $this->done(array('sm_gc' => 'client-saved'));
@@ -545,6 +555,12 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
     /* Proof of possession for the broker                                   */
     /* GET /wp-json/wp-stateless/v1/connect-proof?txn=... returns the verify  */
     /* token the broker handed out when this site opened the transaction.   */
+    /* The route is public on purpose: the broker fetches it from this       */
+    /* site's own origin to confirm the site opened the attempt. It never    */
+    /* accepts a token pushed by a client, so reading the token grants       */
+    /* nothing; the attempt itself is completed by this site's administrator  */
+    /* with the pairing code and the site verifier. Proofs live for twenty   */
+    /* minutes and are dropped as soon as the attempt finishes or restarts.  */
     /* ------------------------------------------------------------------ */
 
     public function rest_routes() {
@@ -581,9 +597,19 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
       update_option(self::PROOFS_OPTION, $all, false);
     }
 
+    /** The proof is only needed while the broker may still verify the attempt. */
+    private function proof_delete($txn) {
+      $all = $this->proofs();
+      if ($txn === '' || !isset($all[$txn])) return;
+      unset($all[$txn]);
+      update_option(self::PROOFS_OPTION, $all, false);
+    }
+
     /** Drops the pending attempt so the next page view opens a fresh one. */
     public function handle_restart() {
       $this->guard();
+      $pkce = $this->state_get('pkce');
+      if (!empty($pkce['site_verifier']) && !empty($pkce['state'])) $this->proof_delete($pkce['state']);
       $this->state_delete('pkce');
       $this->state_delete('error');
       $this->done(array());
@@ -647,6 +673,7 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
           $this->fail(__('That code was not recognized, was already used, or has expired. Check the code and try again. If it still fails, click Sign in with Google to start again.', ud_get_stateless_media()->domain));
         }
         $this->store_connection($client, $r, isset($r['email']) ? $r['email'] : '', array('id' => $r['connection_id'], 'secret' => $r['connection_secret']), $uid);
+        if (!empty($pkce['state'])) $this->proof_delete($pkce['state']);
       }
 
       if (!empty($params['pair'])) {
@@ -975,25 +1002,34 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
           $log[] = sprintf('Creating project %s (%s)', $new_project, $project_id);
           $this->check($this->wait_operation('https://cloudresourcemanager.googleapis.com/v1/' . $op['name']), 'Create project');
           $log[] = 'Project created';
+          // Checkpoint before billing: the project exists now, so a retry after a billing failure must
+          // resume it (and link the chosen billing account below) instead of creating a second project.
+          $draft['project'] = $project_id;
+          $draft['new_project_name'] = '';
+          $this->state_set('draft', $draft, HOUR_IN_SECONDS, $uid);
 
           if ($billing_choice) {
-            $r = $this->api('PUT', 'https://cloudbilling.googleapis.com/v1/projects/' . rawurlencode($project_id) . '/billingInfo', array(
-              'billingAccountName' => $billing_choice,
-            ));
-            $this->check($r, 'Link billing account');
+            $this->link_billing($project_id, $billing_choice);
             $log[] = 'Billing account linked';
+            $draft['billing_account'] = '';
+            $this->state_set('draft', $draft, HOUR_IN_SECONDS, $uid);
           } else {
             $log[] = 'No billing account linked. Google requires one before a bucket can be created.';
           }
-          // Checkpoint: a retry after a later failure reuses this project instead of creating another one.
-          $draft['project'] = $project_id;
-          $draft['new_project_name'] = '';
-          $draft['billing_account'] = '';
-          $this->state_set('draft', $draft, HOUR_IN_SECONDS, $uid);
         } else {
           $project_id = $project_choice;
           if (!preg_match('/^[a-z][a-z0-9-]{4,29}$/', $project_id)) throw new Exception(__('Pick a project.', ud_get_stateless_media()->domain));
           $log[] = sprintf('Using project %s', $project_id);
+          // A project checkpointed by an earlier attempt may still be waiting for its billing account.
+          if ($billing_choice) {
+            $info = $this->api('GET', 'https://cloudbilling.googleapis.com/v1/projects/' . rawurlencode($project_id) . '/billingInfo');
+            if (!is_wp_error($info) && empty($info['billingEnabled'])) {
+              $this->link_billing($project_id, $billing_choice);
+              $log[] = 'Billing account linked';
+              $draft['billing_account'] = '';
+              $this->state_set('draft', $draft, HOUR_IN_SECONDS, $uid);
+            }
+          }
         }
 
         // Check a manually entered bucket before creating accounts, keys or changing permissions.
@@ -1060,11 +1096,20 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
           if (is_wp_error($r) && $r->get_error_code() === 'google_409') {
             throw new Exception(sprintf(__('The bucket name %s is already taken. Bucket names are global across Google Cloud, pick another.', ud_get_stateless_media()->domain), $bucket));
           }
+          if (is_wp_error($r) && $r->get_error_code() === 'google_412') {
+            throw new Exception(self::public_access_prevention_message($project_id));
+          }
           $this->check($r, 'Create bucket');
           $log[] = sprintf('Bucket %s created in %s, new objects public by default', $bucket, $location);
           // Checkpoint: the name is taken now, so a retry must reuse the bucket rather than create it again.
           $draft['bucket_choice'] = 'existing';
           $this->state_set('draft', $draft, HOUR_IN_SECONDS, $uid);
+          // Serving modes need anonymous reads. An organization policy can enforce public access prevention on
+          // the new bucket even though it was created as "inherited", so prove a public read before continuing.
+          if ($mode !== 'backup' && (!defined('WP_STATELESS_SKIP_ACL_SET') || !WP_STATELESS_SKIP_ACL_SET)) {
+            $this->verify_public_read($bucket, $project_id);
+            $log[] = 'Public read verified';
+          }
         } else {
           $r = $this->api('GET', 'https://storage.googleapis.com/storage/v1/b/' . rawurlencode($bucket));
           $this->check($r, 'Find bucket');
@@ -1243,6 +1288,39 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
       }
     }
 
+    private function link_billing($project_id, $billing_account) {
+      $r = $this->api('PUT', 'https://cloudbilling.googleapis.com/v1/projects/' . rawurlencode($project_id) . '/billingInfo', array(
+        'billingAccountName' => $billing_account,
+      ));
+      $this->check($r, 'Link billing account');
+    }
+
+    private static function public_access_prevention_message($project_id) {
+      return sprintf(__('Public access prevention is enforced for project %s (an organization policy), so files in a new bucket there cannot be served to visitors. Pick a project where the constraint is not enforced, ask your Google Cloud administrator to exempt this project, or use Backup mode.', ud_get_stateless_media()->domain), $project_id);
+    }
+
+    /**
+     * Uploads a tiny public object to the new bucket, reads it back without credentials and deletes it.
+     * Fails with an actionable message when visitors would get 403s from this bucket.
+     */
+    private function verify_public_read($bucket, $project_id) {
+      $name = '.wp-stateless-public-read-check-' . substr(md5(uniqid('', true)), 0, 8);
+      $up   = $this->api('POST', 'https://storage.googleapis.com/upload/storage/v1/b/' . rawurlencode($bucket) . '/o?uploadType=media&predefinedAcl=publicRead&name=' . rawurlencode($name), array('wp-stateless' => 'public read check'));
+      if (is_wp_error($up) && $up->get_error_code() === 'google_412') {
+        throw new Exception(self::public_access_prevention_message($project_id));
+      }
+      $this->check($up, 'Verify public read');
+      $probe = wp_remote_get('https://storage.googleapis.com/' . rawurlencode($bucket) . '/' . rawurlencode($name), array('timeout' => 20, 'headers' => array('Cache-Control' => 'no-cache')));
+      $code  = is_wp_error($probe) ? 0 : (int) wp_remote_retrieve_response_code($probe);
+      $this->api('DELETE', 'https://storage.googleapis.com/storage/v1/b/' . rawurlencode($bucket) . '/o/' . rawurlencode($name));
+      if ($code === 403) {
+        throw new Exception(self::public_access_prevention_message($project_id));
+      }
+      if ($code !== 200) {
+        throw new Exception(sprintf(__('Verify public read: a test file in bucket %1$s could not be read anonymously (%2$s). Check the bucket\'s public access settings and retry.', ud_get_stateless_media()->domain), $bucket, $code ? 'HTTP ' . $code : $probe->get_error_message()));
+      }
+    }
+
     /* ------------------------------------------------------------------ */
     /* Helpers                                                              */
     /* ------------------------------------------------------------------ */
@@ -1270,20 +1348,39 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
       return hash('sha256', wp_salt('auth') . '|' . wp_salt('secure_auth') . '|sm_google_connect', true);
     }
 
+    /**
+     * Tokens at rest: libsodium secretbox (v1), else OpenSSL AES-256-GCM (v2). A host without either
+     * extension is not supported by the plugin's requirements, so nothing is ever stored in clear.
+     */
     private function encrypt($plain) {
-      if (!function_exists('sodium_crypto_secretbox')) return 'plain:' . $plain;
-      $nonce = random_bytes(SODIUM_CRYPTO_SECRETBOX_NONCEBYTES);
-      return 'v1:' . base64_encode($nonce . sodium_crypto_secretbox($plain, $nonce, $this->crypto_key()));
+      if (function_exists('sodium_crypto_secretbox')) {
+        $nonce = random_bytes(SODIUM_CRYPTO_SECRETBOX_NONCEBYTES);
+        return 'v1:' . base64_encode($nonce . sodium_crypto_secretbox($plain, $nonce, $this->crypto_key()));
+      }
+      if (function_exists('openssl_encrypt') && in_array('aes-256-gcm', openssl_get_cipher_methods(), true)) {
+        $iv  = random_bytes(12);
+        $tag = '';
+        $box = openssl_encrypt($plain, 'aes-256-gcm', $this->crypto_key(), OPENSSL_RAW_DATA, $iv, $tag, '', 16);
+        if ($box !== false) return 'v2:' . base64_encode($iv . $tag . $box);
+      }
+      throw new Exception(__('Neither the sodium nor the OpenSSL PHP extension is available, so Google credentials cannot be stored securely.', ud_get_stateless_media()->domain));
     }
 
     private function decrypt($stored) {
-      if (strpos($stored, 'plain:') === 0) return substr($stored, 6);
-      if (strpos($stored, 'v1:') !== 0 || !function_exists('sodium_crypto_secretbox_open')) return '';
-      $raw   = base64_decode(substr($stored, 3));
-      $nonce = substr($raw, 0, SODIUM_CRYPTO_SECRETBOX_NONCEBYTES);
-      $box   = substr($raw, SODIUM_CRYPTO_SECRETBOX_NONCEBYTES);
-      $plain = sodium_crypto_secretbox_open($box, $nonce, $this->crypto_key());
-      return $plain === false ? '' : $plain;
+      $stored = (string) $stored;
+      if (strpos($stored, 'v1:') === 0 && function_exists('sodium_crypto_secretbox_open')) {
+        $raw   = base64_decode(substr($stored, 3));
+        $nonce = substr($raw, 0, SODIUM_CRYPTO_SECRETBOX_NONCEBYTES);
+        $box   = substr($raw, SODIUM_CRYPTO_SECRETBOX_NONCEBYTES);
+        $plain = sodium_crypto_secretbox_open($box, $nonce, $this->crypto_key());
+        return $plain === false ? '' : $plain;
+      }
+      if (strpos($stored, 'v2:') === 0 && function_exists('openssl_decrypt')) {
+        $raw   = base64_decode(substr($stored, 3));
+        $plain = openssl_decrypt(substr($raw, 28), 'aes-256-gcm', $this->crypto_key(), OPENSSL_RAW_DATA, substr($raw, 0, 12), substr($raw, 12, 16));
+        return $plain === false ? '' : $plain;
+      }
+      return '';
     }
   }
 }

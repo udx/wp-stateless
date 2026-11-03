@@ -208,6 +208,8 @@ $start_error   = wpCloud\StatelessMedia\GoogleConnect::instance()->start_error;
       <div class="sm-account-summary"><span><?php printf(esc_html__('Google account: %s', $domain), '<strong>' . esc_html($connection['email']) . '</strong>'); ?></span><a href="#sm-step-account" data-wizard-step="account"><?php _e('Change account', $domain); ?></a></div>
       <?php if ($proj_err) : ?>
         <div class="notice notice-error inline"><p><?php echo esc_html($proj_err); ?></p></div>
+      <?php elseif (!empty($proj_note)) : ?>
+        <div class="notice notice-warning inline"><p><?php echo esc_html($proj_note); ?></p></div>
       <?php endif; ?>
       <?php $overridden = $connect->storage_blocked(); if ($overridden) : ?>
         <div class="notice notice-warning inline"><p><?php echo esc_html($overridden); ?></p></div>

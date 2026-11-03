@@ -18,7 +18,7 @@ class Migration_20240423174109 extends Migration {
     global $wpdb;
     $table_name = $wpdb->prefix . 'sm_sync';
 
-    return $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table_name ) ) === $table_name;
+    return $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $wpdb->esc_like( $table_name ) ) ) === $table_name;
   }
 
   public function should_run() {

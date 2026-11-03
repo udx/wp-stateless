@@ -30,7 +30,7 @@ New to Google Cloud? Google is offering you a [$300 credit](https://console.clou
 * Stateless - Store and serve media files with Google Cloud Storage only. Media files are not stored locally.
 
 = Features =
-* Setup assistant makes getting started fast and easy.
+* Stateless Connect: sign in with Google from wp-admin and storage is set up in your own Google Cloud account.
 * No need to manually create service accounts or buckets - handled automatically.
 * Settings panel provides you with further GCS configuration and file url customization.
 * Mask the default GCS URL with your own custom domain.
@@ -68,10 +68,9 @@ Looking for a unique feature for your next project? [Hire us!](https://udx.io/)
 == Installation ==
 
 1. Search, install, and activate the *WP-Stateless* plugin via your WordPress dashboard.
-2. Begin WP-Stateless setup assistant at *Media > Stateless Setup* and click "Get Started Now."
-3. Click "Google Login" and sign-in with your Google account.
-4. Set a Google Cloud Project, Google Cloud Storage Bucket, and Google Cloud Billing Account and click "Continue."
-5. Installation and setup is now complete. Visit *Media > Stateless Settings* for more options.
+2. Open *Media > Stateless Connect* and click *Sign in with Google*. Confirm the connection for your site on stateless.ci; the page brings you back, or you type the eight character code it shows.
+3. Choose a Google Cloud project, billing account, bucket, location and storage mode, and submit the form. WP-Stateless creates the bucket, a service account with access to that bucket only, and its key inside your own Google Cloud account.
+4. Setup is now complete. Visit *Media > Stateless Settings* for more options.
 For a more detailed installation and setup walkthrough, please see the [setup guide](https://stateless.ci/setup/) and the [manual setup instructions](https://stateless.ci/docs/manual-setup/).
 
 == Screenshots ==
@@ -96,7 +95,7 @@ For a complete list of supported wp-config constants, please consult the [config
 
 = How do I manually generate the Service Account JSON? =
 
-The WP-Stateless setup assistant will create the Service Account JSON automatically for you, but you can follow these steps if you choose to create it manually.
+Stateless Connect creates the Service Account JSON automatically for you, but you can follow these steps if you choose to create it manually.
 
 1. Visit Google Cloud Console, and go to *IAM & Admin > Service accounts*.
 2. Click *Create Service Account* and name it *wp-stateless*.
@@ -148,6 +147,7 @@ Before upgrading to WP-Stateless 3.0, please, make sure you tested it on your de
 * ENHANCEMENT - setup verifies the new credentials before it replaces a working configuration, remembers keys it could not revoke and retries them on the next setup, refuses existing buckets that would serve 403s under WP_STATELESS_SKIP_ACL_SET, and stops when the storage mode is pinned to Disabled.
 * ENHANCEMENT - plugin header and composer now state the PHP 8.1 minimum that the bundled Google libraries already require.
 * ENHANCEMENT - documentation links now point to stateless.ci, and the setup wizard links to the guides on Google permissions, storage modes and synchronization.
+* ENHANCEMENT - setup resumes a project whose billing link failed instead of creating a second one, proves a public read from a new bucket before continuing (organization policies that enforce public access prevention get an explanation instead of 403s later), refuses OAuth client changes while that client holds a live connection, encrypts tokens with OpenSSL where sodium is missing, drops sign-in proofs as soon as an attempt finishes, and lists up to 10,000 projects with a note when more exist.
 * SECURITY - the Google client secret never ships in the plugin: sign-in runs through stateless.ci with PKCE, single-use transactions bound to your site, and an explicit confirmation step before any token reaches WordPress.
 * SECURITY - setup mints a service account key inside your own project with Storage Admin on the one bucket only, never a project-wide role; the key is written straight into the site and never passes through stateless.ci.
 * SECURITY - disconnecting verifies that Google and stateless.ci revoked the access before the connection is removed, and setup refuses private or uniform-access buckets for serving modes and refuses to overwrite credentials pinned by constants or environment variables.
