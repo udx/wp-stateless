@@ -339,12 +339,6 @@ namespace wpCloud\StatelessMedia {
                 ));
                 $media_args = apply_filters('wp_stateless_add_media_args', $media_args);
 
-                //Bucket
-                $bucket = ud_get_stateless_media()->get('sm.bucket');
-
-                $bucket = $gs_client->bucket($bucket);
-                $object = $bucket->object($media_args['name']);
-
                 /**
                  * Updating object metadata, ACL, CacheControl and contentDisposition
                  * @return media object
@@ -358,8 +352,8 @@ namespace wpCloud\StatelessMedia {
                   if ( !defined('WP_STATELESS_SKIP_ACL_SET') || !WP_STATELESS_SKIP_ACL_SET) {
                     $mediaOptions['predefinedAcl'] = 'publicRead';
                   }
-      
-                  $media = $object->update(array('metadata' => $media_args['metadata']) + $mediaOptions);
+
+                  $media = $gs_client->update_media($media_args['name'], array('metadata' => $media_args['metadata']) + $mediaOptions);
 
                   $cloud_meta = self::generate_cloud_meta($cloud_meta, $media, $size, $img, $bucketLink);
                   self::resolve_upload_error($attachment_id, $size . $args['is_webp']);

@@ -8,8 +8,6 @@
 
 namespace wpCloud\StatelessMedia {
 
-  use Google\Cloud\Storage\StorageClient;
-  use Google\Auth\HttpHandler\HttpHandlerFactory;
   use wpCloud\StatelessMedia\Sync\FileSync;
   use wpCloud\StatelessMedia\Sync\ImageSync;
   use wpCloud\StatelessMedia\Sync\NonLibrarySync;
@@ -437,33 +435,10 @@ namespace wpCloud\StatelessMedia {
 
       /**
        * @param callable|null $httpHandler
-       * @return StorageClient
-       * @throws \Exception
+       * @return GS_Client|\WP_Error
        */
       public function init_gs_client(?callable $httpHandler = null) {
-        // May be Loading Google SDK....
-        if (!class_exists('HttpHandlerFactory')) {
-          include_once(ud_get_stateless_media()->path('lib/Google/vendor/autoload.php', 'dir'));
-        }
-
-        $httpHandler = $httpHandler ? $httpHandler : HttpHandlerFactory::build();
-
-        $json_key = json_decode($this->settings->get('sm.key_json'), true);
-
-        if (!empty($json_key)) {
-          return new StorageClient(
-            [
-              'keyFile' => $json_key,
-              'httpHandler' => function ($request, $options) use ($httpHandler) {
-                $xGoogApiClientHeader = $request->getHeaderLine('x-goog-api-client');
-                $request = $request->withHeader('x-goog-api-client', $xGoogApiClientHeader);
-
-                return call_user_func_array($httpHandler, [$request, $options]);
-              },
-              'authHttpHandler' => HttpHandlerFactory::build(),
-            ]
-          );
-        }
+        return $this->get_client();
       }
 
       /**
