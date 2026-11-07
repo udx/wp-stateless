@@ -174,7 +174,7 @@ if (!class_exists('wpCloud\StatelessMedia\Plugin_Base')) {
     public function get_schema($key = '') {
       if ($this->schema === null && !empty($this->schema_path) && is_file($this->schema_path)) {
         $schema = json_decode(file_get_contents($this->schema_path), true);
-        $this->schema = class_exists('UDX\\Utility') ? \UDX\Utility::l10n_localize((array) $schema, (array) $this->get_localization()) : (array) $schema;
+        $this->schema = class_exists('wpCloud\\StatelessMedia\\Utility_Base') ? Utility_Base::l10n_localize((array) $schema, (array) $this->get_localization()) : (array) $schema;
       }
       if (!is_array($this->schema)) return false;
       if ($key === '') return $this->schema;

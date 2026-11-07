@@ -4,8 +4,8 @@ if (!defined('WP_STATELESS_AUTOLOAD')) {
   define('WP_STATELESS_AUTOLOAD', true);
   spl_autoload_register(function ($class) {
     static $map = array(
-      'UDX\\Settings' => 'includes/class-settings.php',
-      'UDX\\Utility' => 'includes/class-utility.php',
+      'wpCloud\\StatelessMedia\\Settings_Base' => 'includes/class-settings.php',
+      'wpCloud\\StatelessMedia\\Utility_Base' => 'includes/class-utility.php',
       'wpCloud\\StatelessMedia\\Plugin_Scaffold' => 'includes/class-plugin-base.php',
       'wpCloud\\StatelessMedia\\Plugin_Base' => 'includes/class-plugin-base.php',
       'wpCloud\\StatelessMedia\\Update_Client' => 'includes/class-plugin-base.php',

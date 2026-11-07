@@ -5,12 +5,12 @@
  * @copyright Copyright (c) 2010 - 2013, Usability Dynamics, Inc.
  *
  * @author team@UD
- * @namespace UDX
+ * @namespace wpCloud\StatelessMedia
  * @module Utility
  */
-namespace UDX {
+namespace wpCloud\StatelessMedia {
 
-  if( !class_exists( 'UDX\Utility' ) ) {
+  if( !class_exists( 'wpCloud\StatelessMedia\Utility_Base' ) ) {
 
     /**
      * Utility Library.
@@ -19,7 +19,7 @@ namespace UDX {
      * @version 0.2.2
      * @class Utility
      */
-    class Utility {
+    class Utility_Base {
 
       /**
        * Class version.

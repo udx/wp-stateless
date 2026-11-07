@@ -17,7 +17,7 @@ namespace wpCloud\StatelessMedia {
 
     final class Bootstrap extends Plugin_Base {
 
-      const REQUIRED_PHP_VERSION = '5.5';
+      const REQUIRED_PHP_VERSION = '8.1';
 
       /**
        * Google Storage Client
