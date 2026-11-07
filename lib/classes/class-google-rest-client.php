@@ -183,8 +183,9 @@ if (!class_exists('wpCloud\StatelessMedia\Google_REST_Client')) {
       return $this->uniform_access;
     }
 
-    public function get_bucket() {
-      return $this->request('GET', self::API_ROOT . '/b/' . rawurlencode($this->bucket));
+    public function get_bucket($bucket = null) {
+      $bucket = $bucket === null ? $this->bucket : $bucket;
+      return $this->request('GET', self::API_ROOT . '/b/' . rawurlencode($bucket));
     }
 
     public function get_object($name, $options = array()) {

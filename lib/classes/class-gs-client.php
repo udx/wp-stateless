@@ -6,6 +6,31 @@ if (!class_exists('wpCloud\StatelessMedia\Google_REST_Client')) {
   require_once dirname(__FILE__) . '/class-google-rest-client.php';
 }
 
+if (!class_exists('wpCloud\StatelessMedia\GS_Buckets')) {
+  final class GS_Buckets {
+    private $client;
+
+    public function __construct(Google_REST_Client $client) {
+      $this->client = $client;
+    }
+
+    public function get($bucket) {
+      $info = $this->client->get_bucket($bucket);
+      return json_decode(wp_json_encode($info), false, 512, JSON_THROW_ON_ERROR);
+    }
+  }
+}
+
+if (!class_exists('wpCloud\StatelessMedia\GS_Service')) {
+  final class GS_Service {
+    public $buckets;
+
+    public function __construct(Google_REST_Client $client) {
+      $this->buckets = new GS_Buckets($client);
+    }
+  }
+}
+
 if (!class_exists('wpCloud\StatelessMedia\GS_Client')) {
   final class GS_Client {
     private static $instance;
@@ -19,7 +44,7 @@ if (!class_exists('wpCloud\StatelessMedia\GS_Client')) {
       $this->bucket = $args['bucket'];
       $this->key_json = json_decode($args['key_json'], true);
       $this->client = new Google_REST_Client($this->bucket, $this->key_json);
-      $this->service = null;
+      $this->service = new GS_Service($this->client);
       delete_transient('wp_stateless_google_sdk_conflict');
     }
 
