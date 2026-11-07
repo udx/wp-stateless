@@ -94,9 +94,10 @@ if (!class_exists('wpCloud\StatelessMedia\GS_Client')) {
         }
         $chunk_size = defined('WP_STATELESS_MEDIA_UPLOAD_CHUNK_SIZE') && is_int(WP_STATELESS_MEDIA_UPLOAD_CHUNK_SIZE)
           ? WP_STATELESS_MEDIA_UPLOAD_CHUNK_SIZE : Google_REST_Client::DEFAULT_CHUNK_SIZE;
-        $predefined_acl = !defined('WP_STATELESS_SKIP_ACL_SET') || !WP_STATELESS_SKIP_ACL_SET ? 'bucketOwnerFullControl' : '';
+        $manages_acl = $this->manages_object_acl();
+        $predefined_acl = $manages_acl ? 'bucketOwnerFullControl' : '';
         $media = $this->client->upload($name, $args['absolutePath'], $metadata, $args['mimeType'], $predefined_acl, $chunk_size);
-        if (!defined('WP_STATELESS_SKIP_ACL_SET') || !WP_STATELESS_SKIP_ACL_SET) {
+        if ($manages_acl) {
           $this->mediaInsertACL($name, $media, $args);
         }
         return $media;
@@ -107,13 +108,22 @@ if (!class_exists('wpCloud\StatelessMedia\GS_Client')) {
 
     public function update_media($name, $args) {
       $options = array();
-      if (isset($args['predefinedAcl'])) {
+      if (isset($args['predefinedAcl']) && $this->manages_object_acl()) {
         $options['predefinedAcl'] = $args['predefinedAcl'];
-        unset($args['predefinedAcl']);
       }
+      unset($args['predefinedAcl']);
       $allowed = array('metadata', 'cacheControl', 'contentDisposition', 'contentEncoding', 'contentType', 'storageClass');
       $fields = array_intersect_key($args, array_flip($allowed));
       return $this->client->patch_object($name, $fields, $options);
+    }
+
+    private function manages_object_acl() {
+      if (defined('WP_STATELESS_SKIP_ACL_SET') && WP_STATELESS_SKIP_ACL_SET) return false;
+      try {
+        return !$this->client->has_uniform_access();
+      } catch (\Throwable $e) {
+        return true;
+      }
     }
 
     public function mediaInsertACL($name, $media = array(), $agrs = array()) {
@@ -147,7 +157,7 @@ if (!class_exists('wpCloud\StatelessMedia\GS_Client')) {
         $fields = array_intersect_key($source, array_flip(array('cacheControl', 'contentDisposition', 'contentEncoding', 'contentType', 'metadata', 'storageClass', 'customTime', 'eventBasedHold', 'temporaryHold', 'retentionExpirationTime')));
         $media = new Google_REST_Object($this->client->copy_object($path, $new_path, $fields));
         if (empty($media->id)) return false;
-        if (!defined('WP_STATELESS_SKIP_ACL_SET') || !WP_STATELESS_SKIP_ACL_SET) {
+        if ($this->manages_object_acl()) {
           $this->mediaInsertACL($new_path, $media);
         }
         return $media;

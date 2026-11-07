@@ -159,6 +159,7 @@ if (!class_exists('wpCloud\StatelessMedia\Google_REST_Client')) {
     private $key;
     private $access_token = '';
     private $access_token_expires = 0;
+    private $uniform_access = null;
 
     public function __construct($bucket, $key) {
       if (!is_string($bucket) || trim($bucket) === '') {
@@ -172,6 +173,14 @@ if (!class_exists('wpCloud\StatelessMedia\Google_REST_Client')) {
       }
       $this->bucket = trim($bucket);
       $this->key = $key;
+    }
+
+    public function has_uniform_access() {
+      if ($this->uniform_access === null) {
+        $bucket = $this->get_bucket();
+        $this->uniform_access = !empty($bucket['iamConfiguration']['uniformBucketLevelAccess']['enabled']);
+      }
+      return $this->uniform_access;
     }
 
     public function get_bucket() {
