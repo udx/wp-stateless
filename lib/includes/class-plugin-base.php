@@ -140,6 +140,7 @@ if (!class_exists('wpCloud\StatelessMedia\Plugin_Base')) {
       add_action('init', array($this, 'load_textdomain'), 1);
       add_action('plugins_loaded', array($this, 'pre_init'), 100);
       add_action('plugins_loaded', array($this, 'define_update_client'), 11);
+      add_action('wp_ajax_ud_bootstrap_dismiss_notice', array($this, 'ud_bootstrap_dismiss_notice'));
       $this->maybe_run_upgrade_process();
     }
 
@@ -191,7 +192,7 @@ if (!class_exists('wpCloud\StatelessMedia\Plugin_Base')) {
     }
 
     public function define_update_client() {
-      if ($this->has_errors() || !$this->get_schema('extra.schemas.licenses.client')) return false;
+      if (!is_admin() || $this->has_errors() || !$this->get_schema('extra.schemas.licenses.client')) return false;
       new Update_Client(array_merge($this->args, array(
         'type' => $this->type,
         'name' => $this->name,
