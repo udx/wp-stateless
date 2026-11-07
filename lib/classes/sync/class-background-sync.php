@@ -2,21 +2,17 @@
 
 namespace wpCloud\StatelessMedia\Sync;
 
-// Require lib classes if not yet available
-if (!class_exists('UDX_WP_Async_Request')) {
-  require_once ud_get_stateless_media()->path('lib/ns-vendor/classes/deliciousbrains/wp-background-processing/classes/wp-async-request.php', 'dir');
+if (!class_exists('wpCloud\StatelessMedia\Background_Process')) {
+  require_once dirname(__DIR__) . '/class-background-process.php';
 }
 
-if (!class_exists('UDX_WP_Background_Process')) {
-  require_once ud_get_stateless_media()->path('lib/ns-vendor/classes/deliciousbrains/wp-background-processing/classes/wp-background-process.php', 'dir');
-}
-
-use UDX_WP_Background_Process, JsonSerializable;
+use wpCloud\StatelessMedia\Background_Process;
+use JsonSerializable;
 
 /**
  * Generic background process
  */
-abstract class BackgroundSync extends UDX_WP_Background_Process implements ISync, JsonSerializable {
+abstract class BackgroundSync extends Background_Process implements ISync, JsonSerializable {
 
   /**
    * Cron Healthcheck interval
@@ -117,22 +113,7 @@ abstract class BackgroundSync extends UDX_WP_Background_Process implements ISync
    * the process is not already running.
    */
   public function maybe_handle() {
-    // Don't lock up other requests while processing
-    session_write_close();
-
-    if ($this->is_processing()) {
-      // Background process already running.
-      wp_die();
-    }
-
-    if ($this->is_queue_empty()) {
-      // No data to process.
-      wp_die();
-    }
-
-    $this->handle();
-
-    wp_die();
+    parent::maybe_handle();
   }
 
   /**

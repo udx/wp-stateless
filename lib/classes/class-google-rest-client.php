@@ -342,6 +342,7 @@ if (!class_exists('wpCloud\StatelessMedia\Google_REST_Client')) {
       $assertion = $unsigned . '.' . $this->base64url($signature);
       $response = wp_remote_post(self::TOKEN_ENDPOINT, array(
         'timeout' => 30,
+        'redirection' => 0,
         'body' => array(
           'grant_type' => 'urn:ietf:params:oauth:grant-type:jwt-bearer',
           'assertion' => $assertion,
@@ -385,7 +386,7 @@ if (!class_exists('wpCloud\StatelessMedia\Google_REST_Client')) {
       $request = array(
         'method' => $method,
         'timeout' => $args['timeout'],
-        'redirection' => 5,
+        'redirection' => 0,
         'headers' => $headers,
         'body' => $body,
         'stream' => $args['stream'],

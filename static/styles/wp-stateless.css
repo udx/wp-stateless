@@ -95,3 +95,57 @@ td.image-icon img.wp-stateless-media-item {
 #sm-attachment-metabox a i.dashicons-image-rotate {
     margin-top: 4px;
 }
+#sm-attachment-metabox .rwmb-tabs {
+    display: flex;
+    margin: -6px -12px -12px;
+}
+#sm-attachment-metabox .rwmb-tab-nav {
+    flex-direction: column;
+    margin: 0 -1px 0 0;
+    border-right: 1px solid #ccd0d4;
+    background: #fafafa;
+    padding: 0;
+}
+#sm-attachment-metabox .rwmb-tab-nav li {
+    display: block;
+    min-width: 150px;
+    margin: 0;
+    border-bottom: 1px solid #ccd0d4;
+}
+#sm-attachment-metabox .rwmb-tab-nav a {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 12px;
+    line-height: 1;
+    text-decoration: none;
+}
+#sm-attachment-metabox .rwmb-tab-nav a:focus {
+    outline: none;
+    box-shadow: none;
+}
+#sm-attachment-metabox .rwmb-tab-nav .rwmb-tab-active {
+    background: #fff;
+    margin-right: -1px;
+    z-index: 1;
+}
+#sm-attachment-metabox .rwmb-tab-panels {
+    flex: 1;
+    background: #fff;
+}
+#sm-attachment-metabox .rwmb-tab-panel {
+    display: none;
+    padding: 12px 20px;
+}
+#sm-attachment-metabox .rwmb-field {
+    margin-bottom: 14px;
+}
+@media (max-width: 575px) {
+    #sm-attachment-metabox .rwmb-tabs {
+        flex-direction: column;
+    }
+    #sm-attachment-metabox .rwmb-tab-nav {
+        width: 100%;
+        border-right: 0;
+    }
+}

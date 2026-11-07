@@ -72,22 +72,12 @@ if( !function_exists( 'ud_check_stateless_media' ) ) {
           }
         }
       }
-      //** Be sure vendor autoloader exists */
-      if ( file_exists( dirname( __FILE__ ) . '/vendor/autoload.php' ) ) {
-        require_once ( dirname( __FILE__ ) . '/vendor/autoload.php' );
-      } else {
-        throw new Exception( sprintf( __( 'Distributive is broken. %s file is missed. Try to remove and upload plugin again.', 'stateless-media' ), dirname( __FILE__ ) . '/vendor/autoload.php' ) );
-      }
+      require_once( dirname( __FILE__ ) . '/lib/autoload.php' );
       //** Be sure our Bootstrap class exists */
       if( !class_exists( '\wpCloud\StatelessMedia\Bootstrap' ) ) {
         throw new Exception( __( 'Distributive is broken. Plugin loader is not available. Try to remove and upload plugin again.', 'stateless-media' ) );
       }
 
-      // Include metabox plugin
-      require_once(  dirname( __FILE__ ) . '/vendor/wpmetabox/meta-box/meta-box.php' );
-
-      // Include metabox tabs addon
-      require_once(  dirname( __FILE__ ) . '/lib/meta-box-tabs/meta-box-tabs.php' );
     } catch( Exception $e ) {
       $_ud_stateless_media_error = $e->getMessage();
       return false;

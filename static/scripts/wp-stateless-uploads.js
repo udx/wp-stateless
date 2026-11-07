@@ -39,3 +39,17 @@ jQuery(document).ready(function(){
   });
 
 });
+
+
+jQuery(document).ready(function(){
+  jQuery('#sm-attachment-metabox').on('click', '.rwmb-tab-nav a', function(e){
+    e.preventDefault();
+    var link = jQuery(this);
+    var tabs = link.closest('.rwmb-tabs');
+    var panel = link.parent().data('panel');
+    tabs.find('.rwmb-tab-nav li').removeClass('rwmb-tab-active');
+    link.parent().addClass('rwmb-tab-active');
+    tabs.find('.rwmb-tab-panel').hide();
+    tabs.find('.rwmb-tab-panel[data-panel="' + panel + '"]').show();
+  });
+});

@@ -15,8 +15,6 @@
 namespace wpCloud\StatelessMedia {
 
   use wpCloud\StatelessMedia\Sync\BackgroundSync;
-  use \Firebase\JWT\JWT;
-  use \Firebase\JWT\Key;
 
   if (!class_exists('wpCloud\StatelessMedia\Utility')) {
 
@@ -826,9 +824,10 @@ namespace wpCloud\StatelessMedia {
           'aud' => $site_url,
           'exp' => $now + $ttl
         ]);
-
-        $key = self::get_jwt_signing_key();
-        return JWT::encode($payload, $key, 'HS256');
+        $header = self::jwt_base64url(wp_json_encode(array('alg' => 'HS256', 'typ' => 'JWT')));
+        $claims = self::jwt_base64url(wp_json_encode($payload));
+        $unsigned = $header . '.' . $claims;
+        return $unsigned . '.' . self::jwt_base64url(hash_hmac('sha256', $unsigned, self::get_jwt_signing_key(), true));
       }
 
       /**
@@ -841,8 +840,31 @@ namespace wpCloud\StatelessMedia {
        * @throws \Exception
        */
       public static function verify_jwt_token($token) {
-        $key = self::get_jwt_signing_key();
-        return JWT::decode($token, new Key($key, 'HS256'));
+        $parts = is_string($token) ? explode('.', $token) : array();
+        if (count($parts) !== 3) throw new \Exception('Invalid token format.');
+        list($header, $claims, $signature) = $parts;
+        $algorithm = json_decode(self::jwt_base64url_decode($header), true);
+        if (!is_array($algorithm) || empty($algorithm['alg']) || $algorithm['alg'] !== 'HS256') throw new \Exception('Invalid token algorithm.');
+        $expected = self::jwt_base64url(hash_hmac('sha256', $header . '.' . $claims, self::get_jwt_signing_key(), true));
+        if (!hash_equals($expected, $signature)) throw new \Exception('Token signature verification failed.');
+        $payload = json_decode(self::jwt_base64url_decode($claims));
+        if (!is_object($payload)) throw new \Exception('Invalid token payload.');
+        $now = time();
+        if (isset($payload->exp) && $now >= (int) $payload->exp) throw new \Exception('Token has expired.');
+        if (isset($payload->nbf) && $now < (int) $payload->nbf) throw new \Exception('Token is not yet valid.');
+        if (isset($payload->iat) && (int) $payload->iat > $now + 60) throw new \Exception('Token was issued in the future.');
+        return $payload;
+      }
+
+      private static function jwt_base64url($value) {
+        return rtrim(strtr(base64_encode($value), '+/', '-_'), '=');
+      }
+
+      private static function jwt_base64url_decode($value) {
+        $padding = (4 - strlen($value) % 4) % 4;
+        $decoded = base64_decode(strtr($value . str_repeat('=', $padding), '-_', '+/'), true);
+        if ($decoded === false) throw new \Exception('Invalid token encoding.');
+        return $decoded;
       }
 
       /**

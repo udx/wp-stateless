@@ -15,7 +15,7 @@ namespace wpCloud\StatelessMedia {
 
   if (!class_exists('wpCloud\StatelessMedia\Bootstrap')) {
 
-    final class Bootstrap extends \UsabilityDynamics\WP\Bootstrap_Plugin {
+    final class Bootstrap extends Plugin_Base {
 
       const REQUIRED_PHP_VERSION = '5.5';
 
@@ -153,6 +153,8 @@ namespace wpCloud\StatelessMedia {
 
         // Register meta boxes and fields for media edit page
         add_filter('rwmb_meta_boxes', array($this, 'attachment_meta_box_callback'));
+        require_once(dirname(__FILE__) . '/class-attachment-panel.php');
+        new AttachmentPanel();
 
         // Register meta boxes and fields for media modal page
         add_filter('attachment_fields_to_edit', array($this, 'attachment_modal_meta_box_callback'), 11, 2);
