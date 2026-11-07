@@ -6,7 +6,7 @@ License: GPLv2 or later
 Requires PHP: 8.1
 Requires at least: 5.0
 Tested up to: 6.9
-Stable tag: 4.4.3
+Stable tag: 4.5.0
 
 Upload and serve your WordPress media files from Google Cloud Storage.
 
@@ -30,7 +30,7 @@ New to Google Cloud? Google is offering you a [$300 credit](https://console.clou
 * Stateless - Store and serve media files with Google Cloud Storage only. Media files are not stored locally.
 
 = Features =
-* Setup assistant makes getting started fast and easy.
+* Stateless Connect: sign in with Google from wp-admin and storage is set up in your own Google Cloud account.
 * No need to manually create service accounts or buckets - handled automatically.
 * Settings panel provides you with further GCS configuration and file url customization.
 * Mask the default GCS URL with your own custom domain.
@@ -68,11 +68,10 @@ Looking for a unique feature for your next project? [Hire us!](https://udx.io/)
 == Installation ==
 
 1. Search, install, and activate the *WP-Stateless* plugin via your WordPress dashboard.
-2. Begin WP-Stateless setup assistant at *Media > Stateless Setup* and click "Get Started Now."
-3. Click "Google Login" and sign-in with your Google account.
-4. Set a Google Cloud Project, Google Cloud Storage Bucket, and Google Cloud Billing Account and click "Continue."
-5. Installation and setup is now complete. Visit *Media > Stateless Settings* for more options.
-For a more detailed installation and setup walkthrough, please see the [manual setup instructions on Github](https://stateless.udx.io/setup/).
+2. Open *Media > Stateless Connect* and click *Sign in with Google*. Confirm the connection for your site on stateless.ci; the page brings you back, or you type the eight character code it shows.
+3. Choose a Google Cloud project, billing account, bucket, location and storage mode, and submit the form. WP-Stateless creates the bucket, a service account with access to that bucket only, and its key inside your own Google Cloud account.
+4. Setup is now complete. Visit *Media > Stateless Settings* for more options.
+For a more detailed installation and setup walkthrough, please see the [setup guide](https://stateless.ci/setup/) and the [manual setup instructions](https://stateless.ci/docs/manual-setup/).
 
 == Screenshots ==
 
@@ -88,15 +87,15 @@ For a more detailed installation and setup walkthrough, please see the [manual s
 
 = What are the minimum server requirements for this plugin? =
 
-Beyond the [official WordPress minimum requirements](https://wordpress.org/about/requirements/), WP-Stateless requires a minimum PHP version of 8.0 or higher and OpenSSL to be enabled.
+Beyond the [official WordPress minimum requirements](https://wordpress.org/about/requirements/), WP-Stateless requires a minimum PHP version of 8.1 or higher and OpenSSL to be enabled.
 
 = What wp-config constants are supported? =
 
-For a complete list of supported wp-config constants, please consult the [GitHub documentation](https://stateless.udx.io/docs/constants/).
+For a complete list of supported wp-config constants, please consult the [configuration constants reference](https://stateless.ci/docs/constants/).
 
 = How do I manually generate the Service Account JSON? =
 
-The WP-Stateless setup assistant will create the Service Account JSON automatically for you, but you can follow these steps if you choose to create it manually.
+Stateless Connect creates the Service Account JSON automatically for you, but you can follow these steps if you choose to create it manually.
 
 1. Visit Google Cloud Console, and go to *IAM & Admin > Service accounts*.
 2. Click *Create Service Account* and name it *wp-stateless*.
@@ -136,6 +135,24 @@ Before upgrading to WP-Stateless 3.2.0, please, make sure you use PHP 7.2 or abo
 Before upgrading to WP-Stateless 3.0, please, make sure you tested it on your development environment.
 
 == Changelog ==
+= 4.5.0 - 2026-11-02 =
+* NEW - Stateless Connect replaces the setup wizard: sign in with Google from wp-admin, confirm your site on stateless.ci, and WP-Stateless creates the project, bucket, service account and key inside your own Google Cloud account. No iframe, no copying of keys.
+* NEW - setup works from Network Admin on multisite, with network and per-site connections kept separate.
+* NEW - setup lets you choose an existing project, billing account and bucket from searchable lists, pick single, dual or multi-region locations, and select the storage mode with explanations.
+* NEW - a pairing code completes sign-in when the browser cannot return to the site, and sign-in works for localhost installs.
+* FIX - synchronization no longer reports success when an upload or a thumbnail failed to reach Google Cloud; the failure stays visible and the retry works.
+* FIX - media Trash Undo link now works from the grid view of the Media Library.
+* FIX - upgrading straight from a 2.x install no longer logs database errors for the 3.x sync table that never existed there; the data optimization step checks for the table first.
+* ENHANCEMENT - repeated setups revoke the site's previous service account key instead of piling keys onto the account.
+* ENHANCEMENT - setup verifies the new credentials before it replaces a working configuration, remembers keys it could not revoke and retries them on the next setup, refuses existing buckets that would serve 403s under WP_STATELESS_SKIP_ACL_SET, and stops when the storage mode is pinned to Disabled.
+* ENHANCEMENT - plugin header and composer now state the PHP 8.1 minimum that the bundled Google libraries already require.
+* ENHANCEMENT - documentation links now point to stateless.ci, and the setup wizard links to the guides on Google permissions, storage modes and synchronization.
+* ENHANCEMENT - setup resumes a project whose billing link failed instead of creating a second one, proves a public read from a new bucket before continuing (organization policies that enforce public access prevention get an explanation instead of 403s later), refuses OAuth client changes while that client holds a live connection, encrypts tokens with OpenSSL where sodium is missing, drops sign-in proofs as soon as an attempt finishes, and lists up to 10,000 projects with a note when more exist.
+* SECURITY - the Google client secret never ships in the plugin: sign-in runs through stateless.ci with PKCE, single-use transactions bound to your site, and an explicit confirmation step before any token reaches WordPress.
+* SECURITY - setup mints a service account key inside your own project with Storage Admin on the one bucket only, never a project-wide role; the key is written straight into the site and never passes through stateless.ci.
+* SECURITY - disconnecting verifies that Google and stateless.ci revoked the access before the connection is removed, and setup refuses private or uniform-access buckets for serving modes and refuses to overwrite credentials pinned by constants or environment variables.
+* SECURITY - updated the bundled firebase/php-jwt library to 7.x (CVE-2025-45769), render synchronization counters as text instead of HTML, and restrict the GitHub Actions token used by the security scan workflow to read-only.
+
 = 4.4.3 - 2026-09-05 =
 * FIX - corrected add-on file path for the WooCommerce Extra Product Options add-on: duplicate `.php` extension caused the add-on to always appear uninstalled/inactive on the Stateless Addons screen with an invalid activation link.
 * FIX - resolved PHP warnings in non-media file synchronization: undefined `$media` variable after a failed object metadata update and deprecated dynamic `$client` property creation on PHP 8.2+.
@@ -263,8 +280,8 @@ Before upgrading to WP-Stateless 3.0, please, make sure you tested it on your de
 * NEW - added new Settings tab `Addons`, which contains the list of WP-Stateless Addons, which replace Compatibilities.
 * NEW - added new Settings tab `Status`, which contains status and health information related to Google Cloud Storage and WP-Stateless.
 * NEW - CLI command `wp stateless migrate` to list and operate data optimizations.
-* NEW - configuration constant [`WP_STATELESS_POSTMETA`](https://stateless.udx.io/docs/constants/#wp_stateless_postmeta) allows to read the GCS file data from postmeta instead of the new custom database tables.
-* NEW - configuration constant [`WP_STATELESS_BATCH_HEALTHCHECK_INTERVAL`](https://stateless.udx.io/docs/constants/#wp_stateless_batch_healthcheck_interval) defines an interval in minutes for periodical health checks of a batch background process (like data optimization).
+* NEW - configuration constant [`WP_STATELESS_POSTMETA`](https://stateless.ci/docs/constants/#wp_stateless_postmeta) allows to read the GCS file data from postmeta instead of the new custom database tables.
+* NEW - configuration constant [`WP_STATELESS_BATCH_HEALTHCHECK_INTERVAL`](https://stateless.ci/docs/constants/#wp_stateless_batch_healthcheck_interval) defines an interval in minutes for periodical health checks of a batch background process (like data optimization).
 * COMPATIBILITY - BuddyBoss Compatibility replaced with [WP-Stateless – BuddyBoss Platform Addon](https://wordpress.org/plugins/wp-stateless-buddyboss-platform-addon/).
 * COMPATIBILITY - Elementor Compatibility replaced with [WP-Stateless – Elementor Website Builder Addon](https://wordpress.org/plugins/wp-stateless-elementor-website-builder-addon/).
 * COMPATIBILITY - Gravity Form Compatibility does not support older version of Gravity Forms (< 2.3).
@@ -347,9 +364,9 @@ Before upgrading to WP-Stateless 3.0, please, make sure you tested it on your de
 
 = 3.1.0 =
 * NEW - Completely rewritten the synchronization tool. GitHub issue [#523](https://github.com/udx/wp-stateless/issues/523).
-* NEW - New configuration constant `WP_STATELESS_SYNC_MAX_BATCH_SIZE`. Sets the maximum size of a background sync batch of items to be saved in a single row in the database. [More details](https://stateless.udx.io/docs/constants/#wp_stateless_sync_max_batch_size).
-* NEW - New configuration constant `WP_STATELESS_SYNC_LOG`. Sets a path to a log file where to output logging information during the background sync. [More details](https://stateless.udx.io/docs/constants/#wp_stateless_sync_log).
-* NEW - New configuration constant `WP_STATELESS_SYNC_HEALTHCHECK_INTERVAL`. Defines an interval in minutes for a cron task that periodically checks the health of a particular background sync process. [More details](https://stateless.udx.io/docs/constants/#wp_stateless_sync_healthcheck_interval).
+* NEW - New configuration constant `WP_STATELESS_SYNC_MAX_BATCH_SIZE`. Sets the maximum size of a background sync batch of items to be saved in a single row in the database. [More details](https://stateless.ci/docs/constants/#wp_stateless_sync_max_batch_size).
+* NEW - New configuration constant `WP_STATELESS_SYNC_LOG`. Sets a path to a log file where to output logging information during the background sync. [More details](https://stateless.ci/docs/constants/#wp_stateless_sync_log).
+* NEW - New configuration constant `WP_STATELESS_SYNC_HEALTHCHECK_INTERVAL`. Defines an interval in minutes for a cron task that periodically checks the health of a particular background sync process. [More details](https://stateless.ci/docs/constants/#wp_stateless_sync_healthcheck_interval).
 * FIX - Fixed an issue when original files were not deleted from the server in the Ephemeral mode. GitHub issue [#484](https://github.com/udx/wp-stateless/issues/484).
 * FIX - Fixed an incorrect behavior of image `srcset` attribute in the Backup mode. GitHub issue [#558](https://github.com/udx/wp-stateless/issues/558).
 * COMPATIBILITY - Litespeed Cache - Fixed an incorrect upload folder determination. GitHub issue [#527](https://github.com/udx/wp-stateless/issues/527).

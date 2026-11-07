@@ -31,6 +31,7 @@ abstract class LibrarySync extends BackgroundSync {
 
       // Make sure there is no orphaned data and state
       delete_site_option($this->get_stopped_option_key());
+      delete_site_option("{$this->action}_last_error");
       delete_transient($this->get_total_items_trans_key());
       $this->clear_process_meta();
 
@@ -143,7 +144,7 @@ abstract class LibrarySync extends BackgroundSync {
     parent::complete();
 
     // @todo do something when complete
-    $this->log("Complete");
+    $this->log(get_site_option("{$this->action}_last_error", '') ? "Stopped with an error" : "Complete");
   }
 
   /**

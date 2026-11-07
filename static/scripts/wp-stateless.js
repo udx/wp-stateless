@@ -504,17 +504,8 @@ wpStatelessProcessingApp = {
         if ( response && response.data && response.ok ){
           if (!response.data.is_running) {
             process.stopPolling()
-            process.queued_items = process.getProgressTotal()
-            process.processed_items = process.getProgressTotal()
-
-            setTimeout(function () {
-              Object.assign(process, response.data)
-            }, 3000)
-    
-          } else {
-            Object.assign(process, response.data)
           }
-
+          Object.assign(process, response.data)
           process.refreshBox()
         }
       })
@@ -683,9 +674,9 @@ function ProcessingClass(data, app) {
    * Stop the process
    */
   this.refreshProgress = function () {
-    this.htmlBox.find('.legend .total span').html( this.getProgressTotal() )
-    this.htmlBox.find('.legend .queued span').html( this.getQueuedTotal() )
-    this.htmlBox.find('.legend .processed span').html( this.processed_items )
+    this.htmlBox.find('.legend .total span').text( this.getProgressTotal() )
+    this.htmlBox.find('.legend .queued span').text( this.getQueuedTotal() )
+    this.htmlBox.find('.legend .processed span').text( this.processed_items )
     
     this.htmlBox.find('.bar.total').css({
       'background-color': this.getProgressTotal() == this.getProcessedTotal() ? '#02ae7a' : false
@@ -699,13 +690,6 @@ function ProcessingClass(data, app) {
       'background-color': this.getProgressTotal() == this.getProcessedTotal() ? '#02ae7a' : false
     })
 
-    if (this.notices && this.notices.length) {
-      this.htmlBox.find('.progress-notice').show()
-
-      for (var i in this.notices) {
-        this.htmlBox.find('.progress-notice').append('<p>' + this.notices[i] + '</p>')
-      }
-    }
   }
 
   /**
@@ -743,7 +727,7 @@ function ProcessingClass(data, app) {
    * Refresh the progress data
    */
   this.refreshBox = function () {
-    this.htmlBox.find('.inside ul span').html(this.total_items)
+    this.htmlBox.find('.inside ul span').text(this.total_items)
 
     if (this.is_running) {
       this.startPolling()
@@ -761,11 +745,16 @@ function ProcessingClass(data, app) {
 
       this.htmlBox.find('.dashicons-update').css('display', 'none')
       this.htmlBox.find('.progress').hide()
-      this.htmlBox.find('.progress-notice').hide()
 
       this.htmlBox.find('.limit_enabled').prop('disabled', false)
       this.htmlBox.find('.limit_field input').prop('disabled', !this.limitEnabled)
       this.htmlBox.find('.order_value').prop('disabled', false)
+    }
+
+    var noticeBox = this.htmlBox.find('.progress-notice').empty()
+    noticeBox.toggle(!!(this.notice && this.notice.length))
+    if (this.notice) {
+      this.notice.forEach(function (message) { noticeBox.append('<p>' + message + '</p>') })
     }
 
     if (this.limitEnabled || this.limit > 0) {
@@ -809,6 +798,9 @@ function ProcessingClass(data, app) {
    */
   this.run = function () {
     if ( this.canRun() ) {
+      // Read the visible value even when the number field has not blurred yet.
+      this.limit = this.htmlBox.find('.limit_enabled').is(':checked')
+        ? Math.max(0, parseInt(this.htmlBox.find('.limit_field input').val(), 10) || 0) : 0
       this.app.runProcess(this)
     }
   }

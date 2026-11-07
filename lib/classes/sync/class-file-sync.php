@@ -80,14 +80,14 @@ class FileSync extends LibrarySync {
       return false;
     } catch (FatalException $e) {
       $this->log("Stopped due to error - {$e->getMessage()}");
-      $this->stop();
+      $this->stop_with_error($e->getMessage());
       return false;
     } catch (UnprocessableException $e) {
       $this->log($e->getMessage());
       return false;
     } catch (\Throwable $e) {
       $this->log("Stopped due to error - {$e->getMessage()}");
-      $this->stop();
+      $this->stop_with_error($e->getMessage());
       return false;
     }
   }

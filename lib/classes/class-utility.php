@@ -22,6 +22,34 @@ namespace wpCloud\StatelessMedia {
 
     class Utility {
 
+      /**
+       * Upload errors from the last add_media() run, per attachment. An object that failed to upload can
+       * still exist in the bucket from an earlier sync, so an existence check alone would call the run a success.
+       */
+      /**
+       * Upload failures of the current request, keyed by attachment id and image size.
+       * A sync resets them once per attachment; a size's failure stays recorded until a
+       * later upload of that same size succeeds, so a repeated metadata callback that
+       * finds the previous object in the bucket cannot hide a failed replacement.
+       */
+      private static $upload_errors = array();
+
+      public static function upload_errors($attachment_id) {
+        return isset(self::$upload_errors[$attachment_id]) ? array_values(self::$upload_errors[$attachment_id]) : array();
+      }
+
+      public static function reset_upload_errors($attachment_id) {
+        unset(self::$upload_errors[$attachment_id]);
+      }
+
+      private static function record_upload_error($attachment_id, $size, $message) {
+        self::$upload_errors[$attachment_id][$size] = $size . ': ' . $message;
+      }
+
+      private static function resolve_upload_error($attachment_id, $size) {
+        unset(self::$upload_errors[$attachment_id][$size]);
+      }
+
       static $can_delete_attachment = [];
 
       /**
@@ -171,7 +199,6 @@ namespace wpCloud\StatelessMedia {
         if (empty($metadata)) {
           $metadata = array();
         }
-
         /**
          * To skip the sync process.
          *
@@ -335,17 +362,27 @@ namespace wpCloud\StatelessMedia {
                   $media = $object->update(array('metadata' => $media_args['metadata']) + $mediaOptions);
 
                   $cloud_meta = self::generate_cloud_meta($cloud_meta, $media, $size, $img, $bucketLink);
+                  self::resolve_upload_error($attachment_id, $size . $args['is_webp']);
                 } catch (\Throwable $th) {
-                  //throw $th;
+                  self::record_upload_error($attachment_id, $size . $args['is_webp'], $th->getMessage());
                 }
               } else {
                 /* Add default image */
                 $media = $client->add_media($media_args);
 
-                /* Break if we have errors. */
-                if (!is_wp_error($media)) {
+                if (is_wp_error($media)) {
+                  // Ephemeral and Stateless remove a local copy once its size is uploaded, and the metadata hooks run
+                  // more than once per attachment, so a later pass can find the file gone while the object is already
+                  // in the bucket. That is not a failed upload; a missing object or a failure with the file present is.
+                  $manages_acl   = !defined('WP_STATELESS_SKIP_ACL_SET') || !WP_STATELESS_SKIP_ACL_SET;
+                  $already_there = !file_exists($img['path']) && ($manages_acl ? $client->media_exists($img['gs_name']) : $client->get_media($img['gs_name']));
+                  if (!$already_there) {
+                    self::record_upload_error($attachment_id, $size . $args['is_webp'], $media->get_error_message());
+                  }
+                } else {
                   // @note We don't add storageClass because it's same as parent...
                   $cloud_meta = self::generate_cloud_meta($cloud_meta, $media, $size, $img, $bucketLink);
+                  self::resolve_upload_error($attachment_id, $size . $args['is_webp']);
 
                   /**
                    * Ephemeral and stateless mode: we don't need the local version.
@@ -427,6 +464,29 @@ namespace wpCloud\StatelessMedia {
        * @param $attachment_id
        * @return mixed
        */
+      /**
+       * Name of the first expected object (the original or a generated size or preview) that is not in the bucket,
+       * or an empty string when every object is there. Uses an ACL-independent lookup so uniform-access buckets verify too.
+       *
+       * @param int $attachment_id
+       * @param array|null $metadata Attachment metadata; loaded from the database when omitted.
+       * @return string
+       */
+      public static function missing_cloud_object($attachment_id, $metadata = null) {
+        $client = ud_get_stateless_media()->get_client();
+        // While the plugin manages ACLs (fine-grained buckets) an object without its public-read entry is not
+        // complete either: it would be unreachable at its media URL. Buckets configured with
+        // WP_STATELESS_SKIP_ACL_SET have no per-object ACLs, so only existence can be checked there.
+        $manages_acl = !defined('WP_STATELESS_SKIP_ACL_SET') || !WP_STATELESS_SKIP_ACL_SET;
+        foreach (self::get_path_and_url($metadata, $attachment_id) as $size => $media) {
+          $found = $manages_acl ? $client->media_exists($media['gs_name']) : $client->get_media($media['gs_name']);
+          if (!$found) {
+            return $size === '__full' ? __('original file', ud_get_stateless_media()->domain) : $size;
+          }
+        }
+        return '';
+      }
+
       public static function get_path_and_url($metadata, $attachment_id) {
         /* Get metadata in case if method is called directly. */
         if (empty($metadata) && current_filter() !== 'wp_generate_attachment_metadata' && current_filter() !== 'wp_update_attachment_metadata') {
@@ -1032,6 +1092,8 @@ namespace wpCloud\StatelessMedia {
         if (!function_exists('wp_generate_attachment_metadata')) {
           require_once ABSPATH . '/wp-admin/includes/image.php';
         }
+        // The metadata hooks below call add_media several times for this attachment; collect their failures as one sync.
+        self::reset_upload_errors($image->ID);
         $metadata = wp_generate_attachment_metadata($image->ID, $fullsizepath);
 
         if (get_post_mime_type($image->ID) !== 'image/svg+xml') {
@@ -1046,6 +1108,15 @@ namespace wpCloud\StatelessMedia {
 
         // trigger processing filters
         wp_update_attachment_metadata($image->ID, $metadata);
+        // A failed overwrite leaves the earlier object in place, so check the upload result before existence.
+        $errors = self::upload_errors($image->ID);
+        if ($errors) {
+          throw new FatalException(sprintf(__('Upload failed for "%1$s": %2$s. Check Google Cloud access and retry.', ud_get_stateless_media()->domain), get_the_title($image->ID), implode('; ', $errors)));
+        }
+        $missing = self::missing_cloud_object($image->ID, $metadata);
+        if ($missing !== '') {
+          throw new FatalException(sprintf(__('Upload could not be verified for "%1$s" (%2$s). Check Google Cloud access and retry.', ud_get_stateless_media()->domain), get_the_title($image->ID), $missing));
+        }
         do_action('sm:synced::image', $id, $metadata);
 
         return $image;
@@ -1091,12 +1162,14 @@ namespace wpCloud\StatelessMedia {
 
         if ($local_file_exists) {
 
-          if (!ud_get_stateless_media()->get_client()->media_exists(apply_filters('wp_stateless_file_name', $fullsizepath, true, "", ""))) {
+          // Upload when the original or any generated preview (PDF pages, for example) is missing from the bucket.
+          if (self::missing_cloud_object($file->ID) !== '') {
 
             if (!function_exists('wp_generate_attachment_metadata')) {
               require_once ABSPATH . '/wp-admin/includes/media.php';
               require_once ABSPATH . '/wp-admin/includes/image.php';
             }
+            self::reset_upload_errors($file->ID);
             $metadata = wp_generate_attachment_metadata($file->ID, $fullsizepath);
 
             if (is_wp_error($metadata)) {
@@ -1104,6 +1177,16 @@ namespace wpCloud\StatelessMedia {
             }
 
             wp_update_attachment_metadata($file->ID, $metadata);
+            // Upload hooks can return metadata even when the storage client failed.
+            // Do not report successful synchronization without a cloud object.
+            $errors = self::upload_errors($file->ID);
+            if ($errors) {
+              throw new FatalException(sprintf(__('Upload failed for "%1$s": %2$s. Check Google Cloud access and retry.', ud_get_stateless_media()->domain), get_the_title($file->ID), implode('; ', $errors)));
+            }
+            $missing = self::missing_cloud_object($file->ID, $metadata);
+            if ($missing !== '') {
+              throw new FatalException(sprintf(__('Upload could not be verified for "%1$s" (%2$s). Check Google Cloud access and retry.', ud_get_stateless_media()->domain), get_the_title($file->ID), $missing));
+            }
             do_action('sm:synced::nonImage', $id, $metadata);
           } else {
             // Ephemeral and Stateless modes: we don't need the local version.

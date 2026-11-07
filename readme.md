@@ -20,7 +20,7 @@ New to Google Cloud? Google is offering you a [$300 credit](https://console.clou
 * Stateless - Store and serve media files with Google Cloud Storage only. Media files are not stored locally.
 
 ### Features
-* Setup assistant makes getting started fast and easy.
+* Stateless Connect: sign in with Google from wp-admin and storage is set up in your own Google Cloud account.
 * No need to manually create service accounts or buckets - handled automatically.
 * Settings panel provides you with further GCS configuration and file URL customization.
 * Mask the default GCS URL with your own custom domain.
@@ -58,26 +58,25 @@ Looking for a unique feature for your next project? [Hire us!](https://udx.io/)
 ## Installation
 
 1. Search, install, and activate the *WP-Stateless* plugin via your WordPress dashboard.
-2. Begin WP-Stateless setup assistant at *Media > Stateless Setup* and click "Get Started Now."
-3. Click "Google Login" and sign in with your Google account.
-4. Set a Google Cloud Project, Google Cloud Storage Bucket, and Google Cloud Billing Account and click "Continue."
-5. Installation and setup are now complete. Visit *Media > Stateless Settings* for more options.
+2. Open *Media > Stateless Connect* and click *Sign in with Google*. Confirm the connection for your site on stateless.ci; the page brings you back, or you type the eight character code it shows.
+3. Choose a Google Cloud project, billing account, bucket, location and storage mode, and submit the form. WP-Stateless creates the bucket, a service account with access to that bucket only, and its key inside your own Google Cloud account.
+4. Setup is now complete. Visit *Media > Stateless Settings* for more options.
 
-For a more detailed installation and setup walkthrough, please see the [manual setup instructions on Github](https://stateless.udx.io/setup/).
+For a more detailed installation and setup walkthrough, please see the [setup guide](https://stateless.ci/setup/) and the [manual setup instructions](https://stateless.ci/docs/manual-setup/).
 
 ## Frequently Asked Questions
 
 ### What are the minimum server requirements for this plugin?
 
-Beyond the [official WordPress minimum requirements](https://codex.wordpress.org/Template:Server_requirements), WP-Stateless requires a minimum PHP version of 8.0 or higher and OpenSSL to be enabled.
+Beyond the [official WordPress minimum requirements](https://codex.wordpress.org/Template:Server_requirements), WP-Stateless requires a minimum PHP version of 8.1 or higher and OpenSSL to be enabled.
 
 ### What wp-config constants are supported?
 
-For a complete list of supported wp-config constants, please consult the [GitHub documentation](https://stateless.udx.io/docs/constants/).
+For a complete list of supported wp-config constants, please consult the [configuration constants reference](https://stateless.ci/docs/constants/).
 
 ### How do I manually generate the Service Account JSON?
 
-The WP-Stateless setup assistant will create the Service Account JSON automatically for you, but you can follow these steps if you choose to create it manually.
+Stateless Connect creates the Service Account JSON automatically for you, but you can follow these steps if you choose to create it manually.
 
 1. Visit Google Cloud Console, and go to *IAM & Admin > Service accounts*.
 2. Click *Create Service Account* and name it *wp-stateless*.

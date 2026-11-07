@@ -100,7 +100,7 @@ abstract class BackgroundSync extends UDX_WP_Background_Process implements ISync
           is_numeric($this->currently_processing_item) ? get_the_title($this->currently_processing_item) : $this->currently_processing_item,
           is_numeric($this->currently_processing_item) ? "(ID: {$this->currently_processing_item})" : '',
           $err['message'],
-          ud_get_stateless_media()->get_docs_page_url('docs/constants/#wpstatelessmediauploadchunksize'),
+          ud_get_stateless_media()->get_docs_page_url('docs/constants/#wp_stateless_media_upload_chunk_size'),
         )
       ]);
 
@@ -255,6 +255,12 @@ abstract class BackgroundSync extends UDX_WP_Background_Process implements ISync
     $this->log("Stopped");
   }
 
+  /** Keep transfer failures visible after the queue and progress metadata clear. */
+  protected function stop_with_error($message) {
+    $this->stop();
+    update_site_option("{$this->action}_last_error", wp_strip_all_tags($message));
+  }
+
   /**
    * Determine if process is stopped.
    * 
@@ -364,6 +370,13 @@ abstract class BackgroundSync extends UDX_WP_Background_Process implements ISync
     $subject = sprintf(__('WP-Stateless: %s Synchronization Complete', ud_get_stateless_media()->domain), $sync_name);
     $message = sprintf(__("WP-Stateless has finished synchronizing %s for %s.\n\nIf you have WP_STATELESS_SYNC_LOG or WP_DEBUG_LOG enabled, review those logs now to review any errors that may have occurred during the synchronization process.", ud_get_stateless_media()->domain), $sync_name, $site);
 
+    if ($error = get_site_option("{$this->action}_last_error", '')) {
+      $subject = sprintf(__('WP-Stateless: %s Synchronization Failed', ud_get_stateless_media()->domain), $sync_name);
+      $message = sprintf(__('WP-Stateless stopped synchronizing %1$s for %2$s.', ud_get_stateless_media()->domain), $sync_name, $site)
+        . "\n\n" . $error . "\n\n"
+        . __('Review the Sync tab and retry after resolving the problem.', ud_get_stateless_media()->domain);
+    }
+
     do_action('wp_stateless_send_admin_email', $subject, $message);
   }
 
@@ -410,8 +423,10 @@ abstract class BackgroundSync extends UDX_WP_Background_Process implements ISync
    */
   public function get_process_notice() {
     $notice = $this->get_process_meta('notice');
-    if (empty($notice)) return [];
-    return [$notice];
+    $notices = empty($notice) ? [] : [$notice];
+    $error = get_site_option("{$this->action}_last_error", '');
+    if ($error) $notices[] = esc_html($error);
+    return $notices;
   }
 
   /**

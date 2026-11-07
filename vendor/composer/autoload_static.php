@@ -79,6 +79,7 @@ class ComposerStaticInitc59d002476a452800baaf79c430753cb
         'wpCloud\\StatelessMedia\\Errors' => __DIR__ . '/../..' . '/lib/classes/class-errors.php',
         'wpCloud\\StatelessMedia\\FatalException' => __DIR__ . '/../..' . '/lib/classes/exception-fatal.php',
         'wpCloud\\StatelessMedia\\GS_Client' => __DIR__ . '/../..' . '/lib/classes/class-gs-client.php',
+        'wpCloud\\StatelessMedia\\GoogleConnect' => __DIR__ . '/../..' . '/lib/classes/class-google-connect.php',
         'wpCloud\\StatelessMedia\\Helper' => __DIR__ . '/../..' . '/lib/classes/class-helper.php',
         'wpCloud\\StatelessMedia\\Imagify' => __DIR__ . '/../..' . '/lib/classes/compatibility/imagify.php',
         'wpCloud\\StatelessMedia\\LearnDash' => __DIR__ . '/../..' . '/lib/classes/compatibility/learn-dash.php',

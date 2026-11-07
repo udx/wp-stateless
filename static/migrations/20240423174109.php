@@ -10,11 +10,26 @@ class Migration_20240423174109 extends Migration {
 
   protected $id = '20240423174109';
 
+  /**
+   * The sm_sync table only ever existed on 3.x installs. Sites upgrading straight from 2.x
+   * never had it, so check before querying instead of logging a database error.
+   */
+  private function sync_table_exists() {
+    global $wpdb;
+    $table_name = $wpdb->prefix . 'sm_sync';
+
+    return $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $wpdb->esc_like( $table_name ) ) ) === $table_name;
+  }
+
   public function should_run() {
     // Check if we have attachments to migrate
     global $wpdb;
     $table_name = $wpdb->prefix . 'sm_sync';
     $result = null;
+
+    if ( !$this->sync_table_exists() ) {
+      return false;
+    }
 
     try {
       $result = $wpdb->get_var("SELECT id FROM $table_name LIMIT 1");
@@ -37,6 +52,13 @@ class Migration_20240423174109 extends Migration {
     $table_name = $wpdb->prefix . 'sm_sync';
     $order = self::DESC ? 'DESC' : 'ASC';
     $total = 0;
+
+    if ( !$this->sync_table_exists() ) {
+      $this->total = 0;
+      $this->limit = self::BATCH_SIZE;
+
+      return false;
+    }
 
     // Getting the total number of attachments
     try {

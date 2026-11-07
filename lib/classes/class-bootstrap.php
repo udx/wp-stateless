@@ -100,6 +100,12 @@ namespace wpCloud\StatelessMedia {
          */
         $this->settings = new Settings($this);
         Status::instance();
+
+        /* Google Connect: sign in with Google and provision from wp-admin. The class hooks admin screens
+         * only in admin requests and registers one public REST route the hosted sign-in uses to confirm
+         * that this site opened a transaction. */
+        require_once(dirname(__FILE__) . '/class-google-connect.php');
+        GoogleConnect::instance();
       }
 
       /**
@@ -133,6 +139,19 @@ namespace wpCloud\StatelessMedia {
 
         // Invoke REST API
         add_action('rest_api_init', array($this, 'api_init'));
+
+        // Core's grid view exits before processing its own Trash notice's Undo link.
+        // Use the list action handler for that request only; core still checks the nonce
+        // and delete_post capability. Do not persist a change to the user's view preference.
+        add_filter('get_user_option_media_library_mode', function ($mode) {
+          global $pagenow;
+          if (is_admin() && $pagenow === 'upload.php' && defined('MEDIA_TRASH') && MEDIA_TRASH
+              && isset($_GET['doaction'], $_GET['action'])
+              && $_GET['doaction'] === 'undo' && $_GET['action'] === 'untrash') {
+            return 'list';
+          }
+          return $mode;
+        });
 
         // Register meta boxes and fields for media edit page
         add_filter('rwmb_meta_boxes', array($this, 'attachment_meta_box_callback'));
@@ -654,7 +673,7 @@ namespace wpCloud\StatelessMedia {
       public function get_docs_page_url($path = '') {
         $path = ltrim($path, '/');
 
-        return 'https://stateless.udx.io/' . $path;
+        return 'https://stateless.ci/' . $path;
       }
 
       /**
@@ -1264,7 +1283,9 @@ namespace wpCloud\StatelessMedia {
         wp_register_style('wp-stateless-status', $this->path('static/styles/wp-stateless-status.css', 'url'), array(), self::$version);
 
         // Sync tab
-        wp_register_script('wp-stateless', ud_get_stateless_media()->path('static/scripts/wp-stateless.js', 'url'), array('jquery-ui-core', 'wp-stateless-settings', 'wp-api-request'), self::$version, true);
+        $sync_script = $this->path('static/scripts/wp-stateless.js', 'dir');
+        $sync_version = self::$version . '-' . substr(hash_file('sha256', $sync_script), 0, 12);
+        wp_register_script('wp-stateless', ud_get_stateless_media()->path('static/scripts/wp-stateless.js', 'url'), array('jquery-ui-core', 'wp-stateless-settings', 'wp-api-request'), $sync_version, true);
 
         wp_localize_script('wp-stateless', 'stateless_l10n', $this->get_l10n_data());
         wp_localize_script('wp-stateless', 'wp_stateless_configs', array(
@@ -1371,7 +1392,7 @@ namespace wpCloud\StatelessMedia {
               'title' => sprintf(__("Stateless and Ephemeral modes enables and requires the Cache-Busting option.", ud_get_stateless_media()->domain)),
               'message' => sprintf(__("WordPress looks at local files to prevent files with the same filenames.
                                           Since Stateless mode bypasses this check, there is a potential for files to be stored with the same file name. We enforce the Cache-Busting option to prevent this.
-                                          Override with the <a href='%s' target='_blank'>%s</a> constant.", ud_get_stateless_media()->domain), ud_get_stateless_media()->get_docs_page_url('docs/constants/#wpstatelessmediacachebusting'), "WP_STATELESS_MEDIA_CACHE_BUSTING"),
+                                          Override with the <a href='%s' target='_blank'>%s</a> constant.", ud_get_stateless_media()->domain), ud_get_stateless_media()->get_docs_page_url('docs/constants/#wp_stateless_media_cache_busting'), "WP_STATELESS_MEDIA_CACHE_BUSTING"),
             );
             echo "<script id='template-stateless-cache-busting' type='text/html'>";
             include ud_get_stateless_media()->path('/static/views/error-notice.php', 'dir');
@@ -1790,7 +1811,7 @@ namespace wpCloud\StatelessMedia {
           'title' => sprintf(__("Stateless mode now requires the Cache-Busting option.", ud_get_stateless_media()->domain)),
           'message' => sprintf(__("WordPress looks at local files to prevent files with the same filenames.
                                 Since Stateless mode bypasses this check, there is a potential for files to be stored with the same file name. We enforce the Cache-Busting option to prevent this.
-                                Override with the <a href='%s' target='_blank'>%s</a> constant.", ud_get_stateless_media()->domain), ud_get_stateless_media()->get_docs_page_url('docs/constants/#wpstatelessmediacachebusting'), "WP_STATELESS_MEDIA_CACHE_BUSTING"),
+                                Override with the <a href='%s' target='_blank'>%s</a> constant.", ud_get_stateless_media()->domain), ud_get_stateless_media()->get_docs_page_url('docs/constants/#wp_stateless_media_cache_busting'), "WP_STATELESS_MEDIA_CACHE_BUSTING"),
         ), 'notice');
       }
 

@@ -100,7 +100,7 @@ namespace wpCloud\StatelessMedia {
         // Setting sm variable
         $this->refresh();
 
-        $this->set('page_url.stateless_setup', $this->bootstrap->get_settings_page_url('?page=stateless-setup'));
+        $this->set('page_url.stateless_setup', $this->bootstrap->get_settings_page_url('?page=stateless-connect'));
         $this->set('page_url.stateless_settings', $this->bootstrap->get_settings_page_url('?page=stateless-settings'));
 
         /** Register options */
@@ -708,7 +708,7 @@ namespace wpCloud\StatelessMedia {
           'settings' => sprintf( '<a href="%s">%s</a>', $url, __('Settings', ud_get_stateless_media()->domain) ),
         ];
 
-        $actions['addons'] = sprintf( '<a href="%s" style="color: #f05323" target="_blank">%s</a>', ud_get_stateless_media()->get_docs_page_url('addons'), __('Addons', ud_get_stateless_media()->domain) );
+        $actions['addons'] = sprintf( '<a href="%s" style="color: #f05323" target="_blank">%s</a>', ud_get_stateless_media()->get_docs_page_url('addons/'), __('Addons', ud_get_stateless_media()->domain) );
 
         return $settings + $actions;
       }
@@ -726,7 +726,7 @@ namespace wpCloud\StatelessMedia {
           return $meta;
         }
 
-        $meta['documentation'] = sprintf( '<a href="%s" target="_blank">%s</a>', ud_get_stateless_media()->get_docs_page_url(), __('Documentation', ud_get_stateless_media()->domain) );
+        $meta['documentation'] = sprintf( '<a href="%s" target="_blank">%s</a>', ud_get_stateless_media()->get_docs_page_url('docs/'), __('Documentation', ud_get_stateless_media()->domain) );
 
         return $meta;
       }
@@ -749,22 +749,43 @@ namespace wpCloud\StatelessMedia {
         if ( json_decode($this->get('sm.key_json')) ) {
           return;
         }
+        // Stateless Connect is where the notice sends people; do not show it there.
+        if ( isset($_GET['page']) && $_GET['page'] === 'stateless-connect' ) {
+          return;
+        }
+
+        $connect_url = sprintf(
+          '<a class="button button-primary" style="margin:0 8px 0 4px;vertical-align:baseline" href="%s">%s</a>',
+          esc_url(admin_url('upload.php?page=stateless-connect')),
+          __('Connect Google Cloud', ud_get_stateless_media()->domain),
+        );
 
         $documentation_url = sprintf(
           '<a href="%s" target="_blank">%s</a>',
           $this->bootstrap->get_docs_page_url('/setup/'),
-          __('Refer to the setup manual', ud_get_stateless_media()->domain),
+          __('the setup manual', ud_get_stateless_media()->domain),
         );
+
+        if ( GoogleConnect::hidden_for_site() ) {
+          // The network hid the setup assistant from site admins; point at the manual only.
+          $message = sprintf(
+            __('WP-Stateless is active but not connected to Google Cloud yet. Follow %s to configure it.', ud_get_stateless_media()->domain),
+            $documentation_url,
+          );
+        } else {
+          $message = sprintf(
+            __(
+              'WP-Stateless is active but not connected to Google Cloud yet. %1$s to sign in with Google and have the bucket created for you, or follow %2$s to configure it by hand.',
+              ud_get_stateless_media()->domain,
+            ),
+            $connect_url,
+            $documentation_url,
+          );
+        }
 
         $this->bootstrap->errors->add([
           'title' => __('WP-Stateless: Finish Setup', ud_get_stateless_media()->domain),
-          'message' => sprintf(
-            __(
-              'WP-Stateless has been successfully activated. %s for guidance on completing the setup.',
-              ud_get_stateless_media()->domain,
-            ),
-            $documentation_url,
-          ),
+          'message' => $message,
           'key' => self::SETUP_MESSAGE_KEY,
         ], 'message');
       }
