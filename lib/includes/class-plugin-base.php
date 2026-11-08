@@ -3,6 +3,9 @@
 namespace wpCloud\StatelessMedia;
 
 if (!class_exists('wpCloud\StatelessMedia\Plugin_Scaffold')) {
+  /**
+   * Holds plugin identity, paths, and extra properties shared by the lifecycle classes.
+   */
   class Plugin_Scaffold {
     public $name = false;
     public $slug = false;
@@ -11,8 +14,17 @@ if (!class_exists('wpCloud\StatelessMedia\Plugin_Scaffold')) {
     public $root_url = false;
     public $uservoice_url = false;
     public $support_url = false;
+
+    /** @var array Arbitrary metadata passed through the constructor. */
+    protected $args = array();
+
     protected $_properties = array();
 
+    /**
+     * Assigns declared plugin metadata and retains remaining values in `$args`.
+     *
+     * @param array $args Plugin metadata and paths.
+     */
     protected function __construct($args = array()) {
       $extra = array();
       foreach ($args as $key => $value) {
@@ -32,10 +44,12 @@ if (!class_exists('wpCloud\StatelessMedia\Plugin_Scaffold')) {
       $this->args = $extra;
     }
 
+    /** @return mixed Dynamic property value, or null when absent. */
     public function __get($key) {
       return isset($this->_properties[$key]) ? $this->_properties[$key] : null;
     }
 
+    /** Stores a dynamic property without changing declared plugin metadata. */
     public function __set($key, $value) {
       $this->_properties[$key] = $value;
     }
@@ -43,12 +57,18 @@ if (!class_exists('wpCloud\StatelessMedia\Plugin_Scaffold')) {
 }
 
 if (!class_exists('wpCloud\StatelessMedia\Update_Client')) {
+  /**
+   * Retrieves the daily product update/message payload and handles its notices.
+   */
   class Update_Client {
     private $args;
     private $slug;
     private $domain;
     private $option;
 
+    /**
+     * @param array $args Product metadata containing `slug`, `domain`, and `version`.
+     */
     public function __construct($args) {
       $this->args = $args;
       $this->slug = $args['slug'];
@@ -58,6 +78,12 @@ if (!class_exists('wpCloud\StatelessMedia\Update_Client')) {
       add_action('admin_post_wp_stateless_dismiss_update_notice', array($this, 'dismiss_notice'));
     }
 
+    /**
+     * Uses a 24-hour response cache or requests fresh update information.
+     *
+     * Request arguments remain filterable by existing integrations. Invalid,
+     * empty, or error responses are ignored without changing the last good cache.
+     */
     public function maybe_ping() {
       $response = get_option($this->option);
       $cached = is_array($response) && !empty($response['time']) && time() - $response['time'] < DAY_IN_SECONDS;
@@ -98,6 +124,11 @@ if (!class_exists('wpCloud\StatelessMedia\Update_Client')) {
       add_action('admin_notices', array($this, 'admin_notices'));
     }
 
+    /**
+     * Renders sanitized messages to users allowed to activate plugins.
+     *
+     * Previously dismissed message hashes are excluded and duplicate messages are removed.
+     */
     public function admin_notices() {
       global $_ud_ping_notices;
       $dismissed = get_option('dismissed_ud_notices', array());
@@ -111,6 +142,9 @@ if (!class_exists('wpCloud\StatelessMedia\Update_Client')) {
       }
     }
 
+    /**
+     * Dismisses a message after capability, hash-format, and nonce checks.
+     */
     public function dismiss_notice() {
       if (!current_user_can('activate_plugins')) wp_die(esc_html__('You are not allowed to do this action.', $this->domain));
       $hash = isset($_GET['notice']) ? sanitize_text_field(wp_unslash($_GET['notice'])) : '';
@@ -126,6 +160,9 @@ if (!class_exists('wpCloud\StatelessMedia\Update_Client')) {
 }
 
 if (!class_exists('wpCloud\StatelessMedia\Plugin_Base')) {
+  /**
+   * Provides plugin lifecycle, upgrade, metadata, settings, and notice hooks.
+   */
   class Plugin_Base extends Plugin_Scaffold {
     public static $version = '1.0.0';
     public $type = 'plugin';
@@ -135,6 +172,14 @@ if (!class_exists('wpCloud\StatelessMedia\Plugin_Base')) {
     public $settings = null;
     public $boot_file = false;
 
+    /** @var string|int Previous installed version used by the upgrade dispatcher. */
+    protected $old_version = 0;
+
+    /**
+     * Registers initialization, localization, lifecycle, and dismissal hooks.
+     *
+     * @param array $args Plugin metadata and paths.
+     */
     protected function __construct($args) {
       parent::__construct($args);
       add_action('init', array($this, 'load_textdomain'), 1);
@@ -145,36 +190,68 @@ if (!class_exists('wpCloud\StatelessMedia\Plugin_Base')) {
       $this->boot();
     }
 
+    /** Initializes the plugin when no bootstrap errors were recorded. */
     public function pre_init() {
       if (!$this->has_errors()) $this->init();
     }
 
+    /** Preserves the legacy constructor hook for subclasses. */
     public function boot() {}
 
+    /** Reserved for the concrete plugin's main initialization routine. */
     public function init() {}
 
+    /** Loads the plugin text domain without loading it during bootstrap. */
     public function load_textdomain() {
       load_plugin_textdomain($this->domain, false, dirname(plugin_basename($this->boot_file)) . '/static/languages/');
     }
 
+    /**
+     * Resolves a plugin-relative path to a directory or URL.
+     *
+     * @param string $short_path Relative plugin path.
+     * @param string $type Either `dir` or `url`.
+     * @return string|false Resolved path, or false for an unknown type.
+     */
     public function path($short_path, $type = 'url') {
       if ($type === 'dir') return $this->root_path . ltrim($short_path, '/\\');
       if ($type === 'url') return $this->root_url . ltrim($short_path, '/\\');
       return false;
     }
 
+    /** @return bool Whether the bootstrap recorded any errors. */
     public function has_errors() {
       return $this->errors && $this->errors->has_errors();
     }
 
+    /**
+     * Writes a setting through the plugin settings handler when available.
+     *
+     * @param string|null $key Setting name.
+     * @param mixed $value Setting value.
+     * @return mixed Handler result, or false before settings are initialized.
+     */
     public function set($key = null, $value = null) {
       return is_object($this->settings) ? $this->settings->set($key, $value) : false;
     }
 
+    /**
+     * Reads a setting through the plugin settings handler.
+     *
+     * @param string|null $key Setting name.
+     * @param mixed $default Fallback when the setting is absent or settings are uninitialized.
+     * @return mixed Setting value or the supplied default.
+     */
     public function get($key = null, $default = null) {
       return is_object($this->settings) ? $this->settings->get($key, $default) : $default;
     }
 
+    /**
+     * Reads and optionally localizes the plugin's composer schema.
+     *
+     * @param string $key Optional dot-separated path within the schema.
+     * @return mixed Full schema, a nested value, or false when the schema is invalid.
+     */
     public function get_schema($key = '') {
       if ($this->schema === null && !empty($this->schema_path) && is_file($this->schema_path)) {
         $schema = json_decode(file_get_contents($this->schema_path), true);
@@ -190,10 +267,16 @@ if (!class_exists('wpCloud\StatelessMedia\Plugin_Base')) {
       return $current;
     }
 
+    /** @return array Localization values used to render the composer schema. */
     public function get_localization() {
       return array();
     }
 
+    /**
+     * Creates the internal update client when configured for an admin request.
+     *
+     * @return bool True when the client was created, false when unavailable.
+     */
     public function define_update_client() {
       if (!is_admin() || $this->has_errors() || !$this->get_schema('extra.schemas.licenses.client')) return false;
       new Update_Client(array_merge($this->args, array(
@@ -205,6 +288,7 @@ if (!class_exists('wpCloud\StatelessMedia\Plugin_Base')) {
       return true;
     }
 
+    /** Schedules install/upgrade hooks based on the stored plugin version. */
     protected function maybe_run_upgrade_process() {
       $version = get_option($this->slug . '-current-version', 0);
       $this->old_version = $version;
@@ -213,22 +297,33 @@ if (!class_exists('wpCloud\StatelessMedia\Plugin_Base')) {
       add_action('plugins_loaded', array($this, 'save_version_no'), 100);
     }
 
+    /** Persists the current plugin version after initialization. */
     public function save_version_no() {
       update_option($this->slug . '-current-version', $this->args['version']);
     }
 
+    /** Runs the install routine during plugins_loaded. */
     public function _run_install_process() {
       $this->run_install_process();
     }
 
+    /** Runs the upgrade routine during plugins_loaded. */
     public function _run_upgrade_process() {
       $this->run_upgrade_process();
     }
 
+    /** Reserved for first-install schema and settings creation. */
     public function run_install_process() {}
 
+    /** Reserved for version-to-version schema and data upgrades. */
     public function run_upgrade_process() {}
 
+    /**
+     * Creates or returns the plugin singleton and captures its root metadata.
+     *
+     * @param array $args Optional metadata overrides.
+     * @return static Plugin singleton.
+     */
     public static function get_instance($args = array()) {
       $class = get_called_class();
       if (null === $class::$instance) {
@@ -257,18 +352,28 @@ if (!class_exists('wpCloud\StatelessMedia\Plugin_Base')) {
       return $class::$instance;
     }
 
+    /** Delegates the WordPress activation hook to the concrete plugin. */
     public function _activate() {
       $this->activate();
     }
 
+    /** Delegates the WordPress deactivation hook to the concrete plugin. */
     public function _deactivate() {
       $this->deactivate();
     }
 
+    /** Reserved for plugin activation behavior. */
     public function activate() {}
 
+    /** Reserved for plugin deactivation behavior. */
     public function deactivate() {}
 
+    /**
+     * Dismisses a bootstrap notice after nonce, capability, and input validation.
+     *
+     * Only keys beginning `dismiss_` and ending `_notice` are accepted, and
+     * slug, type, and version must all be present before an option is written.
+     */
     public function ud_bootstrap_dismiss_notice() {
       check_ajax_referer('ud_bootstrap_dismiss_notice', 'nonce');
       $response = array('success' => '0', 'error' => __('There was an error in request.', $this->domain));

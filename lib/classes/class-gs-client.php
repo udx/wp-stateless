@@ -7,13 +7,26 @@ if (!class_exists('wpCloud\StatelessMedia\Google_REST_Client')) {
 }
 
 if (!class_exists('wpCloud\StatelessMedia\GS_Buckets')) {
+  /**
+   * Exposes bucket metadata through the service shape used by earlier clients.
+   */
   final class GS_Buckets {
     private $client;
 
+    /**
+     * @param Google_REST_Client $client Authenticated REST transport.
+     */
     public function __construct(Google_REST_Client $client) {
       $this->client = $client;
     }
 
+    /**
+     * Retrieves bucket metadata as an object, matching the legacy service contract.
+     *
+     * @param string $bucket Bucket name.
+     * @return \stdClass Bucket metadata, including IAM configuration when available.
+     * @throws Google_REST_Exception When authentication or the Google request fails.
+     */
     public function get($bucket) {
       $info = $this->client->get_bucket($bucket);
       return json_decode(wp_json_encode($info), false, 512, JSON_THROW_ON_ERROR);
@@ -22,9 +35,16 @@ if (!class_exists('wpCloud\StatelessMedia\GS_Buckets')) {
 }
 
 if (!class_exists('wpCloud\StatelessMedia\GS_Service')) {
+  /**
+   * Groups the supported Google service resources.
+   */
   final class GS_Service {
+    /** @var GS_Buckets Bucket metadata resource. */
     public $buckets;
 
+    /**
+     * @param Google_REST_Client $client Authenticated REST transport.
+     */
     public function __construct(Google_REST_Client $client) {
       $this->buckets = new GS_Buckets($client);
     }
@@ -32,14 +52,28 @@ if (!class_exists('wpCloud\StatelessMedia\GS_Service')) {
 }
 
 if (!class_exists('wpCloud\StatelessMedia\GS_Client')) {
+  /**
+   * High-level storage client used by WP-Stateless and its add-ons.
+   *
+   * Wraps the REST transport while preserving the response objects and error
+   * behavior expected by the plugin's existing media workflows.
+   */
   final class GS_Client {
     private static $instance;
+
+    /** @var Google_REST_Client Low-level REST transport. */
     public $client;
+
+    /** @var GS_Service Supported Google service resources. */
     public $service;
+
     private $bucket;
     private $temp_objects = array();
     private $key_json = '';
 
+    /**
+     * @param array $args Configuration containing `bucket` and `key_json`.
+     */
     protected function __construct($args) {
       $this->bucket = $args['bucket'];
       $this->key_json = json_decode($args['key_json'], true);
@@ -48,6 +82,15 @@ if (!class_exists('wpCloud\StatelessMedia\GS_Client')) {
       delete_transient('wp_stateless_google_sdk_conflict');
     }
 
+    /**
+     * Lists one page of objects.
+     *
+     * Supported options include `prefix`, `delimiter`, `maxResults`, `pageToken`,
+     * `projection`, and `versions`. Object ACLs are not required for existence checks.
+     *
+     * @param array $options Google object-list query parameters.
+     * @return Google_REST_Object_List Page of objects and an optional continuation token.
+     */
     public function list_objects($options = array()) {
       $options = wp_parse_args($options, array(
         'delimiter' => '',
@@ -63,6 +106,12 @@ if (!class_exists('wpCloud\StatelessMedia\GS_Client')) {
       return new Google_REST_Object_List($this->client->list_objects($options));
     }
 
+    /**
+     * Iterates through every page matching the supplied query.
+     *
+     * @param array $options Google object-list query parameters.
+     * @return Google_REST_Object[] Every matching object.
+     */
     public function list_all_objects($options = array()) {
       $options = wp_parse_args($options, array(
         'delimiter' => '',
@@ -81,6 +130,16 @@ if (!class_exists('wpCloud\StatelessMedia\GS_Client')) {
       return $this->temp_objects;
     }
 
+    /**
+     * Uploads a local file using a resumable upload session.
+     *
+     * Common arguments are `name`, `absolutePath`, `mimeType`, `metadata`,
+     * `cacheControl`, `force`, and `use_root`. A missing local file returns a
+     * WP_Error rather than throwing an exception.
+     *
+     * @param array $args Upload and media-path arguments.
+     * @return array|\WP_Error Raw Google object metadata, or the upload error.
+     */
     public function add_media($args = array()) {
       try {
         set_time_limit(0);
@@ -131,6 +190,17 @@ if (!class_exists('wpCloud\StatelessMedia\GS_Client')) {
       }
     }
 
+    /**
+     * Updates object metadata without replacing the object body.
+     *
+     * Allowed fields are `metadata`, `cacheControl`, `contentDisposition`,
+     * `contentEncoding`, `contentType`, and `storageClass`.
+     *
+     * @param string $name Exact object name.
+     * @param array $args Metadata fields and an optional predefined ACL.
+     * @return array Raw Google object metadata.
+     * @throws Google_REST_Exception When the metadata request fails.
+     */
     public function update_media($name, $args) {
       $options = array();
       if (isset($args['predefinedAcl']) && $this->manages_object_acl()) {
@@ -142,6 +212,11 @@ if (!class_exists('wpCloud\StatelessMedia\GS_Client')) {
       return $this->client->patch_object($name, $fields, $options);
     }
 
+    /**
+     * Determines whether this client should write per-object ACL entries.
+     *
+     * @return bool False for uniform-access buckets or when ACL writes are disabled.
+     */
     private function manages_object_acl() {
       if (defined('WP_STATELESS_SKIP_ACL_SET') && WP_STATELESS_SKIP_ACL_SET) return false;
       try {
@@ -151,14 +226,30 @@ if (!class_exists('wpCloud\StatelessMedia\GS_Client')) {
       }
     }
 
+    /**
+     * Grants the configured public-read ACL to an object.
+     *
+     * @param string $name Exact object name.
+     * @param array|Google_REST_Object $media Object metadata passed through the ACL filter.
+     * @param array $agrs Additional legacy filter arguments.
+     * @return array|null Google ACL response, or null for an empty object name.
+     */
     public function mediaInsertACL($name, $media = array(), $agrs = array()) {
-      if (empty($name)) return;
+      if (empty($name)) return null;
       $acl = new Google_REST_Object(array('entity' => 'allUsers', 'role' => 'READER'));
       $acl = apply_filters('wp_stateless_media_acl', $acl, $name, $media, $agrs);
       $data = is_object($acl) && is_callable(array($acl, 'to_array')) ? $acl->to_array() : get_object_vars($acl);
       return $this->client->insert_object_acl($name, $data);
     }
 
+    /**
+     * Retrieves object metadata or downloads an object to a local path.
+     *
+     * @param string $path Exact object name.
+     * @param bool $save Whether to download instead of returning metadata.
+     * @param string|false $save_path Destination path when downloading.
+     * @return Google_REST_Object|int|false Object metadata, HTTP 200 on download success, or false on failure.
+     */
     public function get_media($path, $save = false, $save_path = false) {
       try {
         $media = new Google_REST_Object($this->client->get_object($path));
@@ -176,6 +267,13 @@ if (!class_exists('wpCloud\StatelessMedia\GS_Client')) {
       return $media;
     }
 
+    /**
+     * Copies an object while preserving its media metadata and ACL behavior.
+     *
+     * @param string $path Source object name.
+     * @param string $new_path Destination object name.
+     * @return Google_REST_Object|false Destination metadata, or false on failure.
+     */
     public function copy_media($path, $new_path) {
       try {
         $source = $this->client->get_object($path);
@@ -191,6 +289,13 @@ if (!class_exists('wpCloud\StatelessMedia\GS_Client')) {
       }
     }
 
+    /**
+     * Copies then deletes an object.
+     *
+     * @param string $path Source object name.
+     * @param string $new_path Destination object name.
+     * @return Google_REST_Object|\WP_Error|false Destination metadata or the delete failure.
+     */
     public function move_media($path, $new_path) {
       $media = $this->copy_media($path, $new_path);
       if (!$media || empty($media->id)) return false;
@@ -199,6 +304,12 @@ if (!class_exists('wpCloud\StatelessMedia\GS_Client')) {
       return $media;
     }
 
+    /**
+     * Checks object existence using metadata only, without requiring an ACL read.
+     *
+     * @param string $path Exact object name.
+     * @return Google_REST_Object|false Object metadata when present, otherwise false.
+     */
     public function media_exists($path) {
       try {
         $media = new Google_REST_Object($this->client->get_object($path));
@@ -208,6 +319,16 @@ if (!class_exists('wpCloud\StatelessMedia\GS_Client')) {
       return empty($media->id) ? false : $media;
     }
 
+    /**
+     * Deletes an object after applying the media path filters.
+     *
+     * @param string $name Object name or media path.
+     * @param string $id Optional attachment ID used by the filename filter.
+     * @param bool $use_root Whether to apply the configured media root.
+     * @param string $size Optional image size used by the filename filter.
+     * @param bool $is_webp Whether to append the WebP suffix when needed.
+     * @return true|\WP_Error True on deletion, or the Google/transport error.
+     */
     public function remove_media($name, $id = '', $use_root = true, $size = '', $is_webp = false) {
       try {
         $name = apply_filters('wp_stateless_file_name', $name, $use_root, $id, $size);
@@ -219,6 +340,11 @@ if (!class_exists('wpCloud\StatelessMedia\GS_Client')) {
       return true;
     }
 
+    /**
+     * Verifies access to the configured bucket.
+     *
+     * @return true|\Throwable True on success, or the connection error.
+     */
     public function is_connected() {
       try {
         $this->client->get_bucket();
@@ -228,6 +354,12 @@ if (!class_exists('wpCloud\StatelessMedia\GS_Client')) {
       return true;
     }
 
+    /**
+     * Creates the shared client instance.
+     *
+     * @param array $args Configuration containing `bucket` and `key_json`.
+     * @return GS_Client|\WP_Error Shared client, or a credential validation error.
+     */
     public static function get_instance($args) {
       if (null === self::$instance) {
         try {

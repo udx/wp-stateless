@@ -21,10 +21,6 @@ namespace wpCloud\StatelessMedia {
     class Utility {
 
       /**
-       * Upload errors from the last add_media() run, per attachment. An object that failed to upload can
-       * still exist in the bucket from an earlier sync, so an existence check alone would call the run a success.
-       */
-      /**
        * Upload failures of the current request, keyed by attachment id and image size.
        * A sync resets them once per attachment; a size's failure stays recorded until a
        * later upload of that same size succeeds, so a repeated metadata callback that
@@ -32,18 +28,33 @@ namespace wpCloud\StatelessMedia {
        */
       private static $upload_errors = array();
 
+      /**
+       * Returns all recorded upload errors for an attachment in insertion order.
+       *
+       * @param int $attachment_id WordPress attachment ID.
+       * @return string[] Sanitized upload error messages, or an empty array.
+       */
       public static function upload_errors($attachment_id) {
         return isset(self::$upload_errors[$attachment_id]) ? array_values(self::$upload_errors[$attachment_id]) : array();
       }
 
+      /** Clears an attachment's previous errors before a fresh synchronization attempt. */
       public static function reset_upload_errors($attachment_id) {
         unset(self::$upload_errors[$attachment_id]);
       }
 
+      /**
+       * Records a failed upload without treating an older remote object as proof of success.
+       *
+       * @param int $attachment_id WordPress attachment ID.
+       * @param string $size Image size or operation identifier.
+       * @param string $message Sanitized failure message.
+       */
       private static function record_upload_error($attachment_id, $size, $message) {
         self::$upload_errors[$attachment_id][$size] = $size . ': ' . $message;
       }
 
+      /** Clears a size's previous error after its replacement upload succeeds. */
       private static function resolve_upload_error($attachment_id, $size) {
         unset(self::$upload_errors[$attachment_id][$size]);
       }
@@ -479,6 +490,17 @@ namespace wpCloud\StatelessMedia {
         return '';
       }
 
+      /**
+       * Builds local and Google paths for the original image and every generated size.
+       *
+       * Each entry contains `path`, `gs_name`, `width`, `height`, `mime_type`,
+       * and `is_thumb`; synchronization uses these values to upload exact object
+       * names and to verify that every expected object exists.
+       *
+       * @param array $metadata WordPress attachment metadata.
+       * @param int $attachment_id WordPress attachment ID.
+       * @return array<string,array<string,mixed>> Original and thumbnail path data.
+       */
       public static function get_path_and_url($metadata, $attachment_id) {
         /* Get metadata in case if method is called directly. */
         if (empty($metadata) && current_filter() !== 'wp_generate_attachment_metadata' && current_filter() !== 'wp_update_attachment_metadata') {
@@ -856,10 +878,23 @@ namespace wpCloud\StatelessMedia {
         return $payload;
       }
 
+      /**
+       * Encodes JWT header, claims, or signature bytes using unpadded base64url.
+       *
+       * @param string $value Raw bytes to encode.
+       * @return string Base64url-encoded value.
+       */
       private static function jwt_base64url($value) {
         return rtrim(strtr(base64_encode($value), '+/', '-_'), '=');
       }
 
+      /**
+       * Decodes a base64url JWT segment and restores any required padding.
+       *
+       * @param string $value Encoded JWT segment.
+       * @return string Decoded bytes.
+       * @throws \Exception When the segment is not valid base64url data.
+       */
       private static function jwt_base64url_decode($value) {
         $padding = (4 - strlen($value) % 4) % 4;
         $decoded = base64_decode(strtr($value . str_repeat('=', $padding), '-_', '+/'), true);

@@ -25,6 +25,9 @@ class BatchTaskManager extends Background_Process {
   protected $prefix = 'sm';
   protected $action = 'batch_process';
 
+  /**
+   * Initializes migration batch hooks and resumes work stalled beyond its healthcheck interval.
+   */
   protected function __construct() {
     parent::__construct();
 
@@ -32,6 +35,7 @@ class BatchTaskManager extends Background_Process {
     $this->_check_force_continue();
   }
 
+  /** Registers state reporting, pause/resume, and heartbeat monitoring hooks. */
   private function _init_hooks() {
     add_filter('wp_stateless_batch_state', [$this, 'get_state'], 10, 1);
     add_filter('wp_stateless_batch_action_pause', [$this, 'pause_task'], 10, 2);

@@ -143,6 +143,7 @@ Before upgrading to WP-Stateless 3.0, please, make sure you tested it on your de
 * FIX - object existence checks no longer require reading object ACLs, so they work with uniform bucket-level access, and cron healthchecks can process queues directly without a loopback request.
 * FIX - native `gs://` streams use exact object paths, recognize virtual directories and preserve directory renames, stream casting and fine-grained or uniform bucket ACL behavior.
 * FIX - preserved the legacy background-process memory/process helpers and bootstrap lifecycle hook for existing integrations.
+* ENHANCEMENT - documented the new REST, storage, stream, background and lifecycle contracts, including return/error behavior, and declared lifecycle metadata properties for reliable static analysis.
 
 = 4.5.0 - 2026-11-02 =
 * NEW - Stateless Connect replaces the setup wizard: sign in with Google from wp-admin, confirm your site on stateless.ci, and WP-Stateless creates the project, bucket, service account and key inside your own Google Cloud account. No iframe, no copying of keys.

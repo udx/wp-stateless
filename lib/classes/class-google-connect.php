@@ -1277,6 +1277,17 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
       }
     }
 
+    /**
+     * Proves newly provisioned credentials can read the target bucket.
+     *
+     * Retries while service-account and IAM changes propagate. The credential
+     * payload is never included in the returned error message.
+     *
+     * @param string $key_json Service-account JSON used only for this verification.
+     * @param string $bucket Target bucket name.
+     * @param int $attempts Maximum attempts before returning the last actionable error.
+     * @return true|string True when bucket metadata is readable, or the last error message.
+     */
     private function verify_key($key_json, $bucket, $attempts = 6) {
       if (!class_exists('wpCloud\StatelessMedia\Google_REST_Client')) {
         require_once dirname(__FILE__) . '/class-google-rest-client.php';

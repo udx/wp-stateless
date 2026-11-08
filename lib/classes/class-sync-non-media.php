@@ -33,6 +33,9 @@ namespace wpCloud\StatelessMedia {
        */
       private $client = null;
 
+      /**
+       * Registers filters and actions for syncing compatibility files outside the Media Library.
+       */
       public function __construct() {
         // Manual sync using sync tab.
         // Return files to be manually sync from sync tab.

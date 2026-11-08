@@ -3,11 +3,16 @@
 namespace wpCloud\StatelessMedia;
 
 if (!class_exists('wpCloud\StatelessMedia\AttachmentPanel')) {
+  /**
+   * Renders WP-Stateless's attachment fields using native WordPress meta boxes and tabs.
+   */
   class AttachmentPanel {
+    /** Registers the attachment panel during WordPress meta-box initialization. */
     public function __construct() {
       add_action('add_meta_boxes', array($this, 'register'));
     }
 
+    /** Adds the low-priority Stateless meta box to the attachment editor. */
     public function register() {
       add_meta_box(
         'sm-attachment-metabox',
@@ -19,6 +24,13 @@ if (!class_exists('wpCloud\StatelessMedia\AttachmentPanel')) {
       );
     }
 
+    /**
+     * Renders the attachment's existing field definitions as accessible tabs.
+     *
+     * Labels and headings are escaped. The `std` field content is rendered as
+     * supplied by the existing media filters so generated action links and URLs
+     * retain their intended markup.
+     */
     public function render() {
       $meta_boxes = apply_filters('rwmb_meta_boxes', array());
       $meta_box = array();

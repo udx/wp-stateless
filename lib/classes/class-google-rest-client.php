@@ -3,11 +3,19 @@
 namespace wpCloud\StatelessMedia;
 
 if (!class_exists('wpCloud\StatelessMedia\Google_REST_Exception')) {
+  /**
+   * Describes a Google API or transport failure without exposing credentials.
+   */
   class Google_REST_Exception extends \Exception {
     private $status = 0;
     private $response = null;
     private $reason = '';
 
+    /**
+     * @param string $message Sanitized failure message.
+     * @param int $status HTTP status, or zero for a local transport failure.
+     * @param array|string|null $response Parsed Google error response, when available.
+     */
     public function __construct($message, $status = 0, $response = null) {
       $this->status = (int) $status;
       $this->response = $response;
@@ -19,18 +27,22 @@ if (!class_exists('wpCloud\StatelessMedia\Google_REST_Exception')) {
       parent::__construct($message, $this->status);
     }
 
+    /** @return int HTTP status, or zero for a local failure. */
     public function getStatus() {
       return $this->status;
     }
 
+    /** @return array|string|null Parsed error response, when available. */
     public function getResponse() {
       return $this->response;
     }
 
+    /** @return array Legacy error list containing reason and message. */
     public function getErrors() {
       return array(array('reason' => $this->reason, 'message' => $this->getMessage()));
     }
 
+    /** @return array Legacy handler context containing the sanitized message. */
     public function getHandlerContext() {
       return array('error' => $this->getMessage());
     }
@@ -38,84 +50,126 @@ if (!class_exists('wpCloud\StatelessMedia\Google_REST_Exception')) {
 }
 
 if (!class_exists('wpCloud\StatelessMedia\Google_REST_Object')) {
+  /**
+   * Wraps Google object metadata with the legacy property and ArrayAccess API.
+   */
   class Google_REST_Object implements \ArrayAccess {
     private $data = array();
 
+    /** @param mixed $data Raw object metadata; non-array input is normalized to an empty array. */
     public function __construct($data = array()) {
       $this->data = is_array($data) ? $data : array();
     }
 
+    /** @return mixed Field value, or null when the field is absent. */
     public function __get($name) {
       return isset($this->data[$name]) ? $this->data[$name] : null;
     }
 
+    /** @return bool Whether the metadata field exists and is not null. */
     public function __isset($name) {
       return isset($this->data[$name]);
     }
 
+    /** @return array Raw Google object metadata. */
     public function to_array() {
       return $this->data;
     }
 
+    /** @return string|null Object Cache-Control header. */
     public function getCacheControl() {
       return $this->__get('cacheControl');
     }
 
+    /**
+     * @param string $value Cache-Control header value.
+     * @return Google_REST_Object This object for chaining.
+     */
     public function setCacheControl($value) {
       $this->data['cacheControl'] = $value;
       return $this;
     }
 
+    /**
+     * @param string $value ACL entity, such as `allUsers`.
+     * @return Google_REST_Object This object for chaining.
+     */
     public function setEntity($value) {
       $this->data['entity'] = $value;
       return $this;
     }
 
+    /**
+     * @param string $value ACL role, such as `READER`.
+     * @return Google_REST_Object This object for chaining.
+     */
     public function setRole($value) {
       $this->data['role'] = $value;
       return $this;
     }
 
+    /** @return string|null Authenticated media download URL. */
     public function getMediaLink() {
       return $this->__get('mediaLink');
     }
 
+    /** @return array<string,mixed>|null Custom object metadata. */
     public function getMetadata() {
       return $this->__get('metadata');
     }
 
+    /**
+     * @param array<string,mixed> $value Custom object metadata.
+     * @return Google_REST_Object This object for chaining.
+     */
     public function setMetadata($value) {
       $this->data['metadata'] = $value;
       return $this;
     }
 
+    /** @return string|null Exact object name. */
     public function getName() {
       return $this->__get('name');
     }
 
+    /** @return string|null Object size in bytes, represented as a string by Google. */
     public function getSize() {
       return $this->__get('size');
     }
 
+    /** @return string|null Google object ID. */
     public function getId() {
       return $this->__get('id');
     }
 
+    /**
+     * @param mixed $offset Metadata field name.
+     * @return bool Whether the field exists and is not null.
+     */
     #[\ReturnTypeWillChange]
     public function offsetExists($offset) {
       return isset($this->data[$offset]);
     }
 
+    /**
+     * @param mixed $offset Metadata field name.
+     * @return mixed Field value, or null when absent.
+     */
     #[\ReturnTypeWillChange]
     public function offsetGet($offset) {
       return $this->__get($offset);
     }
 
+    /**
+     * @param mixed $offset Metadata field name.
+     * @param mixed $value New field value.
+     */
     #[\ReturnTypeWillChange]
     public function offsetSet($offset, $value) {
       $this->data[$offset] = $value;
     }
 
+    /** @param mixed $offset Metadata field name to remove. */
     #[\ReturnTypeWillChange]
     public function offsetUnset($offset) {
       unset($this->data[$offset]);
@@ -124,11 +178,20 @@ if (!class_exists('wpCloud\StatelessMedia\Google_REST_Object')) {
 }
 
 if (!class_exists('wpCloud\StatelessMedia\Google_REST_Object_List')) {
+  /**
+   * Represents one page of Google object-list results.
+   */
   class Google_REST_Object_List {
+    /** @var Google_REST_Object[] Objects in this page. */
     public $items = array();
+
+    /** @var string|null Continuation token for the next page. */
     public $nextPageToken = null;
+
+    /** @var string[] Prefixes returned when a delimiter is used. */
     public $prefixes = array();
 
+    /** @param array $data Raw Google object-list response. */
     public function __construct($data = array()) {
       $items = isset($data['items']) && is_array($data['items']) ? $data['items'] : array();
       $this->items = array_map(function ($item) {
@@ -138,10 +201,12 @@ if (!class_exists('wpCloud\StatelessMedia\Google_REST_Object_List')) {
       $this->prefixes = isset($data['prefixes']) && is_array($data['prefixes']) ? $data['prefixes'] : array();
     }
 
+    /** @return Google_REST_Object[] Objects in this page. */
     public function getItems() {
       return $this->items;
     }
 
+    /** @return string[] Prefixes returned when a delimiter is used. */
     public function getPrefixes() {
       return $this->prefixes;
     }
@@ -149,6 +214,13 @@ if (!class_exists('wpCloud\StatelessMedia\Google_REST_Object_List')) {
 }
 
 if (!class_exists('wpCloud\StatelessMedia\Google_REST_Client')) {
+  /**
+   * Minimal Google Cloud Storage REST transport using WordPress HTTP functions.
+   *
+   * Owns service-account JWT bearer tokens, retries, resumable uploads, and
+   * streamed downloads. It intentionally implements only the operations used by
+   * WP-Stateless rather than the complete Google SDK surface.
+   */
   class Google_REST_Client {
     const TOKEN_ENDPOINT = 'https://oauth2.googleapis.com/token';
     const API_ROOT = 'https://storage.googleapis.com/storage/v1';
@@ -161,6 +233,11 @@ if (!class_exists('wpCloud\StatelessMedia\Google_REST_Client')) {
     private $access_token_expires = 0;
     private $uniform_access = null;
 
+    /**
+     * @param mixed $bucket Bucket name used for object operations; validated at runtime.
+     * @param mixed $key Service-account data containing `client_email` and `private_key`; validated at runtime.
+     * @throws Google_REST_Exception When configuration is invalid or OpenSSL is unavailable.
+     */
     public function __construct($bucket, $key) {
       if (!is_string($bucket) || trim($bucket) === '') {
         throw new Google_REST_Exception(__('Bucket parameter must be provided.', ud_get_stateless_media()->domain));
@@ -175,6 +252,13 @@ if (!class_exists('wpCloud\StatelessMedia\Google_REST_Client')) {
       $this->key = $key;
     }
 
+    /**
+     * Reports whether the configured bucket uses uniform bucket-level access.
+     *
+     * The result is cached for the lifetime of this client.
+     *
+     * @return bool True when per-object ACLs are not used.
+     */
     public function has_uniform_access() {
       if ($this->uniform_access === null) {
         $bucket = $this->get_bucket();
@@ -183,29 +267,64 @@ if (!class_exists('wpCloud\StatelessMedia\Google_REST_Client')) {
       return $this->uniform_access;
     }
 
+    /**
+     * Retrieves bucket metadata.
+     *
+     * @param string|null $bucket Optional bucket override; defaults to the configured bucket.
+     * @return array Raw bucket metadata.
+     */
     public function get_bucket($bucket = null) {
       $bucket = $bucket === null ? $this->bucket : $bucket;
       return $this->request('GET', self::API_ROOT . '/b/' . rawurlencode($bucket));
     }
 
+    /**
+     * Retrieves one object's metadata by its exact name.
+     *
+     * @param string $name Exact object name.
+     * @param array $options Optional query parameters, such as `generation`.
+     * @return array Raw object metadata.
+     */
     public function get_object($name, $options = array()) {
       $url = self::API_ROOT . '/b/' . rawurlencode($this->bucket) . '/o/' . rawurlencode($name);
       if ($options) $url .= '?' . http_build_query($options, '', '&', PHP_QUERY_RFC3986);
       return $this->request('GET', $url);
     }
 
+    /**
+     * Lists one page of objects.
+     *
+     * @param array $options Query parameters including `prefix`, `maxResults`, and `pageToken`.
+     * @return array Raw object-list response.
+     */
     public function list_objects($options = array()) {
       $url = self::API_ROOT . '/b/' . rawurlencode($this->bucket) . '/o';
       if ($options) $url .= '?' . http_build_query($options, '', '&', PHP_QUERY_RFC3986);
       return $this->request('GET', $url);
     }
 
+    /**
+     * Updates object metadata without replacing the object body.
+     *
+     * @param string $name Exact object name.
+     * @param array $fields Metadata fields to patch.
+     * @param array $options Optional query parameters, such as `predefinedAcl`.
+     * @return array Raw object metadata.
+     */
     public function patch_object($name, $fields, $options = array()) {
       $url = self::API_ROOT . '/b/' . rawurlencode($this->bucket) . '/o/' . rawurlencode($name);
       if ($options) $url .= '?' . http_build_query($options, '', '&', PHP_QUERY_RFC3986);
       return $this->request('PATCH', $url, array('json' => $fields));
     }
 
+    /**
+     * Copies an object within the configured bucket.
+     *
+     * @param string $name Source object name.
+     * @param string $new_name Destination object name.
+     * @param array $fields Metadata to preserve or override on the destination.
+     * @return array Raw destination object metadata.
+     */
     public function copy_object($name, $new_name, $fields = array()) {
       $url = self::API_ROOT . '/b/' . rawurlencode($this->bucket) . '/o/' . rawurlencode($name)
         . '/copyTo/b/' . rawurlencode($this->bucket) . '/o/' . rawurlencode($new_name);
@@ -214,16 +333,40 @@ if (!class_exists('wpCloud\StatelessMedia\Google_REST_Client')) {
       return $this->request('POST', $url, array('json' => $fields));
     }
 
+    /**
+     * Deletes one exact object name.
+     *
+     * @param string $name Exact object name.
+     * @return array Empty response on success.
+     */
     public function delete_object($name) {
       $url = self::API_ROOT . '/b/' . rawurlencode($this->bucket) . '/o/' . rawurlencode($name);
       return $this->request('DELETE', $url, array('expected' => array(200, 204)));
     }
 
+    /**
+     * Creates an ACL entry for an object.
+     *
+     * @param string $name Exact object name.
+     * @param array $acl ACL resource containing `entity` and `role`.
+     * @return array Raw ACL response.
+     */
     public function insert_object_acl($name, $acl) {
       $url = self::API_ROOT . '/b/' . rawurlencode($this->bucket) . '/o/' . rawurlencode($name) . '/acl';
       return $this->request('POST', $url, array('json' => $acl));
     }
 
+    /**
+     * Streams an object to disk and atomically moves it into place.
+     *
+     * A unique temporary file is removed on failure. No object content is loaded
+     * into memory as a single string.
+     *
+     * @param string $name Exact object name.
+     * @param string $save_path Final local destination.
+     * @return int HTTP 200 on success.
+     * @throws Google_REST_Exception When the directory, download, or final rename fails.
+     */
     public function download($name, $save_path) {
       $directory = dirname($save_path);
       if (!is_dir($directory) && !wp_mkdir_p($directory)) {
@@ -251,6 +394,21 @@ if (!class_exists('wpCloud\StatelessMedia\Google_REST_Client')) {
       }
     }
 
+    /**
+     * Uploads a file in bounded chunks using a resumable session.
+     *
+     * Zero-byte files are supported. A 308 response advances using Google's
+     * Range header when present, or the last acknowledged chunk otherwise.
+     *
+     * @param string $name Exact object name.
+     * @param string $path Readable local source file.
+     * @param array $metadata Object resource metadata, including `name` and custom `metadata`.
+     * @param string $mime_type Object content type.
+     * @param string $predefined_acl Optional predefined ACL; empty for uniform access.
+     * @param int $chunk_size Chunk size in bytes, at least 262144 when positive.
+     * @return array Raw object metadata for the completed upload.
+     * @throws Google_REST_Exception When the file, session, or a chunk fails.
+     */
     public function upload($name, $path, $metadata, $mime_type, $predefined_acl = '', $chunk_size = self::DEFAULT_CHUNK_SIZE) {
       if (!is_file($path) || !is_readable($path)) {
         throw new Google_REST_Exception(__('Unable to locate file on disk', ud_get_stateless_media()->domain));
@@ -331,6 +489,15 @@ if (!class_exists('wpCloud\StatelessMedia\Google_REST_Client')) {
       }
     }
 
+    /**
+     * Returns a cached bearer token or signs a new service-account assertion.
+     *
+     * Tokens refresh one minute before their nominal expiry, including between
+     * chunks of a long resumable upload.
+     *
+     * @return string OAuth access token.
+     * @throws Google_REST_Exception When signing or token exchange fails.
+     */
     private function access_token() {
       if ($this->access_token !== '' && $this->access_token_expires > time() + 60) {
         return $this->access_token;
@@ -371,6 +538,19 @@ if (!class_exists('wpCloud\StatelessMedia\Google_REST_Client')) {
       return $this->access_token;
     }
 
+    /**
+     * Executes an authenticated request through WordPress's HTTP API.
+     *
+     * Arguments include `headers`, `body`, `json`, `timeout`, `retries`,
+     * `expected`, `return_response`, `stream`, and `filename`. Redirects are
+     * disabled so credentials cannot be forwarded to another host.
+     *
+     * @param string $method HTTP method.
+     * @param string $url Complete request URL.
+     * @param array $args Request options and expected response behavior.
+     * @return array Decoded response data, or the raw WordPress HTTP response array when requested.
+     * @throws Google_REST_Exception After transport or unexpected HTTP responses are exhausted.
+     */
     public function request($method, $url, $args = array()) {
       $args = wp_parse_args($args, array(
         'headers' => array(),
@@ -428,6 +608,12 @@ if (!class_exists('wpCloud\StatelessMedia\Google_REST_Client')) {
       }
     }
 
+    /**
+     * Decodes an HTTP response as JSON when possible.
+     *
+     * @param array $response WordPress HTTP response array.
+     * @return array|string Decoded array, raw non-JSON body, or an empty array for an empty body.
+     */
     private function response_data($response) {
       $raw = wp_remote_retrieve_body($response);
       if ($raw === '') return array();
@@ -435,6 +621,13 @@ if (!class_exists('wpCloud\StatelessMedia\Google_REST_Client')) {
       return is_array($data) ? $data : $raw;
     }
 
+    /**
+     * Extracts a bounded error message without request credentials.
+     *
+     * @param array|string $data Parsed response body.
+     * @param int $code HTTP status code.
+     * @return string Sanitized error message, limited to 500 characters for raw bodies.
+     */
     private function error_message($data, $code) {
       if (is_array($data)) {
         if (!empty($data['error']['message'])) return $data['error']['message'];
@@ -445,6 +638,12 @@ if (!class_exists('wpCloud\StatelessMedia\Google_REST_Client')) {
       return sprintf(__('Google API request failed with HTTP %d.', ud_get_stateless_media()->domain), $code);
     }
 
+    /**
+     * Encodes JWT segments using unpadded base64url.
+     *
+     * @param string $value Raw JSON segment or signature bytes.
+     * @return string Base64url-encoded value.
+     */
     private function base64url($value) {
       return rtrim(strtr(base64_encode($value), '+/', '-_'), '=');
     }
