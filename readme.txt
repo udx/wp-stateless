@@ -141,6 +141,8 @@ Before upgrading to WP-Stateless 3.0, please, make sure you tested it on your de
 * NEW - the plugin now has its own lightweight autoloader, lifecycle bootstrap, update client and HS256 JWT implementation, with no production Composer autoloader or third-party PHP dependency tree.
 * ENHANCEMENT - reduced the release package from 2,405 files and 19.27 MiB to under 200 files and 1.6 MiB, eliminating Composer namespace collisions and dependency security churn.
 * FIX - object existence checks no longer require reading object ACLs, so they work with uniform bucket-level access, and cron healthchecks can process queues directly without a loopback request.
+* FIX - native `gs://` streams use exact object paths, recognize virtual directories and preserve directory renames, stream casting and fine-grained or uniform bucket ACL behavior.
+* FIX - preserved the legacy background-process memory/process helpers and bootstrap lifecycle hook for existing integrations.
 
 = 4.5.0 - 2026-11-02 =
 * NEW - Stateless Connect replaces the setup wizard: sign in with Google from wp-admin, confirm your site on stateless.ci, and WP-Stateless creates the project, bucket, service account and key inside your own Google Cloud account. No iframe, no copying of keys.
