@@ -1,506 +1,381 @@
 <?php
 
-/**
- * GS API Client
- *
- * @since 0.2.0
- * @author peshkov@UD
- */
+namespace wpCloud\StatelessMedia;
 
-namespace wpCloud\StatelessMedia {
+if (!class_exists('wpCloud\StatelessMedia\Google_REST_Client')) {
+  require_once dirname(__FILE__) . '/class-google-rest-client.php';
+}
 
-  use wpCloud\StatelessMedia\Google_Client;
-  use Google_Service_Storage;
-  use WP_Error;
-  use Exception;
-  use Google_Service_Storage_ObjectAccessControl;
-  use Google_Auth_AssertionCredentials;
+if (!class_exists('wpCloud\StatelessMedia\GS_Buckets')) {
+  /**
+   * Exposes bucket metadata through the service shape used by earlier clients.
+   */
+  final class GS_Buckets {
+    private $client;
 
-  if (!class_exists('wpCloud\StatelessMedia\GS_Client')) {
+    /**
+     * @param Google_REST_Client $client Authenticated REST transport.
+     */
+    public function __construct(Google_REST_Client $client) {
+      $this->client = $client;
+    }
 
-    final class GS_Client {
+    /**
+     * Retrieves bucket metadata as an object, matching the legacy service contract.
+     *
+     * @param string $bucket Bucket name.
+     * @return \stdClass Bucket metadata, including IAM configuration when available.
+     * @throws Google_REST_Exception When authentication or the Google request fails.
+     */
+    public function get($bucket) {
+      $info = $this->client->get_bucket($bucket);
+      return json_decode(wp_json_encode($info), false, 512, JSON_THROW_ON_ERROR);
+    }
+  }
+}
 
-      /**
-       * Singleton object
-       *
-       * @var \wpCloud\StatelessMedia\GS_Client
-       */
-      private static $instance;
+if (!class_exists('wpCloud\StatelessMedia\GS_Service')) {
+  /**
+   * Groups the supported Google service resources.
+   */
+  final class GS_Service {
+    /** @var GS_Buckets Bucket metadata resource. */
+    public $buckets;
 
-      /**
-       * Google Client manager
-       *
-       * @var \wpCloud\StatelessMedia\Google_Client\Google_Client $client
-       */
-      public $client;
+    /**
+     * @param Google_REST_Client $client Authenticated REST transport.
+     */
+    public function __construct(Google_REST_Client $client) {
+      $this->buckets = new GS_Buckets($client);
+    }
+  }
+}
 
-      /**
-       * Google Storage Service manager
-       *
-       * @var \Google_Service_Storage $service
-       */
-      public $service;
+if (!class_exists('wpCloud\StatelessMedia\GS_Client')) {
+  /**
+   * High-level storage client used by WP-Stateless and its add-ons.
+   *
+   * Wraps the REST transport while preserving the response objects and error
+   * behavior expected by the plugin's existing media workflows.
+   */
+  final class GS_Client {
+    private static $instance;
 
-      /**
-       * Google Storage Bucket
-       *
-       * @var
-       */
-      private $bucket;
+    /** @var Google_REST_Client Low-level REST transport. */
+    public $client;
 
-      /**
-       * @var
-       */
-      private $temp_objects = array();
+    /** @var GS_Service Supported Google service resources. */
+    public $service;
 
-      /**
-       * @var
-       */
-      private $key_json = '';
+    private $bucket;
+    private $temp_objects = array();
+    private $key_json = '';
 
-      /**
-       * Constructor.
-       * Must not be called directly.
-       *
-       * @param $args
-       * @author peshkov@UD
-       */
-      protected function __construct($args) {
-        global $current_blog;
-        $this->bucket = $args['bucket'];
-        $this->key_json = json_decode($args['key_json'], 1);
+    /**
+     * @param array $args Configuration containing `bucket` and `key_json`.
+     */
+    protected function __construct($args) {
+      $this->bucket = $args['bucket'];
+      $this->key_json = json_decode($args['key_json'], true);
+      $this->client = new Google_REST_Client($this->bucket, $this->key_json);
+      $this->service = new GS_Service($this->client);
+      delete_transient('wp_stateless_google_sdk_conflict');
+    }
 
-        // May be Loading Google SDK....
-        if (!class_exists('\Google\Client')) {
-          include_once(ud_get_stateless_media()->path('lib/Google/vendor/autoload.php', 'dir'));
-        }
+    /**
+     * Lists one page of objects.
+     *
+     * Supported options include `prefix`, `delimiter`, `maxResults`, `pageToken`,
+     * `projection`, and `versions`. Object ACLs are not required for existence checks.
+     *
+     * @param array $options Google object-list query parameters.
+     * @return Google_REST_Object_List Page of objects and an optional continuation token.
+     */
+    public function list_objects($options = array()) {
+      $options = wp_parse_args($options, array(
+        'delimiter' => '',
+        'maxResults' => 1000,
+        'pageToken' => '',
+        'prefix' => '',
+        'projection' => 'noAcl',
+        'versions' => false,
+      ));
+      $options = array_filter($options, function ($value, $key) {
+        return $value !== '' && $value !== false && $value !== null;
+      }, ARRAY_FILTER_USE_BOTH);
+      return new Google_REST_Object_List($this->client->list_objects($options));
+    }
 
-        /* Initialize our client */
-        $this->client = new \Google\Client();
-
-        // We're supporting Google SDK 1.X version since
-        // The plugins which also are using Google SDK may have its old version
-        // what may cause conflicts
-        //
-        if (version_compare($this->client->getLibraryVersion(), '2.0', '<')) {
-          // We should set the warning about potential issue
-          // If Google SDK has different version with already included
-          $this->_setWarning();
-
-          $wp_upload_dir = wp_upload_dir();
-          $dir = $wp_upload_dir['path'];
-          $filename = md5(wp_generate_password()) . '.tmp';
-          $path = wp_normalize_path($dir . '/' . $filename);
-          @file_put_contents($path, json_encode($this->key_json));
-          $cred = $this->client->loadServiceAccountJson($path, ['https://www.googleapis.com/auth/devstorage.full_control']);
-          $this->client->setAssertionCredentials($cred);
-          if ($this->client->getAuth()->isAccessTokenExpired()) {
-            $this->client->getAuth()->refreshTokenWithAssertion($cred);
-          }
-          @unlink($path);
-        } else {
-          // May be delete warning transient if it was set
-          $this->_deleteWarning();
-          $this->client->setAuthConfig($this->key_json);
-        }
-
-        if (isset($current_blog) && isset($current_blog->domain)) {
-          $this->client->setApplicationName($current_blog->domain);
-        } else {
-          $this->client->setApplicationName(urlencode(str_replace(array('http://', 'https://'), '', get_bloginfo('url'))));
-        }
-
-        $this->client->setScopes(['https://www.googleapis.com/auth/devstorage.full_control']);
-
-        // May be Loading Google SDK. Because some bad plugins may load their Google SDK with not included Google_Service_Storage.
-        if (!class_exists('Google_Service_Storage')) {
-          include_once(ud_get_stateless_media()->path('lib/Google/vendor/autoload.php', 'dir'));
-        }
-
-        /* Now, Initialize our Google Storage Service */
-        $this->service = new \Google\Service\Storage($this->client);
-      }
-
-      /**
-       * Wrapper for listObjects()
-       */
-      public function list_objects($options = array()) {
-
-        $options = wp_parse_args($options, array(
-          'delimiter'  => '',
-          'maxResults' => 1000,
-          'pageToken'  => '',
-          'prefix'     => '',
-          'projection' => 'noAcl',
-          'versions'   => false
-        ));
-
-        return $this->service->objects->listObjects($this->bucket, $options);
-      }
-
-      /**
-       * List all items page by page of maxResults
-       * @param $bucket
-       * @param array $options
-       * @return mixed
-       */
-      public function list_all_objects($options = array()) {
-
-        $options = wp_parse_args($options, array(
-          'delimiter'  => '',
-          'maxResults' => 1000,
-          'pageToken'  => '',
-          'prefix'     => '',
-          'projection' => 'noAcl',
-          'versions'   => false
-        ));
-
-        $response = $this->service->objects->listObjects($this->bucket, $options);
-
+    /**
+     * Iterates through every page matching the supplied query.
+     *
+     * @param array $options Google object-list query parameters.
+     * @return Google_REST_Object[] Every matching object.
+     */
+    public function list_all_objects($options = array()) {
+      $options = wp_parse_args($options, array(
+        'delimiter' => '',
+        'maxResults' => 1000,
+        'pageToken' => '',
+        'prefix' => '',
+        'projection' => 'noAcl',
+        'versions' => false,
+      ));
+      $this->temp_objects = array();
+      do {
+        $response = $this->list_objects($options);
         $this->temp_objects = array_merge($this->temp_objects, $response->getItems());
+        $options['pageToken'] = $response->nextPageToken;
+      } while (!empty($response->nextPageToken));
+      return $this->temp_objects;
+    }
 
-        if (!empty($response->nextPageToken)) {
-          $options['pageToken'] = $response->nextPageToken;
-          return $this->list_all_objects($this->bucket, $options);
-        } else {
-          return $this->temp_objects;
+    /**
+     * Uploads a local file using a resumable upload session.
+     *
+     * Common arguments are `name`, `absolutePath`, `mimeType`, `metadata`,
+     * `cacheControl`, `force`, and `use_root`. A missing local file returns a
+     * WP_Error rather than throwing an exception.
+     *
+     * @param array $args Upload and media-path arguments.
+     * @return array|\WP_Error Raw Google object metadata, or the upload error.
+     */
+    public function add_media($args = array()) {
+      try {
+        set_time_limit(0);
+        $args = wp_parse_args($args, array(
+          'use_root' => true,
+          'force' => false,
+          'name' => false,
+          'absolutePath' => false,
+          'mimeType' => 'image/jpeg',
+          'metadata' => array(),
+          'cacheControl' => null,
+          'contentEncoding' => null,
+          'contentDisposition' => null,
+          'is_webp' => '',
+          'skipLocalCheck' => false,
+        ));
+        if (!$args['skipLocalCheck'] && !file_exists($args['absolutePath'])) {
+          return new \WP_Error('sm_error', __('Unable to locate file on disk', ud_get_stateless_media()->domain));
         }
-      }
+        $object_id = isset($args['metadata']['object-id']) ? $args['metadata']['object-id'] : (isset($args['metadata']['child-of']) ? $args['metadata']['child-of'] : '');
+        $object_size = isset($args['metadata']['size']) ? $args['metadata']['size'] : '';
+        $args['name'] = apply_filters('wp_stateless_file_name', $args['name'], $args['use_root'], $object_id, $object_size);
+        $args = apply_filters('wp_stateless_add_media_args', $args);
+        $name = $args['name'];
 
-      /**
-       * Add/Update Media Object to Bucket
-       * 
-       * https://stackoverflow.com/questions/26872851/resumable-uploading-to-google-cloud-storage-using-php-api
-       * 
-       * @author peshkov@UD
-       * @param array $args
-       * @return bool
-       */
-      public function add_media($args = array()) {
+        if (!$args['force'] && ($media = $this->media_exists($name))) {
+          if ($args['cacheControl'] !== null && $media->getCacheControl() !== $args['cacheControl']) {
+            return $this->client->patch_object($name, array('cacheControl' => $args['cacheControl']));
+          }
+          return $media->to_array();
+        }
+
+        $metadata = array('name' => $name, 'metadata' => $args['metadata']);
+        foreach (array('cacheControl', 'contentEncoding', 'contentDisposition') as $field) {
+          if ($args[$field] !== null && $args[$field] !== '') $metadata[$field] = $args[$field];
+        }
+        $chunk_size = defined('WP_STATELESS_MEDIA_UPLOAD_CHUNK_SIZE') && is_int(WP_STATELESS_MEDIA_UPLOAD_CHUNK_SIZE)
+          ? WP_STATELESS_MEDIA_UPLOAD_CHUNK_SIZE : Google_REST_Client::DEFAULT_CHUNK_SIZE;
+        $manages_acl = $this->manages_object_acl();
+        $predefined_acl = $manages_acl ? 'bucketOwnerFullControl' : '';
+        $media = $this->client->upload($name, $args['absolutePath'], $metadata, $args['mimeType'], $predefined_acl, $chunk_size);
+        if ($manages_acl) {
+          $this->mediaInsertACL($name, $media, $args);
+        }
+        return $media;
+      } catch (\Throwable $e) {
+        return new \WP_Error('sm_error', $e->getMessage());
+      }
+    }
+
+    /**
+     * Updates object metadata without replacing the object body.
+     *
+     * Allowed fields are `metadata`, `cacheControl`, `contentDisposition`,
+     * `contentEncoding`, `contentType`, and `storageClass`.
+     *
+     * @param string $name Exact object name.
+     * @param array $args Metadata fields and an optional predefined ACL.
+     * @return array Raw Google object metadata.
+     * @throws Google_REST_Exception When the metadata request fails.
+     */
+    public function update_media($name, $args) {
+      $options = array();
+      if (isset($args['predefinedAcl']) && $this->manages_object_acl()) {
+        $options['predefinedAcl'] = $args['predefinedAcl'];
+      }
+      unset($args['predefinedAcl']);
+      $allowed = array('metadata', 'cacheControl', 'contentDisposition', 'contentEncoding', 'contentType', 'storageClass');
+      $fields = array_intersect_key($args, array_flip($allowed));
+      return $this->client->patch_object($name, $fields, $options);
+    }
+
+    /**
+     * Determines whether this client should write per-object ACL entries.
+     *
+     * @return bool False for uniform-access buckets or when ACL writes are disabled.
+     */
+    private function manages_object_acl() {
+      if (defined('WP_STATELESS_SKIP_ACL_SET') && WP_STATELESS_SKIP_ACL_SET) return false;
+      try {
+        return !$this->client->has_uniform_access();
+      } catch (\Throwable $e) {
+        return true;
+      }
+    }
+
+    /**
+     * Grants the configured public-read ACL to an object.
+     *
+     * @param string $name Exact object name.
+     * @param array|Google_REST_Object $media Object metadata passed through the ACL filter.
+     * @param array $agrs Additional legacy filter arguments.
+     * @return array|null Google ACL response, or null for an empty object name.
+     */
+    public function mediaInsertACL($name, $media = array(), $agrs = array()) {
+      if (empty($name)) return null;
+      $acl = new Google_REST_Object(array('entity' => 'allUsers', 'role' => 'READER'));
+      $acl = apply_filters('wp_stateless_media_acl', $acl, $name, $media, $agrs);
+      $data = is_object($acl) && is_callable(array($acl, 'to_array')) ? $acl->to_array() : get_object_vars($acl);
+      return $this->client->insert_object_acl($name, $data);
+    }
+
+    /**
+     * Retrieves object metadata or downloads an object to a local path.
+     *
+     * @param string $path Exact object name.
+     * @param bool $save Whether to download instead of returning metadata.
+     * @param string|false $save_path Destination path when downloading.
+     * @return Google_REST_Object|int|false Object metadata, HTTP 200 on download success, or false on failure.
+     */
+    public function get_media($path, $save = false, $save_path = false) {
+      try {
+        $media = new Google_REST_Object($this->client->get_object($path));
+      } catch (\Throwable $e) {
+        return false;
+      }
+      if (empty($media->id)) return false;
+      if ($save && $save_path) {
         try {
-
-          set_time_limit(0);
-
-          $args = wp_parse_args($args, array(
-            'use_root' => true,
-            'force' => false,
-            'name' => false,
-            'absolutePath' => false,
-            'mimeType' => 'image/jpeg',
-            'metadata' => array(),
-            'is_webp' => '',
-            'skipLocalCheck' => false,
-          ));
-
-          /* Be sure file exists. */
-          if (!$args['skipLocalCheck'] && !file_exists($args['absolutePath'])) {
-            return new \WP_Error('sm_error', __('Unable to locate file on disk', ud_get_stateless_media()->domain));
-          }
-
-          $object_id = isset($args['metadata']['object-id']) ? $args['metadata']['object-id'] : (isset($args['metadata']['child-of']) ? $args['metadata']['child-of'] : "");
-          $object_size = isset($args['metadata']['size']) ? $args['metadata']['size'] : "";
-
-          $args['name'] = apply_filters('wp_stateless_file_name', $args['name'], $args['use_root'], $object_id, $object_size);
-          $args = apply_filters('wp_stateless_add_media_args', $args);
-          $name = $args['name'];
-
-          // If media exists we just return it
-          if (!$args['force'] && $media = $this->media_exists($name)) {
-            if ($media->getCacheControl() != $args['cacheControl']) {
-              $media->setCacheControl($args['cacheControl']);
-              $media = $this->service->objects->patch($this->bucket, $name, $media);
-            }
-            return get_object_vars($media);
-          }
-
-          $media = new \Google\Service\Storage\StorageObject();
-          $media->setName($name);
-          $media->setMetadata($args['metadata']);
-
-          if (isset($args['cacheControl'])) {
-            $media->setCacheControl($args['cacheControl']);
-          }
-
-          if (isset($args['contentEncoding'])) {
-            $media->setContentEncoding($args['contentEncoding']);
-          }
-
-          if (isset($args['contentDisposition'])) {
-            $media->setContentDisposition($args['contentDisposition']);
-          }
-
-          // If chunk size is defined, we assume user needs the file to be sent by chunks
-          // Otherwise, we send it directly
-          if (defined('WP_STATELESS_MEDIA_UPLOAD_CHUNK_SIZE') && is_int(WP_STATELESS_MEDIA_UPLOAD_CHUNK_SIZE)) {
-            $this->client->setDefer(true);
-
-            $file_size = filesize($args['absolutePath']);
-            $filetoupload = array('name' => $name, 'uploadType' => 'resumable');
-            $request = $this->service->objects->insert($this->bucket, $media, $filetoupload);
-            $uploader = new \Google_Http_MediaFileUpload($this->client, $request, $args['mimeType'], null, true, WP_STATELESS_MEDIA_UPLOAD_CHUNK_SIZE);
-            $uploader->setFileSize($file_size);
-            $handle = fopen($args['absolutePath'], "rb");
-
-            $status = false;
-            while (!$status && !feof($handle)) {
-              $chunk = fread($handle, WP_STATELESS_MEDIA_UPLOAD_CHUNK_SIZE);
-              $status = $uploader->nextChunk($chunk);
-            }
-
-            $media = false;
-            if ($status != false) {
-              $media = $status;
-            }
-
-            fclose($handle);
-            // Reset to the client to execute requests immediately in the future.
-            $this->client->setDefer(false);
-          } else {
-            $mediaOptions = array(
-              'data' => file_get_contents($args['absolutePath']),
-              'uploadType' => 'media',
-              'mimeType' => $args['mimeType'],
-            );
-
-            if ( !defined('WP_STATELESS_SKIP_ACL_SET') || !WP_STATELESS_SKIP_ACL_SET) {
-              $mediaOptions['predefinedAcl'] = 'bucketOwnerFullControl';
-            }
-
-            $media = $this->service->objects->insert($this->bucket, $media, array_filter($mediaOptions));
-          }
-
-          if ( !defined('WP_STATELESS_SKIP_ACL_SET') || !WP_STATELESS_SKIP_ACL_SET) {
-            $this->mediaInsertACL($name, $media, $args);
-          }
-        } catch (Exception $e) {
-          return new WP_Error('sm_error', $e->getMessage());
-        }
-        return get_object_vars($media);
-      }
-
-      /**
-       * Update Object ACL
-       */
-      public function mediaInsertACL($name, $media = array(), $agrs = array()) {
-        /* Make Media Public READ for all on success */
-        if (!empty($name)) {
-          $acl = new \Google\Service\Storage\ObjectAccessControl();
-          $acl->setEntity('allUsers');
-          $acl->setRole('READER');
-          $acl = apply_filters('wp_stateless_media_acl', $acl, $name, $media, $agrs);
-          $this->service->objectAccessControls->insert($this->bucket, $name, $acl);
-        }
-      }
-
-      /**
-       * Get or save media file
-       * 
-       * @param $path
-       * @param bool $save
-       * @param bool $save_path
-       * @return bool|\Google_Service_Storage_StorageObject|int
-       */
-      public function get_media($path, $save = false, $save_path = false) {
-        try {
-          $media = $this->service->objects->get($this->bucket, $path);
-        } catch (\Exception $e) {
+          return $this->client->download($path, $save_path);
+        } catch (\Throwable $e) {
           return false;
         }
-
-        if (empty($media->id)) return false;
-
-        if ($save && $save_path) {
-          if (!file_exists($_dir = dirname($save_path))) {
-            wp_mkdir_p($_dir);
-          }
-          return $this->client->getHttpClient()->get($media->getMediaLink(), ['sink' => $save_path])->getStatusCode();
-        }
-
-        return $media;
       }
+      return $media;
+    }
 
-      /**
-       * get or save media file
-       * @param $path
-       * @param bool $save
-       * @param bool $save_path
-       * @return bool|\Google_Service_Storage_StorageObject|int
-       */
-      public function copy_media($path, $new_path) {
-        try {
-          $media = $this->service->objects->get($this->bucket, $path);
-          $media = $this->service->objects->copy($this->bucket, $path, $this->bucket, $new_path, $media);
+    /**
+     * Copies an object while preserving its media metadata and ACL behavior.
+     *
+     * @param string $path Source object name.
+     * @param string $new_path Destination object name.
+     * @return Google_REST_Object|false Destination metadata, or false on failure.
+     */
+    public function copy_media($path, $new_path) {
+      try {
+        $source = $this->client->get_object($path);
+        $fields = array_intersect_key($source, array_flip(array('cacheControl', 'contentDisposition', 'contentEncoding', 'contentType', 'metadata', 'storageClass', 'customTime', 'eventBasedHold', 'temporaryHold', 'retentionExpirationTime')));
+        $media = new Google_REST_Object($this->client->copy_object($path, $new_path, $fields));
+        if (empty($media->id)) return false;
+        if ($this->manages_object_acl()) {
           $this->mediaInsertACL($new_path, $media);
-        } catch (\Exception $e) {
-          return false;
         }
-
-        if (empty($media->id)) return false;
-
         return $media;
+      } catch (\Throwable $e) {
+        return false;
       }
+    }
 
-      /**
-       * get or save media file
-       * @param $path
-       * @param bool $save
-       * @param bool $save_path
-       * @return bool|\Google_Service_Storage_StorageObject|int
-       */
-      public function move_media($path, $new_path) {
+    /**
+     * Copies then deletes an object.
+     *
+     * @param string $path Source object name.
+     * @param string $new_path Destination object name.
+     * @return Google_REST_Object|\WP_Error|false Destination metadata or the delete failure.
+     */
+    public function move_media($path, $new_path) {
+      $media = $this->copy_media($path, $new_path);
+      if (!$media || empty($media->id)) return false;
+      $removed = $this->remove_media($path);
+      if (is_wp_error($removed)) return $removed;
+      return $media;
+    }
+
+    /**
+     * Checks object existence using metadata only, without requiring an ACL read.
+     *
+     * @param string $path Exact object name.
+     * @return Google_REST_Object|false Object metadata when present, otherwise false.
+     */
+    public function media_exists($path) {
+      try {
+        $media = new Google_REST_Object($this->client->get_object($path));
+      } catch (\Throwable $e) {
+        return false;
+      }
+      return empty($media->id) ? false : $media;
+    }
+
+    /**
+     * Deletes an object after applying the media path filters.
+     *
+     * @param string $name Object name or media path.
+     * @param string $id Optional attachment ID used by the filename filter.
+     * @param bool $use_root Whether to apply the configured media root.
+     * @param string $size Optional image size used by the filename filter.
+     * @param bool $is_webp Whether to append the WebP suffix when needed.
+     * @return true|\WP_Error True on deletion, or the Google/transport error.
+     */
+    public function remove_media($name, $id = '', $use_root = true, $size = '', $is_webp = false) {
+      try {
+        $name = apply_filters('wp_stateless_file_name', $name, $use_root, $id, $size);
+        if ($is_webp && substr($name, -4) !== 'webp') $name .= '.webp';
+        $this->client->delete_object($name);
+      } catch (\Throwable $e) {
+        return new \WP_Error('sm_error', $e->getMessage());
+      }
+      return true;
+    }
+
+    /**
+     * Verifies access to the configured bucket.
+     *
+     * @return true|\Throwable True on success, or the connection error.
+     */
+    public function is_connected() {
+      try {
+        $this->client->get_bucket();
+      } catch (\Throwable $e) {
+        return $e;
+      }
+      return true;
+    }
+
+    /**
+     * Creates the shared client instance.
+     *
+     * @param array $args Configuration containing `bucket` and `key_json`.
+     * @return GS_Client|\WP_Error Shared client, or a credential validation error.
+     */
+    public static function get_instance($args) {
+      if (null === self::$instance) {
         try {
-          $media = $this->copy_media($path, $new_path);
-          $this->remove_media($path);
-        } catch (\Exception $e) {
-          return false;
-        }
-
-        if (empty($media->id)) return false;
-
-        return $media;
-      }
-
-      /**
-       * Check if media exists
-       * @param $path
-       * @return bool|object
-       */
-      public function media_exists($path) {
-        try {
-          $media = $this->service->objects->get($this->bucket, $path);
-          // Here we wanted to check if access allowed, but noticed it actually sets this ACL... Leaving it as is. @author korotkov@ud
-          $this->service->objectAccessControls->get($this->bucket, $path, 'allUsers');
-        } catch (\Exception $e) {
-          return false;
-        }
-
-        if (empty($media->id)) return false;
-        return $media;
-      }
-
-      /**
-       * Fired for every file remove action
-       *
-       * @author peshkov@UD
-       * @param string $name
-       * @param string $id
-       * @param boolean $use_root
-       * @param string $size
-       * @param boolean $is_webp
-       * @return bool
-       */
-      public function remove_media($name, $id = "", $use_root = true, $size = "", $is_webp = false) {
-        try {
-          $name = apply_filters('wp_stateless_file_name', $name, $use_root, $id, $size);
-          if ($is_webp && substr($name, -4) !=  "webp") $name .= ".webp";
-
-          $this->service->objects->delete($this->bucket, $name);
-        } catch (Exception $e) {
-          return new WP_Error('sm_error', $e->getMessage());
-        }
-        return true;
-      }
-
-      /**
-       * Tests connection to Google Storage
-       * by trying to get passed bucket's data.
-       *
-       * @author peshkov@UD
-       */
-      public function is_connected() {
-        try {
-          $this->service->buckets->get($this->bucket);
-        } catch (Exception $e) {
-          return $e;
-        }
-        return true;
-      }
-
-      /**
-       * Determine if instance already exists and Return Instance
-       *
-       * @param array $args
-       *
-       * $args
-       * @param string client_id
-       * @param string service_account_name
-       * @param string key_file_path
-       *
-       * @author peshkov@UD
-       * @return \wpCloud\StatelessMedia\GS_Client
-       */
-      public static function get_instance($args) {
-        if (null === self::$instance) {
-
-          try {
-
-            if (empty($args['bucket'])) {
-              throw new Exception(__('<b>Bucket</b> parameter must be provided.'));
-            }
-
-            $json = "{}";
-
-            if (!empty($args['key_json'])) {
-              $json = json_decode($args['key_json']);
-            }
-
-            if (!$json || !property_exists($json, 'private_key')) {
-              throw new Exception(__('<b>Service Account JSON</b> is invalid.'));
-            }
-
-            self::$instance = new self($args);
-          } catch (Exception $e) {
-            return new WP_Error('sm_error', $e->getMessage());
+          if (empty($args['bucket'])) {
+            throw new \Exception(__('<b>Bucket</b> parameter must be provided.'));
           }
-        }
-        return self::$instance;
-      }
-
-      /**
-       * Set warning about potential conflict with Google SDK
-       *
-       * @since 2.0.1
-       */
-      private function _setWarning() {
-
-        $reflector = new \ReflectionClass('Google_Client');
-        $pluginBasename = wp_normalize_path(plugin_basename($reflector->getFileName()));
-
-        // Check if get_plugins() function exists. This is required on the front end of the
-        // site, since it is in a file that is normally only loaded in the admin.
-        if (!function_exists('get_plugins')) {
-          require_once ABSPATH . 'wp-admin/includes/plugin.php';
-        }
-
-        $pluginBasenameParts = explode('/', $pluginBasename);
-        $pluginName = __("UNDEFINED", ud_get_stateless_media()->domain);
-
-        foreach (get_plugins() as $path => $meta) {
-          if (strpos($path, trailingslashit($pluginBasenameParts[0])) === 0) {
-            $pluginName = $meta['Name'];
+          $json = !empty($args['key_json']) ? json_decode($args['key_json'], true) : array();
+          if (!is_array($json) || empty($json['private_key']) || empty($json['client_email'])) {
+            throw new \Exception(__('<b>Service Account JSON</b> is invalid.'));
           }
-        };
-
-        $error = sprintf(
-          __("%s plugin may have potential Google SDK version conflicts with %s plugin. %s is using Google SDK %s, when %s loads old Google SDK version %s.", ud_get_stateless_media()->domain),
-          "<b>" . 'WP-Stateless' . "</b>",
-          "<b>" . $pluginName . "</b>",
-          'WP-Stateless',
-          "<b>v2.0</b>",
-          $pluginName,
-          "<b>v" . \Google\Client::LIBVER . "</b>"
-        );
-
-        set_transient("wp_stateless_google_sdk_conflict", $error);
+          self::$instance = new self($args);
+        } catch (\Throwable $e) {
+          return new \WP_Error('sm_error', $e->getMessage());
+        }
       }
-
-      /**
-       * Removes Warning if it exists
-       *
-       */
-      private function _deleteWarning() {
-        delete_transient("wp_stateless_google_sdk_conflict");
-      }
+      return self::$instance;
     }
   }
 }

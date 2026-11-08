@@ -17,7 +17,7 @@ namespace wpCloud\StatelessMedia {
      * 
      * @author: peshkov@UD
      */
-    class Errors extends \UsabilityDynamics\WP\Scaffold {
+    class Errors extends Plugin_Scaffold {
     
       /**
        * Errors
@@ -179,13 +179,7 @@ namespace wpCloud\StatelessMedia {
         global $wp_version;
 
         wp_enqueue_style("stateless-error-style", ud_get_stateless_media()->path('static/styles/error-notice.css'));
-        //enqueue dismiss js for ajax requests
-        $script_path = \UsabilityDynamics\WP\Utility::path( 'static/scripts/ud-dismiss.js', 'url' );
         wp_enqueue_script( "sateless-error-notice-js", ud_get_stateless_media()->path( 'static/scripts/error-notice.js', 'url' ), array( 'jquery' ) );
-        wp_enqueue_script( "ud-dismiss", $script_path, array( 'jquery' ) );
-        wp_localize_script( "ud-dismiss", "_ud_vars", array(
-            "ajaxurl" => admin_url( 'admin-ajax.php' ),
-        ));
         wp_localize_script( "sateless-error-notice-js", "stateless_error_notice_vars", array(
           "dismiss_nonce" => wp_create_nonce( 'stateless_notice_dismiss' ),
           "enable_action_nonce" => wp_create_nonce( 'stateless_enable_notice_button_action' ),

@@ -8,8 +8,6 @@
 
 namespace wpCloud\StatelessMedia {
 
-  use Google\Cloud\Storage\StorageClient;
-  use Google\Auth\HttpHandler\HttpHandlerFactory;
   use wpCloud\StatelessMedia\Sync\FileSync;
   use wpCloud\StatelessMedia\Sync\ImageSync;
   use wpCloud\StatelessMedia\Sync\NonLibrarySync;
@@ -17,9 +15,9 @@ namespace wpCloud\StatelessMedia {
 
   if (!class_exists('wpCloud\StatelessMedia\Bootstrap')) {
 
-    final class Bootstrap extends \UsabilityDynamics\WP\Bootstrap_Plugin {
+    final class Bootstrap extends Plugin_Base {
 
-      const REQUIRED_PHP_VERSION = '5.5';
+      const REQUIRED_PHP_VERSION = '8.1';
 
       /**
        * Google Storage Client
@@ -155,6 +153,8 @@ namespace wpCloud\StatelessMedia {
 
         // Register meta boxes and fields for media edit page
         add_filter('rwmb_meta_boxes', array($this, 'attachment_meta_box_callback'));
+        require_once(dirname(__FILE__) . '/class-attachment-panel.php');
+        new AttachmentPanel();
 
         // Register meta boxes and fields for media modal page
         add_filter('attachment_fields_to_edit', array($this, 'attachment_modal_meta_box_callback'), 11, 2);
@@ -437,33 +437,10 @@ namespace wpCloud\StatelessMedia {
 
       /**
        * @param callable|null $httpHandler
-       * @return StorageClient
-       * @throws \Exception
+       * @return GS_Client|\WP_Error
        */
       public function init_gs_client(?callable $httpHandler = null) {
-        // May be Loading Google SDK....
-        if (!class_exists('HttpHandlerFactory')) {
-          include_once(ud_get_stateless_media()->path('lib/Google/vendor/autoload.php', 'dir'));
-        }
-
-        $httpHandler = $httpHandler ? $httpHandler : HttpHandlerFactory::build();
-
-        $json_key = json_decode($this->settings->get('sm.key_json'), true);
-
-        if (!empty($json_key)) {
-          return new StorageClient(
-            [
-              'keyFile' => $json_key,
-              'httpHandler' => function ($request, $options) use ($httpHandler) {
-                $xGoogApiClientHeader = $request->getHeaderLine('x-goog-api-client');
-                $request = $request->withHeader('x-goog-api-client', $xGoogApiClientHeader);
-
-                return call_user_func_array($httpHandler, [$request, $options]);
-              },
-              'authHttpHandler' => HttpHandlerFactory::build(),
-            ]
-          );
-        }
+        return $this->get_client();
       }
 
       /**

@@ -7,19 +7,15 @@
 
 namespace wpCloud\StatelessMedia\Batch;
 
-// Require lib classes if not yet available
-if (!class_exists('UDX_WP_Async_Request')) {
-  require_once ud_get_stateless_media()->path('lib/ns-vendor/classes/deliciousbrains/wp-background-processing/classes/wp-async-request.php', 'dir');
-}
-
-if (!class_exists('UDX_WP_Background_Process')) {
-  require_once ud_get_stateless_media()->path('lib/ns-vendor/classes/deliciousbrains/wp-background-processing/classes/wp-background-process.php', 'dir');
+if (!class_exists('wpCloud\StatelessMedia\Background_Process')) {
+  require_once dirname(__DIR__) . '/class-background-process.php';
 }
 
 use wpCloud\StatelessMedia\Helper;
 use wpCloud\StatelessMedia\Singleton;
+use wpCloud\StatelessMedia\Background_Process;
 
-class BatchTaskManager extends \UDX_WP_Background_Process {
+class BatchTaskManager extends Background_Process {
   use Singleton;
   
   const STATE_KEY = '_state';
@@ -29,6 +25,9 @@ class BatchTaskManager extends \UDX_WP_Background_Process {
   protected $prefix = 'sm';
   protected $action = 'batch_process';
 
+  /**
+   * Initializes migration batch hooks and resumes work stalled beyond its healthcheck interval.
+   */
   protected function __construct() {
     parent::__construct();
 
@@ -36,6 +35,7 @@ class BatchTaskManager extends \UDX_WP_Background_Process {
     $this->_check_force_continue();
   }
 
+  /** Registers state reporting, pause/resume, and heartbeat monitoring hooks. */
   private function _init_hooks() {
     add_filter('wp_stateless_batch_state', [$this, 'get_state'], 10, 1);
     add_filter('wp_stateless_batch_action_pause', [$this, 'pause_task'], 10, 2);

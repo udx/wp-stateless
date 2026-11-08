@@ -4,16 +4,14 @@
  *
  * @namespace UDX
  */
-namespace UDX {
+namespace wpCloud\StatelessMedia {
 
-  if( !class_exists( 'UDX\Settings' ) ) {
+  if( !class_exists( 'wpCloud\StatelessMedia\Settings_Base' ) ) {
 
     /**
-     * Class Settings
-     *
-     * @package UDX
+     * Class Settings_Base
      */
-    class Settings {
+    class Settings_Base {
 
       /**
        * Settings Class version.
@@ -142,14 +140,14 @@ namespace UDX {
        *
        *    $_settings->set( 'my.key', 'my.value' );
        *
-       * @internal param \UDX\type $defaults
-       * @internal param bool|\UDX\type $force_save
-       * @internal param string|\UDX\type $prefix
-       * @internal param bool|\UDX\type $hash_keys
+       * @internal param mixed $defaults
+       * @internal param bool|mixed $force_save
+       * @internal param string|mixed $prefix
+       * @internal param bool|mixed $hash_keys
        */
       public function __construct( $args = false ) {
 
-        $args = Utility::parse_args( $args, array(
+        $args = Utility_Base::parse_args( $args, array(
           'namespace'   => '',
           'key'         => '',
           'auto_commit' => false,
@@ -212,7 +210,7 @@ namespace UDX {
       /**
        * Getter for options
        *
-       * @param bool|\UDX\type $key
+       * @param bool|mixed $key
        *
        * @param bool                         $default
        *
@@ -238,13 +236,13 @@ namespace UDX {
       /**
        * Setter for options
        *
-       * @param string|\UDX\type $key
-       * @param bool|\UDX\type   $value
+       * @param string|mixed $key
+       * @param bool|mixed   $value
        * @param bool                           $bypass_validation
        *
-       * @internal param bool|\UDX\type $force_save
+       * @internal param bool|mixed $force_save
        *
-       * @return \UDX\Settings
+       * @return \wpCloud\StatelessMedia\Settings_Base
        */
       public function set( $key = '', $value = false, $bypass_validation = false ) {
 
@@ -253,15 +251,15 @@ namespace UDX {
         }
 
         // First argument is an object/array.
-        if( Utility::get_type( $key ) === 'object' || Utility::get_type( $key ) === 'array' || Utility::get_type( $key ) === 'stdClass' ) {
+        if( Utility_Base::get_type( $key ) === 'object' || Utility_Base::get_type( $key ) === 'array' || Utility_Base::get_type( $key ) === 'stdClass' ) {
 
           // Conver to array so merge can be done
-          $this->_data = Utility::extend( (array) $this->_data, (array) $key );
+          $this->_data = Utility_Base::extend( (array) $this->_data, (array) $key );
 
         }
 
         // Standard key & value pair
-        if( Utility::get_type( $key ) === 'string' && ( Utility::get_type( $value ) === 'string' || Utility::get_type( $value ) === 'number' || Utility::get_type( $value ) === 'boolean' ) ) {
+        if( Utility_Base::get_type( $key ) === 'string' && ( Utility_Base::get_type( $value ) === 'string' || Utility_Base::get_type( $value ) === 'number' || Utility_Base::get_type( $value ) === 'boolean' ) ) {
 
           if( strpos( $key, '.' ) ) {
             self::set_val( $this->_data, $key, $value );
@@ -272,17 +270,17 @@ namespace UDX {
         }
 
         // Standard key with complex value.
-        if( Utility::get_type( $key ) === 'string' ) {
+        if( Utility_Base::get_type( $key ) === 'string' ) {
 
 
-          if( Utility::get_type( $value ) === 'object' || Utility::get_type( $value ) === 'stdClass' ) {
+          if( Utility_Base::get_type( $value ) === 'object' || Utility_Base::get_type( $value ) === 'stdClass' ) {
 
             if( strpos( $key, '.' ) ) {
               self::set_val( $this->_data, $key, $value );
             } else {
 
-              if( isset( $this->_data[ $key ] ) && Utility::get_type( $this->_data[ $key ] ) === 'object' ) {
-                $this->_data[ $key ] = Utility::extend( $this->_data[ $key ], $value );
+              if( isset( $this->_data[ $key ] ) && Utility_Base::get_type( $this->_data[ $key ] ) === 'object' ) {
+                $this->_data[ $key ] = Utility_Base::extend( $this->_data[ $key ], $value );
               } else {
                 $this->_data[ $key ] = $value;
               }
@@ -292,7 +290,7 @@ namespace UDX {
           }
 
           // Standard key with array value
-          if( Utility::get_type( $value ) === 'array' ) {
+          if( Utility_Base::get_type( $value ) === 'array' ) {
 
             if( strpos( $key, '.' ) ) {
               self::set_val( $this->_data, $key, $value );
@@ -327,7 +325,7 @@ namespace UDX {
        */
       public function file_transfer( $args = array() ) {
 
-        $args = Utility::parse_args( $args, array(
+        $args = Utility_Base::parse_args( $args, array(
           "name"     => "settings",
           "format"   => "json",
           "cache"    => 'public',
@@ -533,7 +531,7 @@ namespace UDX {
       /**
        * Load options from DB
        *
-       * @return \UDX\Settings
+       * @return \wpCloud\StatelessMedia\Settings_Base
        */
       public function _load() {
 

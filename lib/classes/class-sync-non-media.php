@@ -33,6 +33,9 @@ namespace wpCloud\StatelessMedia {
        */
       private $client = null;
 
+      /**
+       * Registers filters and actions for syncing compatibility files outside the Media Library.
+       */
       public function __construct() {
         // Manual sync using sync tab.
         // Return files to be manually sync from sync tab.
@@ -136,11 +139,6 @@ namespace wpCloud\StatelessMedia {
 
             $gs_name = apply_filters('wp_stateless_file_name', $name, $args['name_with_root']);
 
-            //Bucket
-            $bucket = ud_get_stateless_media()->get('sm.bucket');
-
-            $bucket = $gs_client->bucket($bucket);
-            $object = $bucket->object($gs_name);
             $args = wp_parse_args($args, array(
               'use_root' => $args['use_root'],
               'force' => ($forced == 2),
@@ -172,7 +170,7 @@ namespace wpCloud\StatelessMedia {
                 $mediaOptions['predefinedAcl'] = 'publicRead';
               }
 
-              $media = $object->update(array('metadata' => $args['metadata']) + $mediaOptions);
+              $media = $gs_client->update_media($gs_name, array('metadata' => $args['metadata']) + $mediaOptions);
             } catch (\Throwable $th) {
               //throw $th;
             }

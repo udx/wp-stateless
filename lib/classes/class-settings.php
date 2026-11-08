@@ -8,7 +8,7 @@ namespace wpCloud\StatelessMedia {
 
   if( !class_exists( 'wpCloud\StatelessMedia\Settings' ) ) {
 
-    final class Settings extends \UDX\Settings {
+    final class Settings extends Settings_Base {
 
       const DEFAULT_CACHE_CONTROL = 'public, max-age=36000, must-revalidate';
       const SETUP_MESSAGE_KEY = 'finish-setup';
@@ -565,7 +565,7 @@ namespace wpCloud\StatelessMedia {
        * @param string $key
        * @param bool $value
        * @param bool $bypass_validation
-       * @return \UDX\Settings
+       * @return \wpCloud\StatelessMedia\Settings
        */
       public function set( $key = '', $value = false, $bypass_validation = false ) {
         return parent::set( $key, $value, $bypass_validation );

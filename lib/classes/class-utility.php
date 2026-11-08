@@ -15,17 +15,11 @@
 namespace wpCloud\StatelessMedia {
 
   use wpCloud\StatelessMedia\Sync\BackgroundSync;
-  use \Firebase\JWT\JWT;
-  use \Firebase\JWT\Key;
 
   if (!class_exists('wpCloud\StatelessMedia\Utility')) {
 
     class Utility {
 
-      /**
-       * Upload errors from the last add_media() run, per attachment. An object that failed to upload can
-       * still exist in the bucket from an earlier sync, so an existence check alone would call the run a success.
-       */
       /**
        * Upload failures of the current request, keyed by attachment id and image size.
        * A sync resets them once per attachment; a size's failure stays recorded until a
@@ -34,18 +28,33 @@ namespace wpCloud\StatelessMedia {
        */
       private static $upload_errors = array();
 
+      /**
+       * Returns all recorded upload errors for an attachment in insertion order.
+       *
+       * @param int $attachment_id WordPress attachment ID.
+       * @return string[] Sanitized upload error messages, or an empty array.
+       */
       public static function upload_errors($attachment_id) {
         return isset(self::$upload_errors[$attachment_id]) ? array_values(self::$upload_errors[$attachment_id]) : array();
       }
 
+      /** Clears an attachment's previous errors before a fresh synchronization attempt. */
       public static function reset_upload_errors($attachment_id) {
         unset(self::$upload_errors[$attachment_id]);
       }
 
+      /**
+       * Records a failed upload without treating an older remote object as proof of success.
+       *
+       * @param int $attachment_id WordPress attachment ID.
+       * @param string $size Image size or operation identifier.
+       * @param string $message Sanitized failure message.
+       */
       private static function record_upload_error($attachment_id, $size, $message) {
         self::$upload_errors[$attachment_id][$size] = $size . ': ' . $message;
       }
 
+      /** Clears a size's previous error after its replacement upload succeeds. */
       private static function resolve_upload_error($attachment_id, $size) {
         unset(self::$upload_errors[$attachment_id][$size]);
       }
@@ -339,12 +348,6 @@ namespace wpCloud\StatelessMedia {
                 ));
                 $media_args = apply_filters('wp_stateless_add_media_args', $media_args);
 
-                //Bucket
-                $bucket = ud_get_stateless_media()->get('sm.bucket');
-
-                $bucket = $gs_client->bucket($bucket);
-                $object = $bucket->object($media_args['name']);
-
                 /**
                  * Updating object metadata, ACL, CacheControl and contentDisposition
                  * @return media object
@@ -358,8 +361,8 @@ namespace wpCloud\StatelessMedia {
                   if ( !defined('WP_STATELESS_SKIP_ACL_SET') || !WP_STATELESS_SKIP_ACL_SET) {
                     $mediaOptions['predefinedAcl'] = 'publicRead';
                   }
-      
-                  $media = $object->update(array('metadata' => $media_args['metadata']) + $mediaOptions);
+
+                  $media = $gs_client->update_media($media_args['name'], array('metadata' => $media_args['metadata']) + $mediaOptions);
 
                   $cloud_meta = self::generate_cloud_meta($cloud_meta, $media, $size, $img, $bucketLink);
                   self::resolve_upload_error($attachment_id, $size . $args['is_webp']);
@@ -487,6 +490,17 @@ namespace wpCloud\StatelessMedia {
         return '';
       }
 
+      /**
+       * Builds local and Google paths for the original image and every generated size.
+       *
+       * Each entry contains `path`, `gs_name`, `width`, `height`, `mime_type`,
+       * and `is_thumb`; synchronization uses these values to upload exact object
+       * names and to verify that every expected object exists.
+       *
+       * @param array $metadata WordPress attachment metadata.
+       * @param int $attachment_id WordPress attachment ID.
+       * @return array<string,array<string,mixed>> Original and thumbnail path data.
+       */
       public static function get_path_and_url($metadata, $attachment_id) {
         /* Get metadata in case if method is called directly. */
         if (empty($metadata) && current_filter() !== 'wp_generate_attachment_metadata' && current_filter() !== 'wp_update_attachment_metadata') {
@@ -832,9 +846,10 @@ namespace wpCloud\StatelessMedia {
           'aud' => $site_url,
           'exp' => $now + $ttl
         ]);
-
-        $key = self::get_jwt_signing_key();
-        return JWT::encode($payload, $key, 'HS256');
+        $header = self::jwt_base64url(wp_json_encode(array('alg' => 'HS256', 'typ' => 'JWT')));
+        $claims = self::jwt_base64url(wp_json_encode($payload));
+        $unsigned = $header . '.' . $claims;
+        return $unsigned . '.' . self::jwt_base64url(hash_hmac('sha256', $unsigned, self::get_jwt_signing_key(), true));
       }
 
       /**
@@ -847,8 +862,44 @@ namespace wpCloud\StatelessMedia {
        * @throws \Exception
        */
       public static function verify_jwt_token($token) {
-        $key = self::get_jwt_signing_key();
-        return JWT::decode($token, new Key($key, 'HS256'));
+        $parts = is_string($token) ? explode('.', $token) : array();
+        if (count($parts) !== 3) throw new \Exception('Invalid token format.');
+        list($header, $claims, $signature) = $parts;
+        $algorithm = json_decode(self::jwt_base64url_decode($header), true);
+        if (!is_array($algorithm) || empty($algorithm['alg']) || $algorithm['alg'] !== 'HS256') throw new \Exception('Invalid token algorithm.');
+        $expected = self::jwt_base64url(hash_hmac('sha256', $header . '.' . $claims, self::get_jwt_signing_key(), true));
+        if (!hash_equals($expected, $signature)) throw new \Exception('Token signature verification failed.');
+        $payload = json_decode(self::jwt_base64url_decode($claims));
+        if (!is_object($payload)) throw new \Exception('Invalid token payload.');
+        $now = time();
+        if (isset($payload->exp) && $now >= (int) $payload->exp) throw new \Exception('Token has expired.');
+        if (isset($payload->nbf) && $now < (int) $payload->nbf) throw new \Exception('Token is not yet valid.');
+        if (isset($payload->iat) && (int) $payload->iat > $now + 60) throw new \Exception('Token was issued in the future.');
+        return $payload;
+      }
+
+      /**
+       * Encodes JWT header, claims, or signature bytes using unpadded base64url.
+       *
+       * @param string $value Raw bytes to encode.
+       * @return string Base64url-encoded value.
+       */
+      private static function jwt_base64url($value) {
+        return rtrim(strtr(base64_encode($value), '+/', '-_'), '=');
+      }
+
+      /**
+       * Decodes a base64url JWT segment and restores any required padding.
+       *
+       * @param string $value Encoded JWT segment.
+       * @return string Decoded bytes.
+       * @throws \Exception When the segment is not valid base64url data.
+       */
+      private static function jwt_base64url_decode($value) {
+        $padding = (4 - strlen($value) % 4) % 4;
+        $decoded = base64_decode(strtr($value . str_repeat('=', $padding), '-_', '+/'), true);
+        if ($decoded === false) throw new \Exception('Invalid token encoding.');
+        return $decoded;
       }
 
       /**
