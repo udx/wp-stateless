@@ -149,19 +149,34 @@ if (!class_exists('wpCloud\StatelessMedia\StreamWrapper')) {
       return $this->dirty ? $this->flush_upload() : true;
     }
 
+    private function upload_temporary($mime_type) {
+      $client = $this->client->client;
+      $manages_acl = !defined('WP_STATELESS_SKIP_ACL_SET') || !WP_STATELESS_SKIP_ACL_SET;
+      if ($manages_acl) {
+        try {
+          $manages_acl = !$client->has_uniform_access();
+        } catch (\Throwable $e) {
+          $manages_acl = true;
+        }
+      }
+      $media = $client->upload(
+        $this->file,
+        $this->temporary,
+        array('name' => $this->file, 'metadata' => array()),
+        $mime_type,
+        $manages_acl ? 'bucketOwnerFullControl' : ''
+      );
+      if ($manages_acl) $this->client->mediaInsertACL($this->file, $media);
+      return $media;
+    }
+
     private function flush_upload() {
       if (!$this->dirty || !$this->temporary) return true;
       $type = wp_check_filetype($this->file);
-      $result = $this->client->add_media(array(
-        'force' => true,
-        'use_root' => false,
-        'name' => $this->file,
-        'absolutePath' => $this->temporary,
-        'mimeType' => !empty($type['type']) ? $type['type'] : 'application/octet-stream',
-        'metadata' => array(),
-      ));
-      if (is_wp_error($result)) {
-        trigger_error($result->get_error_message(), E_USER_WARNING);
+      try {
+        $this->upload_temporary(!empty($type['type']) ? $type['type'] : 'application/octet-stream');
+      } catch (\Throwable $e) {
+        trigger_error($e->getMessage(), E_USER_WARNING);
         return false;
       }
       $this->dirty = false;
@@ -190,18 +205,14 @@ if (!class_exists('wpCloud\StatelessMedia\StreamWrapper')) {
       try {
         $this->open_path($path);
         if ($this->client->media_exists($this->file)) return true;
-        $temporary = $this->temporary_file();
-        $result = $this->client->add_media(array(
-          'force' => true,
-          'use_root' => false,
-          'name' => $this->file,
-          'absolutePath' => $temporary,
-          'mimeType' => 'application/octet-stream',
-        ));
-        @unlink($temporary);
+        $this->temporary_file();
+        $this->upload_temporary('application/octet-stream');
+        @unlink($this->temporary);
         $this->temporary = '';
-        return !is_wp_error($result);
+        return true;
       } catch (\Throwable $e) {
+        if ($this->temporary && is_file($this->temporary)) @unlink($this->temporary);
+        $this->temporary = '';
         return false;
       }
     }
@@ -213,13 +224,23 @@ if (!class_exists('wpCloud\StatelessMedia\StreamWrapper')) {
           return $this->make_stat(array('mode' => self::DIRECTORY_WRITABLE_MODE));
         }
         $media = $this->client->media_exists($this->file);
-        if (!$media) return false;
-        $updated = $media->__get('updated');
-        return $this->make_stat(array(
-          'mode' => self::FILE_WRITABLE_MODE,
-          'size' => (int) $media->getSize(),
-          'mtime' => $updated ? strtotime($updated) : time(),
+        if ($media) {
+          $updated = $media->__get('updated');
+          return $this->make_stat(array(
+            'mode' => self::FILE_WRITABLE_MODE,
+            'size' => (int) $media->getSize(),
+            'mtime' => $updated ? strtotime($updated) : time(),
+          ));
+        }
+        $objects = $this->client->list_objects(array(
+          'prefix' => $this->file . '/',
+          'maxResults' => 1,
+          'fields' => 'items/name',
         ));
+        if (count($objects->getItems())) {
+          return $this->make_stat(array('mode' => self::DIRECTORY_WRITABLE_MODE));
+        }
+        return false;
       } catch (\Throwable $e) {
         return false;
       }
@@ -235,8 +256,8 @@ if (!class_exists('wpCloud\StatelessMedia\StreamWrapper')) {
     public function unlink($path) {
       try {
         $this->open_path($path);
-        $result = $this->client->remove_media($this->file, '', false);
-        return !is_wp_error($result);
+        $this->client->client->delete_object($this->file);
+        return true;
       } catch (\Throwable $e) {
         return false;
       }
@@ -250,8 +271,8 @@ if (!class_exists('wpCloud\StatelessMedia\StreamWrapper')) {
         $destination = $this->file;
         $media = $this->client->copy_media($source, $destination);
         if (!$media) return false;
-        $removed = $this->client->remove_media($source, '', false);
-        return !is_wp_error($removed);
+        $this->client->client->delete_object($source);
+        return true;
       } catch (\Throwable $e) {
         return false;
       }
@@ -262,18 +283,14 @@ if (!class_exists('wpCloud\StatelessMedia\StreamWrapper')) {
         $this->open_path($path);
         if ($this->file === '') return $this->client->is_connected() === true;
         $this->file = rtrim($this->file, '/') . '/';
-        $temporary = $this->temporary_file();
-        $result = $this->client->add_media(array(
-          'force' => true,
-          'use_root' => false,
-          'name' => $this->file,
-          'absolutePath' => $temporary,
-          'mimeType' => 'application/x-directory',
-        ));
-        @unlink($temporary);
+        $this->temporary_file();
+        $this->upload_temporary('application/x-directory');
+        @unlink($this->temporary);
         $this->temporary = '';
-        return !is_wp_error($result);
+        return true;
       } catch (\Throwable $e) {
+        if ($this->temporary && is_file($this->temporary)) @unlink($this->temporary);
+        $this->temporary = '';
         return false;
       }
     }
@@ -281,8 +298,8 @@ if (!class_exists('wpCloud\StatelessMedia\StreamWrapper')) {
     public function rmdir($path, $options) {
       try {
         $this->open_path($path);
-        $result = $this->client->remove_media(rtrim($this->file, '/') . '/', '', false);
-        return !is_wp_error($result);
+        $this->client->client->delete_object(rtrim($this->file, '/') . '/');
+        return true;
       } catch (\Throwable $e) {
         return false;
       }
