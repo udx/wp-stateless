@@ -200,6 +200,10 @@ if (!class_exists('wpCloud\StatelessMedia\StreamWrapper')) {
       return false;
     }
 
+    public function stream_cast($castAs) {
+      return $this->stream ? $this->stream : false;
+    }
+
     public function stream_metadata($path, $option, $value) {
       if ($option !== STREAM_META_TOUCH) return false;
       try {
@@ -269,10 +273,17 @@ if (!class_exists('wpCloud\StatelessMedia\StreamWrapper')) {
         $source = $this->file;
         $this->open_path($to);
         $destination = $this->file;
-        $media = $this->client->copy_media($source, $destination);
-        if (!$media) return false;
-        $this->client->client->delete_object($source);
-        return true;
+        $objects = $this->client->list_all_objects(array('prefix' => $source));
+        $renamed = false;
+        foreach ($objects as $object) {
+          $old_name = $object->getName();
+          if ($old_name !== $source && strpos($old_name, rtrim($source, '/') . '/') !== 0) continue;
+          $new_name = $destination . substr($old_name, strlen($source));
+          if (!$this->client->copy_media($old_name, $new_name)) return false;
+          $this->client->client->delete_object($old_name);
+          $renamed = true;
+        }
+        return $renamed;
       } catch (\Throwable $e) {
         return false;
       }

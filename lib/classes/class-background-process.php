@@ -202,10 +202,18 @@ if (!class_exists('wpCloud\StatelessMedia\Background_Process')) {
       return $this;
     }
 
-    protected function memory_exceeded() {
-      $limit = ini_get('memory_limit');
+    protected function get_memory_limit() {
+      $limit = function_exists('ini_get') ? ini_get('memory_limit') : '128M';
       if (!$limit || (int) $limit === -1) $limit = '32000M';
-      $exceeded = memory_get_usage(true) >= wp_convert_hr_to_bytes($limit) * 0.9;
+      return wp_convert_hr_to_bytes($limit);
+    }
+
+    protected function is_process_running() {
+      return $this->is_processing();
+    }
+
+    protected function memory_exceeded() {
+      $exceeded = memory_get_usage(true) >= $this->get_memory_limit() * 0.9;
       return apply_filters($this->identifier . '_memory_exceeded', $exceeded);
     }
 

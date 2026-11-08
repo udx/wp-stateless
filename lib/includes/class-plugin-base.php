@@ -142,11 +142,14 @@ if (!class_exists('wpCloud\StatelessMedia\Plugin_Base')) {
       add_action('plugins_loaded', array($this, 'define_update_client'), 11);
       add_action('wp_ajax_ud_bootstrap_dismiss_notice', array($this, 'ud_bootstrap_dismiss_notice'));
       $this->maybe_run_upgrade_process();
+      $this->boot();
     }
 
     public function pre_init() {
       if (!$this->has_errors()) $this->init();
     }
+
+    public function boot() {}
 
     public function init() {}
 
