@@ -24,7 +24,7 @@ permissions:
 
 jobs:
   release:
-    uses: udx/reusable-workflows/.github/workflows/wp-gh-release-ops.yml@master
+    uses: udx/reusable-workflows/.github/workflows/wp-gh-release-ops.yml@fix/prerelease-immutable-assets
     with:
       tag: ${{ github.event.inputs.tag }}
       version: ${{ github.event.inputs.version }}
