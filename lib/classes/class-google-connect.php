@@ -484,24 +484,7 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
       return (int) $state['created'] >= time() - DAY_IN_SECONDS;
     }
 
-    private function funnel_state($network_id = 0) {
-      $state = $network_id && is_multisite() ? get_network_option($network_id, self::FUNNEL_OPTION, false) : get_option(self::FUNNEL_OPTION, false);
-      if (!$this->funnel_valid($state)) {
-        if ($state !== false) $this->forget_funnel($network_id, $state);
-        return null;
-      }
-      return $state;
-    }
-
-    private function forget_funnel($network_id = 0, $expected = null) {
-      if ($expected === null) {
-        if ($network_id && is_multisite()) {
-          delete_network_option($network_id, self::FUNNEL_OPTION);
-        } else {
-          delete_option(self::FUNNEL_OPTION);
-        }
-        return true;
-      }
+    private function funnel_record($network_id = 0) {
       global $wpdb;
       $network = $network_id && is_multisite();
       $table = $network ? $wpdb->sitemeta : $wpdb->options;
@@ -512,10 +495,46 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
         ? $wpdb->prepare("SELECT {$id_column}, {$value_column} FROM {$table} WHERE site_id = %d AND {$key_column} = %s", $network_id, self::FUNNEL_OPTION)
         : $wpdb->prepare("SELECT {$id_column}, {$value_column} FROM {$table} WHERE {$key_column} = %s", self::FUNNEL_OPTION);
       $row = $wpdb->get_row($query);
-      if (!$row || maybe_serialize($expected) !== $row->$value_column) return false;
-      $deleted = $wpdb->query($wpdb->prepare("DELETE FROM {$table} WHERE {$id_column} = %d AND {$value_column} = BINARY %s", $row->$id_column, $row->$value_column));
+      if (!$row) return null;
+      return array(
+        'id'      => $row->$id_column,
+        'raw'     => (string) $row->$value_column,
+        'value'   => maybe_unserialize($row->$value_column),
+        'network' => $network,
+      );
+    }
+
+    private function funnel_state($network_id = 0) {
+      $record = $this->funnel_record($network_id);
+      if (!$record) return null;
+      if (!$this->funnel_valid($record['value'])) {
+        $this->forget_funnel($network_id, $record['raw'], true);
+        return null;
+      }
+      $state = $record['value'];
+      $state['_raw'] = $record['raw'];
+      return $state;
+    }
+
+    private function forget_funnel($network_id = 0, $expected_raw = null, $conditional = false) {
+      if (!$conditional) {
+        if ($network_id && is_multisite()) {
+          delete_network_option($network_id, self::FUNNEL_OPTION);
+        } else {
+          delete_option(self::FUNNEL_OPTION);
+        }
+        return true;
+      }
+      if (!is_string($expected_raw)) return false;
+      global $wpdb;
+      $record = $this->funnel_record($network_id);
+      if (!$record || !hash_equals($expected_raw, $record['raw'])) return false;
+      $table = $record['network'] ? $wpdb->sitemeta : $wpdb->options;
+      $id_column = $record['network'] ? 'meta_id' : 'option_id';
+      $value_column = $record['network'] ? 'meta_value' : 'option_value';
+      $deleted = $wpdb->query($wpdb->prepare("DELETE FROM {$table} WHERE {$id_column} = %d AND {$value_column} = BINARY %s", $record['id'], $record['raw']));
       if ($deleted) {
-        if ($network) {
+        if ($record['network']) {
           wp_cache_delete($network_id . ':' . self::FUNNEL_OPTION, 'site-options');
         } else {
           wp_cache_delete(self::FUNNEL_OPTION, 'options');
@@ -531,16 +550,16 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
     }
 
     public function clear_expired_funnel($network_id = 0) {
-      $network_id = (int) $network_id;
-      $state = $network_id && is_multisite() ? get_network_option($network_id, self::FUNNEL_OPTION, false) : get_option(self::FUNNEL_OPTION, false);
-      if (!$this->funnel_valid($state)) {
-        if ($state !== false && !$this->forget_funnel($network_id, $state)) {
-          $current = $network_id && is_multisite() ? get_network_option($network_id, self::FUNNEL_OPTION, false) : get_option(self::FUNNEL_OPTION, false);
-          if ($this->funnel_valid($current)) $this->schedule_funnel_cleanup($current['created'], $network_id);
+      $record = $this->funnel_record((int) $network_id);
+      if (!$record) return;
+      if (!$this->funnel_valid($record['value'])) {
+        if (!$this->forget_funnel($network_id, $record['raw'], true)) {
+          $current = $this->funnel_state($network_id);
+          if ($current) $this->schedule_funnel_cleanup($current['created'], $network_id);
         }
         return;
       }
-      $this->schedule_funnel_cleanup($state['created'], $network_id);
+      $this->schedule_funnel_cleanup($record['value']['created'], $network_id);
     }
 
     private function remember_funnel($txn, $token) {
@@ -553,7 +572,11 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
     private function track_event($event, $reason = '', $network_id = null, $expected = null) {
       if ($network_id === null) $network_id = $this->network_scope() ? get_current_network_id() : 0;
       $state = $this->funnel_state($network_id);
-      if (!$state || ($expected !== null && maybe_serialize($expected) !== maybe_serialize($state))) return false;
+      if (!$state) return false;
+      if ($expected !== null) {
+        if (!is_array($expected) || empty($expected['txn']) || empty($expected['token']) || !is_string($expected['txn']) || !is_string($expected['token'])) return false;
+        if (!hash_equals($expected['txn'], $state['txn']) || !hash_equals($expected['token'], $state['token'])) return false;
+      }
       $body = array('txn' => $state['txn'], 'verify_token' => $state['token'], 'event' => $event);
       if ($reason !== '') $body['reason'] = $reason;
       $response = wp_remote_post(self::broker_url() . '/connect/google/event', array(
@@ -593,7 +616,7 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
         $this->track_event('upload_failed', 'storage', $network_id, $state);
         return $metadata;
       }
-      if ($this->track_event('first_upload', '', $network_id, $state)) $this->forget_funnel($network_id, $state);
+      if ($this->track_event('first_upload', '', $network_id, $state)) $this->forget_funnel($network_id, $state['_raw'], true);
       return $metadata;
     }
 
