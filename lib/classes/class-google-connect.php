@@ -487,18 +487,45 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
     private function funnel_state($network_id = 0) {
       $state = $network_id && is_multisite() ? get_network_option($network_id, self::FUNNEL_OPTION, false) : get_option(self::FUNNEL_OPTION, false);
       if (!$this->funnel_valid($state)) {
-        if ($state !== false) $this->forget_funnel($network_id);
+        if ($state !== false) $this->forget_funnel($network_id, $state);
         return null;
       }
       return $state;
     }
 
-    private function forget_funnel($network_id = 0) {
-      if ($network_id && is_multisite()) {
-        delete_network_option($network_id, self::FUNNEL_OPTION);
-      } else {
-        delete_option(self::FUNNEL_OPTION);
+    private function forget_funnel($network_id = 0, $expected = null) {
+      if ($expected === null) {
+        if ($network_id && is_multisite()) {
+          delete_network_option($network_id, self::FUNNEL_OPTION);
+        } else {
+          delete_option(self::FUNNEL_OPTION);
+        }
+        return true;
       }
+      if (!is_array($expected) || empty($expected['txn']) || empty($expected['token']) || !is_string($expected['txn']) || !is_string($expected['token'])) return false;
+      global $wpdb;
+      $network = $network_id && is_multisite();
+      $table = $network ? $wpdb->sitemeta : $wpdb->options;
+      $id_column = $network ? 'meta_id' : 'option_id';
+      $key_column = $network ? 'meta_key' : 'option_name';
+      $value_column = $network ? 'meta_value' : 'option_value';
+      $query = $network
+        ? $wpdb->prepare("SELECT {$id_column}, {$value_column} FROM {$table} WHERE site_id = %d AND {$key_column} = %s", $network_id, self::FUNNEL_OPTION)
+        : $wpdb->prepare("SELECT {$id_column}, {$value_column} FROM {$table} WHERE {$key_column} = %s", self::FUNNEL_OPTION);
+      $row = $wpdb->get_row($query);
+      if (!$row) return false;
+      $current = maybe_unserialize($row->$value_column);
+      if (!is_array($current) || empty($current['txn']) || empty($current['token']) || !is_string($current['txn']) || !is_string($current['token'])) return false;
+      if (!hash_equals($expected['txn'], $current['txn']) || !hash_equals($expected['token'], $current['token'])) return false;
+      $deleted = $wpdb->query($wpdb->prepare("DELETE FROM {$table} WHERE {$id_column} = %d AND {$value_column} = %s", $row->$id_column, $row->$value_column));
+      if ($deleted) {
+        if ($network) {
+          wp_cache_delete($network_id . ':' . self::FUNNEL_OPTION, 'site-options');
+        } else {
+          wp_cache_delete(self::FUNNEL_OPTION, 'options');
+        }
+      }
+      return (bool) $deleted;
     }
 
     private function schedule_funnel_cleanup($created, $network_id) {
@@ -511,7 +538,10 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
       $network_id = (int) $network_id;
       $state = $network_id && is_multisite() ? get_network_option($network_id, self::FUNNEL_OPTION, false) : get_option(self::FUNNEL_OPTION, false);
       if (!$this->funnel_valid($state)) {
-        if ($state !== false) $this->forget_funnel($network_id);
+        if ($state !== false && !$this->forget_funnel($network_id, $state)) {
+          $current = $network_id && is_multisite() ? get_network_option($network_id, self::FUNNEL_OPTION, false) : get_option(self::FUNNEL_OPTION, false);
+          if ($this->funnel_valid($current)) $this->schedule_funnel_cleanup($current['created'], $network_id);
+        }
         return;
       }
       $this->schedule_funnel_cleanup($state['created'], $network_id);
@@ -567,7 +597,7 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
         $this->track_event('upload_failed', 'storage', $network_id);
         return $metadata;
       }
-      if ($this->track_event('first_upload', '', $network_id)) $this->forget_funnel($network_id);
+      if ($this->track_event('first_upload', '', $network_id)) $this->forget_funnel($network_id, $state);
       return $metadata;
     }
 
