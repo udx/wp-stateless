@@ -57,10 +57,10 @@ Looking for a unique feature for your next project? [Hire us!](https://udx.io/)
 
 ## Installation
 
-1. Search, install, and activate the *WP-Stateless* plugin via your WordPress dashboard.
-2. Open *Media > Stateless Connect* and click *Sign in with Google*. Confirm the connection for your site on stateless.ci; the page brings you back, or you type the eight character code it shows.
-3. Choose a Google Cloud project, billing account, bucket, location and storage mode, and submit the form. WP-Stateless creates the bucket, a service account with access to that bucket only, and its key inside your own Google Cloud account.
-4. Setup is now complete. Visit *Media > Stateless Settings* for more options.
+1. Search, install, and activate the *WP-Stateless* plugin via your WordPress dashboard. Unconfigured sites open Stateless Connect automatically; you can also open *Media > Stateless Connect*.
+2. Click *Sign in with Google* and confirm the connection for your site on stateless.ci. You return to the same tab, or can use the eight character pairing code on another device.
+3. Choose *Create my storage* for the recommended project, bucket and CDN setup, or open *Advanced storage options* to choose an existing project or bucket, another location or another mode. WP-Stateless creates a service account with access to that bucket only, and Google sends its key directly to your site.
+4. Upload a test image to confirm your storage is working. Visit *Media > Stateless Settings* for more options.
 
 For a more detailed installation and setup walkthrough, please see the [setup guide](https://stateless.ci/setup/) and the [manual setup instructions](https://stateless.ci/docs/manual-setup/).
 

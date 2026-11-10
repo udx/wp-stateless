@@ -43,3 +43,4 @@
 .sm-connect .sm-location-types label:has(:checked){background:#f3f4ff;border-color:#303fe9}
 .sm-connect .sm-mode-option:has(:disabled){opacity:.55;cursor:not-allowed}
 @media(max-width:1000px){.sm-connect .form-table .sm-location-types{grid-template-columns:1fr}}
+.sm-connect-recommended{padding:20px 22px;margin:0 0 20px;background:#f7f8fc;border:1px solid #e0e4ef;border-radius:4px}.sm-connect-recommended h3{margin:0 0 10px;font-size:17px}.sm-connect-recommended p{margin:0 0 10px;line-height:1.65}.sm-connect-recommended p:last-child{margin-bottom:0}.sm-connect .sm-connect-advanced{max-width:none;border-top:0;padding:0;margin:0 0 8px}.sm-connect .sm-connect-advanced>summary{display:inline-block;margin:0 0 16px;font-size:14px}.sm-connect .sm-connect-advanced[open]{padding-bottom:0}.sm-connect .sm-billing-recovery{padding:12px 16px}.sm-connect .sm-billing-recovery form{margin:0}.sm-connect .sm-billing-recovery .submit{margin:0;padding:0;border:0}

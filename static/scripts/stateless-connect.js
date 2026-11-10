@@ -115,7 +115,7 @@
     billing.hidden = isNew || !project.value; billingLink.hidden = isNew || !project.value;
     const currentChoice = newBucket ? 'new' : 'existing';
     if (currentChoice !== bucketChoice) { names[bucketChoice] = name.value; name.value = names[currentChoice]; bucketChoice = currentChoice; renderBuckets(); }
-    go.value = newBucket ? 'Create bucket and connect this site' : 'Connect this bucket';
+    go.value = newBucket ? 'Create my storage' : 'Connect this bucket';
     go.disabled = !project.value || isNew && !form.querySelector('[name=billing_account]').value;
     document.getElementById('sm-bucket-help').textContent = newBucket ? 'Names must be globally unique. Use lowercase letters, numbers, dashes or underscores.' : 'Choose above, or enter the exact name if you cannot list buckets. Its location stays unchanged.';
     if (project.value && !newBucket && loadedProject !== project.value) load(false);

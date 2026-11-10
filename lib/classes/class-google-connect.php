@@ -24,6 +24,7 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
     const PROOFS_OPTION   = 'sm_gc_proofs';
     const LAST_OPTION     = 'sm_gc_last';
     const PENDING_KEYS_OPTION = 'sm_gc_pending_key_revocations';
+    const FUNNEL_OPTION   = 'sm_gc_funnel';
     const BROKER          = 'https://stateless.ci';
     const SCOPES          = 'openid email https://www.googleapis.com/auth/cloud-platform';
     const AUTH_ENDPOINT   = 'https://accounts.google.com/o/oauth2/v2/auth';
@@ -40,14 +41,17 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
 
     protected function __construct() {
       add_action('rest_api_init', array($this, 'rest_routes'));
+      add_filter('wp_stateless_media_synced', array($this, 'track_first_upload'), 999, 4);
       if (!is_admin()) return;
       add_action('admin_init', array($this, 'redirect_legacy_setup'));
       add_action('admin_menu', array($this, 'admin_menu'), 20);
       add_action('network_admin_menu', array($this, 'network_admin_menu'), 20);
       add_action('admin_enqueue_scripts', array($this, 'enqueue'));
+      add_action('admin_post_sm_gc_begin', array($this, 'handle_begin'));
       add_action('admin_post_sm_gc_client', array($this, 'handle_client'));
       add_action('admin_post_sm_gc_finish', array($this, 'handle_finish'));
       add_action('admin_post_sm_gc_provision', array($this, 'handle_provision'));
+      add_action('admin_post_sm_gc_billing_recheck', array($this, 'handle_billing_recheck'));
       add_action('admin_post_sm_gc_disconnect', array($this, 'handle_disconnect'));
       add_action('admin_post_sm_gc_restart', array($this, 'handle_restart'));
       add_action('wp_ajax_sm_gc_buckets', array($this, 'ajax_buckets'));
@@ -223,10 +227,20 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
 
       $requires_stateless = $this->requires_stateless_mode();
       $draft = $this->state_get('draft');
+      if (is_array($draft)) {
+        if (isset($draft['project'])) $default_project = $draft['project'];
+        if (isset($draft['bucket_name'])) $default_bucket = $draft['bucket_name'];
+      }
       $settings = (object) ud_get_stateless_media()->get('sm');
       if ($this->network_scope()) {
         foreach (array('bucket', 'key_json', 'mode') as $key) $settings->$key = $this->read_option('sm_' . $key, $key === 'mode' ? 'disabled' : '');
       }
+      if ($default_project === '' && (empty($settings->key_json) || empty($settings->bucket))) $default_project = '__new__';
+      $suggested_project = preg_replace('/[^a-zA-Z0-9\x20\x21\x22\x27-]/', '-', get_bloginfo('name'));
+      $suggested_project = trim(substr(preg_replace('/\s+/', ' ', $suggested_project), 0, 30));
+      if (strlen($suggested_project) < 4) $suggested_project = trim(substr($suggested_project . ' media', 0, 30));
+      if (strlen($suggested_project) < 4) $suggested_project = 'WordPress media';
+      $billing_recovery = is_array($draft) && !empty($draft['billing_required']) && !empty($draft['project']) && $draft['project'] !== '__new__';
 
       include ud_get_stateless_media()->path('static/views/connect.php', 'dir');
     }
@@ -448,6 +462,104 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
       return strpos($uri, 'http://127.0.0.1') !== 0 && strpos($uri, 'http://localhost') !== 0 && strpos($uri, 'http://[::1]') !== 0;
     }
 
+    public function handle_begin() {
+      $this->guard();
+      if ($this->get_connection()) $this->done(array('sm_gc' => 'connected'));
+      $client = $this->get_client();
+      if (!$client) $this->fail(__('OAuth client is not configured.', ud_get_stateless_media()->domain));
+      $auth_url = $this->build_auth_url($client, get_current_user_id());
+      if (!$auth_url || strpos($auth_url, self::AUTH_ENDPOINT . '?') !== 0) {
+        $this->fail($this->start_error ?: __('The sign-in could not be prepared. Check the connection to the sign-in service and try again.', ud_get_stateless_media()->domain));
+      }
+      $this->track_event('clicked');
+      wp_redirect($auth_url, 303);
+      exit;
+    }
+
+    private function funnel_state() {
+      $state = $this->read_option(self::FUNNEL_OPTION, array());
+      if (!is_array($state) || empty($state['txn']) || empty($state['token']) || empty($state['created'])) return null;
+      if (!preg_match('/^[A-Za-z0-9_-]{32}$/', $state['txn']) || !preg_match('/^[A-Za-z0-9_-]{32}$/', $state['token'])) return null;
+      if ((int) $state['created'] < time() - DAY_IN_SECONDS) return null;
+      return $state;
+    }
+
+    private function remember_funnel($txn, $token) {
+      $this->write_option(self::FUNNEL_OPTION, array('txn' => $txn, 'token' => $token, 'created' => time()), false);
+    }
+
+    private function track_event($event, $reason = '') {
+      $state = $this->funnel_state();
+      if (!$state) return false;
+      $body = array('txn' => $state['txn'], 'verify_token' => $state['token'], 'event' => $event);
+      if ($reason !== '') $body['reason'] = $reason;
+      $response = wp_remote_post(self::broker_url() . '/connect/google/event', array(
+        'timeout'    => 2,
+        'user-agent' => 'WP-Stateless/' . Bootstrap::$version,
+        'body'       => $body,
+      ));
+      if (is_wp_error($response) || (int) wp_remote_retrieve_response_code($response) !== 200) return false;
+      $data = json_decode(wp_remote_retrieve_body($response), true);
+      return is_array($data) && !empty($data['ok']);
+    }
+
+    public function track_first_upload($metadata, $attachment_id, $force = false, $args = array()) {
+      if (!$this->funnel_state()) return $metadata;
+      if (Utility::upload_errors($attachment_id)) {
+        $this->track_event('upload_failed', 'storage');
+        return $metadata;
+      }
+      $cloud = get_post_meta($attachment_id, 'sm_cloud', true);
+      if (empty($cloud['name']) || empty($cloud['bucket'])) return $metadata;
+      try {
+        if (Utility::missing_cloud_object($attachment_id, $metadata) !== '') {
+          $this->track_event('upload_failed', 'storage');
+          return $metadata;
+        }
+      } catch (\Throwable $e) {
+        $this->track_event('upload_failed', 'storage');
+        return $metadata;
+      }
+      if ($this->track_event('first_upload')) $this->remove_option(self::FUNNEL_OPTION);
+      return $metadata;
+    }
+
+    public function handle_billing_recheck() {
+      $this->guard();
+      if (!$this->get_connection()) $this->fail(__('Sign in to Google first.', ud_get_stateless_media()->domain));
+      $uid = get_current_user_id();
+      $draft = $this->state_get('draft', $uid);
+      $project = is_array($draft) && !empty($draft['project']) ? $draft['project'] : '';
+      if (!preg_match('/^[a-z][a-z0-9-]{4,29}$/', $project)) {
+        $this->fail(__('Choose a Google Cloud project before checking its billing status.', ud_get_stateless_media()->domain));
+      }
+      $info = $this->api('GET', 'https://cloudbilling.googleapis.com/v1/projects/' . rawurlencode($project) . '/billingInfo');
+      if (is_wp_error($info)) {
+        $this->fail(__('Billing status could not be checked. Confirm the project billing in Google Cloud, then try again.', ud_get_stateless_media()->domain));
+      }
+      if (empty($info['billingEnabled'])) {
+        $draft['billing_required'] = true;
+        $this->state_set('draft', $draft, HOUR_IN_SECONDS, $uid);
+        $this->fail(__('Billing is not enabled for this project yet. Enable it in Google Cloud, then choose Check again. Your storage choices are saved.', ud_get_stateless_media()->domain));
+      }
+      unset($draft['billing_required']);
+      $this->state_set('draft', $draft, HOUR_IN_SECONDS, $uid);
+      $this->state_delete('error', $uid);
+      $this->done(array('sm_gc' => 'billing-ready'));
+    }
+
+    private function provisioning_reason($e) {
+      if ($e->getCode() === 1001) return 'billing_missing';
+      $message = strtolower($e->getMessage());
+      if (strpos($message, 'billing') !== false) return 'billing_missing';
+      if (strpos($message, 'already taken') !== false) return 'bucket_taken';
+      if (strpos($message, 'bucket name') !== false) return 'bucket_name';
+      if (strpos($message, 'public access') !== false) return 'public_access';
+      if (strpos($message, 'forbidden') !== false || strpos($message, 'permission') !== false) return 'permission_denied';
+      if (strpos($message, 'credential') !== false || strpos($message, 'key') !== false) return 'credentials';
+      return 'google_api';
+    }
+
     public function handle_client() {
       $this->guard();
       $id     = isset($_POST['client_id']) ? trim(sanitize_text_field($_POST['client_id'])) : '';
@@ -548,6 +660,8 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
         'auth_url'      => $r['auth_url'],
         'registered'    => time(),
       ), 20 * MINUTE_IN_SECONDS, $uid);
+      $this->remember_funnel($r['txn'], $r['verify_token']);
+      $this->track_event('viewed');
       return $r['auth_url'];
     }
 
@@ -970,8 +1084,8 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
       $bucket_choice  = isset($post['bucket_choice']) ? sanitize_text_field($post['bucket_choice']) : 'new';
       $bucket         = isset($post['bucket_name']) ? strtolower(trim(sanitize_text_field($post['bucket_name']))) : '';
       $location       = isset($post['location']) ? sanitize_text_field($post['location']) : 'US';
-      $mode           = isset($post['mode']) ? sanitize_text_field($post['mode']) : 'ephemeral';
-      if (!in_array($mode, array('backup', 'cdn', 'ephemeral', 'stateless'), true)) $mode = 'ephemeral';
+      $mode           = isset($post['mode']) ? sanitize_text_field($post['mode']) : 'cdn';
+      if (!in_array($mode, array('backup', 'cdn', 'ephemeral', 'stateless'), true)) $mode = 'cdn';
       $locked_mode    = $this->locked_mode();
       if ($locked_mode) $mode = $locked_mode['mode']; // the form shows the locked mode; never trust a posted one
 
@@ -1045,6 +1159,17 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
             $draft['pending_billing'] = '';
             $this->state_set('draft', $draft, HOUR_IN_SECONDS, $uid);
           }
+        }
+
+        if ($bucket_choice === 'new') {
+          $billing_info = $this->api('GET', 'https://cloudbilling.googleapis.com/v1/projects/' . rawurlencode($project_id) . '/billingInfo');
+          if (!is_wp_error($billing_info) && empty($billing_info['billingEnabled'])) {
+            $draft['billing_required'] = true;
+            $this->state_set('draft', $draft, HOUR_IN_SECONDS, $uid);
+            throw new Exception(__('Google Cloud billing is not enabled for this project. Enable billing, then choose Check again. Your storage choices are saved.', ud_get_stateless_media()->domain), 1001);
+          }
+          unset($draft['billing_required']);
+          $this->state_set('draft', $draft, HOUR_IN_SECONDS, $uid);
         }
 
         // Check a manually entered bucket before creating accounts, keys or changing permissions.
@@ -1236,10 +1361,12 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
 
         $this->state_set('log', $log, 10 * MINUTE_IN_SECONDS, $uid);
         $this->state_delete('draft', $uid);
+        $this->track_event('provisioned');
         $this->done(array('sm_gc' => 'provisioned'));
       } catch (Exception $e) {
         $log[] = 'Stopped: ' . $e->getMessage();
         $this->state_set('log', $log, 10 * MINUTE_IN_SECONDS, $uid);
+        $this->track_event('provision_failed', $this->provisioning_reason($e));
         $this->fail($e->getMessage());
       }
     }

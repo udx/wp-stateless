@@ -1,4 +1,12 @@
 == Changelog ==
+= 4.5.1 - 2026-11-10 =
+* ENHANCEMENT - fresh, unconfigured activations and the Plugins screen lead directly to Stateless Connect; manual bucket and service-account settings remain available under Advanced.
+* ENHANCEMENT - the recommended setup creates a project and US multi-region bucket with CDN mode, while existing projects, buckets, locations and modes remain available under Advanced.
+* ENHANCEMENT - Google sign-in stays in the same tab, setup explains billing and key custody, and missing billing has a Check again path that preserves the storage choices.
+* NEW - privacy-limited setup events measure actual Connect clicks through provisioning and the first verified upload without recording site addresses, email addresses, project IDs, bucket names or free-form errors.
+* FIX - storage drafts restore the selected project and bucket after a failed attempt, and new project names are generated in Google's accepted format.
+* SECURITY - stateless.ci excludes OAuth callback query parameters from its load-balancer log sinks and retains only pseudonymous, short-lived setup-funnel records.
+
 = 4.5.0 - 2026-11-02 =
 * NEW - Stateless Connect replaces the setup wizard: sign in with Google from wp-admin, confirm your site on stateless.ci, and WP-Stateless creates the project, bucket, service account and key inside your own Google Cloud account. No iframe, no copying of keys.
 * NEW - setup works from Network Admin on multisite, with network and per-site connections kept separate.

@@ -6,7 +6,7 @@ License: GPLv2 or later
 Requires PHP: 8.1
 Requires at least: 5.0
 Tested up to: 6.9
-Stable tag: 4.5.0
+Stable tag: 4.5.1
 
 Upload and serve your WordPress media files from Google Cloud Storage.
 
@@ -67,10 +67,10 @@ Looking for a unique feature for your next project? [Hire us!](https://udx.io/)
 
 == Installation ==
 
-1. Search, install, and activate the *WP-Stateless* plugin via your WordPress dashboard.
-2. Open *Media > Stateless Connect* and click *Sign in with Google*. Confirm the connection for your site on stateless.ci; the page brings you back, or you type the eight character code it shows.
-3. Choose a Google Cloud project, billing account, bucket, location and storage mode, and submit the form. WP-Stateless creates the bucket, a service account with access to that bucket only, and its key inside your own Google Cloud account.
-4. Setup is now complete. Visit *Media > Stateless Settings* for more options.
+1. Search, install, and activate the *WP-Stateless* plugin via your WordPress dashboard. Unconfigured sites open Stateless Connect automatically; you can also open *Media > Stateless Connect*.
+2. Click *Sign in with Google* and confirm the connection for your site on stateless.ci. You return to the same tab, or can use the eight character pairing code on another device.
+3. Choose *Create my storage* for the recommended project, bucket and CDN setup, or open *Advanced storage options* to choose an existing project or bucket, another location or another mode. WP-Stateless creates a service account with access to that bucket only, and Google sends its key directly to your site.
+4. Upload a test image to confirm your storage is working. Visit *Media > Stateless Settings* for more options.
 For a more detailed installation and setup walkthrough, please see the [setup guide](https://stateless.ci/setup/) and the [manual setup instructions](https://stateless.ci/docs/manual-setup/).
 
 == Screenshots ==
@@ -135,6 +135,14 @@ Before upgrading to WP-Stateless 3.2.0, please, make sure you use PHP 7.2 or abo
 Before upgrading to WP-Stateless 3.0, please, make sure you tested it on your development environment.
 
 == Changelog ==
+= 4.5.1 - 2026-11-10 =
+* ENHANCEMENT - fresh, unconfigured activations and the Plugins screen lead directly to Stateless Connect; manual bucket and service-account settings remain available under Advanced.
+* ENHANCEMENT - the recommended setup creates a project and US multi-region bucket with CDN mode, while existing projects, buckets, locations and modes remain available under Advanced.
+* ENHANCEMENT - Google sign-in stays in the same tab, setup explains billing and key custody, and missing billing has a Check again path that preserves the storage choices.
+* NEW - privacy-limited setup events measure actual Connect clicks through provisioning and the first verified upload without recording site addresses, email addresses, project IDs, bucket names or free-form errors.
+* FIX - storage drafts restore the selected project and bucket after a failed attempt, and new project names are generated in Google's accepted format.
+* SECURITY - stateless.ci excludes OAuth callback query parameters from its load-balancer log sinks and retains only pseudonymous, short-lived setup-funnel records.
+
 = 4.5.0 - 2026-11-02 =
 * NEW - Stateless Connect replaces the setup wizard: sign in with Google from wp-admin, confirm your site on stateless.ci, and WP-Stateless creates the project, bucket, service account and key inside your own Google Cloud account. No iframe, no copying of keys.
 * NEW - setup works from Network Admin on multisite, with network and per-site connections kept separate.

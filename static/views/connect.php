@@ -55,6 +55,8 @@ $start_error   = wpCloud\StatelessMedia\GoogleConnect::instance()->start_error;
     <div class="notice notice-success"><p><?php _e('OAuth client saved.', $domain); ?></p></div>
   <?php elseif ($msg === 'connected' && $connection) : ?>
     <div class="notice notice-success"><p><?php _e('Google account connected.', $domain); ?></p></div>
+  <?php elseif ($msg === 'billing-ready') : ?>
+    <div class="notice notice-success"><p><?php _e('Billing is enabled for this project. Your storage choices are ready; choose Create my storage to continue.', $domain); ?></p></div>
   <?php elseif ($msg === 'disconnected') : ?>
     <div class="notice notice-success"><p><?php _e('Google account disconnected and access revoked.', $domain); ?></p></div>
   <?php elseif ($msg === 'disconnected-unrevoked') : ?>
@@ -117,13 +119,16 @@ $start_error   = wpCloud\StatelessMedia\GoogleConnect::instance()->start_error;
       <?php endif; ?>
       <p class="sm-connect-lead"><?php _e('Connect Google Cloud and let WP-Stateless take care of the setup. Your photos, videos and files stay in your own account.', $domain); ?></p>
       <?php if ($auth_url) : ?>
-        <p style="margin:16px 0">
-          <a class="button button-primary button-hero" target="_blank" rel="noopener" href="<?php echo esc_url($auth_url); ?>"><img src="<?php echo esc_url(plugins_url('static/images/connect/logo-google.svg', dirname(__DIR__, 2) . '/wp-stateless.php')); ?>" alt="" width="20" height="20"><?php _e('Sign in with Google', $domain); ?></a>
-        </p>
+        <form method="post" action="<?php echo esc_url($post); ?>" style="margin:16px 0">
+          <?php wp_nonce_field($connect->nonce_action()); ?>
+          <input type="hidden" name="action" value="sm_gc_begin">
+          <button type="submit" class="button button-primary button-hero"><img src="<?php echo esc_url(plugins_url('static/images/connect/logo-google.svg', dirname(__DIR__, 2) . '/wp-stateless.php')); ?>" alt="" width="20" height="20"><?php _e('Sign in with Google', $domain); ?></button>
+        </form>
       <?php endif; ?>
 
       <?php if ($hosted) : ?>
-        <p class="sm-connect-next"><?php _e('Sign in, confirm your website, then choose where your media lives. We will bring you right back here.', $domain); ?></p>
+        <p class="sm-connect-next"><?php _e('Sign in, confirm your website, then choose where your media lives. We will bring you right back here in the same tab.', $domain); ?></p>
+        <p class="sm-connect-next"><?php _e('Setup usually takes about two minutes. Google Cloud requires a billing account. Your storage key goes directly from Google to this site; stateless.ci never receives it.', $domain); ?></p>
         <details style="margin:0 0 12px">
           <summary style="cursor:pointer"><?php _e('Signed in on another device, or shown a code?', $domain); ?></summary>
           <p style="margin:10px 0 6px"><?php _e('Type the code from that page here and the sign-in finishes on this site.', $domain); ?></p>
@@ -214,9 +219,38 @@ $start_error   = wpCloud\StatelessMedia\GoogleConnect::instance()->start_error;
       <?php $overridden = $connect->storage_blocked(); if ($overridden) : ?>
         <div class="notice notice-warning inline"><p><?php echo esc_html($overridden); ?></p></div>
       <?php else : ?>
+      <?php if (!$configured) : ?>
+        <?php
+        $recommended_locked = $connect->locked_mode();
+        $recommended_mode = $requires_stateless ? 'stateless' : ($recommended_locked ? $recommended_locked['mode'] : (isset($settings->mode) && in_array($settings->mode, array('cdn', 'backup', 'ephemeral', 'stateless'), true) ? $settings->mode : 'cdn'));
+        ?>
+        <div class="sm-connect-recommended">
+          <h3><?php echo $recommended_mode === 'cdn' ? esc_html__('Recommended setup', $domain) : esc_html__('Your setup', $domain); ?></h3>
+          <?php if ($recommended_mode === 'cdn') : ?>
+            <p><?php _e('We will create a Google Cloud project and a US multi-region bucket, then connect your site in CDN mode. Your media will be served from Google Cloud and a copy will stay on this server.', $domain); ?></p>
+          <?php else : ?>
+            <p><?php _e('We will create a Google Cloud project and a US multi-region bucket, then connect your site. Review the required storage mode under Advanced before continuing.', $domain); ?></p>
+          <?php endif; ?>
+          <p class="description"><?php _e('Google Cloud requires a billing account. Nothing is created until you choose Create my storage.', $domain); ?></p>
+        </div>
+      <?php endif; ?>
+      <?php if ($billing_recovery) : ?>
+        <div class="notice notice-warning inline sm-billing-recovery">
+          <p><?php _e('Google Cloud billing needs to be enabled for this project before its bucket can be created. Your storage choices are saved.', $domain); ?></p>
+          <a class="button" href="https://console.cloud.google.com/billing" target="_blank" rel="noopener"><?php _e('Enable billing in Google Cloud', $domain); ?></a>
+          <form method="post" action="<?php echo esc_url($post); ?>" style="display:inline-block;margin-left:6px">
+            <?php wp_nonce_field($connect->nonce_action()); ?>
+            <input type="hidden" name="action" value="sm_gc_billing_recheck">
+            <?php submit_button(__('Check again', $domain), 'secondary', 'submit', false); ?>
+          </form>
+        </div>
+      <?php endif; ?>
       <form method="post" action="<?php echo esc_url($post); ?>" id="sm-gc-provision">
         <?php wp_nonce_field($connect->nonce_action()); ?>
         <input type="hidden" name="action" value="sm_gc_provision">
+        <details class="sm-connect-advanced" <?php if ($configured || $error || $default_project !== '__new__' || $default_bucket !== '') echo 'open'; ?>>
+          <summary><?php _e('Advanced storage options', $domain); ?></summary>
+          <p class="description"><?php _e('Choose an existing project or bucket, another location, or a different storage mode.', $domain); ?></p>
         <table class="form-table" role="presentation">
           <tr>
             <th scope="row"><label for="sm_gc_project"><?php _e('Google Cloud project', $domain); ?></label></th>
@@ -227,14 +261,14 @@ $start_error   = wpCloud\StatelessMedia\GoogleConnect::instance()->start_error;
                 <?php foreach ($projects as $p) : ?>
                   <option value="<?php echo esc_attr($p['projectId']); ?>" <?php selected($default_project !== '' && $default_project === $p['projectId']); ?>><?php echo esc_html($p['name']); ?> (<?php echo esc_html($p['projectId']); ?>)</option>
                 <?php endforeach; ?>
-                <option value="__new__" <?php selected(empty($projects)); ?>><?php _e('Create a new project', $domain); ?></option>
+                <option value="__new__" <?php selected($default_project, '__new__'); ?>><?php _e('Create a new project', $domain); ?></option>
               </select>
               <p class="description"><?php echo count($projects) ? sprintf(esc_html__('%d projects visible to this account.', $domain), count($projects)) : esc_html__('No projects found in this account.', $domain); ?></p>
             </td>
           </tr>
           <tr class="sm-gc-new-project">
             <th scope="row"><label for="new_project_name"><?php _e('New project name', $domain); ?></label></th>
-            <td><input name="new_project_name" id="new_project_name" type="text" minlength="4" maxlength="30" pattern="[a-zA-Z0-9\x20\x21\x22\x27\x2d]{4,30}" title="<?php esc_attr_e('Use 4 to 30 letters, numbers, spaces, hyphens, quotes or exclamation marks. Periods are not allowed.', $domain); ?>" class="regular-text" value="<?php echo esc_attr(get_bloginfo('name')); ?>"></td>
+            <td><input name="new_project_name" id="new_project_name" type="text" minlength="4" maxlength="30" pattern="[a-zA-Z0-9\x20\x21\x22\x27\x2d]{4,30}" title="<?php esc_attr_e('Use 4 to 30 letters, numbers, spaces, hyphens, quotes or exclamation marks. Periods are not allowed.', $domain); ?>" class="regular-text" value="<?php echo esc_attr($suggested_project); ?>"></td>
           </tr>
           <tr class="sm-gc-new-project">
             <th scope="row"><label for="billing_account"><?php _e('Billing account', $domain); ?></label></th>
@@ -318,12 +352,12 @@ $start_error   = wpCloud\StatelessMedia\GoogleConnect::instance()->start_error;
               <?php if ($requires_stateless) : ?><p class="description"><?php _e('This environment requires Stateless mode because it uses App Engine or cannot write to the uploads directory.', $domain); ?></p><?php endif; ?>
               <fieldset class="sm-mode-options" aria-labelledby="sm-mode-label">
                 <?php
-                $selected_mode = isset($settings->mode) && isset($mode_options[$settings->mode]) ? $settings->mode : 'ephemeral';
+                $selected_mode = isset($settings->mode) && isset($mode_options[$settings->mode]) ? $settings->mode : 'cdn';
                 if ($requires_stateless) $selected_mode = 'stateless';
                 foreach ($mode_options as $value => $option) : ?>
                   <label class="sm-mode-option">
                     <input type="radio" name="mode" value="<?php echo esc_attr($value); ?>" <?php checked($selected_mode, $value); ?> <?php disabled($requires_stateless && $value !== 'stateless'); ?>>
-                    <span><strong><?php echo esc_html($option[0]); ?><?php if ($value === 'ephemeral') : ?> <small><?php _e('Default', $domain); ?></small><?php endif; ?></strong><span><?php echo esc_html($option[1]); ?></span></span>
+                    <span><strong><?php echo esc_html($option[0]); ?><?php if ($value === 'cdn') : ?> <small><?php _e('Recommended', $domain); ?></small><?php endif; ?></strong><span><?php echo esc_html($option[1]); ?></span></span>
                   </label>
                 <?php endforeach; ?>
               </fieldset>
@@ -332,8 +366,9 @@ $start_error   = wpCloud\StatelessMedia\GoogleConnect::instance()->start_error;
             </td>
           </tr>
         </table>
-        <p class="description"><?php _e('Takes 15 to 60 seconds. The page will wait.', $domain); ?></p>
-        <?php submit_button(__('Create bucket and connect this site', $domain), 'primary', 'submit', true, array('id' => 'sm-gc-go')); ?>
+        </details>
+        <p class="description"><?php _e('Usually takes 15 to 60 seconds. Keep this page open while Google creates and verifies your storage.', $domain); ?></p>
+        <?php submit_button(__('Create my storage', $domain), 'primary', 'submit', true, array('id' => 'sm-gc-go')); ?>
       </form>
       <?php endif; ?>
     </div>
