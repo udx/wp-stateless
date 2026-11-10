@@ -502,7 +502,6 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
         }
         return true;
       }
-      if (!is_array($expected) || empty($expected['txn']) || empty($expected['token']) || !is_string($expected['txn']) || !is_string($expected['token'])) return false;
       global $wpdb;
       $network = $network_id && is_multisite();
       $table = $network ? $wpdb->sitemeta : $wpdb->options;
@@ -513,11 +512,8 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
         ? $wpdb->prepare("SELECT {$id_column}, {$value_column} FROM {$table} WHERE site_id = %d AND {$key_column} = %s", $network_id, self::FUNNEL_OPTION)
         : $wpdb->prepare("SELECT {$id_column}, {$value_column} FROM {$table} WHERE {$key_column} = %s", self::FUNNEL_OPTION);
       $row = $wpdb->get_row($query);
-      if (!$row) return false;
-      $current = maybe_unserialize($row->$value_column);
-      if (!is_array($current) || empty($current['txn']) || empty($current['token']) || !is_string($current['txn']) || !is_string($current['token'])) return false;
-      if (!hash_equals($expected['txn'], $current['txn']) || !hash_equals($expected['token'], $current['token'])) return false;
-      $deleted = $wpdb->query($wpdb->prepare("DELETE FROM {$table} WHERE {$id_column} = %d AND {$value_column} = %s", $row->$id_column, $row->$value_column));
+      if (!$row || maybe_serialize($expected) !== $row->$value_column) return false;
+      $deleted = $wpdb->query($wpdb->prepare("DELETE FROM {$table} WHERE {$id_column} = %d AND {$value_column} = BINARY %s", $row->$id_column, $row->$value_column));
       if ($deleted) {
         if ($network) {
           wp_cache_delete($network_id . ':' . self::FUNNEL_OPTION, 'site-options');
@@ -554,10 +550,10 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
       $this->schedule_funnel_cleanup($state['created'], $network_id);
     }
 
-    private function track_event($event, $reason = '', $network_id = null) {
+    private function track_event($event, $reason = '', $network_id = null, $expected = null) {
       if ($network_id === null) $network_id = $this->network_scope() ? get_current_network_id() : 0;
       $state = $this->funnel_state($network_id);
-      if (!$state) return false;
+      if (!$state || ($expected !== null && maybe_serialize($expected) !== maybe_serialize($state))) return false;
       $body = array('txn' => $state['txn'], 'verify_token' => $state['token'], 'event' => $event);
       if ($reason !== '') $body['reason'] = $reason;
       $response = wp_remote_post(self::broker_url() . '/connect/google/event', array(
@@ -583,21 +579,21 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
       }
       if (!$state) return $metadata;
       if (Utility::upload_errors($attachment_id)) {
-        $this->track_event('upload_failed', 'storage', $network_id);
+        $this->track_event('upload_failed', 'storage', $network_id, $state);
         return $metadata;
       }
       $cloud = get_post_meta($attachment_id, 'sm_cloud', true);
       if (empty($cloud['name']) || empty($cloud['bucket'])) return $metadata;
       try {
         if (Utility::missing_cloud_object($attachment_id, $metadata) !== '') {
-          $this->track_event('upload_failed', 'storage', $network_id);
+          $this->track_event('upload_failed', 'storage', $network_id, $state);
           return $metadata;
         }
       } catch (\Throwable $e) {
-        $this->track_event('upload_failed', 'storage', $network_id);
+        $this->track_event('upload_failed', 'storage', $network_id, $state);
         return $metadata;
       }
-      if ($this->track_event('first_upload', '', $network_id)) $this->forget_funnel($network_id, $state);
+      if ($this->track_event('first_upload', '', $network_id, $state)) $this->forget_funnel($network_id, $state);
       return $metadata;
     }
 
