@@ -222,7 +222,7 @@ $start_error   = wpCloud\StatelessMedia\GoogleConnect::instance()->start_error;
       <?php if (!$configured) : ?>
         <?php
         $recommended_locked = $connect->locked_mode();
-        $recommended_mode = $requires_stateless ? 'stateless' : ($recommended_locked ? $recommended_locked['mode'] : (isset($settings->mode) && in_array($settings->mode, array('cdn', 'backup', 'ephemeral', 'stateless'), true) ? $settings->mode : 'cdn'));
+        $recommended_mode = $requires_stateless ? 'stateless' : ($recommended_locked ? $recommended_locked['mode'] : ($configured && isset($settings->mode) && in_array($settings->mode, array('cdn', 'backup', 'ephemeral', 'stateless'), true) ? $settings->mode : 'cdn'));
         ?>
         <div class="sm-connect-recommended">
           <h3><?php echo $recommended_mode === 'cdn' ? esc_html__('Recommended setup', $domain) : esc_html__('Your setup', $domain); ?></h3>
@@ -352,7 +352,7 @@ $start_error   = wpCloud\StatelessMedia\GoogleConnect::instance()->start_error;
               <?php if ($requires_stateless) : ?><p class="description"><?php _e('This environment requires Stateless mode because it uses App Engine or cannot write to the uploads directory.', $domain); ?></p><?php endif; ?>
               <fieldset class="sm-mode-options" aria-labelledby="sm-mode-label">
                 <?php
-                $selected_mode = isset($settings->mode) && isset($mode_options[$settings->mode]) ? $settings->mode : 'cdn';
+                $selected_mode = $configured && isset($settings->mode) && isset($mode_options[$settings->mode]) ? $settings->mode : 'cdn';
                 if ($requires_stateless) $selected_mode = 'stateless';
                 foreach ($mode_options as $value => $option) : ?>
                   <label class="sm-mode-option">

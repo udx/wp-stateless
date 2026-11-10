@@ -41,6 +41,7 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
 
     protected function __construct() {
       add_action('rest_api_init', array($this, 'rest_routes'));
+      add_action('sm_gc_funnel_cleanup', array($this, 'clear_expired_funnel'));
       add_filter('wp_stateless_media_synced', array($this, 'track_first_upload'), 999, 4);
       if (!is_admin()) return;
       add_action('admin_init', array($this, 'redirect_legacy_setup'));
@@ -476,20 +477,56 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
       exit;
     }
 
-    private function funnel_state() {
-      $state = $this->read_option(self::FUNNEL_OPTION, array());
-      if (!is_array($state) || empty($state['txn']) || empty($state['token']) || empty($state['created'])) return null;
-      if (!preg_match('/^[A-Za-z0-9_-]{32}$/', $state['txn']) || !preg_match('/^[A-Za-z0-9_-]{32}$/', $state['token'])) return null;
-      if ((int) $state['created'] < time() - DAY_IN_SECONDS) return null;
+    private function funnel_valid($state) {
+      if (!is_array($state) || empty($state['txn']) || empty($state['token']) || empty($state['created']) || !is_numeric($state['created'])) return false;
+      if (!is_string($state['txn']) || !is_string($state['token'])) return false;
+      if (!preg_match('/^[A-Za-z0-9_-]{32}$/', $state['txn']) || !preg_match('/^[A-Za-z0-9_-]{32}$/', $state['token'])) return false;
+      return (int) $state['created'] >= time() - DAY_IN_SECONDS;
+    }
+
+    private function funnel_state($network_id = 0) {
+      $state = $network_id && is_multisite() ? get_network_option($network_id, self::FUNNEL_OPTION, false) : get_option(self::FUNNEL_OPTION, false);
+      if (!$this->funnel_valid($state)) {
+        if ($state !== false) $this->forget_funnel($network_id);
+        return null;
+      }
       return $state;
     }
 
-    private function remember_funnel($txn, $token) {
-      $this->write_option(self::FUNNEL_OPTION, array('txn' => $txn, 'token' => $token, 'created' => time()), false);
+    private function forget_funnel($network_id = 0) {
+      if ($network_id && is_multisite()) {
+        delete_network_option($network_id, self::FUNNEL_OPTION);
+      } else {
+        delete_option(self::FUNNEL_OPTION);
+      }
     }
 
-    private function track_event($event, $reason = '') {
-      $state = $this->funnel_state();
+    private function schedule_funnel_cleanup($created, $network_id) {
+      if (!wp_next_scheduled('sm_gc_funnel_cleanup', array($network_id))) {
+        wp_schedule_single_event((int) $created + DAY_IN_SECONDS, 'sm_gc_funnel_cleanup', array($network_id));
+      }
+    }
+
+    public function clear_expired_funnel($network_id = 0) {
+      $network_id = (int) $network_id;
+      $state = $network_id && is_multisite() ? get_network_option($network_id, self::FUNNEL_OPTION, false) : get_option(self::FUNNEL_OPTION, false);
+      if (!$this->funnel_valid($state)) {
+        if ($state !== false) $this->forget_funnel($network_id);
+        return;
+      }
+      $this->schedule_funnel_cleanup($state['created'], $network_id);
+    }
+
+    private function remember_funnel($txn, $token) {
+      $network_id = $this->network_scope() ? get_current_network_id() : 0;
+      $state = array('txn' => $txn, 'token' => $token, 'created' => time());
+      $this->write_option(self::FUNNEL_OPTION, $state, false);
+      $this->schedule_funnel_cleanup($state['created'], $network_id);
+    }
+
+    private function track_event($event, $reason = '', $network_id = null) {
+      if ($network_id === null) $network_id = $this->network_scope() ? get_current_network_id() : 0;
+      $state = $this->funnel_state($network_id);
       if (!$state) return false;
       $body = array('txn' => $state['txn'], 'verify_token' => $state['token'], 'event' => $event);
       if ($reason !== '') $body['reason'] = $reason;
@@ -504,23 +541,33 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
     }
 
     public function track_first_upload($metadata, $attachment_id, $force = false, $args = array()) {
-      if (!$this->funnel_state()) return $metadata;
+      $network_id = $this->network_scope() ? get_current_network_id() : 0;
+      $state = $this->funnel_state($network_id);
+      if (!$state && is_multisite() && !$this->get_connection()) {
+        $candidate = get_current_network_id();
+        $network_bucket = get_network_option($candidate, 'sm_bucket', '');
+        if ($network_bucket !== '' && $network_bucket === ud_get_stateless_media()->get('sm.bucket')) {
+          $state = $this->funnel_state($candidate);
+          if ($state) $network_id = $candidate;
+        }
+      }
+      if (!$state) return $metadata;
       if (Utility::upload_errors($attachment_id)) {
-        $this->track_event('upload_failed', 'storage');
+        $this->track_event('upload_failed', 'storage', $network_id);
         return $metadata;
       }
       $cloud = get_post_meta($attachment_id, 'sm_cloud', true);
       if (empty($cloud['name']) || empty($cloud['bucket'])) return $metadata;
       try {
         if (Utility::missing_cloud_object($attachment_id, $metadata) !== '') {
-          $this->track_event('upload_failed', 'storage');
+          $this->track_event('upload_failed', 'storage', $network_id);
           return $metadata;
         }
       } catch (\Throwable $e) {
-        $this->track_event('upload_failed', 'storage');
+        $this->track_event('upload_failed', 'storage', $network_id);
         return $metadata;
       }
-      if ($this->track_event('first_upload')) $this->remove_option(self::FUNNEL_OPTION);
+      if ($this->track_event('first_upload', '', $network_id)) $this->forget_funnel($network_id);
       return $metadata;
     }
 
@@ -900,6 +947,7 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
         }
       }
       $this->remove_option(self::OPTION);
+      $this->forget_funnel($this->network_scope() ? get_current_network_id() : 0);
       $this->done(array('sm_gc' => $unreadable ? 'disconnected-unrevoked' : 'disconnected'));
     }
 
