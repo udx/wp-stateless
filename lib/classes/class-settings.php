@@ -703,12 +703,15 @@ namespace wpCloud\StatelessMedia {
         }
 
         $configured = $this->get('sm.key_json') && $this->get('sm.bucket');
-        $url = $configured
+        $connect_hidden = GoogleConnect::hidden_for_site() && !GoogleConnect::instance()->network_scope();
+        if (defined('WP_STATELESS_MEDIA_HIDE_SETUP_ASSISTANT') && WP_STATELESS_MEDIA_HIDE_SETUP_ASSISTANT == true) $connect_hidden = true;
+        $use_settings = $configured || $connect_hidden;
+        $url = $use_settings
           ? ud_get_stateless_media()->get_settings_page_url('?page=stateless-settings')
           : GoogleConnect::instance()->page_url();
 
         $settings = [
-          'settings' => sprintf( '<a href="%s">%s</a>', esc_url($url), $configured ? __('Settings', ud_get_stateless_media()->domain) : __('Connect', ud_get_stateless_media()->domain) ),
+          'settings' => sprintf( '<a href="%s">%s</a>', esc_url($url), $use_settings ? __('Settings', ud_get_stateless_media()->domain) : __('Connect', ud_get_stateless_media()->domain) ),
         ];
 
         $actions['addons'] = sprintf( '<a href="%s" style="color: #f05323" target="_blank">%s</a>', ud_get_stateless_media()->get_docs_page_url('addons/'), __('Addons', ud_get_stateless_media()->domain) );

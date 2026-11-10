@@ -2,8 +2,12 @@
   <th scope="row"><?php _e('Google Cloud Storage (GCS)', ud_get_stateless_media()->domain); ?></th>
 
   <td>
-    <?php $gcs_configured = !empty($sm->key_json) && !empty($sm->bucket); ?>
-    <?php if (!$gcs_configured) : ?>
+    <?php
+    $gcs_configured = !empty($sm->key_json) && !empty($sm->bucket);
+    $connect_hidden = wpCloud\StatelessMedia\GoogleConnect::hidden_for_site() && !wpCloud\StatelessMedia\GoogleConnect::instance()->network_scope();
+    if (defined('WP_STATELESS_MEDIA_HIDE_SETUP_ASSISTANT') && WP_STATELESS_MEDIA_HIDE_SETUP_ASSISTANT == true) $connect_hidden = true;
+    ?>
+    <?php if (!$gcs_configured && !$connect_hidden) : ?>
       <div class="notice notice-info inline">
         <p><strong><?php _e('The easiest way to get started is Stateless Connect.', ud_get_stateless_media()->domain); ?></strong></p>
         <p><?php _e('Sign in with Google and WP-Stateless can create and connect your storage. You do not need to create a service account or copy a key yourself.', ud_get_stateless_media()->domain); ?></p>

@@ -119,7 +119,7 @@ $start_error   = wpCloud\StatelessMedia\GoogleConnect::instance()->start_error;
       <?php endif; ?>
       <p class="sm-connect-lead"><?php _e('Connect Google Cloud and let WP-Stateless take care of the setup. Your photos, videos and files stay in your own account.', $domain); ?></p>
       <?php if ($auth_url) : ?>
-        <form method="post" action="<?php echo esc_url($post); ?>" style="margin:16px 0">
+        <form method="post" action="<?php echo esc_url($post); ?>" style="margin:16px 0"<?php if (!$hosted) echo ' target="_blank" rel="noopener"'; ?>>
           <?php wp_nonce_field($connect->nonce_action()); ?>
           <input type="hidden" name="action" value="sm_gc_begin">
           <button type="submit" class="button button-primary button-hero"><img src="<?php echo esc_url(plugins_url('static/images/connect/logo-google.svg', dirname(__DIR__, 2) . '/wp-stateless.php')); ?>" alt="" width="20" height="20"><?php _e('Sign in with Google', $domain); ?></button>
@@ -232,6 +232,15 @@ $start_error   = wpCloud\StatelessMedia\GoogleConnect::instance()->start_error;
             <p><?php _e('We will create a Google Cloud project and a US multi-region bucket, then connect your site. Review the required storage mode under Advanced before continuing.', $domain); ?></p>
           <?php endif; ?>
           <p class="description"><?php _e('Google Cloud requires a billing account. Nothing is created until you choose Create my storage.', $domain); ?></p>
+        </div>
+      <?php endif; ?>
+      <?php if ($billing_unavailable) : ?>
+        <div class="notice notice-warning inline sm-billing-recovery">
+          <p><?php _e('Google Cloud requires a billing account before storage can be created. Create one in Google Cloud, then return here and check again.', $domain); ?></p>
+          <p>
+            <a class="button button-primary" href="https://console.cloud.google.com/billing/create" target="_blank" rel="noopener"><?php _e('Create billing account', $domain); ?></a>
+            <a class="button" href="<?php echo esc_url($connect->page_url()); ?>"><?php _e('Check again', $domain); ?></a>
+          </p>
         </div>
       <?php endif; ?>
       <?php if ($billing_recovery) : ?>

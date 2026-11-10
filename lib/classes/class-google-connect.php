@@ -242,6 +242,7 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
       if (strlen($suggested_project) < 4) $suggested_project = trim(substr($suggested_project . ' media', 0, 30));
       if (strlen($suggested_project) < 4) $suggested_project = 'WordPress media';
       $billing_recovery = is_array($draft) && !empty($draft['billing_required']) && !empty($draft['project']) && $draft['project'] !== '__new__';
+      $billing_unavailable = $default_project === '__new__' && !$billing;
 
       include ud_get_stateless_media()->path('static/views/connect.php', 'dir');
     }
@@ -484,16 +485,21 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
       return (int) $state['created'] >= time() - DAY_IN_SECONDS;
     }
 
-    private function funnel_record($network_id = 0) {
+    private function funnel_option($uid = 0) {
+      return $uid ? self::FUNNEL_OPTION . '_u_' . (int) $uid : self::FUNNEL_OPTION;
+    }
+
+    private function funnel_record($network_id = 0, $uid = 0) {
       global $wpdb;
       $network = $network_id && is_multisite();
       $table = $network ? $wpdb->sitemeta : $wpdb->options;
       $id_column = $network ? 'meta_id' : 'option_id';
       $key_column = $network ? 'meta_key' : 'option_name';
       $value_column = $network ? 'meta_value' : 'option_value';
+      $option = $this->funnel_option($uid);
       $query = $network
-        ? $wpdb->prepare("SELECT {$id_column}, {$value_column} FROM {$table} WHERE site_id = %d AND {$key_column} = %s", $network_id, self::FUNNEL_OPTION)
-        : $wpdb->prepare("SELECT {$id_column}, {$value_column} FROM {$table} WHERE {$key_column} = %s", self::FUNNEL_OPTION);
+        ? $wpdb->prepare("SELECT {$id_column}, {$value_column} FROM {$table} WHERE site_id = %d AND {$key_column} = %s", $network_id, $option)
+        : $wpdb->prepare("SELECT {$id_column}, {$value_column} FROM {$table} WHERE {$key_column} = %s", $option);
       $row = $wpdb->get_row($query);
       if (!$row) return null;
       return array(
@@ -504,11 +510,11 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
       );
     }
 
-    private function funnel_state($network_id = 0) {
-      $record = $this->funnel_record($network_id);
+    private function funnel_state($network_id = 0, $uid = 0) {
+      $record = $this->funnel_record($network_id, $uid);
       if (!$record) return null;
       if (!$this->funnel_valid($record['value'])) {
-        $this->forget_funnel($network_id, $record['raw'], true);
+        $this->forget_funnel($network_id, $record['raw'], true, $uid);
         return null;
       }
       $state = $record['value'];
@@ -516,18 +522,19 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
       return $state;
     }
 
-    private function forget_funnel($network_id = 0, $expected_raw = null, $conditional = false) {
+    private function forget_funnel($network_id = 0, $expected_raw = null, $conditional = false, $uid = 0) {
+      $option = $this->funnel_option($uid);
       if (!$conditional) {
         if ($network_id && is_multisite()) {
-          delete_network_option($network_id, self::FUNNEL_OPTION);
+          delete_network_option($network_id, $option);
         } else {
-          delete_option(self::FUNNEL_OPTION);
+          delete_option($option);
         }
         return true;
       }
       if (!is_string($expected_raw)) return false;
       global $wpdb;
-      $record = $this->funnel_record($network_id);
+      $record = $this->funnel_record($network_id, $uid);
       if (!$record || !hash_equals($expected_raw, $record['raw'])) return false;
       $table = $record['network'] ? $wpdb->sitemeta : $wpdb->options;
       $id_column = $record['network'] ? 'meta_id' : 'option_id';
@@ -535,43 +542,49 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
       $deleted = $wpdb->query($wpdb->prepare("DELETE FROM {$table} WHERE {$id_column} = %d AND {$value_column} = BINARY %s", $record['id'], $record['raw']));
       if ($deleted) {
         if ($record['network']) {
-          wp_cache_delete($network_id . ':' . self::FUNNEL_OPTION, 'site-options');
+          wp_cache_delete($network_id . ':' . $option, 'site-options');
         } else {
-          wp_cache_delete(self::FUNNEL_OPTION, 'options');
+          wp_cache_delete($option, 'options');
         }
       }
       return (bool) $deleted;
     }
 
-    private function schedule_funnel_cleanup($created, $network_id) {
-      if (!wp_next_scheduled('sm_gc_funnel_cleanup', array($network_id))) {
-        wp_schedule_single_event((int) $created + DAY_IN_SECONDS, 'sm_gc_funnel_cleanup', array($network_id));
+    private function schedule_funnel_cleanup($created, $network_id, $uid = 0) {
+      if (!wp_next_scheduled('sm_gc_funnel_cleanup', array($network_id, $uid))) {
+        wp_schedule_single_event((int) $created + DAY_IN_SECONDS, 'sm_gc_funnel_cleanup', array($network_id, $uid));
       }
     }
 
-    public function clear_expired_funnel($network_id = 0) {
-      $record = $this->funnel_record((int) $network_id);
+    public function clear_expired_funnel($network_id = 0, $uid = 0) {
+      $record = $this->funnel_record((int) $network_id, $uid);
       if (!$record) return;
       if (!$this->funnel_valid($record['value'])) {
-        if (!$this->forget_funnel($network_id, $record['raw'], true)) {
-          $current = $this->funnel_state($network_id);
-          if ($current) $this->schedule_funnel_cleanup($current['created'], $network_id);
+        if (!$this->forget_funnel($network_id, $record['raw'], true, $uid)) {
+          $current = $this->funnel_state($network_id, $uid);
+          if ($current) $this->schedule_funnel_cleanup($current['created'], $network_id, $uid);
         }
         return;
       }
-      $this->schedule_funnel_cleanup($record['value']['created'], $network_id);
+      $this->schedule_funnel_cleanup($record['value']['created'], $network_id, $uid);
     }
 
     private function remember_funnel($txn, $token) {
       $network_id = $this->network_scope() ? get_current_network_id() : 0;
+      $uid = get_current_user_id();
       $state = array('txn' => $txn, 'token' => $token, 'created' => time());
-      $this->write_option(self::FUNNEL_OPTION, $state, false);
-      $this->schedule_funnel_cleanup($state['created'], $network_id);
+      $this->write_option($this->funnel_option($uid), $state, false);
+      $this->schedule_funnel_cleanup($state['created'], $network_id, $uid);
     }
 
     private function track_event($event, $reason = '', $network_id = null, $expected = null) {
       if ($network_id === null) $network_id = $this->network_scope() ? get_current_network_id() : 0;
-      $state = $this->funnel_state($network_id);
+      if ($expected === null) {
+        $state = $this->funnel_state($network_id, get_current_user_id());
+        if (!$state && $this->get_connection()) $state = $this->funnel_state($network_id);
+      } else {
+        $state = $this->funnel_state($network_id);
+      }
       if (!$state) return false;
       if ($expected !== null) {
         if (!is_array($expected) || empty($expected['txn']) || empty($expected['token']) || !is_string($expected['txn']) || !is_string($expected['token'])) return false;
@@ -940,6 +953,13 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
         $connection['broker_conn'] = $this->encrypt(wp_json_encode($broker_conn));
       }
       $this->write_option(self::OPTION, $connection, false);
+      $network_id = $this->network_scope() ? get_current_network_id() : 0;
+      $pending = $this->funnel_state($network_id, $uid);
+      if ($pending) {
+        $this->write_option(self::FUNNEL_OPTION, array_diff_key($pending, array('_raw' => 1)), false);
+        $this->schedule_funnel_cleanup($pending['created'], $network_id);
+        $this->forget_funnel($network_id, $pending['_raw'], true, $uid);
+      }
       $this->state_delete('pkce', $uid);
       $this->state_delete('error', $uid);
       $this->done(array('sm_gc' => 'connected'));
@@ -996,7 +1016,9 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
         }
       }
       $this->remove_option(self::OPTION);
-      $this->forget_funnel($this->network_scope() ? get_current_network_id() : 0);
+      $network_id = $this->network_scope() ? get_current_network_id() : 0;
+      $this->forget_funnel($network_id);
+      $this->forget_funnel($network_id, null, false, get_current_user_id());
       $this->done(array('sm_gc' => $unreadable ? 'disconnected-unrevoked' : 'disconnected'));
     }
 
