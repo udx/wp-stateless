@@ -41,7 +41,7 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
 
     protected function __construct() {
       add_action('rest_api_init', array($this, 'rest_routes'));
-      add_action('sm_gc_funnel_cleanup', array($this, 'clear_expired_funnel'));
+      add_action('sm_gc_funnel_cleanup', array($this, 'clear_expired_funnel'), 10, 2);
       add_filter('wp_stateless_media_synced', array($this, 'track_first_upload'), 999, 4);
       if (!is_admin()) return;
       add_action('admin_init', array($this, 'redirect_legacy_setup'));
@@ -605,7 +605,7 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
     public function track_first_upload($metadata, $attachment_id, $force = false, $args = array()) {
       $network_id = $this->network_scope() ? get_current_network_id() : 0;
       $state = $this->funnel_state($network_id);
-      if (!$state && is_multisite() && !$this->get_connection()) {
+      if (!$state && is_multisite()) {
         $candidate = get_current_network_id();
         $network_bucket = get_network_option($candidate, 'sm_bucket', '');
         if ($network_bucket !== '' && $network_bucket === ud_get_stateless_media()->get('sm.bucket')) {
