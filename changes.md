@@ -1,7 +1,8 @@
-#### 4.5.1 - 2026-11-10
+#### 4.5.1 - 2026-11-11
 * ENHANCEMENT - fresh, unconfigured activations and the Plugins screen lead directly to Stateless Connect; manual bucket and service-account settings remain available under Advanced.
 * ENHANCEMENT - the recommended setup creates a project and US multi-region bucket with CDN mode, while existing projects, buckets, locations and modes remain available under Advanced.
 * ENHANCEMENT - Google sign-in stays in the same tab, setup explains billing and key custody, and missing billing has a Check again path that preserves the storage choices.
+* ENHANCEMENT - storage setup shows its progress on the Connect screen and no longer depends on one long request: it survives slow Google operations, proxy timeouts and page reloads, and an interrupted setup resumes its saved project, bucket and key instead of starting over.
 * NEW - privacy-limited setup events measure actual Connect clicks through provisioning and the first verified upload without recording site addresses, email addresses, project IDs, bucket names or free-form errors.
 * FIX - storage drafts restore the selected project and bucket after a failed attempt, and new project names are generated in Google's accepted format.
 * SECURITY - stateless.ci excludes OAuth callback query parameters from its load-balancer log sinks and retains only pseudonymous, short-lived setup-funnel records.
