@@ -211,7 +211,13 @@
         }
         if (data.status === 'interrupted') {
           show(data.message);
-          help.textContent = 'Reload and review the saved project before retrying. No automatic retry was sent.';
+          help.textContent = 'Your completed steps are saved. Review them before continuing.';
+          const resume = document.createElement('button');
+          resume.type = 'button';
+          resume.className = 'button button-primary';
+          resume.textContent = 'Resume setup';
+          resume.addEventListener('click', () => location.reload());
+          panel.append(resume);
           remember('');
           return;
         }

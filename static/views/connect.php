@@ -25,7 +25,7 @@ $start_error   = wpCloud\StatelessMedia\GoogleConnect::instance()->start_error;
   <ol class="sm-connect-steps" aria-label="<?php esc_attr_e('Setup progress', $domain); ?>">
     <?php foreach (array('account' => __('Connect Google', $domain), 'storage' => __('Choose storage', $domain), 'ready' => __('Ready to upload', $domain)) as $step => $label) :
       $available = $step === 'account' || ($step === 'storage' && $connection) || ($step === 'ready' && $client && $connection && $configured);
-      $current = !$connection ? 'account' : ((($error || $msg === 'billing-ready') && !empty($draft)) ? 'storage' : ($configured ? 'ready' : 'storage'));
+      $current = !$connection ? 'account' : (!empty($draft) ? 'storage' : ($configured ? 'ready' : 'storage'));
       $number = array('account' => '01', 'storage' => '02', 'ready' => '03'); ?>
       <li data-step="<?php echo esc_attr($step); ?>" class="<?php echo $step === $current ? 'is-current' : ($available ? 'is-done' : ''); ?>" <?php if ($step === $current) echo 'aria-current="step"'; ?>>
         <?php if ($available) : ?><a href="#sm-step-<?php echo esc_attr($step); ?>" data-wizard-step="<?php echo esc_attr($step); ?>"><?php endif; ?>
@@ -411,6 +411,6 @@ $start_error   = wpCloud\StatelessMedia\GoogleConnect::instance()->start_error;
   root.querySelectorAll('[data-wizard-step]').forEach(function (link) {
     link.addEventListener('click', function (event) { event.preventDefault(); show(link.dataset.wizardStep, true); });
   });
-  show(<?php echo wp_json_encode(!$connection ? 'account' : ((($error || $msg === 'billing-ready') && !empty($draft)) ? 'storage' : ($configured ? 'ready' : 'storage'))); ?>, false);
+  show(<?php echo wp_json_encode(!$connection ? 'account' : (!empty($draft) ? 'storage' : ($configured ? 'ready' : 'storage'))); ?>, false);
 })();
 </script>

@@ -36,6 +36,7 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
     private $page_hook = null;
     private $network_hook = null;
     private $provision_job = null;
+    private $provision_lock = null;
 
     /** @var string Why the hosted sign-in could not be prepared, for the page to show. */
     public $start_error = '';
@@ -119,6 +120,7 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
     }
 
     private function write_option($key, $value, $autoload = false) {
+      $this->assert_provision_lock();
       return $this->network_scope() ? update_network_option(get_current_network_id(), $key, $value) : update_option($key, $value, $autoload);
     }
 
@@ -1116,11 +1118,13 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
     }
 
     private function state_set($key, $value, $ttl, $uid = null) {
+      $this->assert_provision_lock();
       $uid = $uid ? $uid : get_current_user_id();
       update_user_meta($uid, $this->state_key($key), array('v' => $value, 'exp' => time() + $ttl));
     }
 
     private function state_delete($key, $uid = null) {
+      $this->assert_provision_lock();
       $uid = $uid ? $uid : get_current_user_id();
       delete_user_meta($uid, $this->state_key($key));
     }
@@ -1215,6 +1219,7 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
     /* ------------------------------------------------------------------ */
 
     public function api($method, $url, $body = null) {
+      $this->assert_provision_lock();
       $token = $this->access_token();
       if (is_wp_error($token)) return $token;
       $args = array(
@@ -1228,6 +1233,7 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
       );
       if ($body !== null) $args['body'] = wp_json_encode($body);
       $res = wp_remote_request($url, $args);
+      $this->assert_provision_lock();
       if (is_wp_error($res)) return $res;
       $code = wp_remote_retrieve_response_code($res);
       $raw  = wp_remote_retrieve_body($res);
@@ -1265,6 +1271,41 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
       return 'sm_gc_job_' . ($this->network_scope() ? 'network_' . get_current_network_id() : 'site_' . get_current_blog_id());
     }
 
+    /** MySQL releases this connection-owned lock even on SIGKILL. No time-based stealing. */
+    private function provision_lock_name() {
+      global $wpdb;
+      return 'sm_gc_' . md5(DB_NAME . ':' . $wpdb->base_prefix . ':' . $this->provision_job_key());
+    }
+
+    private function assert_provision_lock() {
+      if (!$this->provision_job) return;
+      global $wpdb;
+      $owned = $wpdb->get_var($wpdb->prepare('SELECT IS_USED_LOCK(%s) = CONNECTION_ID()', $this->provision_lock));
+      if ((string) $owned !== '1') {
+        // wpdb can reconnect silently. A former owner must never continue mutating Google.
+        $this->provision_job = null;
+        wp_die(__('The setup worker lost its database connection. Reload to resume the saved setup.', ud_get_stateless_media()->domain));
+      }
+    }
+
+    private function release_provision_lock() {
+      if (!$this->provision_lock) return;
+      global $wpdb;
+      $wpdb->get_var($wpdb->prepare('SELECT RELEASE_LOCK(%s)', $this->provision_lock));
+      $this->provision_lock = null;
+    }
+
+    /** Called only while holding the same advisory lock used by provisioning. */
+    private function recover_provision_job($raw, $job) {
+      if (!is_array($job) || $job['status'] !== 'running' || empty($job['worker_lock'])) return $job;
+      global $wpdb;
+      $job['status'] = 'interrupted';
+      $job['message'] = __('The setup worker stopped. Your saved storage choices are ready to resume.', ud_get_stateless_media()->domain);
+      $job['updated'] = time();
+      $wpdb->query($wpdb->prepare("UPDATE {$wpdb->base_prefix}options SET option_value = %s WHERE option_name = %s AND option_value = %s", wp_json_encode($job), $this->provision_job_key(), $raw));
+      return $job;
+    }
+
     private function provision_job_read() {
       global $wpdb;
       $raw = $wpdb->get_var($wpdb->prepare("SELECT option_value FROM {$wpdb->base_prefix}options WHERE option_name = %s", $this->provision_job_key()));
@@ -1273,6 +1314,7 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
 
     private function provision_job_write($changes) {
       if (!$this->provision_job) return;
+      $this->assert_provision_lock();
       global $wpdb;
       list($raw, $job) = $this->provision_job_read();
       if (!is_array($job) || $job['id'] !== $this->provision_job) return;
@@ -1284,12 +1326,20 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
       global $wpdb;
       $id = isset($_POST['sm_gc_job']) ? sanitize_text_field(wp_unslash($_POST['sm_gc_job'])) : wp_generate_uuid4();
       if (!preg_match('/^[a-zA-Z0-9-]{16,64}$/D', $id)) wp_die(__('Invalid setup request.', ud_get_stateless_media()->domain));
+      $lock = $this->provision_lock_name();
+      if ((string) $wpdb->get_var($wpdb->prepare('SELECT GET_LOCK(%s, 0)', $lock)) !== '1') {
+        wp_send_json_error(array('message' => __('Another setup worker is active. Checking its progress.', ud_get_stateless_media()->domain)), 409);
+      }
+      $this->provision_lock = $lock;
+      register_shutdown_function(array($this, 'release_provision_worker'));
+      list($raw, $previous) = $this->provision_job_read();
+      $previous = $this->recover_provision_job($raw, $previous);
       list($raw, $previous) = $this->provision_job_read();
       // A repeated POST never repeats Google mutations, even after the first request finished.
       if (is_array($previous) && ($previous['status'] === 'running' || $previous['id'] === $id)) {
         wp_send_json_error(array('message' => __('A storage setup is already recorded. Checking its progress.', ud_get_stateless_media()->domain)), 409);
       }
-      $job = array('id' => $id, 'uid' => get_current_user_id(), 'status' => 'running', 'started' => time(), 'updated' => time(), 'message' => __('Preparing your storage.', ud_get_stateless_media()->domain));
+      $job = array('id' => $id, 'uid' => get_current_user_id(), 'status' => 'running', 'worker_lock' => true, 'started' => time(), 'updated' => time(), 'message' => __('Preparing your storage.', ud_get_stateless_media()->domain));
       if ($raw === null) {
         $locked = $wpdb->query($wpdb->prepare("INSERT IGNORE INTO {$wpdb->base_prefix}options (option_name, option_value, autoload) VALUES (%s, %s, 'no')", $this->provision_job_key(), wp_json_encode($job)));
       } else {
@@ -1299,16 +1349,27 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
       $this->provision_job = $id;
       // Reverse proxies may close the HTTP connection while Google is still working.
       ignore_user_abort(true);
-      register_shutdown_function(function () {
-        if ($this->provision_job) {
-          $this->provision_job_write(array('status' => 'interrupted', 'message' => __('Setup stopped before completion. Return to storage settings to review the saved choices.', ud_get_stateless_media()->domain)));
-        }
-      });
+    }
+
+    public function release_provision_worker() {
+      if ($this->provision_job) {
+        $this->provision_job_write(array('status' => 'interrupted', 'message' => __('Setup stopped before completion. Reload to resume the saved storage choices.', ud_get_stateless_media()->domain)));
+        $this->provision_job = null;
+      }
+      $this->release_provision_lock();
     }
 
     public function ajax_provision_status() {
       if (!current_user_can($this->capability())) wp_send_json_error(array('message' => __('Insufficient permissions.')), 403);
       check_ajax_referer($this->nonce_action(), 'nonce');
+      global $wpdb;
+      $lock = $this->provision_lock_name();
+      // Taking the lock proves no live worker owns this scope; age alone proves nothing.
+      if ((string) $wpdb->get_var($wpdb->prepare('SELECT GET_LOCK(%s, 0)', $lock)) === '1') {
+        list($raw, $job) = $this->provision_job_read();
+        $this->recover_provision_job($raw, $job);
+        $wpdb->get_var($wpdb->prepare('SELECT RELEASE_LOCK(%s)', $lock));
+      }
       list($raw, $job) = $this->provision_job_read();
       if (!is_array($job)) wp_send_json_success(array('status' => 'none'));
       if ((int) $job['uid'] !== get_current_user_id()) {
@@ -1353,8 +1414,12 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
       if (is_array($previous) && !empty($previous['created_project']) && $previous['created_project'] === $project_choice) {
         $draft['created_project'] = $previous['created_project'];
         $draft['pending_billing'] = isset($previous['pending_billing']) ? (string) $previous['pending_billing'] : '';
+        if (!empty($previous['project_create_name'])) $draft['project_create_name'] = $previous['project_create_name'];
       }
-      $this->state_set('draft', $draft, HOUR_IN_SECONDS, $uid);
+      if (is_array($previous) && isset($previous['bucket_name'], $previous['project']) && $previous['bucket_name'] === $bucket && $previous['project'] === $project_choice && !empty($previous['bucket_create_marker'])) {
+        $draft['bucket_create_marker'] = $previous['bucket_create_marker'];
+      }
+      $this->state_set('draft', $draft, DAY_IN_SECONDS, $uid);
       if ($this->requires_stateless_mode() && $mode !== 'stateless') {
         $this->fail($locked_mode
           ? sprintf(__('This environment requires Stateless mode, but the storage mode is set to %1$s by %2$s. Change it there before continuing.', ud_get_stateless_media()->domain), $mode, $locked_mode['source'])
@@ -1376,6 +1441,12 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
           $project_id = substr(preg_replace('/[^a-z0-9-]/', '-', strtolower($new_project)), 0, 20) . '-' . substr(md5(uniqid('', true)), 0, 6);
           $project_id = trim(preg_replace('/-+/', '-', $project_id), '-');
           if (!preg_match('/^[a-z]/', $project_id)) $project_id = 'wp-' . $project_id;
+          $draft['project'] = $project_id;
+          $draft['new_project_name'] = '';
+          $draft['created_project'] = $project_id;
+          $draft['pending_billing'] = $billing_choice;
+          $draft['project_create_name'] = $new_project;
+          $this->state_set('draft', $draft, DAY_IN_SECONDS, $uid);
           $op = $this->api('POST', 'https://cloudresourcemanager.googleapis.com/v1/projects', array(
             'projectId' => $project_id,
             'name'      => $new_project,
@@ -1403,6 +1474,16 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
         } else {
           $project_id = $project_choice;
           if (!preg_match('/^[a-z][a-z0-9-]{4,29}$/', $project_id)) throw new Exception(__('Pick a project.', ud_get_stateless_media()->domain));
+          if (!empty($draft['project_create_name'])) {
+            $project = $this->api('GET', 'https://cloudresourcemanager.googleapis.com/v1/projects/' . rawurlencode($project_id));
+            if (is_wp_error($project) && $project->get_error_code() === 'google_404') {
+              $op = $this->api('POST', 'https://cloudresourcemanager.googleapis.com/v1/projects', array('projectId' => $project_id, 'name' => $draft['project_create_name']));
+              $this->check($op, 'Resume project creation');
+              $this->check($this->wait_operation('https://cloudresourcemanager.googleapis.com/v1/' . $op['name']), 'Resume project creation');
+            } else {
+              $this->check($project, 'Find saved project');
+            }
+          }
           $log[] = sprintf('Using project %s', $project_id);
           // Only a project this attempt created, whose billing link failed, gets billing linked here, and only
           // to the account the administrator chose for it then. Billing of other existing projects is never changed:
@@ -1483,17 +1564,27 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
 
         /* 3. Bucket */
         if ($bucket_choice === 'new') {
+          if (empty($draft['bucket_create_marker'])) $draft['bucket_create_marker'] = str_replace('-', '', wp_generate_uuid4());
+          $this->state_set('draft', $draft, DAY_IN_SECONDS, $uid);
           $r = $this->api('POST', 'https://storage.googleapis.com/storage/v1/b?project=' . rawurlencode($project_id) . '&predefinedDefaultObjectAcl=publicRead', array(
             'name'             => $bucket,
             'location'         => $location,
             'storageClass'     => 'STANDARD',
+            'labels'           => array('wp-stateless-setup' => $draft['bucket_create_marker']),
             'iamConfiguration' => array(
               'uniformBucketLevelAccess' => array('enabled' => false),
               'publicAccessPrevention'   => 'inherited',
             ),
           ));
           if (is_wp_error($r) && $r->get_error_code() === 'google_409') {
-            throw new Exception(sprintf(__('The bucket name %s is already taken. Bucket names are global across Google Cloud, pick another.', ud_get_stateless_media()->domain), $bucket));
+            $saved_bucket = $this->api('GET', 'https://storage.googleapis.com/storage/v1/b/' . rawurlencode($bucket));
+            $saved_project = $this->api('GET', 'https://cloudresourcemanager.googleapis.com/v1/projects/' . rawurlencode($project_id));
+            if (is_wp_error($saved_bucket) || is_wp_error($saved_project) || empty($saved_bucket['labels']['wp-stateless-setup'])
+                || $saved_bucket['labels']['wp-stateless-setup'] !== $draft['bucket_create_marker']
+                || empty($saved_project['projectNumber']) || (string) $saved_bucket['projectNumber'] !== (string) $saved_project['projectNumber']) {
+              throw new Exception(sprintf(__('The bucket name %s is already taken. Bucket names are global across Google Cloud, pick another.', ud_get_stateless_media()->domain), $bucket));
+            }
+            $r = $saved_bucket;
           }
           if (is_wp_error($r) && $r->get_error_code() === 'google_412') {
             throw new Exception(self::public_access_prevention_message($project_id));
@@ -1557,21 +1648,36 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
 
         /* 6. Key. Remember the key this site used before so it can be revoked once the new one is saved. */
         $previous_key = json_decode((string) $this->read_option('sm_key_json', ''), true);
-        $attempt = 0;
-        do {
-          $attempt++;
-          $r = $this->api('POST', 'https://iam.googleapis.com/v1/projects/-/serviceAccounts/' . rawurlencode($sa_email) . '/keys', array(
-            'privateKeyType' => 'TYPE_GOOGLE_CREDENTIALS_FILE',
-          ));
-          if (is_wp_error($r) && $attempt < 6 && $r->get_error_code() === 'google_404') {
-            sleep(4);
-            continue;
+        $checkpoint = json_decode($this->decrypt((string) $this->read_option('sm_gc_pending_setup_key', '')), true);
+        if (is_array($checkpoint) && $checkpoint['bucket'] === $bucket && $checkpoint['sa_email'] === $sa_email) {
+          $key_json = $checkpoint['key'];
+          $previous_key = $checkpoint['previous'];
+        } else {
+          // Abandoning a saved setup must not leave its known, unused credential active.
+          if (is_array($checkpoint) && !empty($checkpoint['key'])) {
+            $unused = json_decode($checkpoint['key'], true);
+            if (!empty($unused['private_key_id']) && (!is_array($previous_key) || ($previous_key['private_key_id'] ?? '') !== $unused['private_key_id'])) {
+              $this->check($this->revoke_key($unused['client_email'], $unused['private_key_id']), 'Remove abandoned setup key');
+            }
+            $this->remove_option('sm_gc_pending_setup_key');
           }
-          $this->check($r, 'Create service account key');
-          break;
-        } while (true);
-        $key_json = base64_decode($r['privateKeyData']);
-        if (!json_decode($key_json)) throw new Exception(__('Google returned an unreadable key.', ud_get_stateless_media()->domain));
+          $attempt = 0;
+          do {
+            $attempt++;
+            $r = $this->api('POST', 'https://iam.googleapis.com/v1/projects/-/serviceAccounts/' . rawurlencode($sa_email) . '/keys', array(
+              'privateKeyType' => 'TYPE_GOOGLE_CREDENTIALS_FILE',
+            ));
+            if (is_wp_error($r) && $attempt < 6 && $r->get_error_code() === 'google_404') {
+              sleep(4);
+              continue;
+            }
+            $this->check($r, 'Create service account key');
+            break;
+          } while (true);
+          $key_json = base64_decode($r['privateKeyData']);
+          if (!json_decode($key_json)) throw new Exception(__('Google returned an unreadable key.', ud_get_stateless_media()->domain));
+          $this->write_option('sm_gc_pending_setup_key', $this->encrypt(wp_json_encode(array('bucket' => $bucket, 'sa_email' => $sa_email, 'key' => $key_json, 'previous' => $previous_key))), false);
+        }
         $log[] = 'Key issued to this site';
 
         /* 7. Verify with the new key itself before anything is replaced (IAM can lag a few seconds). A site that
@@ -1582,11 +1688,13 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
         $reconfiguring = is_array($previous_key) && !empty($previous_key['private_key_id']) && (string) $this->read_option('sm_bucket', '') !== '';
         if ($verified !== true && $reconfiguring) {
           $removed = $this->revoke_key($sa_email, $new_key['private_key_id']);
+          $this->remove_option('sm_gc_pending_setup_key');
           $log[] = $removed === true ? 'New key removed again' : 'New key could not be removed yet; it will be retried on the next setup';
           throw new Exception(sprintf(__('The new credentials could not reach the bucket (%s), so the current configuration was left unchanged. IAM changes can take a minute to apply; try again shortly.', ud_get_stateless_media()->domain), $verified));
         }
 
         /* 8. Save plugin settings */
+        $this->assert_provision_lock();
         $this->write_option('sm_bucket', $bucket);
         $this->write_option('sm_key_json', $key_json);
         $this->write_option('sm_mode', $mode);
@@ -1613,6 +1721,7 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
             : 'Previous key for this site could not be revoked yet (' . $revoked->get_error_message() . '); it will be retried on the next setup';
         }
         $this->retry_pending_revocations($log);
+        $this->remove_option('sm_gc_pending_setup_key');
 
         $log[] = $verified === true
           ? 'Verified: the site reached the bucket with its own credentials'
