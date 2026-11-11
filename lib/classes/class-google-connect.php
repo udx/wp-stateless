@@ -620,14 +620,20 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
         }
       }
       if (!$state) return $metadata;
-      if (!$this->funnel_uploads) add_action('shutdown', array($this, 'report_first_upload'), 0);
-      $this->funnel_uploads[get_current_blog_id() . ':' . (int) $attachment_id] = array(get_current_blog_id(), (int) $attachment_id, $network_id, $state);
+      if (!$this->funnel_uploads) add_action('shutdown', array($this, 'report_first_upload'), 1000);
+      $key = get_current_blog_id() . ':' . (int) $attachment_id;
+      // A bulk sync can touch thousands of attachments in one process; a few are enough to judge.
+      if (isset($this->funnel_uploads[$key]) || count($this->funnel_uploads) < 10) {
+        $this->funnel_uploads[$key] = array(get_current_blog_id(), (int) $attachment_id, $network_id, $state);
+      }
       return $metadata;
     }
 
     public function report_first_upload() {
       $pending = $this->funnel_uploads;
       $this->funnel_uploads = array();
+      // Send the response first where the server allows it, so the checks below never hold up an upload.
+      if ($pending && function_exists('fastcgi_finish_request') && doing_action('shutdown')) fastcgi_finish_request();
       $failed = array();
       foreach ($pending as $upload) {
         list($blog_id, $attachment_id, $network_id, $state) = $upload;
@@ -661,11 +667,12 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
       if (Utility::upload_errors($attachment_id)) return 'failed';
       $cloud = get_post_meta($attachment_id, 'sm_cloud', true);
       if (empty($cloud['name']) || empty($cloud['bucket'])) return '';
-      if (Utility::missing_cloud_object($attachment_id) !== '') return 'failed';
       // Syncing media that was already in the bucket is not a first upload. Allow for clock drift.
       $object = ud_get_stateless_media()->get_client()->get_media($cloud['name']);
-      $written = $object && !empty($object->timeCreated) ? strtotime($object->timeCreated) : 0;
-      return $written && $written >= (int) $state['created'] - 5 * MINUTE_IN_SECONDS ? 'uploaded' : '';
+      if (!$object) return 'failed';
+      $written = !empty($object->timeCreated) ? strtotime($object->timeCreated) : 0;
+      if (!$written || $written < (int) $state['created'] - 5 * MINUTE_IN_SECONDS) return '';
+      return Utility::missing_cloud_object($attachment_id) !== '' ? 'failed' : 'uploaded';
     }
 
     public function handle_billing_recheck() {
