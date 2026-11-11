@@ -1763,12 +1763,15 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
         } else {
           // A key saved by an attempt for different storage is abandoned now. It must not stay active, and it must
           // not stay reusable: once queued for revocation, a later reuse would end with the site's key deleted.
+          // If that attempt had already replaced the site's key, the key it replaced is revoked here as well.
           if (is_array($checkpoint) && !empty($checkpoint['key'])) {
-            $unused = json_decode($checkpoint['key'], true);
-            $in_use = is_array($unused) && is_array($configured_key) && !empty($unused['private_key_id']) && ($configured_key['private_key_id'] ?? '') === $unused['private_key_id'];
-            if (is_array($unused) && !empty($unused['private_key_id']) && !empty($unused['client_email']) && !$in_use) {
-              $removed = $this->revoke_key($unused['client_email'], $unused['private_key_id']); // a failure is queued and retried
-              $log[] = $removed === true ? 'Unused key from an earlier attempt removed' : 'Unused key from an earlier attempt could not be removed yet; it will be retried';
+            foreach ($this->setup_leftover_keys($checkpoint, $configured_key) as $leftover) {
+              $removed = $this->revoke_key($leftover['email'], $leftover['id']); // a failure is queued and retried
+              if ($leftover['kind'] === 'unused') {
+                $log[] = $removed === true ? 'Unused key from an earlier attempt removed' : 'Unused key from an earlier attempt could not be removed yet; it will be retried';
+              } else {
+                $log[] = $removed === true ? 'Key replaced by an earlier attempt revoked' : 'Key replaced by an earlier attempt could not be revoked yet; it will be retried';
+              }
             }
             $this->remove_option(self::SETUP_KEY_OPTION);
           }
@@ -1886,19 +1889,37 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
     }
 
     /**
+     * The keys a stored setup left behind that the site does not run on. Either the key that setup issued, when
+     * it never became the site's configuration. Or, when it did and the setup stopped before its last step, the
+     * key the site held until then; as in a completed setup, only a key of the same service account, so a key
+     * someone configured by hand is never touched. The key the site is configured with is never returned.
+     */
+    private function setup_leftover_keys($checkpoint, $current) {
+      $issued = is_array($checkpoint) && !empty($checkpoint['key']) ? json_decode($checkpoint['key'], true) : null;
+      if (!is_array($issued) || empty($issued['private_key_id']) || empty($issued['client_email'])) return array();
+      $current_id = is_array($current) && !empty($current['private_key_id']) ? $current['private_key_id'] : '';
+      if ($issued['private_key_id'] !== $current_id) {
+        return array(array('email' => $issued['client_email'], 'id' => $issued['private_key_id'], 'kind' => 'unused'));
+      }
+      $previous = isset($checkpoint['previous']) ? $checkpoint['previous'] : null;
+      if (is_array($previous) && !empty($previous['private_key_id']) && !empty($previous['client_email'])
+          && $previous['client_email'] === $issued['client_email'] && $previous['private_key_id'] !== $current_id) {
+        return array(array('email' => $previous['client_email'], 'id' => $previous['private_key_id'], 'kind' => 'replaced'));
+      }
+      return array();
+    }
+
+    /**
      * Ends a setup that stopped after Google issued its key: removes the stored copy, and with $revoke also the
-     * unused key at Google, unless the site is already configured with it.
+     * keys it left behind at Google. A revocation that fails is queued, so no key stays active without a record.
      */
     private function discard_setup_key($revoke) {
       $stored = (string) $this->read_option(self::SETUP_KEY_OPTION, '');
       if ($stored === '') return;
       if ($revoke) {
-        $checkpoint = json_decode($this->decrypt($stored), true);
-        $unused     = is_array($checkpoint) && !empty($checkpoint['key']) ? json_decode($checkpoint['key'], true) : null;
-        $current    = json_decode((string) $this->read_option('sm_key_json', ''), true);
-        if (is_array($unused) && !empty($unused['client_email']) && !empty($unused['private_key_id'])
-            && (!is_array($current) || ($current['private_key_id'] ?? '') !== $unused['private_key_id'])) {
-          $this->revoke_key($unused['client_email'], $unused['private_key_id']);
+        $current = json_decode((string) $this->read_option('sm_key_json', ''), true);
+        foreach ($this->setup_leftover_keys(json_decode($this->decrypt($stored), true), $current) as $leftover) {
+          $this->revoke_key($leftover['email'], $leftover['id']);
         }
       }
       $this->remove_option(self::SETUP_KEY_OPTION);

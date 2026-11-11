@@ -174,4 +174,18 @@ assert_true($log===false && $error===false,'log of a finished setup is shown onc
 invoke('state_set','error','Old failure',-1,7);
 [$log,$error]=invoke('take_result',7);
 assert_true($error===false,'expired explanation is not shown');
+// Keys an ended setup left behind: its own key when that never went live, otherwise the key it had already replaced.
+$key=fn($id,$email='site@project.iam')=>['private_key_id'=>$id,'client_email'=>$email];
+$saved=fn($issued,$previous)=>['bucket'=>'b','sa_email'=>'site@project.iam','key'=>json_encode($issued),'previous'=>$previous];
+$left=invoke('setup_leftover_keys',$saved($key('K1'),$key('K0')),$key('K0'));
+assert_true(count($left)===1 && $left[0]['id']==='K1' && $left[0]['kind']==='unused','setup key that never went live is revoked; the key in use is not');
+$left=invoke('setup_leftover_keys',$saved($key('K1'),$key('K0')),$key('K1'));
+assert_true(count($left)===1 && $left[0]['id']==='K0' && $left[0]['kind']==='replaced','key replaced by an interrupted setup is revoked');
+$left=invoke('setup_leftover_keys',$saved($key('K1'),$key('K0','hand-made@other.iam')),$key('K1'));
+assert_true($left===[],'replaced key of another service account is left alone');
+$left=invoke('setup_leftover_keys',$saved($key('K1'),null),$key('K1'));
+assert_true($left===[],'first setup that went live leaves nothing behind');
+$left=invoke('setup_leftover_keys',$saved($key('K1'),$key('K0')),$key('KX'));
+assert_true(count($left)===1 && $left[0]['id']==='K1','key that was replaced by hand is not revoked on the setup\'s behalf');
+assert_true(invoke('setup_leftover_keys',null,$key('K1'))===[] && invoke('setup_leftover_keys',['key'=>'not json'],$key('K1'))===[],'unreadable saved setup yields no keys');
 }
