@@ -20,6 +20,13 @@ function ud_get_stateless_media() { return (object) ['domain'=>'test']; }
 function wp_die($s) { throw new \RuntimeException($s); }
 function wp_send_json_error($data, $status = 200) { throw new Reply(false, $data, $status); }
 function wp_send_json_success($data) { throw new Reply(true, $data, 200); }
+function get_user_meta($uid, $key, $single = false) { return $GLOBALS['meta'][$uid][$key] ?? ''; }
+function update_user_meta($uid, $key, $value) { $GLOBALS['meta'][$uid][$key] = $value; return true; }
+function delete_user_meta($uid, $key) { unset($GLOBALS['meta'][$uid][$key]); return true; }
+function wp_strip_all_tags($s) { return trim(strip_tags($s)); }
+function add_query_arg($args, $url) { return $url . '?' . http_build_query($args); }
+function admin_url($path = '') { return '/wp-admin/' . $path; }
+function network_admin_url($path = '') { return '/wp-admin/network/' . $path; }
 class Reply extends \RuntimeException { public $ok, $data, $status; function __construct($ok,$data,$status) {$this->ok=$ok;$this->data=$data;$this->status=$status;} }
 class Database {
  // $locking: 'real' connection-owned locks, 'none' (functions unavailable), 'unverifiable' (GET_LOCK answers 1, ownership cannot be checked).
@@ -142,4 +149,29 @@ $_GET=['job'=>str_repeat('5',32)];
 $wpdb->connection=2;$x=reply(fn()=>invoke('ajax_provision_status'));$wpdb->connection=1;
 assert_true($x->data['status']==='running','slow worker that still holds the lock stays running');
 clear_job();
+// A failed setup keeps its explanation on the screen until the next action; the log of a finished setup is shown once.
+$GLOBALS['blog']=10;$_GET=[];$_POST=['sm_gc_job'=>str_repeat('8',32)];invoke('begin_provision_job');
+invoke('state_set','log',['Project ready','Stopped: That bucket name is taken'],600,7);
+$x=reply(fn()=>invoke('fail','That bucket name is taken'));
+assert_true($x->ok && json_decode($wpdb->rows['sm_gc_job_site_10'],true)['status']==='failed','failed setup is recorded on its job');
+clear_job();
+[$log,$error]=invoke('take_result',7);
+assert_true($error==='That bucket name is taken' && count($log)===2,'failed setup shows its explanation and the steps before it');
+[$log,$error]=invoke('take_result',7);
+assert_true($error==='That bucket name is taken' && count($log)===2,'reload keeps the explanation of a failed setup');
+$_POST['sm_gc_job']=str_repeat('9',32);invoke('begin_provision_job');invoke('clear_result');
+[$log,$error]=invoke('take_result',7);
+assert_true($log===false && $error===false,'next action clears the previous failure');
+invoke('state_set','error','A storage setup is still running.',600,7); // a disconnect refused in another tab meanwhile
+invoke('state_set','log',['Plugin configured'],600,7);
+$x=reply(fn()=>invoke('done',['sm_gc'=>'provisioned']));
+assert_true(json_decode($wpdb->rows['sm_gc_job_site_10'],true)['status']==='complete','finished setup is recorded on its job');
+clear_job();
+[$log,$error]=invoke('take_result',7);
+assert_true($error===false && $log===['Plugin configured'],'finished setup shows its log without an earlier failure');
+[$log,$error]=invoke('take_result',7);
+assert_true($log===false && $error===false,'log of a finished setup is shown once');
+invoke('state_set','error','Old failure',-1,7);
+[$log,$error]=invoke('take_result',7);
+assert_true($error===false,'expired explanation is not shown');
 }

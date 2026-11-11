@@ -176,10 +176,7 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
       $client     = $this->get_client();
       $connection = $this->get_connection();
       $uid        = get_current_user_id();
-      $log        = $this->state_get('log', $uid);
-      $error      = $this->state_get('error', $uid);
-      $this->state_delete('log', $uid);
-      $this->state_delete('error', $uid);
+      list($log, $error) = $this->take_result($uid);
 
       $auth_url  = '';
       $projects  = array();
@@ -474,6 +471,7 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
 
     public function handle_begin() {
       $this->guard();
+      $this->clear_result();
       if ($this->get_connection()) $this->done(array('sm_gc' => 'connected'));
       $client = $this->get_client();
       if (!$client) $this->fail(__('OAuth client is not configured.', ud_get_stateless_media()->domain));
@@ -715,6 +713,7 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
 
     public function handle_billing_recheck() {
       $this->guard();
+      $this->clear_result();
       if (!$this->get_connection()) $this->fail(__('Sign in to Google first.', ud_get_stateless_media()->domain));
       $uid = get_current_user_id();
       $draft = $this->state_get('draft', $uid);
@@ -751,6 +750,7 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
 
     public function handle_client() {
       $this->guard();
+      $this->clear_result();
       $id     = isset($_POST['client_id']) ? trim(sanitize_text_field($_POST['client_id'])) : '';
       $secret = isset($_POST['client_secret']) ? trim(sanitize_text_field($_POST['client_secret'])) : '';
       if (!$id || !$secret) {
@@ -914,7 +914,7 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
       $pkce = $this->state_get('pkce');
       if (!empty($pkce['site_verifier']) && !empty($pkce['state'])) $this->proof_delete($pkce['state']);
       $this->state_delete('pkce');
-      $this->state_delete('error');
+      $this->clear_result();
       $this->done(array());
     }
 
@@ -939,9 +939,9 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
     }
 
     private function finish($pasted) {
+      $this->clear_result();
       // A stale form or a second tab must not turn an established connection into an error.
       if ($this->get_connection()) {
-        $this->state_delete('error');
         $this->done(array('sm_gc' => 'connected'));
       }
       $client = $this->get_client();
@@ -1061,6 +1061,7 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
 
     public function handle_disconnect() {
       $this->guard();
+      $this->clear_result();
       $connection = $this->get_connection();
       $domain = ud_get_stateless_media()->domain;
       // A disconnect and a setup worker must not overlap: disconnecting removes the key an unfinished setup saved,
@@ -1120,8 +1121,29 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
     /* Lives in user meta, not transients: a misconfigured object cache     */
     /* drops transients between requests (seen on a dev pod whose memcached */
     /* was unreachable), and the PKCE verifier must survive from the        */
-    /* sign-in click to the return. The error and log are read once.        */
+    /* sign-in click to the return.                                         */
     /* ------------------------------------------------------------------ */
+
+    /**
+     * The outcome of the last action, for the screen. A failure and the steps before it stay readable until
+     * the next action starts or they expire, so a reload does not lose the explanation. The log of a setup
+     * that finished is shown once.
+     */
+    private function take_result($uid) {
+      $log   = $this->state_get('log', $uid);
+      $error = $this->state_get('error', $uid);
+      if (!$error) {
+        $this->state_delete('log', $uid);
+        $this->state_delete('error', $uid);
+      }
+      return array($log, $error);
+    }
+
+    /** Every action starts by dropping the previous outcome; it reports its own when it ends. */
+    private function clear_result() {
+      $this->state_delete('error');
+      $this->state_delete('log');
+    }
 
     private function state_get($key, $uid = null) {
       $uid = $uid ? $uid : get_current_user_id();
@@ -1459,6 +1481,7 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
     public function handle_provision() {
       $this->guard();
       $this->begin_provision_job();
+      $this->clear_result();
       if (!$this->get_connection()) $this->fail(__('Not connected to Google.', ud_get_stateless_media()->domain));
       $blocked = $this->storage_blocked();
       if ($blocked) $this->fail($blocked);
@@ -1968,6 +1991,9 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
     }
 
     private function done($args) {
+      // An action that ends well leaves no earlier failure on the screen, such as a disconnect that was
+      // refused in another tab while this setup was still running.
+      if (!isset($args['sm_gc']) || $args['sm_gc'] !== 'error') $this->state_delete('error');
       if ($this->provision_job) {
         $this->provision_job_write(array('status' => isset($args['sm_gc']) && $args['sm_gc'] === 'provisioned' ? 'complete' : 'failed', 'url' => $this->page_url($args)));
         $this->provision_job = null;
