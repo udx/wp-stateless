@@ -95,3 +95,20 @@ To ensure new releases cause as little disruption as possible, we rely on a numb
 ### Who maintains this plugin?
 
 [UDX](https://udx.io/) maintains this plugin by continuing development through its own staff, reviewing pull requests, testing, and steering the overall release schedule. UDX is located in Durham, North Carolina, and provides WordPress engineering and hosting services to clients throughout the United States.
+
+## External services
+
+WP-Stateless stores and serves your media from Google Cloud Storage in your own Google account. It relies on the services below. Your media files are sent only to Google Cloud Storage.
+
+### Google Cloud
+The plugin uploads, reads and deletes media in the Google Cloud Storage bucket you configure, using your own service account. During Stateless Connect it also uses Google sign-in and Google Cloud APIs (projects, billing, IAM, service usage and storage) with the permissions you approve, to create or select the project, bucket and service account. This service is provided by Google: [Terms of Service](https://cloud.google.com/terms), [Privacy Policy](https://policies.google.com/privacy).
+
+### stateless.ci (Stateless Connect)
+Stateless Connect uses stateless.ci, operated by UDX, to handle Google sign-in for the plugin. It is contacted when an administrator opens the Stateless Connect screen, which also opens once after the plugin is activated on a site that has no storage configured. Opening the screen sends the site's WordPress admin return address and a one-time challenge so that a sign-in can be prepared. Signing in passes the Google authorization through stateless.ci for one-time delivery to your site, and later token refreshes also pass through it. The service account key is created in your own Google Cloud project and never passes through stateless.ci.
+
+To learn whether setup works, the plugin also reports setup progress for that sign-in attempt: screen viewed, sign-in started, storage created or failed with a general reason, and whether the first upload succeeded. These records do not contain the site address, email address, project ID or bucket name, and they expire after seven days.
+
+Sites configured by hand with a bucket and service account JSON under Stateless Settings do not need Stateless Connect, and the `WP_STATELESS_MEDIA_HIDE_SETUP_ASSISTANT` constant keeps the screen from opening. This service is provided by UDX: [Privacy Policy](https://stateless.ci/privacy/).
+
+### UDX product check-in
+While you use the WordPress admin, the plugin contacts UDX (usabilitydynamics.com) at most once a day to check for product notices. The request includes your site address, the plugin version and the UDX products detected on the site. This service is provided by UDX: [Privacy Policy](https://udx.io/privacy-policy).
