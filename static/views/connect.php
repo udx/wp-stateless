@@ -140,7 +140,9 @@ $start_error   = wpCloud\StatelessMedia\GoogleConnect::instance()->start_error;
           </form>
         </details>
         <div class="sm-connect-help">
-          <span><?php _e('Use your Google Cloud account. You can disconnect anytime.', $domain); ?> <a href="<?php echo esc_url(ud_get_stateless_media()->get_docs_page_url('docs/google-permission-request/')); ?>" target="_blank" rel="noopener"><?php _e('Why Google asks for this access', $domain); ?></a></span>
+          <p><?php _e('Use your Google Cloud account. You can disconnect anytime.', $domain); ?></p>
+          <div class="sm-connect-help-actions">
+          <a href="<?php echo esc_url(ud_get_stateless_media()->get_docs_page_url('docs/google-permission-request/')); ?>" target="_blank" rel="noopener"><?php _e('Why Google asks for this access', $domain); ?></a>
           <?php if ($auth_url) : ?>
             <form method="post" action="<?php echo esc_url($post); ?>">
               <?php wp_nonce_field($connect->nonce_action()); ?>
@@ -148,6 +150,7 @@ $start_error   = wpCloud\StatelessMedia\GoogleConnect::instance()->start_error;
               <button type="submit" class="button-link"><?php _e('Start over', $domain); ?></button>
             </form>
           <?php endif; ?>
+          </div>
         </div>
       <?php else : ?>
         <h3 style="margin-bottom:6px"><?php _e('What happens next', $domain); ?></h3>
