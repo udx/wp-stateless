@@ -618,8 +618,14 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
     /** @var int Sync attempts this process has judged. A bulk run is no longer measured after 100. */
     private $funnel_judged = 0;
 
+    /** @var array When this process last found no setup attempt to measure on a site, keyed by blog ID. */
+    private $funnel_idle = array();
+
     public function track_first_upload($metadata, $attachment_id, $force = false, $args = array()) {
+      $blog_id = get_current_blog_id();
       if ($this->funnel_judged >= 100) return $metadata;
+      // A site with no setup attempt open is looked up at most once a minute by a process, not on every sync.
+      if (isset($this->funnel_idle[$blog_id]) && time() - $this->funnel_idle[$blog_id] < MINUTE_IN_SECONDS) return $metadata;
       $network_id = $this->network_scope() ? get_current_network_id() : 0;
       $state = $this->funnel_state($network_id);
       if (!$state && is_multisite()) {
@@ -630,10 +636,13 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
           if ($state) $network_id = $candidate;
         }
       }
-      if (!$state) return $metadata;
+      if (!$state) {
+        $this->funnel_idle[$blog_id] = time();
+        return $metadata;
+      }
       $attempt = $network_id . ':' . $state['txn'];
       if (!empty($this->funnel_done[$attempt])) return $metadata;
-      $key = get_current_blog_id() . ':' . (int) $attachment_id;
+      $key = $blog_id . ':' . (int) $attachment_id;
       // A bulk sync can touch thousands of attachments in one process. The ones seen earlier are finished
       // by the time another arrives, so judge those now and keep the list short.
       if (!isset($this->funnel_uploads[$key]) && count($this->funnel_uploads) >= 10) {
@@ -641,7 +650,7 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
         if ($this->funnel_judged >= 100 || !empty($this->funnel_done[$attempt])) return $metadata;
       }
       if (!$this->funnel_uploads) add_action('shutdown', array($this, 'report_first_upload'), 1000);
-      $this->funnel_uploads[$key] = array(get_current_blog_id(), (int) $attachment_id, $network_id, $state);
+      $this->funnel_uploads[$key] = array($blog_id, (int) $attachment_id, $network_id, $state);
       return $metadata;
     }
 
