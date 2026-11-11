@@ -35,6 +35,7 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
     /** @var string|null */
     private $page_hook = null;
     private $network_hook = null;
+    private $provision_job = null;
 
     /** @var string Why the hosted sign-in could not be prepared, for the page to show. */
     public $start_error = '';
@@ -55,6 +56,7 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
       add_action('admin_post_sm_gc_billing_recheck', array($this, 'handle_billing_recheck'));
       add_action('admin_post_sm_gc_disconnect', array($this, 'handle_disconnect'));
       add_action('admin_post_sm_gc_restart', array($this, 'handle_restart'));
+      add_action('wp_ajax_sm_gc_provision_status', array($this, 'ajax_provision_status'));
       add_action('wp_ajax_sm_gc_buckets', array($this, 'ajax_buckets'));
       add_action('wp_ajax_sm_gc_project_billing', array($this, 'ajax_project_billing'));
     }
@@ -1258,8 +1260,73 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
     /* Provisioning: project, APIs, bucket, service account, role, key      */
     /* ------------------------------------------------------------------ */
 
+    /** A database-backed scope lock survives proxy timeouts and bypasses stale object caches. */
+    private function provision_job_key() {
+      return 'sm_gc_job_' . ($this->network_scope() ? 'network_' . get_current_network_id() : 'site_' . get_current_blog_id());
+    }
+
+    private function provision_job_read() {
+      global $wpdb;
+      $raw = $wpdb->get_var($wpdb->prepare("SELECT option_value FROM {$wpdb->base_prefix}options WHERE option_name = %s", $this->provision_job_key()));
+      return array($raw, $raw ? json_decode($raw, true) : null);
+    }
+
+    private function provision_job_write($changes) {
+      if (!$this->provision_job) return;
+      global $wpdb;
+      list($raw, $job) = $this->provision_job_read();
+      if (!is_array($job) || $job['id'] !== $this->provision_job) return;
+      $job = array_merge($job, $changes, array('updated' => time()));
+      $wpdb->query($wpdb->prepare("UPDATE {$wpdb->base_prefix}options SET option_value = %s WHERE option_name = %s AND option_value = %s", wp_json_encode($job), $this->provision_job_key(), $raw));
+    }
+
+    private function begin_provision_job() {
+      global $wpdb;
+      $id = isset($_POST['sm_gc_job']) ? sanitize_text_field(wp_unslash($_POST['sm_gc_job'])) : wp_generate_uuid4();
+      if (!preg_match('/^[a-zA-Z0-9-]{16,64}$/D', $id)) wp_die(__('Invalid setup request.', ud_get_stateless_media()->domain));
+      list($raw, $previous) = $this->provision_job_read();
+      // A repeated POST never repeats Google mutations, even after the first request finished.
+      if (is_array($previous) && ($previous['status'] === 'running' || $previous['id'] === $id)) {
+        wp_send_json_error(array('message' => __('A storage setup is already recorded. Checking its progress.', ud_get_stateless_media()->domain)), 409);
+      }
+      $job = array('id' => $id, 'uid' => get_current_user_id(), 'status' => 'running', 'started' => time(), 'updated' => time(), 'message' => __('Preparing your storage.', ud_get_stateless_media()->domain));
+      if ($raw === null) {
+        $locked = $wpdb->query($wpdb->prepare("INSERT IGNORE INTO {$wpdb->base_prefix}options (option_name, option_value, autoload) VALUES (%s, %s, 'no')", $this->provision_job_key(), wp_json_encode($job)));
+      } else {
+        $locked = $wpdb->query($wpdb->prepare("UPDATE {$wpdb->base_prefix}options SET option_value = %s WHERE option_name = %s AND option_value = %s", wp_json_encode($job), $this->provision_job_key(), $raw));
+      }
+      if ($locked !== 1) wp_send_json_error(array('message' => __('Another setup request is starting. Check again shortly.', ud_get_stateless_media()->domain)), 409);
+      $this->provision_job = $id;
+      // Reverse proxies may close the HTTP connection while Google is still working.
+      ignore_user_abort(true);
+      register_shutdown_function(function () {
+        if ($this->provision_job) {
+          $this->provision_job_write(array('status' => 'interrupted', 'message' => __('Setup stopped before completion. Return to storage settings to review the saved choices.', ud_get_stateless_media()->domain)));
+        }
+      });
+    }
+
+    public function ajax_provision_status() {
+      if (!current_user_can($this->capability())) wp_send_json_error(array('message' => __('Insufficient permissions.')), 403);
+      check_ajax_referer($this->nonce_action(), 'nonce');
+      list($raw, $job) = $this->provision_job_read();
+      if (!is_array($job)) wp_send_json_success(array('status' => 'none'));
+      if ((int) $job['uid'] !== get_current_user_id()) {
+        wp_send_json_success(array('status' => $job['status'] === 'running' ? 'busy' : 'none'));
+      }
+      $requested = isset($_GET['job']) ? sanitize_text_field(wp_unslash($_GET['job'])) : '';
+      if ($requested !== $job['id'] && $job['status'] !== 'running') wp_send_json_success(array('status' => 'none'));
+      // Never automatically resubmit a long-running or lost request: it may have created a project.
+      if ($job['status'] === 'running' && time() - $job['started'] > 360) {
+        $job['message'] = __('Google setup is taking longer than expected. Keep this page open; do not start another setup.', ud_get_stateless_media()->domain);
+      }
+      unset($job['uid']);
+      wp_send_json_success($job);
+    }
+
     public function handle_provision() {
       $this->guard();
+      $this->begin_provision_job();
       if (!$this->get_connection()) $this->fail(__('Not connected to Google.', ud_get_stateless_media()->domain));
       $blocked = $this->storage_blocked();
       if ($blocked) $this->fail($blocked);
@@ -1302,6 +1369,7 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
       if (!in_array($bucket_choice, array('new', 'existing'), true)) $this->fail(__('Choose whether to create or reuse a bucket.', ud_get_stateless_media()->domain));
 
       try {
+        $this->provision_job_write(array('message' => __('Preparing your Google Cloud project and billing.', ud_get_stateless_media()->domain)));
         /* 1. Project */
         if ($project_choice === '__new__') {
           if (!$new_project) throw new Exception(__('Give the new project a name.', ud_get_stateless_media()->domain));
@@ -1314,15 +1382,14 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
           ));
           $this->check($op, 'Create project');
           $log[] = sprintf('Creating project %s (%s)', $new_project, $project_id);
-          $this->check($this->wait_operation('https://cloudresourcemanager.googleapis.com/v1/' . $op['name']), 'Create project');
-          $log[] = 'Project created';
-          // Checkpoint before billing: the project exists now, so a retry after a billing failure must
-          // resume it (and link the chosen billing account below) instead of creating a second project.
+          // Save the accepted project before polling: an interrupted wait must not create another one.
           $draft['project'] = $project_id;
           $draft['new_project_name'] = '';
           $draft['created_project'] = $project_id;
           $draft['pending_billing'] = $billing_choice;
           $this->state_set('draft', $draft, HOUR_IN_SECONDS, $uid);
+          $this->check($this->wait_operation('https://cloudresourcemanager.googleapis.com/v1/' . $op['name']), 'Create project');
+          $log[] = 'Project created';
 
           if ($billing_choice) {
             $this->link_billing($project_id, $billing_choice);
@@ -1352,6 +1419,7 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
           }
         }
 
+        $this->provision_job_write(array('message' => __('Checking billing and preparing bucket access.', ud_get_stateless_media()->domain)));
         if ($bucket_choice === 'new') {
           $billing_info = $this->api('GET', 'https://cloudbilling.googleapis.com/v1/projects/' . rawurlencode($project_id) . '/billingInfo');
           if (!is_wp_error($billing_info) && empty($billing_info['billingEnabled'])) {
@@ -1664,6 +1732,11 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
     }
 
     private function done($args) {
+      if ($this->provision_job) {
+        $this->provision_job_write(array('status' => isset($args['sm_gc']) && $args['sm_gc'] === 'provisioned' ? 'complete' : 'failed', 'url' => $this->page_url($args)));
+        $this->provision_job = null;
+        if (isset($_POST['sm_gc_job'])) wp_send_json_success(array('finished' => true));
+      }
       wp_safe_redirect($this->page_url($args));
       exit;
     }
