@@ -50,7 +50,7 @@ $start_error   = wpCloud\StatelessMedia\GoogleConnect::instance()->start_error;
   <?php endif; ?>
 
   <?php if ($error) : ?>
-    <div class="notice notice-error"><p><?php echo wp_kses_post($error); ?></p></div>
+    <div class="notice notice-error sm-connect-result"><p><?php echo wp_kses_post($error); ?></p></div>
   <?php elseif ($msg === 'client-saved') : ?>
     <div class="notice notice-success"><p><?php _e('OAuth client saved.', $domain); ?></p></div>
   <?php elseif ($msg === 'connected' && $connection) : ?>

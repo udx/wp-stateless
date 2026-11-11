@@ -3,12 +3,12 @@ const fs = require('node:fs');
 const vm = require('node:vm');
 const assert = require('node:assert/strict');
 const source = fs.readFileSync(__dirname + '/../static/scripts/stateless-connect.js', 'utf8').split('// Keep the document alive')[1];
-async function scenario({formPresent=true, saved='', responses=[]}={}) {
+async function scenario({formPresent=true, saved='', responses=[], resultShown=false}={}) {
   const requests=[], timers=[], listeners={}, store=new Map(saved ? [['stateless-provision:/wp-admin/upload.php:0',saved]]:[]);
   const nodes=[]; const node=()=>{const n={hidden:false,setAttribute(){},append(){},scrollIntoView(){},addEventListener:(event,fn)=>n[event]=fn};nodes.push(n);return n;};
   const form={action:{value:'sm_gc_provision'},getAttribute:()=>'/wp-admin/admin-post.php',querySelectorAll:()=>[],addEventListener:(event,fn)=>listeners[event]=fn};
   const location={pathname:'/wp-admin/upload.php',assign:url=>location.destination=url,reload:()=>location.reloaded=true};
-  const context={URL,Uint8Array,crypto:require('node:crypto').webcrypto,location,sessionStorage:{getItem:k=>store.get(k),setItem:(k,v)=>store.set(k,v),removeItem:k=>store.delete(k)},document:{getElementById:()=>formPresent?form:null,createElement:node,querySelector:()=>({after(){}})},FormData:class{set(){}},fetch:async(url,options)=>{requests.push({url:String(url),options});return {ok:true,json:async()=>({success:true,data:responses.shift()||{status:'none'}})};}};
+  const context={URL,Uint8Array,crypto:require('node:crypto').webcrypto,location,sessionStorage:{getItem:k=>store.get(k),setItem:(k,v)=>store.set(k,v),removeItem:k=>store.delete(k)},document:{getElementById:()=>formPresent?form:null,createElement:node,querySelector:selector=>selector==='.sm-connect-result'?(resultShown?{}:null):({after(){}})},FormData:class{set(){}},fetch:async(url,options)=>{requests.push({url:String(url),options});return {ok:true,json:async()=>({success:true,data:responses.shift()||{status:'none'}})};}};
   context.window={smConnectPicker:{url:'https://example.test/wp-admin/admin-ajax.php?sm_gc_network=0',nonce:'nonce'},setTimeout:fn=>timers.push(fn)};
   vm.runInNewContext('// Keep the document alive'+source,context);
   await new Promise(setImmediate);
@@ -33,4 +33,10 @@ async function scenario({formPresent=true, saved='', responses=[]}={}) {
   assert.ok(resume);resume.click();assert.equal(s.location.reloaded,true);
   assert.equal(s.requests.filter(r=>r.options.method==='POST').length,0);
   console.log('PASS interrupted worker offers manual resume without replay');
+  s=await scenario({saved:'late',responses:[{id:'late',status:'failed',url:'/error'}],resultShown:true});
+  assert.equal(s.location.destination,undefined);assert.equal(s.store.size,0);
+  console.log('PASS reload after a failed setup keeps the explanation already on the page');
+  s=await scenario({saved:'late',responses:[{id:'late',status:'failed',url:'/error'}]});
+  assert.equal(s.location.destination,'/error');
+  console.log('PASS failed setup without a rendered result still navigates to it');
 })().catch(error=>{console.error(error);process.exitCode=1;});

@@ -1063,6 +1063,15 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
       $this->guard();
       $connection = $this->get_connection();
       $domain = ud_get_stateless_media()->domain;
+      // A disconnect and a setup worker must not overlap: disconnecting removes the key an unfinished setup saved,
+      // which a worker in flight could be about to store as the site's configuration. The lock is held until this
+      // request ends (the database releases it with the connection), so no setup can start meanwhile either.
+      $lock = $this->take_provision_lock(2);
+      list($raw, $job) = $this->provision_job_read();
+      $job = $this->recover_provision_job($raw, $job, $lock);
+      if ($lock === '0' || (is_array($job) && $job['status'] === 'running')) {
+        $this->fail(__('A storage setup is still running. Wait for it to finish, then disconnect.', $domain));
+      }
       $unreadable = $connection && $this->connection_unreadable($connection);
       if ($unreadable && empty($_POST['sm_gc_force'])) {
         // Nothing can be revoked from here, so do not report that it was.
@@ -1298,9 +1307,22 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
     }
 
     private function assert_provision_lock() {
-      // Without a database lock (see take_provision_lock) only the job record guards the setup.
-      if (!$this->provision_job || !$this->provision_lock) return;
+      if (!$this->provision_job) return;
       global $wpdb;
+      if (!$this->provision_lock) {
+        // No database lock here (see take_provision_lock), so the job record is the guard: a worker that was
+        // declared stopped and replaced must not continue, and a live one keeps its record fresh.
+        list($raw, $job) = $this->provision_job_read();
+        if (!is_array($job) || $job['id'] !== $this->provision_job || $job['status'] !== 'running') {
+          $this->provision_job = null;
+          wp_die(__('This setup stopped responding and another one took over. Reload to see its progress.', ud_get_stateless_media()->domain));
+        }
+        if (time() - (int) $job['updated'] >= MINUTE_IN_SECONDS) {
+          $job['updated'] = time();
+          $wpdb->query($wpdb->prepare("UPDATE {$wpdb->base_prefix}options SET option_value = %s WHERE option_name = %s AND option_value = %s", wp_json_encode($job), $this->provision_job_key(), $raw));
+        }
+        return;
+      }
       $owned = $wpdb->get_var($wpdb->prepare('SELECT IS_USED_LOCK(%s) = CONNECTION_ID()', $this->provision_lock));
       if ((string) $owned !== '1') {
         // wpdb can reconnect silently. A former owner must never continue mutating Google.
@@ -1358,9 +1380,9 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
       return array($raw, $raw ? json_decode($raw, true) : null);
     }
 
-    private function provision_job_write($changes) {
+    private function provision_job_write($changes, $guard = true) {
       if (!$this->provision_job) return;
-      $this->assert_provision_lock();
+      if ($guard) $this->assert_provision_lock();
       global $wpdb;
       list($raw, $job) = $this->provision_job_read();
       if (!is_array($job) || $job['id'] !== $this->provision_job) return;
@@ -1400,7 +1422,8 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
 
     public function release_provision_worker() {
       if ($this->provision_job) {
-        $this->provision_job_write(array('status' => 'interrupted', 'message' => __('Setup stopped before completion. Reload to resume the saved storage choices.', ud_get_stateless_media()->domain)));
+        // Unguarded: this runs at shutdown, and the write only ever touches this worker's own record.
+        $this->provision_job_write(array('status' => 'interrupted', 'message' => __('Setup stopped before completion. Reload to resume the saved storage choices.', ud_get_stateless_media()->domain)), false);
         $this->provision_job = null;
       }
       $this->release_provision_lock();

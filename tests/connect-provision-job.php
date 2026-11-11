@@ -3,6 +3,7 @@
 namespace wpCloud\StatelessMedia { trait Singleton {} }
 namespace {
 define('DB_NAME','test');
+define('MINUTE_IN_SECONDS',60);
 function is_admin() { return true; }
 function is_multisite() { return $GLOBALS['multi'] ?? false; }
 function is_network_admin() { return $GLOBALS['network'] ?? false; }
@@ -125,6 +126,14 @@ assert_true(json_decode($wpdb->rows['sm_gc_job_site_6'],true)['id']===str_repeat
 clear_job();
 $wpdb->locking='unverifiable';$GLOBALS['blog']=7;$_POST['sm_gc_job']=str_repeat('4',32);invoke('begin_provision_job');
 assert_true(json_decode($wpdb->rows['sm_gc_job_site_7'],true)['worker_lock']===false,'lock that cannot be verified is not trusted');
+clear_job();
+// Without locks the job record is the guard: a live worker keeps it fresh, a replaced worker stops.
+$wpdb->locking='none';$GLOBALS['blog']=9;$_POST['sm_gc_job']=str_repeat('6',32);invoke('begin_provision_job');
+$row=json_decode($wpdb->rows['sm_gc_job_site_9'],true);$row['updated']=time()-120;$wpdb->rows['sm_gc_job_site_9']=json_encode($row);
+invoke('assert_provision_lock');
+assert_true(time()-json_decode($wpdb->rows['sm_gc_job_site_9'],true)['updated']<5,'live lockless worker refreshes its record');
+$row=json_decode($wpdb->rows['sm_gc_job_site_9'],true);$row['id']=str_repeat('7',32);$wpdb->rows['sm_gc_job_site_9']=json_encode($row);
+try {invoke('assert_provision_lock');throw new \RuntimeException('replaced worker continued');}catch(\RuntimeException $e){assert_true(strpos($e->getMessage(),'took over')!==false,'replaced lockless worker stops before touching Google again');}
 clear_job();$wpdb->locking='real';
 // A worker that held a real lock is never declared dead by age while the lock is still held.
 $GLOBALS['blog']=8;$_POST['sm_gc_job']=str_repeat('5',32);invoke('begin_provision_job');

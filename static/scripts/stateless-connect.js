@@ -209,6 +209,9 @@
         remember(data.id);
         if (data.status === 'complete' || data.status === 'failed') {
           remember('');
+          // A reload can land after the setup failed: this page then already shows the explanation, which is
+          // shown once and would be lost by navigating again.
+          if (data.status === 'failed' && panel.hidden && document.querySelector('.sm-connect-result')) return;
           location.assign(data.url);
           return;
         }
