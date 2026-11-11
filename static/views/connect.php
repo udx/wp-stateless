@@ -66,11 +66,13 @@ $start_error   = wpCloud\StatelessMedia\GoogleConnect::instance()->start_error;
   <?php if (is_array($log) && $log) : ?>
     <div class="card" style="max-width:720px">
       <h2 class="title"><?php echo $msg === 'provisioned' ? esc_html__('Done', $domain) : esc_html__('Progress', $domain); ?></h2>
-      <ol style="margin-left:1.2em">
-        <?php foreach ($log as $line) : ?>
-          <li><?php echo esc_html($line); ?></li>
+      <ul class="sm-connect-log" role="list">
+        <?php foreach ($log as $line) :
+          $line_status = preg_match('/Stopped:|could not|did not pass|pending revocation|No billing account/i', $line) ? 'warning' : (strpos($line, 'Creating project ') === 0 ? 'info' : 'success');
+        ?>
+          <li class="sm-connect-log-<?php echo esc_attr($line_status); ?>"><span class="sm-connect-log-mark" aria-hidden="true"><?php echo $line_status === 'success' ? '&#10003;' : ($line_status === 'warning' ? '!' : '&middot;'); ?></span><span><?php echo esc_html($line); ?></span></li>
         <?php endforeach; ?>
-      </ol>
+      </ul>
       <?php if ($msg === 'provisioned') : ?>
         <p>
           <a class="button button-primary" href="<?php echo esc_url(admin_url('media-new.php')); ?>"><?php _e('Upload a test image', $domain); ?></a>

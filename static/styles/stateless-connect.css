@@ -47,3 +47,5 @@
 
 /* Keep supporting copy separate from the help and restart actions. */
 .sm-connect .sm-connect-help{display:block}.sm-connect-help p{margin:0 0 8px;font-size:inherit;line-height:inherit}.sm-connect-help-actions{display:flex;flex-wrap:wrap;align-items:baseline;gap:8px 24px}.sm-connect-help-actions>a,.sm-connect-help-actions .button-link{display:inline-block;white-space:nowrap;line-height:1.6}.sm-connect-help-actions form{margin:0}
+
+.sm-connect-log{list-style:none;margin:16px 0 20px;padding:0}.sm-connect-log li{display:flex;align-items:flex-start;gap:10px;margin:8px 0;line-height:1.6;overflow-wrap:anywhere}.sm-connect-log-mark{flex:0 0 16px;width:16px;height:16px;box-sizing:border-box;margin-top:3px;text-align:center;line-height:14px;font-size:12px;font-weight:600;border:1px solid #b4c9bc;border-radius:2px;color:#39734d;background:#f3f8f4}.sm-connect-log-warning .sm-connect-log-mark{color:#8a5919;border-color:#d5bd96;background:#fbf7ef}.sm-connect-log-info .sm-connect-log-mark{color:#687086;border-color:transparent;background:transparent}
