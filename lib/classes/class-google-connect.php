@@ -579,9 +579,10 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
 
     private function track_event($event, $reason = '', $network_id = null, $expected = null) {
       if ($network_id === null) $network_id = $this->network_scope() ? get_current_network_id() : 0;
-      if ($expected === null) {
+      if ($expected === null && in_array($event, array('viewed', 'clicked'), true)) {
+        // Viewing and clicking belong to this administrator's own sign-in attempt. Every later milestone
+        // belongs to the attempt that connected the site, whoever is signed in when it happens.
         $state = $this->funnel_state($network_id, get_current_user_id());
-        if (!$state && $this->get_connection()) $state = $this->funnel_state($network_id);
       } else {
         $state = $this->funnel_state($network_id);
       }
@@ -608,7 +609,17 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
      */
     private $funnel_uploads = array();
 
+    /** @var array Setup attempts already told about a failed upload by this process. */
+    private $funnel_failures = array();
+
+    /** @var array Setup attempts whose first upload this process has already reported, confirmed or not. */
+    private $funnel_done = array();
+
+    /** @var int Sync attempts this process has judged. A bulk run is no longer measured after 100. */
+    private $funnel_judged = 0;
+
     public function track_first_upload($metadata, $attachment_id, $force = false, $args = array()) {
+      if ($this->funnel_judged >= 100) return $metadata;
       $network_id = $this->network_scope() ? get_current_network_id() : 0;
       $state = $this->funnel_state($network_id);
       if (!$state && is_multisite()) {
@@ -620,12 +631,17 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
         }
       }
       if (!$state) return $metadata;
-      if (!$this->funnel_uploads) add_action('shutdown', array($this, 'report_first_upload'), 1000);
+      $attempt = $network_id . ':' . $state['txn'];
+      if (!empty($this->funnel_done[$attempt])) return $metadata;
       $key = get_current_blog_id() . ':' . (int) $attachment_id;
-      // A bulk sync can touch thousands of attachments in one process; a few are enough to judge.
-      if (isset($this->funnel_uploads[$key]) || count($this->funnel_uploads) < 10) {
-        $this->funnel_uploads[$key] = array(get_current_blog_id(), (int) $attachment_id, $network_id, $state);
+      // A bulk sync can touch thousands of attachments in one process. The ones seen earlier are finished
+      // by the time another arrives, so judge those now and keep the list short.
+      if (!isset($this->funnel_uploads[$key]) && count($this->funnel_uploads) >= 10) {
+        $this->report_first_upload();
+        if ($this->funnel_judged >= 100 || !empty($this->funnel_done[$attempt])) return $metadata;
       }
+      if (!$this->funnel_uploads) add_action('shutdown', array($this, 'report_first_upload'), 1000);
+      $this->funnel_uploads[$key] = array(get_current_blog_id(), (int) $attachment_id, $network_id, $state);
       return $metadata;
     }
 
@@ -634,28 +650,33 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
       $this->funnel_uploads = array();
       // Send the response first where the server allows it, so the checks below never hold up an upload.
       if ($pending && function_exists('fastcgi_finish_request') && doing_action('shutdown')) fastcgi_finish_request();
-      $failed = array();
       foreach ($pending as $upload) {
         list($blog_id, $attachment_id, $network_id, $state) = $upload;
+        $attempt = $network_id . ':' . $state['txn'];
+        if (!empty($this->funnel_done[$attempt])) continue;
+        $this->funnel_judged++;
         $switched = is_multisite() && get_current_blog_id() !== $blog_id;
         if ($switched) switch_to_blog($blog_id);
         try {
-          $result = $this->first_upload_result($attachment_id, $state);
+          try {
+            $result = $this->first_upload_result($attachment_id, $state);
+          } catch (\Throwable $e) {
+            $result = 'failed';
+          }
+          if ($result === 'failed' && empty($this->funnel_failures[$attempt])) {
+            $this->funnel_failures[$attempt] = true;
+            $this->track_event('upload_failed', 'storage', $network_id, $state);
+          }
+          if ($result === 'uploaded') {
+            // One report per process. If it is not confirmed the record stays open for a later request.
+            $this->funnel_done[$attempt] = true;
+            if ($this->track_event('first_upload', '', $network_id, $state)) $this->forget_funnel($network_id, $state['_raw'], true);
+          }
         } catch (\Throwable $e) {
-          $result = 'failed';
+          // Setup measurement must never interrupt a sync.
+        } finally {
+          if ($switched) restore_current_blog();
         }
-        $key = $network_id . ':' . $state['txn'];
-        $done = false;
-        if ($result === 'failed' && empty($failed[$key])) {
-          $failed[$key] = true;
-          $this->track_event('upload_failed', 'storage', $network_id, $state);
-        }
-        if ($result === 'uploaded') {
-          if ($this->track_event('first_upload', '', $network_id, $state)) $this->forget_funnel($network_id, $state['_raw'], true);
-          $done = true;
-        }
-        if ($switched) restore_current_blog();
-        if ($done) return;
       }
     }
 
