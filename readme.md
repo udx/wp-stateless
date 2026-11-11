@@ -108,7 +108,7 @@ Stateless Connect uses stateless.ci, operated by UDX, to handle Google sign-in f
 
 To learn whether setup works, the plugin also reports setup progress for that sign-in attempt: screen viewed, sign-in started, storage created or failed with a general reason, and whether the first upload succeeded. These records do not contain the site address, email address, project ID or bucket name, and they expire after seven days.
 
-Sites configured by hand with a bucket and service account JSON under Stateless Settings do not need Stateless Connect, and the `WP_STATELESS_MEDIA_HIDE_SETUP_ASSISTANT` constant keeps the screen from opening. This service is provided by UDX: [Privacy Policy](https://stateless.ci/privacy/).
+Sites configured by hand with a bucket and service account JSON under Stateless Settings do not need Stateless Connect, and the `WP_STATELESS_MEDIA_HIDE_SETUP_ASSISTANT` constant keeps the screen from opening. This service is provided by UDX: [Privacy Policy](https://stateless.ci/privacy-policy/).
 
 ### UDX product check-in
 While you use the WordPress admin, the plugin contacts UDX (usabilitydynamics.com) at most once a day to check for product notices. The request includes your site address, the plugin version and the UDX products detected on the site. This service is provided by UDX: [Privacy Policy](https://udx.io/privacy-policy).

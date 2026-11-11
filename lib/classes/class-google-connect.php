@@ -602,6 +602,12 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
       return is_array($data) && !empty($data['ok']);
     }
 
+    /**
+     * Sync attempts seen in this request while a setup funnel is open. WordPress saves attachment metadata
+     * several times while it generates image sizes, so the outcome is judged once, after the last pass.
+     */
+    private $funnel_uploads = array();
+
     public function track_first_upload($metadata, $attachment_id, $force = false, $args = array()) {
       $network_id = $this->network_scope() ? get_current_network_id() : 0;
       $state = $this->funnel_state($network_id);
@@ -614,23 +620,52 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
         }
       }
       if (!$state) return $metadata;
-      if (Utility::upload_errors($attachment_id)) {
-        $this->track_event('upload_failed', 'storage', $network_id, $state);
-        return $metadata;
-      }
-      $cloud = get_post_meta($attachment_id, 'sm_cloud', true);
-      if (empty($cloud['name']) || empty($cloud['bucket'])) return $metadata;
-      try {
-        if (Utility::missing_cloud_object($attachment_id, $metadata) !== '') {
-          $this->track_event('upload_failed', 'storage', $network_id, $state);
-          return $metadata;
-        }
-      } catch (\Throwable $e) {
-        $this->track_event('upload_failed', 'storage', $network_id, $state);
-        return $metadata;
-      }
-      if ($this->track_event('first_upload', '', $network_id, $state)) $this->forget_funnel($network_id, $state['_raw'], true);
+      if (!$this->funnel_uploads) add_action('shutdown', array($this, 'report_first_upload'), 0);
+      $this->funnel_uploads[get_current_blog_id() . ':' . (int) $attachment_id] = array(get_current_blog_id(), (int) $attachment_id, $network_id, $state);
       return $metadata;
+    }
+
+    public function report_first_upload() {
+      $pending = $this->funnel_uploads;
+      $this->funnel_uploads = array();
+      $failed = array();
+      foreach ($pending as $upload) {
+        list($blog_id, $attachment_id, $network_id, $state) = $upload;
+        $switched = is_multisite() && get_current_blog_id() !== $blog_id;
+        if ($switched) switch_to_blog($blog_id);
+        try {
+          $result = $this->first_upload_result($attachment_id, $state);
+        } catch (\Throwable $e) {
+          $result = 'failed';
+        }
+        $key = $network_id . ':' . $state['txn'];
+        $done = false;
+        if ($result === 'failed' && empty($failed[$key])) {
+          $failed[$key] = true;
+          $this->track_event('upload_failed', 'storage', $network_id, $state);
+        }
+        if ($result === 'uploaded') {
+          if ($this->track_event('first_upload', '', $network_id, $state)) $this->forget_funnel($network_id, $state['_raw'], true);
+          $done = true;
+        }
+        if ($switched) restore_current_blog();
+        if ($done) return;
+      }
+    }
+
+    /**
+     * 'uploaded' when the original and every generated size are in the bucket and the original was written
+     * after setup started, 'failed' when an upload failed or an object is missing, '' when nothing new was sent.
+     */
+    private function first_upload_result($attachment_id, $state) {
+      if (Utility::upload_errors($attachment_id)) return 'failed';
+      $cloud = get_post_meta($attachment_id, 'sm_cloud', true);
+      if (empty($cloud['name']) || empty($cloud['bucket'])) return '';
+      if (Utility::missing_cloud_object($attachment_id) !== '') return 'failed';
+      // Syncing media that was already in the bucket is not a first upload. Allow for clock drift.
+      $object = ud_get_stateless_media()->get_client()->get_media($cloud['name']);
+      $written = $object && !empty($object->timeCreated) ? strtotime($object->timeCreated) : 0;
+      return $written && $written >= (int) $state['created'] - 5 * MINUTE_IN_SECONDS ? 'uploaded' : '';
     }
 
     public function handle_billing_recheck() {
