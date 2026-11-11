@@ -65,7 +65,8 @@ $start_error   = wpCloud\StatelessMedia\GoogleConnect::instance()->start_error;
 
   <?php if (is_array($log) && $log) : ?>
     <div class="card" style="max-width:720px">
-      <h2 class="title"><?php echo $msg === 'provisioned' ? esc_html__('Done', $domain) : esc_html__('Progress', $domain); ?></h2>
+      <?php $finished = !$error; // steps are only saved by a setup that finished, or together with the reason it stopped ?>
+      <h2 class="title"><?php echo $finished ? esc_html__('Done', $domain) : esc_html__('Progress', $domain); ?></h2>
       <ul class="sm-connect-log" role="list">
         <?php foreach ($log as $line) :
           $line_status = preg_match('/Stopped:|could not|did not pass|pending revocation|No billing account/i', $line) ? 'warning' : (strpos($line, 'Creating project ') === 0 ? 'info' : 'success');
@@ -73,7 +74,7 @@ $start_error   = wpCloud\StatelessMedia\GoogleConnect::instance()->start_error;
           <li class="sm-connect-log-<?php echo esc_attr($line_status); ?>"><span class="sm-connect-log-mark" aria-hidden="true"><?php echo $line_status === 'success' ? '&#10003;' : ($line_status === 'warning' ? '!' : '&middot;'); ?></span><span><?php echo esc_html($line); ?></span></li>
         <?php endforeach; ?>
       </ul>
-      <?php if ($msg === 'provisioned') : ?>
+      <?php if ($finished) : ?>
         <p>
           <a class="button button-primary" href="<?php echo esc_url(admin_url('media-new.php')); ?>"><?php _e('Upload a test image', $domain); ?></a>
           <a class="button" href="<?php echo esc_url(ud_get_stateless_media()->get_settings_page_url('?page=stateless-settings')); ?>"><?php _e('Open Stateless Settings', $domain); ?></a>

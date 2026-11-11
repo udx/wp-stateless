@@ -176,7 +176,7 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
       $client     = $this->get_client();
       $connection = $this->get_connection();
       $uid        = get_current_user_id();
-      list($log, $error) = $this->take_result($uid);
+      list($log, $error) = $this->last_result($uid);
 
       $auth_url  = '';
       $projects  = array();
@@ -1125,18 +1125,12 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
     /* ------------------------------------------------------------------ */
 
     /**
-     * The outcome of the last action, for the screen. A failure and the steps before it stay readable until
-     * the next action starts or they expire, so a reload does not lose the explanation. The log of a setup
-     * that finished is shown once.
+     * The outcome of the last action, for the screen: the steps of a setup and, when it failed, the explanation.
+     * Showing it does not use it up. It stays until the next action starts or it expires, so neither a reload nor
+     * a reload that crosses the end of a setup loses the explanation or a warning in the steps.
      */
-    private function take_result($uid) {
-      $log   = $this->state_get('log', $uid);
-      $error = $this->state_get('error', $uid);
-      if (!$error) {
-        $this->state_delete('log', $uid);
-        $this->state_delete('error', $uid);
-      }
-      return array($log, $error);
+    private function last_result($uid) {
+      return array($this->state_get('log', $uid), $this->state_get('error', $uid));
     }
 
     /** Every action starts by dropping the previous outcome; it reports its own when it ends. */
@@ -1855,7 +1849,7 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
         $log[] = 'Stopped: ' . $e->getMessage();
         $this->state_set('log', $log, 10 * MINUTE_IN_SECONDS, $uid);
         $this->track_event('provision_failed', $this->provisioning_reason($e));
-        $this->fail($e->getMessage());
+        $this->fail($e->getMessage(), true);
       }
     }
 
@@ -2012,9 +2006,14 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
     }
 
     private function done($args) {
-      // An action that ends well leaves no earlier failure on the screen, such as a disconnect that was
-      // refused in another tab while this setup was still running.
-      if (!isset($args['sm_gc']) || $args['sm_gc'] !== 'error') $this->state_delete('error');
+      // What stays on the screen belongs to the action that just ended. One that ends well leaves no earlier
+      // failure behind, such as a disconnect that was refused in another tab while this setup was running, and
+      // only a finished setup leaves its steps.
+      $outcome = isset($args['sm_gc']) ? $args['sm_gc'] : '';
+      if ($outcome !== 'error') {
+        $this->state_delete('error');
+        if ($outcome !== 'provisioned') $this->state_delete('log');
+      }
       if ($this->provision_job) {
         $this->provision_job_write(array('status' => isset($args['sm_gc']) && $args['sm_gc'] === 'provisioned' ? 'complete' : 'failed', 'url' => $this->page_url($args)));
         $this->provision_job = null;
@@ -2024,7 +2023,9 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
       exit;
     }
 
-    private function fail($message) {
+    /** Ends an action with an explanation. $with_steps keeps the steps a stopped setup saved just before. */
+    private function fail($message, $with_steps = false) {
+      if (!$with_steps) $this->state_delete('log'); // steps of another action must not appear under this explanation
       $this->state_set('error', wp_strip_all_tags((string) $message), 10 * MINUTE_IN_SECONDS);
       $this->done(array('sm_gc' => 'error'));
     }

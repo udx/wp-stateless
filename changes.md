@@ -5,7 +5,7 @@
 * ENHANCEMENT - storage setup shows its progress on the Connect screen and no longer depends on one long request: it survives slow Google operations, proxy timeouts and page reloads, and an interrupted setup resumes its saved project, bucket and key instead of starting over.
 * NEW - privacy-limited setup events measure actual Connect clicks through provisioning and the first verified upload without recording site addresses, email addresses, project IDs, bucket names or free-form errors.
 * FIX - storage drafts restore the selected project and bucket after a failed attempt, and new project names are generated in Google's accepted format.
-* FIX - a failed storage setup keeps its explanation on the Connect screen until the next action, so reloading the page no longer loses it.
+* FIX - the result of a storage setup, including the explanation when it fails, stays on the Connect screen until the next action, so reloading the page no longer loses it.
 * FIX - a storage setup that is interrupted or replaced by another no longer leaves a service account key behind: the next setup or a disconnect revokes it, and a revocation that fails is retried.
 * SECURITY - stateless.ci excludes OAuth callback query parameters from its load-balancer log sinks and retains only pseudonymous, short-lived setup-funnel records.
 
