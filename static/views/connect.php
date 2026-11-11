@@ -275,6 +275,11 @@ $start_error   = wpCloud\StatelessMedia\GoogleConnect::instance()->start_error;
                 <?php foreach ($projects as $p) : ?>
                   <option value="<?php echo esc_attr($p['projectId']); ?>" <?php selected($default_project !== '' && $default_project === $p['projectId']); ?>><?php echo esc_html($p['name']); ?> (<?php echo esc_html($p['projectId']); ?>)</option>
                 <?php endforeach; ?>
+                <?php // A project this setup asked Google to create is not listed until Google finishes it. Keep it
+                      // selectable so the saved setup resumes it instead of creating a second project.
+                if (is_array($draft) && !empty($draft['created_project']) && $draft['created_project'] === $default_project && !in_array($default_project, wp_list_pluck($projects, 'projectId'), true)) : ?>
+                  <option value="<?php echo esc_attr($default_project); ?>" data-pending="1" selected><?php echo esc_html(sprintf(__('%1$s (%2$s), still being created', $domain), !empty($draft['project_create_name']) ? $draft['project_create_name'] : $default_project, $default_project)); ?></option>
+                <?php endif; ?>
                 <option value="__new__" <?php selected($default_project, '__new__'); ?>><?php _e('Create a new project', $domain); ?></option>
               </select>
               <p class="description"><?php echo count($projects) ? sprintf(esc_html__('%d projects visible to this account.', $domain), count($projects)) : esc_html__('No projects found in this account.', $domain); ?></p>

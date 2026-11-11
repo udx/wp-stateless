@@ -126,6 +126,9 @@
     renderBuckets(); sync();
     if (!project.value || project.value === '__new__') return;
     const version = generation;
+    // A project this setup asked Google to create cannot be queried yet; submitting resumes it.
+    const chosen = project.selectedOptions[0];
+    if (chosen && chosen.dataset.pending) { billing.textContent = 'Google is still creating this project. Continue to finish the saved setup.'; return; }
     billing.textContent = 'Checking project billing…';
     try {
       const data = await request('sm_gc_project_billing', {project:project.value});

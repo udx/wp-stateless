@@ -21,13 +21,15 @@ function wp_send_json_error($data, $status = 200) { throw new Reply(false, $data
 function wp_send_json_success($data) { throw new Reply(true, $data, 200); }
 class Reply extends \RuntimeException { public $ok, $data, $status; function __construct($ok,$data,$status) {$this->ok=$ok;$this->data=$data;$this->status=$status;} }
 class Database {
- public $base_prefix='wp_', $rows=[], $race=false, $locks=[], $connection=1;
+ // $locking: 'real' connection-owned locks, 'none' (functions unavailable), 'unverifiable' (GET_LOCK answers 1, ownership cannot be checked).
+ public $base_prefix='wp_', $rows=[], $race=false, $locks=[], $connection=1, $locking='real', $lock_requests=0;
  function prepare($sql,...$args) { return [$sql,$args]; }
+ function suppress_errors($suppress=true) { return false; }
  function get_var($q) {
   [$sql,$a]=$q; $key=$a[0];
-  if(strpos($sql,'SELECT GET_LOCK')===0) {if(isset($this->locks[$key]) && $this->locks[$key]!==$this->connection)return '0';$this->locks[$key]=$this->connection;return '1';}
-  if(strpos($sql,'SELECT RELEASE_LOCK')===0) {if(($this->locks[$key]??null)!==$this->connection)return '0';unset($this->locks[$key]);return '1';}
-  if(strpos($sql,'SELECT IS_USED_LOCK')===0)return ($this->locks[$key]??null)===$this->connection?'1':'0';
+  if(strpos($sql,'SELECT GET_LOCK')===0) {$this->lock_requests++;if($this->locking==='none')return null;if($this->locking==='unverifiable')return '1';if(isset($this->locks[$key]) && $this->locks[$key]!==$this->connection)return '0';$this->locks[$key]=$this->connection;return '1';}
+  if(strpos($sql,'SELECT RELEASE_LOCK')===0) {if($this->locking!=='real')return null;if(($this->locks[$key]??null)!==$this->connection)return '0';unset($this->locks[$key]);return '1';}
+  if(strpos($sql,'SELECT IS_USED_LOCK')===0) {if($this->locking!=='real')return null;return ($this->locks[$key]??null)===$this->connection?'1':'0';}
   return $this->rows[$key] ?? null;
  }
  function query($q) {
@@ -95,4 +97,40 @@ $wpdb->connection=2; $x=reply(fn()=>invoke('ajax_provision_status')); $wpdb->con
 assert_true($x->status===403,'status rejects unauthorized users');
 $GLOBALS['allowed']=true;$GLOBALS['nonce_ok']=false;
 try {invoke('ajax_provision_status');throw new \RuntimeException('Nonce bypass');}catch(\RuntimeException $e){assert_true($e->getMessage()==='bad nonce','status validates nonce');}
+$GLOBALS['nonce_ok']=true;
+// An idle status poll must not touch the lock, or it could make a submission that arrives with it look like a duplicate.
+$GLOBALS['blog']=5;$_GET=[];$before=$wpdb->lock_requests;
+$wpdb->connection=2;$x=reply(fn()=>invoke('ajax_provision_status'));$wpdb->connection=1;
+assert_true($x->data['status']==='none' && $wpdb->lock_requests===$before,'idle status poll leaves the lock alone');
+$_POST['sm_gc_job']=str_repeat('f',32);invoke('begin_provision_job');invoke('provision_job_write',['status'=>'complete','url'=>'/done']);clear_job();
+$before=$wpdb->lock_requests;
+$wpdb->connection=2;$x=reply(fn()=>invoke('ajax_provision_status'));$wpdb->connection=1;
+assert_true($wpdb->lock_requests===$before,'finished job is reported without taking the lock');
+// Databases without connection-owned locks (SQLite, some clusters) fall back to the job record.
+$wpdb->locking='none';$GLOBALS['blog']=6;$_POST['sm_gc_job']=str_repeat('1',32);invoke('begin_provision_job');
+$row=json_decode($wpdb->rows['sm_gc_job_site_6'],true);
+assert_true($row['status']==='running' && $row['worker_lock']===false,'setup starts on a database without locks');
+invoke('assert_provision_lock');
+assert_true(true,'lockless worker is not stopped by the ownership check');
+clear_job();
+$_POST['sm_gc_job']=str_repeat('2',32);$x=reply(fn()=>invoke('begin_provision_job'));
+assert_true($x->status===409 && json_decode($wpdb->rows['sm_gc_job_site_6'],true)['id']===str_repeat('1',32),'job record alone refuses an overlapping submission');
+$_GET=['job'=>str_repeat('1',32)];$x=reply(fn()=>invoke('ajax_provision_status'));
+assert_true($x->data['status']==='running','silent lockless job is not declared dead early');
+$row['updated']=time()-901;$wpdb->rows['sm_gc_job_site_6']=json_encode($row);
+$x=reply(fn()=>invoke('ajax_provision_status'));
+assert_true($x->data['status']==='interrupted','lockless job resumes after the stale period');
+$_POST['sm_gc_job']=str_repeat('3',32);invoke('begin_provision_job');
+assert_true(json_decode($wpdb->rows['sm_gc_job_site_6'],true)['id']===str_repeat('3',32),'new worker takes over a stale lockless job');
+clear_job();
+$wpdb->locking='unverifiable';$GLOBALS['blog']=7;$_POST['sm_gc_job']=str_repeat('4',32);invoke('begin_provision_job');
+assert_true(json_decode($wpdb->rows['sm_gc_job_site_7'],true)['worker_lock']===false,'lock that cannot be verified is not trusted');
+clear_job();$wpdb->locking='real';
+// A worker that held a real lock is never declared dead by age while the lock is still held.
+$GLOBALS['blog']=8;$_POST['sm_gc_job']=str_repeat('5',32);invoke('begin_provision_job');
+$row=json_decode($wpdb->rows['sm_gc_job_site_8'],true);$row['updated']=time()-5000;$wpdb->rows['sm_gc_job_site_8']=json_encode($row);
+$_GET=['job'=>str_repeat('5',32)];
+$wpdb->connection=2;$x=reply(fn()=>invoke('ajax_provision_status'));$wpdb->connection=1;
+assert_true($x->data['status']==='running','slow worker that still holds the lock stays running');
+clear_job();
 }
