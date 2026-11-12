@@ -6,7 +6,7 @@ License: GPLv2 or later
 Requires PHP: 8.1
 Requires at least: 5.0
 Tested up to: 6.9
-Stable tag: 4.5.0
+Stable tag: 4.5.1
 
 Upload and serve your WordPress media files from Google Cloud Storage.
 
@@ -67,21 +67,21 @@ Looking for a unique feature for your next project? [Hire us!](https://udx.io/)
 
 == Installation ==
 
-1. Search, install, and activate the *WP-Stateless* plugin via your WordPress dashboard.
-2. Open *Media > Stateless Connect* and click *Sign in with Google*. Confirm the connection for your site on stateless.ci; the page brings you back, or you type the eight character code it shows.
-3. Choose a Google Cloud project, billing account, bucket, location and storage mode, and submit the form. WP-Stateless creates the bucket, a service account with access to that bucket only, and its key inside your own Google Cloud account.
-4. Setup is now complete. Visit *Media > Stateless Settings* for more options.
+1. Search, install, and activate the *WP-Stateless* plugin via your WordPress dashboard. Unconfigured sites open Stateless Connect automatically; you can also open *Media > Stateless Connect*.
+2. Click *Sign in with Google* and confirm the connection for your site on stateless.ci. You return to the same tab, or can use the eight character pairing code on another device.
+3. Choose *Create my storage* for the recommended project, bucket and CDN setup, or open *Advanced storage options* to choose an existing project or bucket, another location or another mode. WP-Stateless creates a service account with access to that bucket only, and Google sends its key directly to your site.
+4. Upload a test image to confirm your storage is working. Visit *Media > Stateless Settings* for more options.
 For a more detailed installation and setup walkthrough, please see the [setup guide](https://stateless.ci/setup/) and the [manual setup instructions](https://stateless.ci/docs/manual-setup/).
 
 == Screenshots ==
 
-1. Settings Panel: Supports network setting and wp-config constant overrides.
-2. Setup Assistant
-3. Setup Assistant: Google Login
-4. Setup Assistant: Approve Permissions
-5. Setup Assistant: Project & Bucket
-6. Setup Assistant: Complete
-7. Edit Media: Image stored on Google Cloud Storage.
+1. Settings: choose a media storage mode and configure URL replacement.
+2. Stateless Connect: sign in with Google to start the setup wizard.
+3. Pairing code: finish sign-in when you use another device.
+4. Recommended setup: create cloud storage with sensible defaults.
+5. Advanced setup: choose an existing project and bucket, and compare storage modes.
+6. Ready to upload: return to your Media Library after connecting storage.
+7. Edit Media: view an image stored in Google Cloud Storage.
 
 == Frequently Asked Questions ==
 
@@ -116,6 +116,24 @@ To ensure new releases cause as little disruption as possible, we rely on a numb
 [UDX](https://udx.io/) maintains this plugin by continuing development through it's own staff, reviewing pull requests, testing, and steering the overall release schedule. UDX is located in Durham, North Carolina and provides WordPress engineering and hosting services to clients throughout the United States.
 
 
+== External services ==
+
+WP-Stateless stores and serves your media from Google Cloud Storage in your own Google account. It relies on the services below. Your media files are sent only to Google Cloud Storage.
+
+= Google Cloud =
+The plugin uploads, reads and deletes media in the Google Cloud Storage bucket you configure, using your own service account. During Stateless Connect it also uses Google sign-in and Google Cloud APIs (projects, billing, IAM, service usage and storage) with the permissions you approve, to create or select the project, bucket and service account. This service is provided by Google: [Terms of Service](https://cloud.google.com/terms), [Privacy Policy](https://policies.google.com/privacy).
+
+= stateless.ci (Stateless Connect) =
+Stateless Connect uses stateless.ci, operated by UDX, to handle Google sign-in for the plugin. It is contacted when an administrator opens the Stateless Connect screen, which also opens once after the plugin is activated on a site that has no storage configured. Opening the screen sends the site's WordPress admin return address and a one-time challenge so that a sign-in can be prepared. Signing in passes the Google authorization through stateless.ci for one-time delivery to your site, and later token refreshes also pass through it. The service account key is created in your own Google Cloud project and never passes through stateless.ci.
+
+To learn whether setup works, the plugin also reports setup progress for that sign-in attempt: screen viewed, sign-in started, storage created or failed with a general reason, and whether the first upload succeeded. These records do not contain the site address, email address, project ID or bucket name, and they expire after seven days.
+
+Sites configured by hand with a bucket and service account JSON under Stateless Settings do not need Stateless Connect, and the `WP_STATELESS_MEDIA_HIDE_SETUP_ASSISTANT` constant keeps the screen from opening. This service is provided by UDX: [Privacy Policy](https://stateless.ci/privacy-policy/).
+
+= UDX product check-in =
+While you use the WordPress admin, the plugin contacts UDX (usabilitydynamics.com) at most once a day to check for product notices. The request includes your site address, the plugin version and the UDX products detected on the site. This service is provided by UDX: [Privacy Policy](https://udx.io/privacy-policy).
+
+
 == Upgrade Notice ==
 = 4.1.0 =
 You will be prompted to run data optimization after upgrade. Please make a backup copy of your database.
@@ -135,6 +153,17 @@ Before upgrading to WP-Stateless 3.2.0, please, make sure you use PHP 7.2 or abo
 Before upgrading to WP-Stateless 3.0, please, make sure you tested it on your development environment.
 
 == Changelog ==
+= 4.5.1 - 2026-11-12 =
+* ENHANCEMENT - fresh, unconfigured activations and the Plugins screen lead directly to Stateless Connect; manual bucket and service-account settings remain available under Advanced.
+* ENHANCEMENT - the recommended setup creates a project and US multi-region bucket with CDN mode, while existing projects, buckets, locations and modes remain available under Advanced.
+* ENHANCEMENT - Google sign-in stays in the same tab, setup explains billing and key custody, and missing billing has a Check again path that preserves the storage choices.
+* ENHANCEMENT - storage setup shows its progress on the Connect screen and no longer depends on one long request: it survives slow Google operations, proxy timeouts and page reloads, and an interrupted setup resumes its saved project, bucket and key instead of starting over.
+* NEW - privacy-limited setup events measure actual Connect clicks through provisioning and the first verified upload without recording site addresses, email addresses, project IDs, bucket names or free-form errors.
+* FIX - storage drafts restore the selected project and bucket after a failed attempt, and new project names are generated in Google's accepted format.
+* FIX - the result of a storage setup, including the explanation when it fails, stays on the Connect screen until the next action, so reloading the page no longer loses it.
+* FIX - a storage setup that is interrupted or replaced by another no longer leaves a service account key behind: the next setup or a disconnect revokes it, and a revocation that fails is retried.
+* SECURITY - stateless.ci excludes OAuth callback query parameters from its load-balancer log sinks and retains only pseudonymous, short-lived setup-funnel records.
+
 = 4.5.0 - 2026-11-02 =
 * NEW - Stateless Connect replaces the setup wizard: sign in with Google from wp-admin, confirm your site on stateless.ci, and WP-Stateless creates the project, bucket, service account and key inside your own Google Cloud account. No iframe, no copying of keys.
 * NEW - setup works from Network Admin on multisite, with network and per-site connections kept separate.

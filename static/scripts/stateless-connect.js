@@ -93,7 +93,7 @@
       buckets = Array.from(new Map(buckets.map(b => [b.name,b])).values());
       next = data.next; loadedProject = id;
       renderBuckets(); more.hidden = !next;
-      status.textContent = buckets.length ? buckets.length + ' buckets loaded.' + (next ? ' Load more to search additional buckets.' : '') : 'No buckets found in this project. Create a new bucket or enter a known name below.';
+      status.textContent = buckets.length ? (buckets.length === 1 ? '1 bucket loaded.' : buckets.length + ' buckets loaded.') + (next ? ' Load more to search additional buckets.' : '') : 'No buckets found in this project. Create a new bucket or enter a known name below.';
     } catch (error) {
       if (version !== generation) return;
       status.textContent = error.message + ' You can also enter a known bucket name below.'; retry.hidden = false;
@@ -115,7 +115,7 @@
     billing.hidden = isNew || !project.value; billingLink.hidden = isNew || !project.value;
     const currentChoice = newBucket ? 'new' : 'existing';
     if (currentChoice !== bucketChoice) { names[bucketChoice] = name.value; name.value = names[currentChoice]; bucketChoice = currentChoice; renderBuckets(); }
-    go.value = newBucket ? 'Create bucket and connect this site' : 'Connect this bucket';
+    go.value = newBucket ? 'Create my storage' : 'Connect this bucket';
     go.disabled = !project.value || isNew && !form.querySelector('[name=billing_account]').value;
     document.getElementById('sm-bucket-help').textContent = newBucket ? 'Names must be globally unique. Use lowercase letters, numbers, dashes or underscores.' : 'Choose above, or enter the exact name if you cannot list buckets. Its location stays unchanged.';
     if (project.value && !newBucket && loadedProject !== project.value) load(false);
@@ -126,6 +126,9 @@
     renderBuckets(); sync();
     if (!project.value || project.value === '__new__') return;
     const version = generation;
+    // A project this setup asked Google to create cannot be queried yet; submitting resumes it.
+    const chosen = project.selectedOptions[0];
+    if (chosen && chosen.dataset.pending) { billing.textContent = 'Google is still creating this project. Continue to finish the saved setup.'; return; }
     billing.textContent = 'Checking project billing…';
     try {
       const data = await request('sm_gc_project_billing', {project:project.value});
@@ -141,6 +144,110 @@
   name.addEventListener('input',renderBuckets);
   search.addEventListener('input',renderBuckets);
   more.addEventListener('click', () => load(true)); retry.addEventListener('click', () => load(!!next));
-  form.addEventListener('submit', () => { go.value = 'Connecting storage, please wait…'; go.classList.add('disabled'); });
   changeProject(false);
+})();
+
+// Keep the document alive while provisioning runs. A proxy timeout is not a failed setup.
+(function () {
+  'use strict';
+  const form = document.getElementById('sm-gc-provision');
+  const config = window.smConnectPicker;
+  if (!config) return;
+  const storageKey = 'stateless-provision:' + location.pathname + ':' + new URL(config.url).searchParams.get('sm_gc_network');
+  let job = '', polling = false, misses = 0;
+  try { job = sessionStorage.getItem(storageKey) || ''; } catch (_) {}
+  const panel = document.createElement('section');
+  panel.className = 'sm-connect-provision-progress card';
+  panel.hidden = true;
+  panel.setAttribute('role', 'status');
+  panel.setAttribute('aria-live', 'polite');
+  const title = document.createElement('h2');
+  title.textContent = 'Connecting your storage';
+  const message = document.createElement('p');
+  const help = document.createElement('p');
+  help.textContent = 'Google can take a few minutes. You can reload this page without starting over.';
+  panel.append(title, message, help);
+  document.querySelector('.sm-connect-steps').after(panel);
+  function remember(value) {
+    job = value;
+    try { if (value) sessionStorage.setItem(storageKey, value); else sessionStorage.removeItem(storageKey); } catch (_) {}
+  }
+  function show(text) {
+    panel.hidden = false;
+    message.textContent = text;
+    if (form) form.querySelectorAll('input[type=submit], button[type=submit]').forEach(button => { button.disabled = true; });
+  }
+  async function poll() {
+    if (polling) return;
+    polling = true;
+    try {
+      const url = new URL(config.url);
+      url.searchParams.set('action', 'sm_gc_provision_status');
+      url.searchParams.set('nonce', config.nonce);
+      if (job) url.searchParams.set('job', job);
+      const response = await fetch(url, {credentials: 'same-origin', cache: 'no-store'});
+      if (!response.ok) throw new Error('Status unavailable');
+      const result = await response.json();
+      if (!result.success) throw new Error('Status unavailable');
+      const data = result.data;
+      if (data.status === 'none') {
+        if (!job) {
+          if (!panel.hidden) location.reload();
+          return;
+        }
+        misses++;
+        show('Waiting for the setup request to reach WordPress. Do not submit it again.');
+        if (misses > 20) {
+          show('WordPress has not confirmed this request. Reload to review your choices before trying again.');
+          remember('');
+          return;
+        }
+      } else if (data.status === 'busy') {
+        show('Another administrator is connecting storage. Waiting for that setup to finish.');
+      } else {
+        misses = 0;
+        remember(data.id);
+        if (data.status === 'complete' || data.status === 'failed') {
+          remember('');
+          // A reload can land after the setup failed: this page then already shows the explanation, so there
+          // is nothing to navigate to.
+          if (data.status === 'failed' && panel.hidden && document.querySelector('.sm-connect-result')) return;
+          location.assign(data.url);
+          return;
+        }
+        if (data.status === 'interrupted') {
+          show(data.message);
+          help.textContent = 'Your completed steps are saved. Review them before continuing.';
+          const resume = document.createElement('button');
+          resume.type = 'button';
+          resume.className = 'button button-primary';
+          resume.textContent = 'Resume setup';
+          resume.addEventListener('click', () => location.reload());
+          panel.append(resume);
+          remember('');
+          return;
+        }
+        show(data.message);
+      }
+    } catch (_) {
+      if (!job && panel.hidden) return;
+      show('Still checking your setup. The connection was interrupted; your setup request has not been repeated.');
+    } finally { polling = false; }
+    window.setTimeout(poll, 2000);
+  }
+  if (form) form.addEventListener('submit', event => {
+    event.preventDefault();
+    if (job || !panel.hidden) return;
+    const bytes = new Uint8Array(16);
+    crypto.getRandomValues(bytes);
+    remember(Array.from(bytes, b => b.toString(16).padStart(2, '0')).join(''));
+    const body = new FormData(form);
+    body.set('sm_gc_job', job);
+    show('Starting your Google Cloud setup.');
+    panel.scrollIntoView({block: 'center', behavior: 'smooth'});
+    // Do not retry this POST. Poll the persisted result even if the proxy drops its response.
+    fetch(form.getAttribute('action'), {method: 'POST', body, credentials: 'same-origin'}).catch(() => {});
+    poll();
+  });
+  poll();
 })();

@@ -1760,35 +1760,30 @@ namespace wpCloud\StatelessMedia {
        * @param string $plugin
        */
       public function redirect_to_splash($plugin = '') {
-        // $this->settings = new Settings();
+        $configured = $this->settings->get('sm.key_json') && $this->settings->get('sm.bucket');
 
-        if (defined('WP_CLI') || $this->settings->get('sm.key_json') || isset($_POST['checked']) && count($_POST['checked']) > 1) {
+        if (defined('WP_CLI') || $configured || isset($_POST['checked']) && count($_POST['checked']) > 1) {
+          return;
+        }
+
+        if (GoogleConnect::hidden_for_site() && !is_network_admin()) {
           return;
         }
 
         if (
-          !$this->settings->get('sm.key_json') &&
           defined('WP_STATELESS_MEDIA_HIDE_SETUP_ASSISTANT') && WP_STATELESS_MEDIA_HIDE_SETUP_ASSISTANT == true &&
           defined('WP_STATELESS_MEDIA_HIDE_SETTINGS_PANEL') && WP_STATELESS_MEDIA_HIDE_SETTINGS_PANEL == true
         ) {
           return;
         }
 
-        if (!$this->settings->get('sm.key_json') && defined('WP_STATELESS_MEDIA_HIDE_SETUP_ASSISTANT') && WP_STATELESS_MEDIA_HIDE_SETUP_ASSISTANT == true) {
+        if (defined('WP_STATELESS_MEDIA_HIDE_SETUP_ASSISTANT') && WP_STATELESS_MEDIA_HIDE_SETUP_ASSISTANT == true) {
           $url = $this->get_settings_page_url('?page=stateless-settings');
-          exit(wp_redirect($url));
+          exit(wp_safe_redirect($url));
         }
 
         if ($plugin == plugin_basename($this->boot_file)) {
-          // #152
-          // $url = $this->get_settings_page_url('?page=stateless-setup&step=splash-screen');
-          $url = $this->get_settings_page_url('?page=stateless-settings');
-
-          if (json_decode($this->settings->get('sm.key_json'))) {
-            $url = $this->get_settings_page_url('?page=stateless-settings');
-          }
-
-          exit( wp_redirect($url) );
+          exit(wp_safe_redirect(GoogleConnect::instance()->page_url()));
         }
       }
 
