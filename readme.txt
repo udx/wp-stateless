@@ -153,7 +153,7 @@ Before upgrading to WP-Stateless 3.2.0, please, make sure you use PHP 7.2 or abo
 Before upgrading to WP-Stateless 3.0, please, make sure you tested it on your development environment.
 
 == Changelog ==
-= 4.5.1 - 2026-11-11 =
+= 4.5.1 - 2026-11-12 =
 * ENHANCEMENT - fresh, unconfigured activations and the Plugins screen lead directly to Stateless Connect; manual bucket and service-account settings remain available under Advanced.
 * ENHANCEMENT - the recommended setup creates a project and US multi-region bucket with CDN mode, while existing projects, buckets, locations and modes remain available under Advanced.
 * ENHANCEMENT - Google sign-in stays in the same tab, setup explains billing and key custody, and missing billing has a Check again path that preserves the storage choices.
