@@ -75,13 +75,13 @@ For a more detailed installation and setup walkthrough, please see the [setup gu
 
 == Screenshots ==
 
-1. Settings Panel: Supports network setting and wp-config constant overrides.
-2. Setup Assistant
-3. Setup Assistant: Google Login
-4. Setup Assistant: Approve Permissions
-5. Setup Assistant: Project & Bucket
-6. Setup Assistant: Complete
-7. Edit Media: Image stored on Google Cloud Storage.
+1. Settings: choose a media storage mode and configure URL replacement.
+2. Stateless Connect: sign in with Google to start the setup wizard.
+3. Pairing code: finish sign-in when you use another device.
+4. Recommended setup: create cloud storage with sensible defaults.
+5. Advanced setup: choose an existing project and bucket, and compare storage modes.
+6. Ready to upload: return to your Media Library after connecting storage.
+7. Edit Media: view an image stored in Google Cloud Storage.
 
 == Frequently Asked Questions ==
 
