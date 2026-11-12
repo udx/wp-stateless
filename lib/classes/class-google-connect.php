@@ -133,6 +133,15 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
       return $this->network_scope() ? delete_network_option(get_current_network_id(), $key) : delete_option($key);
     }
 
+    /**
+     * Makes the next read of an option come from the database. WordPress answers option reads from the copy a
+     * request already has, which is wrong for the few records that requests use to learn what another one did
+     * in the meantime.
+     */
+    private function reread_option($key, $network_id = 0) {
+      $network_id ? wp_cache_delete($network_id . ':' . $key, 'site-options') : wp_cache_delete($key, 'options');
+    }
+
     private function state_key($key) {
       if (!is_multisite()) return 'sm_gc_' . $key;
       return 'sm_gc_' . ($this->network_scope() ? 'network_' . get_current_network_id() : 'site_' . get_current_blog_id()) . '_' . $key;
@@ -520,6 +529,9 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
       $option  = $this->funnel_option($uid);
       $network = $network_id && is_multisite();
       if ($conditional) {
+        // Compare with the record as it is now, not as this request first saw it: a bulk sync runs for minutes.
+        // What remains is the instant between this look and the removal, and what is at stake is one measurement.
+        $this->reread_option($option, $network ? $network_id : 0);
         $stored = $this->funnel_stored($network_id, $uid);
         if ($stored === null || maybe_serialize($stored) !== maybe_serialize($expected)) return false;
         return $network ? delete_network_option($network_id, $option) : delete_option($option);
@@ -1311,9 +1323,15 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
       return 'sm_gc_job_' . ($this->network_scope() ? 'network_' . get_current_network_id() : 'site_' . get_current_blog_id());
     }
 
-    /** The job record: who is setting up storage in this scope, how far it got and how it ended. */
+    /**
+     * The job record: who is setting up storage in this scope, how far it got and how it ended. Always read from
+     * the database, because a status check, a second submission and a worker all act on what another request
+     * wrote a moment ago.
+     */
     private function provision_job_read() {
-      $job = $this->read_option($this->provision_job_key(), null);
+      $key = $this->provision_job_key();
+      $this->reread_option($key, $this->network_scope() ? get_current_network_id() : 0);
+      $job = $this->read_option($key, null);
       return is_array($job) && isset($job['id'], $job['status']) ? $job : null;
     }
 
@@ -1398,6 +1416,9 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
       }
       $this->scope_taken = true;
       register_shutdown_function(array($this, 'release_scope'));
+      // This request owns the scope now, so a job that is still recorded as running has no worker any more.
+      $left = $this->provision_job_read();
+      if (is_array($left) && $left['status'] === 'running') $this->provision_job_interrupt($left);
       return true;
     }
 
@@ -1436,6 +1457,15 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
       }
     }
 
+    /** Records that the worker of a job is gone, so the screen offers to resume. */
+    private function provision_job_interrupt($job) {
+      $job['status']  = 'interrupted';
+      $job['message'] = __('The setup worker stopped. Your saved storage choices are ready to resume.', ud_get_stateless_media()->domain);
+      $job['updated'] = time();
+      $this->provision_job_save($job);
+      return $job;
+    }
+
     /**
      * Marks a job recorded as running as interrupted once its worker is gone. With a database lock that is known
      * at once: the lock can be taken only after its owner's connection ended, and holding it while the record
@@ -1447,13 +1477,7 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
       if ($lock === '0') return $job; // its worker is alive
       if ($lock === '1' || time() - (int) $job['started'] >= self::PROVISION_STALE) {
         $current = $this->provision_job_read();
-        if (is_array($current) && $current['id'] === $job['id'] && $current['status'] === 'running') {
-          $current['status']  = 'interrupted';
-          $current['message'] = __('The setup worker stopped. Your saved storage choices are ready to resume.', ud_get_stateless_media()->domain);
-          $current['updated'] = time();
-          $this->provision_job_save($current);
-        }
-        $job = $current;
+        $job = is_array($current) && $current['id'] === $job['id'] && $current['status'] === 'running' ? $this->provision_job_interrupt($current) : $current;
       }
       if ($lock === '1') {
         $this->scope_claim(false); // its owner is gone for certain, so the claim it left goes too
@@ -1793,6 +1817,14 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
           // An interrupted attempt for this same storage already holds a key: reuse it instead of issuing another.
           $key_json = $checkpoint['key'];
           $previous_key = $this->resumed_previous_key($checkpoint, $configured_key);
+          // That can be another key than the one on record, when the configuration was changed by hand after the
+          // attempt stopped. It goes on record first, so that it is still known should this attempt stop as well.
+          $key_id   = function ($key) { return is_array($key) && !empty($key['private_key_id']) ? $key['private_key_id'] : ''; };
+          $recorded = isset($checkpoint['previous']) ? $checkpoint['previous'] : null;
+          if ($key_id($recorded) !== $key_id($previous_key)) {
+            $checkpoint['previous'] = $previous_key;
+            $this->write_option(self::SETUP_KEY_OPTION, $this->encrypt(wp_json_encode($checkpoint)), false);
+          }
         } else {
           // A key saved by an attempt for different storage is abandoned now. It must not stay active, and it must
           // not stay reusable: once queued for revocation, a later reuse would end with the site's key deleted.

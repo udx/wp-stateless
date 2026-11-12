@@ -39,19 +39,22 @@ function wp_strip_all_tags($s) { return trim(strip_tags($s)); }
 function add_query_arg($args, $url) { return $url . '?' . http_build_query($args); }
 function admin_url($path = '') { return '/wp-admin/' . $path; }
 function network_admin_url($path = '') { return '/wp-admin/network/' . $path; }
-// The Options API, per site and per network.
-function get_option($k, $d = false) { $o = $GLOBALS['options'][get_current_blog_id()] ?? []; return array_key_exists($k, $o) ? $o[$k] : $d; }
-function update_option($k, $v, $autoload = null) { $GLOBALS['options'][get_current_blog_id()][$k] = $v; return true; }
-function delete_option($k) { $b = get_current_blog_id(); if (!array_key_exists($k, $GLOBALS['options'][$b] ?? [])) return false; unset($GLOBALS['options'][$b][$k]); return true; }
-function get_network_option($n, $k, $d = false) { $o = $GLOBALS['network_options'][$n] ?? []; return array_key_exists($k, $o) ? $o[$k] : $d; }
-function update_network_option($n, $k, $v) { $GLOBALS['network_options'][$n][$k] = $v; return true; }
-function delete_network_option($n, $k) { if (!array_key_exists($k, $GLOBALS['network_options'][$n] ?? [])) return false; unset($GLOBALS['network_options'][$n][$k]); return true; }
+// The Options API, per site and per network. As in WordPress, a request answers repeated reads of an option from
+// its own copy, so a change made by another request is only seen after wp_cache_delete().
+function &request_cache() { $id = $GLOBALS['request'] ?? 0; if (!isset($GLOBALS['cache'][$id])) $GLOBALS['cache'][$id] = []; return $GLOBALS['cache'][$id]; }
+function wp_cache_delete($key, $group = '') { $c = &request_cache(); unset($c[($group === 'site-options' ? 'n:' : 'o:' . get_current_blog_id() . ':') . $key]); return true; }
+function get_option($k, $d = false) { $b = get_current_blog_id(); $c = &request_cache(); if (!array_key_exists("o:$b:$k", $c)) { $o = $GLOBALS['options'][$b] ?? []; if (!array_key_exists($k, $o)) return $d; $c["o:$b:$k"] = $o[$k]; } return $c["o:$b:$k"]; }
+function update_option($k, $v, $autoload = null) { $b = get_current_blog_id(); $GLOBALS['options'][$b][$k] = $v; $c = &request_cache(); $c["o:$b:$k"] = $v; return true; }
+function delete_option($k) { $b = get_current_blog_id(); $c = &request_cache(); unset($c["o:$b:$k"]); if (!array_key_exists($k, $GLOBALS['options'][$b] ?? [])) return false; unset($GLOBALS['options'][$b][$k]); return true; }
+function get_network_option($n, $k, $d = false) { $c = &request_cache(); if (!array_key_exists("n:$n:$k", $c)) { $o = $GLOBALS['network_options'][$n] ?? []; if (!array_key_exists($k, $o)) return $d; $c["n:$n:$k"] = $o[$k]; } return $c["n:$n:$k"]; }
+function update_network_option($n, $k, $v) { $GLOBALS['network_options'][$n][$k] = $v; $c = &request_cache(); $c["n:$n:$k"] = $v; return true; }
+function delete_network_option($n, $k) { $c = &request_cache(); unset($c["n:$n:$k"]); if (!array_key_exists($k, $GLOBALS['network_options'][$n] ?? [])) return false; unset($GLOBALS['network_options'][$n][$k]); return true; }
 class WP_Error { private $code, $message; function __construct($code = '', $message = '') { $this->code = $code; $this->message = $message; } function get_error_code() { return $this->code; } function get_error_message() { return $this->message; } }
 // Core's lock: an option named "<name>.lock" holding the time it was taken.
 class WP_Upgrader {
  static function create_lock($name, $timeout = null) {
   if (!empty($GLOBALS['claim_lost'])) return false; // another database node got there first
-  $taken = get_option($name . '.lock');
+  $taken = $GLOBALS['options'][get_current_blog_id()][$name . '.lock'] ?? null; // core tries an INSERT IGNORE, straight at the database
   if ($taken && $taken > time() - $timeout) return false;
   return update_option($name . '.lock', time());
  }
@@ -65,7 +68,7 @@ class Database {
  function suppress_errors($suppress=true) { return false; }
  function get_var($q) {
   [$sql,$a]=$q; $key=$a[0];
-  if(strpos($sql,'SELECT GET_LOCK')===0) {$this->lock_requests++;if($this->locking==='none')return null;if($this->locking==='unverifiable')return '1';if(isset($this->locks[$key]) && $this->locks[$key]!==$this->connection)return '0';$this->locks[$key]=$this->connection;return '1';}
+  if(strpos($sql,'SELECT GET_LOCK')===0) {if(!empty($GLOBALS['before_lock'])){$f=$GLOBALS['before_lock'];$GLOBALS['before_lock']=null;$f();}$this->lock_requests++;if($this->locking==='none')return null;if($this->locking==='unverifiable')return '1';if(isset($this->locks[$key]) && $this->locks[$key]!==$this->connection)return '0';$this->locks[$key]=$this->connection;return '1';}
   if(strpos($sql,'SELECT RELEASE_LOCK')===0) {if($this->locking!=='real')return null;if(($this->locks[$key]??null)!==$this->connection)return '0';unset($this->locks[$key]);return '1';}
   if(strpos($sql,'SELECT IS_USED_LOCK')===0) {if($this->locking!=='real')return null;return ($this->locks[$key]??null)===$this->connection?'1':'0';}
   throw new \RuntimeException('unexpected query: '.$sql);
@@ -75,8 +78,8 @@ $wpdb=new Database;
 require dirname(__DIR__).'/lib/classes/class-google-connect.php';
 $r=new \ReflectionClass('wpCloud\\StatelessMedia\\GoogleConnect');
 /** A request: its own object, on its own database connection. */
-function request($connection) {global $r;return [$r->newInstanceWithoutConstructor(),$connection];}
-function call($request,$name,...$args) {global $r,$wpdb;$wpdb->connection=$request[1];$m=$r->getMethod($name);$m->setAccessible(true);return $m->invokeArgs($request[0],$args);}
+function request($connection) {global $r;static $seq=0;return [$r->newInstanceWithoutConstructor(),$connection,++$seq];}
+function call($request,$name,...$args) {global $r,$wpdb;$before=[$wpdb->connection,$GLOBALS['request']??0];$wpdb->connection=$request[1];$GLOBALS['request']=$request[2];$m=$r->getMethod($name);$m->setAccessible(true);try{return $m->invokeArgs($request[0],$args);}finally{[$wpdb->connection,$GLOBALS['request']]=$before;}}
 function reply($request,$name,...$args) {try{call($request,$name,...$args);}catch(Reply $x){return $x;}throw new \RuntimeException('Expected a response from '.$name);}
 function stopped($request,$name,...$args) {try{call($request,$name,...$args);}catch(Reply $x){throw new \RuntimeException('Expected '.$name.' to stop');}catch(\RuntimeException $e){return $e->getMessage();}return '';}
 /** The request ends normally: its shutdown handler runs. */
@@ -88,6 +91,7 @@ function submit($request,$id) {$_POST=['sm_gc_job'=>$id];return call($request,'b
 function complete($request) {return reply($request,'done',['sm_gc'=>'provisioned']);}
 /** A submission that is turned away; its request then ends like any other. */
 function refused($request,$id) {$_POST=['sm_gc_job'=>$id];$x=reply($request,'begin_provision_job');finish($request);return $x;}
+function stored($key,$blog=null) {return $GLOBALS['options'][$blog ?? get_current_blog_id()][$key] ?? null;}
 function job($blog=null) {return $GLOBALS['options'][$blog ?? get_current_blog_id()]['sm_gc_job_site_'.($blog ?? get_current_blog_id())] ?? null;}
 function claim($blog=null) {return $GLOBALS['options'][$blog ?? get_current_blog_id()]['sm_gc_job_site_'.($blog ?? get_current_blog_id()).'.lock'] ?? null;}
 function assert_true($v,$message) {if(!$v)throw new \RuntimeException('FAILED: '.$message);echo "PASS $message\n";}
@@ -122,6 +126,11 @@ assert_true(job()['status']==='running' && claim(),'killed worker leaves its rec
 $_GET=['job'=>$A];$x=reply(request(11),'ajax_provision_status');$_GET=[];
 assert_true($x->data['status']==='interrupted' && claim()===null && $wpdb->locks===[],'dead worker becomes resumable without waiting for expiry');
 $w=request(12);submit($w,$B);kill($w);
+$d=request(14);
+assert_true(call($d,'take_scope',2)===true && job()['id']===$B && job()['status']==='interrupted','disconnect that takes over from a dead worker records that it stopped');
+call($d,'release_scope');
+$w=request(15);submit($w,$A);kill($w);
+assert_true(strpos(refused(request(16),$A)->data['message'],'already recorded')!==false && job()['status']==='interrupted','repeated request of a dead worker is not run again and is offered for resume');
 $w=request(13);submit($w,$C);
 assert_true(job()['id']===$C && job()['status']==='running','new worker takes over the scope of a dead one');
 $wpdb->locks=[]; // this worker's database connection was replaced behind its back
@@ -142,6 +151,14 @@ finish($w);
 $GLOBALS['blog']=5;$GLOBALS['claim_lost']=true;
 assert_true(refused(request(30),$A)->status===409 && job()===null && $wpdb->locks===[],'failed claim stops the setup and frees the lock');
 $GLOBALS['claim_lost']=false;
+
+// A status check that arrives just as the setup finishes must not turn the finished job into an interrupted one:
+// what it read before waiting for the lock is out of date by the time it has the lock.
+$GLOBALS['blog']=12;$w=request(90);submit($w,$A);
+$GLOBALS['before_lock']=function() use ($w) {complete($w);};
+$_GET=['job'=>$A];$x=reply(request(91),'ajax_provision_status');$_GET=[];
+assert_true($x->data['status']==='complete' && job()['status']==='complete','status check that crosses the end of a setup reports it as finished');
+$GLOBALS['blog']=5;
 
 // Status endpoint.
 $GLOBALS['allowed']=false;
@@ -275,16 +292,20 @@ $first=['txn'=>str_repeat('1',32),'token'=>$token,'created'=>time()];$second=['t
 update_option('sm_gc_funnel',$first);
 assert_true(call($any,'funnel_state')===$first,'sign-in attempt on record is read back as saved');
 update_option('sm_gc_funnel',$second);
-assert_true(call($any,'forget_funnel',0,$first,true)===false && get_option('sm_gc_funnel')===$second,'attempt saved meanwhile by another request is kept');
-assert_true(call($any,'forget_funnel',0,$second,true)===true && get_option('sm_gc_funnel',null)===null,'attempt that is still the one read is removed');
+assert_true(call($any,'forget_funnel',0,$first,true)===false && stored('sm_gc_funnel')===$second,'attempt saved meanwhile by another request is kept');
+assert_true(call($any,'forget_funnel',0,$second,true)===true && stored('sm_gc_funnel')===null,'attempt that is still the one read is removed');
+update_option('sm_gc_funnel',$first);$sync=request(95);$seen=call($sync,'funnel_state');
+update_option('sm_gc_funnel',$second); // another request saves a newer attempt while the sync is still running
+assert_true(call($sync,'forget_funnel',0,$seen,true)===false && stored('sm_gc_funnel')===$second,'long-running sync does not remove an attempt saved after it started');
+delete_option('sm_gc_funnel');
 update_option('sm_gc_funnel',['txn'=>'short','token'=>$token,'created'=>time()]);
-assert_true(call($any,'funnel_state')===null && get_option('sm_gc_funnel',null)===null,'malformed attempt is dropped when read');
+assert_true(call($any,'funnel_state')===null && stored('sm_gc_funnel')===null,'malformed attempt is dropped when read');
 update_option('sm_gc_funnel',['txn'=>str_repeat('3',32),'token'=>$token,'created'=>time()-90000]);
-assert_true(call($any,'funnel_state')===null && get_option('sm_gc_funnel',null)===null,'attempt older than a day is dropped when read');
+assert_true(call($any,'funnel_state')===null && stored('sm_gc_funnel')===null,'attempt older than a day is dropped when read');
 update_option('sm_gc_funnel_u_7',$first);
 assert_true(call($any,'funnel_state',0,7)===$first && call($any,'funnel_state')===null,'attempt of one administrator is separate from the one that connected the site');
-assert_true(call($any,'forget_funnel',0,null,false,7)===true && get_option('sm_gc_funnel_u_7',null)===null,'attempt is removed outright when asked');
+assert_true(call($any,'forget_funnel',0,null,false,7)===true && stored('sm_gc_funnel_u_7')===null,'attempt is removed outright when asked');
 $GLOBALS['multi']=true;update_network_option(1,'sm_gc_funnel',$first);
-assert_true(call($any,'funnel_state',1)===$first && call($any,'forget_funnel',1,$first,true)===true && get_network_option(1,'sm_gc_funnel',null)===null,'network attempt lives in network options');
+assert_true(call($any,'funnel_state',1)===$first && call($any,'forget_funnel',1,$first,true)===true && ($GLOBALS['network_options'][1]['sm_gc_funnel'] ?? null)===null,'network attempt lives in network options');
 $GLOBALS['multi']=false;
 }
