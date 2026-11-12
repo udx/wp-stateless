@@ -1,20 +1,32 @@
 <?php
-/** Standalone regression checks: php tests/connect-provision-job.php */
+/**
+ * Standalone regression checks: php tests/connect-provision-job.php
+ *
+ * WordPress is replaced by the few functions below. Options live in arrays, WP_Upgrader's lock behaves like
+ * core's (one claim per name, taken over once it is older than its timeout), and $wpdb only answers the three
+ * named-lock functions, per connection. A request is one object of the class on one database connection.
+ */
 namespace wpCloud\StatelessMedia { trait Singleton {} }
 namespace {
 define('DB_NAME','test');
 define('MINUTE_IN_SECONDS',60);
+define('DAY_IN_SECONDS',86400);
 function is_admin() { return true; }
 function is_multisite() { return $GLOBALS['multi'] ?? false; }
 function is_network_admin() { return $GLOBALS['network'] ?? false; }
 function get_current_network_id() { return 1; }
+function get_main_site_id() { return $GLOBALS['main_site'] ?? 1; }
 function get_current_blog_id() { return $GLOBALS['blog'] ?? 1; }
+function switch_to_blog($id) { $GLOBALS['blog_stack'][] = get_current_blog_id(); $GLOBALS['blog'] = $id; }
+function restore_current_blog() { $GLOBALS['blog'] = array_pop($GLOBALS['blog_stack']); }
 function get_current_user_id() { return $GLOBALS['uid'] ?? 7; }
 function current_user_can($cap) { return $GLOBALS['allowed'] ?? true; }
 function check_ajax_referer($action, $field) { if (!($GLOBALS['nonce_ok'] ?? true)) throw new \RuntimeException('bad nonce'); }
 function sanitize_text_field($s) { return strip_tags($s); }
 function wp_unslash($s) { return $s; }
 function wp_json_encode($v) { return json_encode($v); }
+function wp_generate_uuid4() { return sprintf('%08x-0000-4000-8000-%012x', mt_rand(), mt_rand()); }
+function maybe_serialize($v) { return is_array($v) || is_object($v) ? serialize($v) : $v; }
 function __($s, $domain = null) { return $s; }
 function ud_get_stateless_media() { return (object) ['domain'=>'test']; }
 function wp_die($s) { throw new \RuntimeException($s); }
@@ -27,10 +39,28 @@ function wp_strip_all_tags($s) { return trim(strip_tags($s)); }
 function add_query_arg($args, $url) { return $url . '?' . http_build_query($args); }
 function admin_url($path = '') { return '/wp-admin/' . $path; }
 function network_admin_url($path = '') { return '/wp-admin/network/' . $path; }
+// The Options API, per site and per network.
+function get_option($k, $d = false) { $o = $GLOBALS['options'][get_current_blog_id()] ?? []; return array_key_exists($k, $o) ? $o[$k] : $d; }
+function update_option($k, $v, $autoload = null) { $GLOBALS['options'][get_current_blog_id()][$k] = $v; return true; }
+function delete_option($k) { $b = get_current_blog_id(); if (!array_key_exists($k, $GLOBALS['options'][$b] ?? [])) return false; unset($GLOBALS['options'][$b][$k]); return true; }
+function get_network_option($n, $k, $d = false) { $o = $GLOBALS['network_options'][$n] ?? []; return array_key_exists($k, $o) ? $o[$k] : $d; }
+function update_network_option($n, $k, $v) { $GLOBALS['network_options'][$n][$k] = $v; return true; }
+function delete_network_option($n, $k) { if (!array_key_exists($k, $GLOBALS['network_options'][$n] ?? [])) return false; unset($GLOBALS['network_options'][$n][$k]); return true; }
+class WP_Error { private $code, $message; function __construct($code = '', $message = '') { $this->code = $code; $this->message = $message; } function get_error_code() { return $this->code; } function get_error_message() { return $this->message; } }
+// Core's lock: an option named "<name>.lock" holding the time it was taken.
+class WP_Upgrader {
+ static function create_lock($name, $timeout = null) {
+  if (!empty($GLOBALS['claim_lost'])) return false; // another database node got there first
+  $taken = get_option($name . '.lock');
+  if ($taken && $taken > time() - $timeout) return false;
+  return update_option($name . '.lock', time());
+ }
+ static function release_lock($name) { return delete_option($name . '.lock'); }
+}
 class Reply extends \RuntimeException { public $ok, $data, $status; function __construct($ok,$data,$status) {$this->ok=$ok;$this->data=$data;$this->status=$status;} }
 class Database {
  // $locking: 'real' connection-owned locks, 'none' (functions unavailable), 'unverifiable' (GET_LOCK answers 1, ownership cannot be checked).
- public $base_prefix='wp_', $rows=[], $race=false, $locks=[], $connection=1, $locking='real', $lock_requests=0;
+ public $base_prefix='wp_', $locks=[], $connection=1, $locking='real', $lock_requests=0;
  function prepare($sql,...$args) { return [$sql,$args]; }
  function suppress_errors($suppress=true) { return false; }
  function get_var($q) {
@@ -38,163 +68,223 @@ class Database {
   if(strpos($sql,'SELECT GET_LOCK')===0) {$this->lock_requests++;if($this->locking==='none')return null;if($this->locking==='unverifiable')return '1';if(isset($this->locks[$key]) && $this->locks[$key]!==$this->connection)return '0';$this->locks[$key]=$this->connection;return '1';}
   if(strpos($sql,'SELECT RELEASE_LOCK')===0) {if($this->locking!=='real')return null;if(($this->locks[$key]??null)!==$this->connection)return '0';unset($this->locks[$key]);return '1';}
   if(strpos($sql,'SELECT IS_USED_LOCK')===0) {if($this->locking!=='real')return null;return ($this->locks[$key]??null)===$this->connection?'1':'0';}
-  return $this->rows[$key] ?? null;
- }
- function query($q) {
-  [$sql,$a]=$q;
-  if ($this->race) return 0;
-  if (strpos($sql,'INSERT IGNORE')===0) {if(isset($this->rows[$a[0]]))return 0;$this->rows[$a[0]]=$a[1];return 1;}
-  if (($this->rows[$a[1]]??null)!==$a[2])return 0;
-  $this->rows[$a[1]]=$a[0];return 1;
+  throw new \RuntimeException('unexpected query: '.$sql);
  }
 }
 $wpdb=new Database;
 require dirname(__DIR__).'/lib/classes/class-google-connect.php';
 $r=new \ReflectionClass('wpCloud\\StatelessMedia\\GoogleConnect');
-$c=$r->newInstanceWithoutConstructor();
-function invoke($name,...$args) {global $r,$c;$m=$r->getMethod($name);$m->setAccessible(true);return $m->invokeArgs($c,$args);}
-function clear_job() {global $r,$c;invoke('release_provision_lock');$p=$r->getProperty('provision_job');$p->setAccessible(true);$p->setValue($c,null);}
-function assert_true($v,$message) {if(!$v)throw new \RuntimeException($message);echo "PASS $message\n";}
-function reply($call) {try{$call();}catch(Reply $r){return $r;}throw new \RuntimeException('Expected response');}
-$_POST=['sm_gc_job'=>str_repeat('a',32)]; $_GET=[];
-invoke('begin_provision_job');
-assert_true(count($wpdb->rows)===1,'first submission acquires scope lock');
-$wpdb->connection=2;$x=reply(fn()=>invoke('begin_provision_job'));$wpdb->connection=1;
-assert_true($x->status===409,'duplicate running submission rejected');
-$_POST['sm_gc_job']=str_repeat('b',32);
-$wpdb->connection=2;$x=reply(fn()=>invoke('begin_provision_job'));$wpdb->connection=1;
-assert_true($x->status===409,'different submission cannot overlap');
-$wpdb->connection=2; $x=reply(fn()=>invoke('ajax_provision_status')); $wpdb->connection=1;
-assert_true($x->data['id']===str_repeat('a',32),'reload discovers existing running attempt');
-$GLOBALS['uid']=8;
-$wpdb->connection=2; $x=reply(fn()=>invoke('ajax_provision_status')); $wpdb->connection=1;
+/** A request: its own object, on its own database connection. */
+function request($connection) {global $r;return [$r->newInstanceWithoutConstructor(),$connection];}
+function call($request,$name,...$args) {global $r,$wpdb;$wpdb->connection=$request[1];$m=$r->getMethod($name);$m->setAccessible(true);return $m->invokeArgs($request[0],$args);}
+function reply($request,$name,...$args) {try{call($request,$name,...$args);}catch(Reply $x){return $x;}throw new \RuntimeException('Expected a response from '.$name);}
+function stopped($request,$name,...$args) {try{call($request,$name,...$args);}catch(Reply $x){throw new \RuntimeException('Expected '.$name.' to stop');}catch(\RuntimeException $e){return $e->getMessage();}return '';}
+/** The request ends normally: its shutdown handler runs. */
+function finish($request) {call($request,'release_provision_worker');}
+/** The process is killed: nothing of its own runs, the database just drops its connection and with it its lock. */
+function kill($request) {global $wpdb;foreach($wpdb->locks as $name=>$owner)if($owner===$request[1])unset($wpdb->locks[$name]);}
+function submit($request,$id) {$_POST=['sm_gc_job'=>$id];return call($request,'begin_provision_job');}
+/** The setup ends the way the plugin ends it: the job is recorded as complete and the scope given back. */
+function complete($request) {return reply($request,'done',['sm_gc'=>'provisioned']);}
+/** A submission that is turned away; its request then ends like any other. */
+function refused($request,$id) {$_POST=['sm_gc_job'=>$id];$x=reply($request,'begin_provision_job');finish($request);return $x;}
+function job($blog=null) {return $GLOBALS['options'][$blog ?? get_current_blog_id()]['sm_gc_job_site_'.($blog ?? get_current_blog_id())] ?? null;}
+function claim($blog=null) {return $GLOBALS['options'][$blog ?? get_current_blog_id()]['sm_gc_job_site_'.($blog ?? get_current_blog_id()).'.lock'] ?? null;}
+function assert_true($v,$message) {if(!$v)throw new \RuntimeException('FAILED: '.$message);echo "PASS $message\n";}
+$A=str_repeat('a',32);$B=str_repeat('b',32);$C=str_repeat('c',32);$_GET=[];
+
+// One setup at a time.
+$w1=request(1);submit($w1,$A);
+assert_true(job()['status']==='running' && job()['worker_lock']===true && claim(),'first submission takes the scope');
+assert_true(refused(request(2),$A)->status===409,'duplicate running submission rejected');
+assert_true(refused(request(2),$B)->status===409 && job()['id']===$A,'different submission cannot overlap');
+$x=reply(request(2),'ajax_provision_status');
+assert_true($x->data['id']===$A && $x->data['status']==='running','reload discovers existing running attempt');
+$GLOBALS['uid']=8;$x=reply(request(2),'ajax_provision_status');$GLOBALS['uid']=7;
 assert_true($x->data===['status'=>'busy'],'another administrator cannot read attempt details');
-$GLOBALS['uid']=7;
-invoke('provision_job_write',['status'=>'complete','url'=>'/complete']); clear_job();
-$_POST['sm_gc_job']=str_repeat('a',32);
-$wpdb->connection=2;$x=reply(fn()=>invoke('begin_provision_job'));$wpdb->connection=1;
-assert_true($x->status===409,'completed request cannot replay');$wpdb->connection=2;invoke('release_provision_lock');$wpdb->connection=1;
-$_GET=['job'=>str_repeat('a',32)];
-$wpdb->connection=2; $x=reply(fn()=>invoke('ajax_provision_status')); $wpdb->connection=1;
-assert_true($x->data['status']==='complete','matching client recovers completed response');
-$_GET=[];
-$wpdb->connection=2; $x=reply(fn()=>invoke('ajax_provision_status')); $wpdb->connection=1;
+complete($w1);
+assert_true(job()['status']==='complete' && claim()===null && $wpdb->locks===[],'finished setup gives the scope back');
+$x=refused(request(2),$A);
+assert_true($x->status===409 && strpos($x->data['message'],'already recorded')!==false,'completed request cannot replay');
+$_GET=['job'=>$A];$x=reply(request(3),'ajax_provision_status');
+assert_true($x->data['status']==='complete' && strpos($x->data['url'],'sm_gc=provisioned')!==false,'matching client recovers completed response');
+$_GET=[];$x=reply(request(3),'ajax_provision_status');
 assert_true($x->data['status']==='none','ordinary reload does not redirect to old completion');
-$_POST['sm_gc_job']=str_repeat('b',32); invoke('begin_provision_job');
-assert_true(json_decode(current($wpdb->rows),true)['id']===str_repeat('b',32),'new attempt can replace finished record');
-$GLOBALS['blog']=2; invoke('begin_provision_job');
-assert_true(count($wpdb->rows)===2,'site locks are isolated');
-$GLOBALS['multi']=true; $GLOBALS['network']=true; invoke('begin_provision_job');
-assert_true(count($wpdb->rows)===3,'network lock is separate from site locks');
-clear_job(); $GLOBALS['blog']=3; $GLOBALS['network']=false;$wpdb->race=true;
-$wpdb->connection=2;$x=reply(fn()=>invoke('begin_provision_job'));$wpdb->connection=1;
-assert_true($x->status===409,'failed atomic acquisition stops provisioning');
-$wpdb->race=false;$GLOBALS['blog']=4;$_POST['sm_gc_job']=str_repeat('c',32);invoke('begin_provision_job');
-$wpdb->locks=[]; // A killed process closes its MySQL session.
-clear_job();
-$_GET=['job'=>str_repeat('c',32)];
-$wpdb->connection=2;$x=reply(fn()=>invoke('ajax_provision_status'));$wpdb->connection=1;
-assert_true($x->data['status']==='interrupted','dead worker becomes resumable without waiting for expiry');
-$_POST['sm_gc_job']=str_repeat('d',32);invoke('begin_provision_job');
-assert_true(json_decode($wpdb->rows['sm_gc_job_site_4'],true)['status']==='running','new worker acquires abandoned scope');
-$wpdb->locks=[];
-try {invoke('assert_provision_lock');throw new \RuntimeException('lost lock accepted');}catch(\RuntimeException $e){assert_true(strpos($e->getMessage(),'lost its database')!==false,'reconnected worker cannot continue after losing lock');}
-clear_job();
+$w2=request(4);submit($w2,$B);
+assert_true(job()['id']===$B && job()['status']==='running','new attempt can replace finished record');
+$GLOBALS['blog']=2;$w3=request(5);submit($w3,$A);
+assert_true(job(1)['id']===$B && job(2)['id']===$A,'site scopes are isolated');
+finish($w3);$GLOBALS['blog']=1;finish($w2);
+
+// A worker that died is known at once where the database has locks, and its scope is free again.
+$GLOBALS['blog']=3;$w=request(10);submit($w,$A);kill($w);
+assert_true(job()['status']==='running' && claim(),'killed worker leaves its record and its claim behind');
+$_GET=['job'=>$A];$x=reply(request(11),'ajax_provision_status');$_GET=[];
+assert_true($x->data['status']==='interrupted' && claim()===null && $wpdb->locks===[],'dead worker becomes resumable without waiting for expiry');
+$w=request(12);submit($w,$B);kill($w);
+$w=request(13);submit($w,$C);
+assert_true(job()['id']===$C && job()['status']==='running','new worker takes over the scope of a dead one');
+$wpdb->locks=[]; // this worker's database connection was replaced behind its back
+assert_true(strpos(stopped($w,'assert_provision_lock'),'lost its database')!==false,'reconnected worker cannot continue after losing lock');
+finish($w);
+assert_true(claim()!==null,'worker that lost its lock leaves the claim alone: it may be another worker\'s by now');
+$GLOBALS['options'][3]=[];
+// A slow worker that still holds its lock is never declared dead by age.
+$GLOBALS['blog']=4;$w=request(20);submit($w,$A);
+$GLOBALS['options'][4]['sm_gc_job_site_4']['started']=time()-5000;
+$_GET=['job'=>$A];$x=reply(request(21),'ajax_provision_status');$_GET=[];
+assert_true($x->data['status']==='running','slow worker that still holds the lock stays running');
+assert_true(refused(request(22),$B)->status===409,'and keeps its scope');
+call($w,'assert_provision_lock');
+assert_true(true,'and is not stopped by the clock');
+finish($w);
+// Where the claim cannot be made although the lock was free, the setup does not start.
+$GLOBALS['blog']=5;$GLOBALS['claim_lost']=true;
+assert_true(refused(request(30),$A)->status===409 && job()===null && $wpdb->locks===[],'failed claim stops the setup and frees the lock');
+$GLOBALS['claim_lost']=false;
+
+// Status endpoint.
 $GLOBALS['allowed']=false;
-$wpdb->connection=2; $x=reply(fn()=>invoke('ajax_provision_status')); $wpdb->connection=1;
-assert_true($x->status===403,'status rejects unauthorized users');
+assert_true(reply(request(31),'ajax_provision_status')->status===403,'status rejects unauthorized users');
 $GLOBALS['allowed']=true;$GLOBALS['nonce_ok']=false;
-try {invoke('ajax_provision_status');throw new \RuntimeException('Nonce bypass');}catch(\RuntimeException $e){assert_true($e->getMessage()==='bad nonce','status validates nonce');}
+assert_true(stopped(request(31),'ajax_provision_status')==='bad nonce','status validates nonce');
 $GLOBALS['nonce_ok']=true;
 // An idle status poll must not touch the lock, or it could make a submission that arrives with it look like a duplicate.
-$GLOBALS['blog']=5;$_GET=[];$before=$wpdb->lock_requests;
-$wpdb->connection=2;$x=reply(fn()=>invoke('ajax_provision_status'));$wpdb->connection=1;
+$before=$wpdb->lock_requests;$x=reply(request(31),'ajax_provision_status');
 assert_true($x->data['status']==='none' && $wpdb->lock_requests===$before,'idle status poll leaves the lock alone');
-$_POST['sm_gc_job']=str_repeat('f',32);invoke('begin_provision_job');invoke('provision_job_write',['status'=>'complete','url'=>'/done']);clear_job();
-$before=$wpdb->lock_requests;
-$wpdb->connection=2;$x=reply(fn()=>invoke('ajax_provision_status'));$wpdb->connection=1;
+$w=request(32);submit($w,$A);complete($w);
+$before=$wpdb->lock_requests;reply(request(31),'ajax_provision_status');
 assert_true($wpdb->lock_requests===$before,'finished job is reported without taking the lock');
-// Databases without connection-owned locks (SQLite, some clusters) fall back to the job record.
-$wpdb->locking='none';$GLOBALS['blog']=6;$_POST['sm_gc_job']=str_repeat('1',32);invoke('begin_provision_job');
-$row=json_decode($wpdb->rows['sm_gc_job_site_6'],true);
-assert_true($row['status']==='running' && $row['worker_lock']===false,'setup starts on a database without locks');
-invoke('assert_provision_lock');
+
+// Databases without connection-owned locks (SQLite, some clusters): the claim alone guards the scope and runs out with time.
+$wpdb->locking='none';$GLOBALS['blog']=6;$w=request(40);submit($w,$A);
+assert_true(job()['status']==='running' && job()['worker_lock']===false && claim(),'setup starts on a database without locks');
+call($w,'assert_provision_lock');
 assert_true(true,'lockless worker is not stopped by the ownership check');
-clear_job();
-$_POST['sm_gc_job']=str_repeat('2',32);$x=reply(fn()=>invoke('begin_provision_job'));
-assert_true($x->status===409 && json_decode($wpdb->rows['sm_gc_job_site_6'],true)['id']===str_repeat('1',32),'job record alone refuses an overlapping submission');
-$_GET=['job'=>str_repeat('1',32)];$x=reply(fn()=>invoke('ajax_provision_status'));
+assert_true(refused(request(41),$B)->status===409 && job()['id']===$A,'claim alone refuses an overlapping submission');
+$_GET=['job'=>$A];$x=reply(request(42),'ajax_provision_status');
 assert_true($x->data['status']==='running','silent lockless job is not declared dead early');
-$row['updated']=time()-901;$wpdb->rows['sm_gc_job_site_6']=json_encode($row);
-$x=reply(fn()=>invoke('ajax_provision_status'));
-assert_true($x->data['status']==='interrupted','lockless job resumes after the stale period');
-$_POST['sm_gc_job']=str_repeat('3',32);invoke('begin_provision_job');
-assert_true(json_decode($wpdb->rows['sm_gc_job_site_6'],true)['id']===str_repeat('3',32),'new worker takes over a stale lockless job');
-clear_job();
-$wpdb->locking='unverifiable';$GLOBALS['blog']=7;$_POST['sm_gc_job']=str_repeat('4',32);invoke('begin_provision_job');
-assert_true(json_decode($wpdb->rows['sm_gc_job_site_7'],true)['worker_lock']===false,'lock that cannot be verified is not trusted');
-clear_job();
-// Without locks the job record is the guard: a live worker keeps it fresh, a replaced worker stops.
-$wpdb->locking='none';$GLOBALS['blog']=9;$_POST['sm_gc_job']=str_repeat('6',32);invoke('begin_provision_job');
-$row=json_decode($wpdb->rows['sm_gc_job_site_9'],true);$row['updated']=time()-120;$wpdb->rows['sm_gc_job_site_9']=json_encode($row);
-invoke('assert_provision_lock');
-assert_true(time()-json_decode($wpdb->rows['sm_gc_job_site_9'],true)['updated']<5,'live lockless worker refreshes its record');
-$row=json_decode($wpdb->rows['sm_gc_job_site_9'],true);$row['id']=str_repeat('7',32);$wpdb->rows['sm_gc_job_site_9']=json_encode($row);
-try {invoke('assert_provision_lock');throw new \RuntimeException('replaced worker continued');}catch(\RuntimeException $e){assert_true(strpos($e->getMessage(),'took over')!==false,'replaced lockless worker stops before touching Google again');}
-clear_job();$wpdb->locking='real';
-// A worker that held a real lock is never declared dead by age while the lock is still held.
-$GLOBALS['blog']=8;$_POST['sm_gc_job']=str_repeat('5',32);invoke('begin_provision_job');
-$row=json_decode($wpdb->rows['sm_gc_job_site_8'],true);$row['updated']=time()-5000;$wpdb->rows['sm_gc_job_site_8']=json_encode($row);
-$_GET=['job'=>str_repeat('5',32)];
-$wpdb->connection=2;$x=reply(fn()=>invoke('ajax_provision_status'));$wpdb->connection=1;
-assert_true($x->data['status']==='running','slow worker that still holds the lock stays running');
-clear_job();
+kill($w); // nothing tells the database apart from a slow worker here
+$GLOBALS['options'][6]['sm_gc_job_site_6']['started']=time()-901;$GLOBALS['options'][6]['sm_gc_job_site_6.lock']=time()-901;
+$x=reply(request(42),'ajax_provision_status');$_GET=[];
+assert_true($x->data['status']==='interrupted','lockless job is resumable once its claim has run out');
+$w=request(43);submit($w,$B);
+assert_true(job()['id']===$B && job()['status']==='running','new worker takes over a claim that ran out');
+// A worker whose scope was taken over stops before it touches Google again; one about to run out stops and hands the scope back.
+$GLOBALS['options'][6]['sm_gc_job_site_6']['id']=$C;
+assert_true(strpos(stopped($w,'assert_provision_lock'),'took over')!==false,'replaced lockless worker stops');
+finish($w);
+assert_true(job()['id']===$C && claim()!==null,'and leaves the record and the claim of its successor alone');
+$GLOBALS['options'][6]=[];
+$w=request(44);submit($w,$A);$GLOBALS['options'][6]['sm_gc_job_site_6']['started']=time()-(900-179);
+assert_true(strpos(stopped($w,'assert_provision_lock'),'ran out of time')!==false,'lockless worker stops before its claim runs out');
+finish($w);
+assert_true(job()['status']==='interrupted' && claim()===null,'and hands the scope back for an immediate resume');
+$wpdb->locking='unverifiable';$GLOBALS['blog']=7;$w=request(45);submit($w,$A);
+assert_true(job()['worker_lock']===false,'lock that cannot be verified is not trusted');
+finish($w);$wpdb->locking='real';
+
+// A disconnect takes the scope the same way, with or without database locks, and gives it back when its request ends.
+foreach (['real'=>8,'none'=>9] as $mode=>$blog) {
+ $wpdb->locking=$mode;$GLOBALS['blog']=$blog;
+ $d=request(50);
+ assert_true(call($d,'take_scope',2)===true,"disconnect takes the scope ($mode locks)");
+ assert_true(refused(request(51),$A)->status===409 && job()===null,"setup cannot start while a disconnect is under way ($mode locks)");
+ assert_true(call(request(52),'take_scope',0)===false,"second disconnect is refused meanwhile ($mode locks)");
+ call($d,'release_scope');
+ $w=request(53);submit($w,$A);
+ assert_true(job()['status']==='running',"setup starts once the disconnect is over ($mode locks)");
+ assert_true(call(request(54),'take_scope',0)===false,"disconnect is refused while a setup runs ($mode locks)");
+ finish($w);
+}
+$wpdb->locking='real';
+
+// Where the records live: ordinary options of the site, network options for a network setup, the claim with the main site.
+$GLOBALS['multi']=true;$GLOBALS['blog']=3;$GLOBALS['options'][3]=[];$w=request(60);submit($w,$A);
+assert_true(isset($GLOBALS['options'][3]['sm_gc_job_site_3'],$GLOBALS['options'][3]['sm_gc_job_site_3.lock']),'site setup on a network keeps record and claim with that site');
+finish($w);
+$GLOBALS['network']=true;$GLOBALS['main_site']=4;$GLOBALS['options'][4]=[];$w=request(61);submit($w,$A);
+assert_true(isset($GLOBALS['network_options'][1]['sm_gc_job_network_1']) && isset($GLOBALS['options'][4]['sm_gc_job_network_1.lock']) && !isset($GLOBALS['options'][3]['sm_gc_job_network_1.lock']) && get_current_blog_id()===3,'network setup keeps its record in network options and its claim with the main site');
+assert_true(refused(request(62),$B)->status===409,'network scope refuses a second setup');
+$GLOBALS['network']=false;$w2=request(63);submit($w2,$B);
+assert_true($GLOBALS['options'][3]['sm_gc_job_site_3']['id']===$B,'network scope is separate from the site scopes');
+finish($w2);$GLOBALS['network']=true;finish($w);
+$GLOBALS['multi']=false;$GLOBALS['network']=false;$GLOBALS['main_site']=1;
+
 // The outcome of an action stays on the screen until the next action: a failure with the steps before it, a finished setup with its steps.
-$GLOBALS['blog']=10;$_GET=[];$_POST=['sm_gc_job'=>str_repeat('8',32)];invoke('begin_provision_job');
-invoke('state_set','log',['Project ready','Stopped: That bucket name is taken'],600,7);
-$x=reply(fn()=>invoke('fail','That bucket name is taken',true));
-assert_true($x->ok && json_decode($wpdb->rows['sm_gc_job_site_10'],true)['status']==='failed','failed setup is recorded on its job');
-clear_job();
-[$log,$error]=invoke('last_result',7);
+$GLOBALS['blog']=10;$w=request(70);submit($w,$A);
+call($w,'state_set','log',['Project ready','Stopped: That bucket name is taken'],600,7);
+$x=reply($w,'fail','That bucket name is taken',true);
+assert_true($x->ok && job()['status']==='failed' && claim()===null,'failed setup is recorded on its job and frees the scope');
+[$log,$error]=call(request(71),'last_result',7);
 assert_true($error==='That bucket name is taken' && count($log)===2,'failed setup shows its explanation and the steps before it');
-[$log,$error]=invoke('last_result',7);
+[$log,$error]=call(request(71),'last_result',7);
 assert_true($error==='That bucket name is taken' && count($log)===2,'reload keeps the explanation of a failed setup');
-$_POST['sm_gc_job']=str_repeat('9',32);invoke('begin_provision_job');invoke('clear_result');
-[$log,$error]=invoke('last_result',7);
+$w=request(72);submit($w,$B);call($w,'clear_result');
+[$log,$error]=call($w,'last_result',7);
 assert_true($log===false && $error===false,'next action clears the previous failure');
-invoke('state_set','error','A storage setup is still running.',600,7); // a disconnect refused in another tab meanwhile
-invoke('state_set','log',['Plugin configured'],600,7);
-$x=reply(fn()=>invoke('done',['sm_gc'=>'provisioned']));
-assert_true(json_decode($wpdb->rows['sm_gc_job_site_10'],true)['status']==='complete','finished setup is recorded on its job');
-clear_job();
-[$log,$error]=invoke('last_result',7);
+call($w,'state_set','error','A storage setup is still running.',600,7); // a disconnect refused in another tab meanwhile
+call($w,'state_set','log',['Plugin configured'],600,7);
+$x=reply($w,'done',['sm_gc'=>'provisioned']);
+assert_true(job()['status']==='complete','finished setup is recorded on its job');
+[$log,$error]=call(request(73),'last_result',7);
 assert_true($error===false && $log===['Plugin configured'],'finished setup shows its steps without an earlier failure');
-[$log,$error]=invoke('last_result',7);
+[$log,$error]=call(request(73),'last_result',7);
 assert_true($error===false && $log===['Plugin configured'],'reload keeps the steps of a finished setup');
-$_POST['sm_gc_job']=str_repeat('a',32);invoke('begin_provision_job');
-$x=reply(fn()=>invoke('fail','A storage setup is still running.'));clear_job();
-[$log,$error]=invoke('last_result',7);
+$w=request(74);submit($w,$C);$x=reply($w,'fail','A storage setup is still running.');
+[$log,$error]=call(request(75),'last_result',7);
 assert_true($error==='A storage setup is still running.' && $log===false,'failure of another action does not appear above the steps of a finished setup');
-invoke('state_set','log',['Stopped: an earlier setup'],600,7);
-$_POST['sm_gc_job']=str_repeat('b',32);invoke('begin_provision_job');
-$x=reply(fn()=>invoke('done',['sm_gc'=>'billing-ready']));clear_job();
-[$log,$error]=invoke('last_result',7);
+call(request(75),'state_set','log',['Stopped: an earlier setup'],600,7);
+$w=request(76);submit($w,$A);$x=reply($w,'done',['sm_gc'=>'billing-ready']);
+[$log,$error]=call(request(77),'last_result',7);
 assert_true($log===false && $error===false,'action that ends well leaves neither a failure nor the steps of another action');
-invoke('state_set','error','Old failure',-1,7);
-[$log,$error]=invoke('last_result',7);
+call(request(77),'state_set','error','Old failure',-1,7);
+[$log,$error]=call(request(77),'last_result',7);
 assert_true($error===false,'expired explanation is not shown');
+
 // Keys an ended setup left behind: its own key when that never went live, otherwise the key it had already replaced.
+$any=request(80);
 $key=fn($id,$email='site@project.iam')=>['private_key_id'=>$id,'client_email'=>$email];
 $saved=fn($issued,$previous)=>['bucket'=>'b','sa_email'=>'site@project.iam','key'=>json_encode($issued),'previous'=>$previous];
-$left=invoke('setup_leftover_keys',$saved($key('K1'),$key('K0')),$key('K0'));
+$left=call($any,'setup_leftover_keys',$saved($key('K1'),$key('K0')),$key('K0'));
 assert_true(count($left)===1 && $left[0]['id']==='K1' && $left[0]['kind']==='unused','setup key that never went live is revoked; the key in use is not');
-$left=invoke('setup_leftover_keys',$saved($key('K1'),$key('K0')),$key('K1'));
+$left=call($any,'setup_leftover_keys',$saved($key('K1'),$key('K0')),$key('K1'));
 assert_true(count($left)===1 && $left[0]['id']==='K0' && $left[0]['kind']==='replaced','key replaced by an interrupted setup is revoked');
-$left=invoke('setup_leftover_keys',$saved($key('K1'),$key('K0','hand-made@other.iam')),$key('K1'));
+$left=call($any,'setup_leftover_keys',$saved($key('K1'),$key('K0','hand-made@other.iam')),$key('K1'));
 assert_true($left===[],'replaced key of another service account is left alone');
-$left=invoke('setup_leftover_keys',$saved($key('K1'),null),$key('K1'));
+$left=call($any,'setup_leftover_keys',$saved($key('K1'),null),$key('K1'));
 assert_true($left===[],'first setup that went live leaves nothing behind');
-$left=invoke('setup_leftover_keys',$saved($key('K1'),$key('K0')),$key('KX'));
+$left=call($any,'setup_leftover_keys',$saved($key('K1'),$key('K0')),$key('KX'));
 assert_true(count($left)===1 && $left[0]['id']==='K1','key that was replaced by hand is not revoked on the setup\'s behalf');
-assert_true(invoke('setup_leftover_keys',null,$key('K1'))===[] && invoke('setup_leftover_keys',['key'=>'not json'],$key('K1'))===[],'unreadable saved setup yields no keys');
+assert_true(call($any,'setup_leftover_keys',null,$key('K1'))===[] && call($any,'setup_leftover_keys',['key'=>'not json'],$key('K1'))===[],'unreadable saved setup yields no keys');
+// A resumed setup replaces the key the site is configured with now. Only when its own key already went live does it recover the key on record.
+assert_true(call($any,'resumed_previous_key',$saved($key('K1'),null),$key('HAND','hand-made@other.iam'))['private_key_id']==='HAND','configuration entered by hand after a setup stopped is what the resumed setup protects');
+assert_true(call($any,'resumed_previous_key',$saved($key('K1'),$key('K0')),$key('HAND'))['private_key_id']==='HAND','key changed by hand after a setup stopped replaces the one on record');
+assert_true(call($any,'resumed_previous_key',$saved($key('K1'),$key('K0')),$key('K1'))['private_key_id']==='K0','setup whose key already went live recovers the key it replaced');
+assert_true(call($any,'resumed_previous_key',$saved($key('K1'),null),$key('K1'))===null,'first setup whose key went live has no earlier key');
+assert_true(call($any,'resumed_previous_key',$saved($key('K1'),$key('K0')),$key('K0'))['private_key_id']==='K0','unchanged configuration resumes as before');
+assert_true(call($any,'resumed_previous_key',$saved($key('K1'),$key('K0')),null)===null,'configuration removed by hand leaves nothing to protect or revoke');
+// A disconnect waits only for failures that pass.
+$err=fn($code)=>new \WP_Error($code,'x');
+assert_true(call($any,'worth_retrying',$err('http_request_failed')) && call($any,'worth_retrying',$err('google_503')) && call($any,'worth_retrying',$err('google_500')) && call($any,'worth_retrying',$err('google_429')),'network failures and busy answers from Google are worth another try');
+assert_true(!call($any,'worth_retrying',$err('google_403')) && !call($any,'worth_retrying',$err('google_401')) && !call($any,'worth_retrying',$err('google_400')) && !call($any,'worth_retrying',$err('token')) && !call($any,'worth_retrying',$err('not_connected')) && !call($any,'worth_retrying',$err('broker')),'refusals and lost access are not');
+
+// The sign-in attempt on record is an ordinary option; it is only removed while it still is the one that was read.
+$GLOBALS['blog']=11;$token=str_repeat('t',32);
+$first=['txn'=>str_repeat('1',32),'token'=>$token,'created'=>time()];$second=['txn'=>str_repeat('2',32),'token'=>$token,'created'=>time()];
+update_option('sm_gc_funnel',$first);
+assert_true(call($any,'funnel_state')===$first,'sign-in attempt on record is read back as saved');
+update_option('sm_gc_funnel',$second);
+assert_true(call($any,'forget_funnel',0,$first,true)===false && get_option('sm_gc_funnel')===$second,'attempt saved meanwhile by another request is kept');
+assert_true(call($any,'forget_funnel',0,$second,true)===true && get_option('sm_gc_funnel',null)===null,'attempt that is still the one read is removed');
+update_option('sm_gc_funnel',['txn'=>'short','token'=>$token,'created'=>time()]);
+assert_true(call($any,'funnel_state')===null && get_option('sm_gc_funnel',null)===null,'malformed attempt is dropped when read');
+update_option('sm_gc_funnel',['txn'=>str_repeat('3',32),'token'=>$token,'created'=>time()-90000]);
+assert_true(call($any,'funnel_state')===null && get_option('sm_gc_funnel',null)===null,'attempt older than a day is dropped when read');
+update_option('sm_gc_funnel_u_7',$first);
+assert_true(call($any,'funnel_state',0,7)===$first && call($any,'funnel_state')===null,'attempt of one administrator is separate from the one that connected the site');
+assert_true(call($any,'forget_funnel',0,null,false,7)===true && get_option('sm_gc_funnel_u_7',null)===null,'attempt is removed outright when asked');
+$GLOBALS['multi']=true;update_network_option(1,'sm_gc_funnel',$first);
+assert_true(call($any,'funnel_state',1)===$first && call($any,'forget_funnel',1,$first,true)===true && get_network_option(1,'sm_gc_funnel',null)===null,'network attempt lives in network options');
+$GLOBALS['multi']=false;
 }

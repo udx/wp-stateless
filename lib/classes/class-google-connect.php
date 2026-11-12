@@ -26,7 +26,7 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
     const PENDING_KEYS_OPTION = 'sm_gc_pending_key_revocations';
     /** A key Google issued during a setup that has not finished yet, kept encrypted so a resumed setup reuses it. */
     const SETUP_KEY_OPTION = 'sm_gc_pending_setup_key';
-    /** Seconds without progress after which a setup job that holds no database lock counts as stopped. */
+    /** Seconds after which a claim on a setup scope runs out where the database cannot tell that its owner died. */
     const PROVISION_STALE = 900;
     const FUNNEL_OPTION   = 'sm_gc_funnel';
     const BROKER          = 'https://stateless.ci';
@@ -40,7 +40,8 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
     private $page_hook = null;
     private $network_hook = null;
     private $provision_job = null;
-    private $provision_lock = null;
+    private $provision_lock = false;
+    private $scope_taken = false;
 
     /** @var string Why the hosted sign-in could not be prepared, for the page to show. */
     public $start_error = '';
@@ -495,65 +496,36 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
       return $uid ? self::FUNNEL_OPTION . '_u_' . (int) $uid : self::FUNNEL_OPTION;
     }
 
-    private function funnel_record($network_id = 0, $uid = 0) {
-      global $wpdb;
-      $network = $network_id && is_multisite();
-      $table = $network ? $wpdb->sitemeta : $wpdb->options;
-      $id_column = $network ? 'meta_id' : 'option_id';
-      $key_column = $network ? 'meta_key' : 'option_name';
-      $value_column = $network ? 'meta_value' : 'option_value';
+    /** The sign-in attempt on record for this scope, or for one administrator, as it was saved. Null when there is none. */
+    private function funnel_stored($network_id = 0, $uid = 0) {
       $option = $this->funnel_option($uid);
-      $query = $network
-        ? $wpdb->prepare("SELECT {$id_column}, {$value_column} FROM {$table} WHERE site_id = %d AND {$key_column} = %s", $network_id, $option)
-        : $wpdb->prepare("SELECT {$id_column}, {$value_column} FROM {$table} WHERE {$key_column} = %s", $option);
-      $row = $wpdb->get_row($query);
-      if (!$row) return null;
-      return array(
-        'id'      => $row->$id_column,
-        'raw'     => (string) $row->$value_column,
-        'value'   => maybe_unserialize($row->$value_column),
-        'network' => $network,
-      );
+      return $network_id && is_multisite() ? get_network_option($network_id, $option, null) : get_option($option, null);
     }
 
     private function funnel_state($network_id = 0, $uid = 0) {
-      $record = $this->funnel_record($network_id, $uid);
-      if (!$record) return null;
-      if (!$this->funnel_valid($record['value'])) {
-        $this->forget_funnel($network_id, $record['raw'], true, $uid);
+      $state = $this->funnel_stored($network_id, $uid);
+      if ($state === null) return null;
+      if (!$this->funnel_valid($state)) {
+        $this->forget_funnel($network_id, $state, true, $uid);
         return null;
       }
-      $state = $record['value'];
-      $state['_raw'] = $record['raw'];
       return $state;
     }
 
-    private function forget_funnel($network_id = 0, $expected_raw = null, $conditional = false, $uid = 0) {
-      $option = $this->funnel_option($uid);
-      if (!$conditional) {
-        if ($network_id && is_multisite()) {
-          delete_network_option($network_id, $option);
-        } else {
-          delete_option($option);
-        }
-        return true;
+    /**
+     * Removes the sign-in attempt on record. With $conditional only while it still is $expected, so that an
+     * attempt another request saved in the meantime stays.
+     */
+    private function forget_funnel($network_id = 0, $expected = null, $conditional = false, $uid = 0) {
+      $option  = $this->funnel_option($uid);
+      $network = $network_id && is_multisite();
+      if ($conditional) {
+        $stored = $this->funnel_stored($network_id, $uid);
+        if ($stored === null || maybe_serialize($stored) !== maybe_serialize($expected)) return false;
+        return $network ? delete_network_option($network_id, $option) : delete_option($option);
       }
-      if (!is_string($expected_raw)) return false;
-      global $wpdb;
-      $record = $this->funnel_record($network_id, $uid);
-      if (!$record || !hash_equals($expected_raw, $record['raw'])) return false;
-      $table = $record['network'] ? $wpdb->sitemeta : $wpdb->options;
-      $id_column = $record['network'] ? 'meta_id' : 'option_id';
-      $value_column = $record['network'] ? 'meta_value' : 'option_value';
-      $deleted = $wpdb->query($wpdb->prepare("DELETE FROM {$table} WHERE {$id_column} = %d AND {$value_column} = BINARY %s", $record['id'], $record['raw']));
-      if ($deleted) {
-        if ($record['network']) {
-          wp_cache_delete($network_id . ':' . $option, 'site-options');
-        } else {
-          wp_cache_delete($option, 'options');
-        }
-      }
-      return (bool) $deleted;
+      $network ? delete_network_option($network_id, $option) : delete_option($option);
+      return true;
     }
 
     private function schedule_funnel_cleanup($created, $network_id, $uid = 0) {
@@ -563,16 +535,16 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
     }
 
     public function clear_expired_funnel($network_id = 0, $uid = 0) {
-      $record = $this->funnel_record((int) $network_id, $uid);
-      if (!$record) return;
-      if (!$this->funnel_valid($record['value'])) {
-        if (!$this->forget_funnel($network_id, $record['raw'], true, $uid)) {
+      $stored = $this->funnel_stored((int) $network_id, $uid);
+      if ($stored === null) return;
+      if (!$this->funnel_valid($stored)) {
+        if (!$this->forget_funnel($network_id, $stored, true, $uid)) {
           $current = $this->funnel_state($network_id, $uid);
           if ($current) $this->schedule_funnel_cleanup($current['created'], $network_id, $uid);
         }
         return;
       }
-      $this->schedule_funnel_cleanup($record['value']['created'], $network_id, $uid);
+      $this->schedule_funnel_cleanup($stored['created'], $network_id, $uid);
     }
 
     private function remember_funnel($txn, $token) {
@@ -685,7 +657,7 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
           if ($result === 'uploaded') {
             // One report per process. If it is not confirmed the record stays open for a later request.
             $this->funnel_done[$attempt] = true;
-            if ($this->track_event('first_upload', '', $network_id, $state)) $this->forget_funnel($network_id, $state['_raw'], true);
+            if ($this->track_event('first_upload', '', $network_id, $state)) $this->forget_funnel($network_id, $state, true);
           }
         } catch (\Throwable $e) {
           // Setup measurement must never interrupt a sync.
@@ -1036,9 +1008,9 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
       $network_id = $this->network_scope() ? get_current_network_id() : 0;
       $pending = $this->funnel_state($network_id, $uid);
       if ($pending) {
-        $this->write_option(self::FUNNEL_OPTION, array_diff_key($pending, array('_raw' => 1)), false);
+        $this->write_option(self::FUNNEL_OPTION, $pending, false);
         $this->schedule_funnel_cleanup($pending['created'], $network_id);
-        $this->forget_funnel($network_id, $pending['_raw'], true, $uid);
+        $this->forget_funnel($network_id, $pending, true, $uid);
       }
       $this->state_delete('pkce', $uid);
       $this->state_delete('error', $uid);
@@ -1065,12 +1037,9 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
       $connection = $this->get_connection();
       $domain = ud_get_stateless_media()->domain;
       // A disconnect and a setup worker must not overlap: disconnecting removes the key an unfinished setup saved,
-      // which a worker in flight could be about to store as the site's configuration. The lock is held until this
-      // request ends (the database releases it with the connection), so no setup can start meanwhile either.
-      $lock = $this->take_provision_lock(2);
-      list($raw, $job) = $this->provision_job_read();
-      $job = $this->recover_provision_job($raw, $job, $lock);
-      if ($lock === '0' || (is_array($job) && $job['status'] === 'running')) {
+      // which a worker in flight could be about to store as the site's configuration. So the disconnect takes the
+      // scope the way a setup does and keeps it until this request ends; no setup can start meanwhile either.
+      if (!$this->take_scope(2)) {
         $this->fail(__('A storage setup is still running. Wait for it to finish, then disconnect.', $domain));
       }
       $unreadable = $connection && $this->connection_unreadable($connection);
@@ -1078,10 +1047,20 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
         // Nothing can be revoked from here, so do not report that it was.
         $this->fail(__('The stored Google credentials cannot be read, usually because the WordPress authentication salts changed or the sodium extension is gone, so this site cannot revoke its own access. Restore the previous salts and disconnect again, or revoke access under Third-party apps in your Google Account and then remove the connection without revoking.', $domain));
       }
+      $stuck = array();
       if ($connection && !$unreadable) {
-        // A setup that stopped after Google issued its key keeps that key for resuming. Disconnecting ends the
-        // setup, so remove the unused key now, while this site can still reach Google.
+        // Before this site gives up its access, it removes the keys it still has on record at Google: the key of
+        // a setup that stopped after Google issued it (disconnecting ends that setup), and keys whose removal
+        // failed before. When one cannot be removed for a reason that passes, the connection is kept, so that
+        // disconnecting again finishes the job instead of leaving a key that nothing can remove any more.
         $this->discard_setup_key(true);
+        $steps = array();
+        $stuck = $this->retry_pending_revocations($steps);
+        foreach ($stuck as $error) {
+          if (self::worth_retrying($error)) {
+            $this->fail(sprintf(__('A service account key this site no longer uses could not be removed at Google yet (%s). The connection was kept so you can try again.', $domain), $error->get_error_message()));
+          }
+        }
         $problems = array();
         $refresh  = $this->decrypt($connection['refresh_token']);
         if ($refresh) {
@@ -1107,12 +1086,23 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
           // Keep the connection so the revocation can be retried instead of reporting success while access remains.
           $this->fail(sprintf(__('Access could not be revoked yet: %s. The connection was kept so you can try again.', $domain), implode('; ', $problems)));
         }
+      } else {
+        $this->discard_setup_key(false); // without a readable connection only the stored copy can be removed
       }
-      $this->discard_setup_key(false); // without a readable connection only the stored copy can be removed
       $this->remove_option(self::OPTION);
       $network_id = $this->network_scope() ? get_current_network_id() : 0;
       $this->forget_funnel($network_id);
       $this->forget_funnel($network_id, null, false, get_current_user_id());
+      if ($stuck) {
+        // Google refused to remove a key and repeating the request would not change that, so the disconnect went
+        // ahead. The key stays on record for the next setup; meanwhile say which one it is.
+        $names = array();
+        foreach (array_keys($stuck) as $name) {
+          list($email, $key_id) = array_pad(explode('/', $name, 2), 2, '');
+          $names[] = sprintf('%1$s (%2$s)', $key_id, $email);
+        }
+        $this->fail(sprintf(__('Google account disconnected and access revoked. Google did not let this site remove a service account key it no longer uses (%1$s). Delete it in the Google Cloud console under IAM, Service Accounts: %2$s.', $domain), current($stuck)->get_error_message(), implode(', ', $names)));
+      }
       $this->done(array('sm_gc' => $unreadable ? 'disconnected-unrevoked' : 'disconnected'));
     }
 
@@ -1311,126 +1301,182 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
     /* Provisioning: project, APIs, bucket, service account, role, key      */
     /* ------------------------------------------------------------------ */
 
-    /** A database-backed scope lock survives proxy timeouts and bypasses stale object caches. */
+    /**
+     * One setup at a time. Nothing here queries the options table: the claim on a scope is WordPress core's own
+     * lock, and the job record is an ordinary option.
+     */
+
+    /** Names the scope a setup runs in, this site or the network: its claim, its lock and its job record. */
     private function provision_job_key() {
       return 'sm_gc_job_' . ($this->network_scope() ? 'network_' . get_current_network_id() : 'site_' . get_current_blog_id());
     }
 
-    /** MySQL releases this connection-owned lock even on SIGKILL. No time-based stealing. */
-    private function provision_lock_name() {
-      global $wpdb;
-      return 'sm_gc_' . md5(DB_NAME . ':' . $wpdb->base_prefix . ':' . $this->provision_job_key());
-    }
-
-    private function assert_provision_lock() {
-      if (!$this->provision_job) return;
-      global $wpdb;
-      if (!$this->provision_lock) {
-        // No database lock here (see take_provision_lock), so the job record is the guard: a worker that was
-        // declared stopped and replaced must not continue, and a live one keeps its record fresh.
-        list($raw, $job) = $this->provision_job_read();
-        if (!is_array($job) || $job['id'] !== $this->provision_job || $job['status'] !== 'running') {
-          $this->provision_job = null;
-          wp_die(__('This setup stopped responding and another one took over. Reload to see its progress.', ud_get_stateless_media()->domain));
-        }
-        if (time() - (int) $job['updated'] >= MINUTE_IN_SECONDS) {
-          $job['updated'] = time();
-          $wpdb->query($wpdb->prepare("UPDATE {$wpdb->base_prefix}options SET option_value = %s WHERE option_name = %s AND option_value = %s", wp_json_encode($job), $this->provision_job_key(), $raw));
-        }
-        return;
-      }
-      $owned = $wpdb->get_var($wpdb->prepare('SELECT IS_USED_LOCK(%s) = CONNECTION_ID()', $this->provision_lock));
-      if ((string) $owned !== '1') {
-        // wpdb can reconnect silently. A former owner must never continue mutating Google.
-        $this->provision_job = null;
-        wp_die(__('The setup worker lost its database connection. Reload to resume the saved setup.', ud_get_stateless_media()->domain));
-      }
-    }
-
-    /**
-     * Takes the setup lock on this database connection, waiting up to $wait seconds.
-     * Returns '1' when this connection owns it, '0' when another connection does, and null when the database
-     * has no connection-owned locks (SQLite, some clusters). Then the job record alone guards the setup.
-     */
-    private function take_provision_lock($wait = 0) {
-      global $wpdb;
-      // On a replicated database the lock must live on the primary, or two workers could each take it.
-      if (method_exists($wpdb, 'send_reads_to_masters')) $wpdb->send_reads_to_masters();
-      $name  = $this->provision_lock_name();
-      $quiet = $wpdb->suppress_errors(true); // an unsupported lock function is an answer here, not an error to print
-      $got   = $wpdb->get_var($wpdb->prepare('SELECT GET_LOCK(%s, %d)', $name, $wait));
-      $owned = (string) $got === '1' ? $wpdb->get_var($wpdb->prepare('SELECT IS_USED_LOCK(%s) = CONNECTION_ID()', $name)) : null;
-      $wpdb->suppress_errors($quiet);
-      if ((string) $got === '0') return '0';
-      return (string) $got === '1' && (string) $owned === '1' ? '1' : null;
-    }
-
-    private function release_provision_lock() {
-      if (!$this->provision_lock) return;
-      global $wpdb;
-      $wpdb->get_var($wpdb->prepare('SELECT RELEASE_LOCK(%s)', $this->provision_lock));
-      $this->provision_lock = null;
-    }
-
-    /**
-     * Marks a recorded running job as interrupted once its worker is gone. $lock is the caller's
-     * take_provision_lock() result: a worker that held the database lock is gone exactly when the lock could be
-     * taken. Without lock support only a long silence can tell.
-     */
-    private function recover_provision_job($raw, $job, $lock) {
-      if (!is_array($job) || $job['status'] !== 'running') return $job;
-      $held_lock = !empty($job['worker_lock']);
-      if ($held_lock && $lock === '0') return $job; // its worker is alive
-      if (!($held_lock && $lock === '1') && time() - (int) $job['updated'] < self::PROVISION_STALE) return $job;
-      global $wpdb;
-      $job['status'] = 'interrupted';
-      $job['message'] = __('The setup worker stopped. Your saved storage choices are ready to resume.', ud_get_stateless_media()->domain);
-      $job['updated'] = time();
-      $wpdb->query($wpdb->prepare("UPDATE {$wpdb->base_prefix}options SET option_value = %s WHERE option_name = %s AND option_value = %s", wp_json_encode($job), $this->provision_job_key(), $raw));
-      return $job;
-    }
-
+    /** The job record: who is setting up storage in this scope, how far it got and how it ended. */
     private function provision_job_read() {
-      global $wpdb;
-      $raw = $wpdb->get_var($wpdb->prepare("SELECT option_value FROM {$wpdb->base_prefix}options WHERE option_name = %s", $this->provision_job_key()));
-      return array($raw, $raw ? json_decode($raw, true) : null);
+      $job = $this->read_option($this->provision_job_key(), null);
+      return is_array($job) && isset($job['id'], $job['status']) ? $job : null;
+    }
+
+    /** Saves the job record. Not through write_option(), whose ownership check reads this very record. */
+    private function provision_job_save($job) {
+      $key = $this->provision_job_key();
+      return $this->network_scope() ? update_network_option(get_current_network_id(), $key, $job) : update_option($key, $job, false);
     }
 
     private function provision_job_write($changes, $guard = true) {
       if (!$this->provision_job) return;
       if ($guard) $this->assert_provision_lock();
-      global $wpdb;
-      list($raw, $job) = $this->provision_job_read();
+      $job = $this->provision_job_read();
       if (!is_array($job) || $job['id'] !== $this->provision_job) return;
-      $job = array_merge($job, $changes, array('updated' => time()));
-      $wpdb->query($wpdb->prepare("UPDATE {$wpdb->base_prefix}options SET option_value = %s WHERE option_name = %s AND option_value = %s", wp_json_encode($job), $this->provision_job_key(), $raw));
+      $this->provision_job_save(array_merge($job, $changes, array('updated' => time())));
+    }
+
+    /**
+     * Claims or gives up a scope with the lock WordPress core uses for its own updaters, which holds on every
+     * database. A network setup keeps its claim with the network's main site.
+     */
+    private function scope_claim($take) {
+      if (!class_exists('WP_Upgrader')) require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
+      $elsewhere = $this->network_scope() && get_current_blog_id() !== get_main_site_id();
+      if ($elsewhere) switch_to_blog(get_main_site_id());
+      $done = $take ? \WP_Upgrader::create_lock($this->provision_job_key(), self::PROVISION_STALE) : \WP_Upgrader::release_lock($this->provision_job_key());
+      if ($elsewhere) restore_current_blog();
+      return (bool) $done;
+    }
+
+    /** The name of the database lock for this scope. Such locks are shared by everything on the server. */
+    private function provision_lock_name() {
+      global $wpdb;
+      return 'sm_gc_' . md5(DB_NAME . ':' . $wpdb->base_prefix . ':' . $this->provision_job_key());
+    }
+
+    /**
+     * Takes the database's connection-owned lock for this scope, waiting up to $wait seconds. The database frees
+     * it the moment its owner's connection ends, however the owner died, and that is the only way to know at once
+     * that a setup worker is gone. WordPress has no API for it, hence these three direct calls; none touches a
+     * table. Returns '1' when this connection owns the lock, '0' when another connection does, and null when the
+     * database has no such locks (SQLite, some clusters). Then a claim only runs out with time.
+     */
+    private function take_provision_lock($wait = 0) {
+      global $wpdb;
+      // On a replicated database the lock must live on the primary, or two workers could each take it.
+      if (method_exists($wpdb, 'send_reads_to_masters')) $wpdb->send_reads_to_masters();
+      $quiet = $wpdb->suppress_errors(true); // an unsupported lock function is an answer here, not an error to print
+      $got   = $wpdb->get_var($wpdb->prepare('SELECT GET_LOCK(%s, %d)', $this->provision_lock_name(), $wait));
+      $owned = (string) $got === '1' && $this->owns_provision_lock();
+      $wpdb->suppress_errors($quiet);
+      if ((string) $got === '0') return '0';
+      return $owned ? '1' : null;
+    }
+
+    private function owns_provision_lock() {
+      global $wpdb;
+      return (string) $wpdb->get_var($wpdb->prepare('SELECT IS_USED_LOCK(%s) = CONNECTION_ID()', $this->provision_lock_name())) === '1';
+    }
+
+    private function release_provision_lock() {
+      global $wpdb;
+      $wpdb->get_var($wpdb->prepare('SELECT RELEASE_LOCK(%s)', $this->provision_lock_name()));
+      $this->provision_lock = false;
+    }
+
+    /**
+     * Takes this scope for the request, a setup or a disconnect. Returns false while a live owner exists.
+     * Where the database has connection-owned locks the owner holds that lock as well, so a claim whose owner
+     * died is recognised here at once and cleared, instead of blocking the scope until it runs out.
+     */
+    private function take_scope($wait = 0) {
+      $lock = $this->take_provision_lock($wait);
+      if ($lock === '0') return false;
+      if ($lock === '1') {
+        $this->provision_lock = true;
+        $this->scope_claim(false); // nobody alive holds the lock, so a claim that is still there was left behind
+      }
+      if (!$this->scope_claim(true)) {
+        if ($this->provision_lock) $this->release_provision_lock();
+        return false;
+      }
+      $this->scope_taken = true;
+      register_shutdown_function(array($this, 'release_scope'));
+      return true;
+    }
+
+    /** Gives the scope back: when the request ends, and earlier when a setup finishes. */
+    public function release_scope() {
+      if ($this->scope_taken) {
+        $this->scope_taken = false;
+        $this->scope_claim(false);
+      }
+      if ($this->provision_lock) $this->release_provision_lock();
+    }
+
+    /** Stops a worker that no longer owns its scope. Checked around everything it does at Google or saves. */
+    private function assert_provision_lock() {
+      if (!$this->provision_job) return;
+      $domain = ud_get_stateless_media()->domain;
+      if ($this->provision_lock) {
+        if ($this->owns_provision_lock()) return;
+        // wpdb can reconnect silently. A former owner must never continue mutating Google, and neither the
+        // lock nor the claim is its own to give up any more.
+        $this->provision_job  = null;
+        $this->provision_lock = false;
+        $this->scope_taken    = false;
+        wp_die(__('The setup worker lost its database connection. Reload to resume the saved setup.', $domain));
+      }
+      // Without a database lock a claim runs out with time. A worker whose scope was taken over stops, and so
+      // does one that is about to run out, which then hands the scope back itself.
+      $job = $this->provision_job_read();
+      if (!is_array($job) || $job['id'] !== $this->provision_job || $job['status'] !== 'running') {
+        $this->provision_job = null;
+        $this->scope_taken   = false;
+        wp_die(__('This setup stopped responding and another one took over. Reload to see its progress.', $domain));
+      }
+      if (time() - (int) $job['started'] > self::PROVISION_STALE - 3 * MINUTE_IN_SECONDS) {
+        wp_die(__('This setup ran out of time. Reload to resume the saved setup.', $domain));
+      }
+    }
+
+    /**
+     * Marks a job recorded as running as interrupted once its worker is gone. With a database lock that is known
+     * at once: the lock can be taken only after its owner's connection ended, and holding it while the record
+     * changes keeps a new setup from starting in between. Without one, only time can tell.
+     */
+    private function recover_provision_job($job) {
+      if (!is_array($job) || $job['status'] !== 'running') return $job;
+      $lock = !empty($job['worker_lock']) ? $this->take_provision_lock(0) : null;
+      if ($lock === '0') return $job; // its worker is alive
+      if ($lock === '1' || time() - (int) $job['started'] >= self::PROVISION_STALE) {
+        $current = $this->provision_job_read();
+        if (is_array($current) && $current['id'] === $job['id'] && $current['status'] === 'running') {
+          $current['status']  = 'interrupted';
+          $current['message'] = __('The setup worker stopped. Your saved storage choices are ready to resume.', ud_get_stateless_media()->domain);
+          $current['updated'] = time();
+          $this->provision_job_save($current);
+        }
+        $job = $current;
+      }
+      if ($lock === '1') {
+        $this->scope_claim(false); // its owner is gone for certain, so the claim it left goes too
+        $this->release_provision_lock();
+      }
+      return $job;
     }
 
     private function begin_provision_job() {
-      global $wpdb;
+      $domain = ud_get_stateless_media()->domain;
       $id = isset($_POST['sm_gc_job']) ? sanitize_text_field(wp_unslash($_POST['sm_gc_job'])) : wp_generate_uuid4();
-      if (!preg_match('/^[a-zA-Z0-9-]{16,64}$/D', $id)) wp_die(__('Invalid setup request.', ud_get_stateless_media()->domain));
-      // A status poll can hold the lock for a moment, so wait briefly instead of refusing a genuine submission.
-      $lock = $this->take_provision_lock(3);
-      if ($lock === '0') {
-        wp_send_json_error(array('message' => __('Another setup worker is active. Checking its progress.', ud_get_stateless_media()->domain)), 409);
-      }
-      if ($lock === '1') $this->provision_lock = $this->provision_lock_name();
+      if (!preg_match('/^[a-zA-Z0-9-]{16,64}$/D', $id)) wp_die(__('Invalid setup request.', $domain));
       register_shutdown_function(array($this, 'release_provision_worker'));
-      list($raw, $previous) = $this->provision_job_read();
-      $this->recover_provision_job($raw, $previous, $lock);
-      list($raw, $previous) = $this->provision_job_read();
+      // A status poll can hold the database lock for a moment, so wait briefly instead of refusing a genuine submission.
+      if (!$this->take_scope(3)) {
+        wp_send_json_error(array('message' => __('Another setup worker is active. Checking its progress.', $domain)), 409);
+      }
       // A repeated POST never repeats Google mutations, even after the first request finished.
-      if (is_array($previous) && ($previous['status'] === 'running' || $previous['id'] === $id)) {
-        wp_send_json_error(array('message' => __('A storage setup is already recorded. Checking its progress.', ud_get_stateless_media()->domain)), 409);
+      $previous = $this->provision_job_read();
+      if (is_array($previous) && $previous['id'] === $id) {
+        wp_send_json_error(array('message' => __('A storage setup is already recorded. Checking its progress.', $domain)), 409);
       }
-      $job = array('id' => $id, 'uid' => get_current_user_id(), 'status' => 'running', 'worker_lock' => $lock === '1', 'started' => time(), 'updated' => time(), 'message' => __('Preparing your storage.', ud_get_stateless_media()->domain));
-      if ($raw === null) {
-        $locked = $wpdb->query($wpdb->prepare("INSERT IGNORE INTO {$wpdb->base_prefix}options (option_name, option_value, autoload) VALUES (%s, %s, 'no')", $this->provision_job_key(), wp_json_encode($job)));
-      } else {
-        $locked = $wpdb->query($wpdb->prepare("UPDATE {$wpdb->base_prefix}options SET option_value = %s WHERE option_name = %s AND option_value = %s", wp_json_encode($job), $this->provision_job_key(), $raw));
-      }
-      if ($locked !== 1) wp_send_json_error(array('message' => __('Another setup request is starting. Check again shortly.', ud_get_stateless_media()->domain)), 409);
+      $this->provision_job_save(array('id' => $id, 'uid' => get_current_user_id(), 'status' => 'running', 'worker_lock' => (bool) $this->provision_lock, 'started' => time(), 'updated' => time(), 'message' => __('Preparing your storage.', $domain)));
       $this->provision_job = $id;
       // Reverse proxies may close the HTTP connection while Google is still working.
       ignore_user_abort(true);
@@ -1442,22 +1488,15 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
         $this->provision_job_write(array('status' => 'interrupted', 'message' => __('Setup stopped before completion. Reload to resume the saved storage choices.', ud_get_stateless_media()->domain)), false);
         $this->provision_job = null;
       }
-      $this->release_provision_lock();
+      $this->release_scope();
     }
 
     public function ajax_provision_status() {
       if (!current_user_can($this->capability())) wp_send_json_error(array('message' => __('Insufficient permissions.')), 403);
       check_ajax_referer($this->nonce_action(), 'nonce');
-      global $wpdb;
-      list($raw, $job) = $this->provision_job_read();
       // Only a job recorded as running needs a liveness check: an idle poll must not contend for the lock with a
       // new submission. Taking the lock proves no live worker owns this scope; age alone proves nothing.
-      if (is_array($job) && $job['status'] === 'running') {
-        $lock = $this->take_provision_lock(0);
-        $this->recover_provision_job($raw, $job, $lock);
-        if ($lock === '1') $wpdb->get_var($wpdb->prepare('SELECT RELEASE_LOCK(%s)', $this->provision_lock_name()));
-        list($raw, $job) = $this->provision_job_read();
-      }
+      $job = $this->recover_provision_job($this->provision_job_read());
       if (!is_array($job)) wp_send_json_success(array('status' => 'none'));
       if ((int) $job['uid'] !== get_current_user_id()) {
         wp_send_json_success(array('status' => $job['status'] === 'running' ? 'busy' : 'none'));
@@ -1753,7 +1792,7 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
         if (is_array($checkpoint) && isset($checkpoint['bucket'], $checkpoint['sa_email'], $checkpoint['key']) && $checkpoint['bucket'] === $bucket && $checkpoint['sa_email'] === $sa_email) {
           // An interrupted attempt for this same storage already holds a key: reuse it instead of issuing another.
           $key_json = $checkpoint['key'];
-          $previous_key = isset($checkpoint['previous']) ? $checkpoint['previous'] : null;
+          $previous_key = $this->resumed_previous_key($checkpoint, $configured_key);
         } else {
           // A key saved by an attempt for different storage is abandoned now. It must not stay active, and it must
           // not stay reusable: once queued for revocation, a later reuse would end with the site's key deleted.
@@ -1904,24 +1943,53 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
     }
 
     /**
-     * Ends a setup that stopped after Google issued its key: removes the stored copy, and with $revoke also the
-     * keys it left behind at Google. A revocation that fails is queued, so no key stays active without a record.
+     * The key a resumed setup replaces: the one the site is configured with now, which may have changed since
+     * the setup stopped. Only when the saved key already is the site's configuration did the stopped setup
+     * replace an older key, and that one is on record. So a configuration entered by hand in between is
+     * protected like any working configuration when the saved key cannot be verified.
+     */
+    private function resumed_previous_key($checkpoint, $configured_key) {
+      $issued = is_array($checkpoint) && !empty($checkpoint['key']) ? json_decode($checkpoint['key'], true) : null;
+      $live   = is_array($issued) && !empty($issued['private_key_id']) && is_array($configured_key)
+                && !empty($configured_key['private_key_id']) && $issued['private_key_id'] === $configured_key['private_key_id'];
+      if (!$live) return $configured_key;
+      return isset($checkpoint['previous']) ? $checkpoint['previous'] : null;
+    }
+
+    /** True when repeating a failed Google request can succeed: the network or Google failed, not the request. */
+    private static function worth_retrying($error) {
+      $code = (string) $error->get_error_code();
+      if (strpos($code, 'google_') !== 0) return $code === 'http_request_failed';
+      $status = (int) substr($code, 7);
+      return $status === 429 || $status >= 500;
+    }
+
+    /**
+     * Ends a setup that stopped after Google issued its key: with $revoke the keys it left at Google go on the
+     * list of keys to remove, then the stored copy is dropped. So such a key is never both awaiting removal and
+     * still reusable, and none stays active without a record. The caller removes what is on the list.
      */
     private function discard_setup_key($revoke) {
       $stored = (string) $this->read_option(self::SETUP_KEY_OPTION, '');
       if ($stored === '') return;
       if ($revoke) {
         $current = json_decode((string) $this->read_option('sm_key_json', ''), true);
-        foreach ($this->setup_leftover_keys(json_decode($this->decrypt($stored), true), $current) as $leftover) {
-          $this->revoke_key($leftover['email'], $leftover['id']);
+        $leftovers = $this->setup_leftover_keys(json_decode($this->decrypt($stored), true), $current);
+        if ($leftovers) {
+          $pending = $this->read_option(self::PENDING_KEYS_OPTION, array());
+          if (!is_array($pending)) $pending = array();
+          foreach ($leftovers as $leftover) $pending[$leftover['email'] . '/' . $leftover['id']] = time();
+          $this->write_option(self::PENDING_KEYS_OPTION, $pending, false);
         }
       }
       $this->remove_option(self::SETUP_KEY_OPTION);
     }
 
+    /** Tries once to remove every key on the list. Returns the errors of those still there, by key name. */
     private function retry_pending_revocations(&$log) {
+      $failed  = array();
       $pending = $this->read_option(self::PENDING_KEYS_OPTION, array());
-      if (!is_array($pending) || !$pending) return;
+      if (!is_array($pending) || !$pending) return $failed;
       // Never revoke the key the site is configured with, however it got onto this list.
       $current = json_decode((string) $this->read_option('sm_key_json', ''), true);
       $in_use  = is_array($current) && !empty($current['client_email']) && !empty($current['private_key_id']) ? $current['client_email'] . '/' . $current['private_key_id'] : '';
@@ -1933,8 +2001,10 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
         list($email, $key_id) = array_pad(explode('/', $name, 2), 2, '');
         if ($email === '' || $key_id === '') continue;
         $r = $this->revoke_key($email, $key_id);
+        if ($r !== true) $failed[$name] = $r;
         $log[] = $r === true ? 'Earlier key ' . $key_id . ' revoked' : 'Earlier key ' . $key_id . ' still pending revocation: ' . $r->get_error_message();
       }
+      return $failed;
     }
 
     private function verify_key($key_json, $bucket, $attempts = 6) {
@@ -2017,6 +2087,7 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
       if ($this->provision_job) {
         $this->provision_job_write(array('status' => isset($args['sm_gc']) && $args['sm_gc'] === 'provisioned' ? 'complete' : 'failed', 'url' => $this->page_url($args)));
         $this->provision_job = null;
+        $this->release_scope();
         if (isset($_POST['sm_gc_job'])) wp_send_json_success(array('finished' => true));
       }
       wp_safe_redirect($this->page_url($args));
