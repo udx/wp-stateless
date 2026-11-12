@@ -215,6 +215,25 @@ foreach (['real'=>8,'none'=>9] as $mode=>$blog) {
  finish($w);
 }
 $wpdb->locking='real';
+// A disconnect is held to the same ownership check as a setup worker, and gives up only a claim that is still its own.
+function since($request,$seconds) {global $r;$p=$r->getProperty('scope_since');$p->setAccessible(true);$p->setValue($request[0],time()-$seconds);}
+$GLOBALS['blog']=13;$d=request(55);call($d,'take_scope',2);
+call($d,'assert_provision_lock');
+assert_true(true,'disconnect that holds its lock goes on');
+$wpdb->locks=[]; // its database connection was replaced behind its back
+assert_true(strpos(stopped($d,'assert_provision_lock'),'connection was lost')!==false,'disconnect that lost its lock stops');
+call($d,'release_scope');
+assert_true(claim()!==null,'and leaves the claim alone: it may be a setup\'s by now');
+$GLOBALS['options'][13]=[];$wpdb->locking='none';
+$d=request(56);call($d,'take_scope',2);call($d,'release_scope');
+assert_true(claim()===null,'disconnect without database locks gives its claim back');
+$d=request(57);call($d,'take_scope',2);since($d,901); // it was held up until its claim had run out
+assert_true(strpos(stopped($d,'assert_provision_lock'),'connection was lost')!==false,'request whose claim ran out stops');
+$d=request(58);call($d,'take_scope',2);since($d,901);$GLOBALS['options'][13]['sm_gc_job_site_13.lock']=time()-901;$w=request(59);submit($w,$A); // a setup took the claim over meanwhile
+call($d,'release_scope');
+assert_true(claim()!==null && job()['id']===$A,'request whose claim ran out does not give up the claim of the setup that took over');
+finish($w);
+$wpdb->locking='real';
 
 // Where the records live: ordinary options of the site, network options for a network setup, the claim with the main site.
 $GLOBALS['multi']=true;$GLOBALS['blog']=3;$GLOBALS['options'][3]=[];$w=request(60);submit($w,$A);

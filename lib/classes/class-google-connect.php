@@ -42,6 +42,7 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
     private $provision_job = null;
     private $provision_lock = false;
     private $scope_taken = false;
+    private $scope_since = 0;
 
     /** @var string Why the hosted sign-in could not be prepared, for the page to show. */
     public $start_error = '';
@@ -130,6 +131,7 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
     }
 
     private function remove_option($key) {
+      $this->assert_provision_lock();
       return $this->network_scope() ? delete_network_option(get_current_network_id(), $key) : delete_option($key);
     }
 
@@ -1075,6 +1077,7 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
         }
         $problems = array();
         $refresh  = $this->decrypt($connection['refresh_token']);
+        $this->assert_provision_lock();
         if ($refresh) {
           // 200 means revoked. Google answers 400 invalid_token for a grant that is already gone, which is the same outcome.
           $res  = wp_remote_post(self::REVOKE_ENDPOINT, array('body' => array('token' => $refresh), 'timeout' => 20));
@@ -1085,6 +1088,7 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
           }
         }
         $conn = $this->broker_conn($connection);
+        $this->assert_provision_lock();
         if ($conn) {
           $r = $this->broker_request('/connect/google/disconnect', array('connection_id' => $conn['id'], 'connection_secret' => $conn['secret']));
           // ok, or 401 invalid_connection when the broker already forgot this connection.
@@ -1415,6 +1419,7 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
         return false;
       }
       $this->scope_taken = true;
+      $this->scope_since = time();
       register_shutdown_function(array($this, 'release_scope'));
       // This request owns the scope now, so a job that is still recorded as running has no worker any more.
       $left = $this->provision_job_read();
@@ -1422,39 +1427,58 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
       return true;
     }
 
-    /** Gives the scope back: when the request ends, and earlier when a setup finishes. */
+    /**
+     * Whether this request still holds the scope it took. With the database lock that is known exactly. Without
+     * it, a claim cannot have been taken over before it ran out, so a younger one is still this request's own.
+     */
+    private function holds_scope() {
+      if (!$this->scope_taken) return false;
+      return $this->provision_lock ? $this->owns_provision_lock() : time() - $this->scope_since < self::PROVISION_STALE - 10;
+    }
+
+    /**
+     * Gives the scope back: when the request ends, and earlier when a setup finishes. A claim that may be
+     * another request's by now is left alone.
+     */
     public function release_scope() {
       if ($this->scope_taken) {
+        $own = $this->holds_scope();
         $this->scope_taken = false;
-        $this->scope_claim(false);
+        if ($own) $this->scope_claim(false);
       }
       if ($this->provision_lock) $this->release_provision_lock();
     }
 
-    /** Stops a worker that no longer owns its scope. Checked around everything it does at Google or saves. */
+    /**
+     * Stops a request that no longer holds the scope it took, a setup worker or a disconnect. Checked around
+     * everything such a request does at Google and around what it saves or removes.
+     */
     private function assert_provision_lock() {
-      if (!$this->provision_job) return;
+      if (!$this->scope_taken) return;
       $domain = ud_get_stateless_media()->domain;
-      if ($this->provision_lock) {
-        if ($this->owns_provision_lock()) return;
-        // wpdb can reconnect silently. A former owner must never continue mutating Google, and neither the
-        // lock nor the claim is its own to give up any more.
-        $this->provision_job  = null;
-        $this->provision_lock = false;
-        $this->scope_taken    = false;
-        wp_die(__('The setup worker lost its database connection. Reload to resume the saved setup.', $domain));
+      if ($this->provision_job && !$this->provision_lock) {
+        // Without a database lock a claim runs out with time. A worker whose scope was taken over stops, and so
+        // does one that is about to run out, which then hands the scope back itself.
+        $job = $this->provision_job_read();
+        if (!is_array($job) || $job['id'] !== $this->provision_job || $job['status'] !== 'running') {
+          $this->provision_job = null;
+          $this->scope_taken   = false;
+          wp_die(__('This setup stopped responding and another one took over. Reload to see its progress.', $domain));
+        }
+        if (time() - (int) $job['started'] > self::PROVISION_STALE - 3 * MINUTE_IN_SECONDS) {
+          wp_die(__('This setup ran out of time. Reload to resume the saved setup.', $domain));
+        }
       }
-      // Without a database lock a claim runs out with time. A worker whose scope was taken over stops, and so
-      // does one that is about to run out, which then hands the scope back itself.
-      $job = $this->provision_job_read();
-      if (!is_array($job) || $job['id'] !== $this->provision_job || $job['status'] !== 'running') {
-        $this->provision_job = null;
-        $this->scope_taken   = false;
-        wp_die(__('This setup stopped responding and another one took over. Reload to see its progress.', $domain));
-      }
-      if (time() - (int) $job['started'] > self::PROVISION_STALE - 3 * MINUTE_IN_SECONDS) {
-        wp_die(__('This setup ran out of time. Reload to resume the saved setup.', $domain));
-      }
+      if ($this->holds_scope()) return;
+      // wpdb can reconnect silently, and with the old connection the lock is gone. A former owner must never
+      // continue, and neither the lock nor the claim is its own to give up any more.
+      $worker = (bool) $this->provision_job;
+      $this->provision_job  = null;
+      $this->provision_lock = false;
+      $this->scope_taken    = false;
+      wp_die($worker
+        ? __('The setup worker lost its database connection. Reload to resume the saved setup.', $domain)
+        : __('The database connection was lost before this request finished. Reload and try again.', $domain));
     }
 
     /** Records that the worker of a job is gone, so the screen offers to resume. */
