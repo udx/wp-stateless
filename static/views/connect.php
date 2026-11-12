@@ -283,7 +283,7 @@ $start_error   = wpCloud\StatelessMedia\GoogleConnect::instance()->start_error;
                 <?php endif; ?>
                 <option value="__new__" <?php selected($default_project, '__new__'); ?>><?php _e('Create a new project', $domain); ?></option>
               </select>
-              <p class="description"><?php echo count($projects) ? sprintf(esc_html__('%d projects visible to this account.', $domain), count($projects)) : esc_html__('No projects found in this account.', $domain); ?></p>
+              <p class="description"><?php echo count($projects) ? sprintf(esc_html(_n('%d project visible to this account.', '%d projects visible to this account.', count($projects), $domain)), count($projects)) : esc_html__('No projects found in this account.', $domain); ?></p>
             </td>
           </tr>
           <tr class="sm-gc-new-project">

@@ -93,7 +93,7 @@
       buckets = Array.from(new Map(buckets.map(b => [b.name,b])).values());
       next = data.next; loadedProject = id;
       renderBuckets(); more.hidden = !next;
-      status.textContent = buckets.length ? buckets.length + ' buckets loaded.' + (next ? ' Load more to search additional buckets.' : '') : 'No buckets found in this project. Create a new bucket or enter a known name below.';
+      status.textContent = buckets.length ? (buckets.length === 1 ? '1 bucket loaded.' : buckets.length + ' buckets loaded.') + (next ? ' Load more to search additional buckets.' : '') : 'No buckets found in this project. Create a new bucket or enter a known name below.';
     } catch (error) {
       if (version !== generation) return;
       status.textContent = error.message + ' You can also enter a known bucket name below.'; retry.hidden = false;
