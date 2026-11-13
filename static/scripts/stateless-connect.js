@@ -6,6 +6,8 @@
   if (draft) Object.entries(draft).forEach(([key,value]) => {
     const field = form.elements.namedItem(key);
     if (!field) return;
+    // The choice to make a bucket public is rendered by the server, ticked only for the bucket it was made for.
+    if (key === 'bucket_public') return;
     if (key === 'mode') {
       // Restore the mode only when it is an editable radio group. A locked mode is a hidden input and a
       // required mode leaves the other radios disabled; both must keep what the server rendered.

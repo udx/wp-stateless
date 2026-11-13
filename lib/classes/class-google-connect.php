@@ -264,7 +264,7 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
       $billing_unavailable = $default_project === '__new__' && !$billing;
       // An existing bucket the last attempt found private: the screen then offers the choice to make it public.
       $public_required = is_array($draft) && !empty($draft['public_required']) && isset($draft['bucket_choice']) && $draft['bucket_choice'] === 'existing';
-      $bucket_public   = is_array($draft) && !empty($draft['bucket_public']);
+      $bucket_public   = is_array($draft) && !empty($draft['bucket_public']) && isset($draft['bucket_name']) && $draft['bucket_public'] === $draft['bucket_name'];
 
       include ud_get_stateless_media()->path('static/views/connect.php', 'dir');
     }
@@ -1608,7 +1608,7 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
       $public_for     = isset($post['bucket_public']) && is_string($post['bucket_public']) ? strtolower(trim(sanitize_text_field($post['bucket_public']))) : '';
       $make_public    = $bucket_choice === 'existing' && $bucket !== '' && $public_for === $bucket;
 
-      $draft = array('project' => $project_choice, 'new_project_name' => $new_project, 'billing_account' => $billing_choice, 'bucket_choice' => $bucket_choice, 'bucket_name' => $bucket, 'location' => $location, 'mode' => $mode, 'bucket_public' => $make_public);
+      $draft = array('project' => $project_choice, 'new_project_name' => $new_project, 'billing_account' => $billing_choice, 'bucket_choice' => $bucket_choice, 'bucket_name' => $bucket, 'location' => $location, 'mode' => $mode, 'bucket_public' => $make_public ? $bucket : '');
       // A project this attempt created earlier carries its explicit billing choice until the link succeeds.
       $previous = $this->state_get('draft', $uid);
       if (is_array($previous) && !empty($previous['created_project']) && $previous['created_project'] === $project_choice) {
