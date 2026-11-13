@@ -1752,6 +1752,12 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
                 throw new Exception(__('This bucket is private, and its files can only be public or private together. To serve media from it, choose "Make the files in this bucket public" under the bucket name and connect again. To keep the bucket private, choose Backup mode.', ud_get_stateless_media()->domain), 1002);
               }
               $open_bucket = true;
+            } else {
+              // The permission is in place, but an organization policy can still refuse anonymous reads. A setup
+              // that ends well has to mean media links work, so one file is read back before a key is issued.
+              if ($this->await_public_read($bucket, 1) === 'HTTP 403') {
+                throw new Exception(__('This bucket has a public permission, but Google Cloud still refuses to serve its files to visitors, usually because an organization policy enforces public access prevention. Ask your Google Cloud administrator for an exemption, or choose Backup mode to keep the bucket private.', ud_get_stateless_media()->domain), 1002);
+              }
             }
           } elseif ($mode !== 'backup') {
             if ($prevented) {
@@ -2206,9 +2212,9 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
     }
 
     /**
-     * Whether a file in a bucket that was just made public can be read without credentials: true, or what the
-     * last attempt answered. Google applies a permission change within seconds to a few minutes, so this waits
-     * for it and reports, rather than failing a setup whose permissions are already in place.
+     * Whether a file in a public bucket can be read without credentials: true, or what the last attempt answered
+     * ("HTTP 403" when Google refuses). Google applies a permission change within seconds to a few minutes, so
+     * after one the caller waits and reports rather than failing a setup whose permissions are already in place.
      */
     private function await_public_read($bucket, $attempts = 10) {
       $name = '.wp-stateless-public-read-check-' . substr(md5(uniqid('', true)), 0, 8);
