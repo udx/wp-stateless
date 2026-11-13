@@ -1754,9 +1754,14 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
               $open_bucket = true;
             } else {
               // The permission is in place, but an organization policy can still refuse anonymous reads. A setup
-              // that ends well has to mean media links work, so one file is read back before a key is issued.
-              if ($this->await_public_read($bucket, 1) === 'HTTP 403') {
+              // that ends well has to mean media links work, so a file is read back before a key is issued. Nothing
+              // was changed here that Google still has to apply, so anything but a successful read stops the setup.
+              $readable = $this->await_public_read($bucket, 2);
+              if ($readable === 'HTTP 403') {
                 throw new Exception(__('This bucket has a public permission, but Google Cloud still refuses to serve its files to visitors, usually because an organization policy enforces public access prevention. Ask your Google Cloud administrator for an exemption, or choose Backup mode to keep the bucket private.', ud_get_stateless_media()->domain), 1002);
+              }
+              if ($readable !== true) {
+                throw new Exception(sprintf(__('Verify public read: a test file in bucket %1$s could not be read anonymously (%2$s). Check the bucket\'s public access settings and retry.', ud_get_stateless_media()->domain), $bucket, $readable));
               }
             }
           } elseif ($mode !== 'backup') {
