@@ -26,6 +26,8 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
     const PENDING_KEYS_OPTION = 'sm_gc_pending_key_revocations';
     /** A key Google issued during a setup that has not finished yet, kept encrypted so a resumed setup reuses it. */
     const SETUP_KEY_OPTION = 'sm_gc_pending_setup_key';
+    /** Name of the connected bucket when it uses uniform access; uploads to it leave per-object permissions alone. */
+    const UNIFORM_OPTION = 'sm_uniform_bucket';
     /** Seconds after which a claim on a setup scope runs out where the database cannot tell that its owner died. */
     const PROVISION_STALE = 900;
     const FUNNEL_OPTION   = 'sm_gc_funnel';
@@ -260,6 +262,9 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
       if (strlen($suggested_project) < 4) $suggested_project = 'WordPress media';
       $billing_recovery = is_array($draft) && !empty($draft['billing_required']) && !empty($draft['project']) && $draft['project'] !== '__new__';
       $billing_unavailable = $default_project === '__new__' && !$billing;
+      // An existing bucket the last attempt found private: the screen then offers the choice to make it public.
+      $public_required = is_array($draft) && !empty($draft['public_required']) && isset($draft['bucket_choice']) && $draft['bucket_choice'] === 'existing';
+      $bucket_public   = is_array($draft) && !empty($draft['bucket_public']);
 
       include ud_get_stateless_media()->path('static/views/connect.php', 'dir');
     }
@@ -278,7 +283,7 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
       if (is_wp_error($res)) wp_send_json_error(array('message' => wp_strip_all_tags($res->get_error_message())), 400);
       $buckets = array();
       foreach (isset($res['items']) ? $res['items'] : array() as $b) {
-        $buckets[] = array('name' => $b['name'], 'location' => isset($b['location']) ? $b['location'] : '', 'locationType' => isset($b['locationType']) ? $b['locationType'] : '', 'storageClass' => isset($b['storageClass']) ? $b['storageClass'] : '');
+        $buckets[] = array('name' => $b['name'], 'location' => isset($b['location']) ? $b['location'] : '', 'locationType' => isset($b['locationType']) ? $b['locationType'] : '', 'storageClass' => isset($b['storageClass']) ? $b['storageClass'] : '', 'uniform' => !empty($b['iamConfiguration']['uniformBucketLevelAccess']['enabled']));
       }
       wp_send_json_success(array('buckets' => $buckets, 'next' => isset($res['nextPageToken']) ? $res['nextPageToken'] : ''));
     }
@@ -383,6 +388,20 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
         if (isset($item['entity'], $item['role']) && $item['entity'] === 'allUsers' && in_array($item['role'], array('READER', 'OWNER'), true)) return true;
       }
       return false;
+    }
+
+    /** Lets allUsers read the bucket's objects; every other binding, conditional ones included, is kept as it is. */
+    public static function public_bindings($bindings) {
+      if (self::bucket_is_public($bindings)) return $bindings;
+      foreach ($bindings as &$binding) {
+        if (isset($binding['role']) && $binding['role'] === 'roles/storage.objectViewer' && empty($binding['condition'])) {
+          $binding['members'][] = 'allUsers';
+          return $bindings;
+        }
+      }
+      unset($binding);
+      $bindings[] = array('role' => 'roles/storage.objectViewer', 'members' => array('allUsers'));
+      return $bindings;
     }
 
     public static function bucket_is_public($bindings) {
@@ -724,6 +743,8 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
 
     private function provisioning_reason($e) {
       if ($e->getCode() === 1001) return 'billing_missing';
+      if ($e->getCode() === 1002) return 'public_access'; // a private bucket that was not, or could not be, made public
+      if ($e->getCode() === 1003) return 'other';         // a bucket that lives in another project
       $message = strtolower($e->getMessage());
       if (strpos($message, 'billing') !== false) return 'billing_missing';
       if (strpos($message, 'already taken') !== false) return 'bucket_taken';
@@ -1582,8 +1603,10 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
       if (!in_array($mode, array('backup', 'cdn', 'ephemeral', 'stateless'), true)) $mode = 'cdn';
       $locked_mode    = $this->locked_mode();
       if ($locked_mode) $mode = $locked_mode['mode']; // the form shows the locked mode; never trust a posted one
+      // The administrator's choice for an existing bucket whose files are public or private together.
+      $make_public    = $bucket_choice === 'existing' && !empty($post['bucket_public']);
 
-      $draft = array('project' => $project_choice, 'new_project_name' => $new_project, 'billing_account' => $billing_choice, 'bucket_choice' => $bucket_choice, 'bucket_name' => $bucket, 'location' => $location, 'mode' => $mode);
+      $draft = array('project' => $project_choice, 'new_project_name' => $new_project, 'billing_account' => $billing_choice, 'bucket_choice' => $bucket_choice, 'bucket_name' => $bucket, 'location' => $location, 'mode' => $mode, 'bucket_public' => $make_public);
       // A project this attempt created earlier carries its explicit billing choice until the link succeeds.
       $previous = $this->state_get('draft', $uid);
       if (is_array($previous) && !empty($previous['created_project']) && $previous['created_project'] === $project_choice) {
@@ -1700,40 +1723,49 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
         }
 
         // Check a manually entered bucket before creating accounts, keys or changing permissions.
+        $uniform     = false; // the bucket takes no per-object permissions, so uploads leave them alone
+        $prevented   = false; // the bucket itself refuses public access
+        $open_bucket = false; // a private uniform-access bucket the administrator chose to make public
         if ($bucket_choice === 'existing') {
           $existing_bucket = $this->api('GET', 'https://storage.googleapis.com/storage/v1/b/' . rawurlencode($bucket));
           $this->check($existing_bucket, 'Find bucket');
           $project_info = $this->api('GET', 'https://cloudresourcemanager.googleapis.com/v1/projects/' . rawurlencode($project_id));
           $this->check($project_info, 'Check bucket project');
           if (empty($existing_bucket['projectNumber']) || empty($project_info['projectNumber']) || (string) $existing_bucket['projectNumber'] !== (string) $project_info['projectNumber']) {
-            throw new Exception(__('This bucket belongs to a different project. Select its project before continuing.', ud_get_stateless_media()->domain));
+            throw new Exception(__('This bucket belongs to a different project. Select its project before continuing.', ud_get_stateless_media()->domain), 1003);
           }
-          $uniform = !empty($existing_bucket['iamConfiguration']['uniformBucketLevelAccess']['enabled']);
-          if ($uniform && (!defined('WP_STATELESS_SKIP_ACL_SET') || !WP_STATELESS_SKIP_ACL_SET)) {
-            throw new Exception(__('This bucket uses uniform access. Configure WP_STATELESS_SKIP_ACL_SET before connecting it, or choose a bucket with fine-grained access.', ud_get_stateless_media()->domain));
-          }
-          // CDN, Ephemeral and Stateless serve media through unsigned public URLs. The plugin sets a public-read
-          // ACL per object on fine-grained buckets, but it cannot do that on a uniform-access bucket, and no ACL
-          // helps when public access prevention is enforced, so those buckets must already be readable by allUsers.
-          if ($mode !== 'backup') {
-            if (isset($existing_bucket['iamConfiguration']['publicAccessPrevention']) && $existing_bucket['iamConfiguration']['publicAccessPrevention'] === 'enforced') {
+          $uniform   = !empty($existing_bucket['iamConfiguration']['uniformBucketLevelAccess']['enabled']);
+          $prevented = isset($existing_bucket['iamConfiguration']['publicAccessPrevention']) && $existing_bucket['iamConfiguration']['publicAccessPrevention'] === 'enforced';
+          // CDN, Ephemeral and Stateless serve media through unsigned public URLs. On a fine-grained bucket the plugin
+          // sets a public-read ACL per object. A uniform-access bucket has no per-object permissions: its files are
+          // public or private together, through the bucket's own permissions, and that is the administrator's choice.
+          if ($mode !== 'backup' && $uniform) {
+            $policy = $this->api('GET', 'https://storage.googleapis.com/storage/v1/b/' . rawurlencode($bucket) . '/iam?optionsRequestedPolicyVersion=3');
+            $this->check($policy, 'Read bucket permissions');
+            if ($prevented || !self::bucket_is_public(isset($policy['bindings']) ? $policy['bindings'] : array())) {
+              if (!$make_public) {
+                $draft['public_required'] = true;
+                $this->state_set('draft', $draft, DAY_IN_SECONDS, $uid);
+                throw new Exception(__('This bucket is private, and its files can only be public or private together. To serve media from it, choose "Make the files in this bucket public" under the bucket name and connect again. To keep the bucket private, choose Backup mode.', ud_get_stateless_media()->domain), 1002);
+              }
+              $open_bucket = true;
+            }
+          } elseif ($mode !== 'backup') {
+            if ($prevented) {
               throw new Exception(__('This bucket enforces public access prevention, so media URLs would be refused in CDN, Ephemeral or Stateless mode. Turn it off for this bucket, or choose Backup mode.', ud_get_stateless_media()->domain));
             }
             // With WP_STATELESS_SKIP_ACL_SET the plugin writes no object ACLs on fine-grained buckets either,
             // so readability must already come from the bucket: an allUsers IAM binding or a public default object ACL.
-            $skip_acl = defined('WP_STATELESS_SKIP_ACL_SET') && WP_STATELESS_SKIP_ACL_SET;
-            if ($uniform || $skip_acl) {
+            if (defined('WP_STATELESS_SKIP_ACL_SET') && WP_STATELESS_SKIP_ACL_SET) {
               $policy = $this->api('GET', 'https://storage.googleapis.com/storage/v1/b/' . rawurlencode($bucket) . '/iam?optionsRequestedPolicyVersion=3');
               $this->check($policy, 'Read bucket permissions');
               $public = self::bucket_is_public(isset($policy['bindings']) ? $policy['bindings'] : array());
-              if (!$public && !$uniform) {
+              if (!$public) {
                 $default_acl = $this->api('GET', 'https://storage.googleapis.com/storage/v1/b/' . rawurlencode($bucket) . '/defaultObjectAcl');
                 $public = !is_wp_error($default_acl) && self::default_acl_is_public(isset($default_acl['items']) ? $default_acl['items'] : array());
               }
               if (!$public) {
-                throw new Exception($uniform
-                  ? __('This bucket uses uniform access but is not publicly readable, so media URLs would return 403 in CDN, Ephemeral or Stateless mode. Grant allUsers the Storage Object Viewer role on the bucket, or choose Backup mode.', ud_get_stateless_media()->domain)
-                  : __('WP_STATELESS_SKIP_ACL_SET is enabled, so the plugin will not make uploads public itself, and this bucket is not publicly readable: media URLs would return 403 in CDN, Ephemeral or Stateless mode. Grant allUsers the Storage Object Viewer role on the bucket, give it a public default object ACL, or choose Backup mode.', ud_get_stateless_media()->domain));
+                throw new Exception(__('WP_STATELESS_SKIP_ACL_SET is enabled, so the plugin will not make uploads public itself, and this bucket is not publicly readable: media URLs would return 403 in CDN, Ephemeral or Stateless mode. Grant allUsers the Storage Object Viewer role on the bucket, give it a public default object ACL, or choose Backup mode.', ud_get_stateless_media()->domain));
               }
             }
           }
@@ -1791,6 +1823,14 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
           $r = $this->api('GET', 'https://storage.googleapis.com/storage/v1/b/' . rawurlencode($bucket));
           $this->check($r, 'Find bucket');
           $log[] = sprintf('Using existing bucket %s', $bucket);
+          if ($open_bucket) {
+            $this->open_bucket($bucket, $prevented);
+            $log[] = 'Bucket made public, as chosen: anyone with a link can read its files';
+            $readable = $this->await_public_read($bucket);
+            $log[] = $readable === true
+              ? 'Public read verified'
+              : 'Google did not pass the public read check yet (' . $readable . '); media links can be refused for a few minutes';
+          }
         }
 
         /* 4. Service account */
@@ -1907,6 +1947,12 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
         $this->write_option('sm_bucket', $bucket);
         $this->write_option('sm_key_json', $key_json);
         $this->write_option('sm_mode', $mode);
+        // Uploads to a uniform-access bucket must leave per-object permissions alone; see Utility::skip_acl_set().
+        if ($uniform) {
+          $this->write_option(self::UNIFORM_OPTION, $bucket);
+        } else {
+          $this->remove_option(self::UNIFORM_OPTION);
+        }
         if (apply_filters('wp_stateless_is_app_engine', false)) {
           $modules = $this->read_option('stateless-modules', array());
           $modules['google-app-engine'] = 'true';
@@ -2120,6 +2166,64 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
       if ($code !== 200) {
         throw new Exception(sprintf(__('Verify public read: a test file in bucket %1$s could not be read anonymously (%2$s). Check the bucket\'s public access settings and retry.', ud_get_stateless_media()->domain), $bucket, $code ? 'HTTP ' . $code : $probe->get_error_message()));
       }
+    }
+
+    /**
+     * Makes a uniform-access bucket readable by anyone, at the administrator's request: lifts the bucket's own
+     * public access prevention when it is on, then lets allUsers read its objects. Other permissions are kept.
+     * An organization policy can forbid public buckets altogether, which Google answers with 412.
+     */
+    private function open_bucket($bucket, $prevented) {
+      $url = 'https://storage.googleapis.com/storage/v1/b/' . rawurlencode($bucket);
+      if ($prevented) {
+        $r = $this->api('PATCH', $url . '?fields=iamConfiguration', array('iamConfiguration' => array('publicAccessPrevention' => 'inherited')));
+        $this->check($r, 'Allow public access');
+      }
+      $attempt = 0;
+      do {
+        $attempt++;
+        $policy = $this->api('GET', $url . '/iam?optionsRequestedPolicyVersion=3');
+        $this->check($policy, 'Read bucket permissions');
+        $r = $this->api('PUT', $url . '/iam', array(
+          'version'  => isset($policy['version']) ? $policy['version'] : 1,
+          'bindings' => self::public_bindings(isset($policy['bindings']) ? $policy['bindings'] : array()),
+          'etag'     => isset($policy['etag']) ? $policy['etag'] : null,
+        ));
+        // 409 and 412 can also mean the permissions changed between the read and the write: read them again.
+        if (is_wp_error($r) && $attempt < 3 && in_array($r->get_error_code(), array('google_409', 'google_412'), true)) {
+          sleep(2);
+          continue;
+        }
+        if (is_wp_error($r) && $r->get_error_code() === 'google_412') {
+          throw new Exception(sprintf(__('Google Cloud refused to make this bucket public (%s). An organization policy usually enforces public access prevention or limits sharing to your organization. Ask your Google Cloud administrator for an exemption, or choose Backup mode to keep the bucket private.', ud_get_stateless_media()->domain), $r->get_error_message()), 1002);
+        }
+        $this->check($r, 'Make bucket public');
+        break;
+      } while (true);
+    }
+
+    /**
+     * Whether a file in a bucket that was just made public can be read without credentials: true, or what the
+     * last attempt answered. Google applies a permission change within seconds to a few minutes, so this waits
+     * for it and reports, rather than failing a setup whose permissions are already in place.
+     */
+    private function await_public_read($bucket, $attempts = 10) {
+      $name = '.wp-stateless-public-read-check-' . substr(md5(uniqid('', true)), 0, 8);
+      $up   = $this->api('POST', 'https://storage.googleapis.com/upload/storage/v1/b/' . rawurlencode($bucket) . '/o?uploadType=media&name=' . rawurlencode($name), array('wp-stateless' => 'public read check'));
+      if (is_wp_error($up)) return $up->get_error_message();
+      $last = '';
+      for ($i = 0; $i < $attempts; $i++) {
+        if ($i) sleep(4);
+        $probe = wp_remote_get('https://storage.googleapis.com/' . rawurlencode($bucket) . '/' . rawurlencode($name), array('timeout' => 20, 'headers' => array('Cache-Control' => 'no-cache')));
+        $code  = is_wp_error($probe) ? 0 : (int) wp_remote_retrieve_response_code($probe);
+        if ($code === 200) {
+          $last = true;
+          break;
+        }
+        $last = $code ? 'HTTP ' . $code : $probe->get_error_message();
+      }
+      $this->api('DELETE', 'https://storage.googleapis.com/storage/v1/b/' . rawurlencode($bucket) . '/o/' . rawurlencode($name));
+      return $last;
     }
 
     /* ------------------------------------------------------------------ */

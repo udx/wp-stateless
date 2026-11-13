@@ -37,6 +37,8 @@
   const retry = document.getElementById('sm-bucket-retry');
   const location = document.getElementById('sm-bucket-location');
   const go = document.getElementById('sm-gc-go');
+  const access = document.getElementById('sm-bucket-access');
+  const makePublic = document.getElementById('sm-bucket-public');
   let bucketChoice = form.querySelector('[name=bucket_choice]:checked').value;
   const names = {new: bucketChoice === 'new' ? name.value : '', existing: bucketChoice === 'existing' ? name.value : ''};
   let buckets = [], next = '', generation = 0, loadedProject = '', loading = false;
@@ -80,6 +82,17 @@
     select.value = buckets.some(b => b.name === name.value) ? name.value : '';
     const bucket = buckets.find(b => b.name === name.value);
     location.textContent = bucket ? 'Location: ' + bucket.location + ' · ' + bucket.locationType + '. Existing buckets keep their current location.' : '';
+    syncAccess();
+  }
+  // The choice to make a bucket public is offered for an existing bucket that is known to use uniform access,
+  // or that the last attempt found private, and only when media would be served from it.
+  function syncAccess() {
+    const existing = form.querySelector('[name=bucket_choice]:checked').value === 'existing';
+    const mode = form.querySelector('[name=mode]:checked') || form.querySelector('[name=mode]');
+    const bucket = buckets.find(b => b.name === name.value);
+    const offered = existing && !!name.value && (!mode || mode.value !== 'backup') && (bucket ? !!bucket.uniform : access.dataset.requiredFor === name.value);
+    access.hidden = !offered;
+    makePublic.disabled = !offered;
   }
   async function load(append) {
     if (loading) return;
@@ -118,6 +131,7 @@
     go.value = newBucket ? 'Create my storage' : 'Connect this bucket';
     go.disabled = !project.value || isNew && !form.querySelector('[name=billing_account]').value;
     document.getElementById('sm-bucket-help').textContent = newBucket ? 'Names must be globally unique. Use lowercase letters, numbers, dashes or underscores.' : 'Choose above, or enter the exact name if you cannot list buckets. Its location stays unchanged.';
+    syncAccess();
     if (project.value && !newBucket && loadedProject !== project.value) load(false);
   }
   async function changeProject(clearName) {
@@ -138,6 +152,7 @@
   }
   project.addEventListener('change', () => changeProject(true));
   form.querySelectorAll('[name=bucket_choice]').forEach(c => c.addEventListener('change',sync));
+  form.querySelectorAll('[name=mode]').forEach(m => m.addEventListener('change',syncAccess));
   // The Create button depends on a billing account for new projects; re-evaluate when one is picked.
   form.querySelectorAll('[name=billing_account]').forEach(b => b.addEventListener('change',sync));
   select.addEventListener('change', () => { if (select.value) name.value = select.value; renderBuckets(); });

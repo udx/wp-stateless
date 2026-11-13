@@ -327,4 +327,22 @@ assert_true(call($any,'forget_funnel',0,null,false,7)===true && stored('sm_gc_fu
 $GLOBALS['multi']=true;update_network_option(1,'sm_gc_funnel',$first);
 assert_true(call($any,'funnel_state',1)===$first && call($any,'forget_funnel',1,$first,true)===true && ($GLOBALS['network_options'][1]['sm_gc_funnel'] ?? null)===null,'network attempt lives in network options');
 $GLOBALS['multi']=false;
+
+// A bucket whose files are public or private together is made public by adding one reader; everything else stays.
+$GC='wpCloud\\StatelessMedia\\GoogleConnect';
+$admin=['role'=>'roles/storage.admin','members'=>['serviceAccount:site@p.iam.gserviceaccount.com']];
+$timed=['role'=>'roles/storage.objectViewer','members'=>['user:a@example.com'],'condition'=>['title'=>'until','expression'=>'request.time < timestamp("2030-01-01T00:00:00Z")']];
+$opened=$GC::public_bindings([$admin,$timed]);
+assert_true($GC::bucket_is_public($opened) && $opened[0]===$admin && $opened[1]===$timed && $opened[2]===['role'=>'roles/storage.objectViewer','members'=>['allUsers']],'making a bucket public adds one reader and keeps every other permission');
+$opened=$GC::public_bindings([['role'=>'roles/storage.objectViewer','members'=>['group:team@example.com']]]);
+assert_true(count($opened)===1 && $opened[0]['members']===['group:team@example.com','allUsers'],'an existing reader entry gains the public reader instead of a second entry');
+$public=[['role'=>'roles/storage.legacyObjectReader','members'=>['allUsers']]];
+assert_true($GC::public_bindings($public)===$public,'a bucket that is already public is left as it is');
+$conditional=['role'=>'roles/storage.objectViewer','members'=>['allUsers'],'condition'=>['title'=>'t','expression'=>'true']];
+assert_true(!$GC::bucket_is_public([$conditional]) && $GC::bucket_is_public($GC::public_bindings([$conditional])) && $GC::public_bindings([$conditional])[0]===$conditional,'a conditional public entry does not count as public and is not edited');
+assert_true($GC::public_bindings([])===[['role'=>'roles/storage.objectViewer','members'=>['allUsers']]],'a bucket without permissions on record gets the public reader');
+// What a stopped setup reports goes by its code where it has one, so the label does not depend on the site's language.
+$stop=fn($message,$code=0)=>new \Exception($message,$code);
+assert_true(call($any,'provisioning_reason',$stop('x',1001))==='billing_missing' && call($any,'provisioning_reason',$stop('x',1002))==='public_access' && call($any,'provisioning_reason',$stop('x',1003))==='other','missing billing, a private bucket and a bucket of another project are reported by code');
+assert_true(call($any,'provisioning_reason',$stop('Create bucket: backend error'))==='google_api' && call($any,'provisioning_reason',$stop('The bucket name x is already taken.'))==='bucket_taken','other stops keep their labels');
 }

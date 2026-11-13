@@ -4,7 +4,7 @@
  *
  * Variables provided by GoogleConnect::render_page():
  * $client, $connection, $auth_url, $projects, $billing, $proj_err, $log, $error,
- * $suggested_bucket, $default_project, $default_bucket, $settings
+ * $suggested_bucket, $default_project, $default_bucket, $settings, $public_required, $bucket_public
  */
 $domain  = ud_get_stateless_media()->domain;
 $msg     = isset($_GET['sm_gc']) ? sanitize_text_field($_GET['sm_gc']) : '';
@@ -327,6 +327,10 @@ $start_error   = wpCloud\StatelessMedia\GoogleConnect::instance()->start_error;
               <label for="sm-bucket-name" class="sm-field-label"><?php _e('Bucket name', $domain); ?></label>
               <input id="sm-bucket-name" name="bucket_name" type="text" required class="regular-text code" value="<?php echo esc_attr($default_bucket !== '' ? $default_bucket : $suggested_bucket); ?>">
               <p class="description" id="sm-bucket-help">Names must be globally unique. Use lowercase letters, numbers, dashes or underscores.</p>
+              <div id="sm-bucket-access" class="sm-bucket-access" data-required-for="<?php echo esc_attr($public_required ? $default_bucket : ''); ?>" <?php if (!$public_required) echo 'hidden'; ?>>
+                <label><input type="checkbox" name="bucket_public" id="sm-bucket-public" value="1" <?php checked($bucket_public); ?>> <?php _e('Make the files in this bucket public', $domain); ?></label>
+                <p class="description"><?php _e('This bucket uses uniform access, so its files are public or private together. Your site can only serve media from it when they are public: anyone with a link can then read any file in the bucket, including files that are already there. Leave this off if the bucket is already public, or choose Backup mode to keep it private.', $domain); ?></p>
+              </div>
             </td>
           </tr>
           <tr class="sm-gc-new-bucket">

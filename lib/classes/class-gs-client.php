@@ -262,14 +262,14 @@ namespace wpCloud\StatelessMedia {
               'mimeType' => $args['mimeType'],
             );
 
-            if ( !defined('WP_STATELESS_SKIP_ACL_SET') || !WP_STATELESS_SKIP_ACL_SET) {
+            if ( !Utility::skip_acl_set() ) {
               $mediaOptions['predefinedAcl'] = 'bucketOwnerFullControl';
             }
 
             $media = $this->service->objects->insert($this->bucket, $media, array_filter($mediaOptions));
           }
 
-          if ( !defined('WP_STATELESS_SKIP_ACL_SET') || !WP_STATELESS_SKIP_ACL_SET) {
+          if ( !Utility::skip_acl_set() ) {
             $this->mediaInsertACL($name, $media, $args);
           }
         } catch (Exception $e) {
@@ -330,7 +330,9 @@ namespace wpCloud\StatelessMedia {
         try {
           $media = $this->service->objects->get($this->bucket, $path);
           $media = $this->service->objects->copy($this->bucket, $path, $this->bucket, $new_path, $media);
-          $this->mediaInsertACL($new_path, $media);
+          if ( !Utility::skip_acl_set() ) {
+            $this->mediaInsertACL($new_path, $media);
+          }
         } catch (\Exception $e) {
           return false;
         }

@@ -6,7 +6,7 @@ License: GPLv2 or later
 Requires PHP: 8.1
 Requires at least: 5.0
 Tested up to: 6.9
-Stable tag: 4.5.1
+Stable tag: 4.5.2
 
 Upload and serve your WordPress media files from Google Cloud Storage.
 
@@ -153,6 +153,11 @@ Before upgrading to WP-Stateless 3.2.0, please, make sure you use PHP 7.2 or abo
 Before upgrading to WP-Stateless 3.0, please, make sure you tested it on your development environment.
 
 == Changelog ==
+= 4.5.2 - 2026-11-13 =
+* ENHANCEMENT - Stateless Connect connects an existing bucket that uses uniform bucket-level access, the default for buckets created in the Google Cloud console. Setup no longer asks for WP_STATELESS_SKIP_ACL_SET in wp-config.php: uploads to such a bucket leave per-file permissions alone on their own.
+* ENHANCEMENT - when such a bucket is private, setup offers to make its files public so the site can serve media from it. The choice is off by default and says what becomes readable; Backup mode keeps the bucket private.
+* FIX - copying a file within the bucket no longer fails on a bucket without per-file permissions.
+
 = 4.5.1 - 2026-11-12 =
 * ENHANCEMENT - fresh, unconfigured activations and the Plugins screen lead directly to Stateless Connect; manual bucket and service-account settings remain available under Advanced.
 * ENHANCEMENT - the recommended setup creates a project and US multi-region bucket with CDN mode, while existing projects, buckets, locations and modes remain available under Advanced.
