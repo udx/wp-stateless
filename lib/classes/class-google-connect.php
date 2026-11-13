@@ -391,17 +391,21 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
       return false;
     }
 
-    /** Lets allUsers read the bucket's objects; every other binding, conditional ones included, is kept as it is. */
+    /**
+     * Lets allUsers read the bucket's objects; every other binding, conditional ones included, is kept as it is.
+     * The role is Storage Legacy Object Reader: it allows reading a file whose link is known, which is all that
+     * serving media needs. Storage Object Viewer would also let anyone list every file in the bucket.
+     */
     public static function public_bindings($bindings) {
       if (self::bucket_is_public($bindings)) return $bindings;
       foreach ($bindings as &$binding) {
-        if (isset($binding['role']) && $binding['role'] === 'roles/storage.objectViewer' && empty($binding['condition'])) {
+        if (isset($binding['role']) && $binding['role'] === 'roles/storage.legacyObjectReader' && empty($binding['condition'])) {
           $binding['members'][] = 'allUsers';
           return $bindings;
         }
       }
       unset($binding);
-      $bindings[] = array('role' => 'roles/storage.objectViewer', 'members' => array('allUsers'));
+      $bindings[] = array('role' => 'roles/storage.legacyObjectReader', 'members' => array('allUsers'));
       return $bindings;
     }
 
@@ -2187,7 +2191,7 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
 
     /**
      * Makes a uniform-access bucket readable by anyone, at the administrator's request: lifts the bucket's own
-     * public access prevention when it is on, then lets allUsers read its objects. Other permissions are kept.
+     * public access prevention when it is on, then lets allUsers read its objects by link, without listing them. Other permissions are kept.
      * An organization policy can forbid public buckets altogether, which Google answers with 412.
      */
     private function open_bucket($bucket, $prevented) {

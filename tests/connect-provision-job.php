@@ -329,18 +329,23 @@ assert_true(call($any,'funnel_state',1)===$first && call($any,'forget_funnel',1,
 $GLOBALS['multi']=false;
 
 // A bucket whose files are public or private together is made public by adding one reader; everything else stays.
+// The reader role allows reading a file by its link and nothing else: the role that also lists the bucket is not used.
 $GC='wpCloud\\StatelessMedia\\GoogleConnect';
+$reader='roles/storage.legacyObjectReader';
 $admin=['role'=>'roles/storage.admin','members'=>['serviceAccount:site@p.iam.gserviceaccount.com']];
-$timed=['role'=>'roles/storage.objectViewer','members'=>['user:a@example.com'],'condition'=>['title'=>'until','expression'=>'request.time < timestamp("2030-01-01T00:00:00Z")']];
+$timed=['role'=>$reader,'members'=>['user:a@example.com'],'condition'=>['title'=>'until','expression'=>'request.time < timestamp("2030-01-01T00:00:00Z")']];
 $opened=$GC::public_bindings([$admin,$timed]);
-assert_true($GC::bucket_is_public($opened) && $opened[0]===$admin && $opened[1]===$timed && $opened[2]===['role'=>'roles/storage.objectViewer','members'=>['allUsers']],'making a bucket public adds one reader and keeps every other permission');
-$opened=$GC::public_bindings([['role'=>'roles/storage.objectViewer','members'=>['group:team@example.com']]]);
+assert_true($GC::bucket_is_public($opened) && $opened[0]===$admin && $opened[1]===$timed && $opened[2]===['role'=>$reader,'members'=>['allUsers']],'making a bucket public adds one reader and keeps every other permission');
+$opened=$GC::public_bindings([['role'=>$reader,'members'=>['group:team@example.com']]]);
 assert_true(count($opened)===1 && $opened[0]['members']===['group:team@example.com','allUsers'],'an existing reader entry gains the public reader instead of a second entry');
-$public=[['role'=>'roles/storage.legacyObjectReader','members'=>['allUsers']]];
+$viewers=['role'=>'roles/storage.objectViewer','members'=>['group:team@example.com']];
+$opened=$GC::public_bindings([$viewers]);
+assert_true($opened[0]===$viewers && $opened[1]===['role'=>$reader,'members'=>['allUsers']],'the public reader is never added to a role that can also list the bucket');
+$public=[['role'=>'roles/storage.objectViewer','members'=>['allUsers']]];
 assert_true($GC::public_bindings($public)===$public,'a bucket that is already public is left as it is');
-$conditional=['role'=>'roles/storage.objectViewer','members'=>['allUsers'],'condition'=>['title'=>'t','expression'=>'true']];
+$conditional=['role'=>$reader,'members'=>['allUsers'],'condition'=>['title'=>'t','expression'=>'true']];
 assert_true(!$GC::bucket_is_public([$conditional]) && $GC::bucket_is_public($GC::public_bindings([$conditional])) && $GC::public_bindings([$conditional])[0]===$conditional,'a conditional public entry does not count as public and is not edited');
-assert_true($GC::public_bindings([])===[['role'=>'roles/storage.objectViewer','members'=>['allUsers']]],'a bucket without permissions on record gets the public reader');
+assert_true($GC::public_bindings([])===[['role'=>$reader,'members'=>['allUsers']]],'a bucket without permissions on record gets the public reader');
 // What a stopped setup reports goes by its code where it has one, so the label does not depend on the site's language.
 $stop=fn($message,$code=0)=>new \Exception($message,$code);
 assert_true(call($any,'provisioning_reason',$stop('x',1001))==='billing_missing' && call($any,'provisioning_reason',$stop('x',1002))==='public_access' && call($any,'provisioning_reason',$stop('x',1003))==='other','missing billing, a private bucket and a bucket of another project are reported by code');
