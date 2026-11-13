@@ -1603,8 +1603,10 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
       if (!in_array($mode, array('backup', 'cdn', 'ephemeral', 'stateless'), true)) $mode = 'cdn';
       $locked_mode    = $this->locked_mode();
       if ($locked_mode) $mode = $locked_mode['mode']; // the form shows the locked mode; never trust a posted one
-      // The administrator's choice for an existing bucket whose files are public or private together.
-      $make_public    = $bucket_choice === 'existing' && !empty($post['bucket_public']);
+      // The administrator's choice for an existing bucket whose files are public or private together. The form
+      // sends the name of the bucket the choice was made for, so it cannot apply to a bucket picked afterwards.
+      $public_for     = isset($post['bucket_public']) && is_string($post['bucket_public']) ? strtolower(trim(sanitize_text_field($post['bucket_public']))) : '';
+      $make_public    = $bucket_choice === 'existing' && $bucket !== '' && $public_for === $bucket;
 
       $draft = array('project' => $project_choice, 'new_project_name' => $new_project, 'billing_account' => $billing_choice, 'bucket_choice' => $bucket_choice, 'bucket_name' => $bucket, 'location' => $location, 'mode' => $mode, 'bucket_public' => $make_public);
       // A project this attempt created earlier carries its explicit billing choice until the link succeeds.

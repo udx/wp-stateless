@@ -370,8 +370,12 @@ namespace wpCloud\StatelessMedia {
       public function media_exists($path) {
         try {
           $media = $this->service->objects->get($this->bucket, $path);
-          // Here we wanted to check if access allowed, but noticed it actually sets this ACL... Leaving it as is. @author korotkov@ud
-          $this->service->objectAccessControls->get($this->bucket, $path, 'allUsers');
+          // A bucket without per-object permissions has no ACL to look up, and Google rejects the request there:
+          // the object being in the bucket is all there is to know.
+          if ( !Utility::skip_acl_set() ) {
+            // Here we wanted to check if access allowed, but noticed it actually sets this ACL... Leaving it as is. @author korotkov@ud
+            $this->service->objectAccessControls->get($this->bucket, $path, 'allUsers');
+          }
         } catch (\Exception $e) {
           return false;
         }

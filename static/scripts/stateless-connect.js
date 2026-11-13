@@ -91,6 +91,8 @@
     const mode = form.querySelector('[name=mode]:checked') || form.querySelector('[name=mode]');
     const bucket = buckets.find(b => b.name === name.value);
     const offered = existing && !!name.value && (!mode || mode.value !== 'backup') && (bucket ? !!bucket.uniform : access.dataset.requiredFor === name.value);
+    // The choice is made for one bucket. It carries that bucket's name and is cleared when another one is picked.
+    if (makePublic.value !== name.value) { makePublic.checked = false; makePublic.value = name.value; }
     access.hidden = !offered;
     makePublic.disabled = !offered;
   }
