@@ -262,14 +262,14 @@ namespace wpCloud\StatelessMedia {
               'mimeType' => $args['mimeType'],
             );
 
-            if ( !defined('WP_STATELESS_SKIP_ACL_SET') || !WP_STATELESS_SKIP_ACL_SET) {
+            if ( !Utility::skip_acl_set() ) {
               $mediaOptions['predefinedAcl'] = 'bucketOwnerFullControl';
             }
 
             $media = $this->service->objects->insert($this->bucket, $media, array_filter($mediaOptions));
           }
 
-          if ( !defined('WP_STATELESS_SKIP_ACL_SET') || !WP_STATELESS_SKIP_ACL_SET) {
+          if ( !Utility::skip_acl_set() ) {
             $this->mediaInsertACL($name, $media, $args);
           }
         } catch (Exception $e) {
@@ -330,7 +330,9 @@ namespace wpCloud\StatelessMedia {
         try {
           $media = $this->service->objects->get($this->bucket, $path);
           $media = $this->service->objects->copy($this->bucket, $path, $this->bucket, $new_path, $media);
-          $this->mediaInsertACL($new_path, $media);
+          if ( !Utility::skip_acl_set() ) {
+            $this->mediaInsertACL($new_path, $media);
+          }
         } catch (\Exception $e) {
           return false;
         }
@@ -368,8 +370,12 @@ namespace wpCloud\StatelessMedia {
       public function media_exists($path) {
         try {
           $media = $this->service->objects->get($this->bucket, $path);
-          // Here we wanted to check if access allowed, but noticed it actually sets this ACL... Leaving it as is. @author korotkov@ud
-          $this->service->objectAccessControls->get($this->bucket, $path, 'allUsers');
+          // A bucket without per-object permissions has no ACL to look up, and Google rejects the request there:
+          // the object being in the bucket is all there is to know.
+          if ( !Utility::skip_acl_set() ) {
+            // Here we wanted to check if access allowed, but noticed it actually sets this ACL... Leaving it as is. @author korotkov@ud
+            $this->service->objectAccessControls->get($this->bucket, $path, 'allUsers');
+          }
         } catch (\Exception $e) {
           return false;
         }

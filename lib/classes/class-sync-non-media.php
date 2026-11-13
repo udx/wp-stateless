@@ -168,7 +168,7 @@ namespace wpCloud\StatelessMedia {
                 'contentDisposition' => apply_filters('sm:item:contentDisposition', null, $absolutePath)
               );
 
-              if ( !defined('WP_STATELESS_SKIP_ACL_SET') || !WP_STATELESS_SKIP_ACL_SET) {
+              if ( !Utility::skip_acl_set() ) {
                 $mediaOptions['predefinedAcl'] = 'publicRead';
               }
 

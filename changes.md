@@ -1,3 +1,8 @@
+#### 4.5.2 - 2026-11-13
+* ENHANCEMENT - Stateless Connect connects an existing bucket that uses uniform bucket-level access, the default for buckets created in the Google Cloud console. Setup no longer asks for WP_STATELESS_SKIP_ACL_SET in wp-config.php: uploads to such a bucket leave per-file permissions alone on their own.
+* ENHANCEMENT - when such a bucket is private, setup offers to make its files public so the site can serve media from it. The choice is off by default and says what becomes readable; Backup mode keeps the bucket private.
+* FIX - on a bucket without per-file permissions, a file that is already in the bucket is recognised as such: it is no longer uploaded again on every sync, non-library files are no longer dropped from the sync queue, and copying a file within the bucket no longer fails. This also applies to sites that use WP_STATELESS_SKIP_ACL_SET.
+
 #### 4.5.1 - 2026-11-12
 * ENHANCEMENT - fresh, unconfigured activations and the Plugins screen lead directly to Stateless Connect; manual bucket and service-account settings remain available under Advanced.
 * ENHANCEMENT - the recommended setup creates a project and US multi-region bucket with CDN mode, while existing projects, buckets, locations and modes remain available under Advanced.

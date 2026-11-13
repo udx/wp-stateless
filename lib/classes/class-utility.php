@@ -42,6 +42,24 @@ namespace wpCloud\StatelessMedia {
         unset(self::$upload_errors[$attachment_id]);
       }
 
+      /**
+       * Whether uploads leave per-file permissions (ACLs) alone.
+       *
+       * True when WP_STATELESS_SKIP_ACL_SET says so, and for the bucket that Stateless Connect found to use
+       * uniform bucket-level access: Google rejects per-file permissions there, and access is granted on the
+       * bucket itself. The record holds the bucket's name, so it stops applying once another bucket is configured.
+       *
+       * @return bool
+       */
+      public static function skip_acl_set() {
+        if (defined('WP_STATELESS_SKIP_ACL_SET') && WP_STATELESS_SKIP_ACL_SET) return true;
+        $bucket = ud_get_stateless_media()->get('sm.bucket');
+        if (!is_string($bucket) || $bucket === '') return false;
+        $uniform = get_option('sm_uniform_bucket', '');
+        if ($uniform !== $bucket && is_multisite()) $uniform = get_site_option('sm_uniform_bucket', '');
+        return $uniform === $bucket;
+      }
+
       private static function record_upload_error($attachment_id, $size, $message) {
         self::$upload_errors[$attachment_id][$size] = $size . ': ' . $message;
       }
@@ -355,10 +373,10 @@ namespace wpCloud\StatelessMedia {
                     'contentDisposition' => $_contentDisposition
                   );
 
-                  if ( !defined('WP_STATELESS_SKIP_ACL_SET') || !WP_STATELESS_SKIP_ACL_SET) {
+                  if ( !self::skip_acl_set() ) {
                     $mediaOptions['predefinedAcl'] = 'publicRead';
                   }
-      
+
                   $media = $object->update(array('metadata' => $media_args['metadata']) + $mediaOptions);
 
                   $cloud_meta = self::generate_cloud_meta($cloud_meta, $media, $size, $img, $bucketLink);
@@ -374,8 +392,8 @@ namespace wpCloud\StatelessMedia {
                   // Ephemeral and Stateless remove a local copy once its size is uploaded, and the metadata hooks run
                   // more than once per attachment, so a later pass can find the file gone while the object is already
                   // in the bucket. That is not a failed upload; a missing object or a failure with the file present is.
-                  $manages_acl   = !defined('WP_STATELESS_SKIP_ACL_SET') || !WP_STATELESS_SKIP_ACL_SET;
-                  $already_there = !file_exists($img['path']) && ($manages_acl ? $client->media_exists($img['gs_name']) : $client->get_media($img['gs_name']));
+                  $manages_acl   = !self::skip_acl_set();
+                  $already_there =!file_exists($img['path']) && ($manages_acl ? $client->media_exists($img['gs_name']) : $client->get_media($img['gs_name']));
                   if (!$already_there) {
                     self::record_upload_error($attachment_id, $size . $args['is_webp'], $media->get_error_message());
                   }
@@ -475,9 +493,9 @@ namespace wpCloud\StatelessMedia {
       public static function missing_cloud_object($attachment_id, $metadata = null) {
         $client = ud_get_stateless_media()->get_client();
         // While the plugin manages ACLs (fine-grained buckets) an object without its public-read entry is not
-        // complete either: it would be unreachable at its media URL. Buckets configured with
-        // WP_STATELESS_SKIP_ACL_SET have no per-object ACLs, so only existence can be checked there.
-        $manages_acl = !defined('WP_STATELESS_SKIP_ACL_SET') || !WP_STATELESS_SKIP_ACL_SET;
+        // complete either: it would be unreachable at its media URL. Uniform-access buckets and sites configured
+        // with WP_STATELESS_SKIP_ACL_SET have no per-object ACLs, so only existence can be checked there.
+        $manages_acl = !self::skip_acl_set();
         foreach (self::get_path_and_url($metadata, $attachment_id) as $size => $media) {
           $found = $manages_acl ? $client->media_exists($media['gs_name']) : $client->get_media($media['gs_name']);
           if (!$found) {

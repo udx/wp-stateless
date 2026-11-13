@@ -26,6 +26,10 @@
 .sm-connect .description{line-height:1.6;margin-top:10px;color:#62697a}
 .sm-connect .sm-location-help{margin:0 0 12px;max-width:580px}
 .sm-connect #sm-bucket-picker{padding:16px;background:#f7f8fc;border:1px solid #e0e4ef;border-radius:4px;margin:12px 0;max-width:540px}
+.sm-connect .sm-bucket-access{padding:16px;background:#f7f8fc;border:1px solid #e0e4ef;border-radius:4px;margin:16px 0 0;max-width:540px}
+.sm-connect .form-table .sm-bucket-access label{display:inline-flex;align-items:center;gap:8px;margin:0;font-weight:500}
+.sm-connect .sm-bucket-access input[type=checkbox]{margin:0}
+.sm-connect .sm-bucket-access .description{margin:10px 0 0}
 .sm-connect .submit{margin:20px 0 0;padding-top:20px;border-top:1px solid #eef0f6}
 .sm-connect .submit .button{min-height:42px;padding:5px 18px}
 @media(max-width:782px){.sm-connect .form-table th{width:auto;padding:20px 0 0}.sm-connect .form-table td{padding:12px 0 20px}.sm-connect .form-table tr+tr>td{border-top:0}.sm-connect .form-table td .sm-mode-option{min-height:0;padding:16px}.sm-connect .sm-mode-options{grid-template-columns:1fr}}
