@@ -1840,10 +1840,13 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
           if ($open_bucket) {
             $this->open_bucket($bucket, $prevented);
             $log[] = 'Bucket made public, as chosen: anyone with a link can read its files';
+            // Google usually applies the change at once. Until a file can be read without credentials the site is
+            // not moved onto the bucket: in Ephemeral and Stateless mode its media would have no working copy.
             $readable = $this->await_public_read($bucket);
-            $log[] = $readable === true
-              ? 'Public read verified'
-              : 'Google did not pass the public read check yet (' . $readable . '); media links can be refused for a few minutes';
+            if ($readable !== true) {
+              throw new Exception(sprintf(__('The bucket was made public, but Google Cloud is not serving its files to visitors yet (%s). A permission change can take a few minutes to apply, so connect again shortly. If it keeps failing, a policy or security perimeter in your Google Cloud organization is blocking public access.', ud_get_stateless_media()->domain), $readable), 1002);
+            }
+            $log[] = 'Public read verified';
           }
         }
 
@@ -2218,8 +2221,8 @@ if (!class_exists('wpCloud\StatelessMedia\GoogleConnect')) {
 
     /**
      * Whether a file in a public bucket can be read without credentials: true, or what the last attempt answered
-     * ("HTTP 403" when Google refuses). Google applies a permission change within seconds to a few minutes, so
-     * after one the caller waits and reports rather than failing a setup whose permissions are already in place.
+     * ("HTTP 403" when Google refuses). Google applies a permission change within seconds to a few minutes, which
+     * is what the repeated attempts are for.
      */
     private function await_public_read($bucket, $attempts = 10) {
       $name = '.wp-stateless-public-read-check-' . substr(md5(uniqid('', true)), 0, 8);
